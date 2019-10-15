@@ -1,0 +1,20 @@
+Package: target
+Type: Package
+Title: What the Package Does Using Title Case
+Version: 0.1
+Date: 2018-10-19
+Author: Klaus Holst
+Maintainer: Klaus Holst <klaus.holst@maersk.com>
+Description: More details about what the package does. See
+        <http://cran.r-project.org/doc/manuals/r-release/R-exts.html#The-DESCRIPTION-file>
+        for details on how to write this part.
+Depends:
+    R (>= 3.3),
+    lava (>= 1.6.3)
+License: GPL (>= 2)
+Imports: Rcpp (>= 0.12.18), DEoptim
+LinkingTo: Rcpp, RcppArmadillo
+SystemRequirements: C++11
+ByteCompile: yes
+Encoding: UTF-8
+RoxygenNote: 6.1.1

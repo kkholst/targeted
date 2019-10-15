@@ -1,4 +1,4 @@
-VALGRIND_DIR := codetest
+VALGRIND_DIR := tmp/codetest
 DOXYGEN_DIR := doc
 COVERAGE_DIR := build
 BUILD_DIR := build
@@ -71,8 +71,8 @@ cov:
 ##################################################
 
 check:
-	-cclint *.cpp *.h
-	-cppcheck --enable=all .
+	-cclint src/*.cpp src/*.h
+	-cppcheck --enable=all src/
 
 ## Alternatively, enable Address Sanitizer (ASAN argument)
 valgrind:

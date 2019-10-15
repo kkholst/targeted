@@ -10,12 +10,12 @@
 #ifndef SRC_GLM_H_
 #define SRC_GLM_H_
 
-#ifndef RARMA
+#ifndef ARMA_R
 #define MATHLIB_STANDALONE
 #include <armadillo>
 #include "Rmath.h"
 #endif
-#if defined(RARMA)
+#if defined(ARMA_R)
 #define ARMA_DONT_USE_OPENMP
 #include <RcppArmadillo.h>
 #endif
