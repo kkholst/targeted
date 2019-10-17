@@ -1,4 +1,4 @@
-VALGRIND_DIR := tmp/codetest
+VALGRIND_DIR := build/codetest
 DOXYGEN_DIR := doc
 COVERAGE_DIR := build
 BUILD_DIR := build
@@ -18,7 +18,7 @@ default: run
 all: clean run
 
 clean:
-	@rm -Rf $(BUILD_DIR) $(VALGRIND_DIR) $(DOXYGEN_DIR) $(COVERAGE_DIR)
+	@rm -Rf $(BUILD_DIR) $(VALGRIND_DIR) $(DOXYGEN_DIR)/html $(COVERAGE_DIR)
 
 init:	clean
 	@$(MESON) $(BUILD_DIR)
@@ -117,11 +117,6 @@ dbuild:
 
 dr:
 	@$(MAKE) --no-print-directory docker_xrun CMD="R --no-save"
-
-# l: docker_list
-# i: docker_interactive
-# c: docker_clean
-# x: docker_xrun
 
 ##################################################
 

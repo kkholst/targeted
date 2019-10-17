@@ -1,0 +1,9 @@
+[submodule "lib/pybind11"]
+	path = lib/pybind11
+	url = https://github.com/pybind/pybind11.git
+[submodule "lib/armadillo"]
+	path = lib/armadillo
+	url = https://gitlab.com/conradsnicta/armadillo-code.git
+[submodule "lib/unittest-cpp"]
+	path = lib/unittest-cpp
+	url = https://github.com/unittest-cpp/unittest-cpp

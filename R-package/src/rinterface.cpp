@@ -16,7 +16,7 @@
 #include <RcppArmadillo.h>
 #include <Rmath.h>
 #include <cmath>
-#include "targeted.h"
+#include "target.h"
 #include "glm.h"
 
 typedef std::complex<double> Complex;
@@ -32,10 +32,10 @@ arma::vec bin_logl(const arma::vec &y,
 		   bool indiv = false) {
   arma::vec res;
   if (!type.compare("rd")) {
-    targeted::RD<double> inp(y, a, x1, x2, x2, par, weights);
+    target::RD<double> inp(y, a, x1, x2, x2, par, weights);
     res = inp.loglik(indiv);
   } else {
-    targeted::RR<double> inp(y, a, x1, x2, x2, par, weights);
+    target::RR<double> inp(y, a, x1, x2, x2, par, weights);
     res = inp.loglik(indiv);
   }
   return( res );
@@ -53,10 +53,10 @@ arma::mat bin_dlogl(const arma::vec &y,
 		    bool indiv = false) {
   arma::mat res;
   if (!type.compare("rd")) {
-    targeted::RD<double> inp(y, a, x1, x2, x2, par, weights);
+    target::RD<double> inp(y, a, x1, x2, x2, par, weights);
     res = inp.score(indiv);
   } else {
-    targeted::RR<double> inp(y, a, x1, x2, x2, par, weights);
+    target::RR<double> inp(y, a, x1, x2, x2, par, weights);
     res = inp.score(indiv);
   }
   return( res );
@@ -71,10 +71,10 @@ arma::mat bin_pa(const arma::vec &y,
 		 std::string type = "rd") {
   arma::mat res;
   if (!type.compare("rd")) {
-    targeted::RD<double> inp(y, a, x1, x2, x2, par, a);
+    target::RD<double> inp(y, a, x1, x2, x2, par, a);
     res = inp.pa();
   } else {
-    targeted::RR<double> inp(y, a, x1, x2, x2, par, a);
+    target::RR<double> inp(y, a, x1, x2, x2, par, a);
     res = inp.pa();
   }
   return( res );
@@ -93,10 +93,10 @@ arma::cx_mat bin_dlogl_c(const arma::cx_vec &y,
 			 bool indiv = false) {
   arma::cx_mat res;
   if (!type.compare("rd")) {
-    targeted::RD<Complex> inp(y, a, x1, x2, x2, par, weights);
+    target::RD<Complex> inp(y, a, x1, x2, x2, par, weights);
     res = inp.score(indiv);
   } else {
-    targeted::RR<Complex> inp(y, a, x1, x2, x2, par, weights);
+    target::RR<Complex> inp(y, a, x1, x2, x2, par, weights);
     res = inp.score(indiv);
   }
   return( res );
@@ -115,10 +115,10 @@ arma::mat bin_esteq(const arma::vec &y,
 		    std::string type = "rd") {
   arma::mat res;
   if (!type.compare("rd")) {
-    targeted::RD<double> inp(y, a, x1, x2, x2, par, weights);
+    target::RD<double> inp(y, a, x1, x2, x2, par, weights);
     res = inp.est(alpha, pr);
   } else {
-    targeted::RR<double> inp(y, a, x1, x2, x2, par, weights);
+    target::RR<double> inp(y, a, x1, x2, x2, par, weights);
     res = inp.est(alpha, pr);
   }
   return ( res );
@@ -136,10 +136,10 @@ arma::cx_mat bin_esteq_c(const arma::cx_vec &y,
 			 std::string type = "rd") {
   arma::cx_mat res;
   if (!type.compare("rd")) {
-    targeted::RD<Complex> inp(y, a, x1, x2, x3, par, weights);
+    target::RD<Complex> inp(y, a, x1, x2, x3, par, weights);
     res = inp.est(alpha);
   } else {
-    targeted::RR<Complex> inp(y, a, x1, x2, x3, par, weights);
+    target::RR<Complex> inp(y, a, x1, x2, x3, par, weights);
     res = inp.est(alpha);
   }
   return ( res );
@@ -158,7 +158,7 @@ Rcpp::List ace_est(const arma::cx_vec &y,
   arma::cx_vec par(theta.n_elem+1);
   par[0] = 0;
   for (unsigned i=0; i < theta.n_elem; i++) par[i+1] = theta[i];
-  targeted::ACE model(y, a, x1, x2, par, weights, binary);
+  target::ACE model(y, a, x1, x2, par, weights, binary);
   double alpha = real(model.est(false)[0])/y.n_elem;
   par[0] = alpha;
   model.updatePar(par);

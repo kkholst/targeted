@@ -1,5 +1,5 @@
 /*!
-  @file targeted.cpp
+  @file target.cpp
   @author Klaus K. Holst
   @copyright 2018, Klaus Kähler Holst
 
@@ -10,16 +10,16 @@
 
 */
 
-#include "targeted.h"
+#include "target.h"
 #include <limits>
 #include "glm.h"
 
-namespace targeted {
+namespace target {
 
-  // typedef Targeted<T> B;
+  // typedef Target<T> B;
 
   /*!
-    @brief Targeted class constructur
+    @brief Target class constructur
 
     @param y - Response vector
     @param a - Exposure/treatment vector
@@ -28,16 +28,16 @@ namespace targeted {
     @param x3 - Design matrix for exposure propensity
     @param parameter - Parameter vector (order: \c target, \c nuisance, and optionally \c propensity)
     @param weights - Optional weights
-    @return Targeted class
+    @return Target class
   */
   template <typename T>
-  Targeted<T>::Targeted(const arma::Col<T> &y,
-			const arma::Mat<T> &a,
-			const arma::Mat<T> &x1,
-			const arma::Mat<T> &x2,
-			const arma::Mat<T> &x3,
-			const arma::Col<T> &parameter,
-			const arma::Col<T> &weights) : Targeted(y, a, x1, x2, x3, parameter) {
+  Target<T>::Target(const arma::Col<T> &y,
+		    const arma::Mat<T> &a,
+		    const arma::Mat<T> &x1,
+		    const arma::Mat<T> &x2,
+		    const arma::Mat<T> &x3,
+		    const arma::Col<T> &parameter,
+		    const arma::Col<T> &weights) : Target(y, a, x1, x2, x3, parameter) {
     _weights = &weights;
     useWeights = true;
   }
@@ -49,7 +49,7 @@ namespace targeted {
     @param parameter - Description of parameter
   */
   template <typename T>
-  void Targeted<T>::updatePar(const arma::Col<T> &parameter) {
+  void Target<T>::updatePar(const arma::Col<T> &parameter) {
     unsigned pos = 0;
     for (unsigned i=0; i < alpha.n_elem; i++) {
       alpha[i] = parameter[i];
@@ -68,7 +68,7 @@ namespace targeted {
 
 
   template <typename T>
-  Targeted<T>::Targeted(const arma::Col<T> &y,
+  Target<T>::Target(const arma::Col<T> &y,
 			const arma::Mat<T> &a,
 			const arma::Mat<T> &x1,
 			const arma::Mat<T> &x2,
@@ -86,34 +86,34 @@ namespace targeted {
   }
 
   template <typename T>
-  Targeted<T>::Targeted(const arma::Col<T> &y,
+  Target<T>::Target(const arma::Col<T> &y,
 			const arma::Mat<T> &a,
 			const arma::Mat<T> &x1,
 			const arma::Mat<T> &x2,
 			const arma::Col<T> &parameter,
-			const arma::Col<T> &weights) : Targeted(y, a, x1, x2, x2, parameter) {
+			const arma::Col<T> &weights) : Target(y, a, x1, x2, x2, parameter) {
     _weights = &weights;
     useWeights = true;
   }
 
   template <typename T>
-  Targeted<T>::Targeted(const arma::Col<T> &y,
+  Target<T>::Target(const arma::Col<T> &y,
 			const arma::Mat<T> &a,
 			const arma::Mat<T> &x1,
 			const arma::Mat<T> &x2,
-			const arma::Col<T> &parameter) : Targeted(y, a, x1, x2, x2, parameter)  {
+			const arma::Col<T> &parameter) : Target(y, a, x1, x2, x2, parameter)  {
   }
 
 
 
   template <typename T>
-  void Targeted<T>::calculate(bool target, bool nuisance, bool propensity) {
+  void Target<T>::calculate(bool target, bool nuisance, bool propensity) {
     if (target)  // Target, linear predictor
-      this->target = Targeted<T>::X1()*Targeted<T>::alpha;
+      this->target = Target<T>::X1()*Target<T>::alpha;
     if (nuisance)  // Nuisance, linear predictor
-      this->nuisance = Targeted<T>::X2()*Targeted<T>::beta;
-    if (propensity && Targeted<T>::gamma.n_elem > 0) {  // Propensity
-      this->propensity = Targeted<T>::X3()*Targeted<T>::gamma;
+      this->nuisance = Target<T>::X2()*Target<T>::beta;
+    if (propensity && Target<T>::gamma.n_elem > 0) {  // Propensity
+      this->propensity = Target<T>::X3()*Target<T>::gamma;
       this->propensity = glm::expit(this->propensity);
     }
   }
@@ -130,7 +130,7 @@ namespace targeted {
     @return arma::Mat
   */
   template <typename T>
-  arma::Mat<T> TargetedBinary<T>::pa() {
+  arma::Mat<T> TargetBinary<T>::pa() {
     arma::Mat<T> res(this->Y().n_elem, 5);
     res.col(1) = this->p(0);
     res.col(2) = this->p(1);
@@ -148,12 +148,12 @@ namespace targeted {
     @return vector of type \c arma::Vec<T>
   */
   template <typename T>
-  arma::Col<T> TargetedBinary<T>::loglik(bool indiv) {
-    arma::Col<T> phat = TargetedBinary<T>::p(0) %
-      (1-Targeted<T>::A()) + TargetedBinary<T>::p(1) % Targeted<T>::A();
-    arma::Col<T> logl = Targeted<T>::Y() % log(phat) +
-      (1-Targeted<T>::Y()) % log(1-phat);
-    if (Targeted<T>::useWeights) logl %= Targeted<T>::weights();
+  arma::Col<T> TargetBinary<T>::loglik(bool indiv) {
+    arma::Col<T> phat = TargetBinary<T>::p(0) %
+      (1-Target<T>::A()) + TargetBinary<T>::p(1) % Target<T>::A();
+    arma::Col<T> logl = Target<T>::Y() % log(phat) +
+      (1-Target<T>::Y()) % log(1-phat);
+    if (Target<T>::useWeights) logl %= Target<T>::weights();
     if (indiv) return(logl);
     return(sum(logl, 0));
   }
@@ -177,7 +177,7 @@ namespace targeted {
     @return arma::Mat<T>
   */
   template <typename T>
-  arma::Mat<T> TargetedBinary<T>::est(arma::Col<T> alpha,
+  arma::Mat<T> TargetBinary<T>::est(arma::Col<T> alpha,
 				      const arma::Col<T> &propensity) {
     arma::Col<T> p0 = this->p(0);
     for (unsigned i=0; i < alpha.n_elem; i++) this->alpha[i] = alpha[i];
@@ -194,9 +194,9 @@ namespace targeted {
   }
 
   template <typename T>
-  arma::Mat<T> TargetedBinary<T>::est(arma::Col<T> alpha) {
+  arma::Mat<T> TargetBinary<T>::est(arma::Col<T> alpha) {
     calculate(false, false, true);  // Calculate propensity weights
-    return( sum(TargetedBinary<T>::est(alpha, this->propensity), 0) );
+    return( sum(TargetBinary<T>::est(alpha, this->propensity), 0) );
   }
 
 
@@ -207,7 +207,7 @@ namespace targeted {
     @return arma::Mat
   */
   template <typename T>
-  arma::Mat<T> TargetedBinary<T>::score(bool indiv) {
+  arma::Mat<T> TargetBinary<T>::score(bool indiv) {
     arma::Col<T> phat = this->p(0) % (1-this->A().col(0)) +
       this->p(1) % this->A().col(0);
     arma::Mat<T> dp_dlp = dp();
@@ -221,10 +221,10 @@ namespace targeted {
 
 
   template <typename T>
-  void TargetedBinary<T>::calculate(bool target,
+  void TargetBinary<T>::calculate(bool target,
 				    bool nuisance,
 				    bool propensity) {
-    Targeted<T>::calculate(target, nuisance, propensity);
+    Target<T>::calculate(target, nuisance, propensity);
     if (nuisance)
       this->nuisance = exp(this->nuisance);  // Odds-product
   }
@@ -239,7 +239,7 @@ namespace targeted {
 	    const arma::Mat<T> &x3,
 	    const arma::Col<T> &parameter,
 	    const arma::Col<T> &weights) :
-    TargetedBinary<T>(y, a, x1, x2, x3, parameter, weights) {
+    TargetBinary<T>(y, a, x1, x2, x3, parameter, weights) {
     calculate();
   }
 
@@ -251,13 +251,13 @@ namespace targeted {
 	    const arma::Mat<T> &x3,
 	    const arma::Col<T> &parameter,
 	    const arma::Col<T> &weights) :
-    TargetedBinary<T>(y, a, x1, x2, x3, parameter, weights) {
+    TargetBinary<T>(y, a, x1, x2, x3, parameter, weights) {
     calculate();
   }
 
   template <typename T>
   void RD<T>::calculate(bool target, bool nuisance, bool propensity) {
-    TargetedBinary<T>::calculate(target, nuisance, propensity);
+    TargetBinary<T>::calculate(target, nuisance, propensity);
     if (target)
       this->target = tanh(this->target);  // Relative risk
     if (target || nuisance)
@@ -266,7 +266,7 @@ namespace targeted {
 
   template <typename T>
   void RR<T>::calculate(bool target, bool nuisance, bool propensity) {
-    TargetedBinary<T>::calculate(target, nuisance, propensity);
+    TargetBinary<T>::calculate(target, nuisance, propensity);
     if (target)
       this->target = exp(this->target);  // Relative risk
     if (target || nuisance)
@@ -374,13 +374,13 @@ namespace targeted {
 	   const arma::cx_vec &parameter,
 	   const arma::cx_vec &weights,
 	   bool binary) :
-    Targeted<Complex>(y, a, arma::cx_mat(1, 1), x2, x3, parameter, weights) {
+    Target<Complex>(y, a, arma::cx_mat(1, 1), x2, x3, parameter, weights) {
     this->binary = binary;
     ACE::calculate(true, true);
   }
 
   void ACE::calculate(bool target, bool nuisance, bool propensity) {
-    Targeted<Complex>::calculate(false, nuisance, propensity);
+    Target<Complex>::calculate(false, nuisance, propensity);
     if (nuisance && this->binary) {
       this->nuisance = glm::expit(this->nuisance);  // Outcome regression model
     }
@@ -397,7 +397,7 @@ namespace targeted {
   }
 
   arma::cx_mat ACE::est(arma::cx_vec par, bool indiv, const Complex &value) {
-    Targeted<Complex>::updatePar(par);
+    Target<Complex>::updatePar(par);
     ACE::calculate();
     return(ACE::est(indiv, value));
   }
@@ -450,4 +450,4 @@ namespace targeted {
   template class RD<std::complex<double> >;
 
 
-}  // namespace targeted
+}  // namespace target

@@ -1,0 +1,91 @@
+cmake_minimum_required(VERSION 2.8.12)
+set(target "target_c")
+
+project(${target})
+
+set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
+# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+find_package(PythonLibs QUIET)
+include_directories(${PYTHON_INCLUDE_DIRS})
+message(STATUS "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
+message(STATUS "PYTHON_EXECUTABLE = ${PYTHON_EXECUTABLE}")
+message(STATUS "PYTHON_INCLUDE_DIRS = ${PYTHON_INCLUDE_DIRS}")
+
+find_package(Armadillo QUIET)
+if (ARMADILLO_FOUND)	
+  MESSAGE ([Main]  " Armadillo FOUND")
+else()
+  MESSAGE ([Main]  " Using Armadillo included in this package")
+  find_package(LAPACK REQUIRED)
+  add_subdirectory(src/armadillo)
+endif ()
+MESSAGE( [Main] " ARMADILLO_LIBRARIES = ${ARMADILLO_LIBRARIES}")
+MESSAGE( [Main] " ARMADILLO_INCLUDE_DIRS = ${ARMADILLO_INCLUDE_DIRS}")
+
+SET(LIBTARGET_DIR "${CMAKE_SOURCE_DIR}/src/libtarget")
+#SET(LIBTARGET_SRC "${LIBTARGET}/glm.cpp" "${LIBTARGET}/target.cpp")
+FILE(GLOB LIBTARGET_SRC ${LIBTARGET_DIR}/*.cpp)
+FILE(GLOB LIBTARGET_HDR ${LIBTARGET_DIR}/*.hpp)
+include_directories(${LIBTARGET_DIR} LIBTARGET)
+add_library(libtarget ${LIBTARGET_SRC} ${LIBTARGET_HDR})
+
+MESSAGE( [Main] " LIBTARGET_DIR = ${LIBTARGET_DIR}")
+
+################################################################################
+# Tests
+################################################################################
+
+SET(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/target")
+SET(TEST_DIR "tests")
+SET(TESTS
+  "${SOURCE_DIR}/lib.cpp" 
+  "${TEST_DIR}/test_c.cpp")
+    # "${TEST_DIR}/test_main.cpp"
+    # "${TEST_DIR}/test_math.cpp")
+
+find_package(UnitTest++ QUIET)
+if (UnitTest++_FOUND)	
+  MESSAGE ([Main]  " UnitTest++ FOUND")
+else()
+  MESSAGE ([Main]  " Using UnitTest++ included in this package")
+  add_subdirectory(src/unittest-cpp)
+endif()
+
+add_executable("${PROJECT_NAME}_test" ${TESTS})
+target_link_libraries("${PROJECT_NAME}_test" PRIVATE armadillo UnitTest++)
+
+################################################################################
+# Python bindings
+################################################################################
+
+find_package(pybind11 QUIET)
+if (pybind11_FOUND)	
+  MESSAGE ([Main]  " pybind11 FOUND")
+else()
+  MESSAGE ([Main]  " Using pybind11 included in this package")
+  add_subdirectory(src/pybind11)
+endif()
+
+pybind11_add_module(${target}
+  src/target/example.cpp
+  src/target/lib.cpp
+  )
+ 
+if(APPLE)
+  set_target_properties(${target} PROPERTIES INSTALL_NAME_DIR "@rpath")
+  set_target_properties(${target} PROPERTIES INSTALL_RPATH "@loader_path")
+else()
+  set_target_properties(${target} PROPERTIES INSTALL_RPATH "$ORIGIN")
+  #set_target_properties(${target} PROPERTIES LINK_FLAGS "-shared")
+endif()
+
+target_link_libraries(${target} PRIVATE armadillo libtarget)
+
+
+
+

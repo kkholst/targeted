@@ -13,7 +13,7 @@
 #ifndef ARMA_R
 #define MATHLIB_STANDALONE
 #include <armadillo>
-#include "Rmath.h"
+//#include "Rmath.h"
 #endif
 #if defined(ARMA_R)
 #define ARMA_DONT_USE_OPENMP

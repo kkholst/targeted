@@ -8,7 +8,7 @@
 */
 
 #include <UnitTest++/UnitTest++.h>
-#include "targeted.h"
+#include "target.h"
 #include "util.h"
 
 using arma::arma_rng;
@@ -19,7 +19,7 @@ using arma::mat;
 
 bool True() { return(true); }
 
-SUITE(TargetedClass) {
+SUITE(TargetClass) {
   TEST(Sanity) {
     CHECK(True());
     CHECK_EQUAL(2, 2);
@@ -36,7 +36,7 @@ SUITE(TargetedClass) {
     mat x1(n, 1); x1.fill(1);
 
     colvec p(4); p.fill(0.5);
-    targeted::RD <double> model(y, a, x1, x2, x2, p, w);
+    target::RD <double> model(y, a, x1, x2, x2, p, w);
     vec res = model.loglik();
 
     mat pp = model.pa();
@@ -46,7 +46,7 @@ SUITE(TargetedClass) {
     CHECK_CLOSE(logl, res[0], 1e-9);
 
     vec w2 = w*2;
-    model = targeted::RD<double>(y, a, x1, x2, x2, p, w2);
+    model = target::RD<double>(y, a, x1, x2, x2, p, w2);
     CHECK_CLOSE(2*logl, model.loglik()[0], 1e-9);
   }
 
@@ -61,9 +61,9 @@ SUITE(TargetedClass) {
 
     colvec p(6); p.fill(0.5);
     colvec alpha(2); p.fill(1);
-    targeted::RR <double> model(y, a, x1, x2, x2, p, w);
+    target::RR <double> model(y, a, x1, x2, x2, p, w);
 
-    mat pp0 = model.TargetedBinary::pa();
+    mat pp0 = model.TargetBinary::pa();
     mat U = model.score(false);
     mat res = model.est(alpha);
 
