@@ -22,8 +22,8 @@
 ##'
 ##' example(ace)
 ##'
+loadModule("riskregmodels", TRUE)
 NULL
-
 
 ##' For internal use
 ##'

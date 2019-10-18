@@ -99,7 +99,6 @@ class CMakeBuild(build_ext):
         copyfile(src_file, dest_file)
         copymode(src_file, dest_file)
 
-
 ext_modules = [CMakeExtension(pkg+'/'+pkg+'_c')]
 scripts = list(map(lambda x: 'bin/'+x, os.listdir('bin')))
 
@@ -130,5 +129,6 @@ setuptools.setup(
     install_requires=[
         'numpy>=1.15'
     ],
+    package_data={pkg: ['data/*.csv']},
     tests_require=['pytest'],
 )

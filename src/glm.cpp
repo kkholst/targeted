@@ -10,7 +10,7 @@
 
 */
 
-#include "glm.h"
+#include "glm.hpp"
 
 namespace glm {
 

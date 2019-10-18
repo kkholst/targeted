@@ -1,7 +1,7 @@
 /*!
   @file target.cpp
   @author Klaus K. Holst
-  @copyright 2018, Klaus Kähler Holst
+  @copyright 2019, Klaus Kähler Holst
 
   @brief Classes for targeted inference models
 
@@ -10,12 +10,12 @@
 
 */
 
-#include "target.h"
+#include "target.hpp"
 #include <limits>
-#include "glm.h"
+#include "glm.hpp"
 
 namespace target {
-
+  
   // typedef Target<T> B;
 
   /*!
@@ -38,7 +38,8 @@ namespace target {
 		    const arma::Mat<T> &x3,
 		    const arma::Col<T> &parameter,
 		    const arma::Col<T> &weights) : Target(y, a, x1, x2, x3, parameter) {
-    _weights = &weights;
+    // _weights = &weights;
+    _weights = weights;
     useWeights = true;
   }
 
@@ -74,11 +75,16 @@ namespace target {
 			const arma::Mat<T> &x2,
 			const arma::Mat<T> &x3,
 			const arma::Col<T> &parameter) {
-    _response = &y;
-    _exposure = &a;
-    _x1 = &x1;
-    _x2 = &x2;
-    _x3 = &x3;
+    // _response = &y;
+    // _exposure = &a;
+    // _x1 = &x1;
+    // _x2 = &x2;
+    // _x3 = &x3;
+    _response = y;
+    _exposure = a;
+    _x1 = x1;
+    _x2 = x2;
+    _x3 = x3;    
     alpha = arma::Col<T>(x1.n_cols);
     beta = arma::Col<T>(x2.n_cols);
     gamma = arma::Col<T>(x3.n_cols);
@@ -92,7 +98,8 @@ namespace target {
 			const arma::Mat<T> &x2,
 			const arma::Col<T> &parameter,
 			const arma::Col<T> &weights) : Target(y, a, x1, x2, x2, parameter) {
-    _weights = &weights;
+    //_weights = &weights;
+    _weights = weights;
     useWeights = true;
   }
 
@@ -110,8 +117,9 @@ namespace target {
   void Target<T>::calculate(bool target, bool nuisance, bool propensity) {
     if (target)  // Target, linear predictor
       this->target = Target<T>::X1()*Target<T>::alpha;
+    arma::Mat<T> tt = Target<T>::X2()*Target<T>::beta;
     if (nuisance)  // Nuisance, linear predictor
-      this->nuisance = Target<T>::X2()*Target<T>::beta;
+      this->nuisance = Target<T>::X2()*Target<T>::beta; 
     if (propensity && Target<T>::gamma.n_elem > 0) {  // Propensity
       this->propensity = Target<T>::X3()*Target<T>::gamma;
       this->propensity = glm::expit(this->propensity);
@@ -139,8 +147,7 @@ namespace target {
     res.col(4) = this->nuisance;
     return(res);
   }
-
-
+ 
   /*!
     @brief log likelihood
 
@@ -222,8 +229,8 @@ namespace target {
 
   template <typename T>
   void TargetBinary<T>::calculate(bool target,
-				    bool nuisance,
-				    bool propensity) {
+				  bool nuisance,
+				  bool propensity) {
     Target<T>::calculate(target, nuisance, propensity);
     if (nuisance)
       this->nuisance = exp(this->nuisance);  // Odds-product
@@ -242,7 +249,7 @@ namespace target {
     TargetBinary<T>(y, a, x1, x2, x3, parameter, weights) {
     calculate();
   }
-
+  
   template <typename T>
   RD<T>::RD(const arma::Col<T> &y,
 	    const arma::Mat<T> &a,
@@ -443,9 +450,12 @@ namespace target {
 
   ////////////////////////////////////////////////////////////////////////////////
 
+  
   // specific template instantiations:
   template class RR<double>;
   template class RD<double>;
+  template class Target<double>;
+  template class TargetBinary<double>;
   template class RR<std::complex<double> >;
   template class RD<std::complex<double> >;
 

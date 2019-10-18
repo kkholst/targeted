@@ -364,6 +364,8 @@ RcppExport SEXP _target_RcppExport_registerCCallable() {
     return R_NilValue;
 }
 
+RcppExport SEXP _rcpp_module_boot_riskregmodels();
+
 static const R_CallMethodDef CallEntries[] = {
     {"_target_bin_logl", (DL_FUNC) &_target_bin_logl, 8},
     {"_target_bin_dlogl", (DL_FUNC) &_target_bin_dlogl, 8},
@@ -373,6 +375,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_target_bin_esteq_c", (DL_FUNC) &_target_bin_esteq_c, 9},
     {"_target_ace_est", (DL_FUNC) &_target_ace_est, 7},
     {"_target_fast_iid", (DL_FUNC) &_target_fast_iid, 5},
+    {"_rcpp_module_boot_riskregmodels", (DL_FUNC) &_rcpp_module_boot_riskregmodels, 0},
     {"_target_RcppExport_registerCCallable", (DL_FUNC) &_target_RcppExport_registerCCallable, 0},
     {NULL, NULL, 0}
 };

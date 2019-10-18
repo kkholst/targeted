@@ -16,8 +16,9 @@
 #include <RcppArmadillo.h>
 #include <Rmath.h>
 #include <cmath>
-#include "target.h"
-#include "glm.h"
+#include <string>
+#include <memory>
+#include "riskreg.hpp"
 
 typedef std::complex<double> Complex;
 
@@ -186,4 +187,18 @@ arma::mat fast_iid(const arma::vec &y,
   return res;
 }
 
+
+
+RCPP_MODULE(riskregmodels){
+    using namespace Rcpp ;
+    class_<RiskReg>("RiskReg")
+    // expose the constructor
+      .constructor<arma::vec , arma::vec ,
+		   arma::mat , arma::mat ,
+		   arma::vec , std::string>("Constructor")      
+      
+      .method("logl",  &RiskReg::logl,   "log-likelihood")
+      .method("dlogl", &RiskReg::dlogl,  "score function")
+      ;
+}
 

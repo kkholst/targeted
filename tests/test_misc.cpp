@@ -8,7 +8,7 @@
 */
 
 #include <UnitTest++/UnitTest++.h>
-#include "target.h"
+#include "target.hpp"
 #include "util.h"
 
 using arma::arma_rng;

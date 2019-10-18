@@ -1,7 +1,7 @@
 /*!
-  @file target.h
+  @file target.hpp
   @author Klaus K. Holst
-  @copyright 2018, Klaus Kähler Holst
+  @copyright 2019, Klaus Kähler Holst
 
   @brief Classes for targeted inference models
 
@@ -13,7 +13,6 @@
 #ifndef ARMA_R
 #define MATHLIB_STANDALONE
 #include <armadillo>
-//#include "Rmath.h"
 #endif
 #if defined(ARMA_R)
 #define ARMA_DONT_USE_OPENMP
@@ -21,7 +20,7 @@
 #endif
 #include <complex>
 typedef std::complex<double> Complex;
-#include "glm.h"
+#include "glm.hpp"
 
 namespace target {
 
@@ -35,22 +34,27 @@ namespace target {
     arma::Col<T> target;
     arma::Col<T> propensity;
 
-    const arma::Col<T> *_response;
-    const arma::Mat<T> *_exposure;
-    const arma::Mat<T> *_x1;
-    const arma::Mat<T> *_x2;
-    const arma::Mat<T> *_x3;
-    const arma::Col<T> *_weights = nullptr;
+    // const arma::Col<T> *_response;
+    // const arma::Mat<T> *_exposure;
+    // const arma::Mat<T> *_x1;
+    // const arma::Mat<T> *_x2;
+    // const arma::Mat<T> *_x3;
+    // const arma::Col<T> *_weights = nullptr;
+    arma::Col<T> _response;
+    arma::Mat<T> _exposure;
+    arma::Mat<T> _x1;
+    arma::Mat<T> _x2;
+    arma::Mat<T> _x3;
+    arma::Col<T> _weights;
 
+  public:        
     bool useWeights = false;
-
     arma::Col<T> alpha;  // Target parameter
     arma::Col<T> beta;  // Nuisance parameter
     arma::Col<T> gamma;  // Propensity parameter
 
-  public:
     //! Constructor
-    // Target() {};
+    Target() {}
 
     Target(const arma::Col<T> &y, const arma::Mat<T> &a,
 	   const arma::Mat<T> &x1, const arma::Mat<T> &x2, const arma::Mat<T> &x3,
@@ -72,17 +76,24 @@ namespace target {
     
     virtual ~Target() {} // Abstract class
 
-    void weights(const arma::Col<T> &weights) { _weights = &weights; }
+    void weights(const arma::Col<T> &weights) { _weights = weights; } //{ _weights = &weights; }
     virtual void calculate(bool target = true,
 			   bool nuisance = true,
 			   bool propensity = false);
     void updatePar(const arma::Col<T> &parameter);
-    arma::Col<T> weights() { return *(_weights); }
-    arma::Col<T> A() { return *(_exposure); }
-    arma::Col<T> Y() { return *(_response); }
-    arma::Mat<T> X1() { return *_x1; }
-    arma::Mat<T> X2() { return *_x2; }
-    arma::Mat<T> X3() { return *_x3; }
+    // arma::Col<T> weights() { return *(_weights); }
+    // arma::Col<T> A() { return *(_exposure); }
+    // arma::Col<T> Y() { return *(_response); }
+    // arma::Mat<T> X1() { return *_x1; }
+    // arma::Mat<T> X2() { return *_x2; }
+    // arma::Mat<T> X3() { return *_x3; }
+    arma::Col<T> weights() { return (_weights); } // 
+    arma::Col<T> A() { return (_exposure); }
+    arma::Col<T> Y() { return (_response); }
+    arma::Mat<T> X1() { return _x1; }
+    arma::Mat<T> X2() { return _x2; }
+    arma::Mat<T> X3() { return _x3; }
+    
   };
 
 
@@ -117,6 +128,7 @@ namespace target {
     arma::Col<T> H() override { return(RD<T>::Y() - RD<T>::A()%rd()); }
     arma::Mat<T> dp() override;
   public:
+    RD() {}
     RD(const arma::Col<T> &y, const arma::Mat<T> &a,
        const arma::Mat<T> &x1, const arma::Mat<T> &x2, const arma::Mat<T> &x3,
        const arma::Col<T> &parameter,
@@ -138,6 +150,7 @@ namespace target {
     arma::Mat<T> dp() override;
 
   public:
+    RR() {}
     RR(const arma::Col<T> &y, const arma::Mat<T> &x,
        const arma::Mat<T> &z1, const arma::Mat<T> &z2, const arma::Mat<T> &z3,
        const arma::Col<T> &parameter,

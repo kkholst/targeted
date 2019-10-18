@@ -1,7 +1,7 @@
 /*!
-  @file glm.h
+  @file glm.hpp
   @author Klaus K. Holst
-  @copyright 2018, Klaus Kähler Holst
+  @copyright 2019, Klaus Kähler Holst
 
   @brief Utility functions for Generalized Linear Models
 

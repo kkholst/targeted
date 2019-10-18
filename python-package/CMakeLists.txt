@@ -1,14 +1,19 @@
 cmake_minimum_required(VERSION 2.8.12)
 set(target "target_c")
-
 project(${target})
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
+#set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
 # set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 # set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+find_program(CCACHE_FOUND ccache)
+if(CCACHE_FOUND)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+endif(CCACHE_FOUND)
 
 find_package(PythonLibs QUIET)
 include_directories(${PYTHON_INCLUDE_DIRS})
@@ -27,13 +32,12 @@ endif ()
 MESSAGE( [Main] " ARMADILLO_LIBRARIES = ${ARMADILLO_LIBRARIES}")
 MESSAGE( [Main] " ARMADILLO_INCLUDE_DIRS = ${ARMADILLO_INCLUDE_DIRS}")
 
-SET(LIBTARGET_DIR "${CMAKE_SOURCE_DIR}/src/libtarget")
+SET(LIBTARGET_DIR "${CMAKE_SOURCE_DIR}/src/target-cpp")
 #SET(LIBTARGET_SRC "${LIBTARGET}/glm.cpp" "${LIBTARGET}/target.cpp")
 FILE(GLOB LIBTARGET_SRC ${LIBTARGET_DIR}/*.cpp)
-FILE(GLOB LIBTARGET_HDR ${LIBTARGET_DIR}/*.hpp)
+FILE(GLOB LIBTARGET_HDR ${LIBTARGET_DIR}/*.h*)
 include_directories(${LIBTARGET_DIR} LIBTARGET)
 add_library(libtarget ${LIBTARGET_SRC} ${LIBTARGET_HDR})
-
 MESSAGE( [Main] " LIBTARGET_DIR = ${LIBTARGET_DIR}")
 
 ################################################################################
@@ -43,7 +47,7 @@ MESSAGE( [Main] " LIBTARGET_DIR = ${LIBTARGET_DIR}")
 SET(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/target")
 SET(TEST_DIR "tests")
 SET(TESTS
-  "${SOURCE_DIR}/lib.cpp" 
+  #"${SOURCE_DIR}/lib.cpp" 
   "${TEST_DIR}/test_c.cpp")
     # "${TEST_DIR}/test_main.cpp"
     # "${TEST_DIR}/test_math.cpp")
@@ -53,6 +57,7 @@ if (UnitTest++_FOUND)
   MESSAGE ([Main]  " UnitTest++ FOUND")
 else()
   MESSAGE ([Main]  " Using UnitTest++ included in this package")
+  set(UTPP_INCLUDE_TESTS_IN_BUILD OFF CACHE BOOL "unit test building disabled" FORCE)  
   add_subdirectory(src/unittest-cpp)
 endif()
 
@@ -72,8 +77,8 @@ else()
 endif()
 
 pybind11_add_module(${target}
-  src/target/example.cpp
-  src/target/lib.cpp
+  ${LIBTARGET_SRC}
+  src/target/interface.cpp
   )
  
 if(APPLE)
@@ -84,7 +89,8 @@ else()
   #set_target_properties(${target} PROPERTIES LINK_FLAGS "-shared")
 endif()
 
-target_link_libraries(${target} PRIVATE armadillo libtarget)
+#target_link_libraries(${target} PRIVATE armadillo libtarget)
+target_link_libraries(${target} PRIVATE armadillo)
 
 
 

@@ -11,8 +11,9 @@ incdir = include_directories('src')
 ##################################################
 ##################################################
 # Library and headers
-install_headers(['src/target.h',
-                 'src/glm.h',
+install_headers(['src/target.hpp',
+                 'src/glm.hpp',
+                 'src/riskreg.hpp',
                  'src/util.h'],
                 subdir: 'target')
 srclist = ['src/target.cpp', 'src/glm.cpp']

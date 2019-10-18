@@ -17,12 +17,15 @@ default: run
 
 all: clean run
 
-clean:
-	@rm -Rf $(BUILD_DIR) $(VALGRIND_DIR) $(DOXYGEN_DIR)/html $(COVERAGE_DIR)
+.PHONY: clean
+clean: cleanr cleanpy
+	@rm -Rf $(BUILD_DIR) $(VALGRIND_DIR) $(DOXYGEN_DIR)/html $(COVERAGE_DIR)	
 
+.PHONY: init
 init:	clean
 	@$(MESON) $(BUILD_DIR)
 
+.PHONY: run
 run:
 	@if [ ! -d "$(BUILD_DIR)" ]; then $(MAKE) --no-print-directory init; fi
 	@$(MAKE) --no-print-directory build # > /dev/null
@@ -30,19 +33,40 @@ run:
 	@build/dredemo
 	@printf "\n\n"
 
+.PHONY: build
 build:
 	@ninja -C $(BUILD_DIR)
 
+.PHONY: install
 install:
 	ninja -C $(BUILD_DIR) install
 
+.PHONY: uninstall
 uninstall:
 	ninja -C $(BUILD_DIR) uninstall
+
+
+##################################################
+
+.PHONY: cleanr r
+r:
+	R CMD INSTALL R-package
+
+cleanr:
+	@rm -Rf R-package/src/*.o R-package/src/*.so
+
+.PHONY: py cleanpy
+py:
+	cd python-package; python setup.py install
+
+cleanpy:
+	@cd python-package; $(MAKE) --no-print-directory clean
 
 ##################################################
 ## Documentation
 ##################################################
 
+.PHONY: docs doc
 docs:
 	@cd $(DOXYGEN_DIR); doxygen
 
@@ -53,12 +77,15 @@ doc:	docs
 ## Unit tests & code coverage
 ##################################################
 
+.PHONY: rtest
 rtest:
 	R --no-save < ex.R
 
+.PHONY: test
 test:	build
 	@ninja -C $(BUILD_DIR) test
 
+.PHONY: cov
 cov:
 	@$(MESON) $(COVERAGE_DIR) -Db_coverage=true
 	@ninja -C $(COVERAGE_DIR)
@@ -70,10 +97,12 @@ cov:
 ## Debugging, profiling, and memory inspection
 ##################################################
 
+.PHONY: check
 check:
 	-cclint src/*.cpp src/*.h
 	-cppcheck --enable=all src/
 
+.PHONY: valgrind
 ## Alternatively, enable Address Sanitizer (ASAN argument)
 valgrind:
 	@meson $(VALGRIND_DIR)
@@ -118,6 +147,7 @@ dbuild:
 dr:
 	@$(MAKE) --no-print-directory docker_xrun CMD="R --no-save"
 
+.PHONY: docker_run drun dcopy drm dbuild dr
+
 ##################################################
 
-.PHONY: build test check dbuild drun dcopy drm docs doc cov

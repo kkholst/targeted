@@ -1,10 +1,12 @@
-PKG:=pyb
+PKG:=rls
+PIP:=/usr/bin/env pip
+PYTHON:=/usr/bin/env python3
 
 default: install
 
 .PHONY: update
 update:
-	pip3 install wheel setuptools twine --user --upgrade
+	$(PIB) install wheel setuptools twine --user --upgrade
 
 UID := $(shell id -u)
 PWD := $(shell pwd)
@@ -15,33 +17,34 @@ build: clean dockerbuild
 	mv wheelhouse/* dist/; rmdir wheelhouse
 	$(MAKE) sourcebuild
 
-sourcebuild:
-	python3 setup.py sdist
+source:
+	$(PYTHON) setup.py sdist
 
 .PHONY: clean
 clean:
-	rm -Rf dist/* *.egg-info build *.so *.so.*
+	@rm -Rf dist/* *.egg-info build *.so *.so.*
 
 .PHONY: upload
 upload:	
-	python3 -m twine upload --repository pypitest dist/*
+	$(PYTHON) -m twine upload --repository pypitest dist/*
 
 .PHONY: install
 install:
-	pip3 install -e . --user --upgrade
+	$(PYTHON) setup.py install
+#	$(PIP)	 install -e . --user --upgrade
 	rm -Rf *.egg-info
 
 .PHONY: check
 check:
-	python setup.py flake8
+	$(PYTHON) setup.py flake8
 
 .PHONY: test
 test:
-	python setup.py test
+	$(PYTHON) setup.py test
 
 .PHONY: installpypi
 installpypi:
-	pip3 install --upgrade --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ ${PKG}
+	$(PIP) install --upgrade --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ ${PKG}
 
 .PHONY: dockerbuild
 dockerbuild:
