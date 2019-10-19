@@ -19,11 +19,12 @@
 #define ARMA_DONT_USE_OPENMP
 #include <RcppArmadillo.h>
 #endif
+#include <cmath>
 #include <complex>
 typedef std::complex<double> Complex;
 
 namespace glm {
-
+  
   class IID {
   public:
     arma::mat iid;
@@ -42,8 +43,13 @@ namespace glm {
 		 const arma::mat &x,
 		 const arma::vec &w);
 
-  template<typename T>
-  arma::Mat<T> expit(const arma::Mat<T> &x) { return 1.0/(1+exp(-x)); }
+  // template<typename T>
+  // arma::Mat<T> expit(const arma::Mat<T> &x) {
+  //   return 1.0/(1+exp(-x));
+  // }
+  arma::mat expit(arma::mat x);
+  arma::cx_mat expit(arma::cx_mat x);
+
 
 }  // namespace glm
 

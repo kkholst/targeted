@@ -49,3 +49,16 @@ m.update(cc)
 m.loglik()
 res = m.hessian()
 print(res)
+
+val = target.riskreg(y, a, x2=X2)
+print(val['op'])
+
+val = target.riskreg(y, a, x2=X2, x3=X2)
+print(val['op'])
+
+val = target.riskreg(y, a, x2=X1, x3=X2)
+print(val['op'])
+
+print('risk difference')
+val = target.riskreg(y, a, x2=X2, x3=X2, model='rd')
+print(val['op'])

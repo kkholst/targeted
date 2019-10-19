@@ -171,7 +171,7 @@ pip install meson ninja cclint
 ```
 
 The following are included as submodules:
-..* Armadillo <http://arma.sourceforge.net/docs.html>
-..* UnitTest++ (unit tests only) <https://unittest-cpp.github.io/>
---* pybind11++ (python bindings only) <https://pybind11.readthedocs.io>
+* Armadillo <http://arma.sourceforge.net/docs.html>
+* UnitTest++ (unit tests only) <https://unittest-cpp.github.io/>
+* pybind11++ (python bindings only) <https://pybind11.readthedocs.io>
 

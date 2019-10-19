@@ -14,8 +14,41 @@
 
 namespace glm {
 
-  template arma::mat expit<double>(const arma::mat&);
-  template arma::cx_mat expit<Complex>(const arma::cx_mat&);
+  // template arma::mat expit<double>(const arma::mat&);
+  // template arma::cx_mat expit<Complex>(const arma::cx_mat&);
+    
+  arma::mat expit(arma::mat x) {
+    for (unsigned i=0; i<x.n_elem; i++) {
+      double z = x(i);
+      if (z>=0) {
+	x(i) = 1/(1+exp(-z));
+      } else {
+	z = exp(z);
+	x(i) = z/(1+z);
+      }
+    }
+    return(x);
+  }
+  arma::cx_mat expit(arma::cx_mat x) {
+    return 1.0/(1+exp(-x));
+  }
+  
+  arma::vec softmax(arma::vec u) {
+    double umax = u.max();
+    u -= umax;
+    double denom = sum(exp(u));  
+    return u - log(denom);
+  }
+
+  arma::mat softmax(arma::mat &lp, bool ref=true, bool log=false) {
+    if (ref) lp.insert_cols(0, arma::zeros(lp.n_rows));
+    arma::colvec lpmax = arma::max(lp, 1);
+    lp.each_col() -= lpmax;
+    arma::colvec denom = sum(exp(lp), 1);
+    lp.each_col() -= arma::log(denom);
+    if (log) return(lp);
+    return(exp(lp));
+  }
 
 
   IID logistic_iid(const arma::vec &y,

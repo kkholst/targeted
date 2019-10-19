@@ -14,13 +14,17 @@
 // [[Rcpp::plugins(cpp11)]]
 
 #include <RcppArmadillo.h>
-#include <Rmath.h>
+#include "riskreg.hpp"
+//#include <Rmath.h>
 #include <cmath>
 #include <string>
-#include <memory>
-#include "riskreg.hpp"
+#include <complex>
+#include <memory>     // smart pointers (unique_ptr)
+#include <cfloat>     // precision of double (DBL_MIN)
+#include <functional> // std::bind for using non-static member function as argument to free function
 
-typedef std::complex<double> Complex;
+using complex = std::complex<double>;
+using cxfunc  = std::function<arma::cx_mat(arma::cx_vec theta)>;
 
 // [[Rcpp::export]]
 arma::vec bin_logl(const arma::vec &y,
@@ -94,10 +98,10 @@ arma::cx_mat bin_dlogl_c(const arma::cx_vec &y,
 			 bool indiv = false) {
   arma::cx_mat res;
   if (!type.compare("rd")) {
-    target::RD<Complex> inp(y, a, x1, x2, x2, par, weights);
+    target::RD<complex> inp(y, a, x1, x2, x2, par, weights);
     res = inp.score(indiv);
   } else {
-    target::RR<Complex> inp(y, a, x1, x2, x2, par, weights);
+    target::RR<complex> inp(y, a, x1, x2, x2, par, weights);
     res = inp.score(indiv);
   }
   return( res );
@@ -137,10 +141,10 @@ arma::cx_mat bin_esteq_c(const arma::cx_vec &y,
 			 std::string type = "rd") {
   arma::cx_mat res;
   if (!type.compare("rd")) {
-    target::RD<Complex> inp(y, a, x1, x2, x3, par, weights);
+    target::RD<complex> inp(y, a, x1, x2, x3, par, weights);
     res = inp.est(alpha);
   } else {
-    target::RR<Complex> inp(y, a, x1, x2, x3, par, weights);
+    target::RR<complex> inp(y, a, x1, x2, x3, par, weights);
     res = inp.est(alpha);
   }
   return ( res );
@@ -194,11 +198,12 @@ RCPP_MODULE(riskregmodels){
     class_<RiskReg>("RiskReg")
     // expose the constructor
       .constructor<arma::vec , arma::vec ,
-		   arma::mat , arma::mat ,
+		   arma::mat , arma::mat , arma::mat ,
 		   arma::vec , std::string>("Constructor")      
       
-      .method("logl",  &RiskReg::logl,   "log-likelihood")
-      .method("dlogl", &RiskReg::dlogl,  "score function")
+      .method("logl",   &RiskReg::logl,   "log-likelihood")
+      .method("dlogl",  &RiskReg::dlogl,  "score function")
+      .method("update", &RiskReg::update, "Update parameter vector")
       ;
 }
 

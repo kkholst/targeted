@@ -48,9 +48,10 @@ uninstall:
 
 ##################################################
 
-.PHONY: cleanr r
-r:
+.PHONY: r cleanr
+r: cleanr
 	R CMD INSTALL R-package
+	cd examples; R --no-save -f test.R
 
 cleanr:
 	@rm -Rf R-package/src/*.o R-package/src/*.so
@@ -77,10 +78,6 @@ doc:	docs
 ##################################################
 ## Unit tests & code coverage
 ##################################################
-
-.PHONY: rtest
-rtest:
-	R --no-save < ex.R
 
 .PHONY: test
 test:	build
