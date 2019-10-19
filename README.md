@@ -121,29 +121,16 @@ void main() {
 
 ```
 
-
-
-
 ### Installation
 
-This program may be built as a stand-alone program or as a
-shared R-library.  Embedding into other languages (python, julia,
-octave, stata), should be possible by linking to armadillo.
-
-<!-- Program to be embedded in the [mets](http://lava.r-forge.r-project.org) package ... -->
-
-To compile and run the test program
-meson and 
+This program may be compiled as a shared library or as stand-alone python and R
+libraries.
 
 
+To compile and run the test program (depends on meson and ninja)
 ```
 make
 ```	
-
-The R-test program may be run with
-```
-make rtest
-```
 
 Unit tests and code coverage
 ```
@@ -160,27 +147,31 @@ Code inspection (memory leaks, requires *valgrind*)
 make valgrind
 ```
 
-
 This documentation is based on Doxygen and can be compiled by
 ```
 make doc
 ```
 
+The R package can be built and installed with
+```
+make r
+```
+
+The python package can be built and installed with
+```
+make py
+```
 
 ### Dependencies
 
 To build the shared library meson and ninja are needed.
-
-  - Armadillo http://arma.sourceforge.net/docs.html
-  - UnitTest++ (unit tests only) https://unittest-cpp.github.io/
-
-Further the R interface depends, besides on the R development files,
-the following packages
-  - RcppArmadillo, Rcpp, DEoptim
-
-
-Assuming a working python3 installation is available:
 ```
-pip3 install meson ninja cclint --user
+pip install meson ninja cclint 
 
 ```
+
+The following are included as submodules:
+  - Armadillo <http://arma.sourceforge.net/docs.html>
+  - UnitTest++ (unit tests only) <https://unittest-cpp.github.io/>
+  - pybind11++ (python bindings only) <https://pybind11.readthedocs.io>
+
