@@ -72,7 +72,7 @@ functions.
 
 
 ## R
-```{.r}
+```r
 library('target')
 
 m <- lvm(exposure[-2] ~ 1*confounder,
@@ -84,12 +84,12 @@ dd <- sim(m,5e2,seed=1)
 y <- dd$response; x <- dd$exposure; x1 <- x2 <- x3 <- cbind(1,dd$confounder); weights <- rep(1,length(y))
 ```
 
-```{.r}
+```r
 summary(fit <- target::riskreg(y ~ a | 1 | x+z | 1, data=d, type="rr"))
 ```
 
 ## Python
-```{.py}
+```python
 import target
 
 inp = pkg_resources.resource_filename('target', '/data/d.csv')
@@ -108,7 +108,7 @@ m.loglik()
 ```
 
 ## C++
-```
+```cpp
 #include <target/target.h>
 
 using namespace arma;
@@ -171,7 +171,7 @@ pip install meson ninja cclint
 ```
 
 The following are included as submodules:
-  - Armadillo <http://arma.sourceforge.net/docs.html>
-  - UnitTest++ (unit tests only) <https://unittest-cpp.github.io/>
-  - pybind11++ (python bindings only) <https://pybind11.readthedocs.io>
+..* Armadillo <http://arma.sourceforge.net/docs.html>
+..* UnitTest++ (unit tests only) <https://unittest-cpp.github.io/>
+--* pybind11++ (python bindings only) <https://pybind11.readthedocs.io>
 
