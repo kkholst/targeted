@@ -1,7 +1,7 @@
 
 # Introduction
 
-This library provides C++ classes for [targeted inference](targeted.md) 
+This library provides C++ classes for [targeted inference](doc/targeted.md) 
 and semi-parametric efficient estimators as
 well as bindings for *R*. Relevant models includes models binary
 regression models with binary exposure and with nuisance models
@@ -11,7 +11,7 @@ richardson_rr_rd and the odds ratio in \cite tchetgen2010_or. Various
 missing data estimators and causal inference models 
 (see \cite tsiatis2006semiparametric) also fits into this framework.
 
-![](images/targeted.jpg) width=150px 
+![](doc/images/targeted.jpg) width=150px 
 <!--@image latex targeted.png-->
 
 A double robust estimator for the average potential outcome is 

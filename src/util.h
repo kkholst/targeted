@@ -1,7 +1,7 @@
 /*!
   @file util.h
   @author Klaus K. Holst
-  @copyright 2018, Klaus Kähler Holst
+  @copyright 2019, Klaus Kähler Holst
 
   @brief Various utility functions and constants
 
