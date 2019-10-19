@@ -51,7 +51,6 @@ def riskreg(y, a, optimal=True, *args, **kwargs):
 
     lp = np.matmul(x3, b1)
     pr = target.expit(lp)
-    print(pr.flatten()[:10])
     m = target.riskregmodel(y, a, x1, x2, x3, w, model)
     par = np.concatenate((mle_coef, b1))
     m.update(par)
