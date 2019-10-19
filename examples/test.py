@@ -49,5 +49,3 @@ m.update(cc)
 m.loglik()
 res = m.hessian()
 print(res)
-
-
