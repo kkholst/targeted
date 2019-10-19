@@ -9,7 +9,7 @@ prune src/armadillo/mex_interface
 prune src/armadillo/build
 prune src/armadillo/tests
 #prune src/armadillo/misc src/armadillo/examples
-prune src/pybind11/docs
+prune src/pybind11/doc
 prune src/pybind11/tests
 prune build
 prune dist
