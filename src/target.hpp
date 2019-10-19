@@ -34,18 +34,21 @@ namespace target {
     arma::Col<T> target;
     arma::Col<T> propensity;
 
-    // const arma::Col<T> *_response;
-    // const arma::Mat<T> *_exposure;
-    // const arma::Mat<T> *_x1;
-    // const arma::Mat<T> *_x2;
-    // const arma::Mat<T> *_x3;
-    // const arma::Col<T> *_weights = nullptr;
+#ifndef TARGET_DATA_NOTREF
+    const arma::Col<T> *_response;
+    const arma::Mat<T> *_exposure;
+    const arma::Mat<T> *_x1;
+    const arma::Mat<T> *_x2;
+    const arma::Mat<T> *_x3;
+    const arma::Col<T> *_weights = nullptr;
+#elif
     arma::Col<T> _response;
     arma::Mat<T> _exposure;
     arma::Mat<T> _x1;
     arma::Mat<T> _x2;
     arma::Mat<T> _x3;
     arma::Col<T> _weights;
+#endif
 
   public:        
     bool useWeights = false;
@@ -76,29 +79,53 @@ namespace target {
     
     virtual ~Target() {} // Abstract class
 
-    void weights(const arma::Col<T> &weights) { _weights = weights; } //{ _weights = &weights; }
-    virtual void calculate(bool target = true,
-			   bool nuisance = true,
-			   bool propensity = false);
-    void updatePar(const arma::Col<T> &parameter);
-    // arma::Col<T> weights() { return *(_weights); }
-    // arma::Col<T> A() { return *(_exposure); }
-    // arma::Col<T> Y() { return *(_response); }
-    // arma::Mat<T> X1() { return *_x1; }
-    // arma::Mat<T> X2() { return *_x2; }
-    // arma::Mat<T> X3() { return *_x3; }
-    arma::Col<T> weights() { return (_weights); } // 
+#ifndef TARGET_DATA_NOTREF
+    void weights(const arma::Col<T> &weights) { _weights = &weights; }    
+    arma::Col<T> weights() { return *(_weights); }
+    arma::Col<T> A() { return *(_exposure); }
+    arma::Col<T> Y() { return *(_response); }
+    arma::Mat<T> X1() { return *_x1; }
+    arma::Mat<T> X2() { return *_x2; }
+    arma::Mat<T> X3() { return *_x3; }
+    void update_data(const arma::Col<T> &y,
+		    const arma::Mat<T> &a,
+		    const arma::Mat<T> &x1,
+		    const arma::Mat<T> &x2,
+		    const arma::Mat<T> &x3) {
+      _response = &y;
+      _exposure = &a;
+      _x1 = &x1;
+      _x2 = &x2;
+      _x3 = &x3;
+    }
+#elif
+    void weights(const arma::Col<T> &weights) { _weights = weights; }
+    arma::Col<T> weights() { return (_weights); }
     arma::Col<T> A() { return (_exposure); }
     arma::Col<T> Y() { return (_response); }
     arma::Mat<T> X1() { return _x1; }
     arma::Mat<T> X2() { return _x2; }
     arma::Mat<T> X3() { return _x3; }
+    void update_data(const arma::Col<T> &y,
+		    const arma::Mat<T> &a,
+		    const arma::Mat<T> &x1,
+		    const arma::Mat<T> &x2,
+		    const arma::Mat<T> &x3) {
+      _response = y;
+      _exposure = a;
+      _x1 = x1;
+      _x2 = x2;
+      _x3 = x3;    
+    }    
+#endif
+    virtual void calculate(bool target = true,
+			   bool nuisance = true,
+			   bool propensity = false);
+    void updatePar(const arma::Col<T> &parameter);
     
   };
 
-
   ////////////////////////////////////////////////////////////////////////////////
-
 
   template <class T>
   class TargetBinary : public Target<T> {

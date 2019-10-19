@@ -38,8 +38,7 @@ namespace target {
 		    const arma::Mat<T> &x3,
 		    const arma::Col<T> &parameter,
 		    const arma::Col<T> &weights) : Target(y, a, x1, x2, x3, parameter) {
-    // _weights = &weights;
-    _weights = weights;
+    this->weights(weights);
     useWeights = true;
   }
 
@@ -70,21 +69,12 @@ namespace target {
 
   template <typename T>
   Target<T>::Target(const arma::Col<T> &y,
-			const arma::Mat<T> &a,
-			const arma::Mat<T> &x1,
-			const arma::Mat<T> &x2,
-			const arma::Mat<T> &x3,
-			const arma::Col<T> &parameter) {
-    // _response = &y;
-    // _exposure = &a;
-    // _x1 = &x1;
-    // _x2 = &x2;
-    // _x3 = &x3;
-    _response = y;
-    _exposure = a;
-    _x1 = x1;
-    _x2 = x2;
-    _x3 = x3;    
+		    const arma::Mat<T> &a,
+		    const arma::Mat<T> &x1,
+		    const arma::Mat<T> &x2,
+		    const arma::Mat<T> &x3,
+		    const arma::Col<T> &parameter) {
+    this->update_data(y,a,x1,x2,x3);
     alpha = arma::Col<T>(x1.n_cols);
     beta = arma::Col<T>(x2.n_cols);
     gamma = arma::Col<T>(x3.n_cols);
@@ -98,8 +88,7 @@ namespace target {
 			const arma::Mat<T> &x2,
 			const arma::Col<T> &parameter,
 			const arma::Col<T> &weights) : Target(y, a, x1, x2, x2, parameter) {
-    //_weights = &weights;
-    _weights = weights;
+    this->weights(weights);    
     useWeights = true;
   }
 

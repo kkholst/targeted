@@ -58,6 +58,7 @@ cleanr:
 .PHONY: py cleanpy
 py:
 	cd python-package; python setup.py install
+	python examples/test.py
 
 cleanpy:
 	@cd python-package; $(MAKE) --no-print-directory clean

@@ -127,6 +127,10 @@ setuptools.setup(
     ],
     scripts=scripts,
     install_requires=[
+        'pandas',
+        'scipy',
+        'statsmodels',
+        'patsy',
         'numpy>=1.15'
     ],
     package_data={pkg: ['data/*.csv']},

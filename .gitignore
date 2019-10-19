@@ -1,4 +1,7 @@
-examples
+examples/functional
+examples/test
+.Rhistory
+examples/*.csv
 doc/html
 build
 tmp
