@@ -117,4 +117,12 @@ The following are included as submodules:
 1. Armadillo <http://arma.sourceforge.net/docs.html>
 2. UnitTest++ (unit tests only) <https://unittest-cpp.github.io/>
 3. pybind11++ (python bindings only) <https://pybind11.readthedocs.io>
+```
+git init
+git submodules update
+```
 
+```
+make py r
+mkdir build; cd build; cmake .. -G Ninja && ninja
+```
