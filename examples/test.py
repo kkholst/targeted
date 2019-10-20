@@ -2,12 +2,11 @@ import target
 import pandas as pd
 import numpy as np
 import patsy
-import pkg_resources
 from scipy import optimize
 import statsmodels.api as sm
 import target.formula as tg
 
-inp = pkg_resources.resource_filename('target', '/data/d.csv')
+inp = target.get_data()
 d = pd.read_csv(inp, sep=',', header=0)
 n = d.shape[0]
 y, X2 = patsy.dmatrices('y ~ x+z', d)

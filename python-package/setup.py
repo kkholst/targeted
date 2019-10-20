@@ -133,6 +133,6 @@ setuptools.setup(
         'patsy',
         'numpy>=1.15'
     ],
-    package_data={pkg: ['data/*.csv']},
+    package_data={pkg: ['data/*.dat', 'data/*.dat', 'data/*.gz']},
     tests_require=['pytest'],
 )
