@@ -10,6 +10,8 @@ MESON = meson $(ARG)
 # CXX = clang++
 # CC = g++
 OPEN = $(shell which xdg-open || which gnome-open || which open)
+PYTHON = /usr/bin/env python
+R = /usr/bin/env R
 
 default: run
 
@@ -50,16 +52,16 @@ uninstall:
 
 .PHONY: r cleanr
 r: cleanr
-	R CMD INSTALL R-package
-	cd examples; R --no-save -f test.R
+	$(R) CMD INSTALL R-package
+	cd examples; $(R) --no-save -f test.R
 
 cleanr:
 	@rm -Rf R-package/src/*.o R-package/src/*.so
 
 .PHONY: py cleanpy
 py:
-	cd python-package; python setup.py install
-	python examples/test.py
+	cd python-package; $(PYTHON) setup.py install
+	$(PYTHON) examples/test.py
 
 cleanpy:
 	@cd python-package; $(MAKE) --no-print-directory clean
@@ -79,9 +81,13 @@ doc:	docs
 ## Unit tests & code coverage
 ##################################################
 
-.PHONY: test
+.PHONY: test testall
 test:	build
 	@ninja -C $(BUILD_DIR) test
+
+testall: test r py
+	cd R-package; $(R) -e 'devtools::test()'
+	cd python-package; $(MAKE) test
 
 .PHONY: cov
 cov:
@@ -120,7 +126,7 @@ TARGET=$(HOME)/Software/target
 TARGET_TMP=target.tmp
 
 docker_run: drm drun dcopy
-	@echo "Publish::org(read.csv(file='./result.csv'))" | R --slave
+	@echo "Publish::org(read.csv(file='./result.csv'))" | $(R) --slave
 	@sleep 0.2
 	@$(MAKE) drm &> /dev/null # Clean-up
 
