@@ -6,8 +6,7 @@ from scipy import optimize
 import statsmodels.api as sm
 import target.formula as tg
 
-inp = target.get_data()
-d = pd.read_csv(inp, sep=',', header=0)
+d = target.get_data()
 n = d.shape[0]
 y, X2 = patsy.dmatrices('y ~ x+z', d)
 a = d['a'].values.reshape(n, 1)
