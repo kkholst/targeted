@@ -41,7 +41,7 @@ FILE(GLOB LIBTARGET_HDR ${LIBTARGET_DIR}/*.h*)
 include_directories(${LIBTARGET_DIR} LIBTARGET)
 add_library(target ${LIBTARGET_SRC} ${LIBTARGET_HDR})
 MESSAGE( [Main] " LIBTARGET_DIR = ${LIBTARGET_DIR}")
-target_link_libraries(target PRIVATE armadillo UnitTest++)
+target_link_libraries(target PRIVATE armadillo)
 
 ################################################################################
 # Executables
@@ -65,6 +65,14 @@ SET(TESTS
 add_executable("${PROJECT_NAME}_test" ${TESTS})
 target_link_libraries("${PROJECT_NAME}_test" PRIVATE armadillo UnitTest++ target)
 
+find_program( MEMORYCHECK_COMMAND valgrind )
+set( MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full" )
+include( CTest )
+add_test(NAME "${PROJECT_NAME}_test" COMMAND "${PROJECT_NAME}_test")
 
+add_custom_target(test_memcheck
+    COMMAND ${CMAKE_CTEST_COMMAND} 
+        --force-new-ctest-process --test-action memcheck
+    COMMAND cat "${CMAKE_BINARY_DIR}/Testing/Temporary/MemoryChecker.*.log")
 
 
