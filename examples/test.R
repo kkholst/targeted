@@ -1,6 +1,6 @@
 library("target")
 
-devtools::load_all("../R-package")
+##devtools::load_all("../R-package")
 
 set.seed(1)
 m <- lvm(a[-2] ~ 1*x+z,

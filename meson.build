@@ -1,12 +1,17 @@
 project('target', 'cpp',
         version: '0.1',
         default_options: ['warning_level=3', 'cpp_std=c++11'])
+cmake = import('cmake')
 
-arma = dependency('armadillo', version: '>=8.1')
+
 # rmath = dependency('libRmath', version: '>=3.0')
+arma = dependency('armadillo', version: '>=8.1', required: false)
+if arma.found()
+  # Do something.
+else
+# arma = cmake.subproject('armadillo')
+endif
 test = dependency('UnitTest++')
-incdir = include_directories('src')
-
 
 ##################################################
 ##################################################
