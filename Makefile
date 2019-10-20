@@ -12,6 +12,7 @@ MESON = meson $(ARG)
 OPEN = $(shell which xdg-open || which gnome-open || which open)
 PYTHON = /usr/bin/env python
 R = /usr/bin/env R
+CMAKE = /usr/bin/env cmake
 
 default: run
 
@@ -25,7 +26,8 @@ clean: cleanr cleanpy
 
 .PHONY: init
 init:	clean
-	@$(MESON) $(BUILD_DIR)
+#	@$(MESON) $(BUILD_DIR)
+	@$(CMAKE) -G Ninja -B build
 
 .PHONY: run
 run:
@@ -109,9 +111,10 @@ check:
 .PHONY: valgrind
 ## Alternatively, enable Address Sanitizer (ASAN argument)
 valgrind:
-	@meson $(VALGRIND_DIR)
-	@cd $(VALGRIND_DIR); ninja test & meson test --wrap='valgrind  --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes '
-	@less $(VALGRIND_DIR)/meson-logs/testlog-valgrind.txt
+#	@meson $(VALGRIND_DIR)
+#	@cd $(VALGRIND_DIR); ninja test & meson test --wrap='valgrind  --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes '
+#	@less $(VALGRIND_DIR)/meson-logs/testlog-valgrind.txt
+	@ninja -C build test_memcheck
 
 
 ##################################################
