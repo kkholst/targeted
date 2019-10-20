@@ -1,4 +1,4 @@
-import target
+import target as tg
 import numpy as np
 import statsmodels.api as sm
 from scipy import optimize
@@ -8,7 +8,7 @@ def riskreg_mle(y, a, x2, *args, **kwargs):
     x1 = kwargs.get('x1', one)
     w = kwargs.get('weights', one)
     model = kwargs.get('model', 'rr')
-    m = target.riskregmodel(y, a, x1, x2, one, w, model)
+    m = tg.riskregmodel(y, a, x1, x2, one, w, model)
 
     def obj(theta):
         m.update(np.matrix(theta))
@@ -22,7 +22,6 @@ def riskreg_mle(y, a, x2, *args, **kwargs):
     init = kwargs.get('init', np.repeat(0, p))
     op = optimize.minimize(obj, init, method='BFGS', jac=jac)
     return op
-
 
 def riskreg(y, a, optimal=True, *args, **kwargs):
     """Risk regression with binary exposure
@@ -50,8 +49,8 @@ def riskreg(y, a, optimal=True, *args, **kwargs):
     mle_coef = mle['x']
 
     lp = np.matmul(x3, b1)
-    pr = target.expit(lp)
-    m = target.riskregmodel(y, a, x1, x2, x3, w, model)
+    pr = tg.expit(lp)
+    m = tg.riskregmodel(y, a, x1, x2, x3, w, model)
     par = np.concatenate((mle_coef, b1))
     m.update(par)
 
@@ -73,7 +72,7 @@ def riskreg(y, a, optimal=True, *args, **kwargs):
             denom = (1-pr)*p0/(1-p0) + pr*p1/(1-p1)
             omega = nom/denom / (pr*(1-p0))
         w = np.multiply(w.flatten(), omega).reshape(n, 1)
-        m = target.riskregmodel(y, a, x1, x2, x3, w, model)
+        m = tg.riskregmodel(y, a, x1, x2, x3, w, model)
         m.update(par)
 
     alpha0 = mle_coef[:x1.shape[1]]
