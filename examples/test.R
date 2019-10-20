@@ -28,9 +28,9 @@ sum(res)
 m <- new(target:::RiskReg, y,a,x1,x2,x2,w, "rr")
 m$update(theta)
 
-m$logl(theta)
-m$dlogl(theta)
-op <- nlminb(theta, function(p) -m$logl(p), function(p) -m$dlogl(p))
+m$logl()
+head(m$dlogl(TRUE))
+op <- nlminb(theta, function(p) {m$update(p); -m$logl()}, function(p) {m$update(p); -m$dlogl(FALSE)})
 f <- function(p) {
     target:::bin_logl(y,a,x1,x2, rbind(p), w, type="rr", indiv=FALSE)[1]
 }
