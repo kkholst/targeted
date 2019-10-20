@@ -11,7 +11,7 @@ pyarray expit(pyarray &x) {
 }
 
 class RiskRegPy : public RiskReg {
-   
+
 public:
   RiskRegPy(pyarray &y, pyarray &a,
 	    pyarray &x1, pyarray &x2, pyarray &x3,
@@ -24,7 +24,7 @@ public:
     arma::vec theta = arma::zeros(X1.n_cols + X2.n_cols + X3.n_cols);
     arma::vec W = pymat(weights).as_col();
     this->type = Model;
-    RiskReg::setData(Y, A, X1, X2, X3, W);    
+    RiskReg::setData(Y, A, X1, X2, X3, W);
   }
 
   void update(pyarray &par) {
@@ -37,18 +37,18 @@ public:
   }
   double logl() {
     return RiskReg::logl();
-  }  
+  }
   pyarray dlogl(bool indiv=false) {
     arma::mat res = RiskReg::dlogl(indiv);
     return matpy(res);
-  }  
-  
+  }
+
   pyarray esteq(pyarray &par, pyarray &pred) {
     arma::vec alpha = pymat(par).as_col();
     arma::vec pr = pymat(pred).as_col();
-    arma::vec res = RiskReg::esteq(alpha, pr);    
+    arma::mat res  = RiskReg::esteq(alpha, pr);
     return matpy(res);
-  }  
+  }
   pyarray hessian() {
     arma::mat res = RiskReg::hessian();
     return matpy(res);
@@ -59,9 +59,9 @@ public:
 
 PYBIND11_MODULE(target_c, m) {
   m.doc() = "Python bindings for the Target C++ library";
-  
-  m.def("expit", &expit, "Sigmoid function (inverse logit)"); 
-  
+
+  m.def("expit", &expit, "Sigmoid function (inverse logit)");
+
   py::class_<RiskRegPy>(m, "riskregmodel")
     .def(py::init<pyarray &, pyarray &,   // y, a
        pyarray &, pyarray &, pyarray &, // x1, x2, x3

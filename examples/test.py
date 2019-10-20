@@ -5,6 +5,7 @@ import patsy
 import pkg_resources
 from scipy import optimize
 import statsmodels.api as sm
+import target.formula as tg
 
 inp = pkg_resources.resource_filename('target', '/data/d.csv')
 d = pd.read_csv(inp, sep=',', header=0)
@@ -15,6 +16,9 @@ w = np.repeat(1, n).reshape(n, 1)
 X1 = w
 theta = [[1, 1, 1, 1]]
 m = target.riskregmodel(y, a, X1, X2, X2, w, 'rr')
+# m = target.riskregmodel(y, a, X2, X2, X2, w, 'rr')
+# par = np.matrix([[1,2,3]]).transpose()
+# m.esteq(par, w)
 
 prop_mod = sm.GLM(endog=y, exog=X2, family=sm.families.Binomial())
 prop = prop_mod.fit()
@@ -61,4 +65,15 @@ print(val['op'])
 
 print('risk difference')
 val = target.riskreg(y, a, x2=X2, x3=X2, model='rd')
+print(val['op'])
+
+
+print('-----------------')
+print('Formula syntax')
+val = tg.riskreg(d, 'y~a')
+print(val['op'])
+val = tg.riskreg(d, 'y~a', nuisance='x+z', propensity='x+z')
+print(val['op'])
+print('Interaction')
+val = tg.riskreg(d, 'y~a', interaction='x', nuisance='x+z')
 print(val['op'])

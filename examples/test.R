@@ -13,6 +13,7 @@ write.csv(subset(d, select=c(y,a,x,z)), "d.csv", row.names=FALSE)
 
 d <- read.csv(file="d.csv")
 summary(fit <- target::riskreg(y ~ a | 1 | x+z | 1, data=d, type="rr"))
+summary(fit <- target::riskreg(y ~ a | x | x+z | 1, data=d, type="rr"))
 
 
 x2 <- model.matrix(~x+z,d)

@@ -75,10 +75,9 @@ def riskreg(y, a, optimal=True, *args, **kwargs):
         m = tg.riskregmodel(y, a, x1, x2, x3, w, model)
         m.update(par)
 
-    alpha0 = mle_coef[:x1.shape[1]]
-
+    alpha0 = mle_coef[:x1.shape[1]].reshape(x1.shape[1], 1)
     def obj(alpha):
-        return sum(m.esteq(alpha, pr))**2
+        return sum(sum(m.esteq(alpha, pr))**2)
 
     op = optimize.minimize(obj, alpha0, method='Nelder-Mead')
     alphahat = op['x']
