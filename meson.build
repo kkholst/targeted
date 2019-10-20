@@ -3,15 +3,10 @@ project('target', 'cpp',
         default_options: ['warning_level=3', 'cpp_std=c++11'])
 cmake = import('cmake')
 
-
 # rmath = dependency('libRmath', version: '>=3.0')
-arma = dependency('armadillo', version: '>=8.1', required: false)
-if arma.found()
-  # Do something.
-else
-# arma = cmake.subproject('armadillo')
-endif
+arma = dependency('armadillo', version: '>=8.1')
 test = dependency('UnitTest++')
+incdir = include_directories('src')
 
 ##################################################
 ##################################################
@@ -46,6 +41,5 @@ executable('dredemo',
 e = executable('test_misc',
                sources: ['tests/test_misc.cpp'] + srclist,
                include_directories: incdir,
-#               dependencies: [arma, rmath, test])
                dependencies: [arma, test])
 test('Test suite one', e)
