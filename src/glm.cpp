@@ -12,7 +12,7 @@
 
 #include "glm.hpp"
 
-namespace glm {
+namespace target {
 
   // template arma::mat expit<double>(const arma::mat&);
   // template arma::cx_mat expit<Complex>(const arma::cx_mat&);
@@ -51,6 +51,24 @@ namespace glm {
   }
 
 
+  arma::mat deriv(cx_func f, arma::vec theta) {
+    arma::cx_vec thetac = arma::conv_to<arma::cx_vec>::from(theta);
+    arma::cx_mat val0 = f(thetac);
+    unsigned n = val0.n_elem;
+    unsigned p = theta.n_elem;
+    arma::mat res(n,p);
+    double h = DBL_MIN;
+    cx_dbl h0 = cx_dbl(0, h);
+    for (unsigned i=0; i<p; i++) {
+      arma::cx_vec theta0 = thetac;
+      theta0[i] += h0;
+      arma::mat val = imag(f(theta0))/h;
+      for (unsigned j=0; j<n; j++)
+	res(j,i) = val[j];      
+    }
+    return(res);
+  }  
+
   IID logistic_iid(const arma::vec &y,
 		   const arma::vec &p,
 		   const arma::mat &x,
@@ -86,7 +104,7 @@ namespace glm {
     return IID(U, sigma2*H.i());
   }
 
-}  // namespace glm
+}  // namespace target
 
 
 

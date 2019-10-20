@@ -23,8 +23,8 @@
 #include <cfloat>     // precision of double (DBL_MIN)
 #include <functional> // std::bind for using non-static member function as argument to free function
 
-using complex = std::complex<double>;
-using cxfunc  = std::function<arma::cx_mat(arma::cx_vec theta)>;
+using cx_dbl = target::cx_dbl;
+using cx_func = target::cx_func;
 
 // [[Rcpp::export]]
 arma::vec bin_logl(const arma::vec &y,
@@ -98,10 +98,10 @@ arma::cx_mat bin_dlogl_c(const arma::cx_vec &y,
 			 bool indiv = false) {
   arma::cx_mat res;
   if (!type.compare("rd")) {
-    target::RD<complex> inp(y, a, x1, x2, x2, par, weights);
+    target::RD<cx_dbl> inp(y, a, x1, x2, x2, par, weights);
     res = inp.score(indiv);
   } else {
-    target::RR<complex> inp(y, a, x1, x2, x2, par, weights);
+    target::RR<cx_dbl> inp(y, a, x1, x2, x2, par, weights);
     res = inp.score(indiv);
   }
   return( res );
@@ -141,10 +141,10 @@ arma::cx_mat bin_esteq_c(const arma::cx_vec &y,
 			 std::string type = "rd") {
   arma::cx_mat res;
   if (!type.compare("rd")) {
-    target::RD<complex> inp(y, a, x1, x2, x3, par, weights);
+    target::RD<cx_dbl> inp(y, a, x1, x2, x3, par, weights);
     res = inp.est(alpha);
   } else {
-    target::RR<complex> inp(y, a, x1, x2, x3, par, weights);
+    target::RR<cx_dbl> inp(y, a, x1, x2, x3, par, weights);
     res = inp.est(alpha);
   }
   return ( res );
@@ -184,9 +184,9 @@ arma::mat fast_iid(const arma::vec &y,
 		   bool logistic = true) {
   arma::mat res;
   if (logistic) {
-    res = glm::logistic_iid(y, p, x1, weights).iid;
+    res = target::logistic_iid(y, p, x1, weights).iid;
   } else {
-    res = glm::linear_iid(y, p, x1, weights).iid;
+    res = target::linear_iid(y, p, x1, weights).iid;
   }
   return res;
 }

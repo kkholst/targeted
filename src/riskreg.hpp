@@ -5,15 +5,11 @@
 #include <string>
 #include <complex>
 #include <memory>     // smart pointers (unique_ptr)
-#include <cfloat>     // precision of double (DBL_MIN)
-#include <functional> // std::bind for using non-static member function as argument to free function
-
-using complex = std::complex<double>;
-using cxfunc  = std::function<arma::cx_mat(arma::cx_vec theta)>;
 
 class RiskReg {
   
 public:
+  using cx_dbl = target::cx_dbl;
   RiskReg(const arma::vec &y, const arma::vec &a,
   	  const arma::mat &x1, const arma::mat &x2, const arma::mat &x3,
   	  const arma::vec &weights, std::string Model) {
@@ -48,7 +44,7 @@ public:
 
 private:
   std::unique_ptr< target::TargetBinary<double> >   model;
-  std::unique_ptr< target::TargetBinary<complex> >  model_c;
+  std::unique_ptr< target::TargetBinary<cx_dbl> >  model_c;
   arma::vec Y;
   arma::vec A;
   arma::mat X1;

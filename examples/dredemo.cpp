@@ -13,7 +13,7 @@
 #include <cstdio>  // remove
 #include <algorithm> // max
 #include "target.hpp"
-#include "util.h"
+#include "utils.hpp"
 
 using namespace arma;
 

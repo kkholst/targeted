@@ -4,37 +4,20 @@
 #include <string>
 #include <complex>
 #include <memory>     // smart pointers (unique_ptr)
-#include <cfloat>     // precision of double (DBL_MIN)
-#include <functional> // std::bind for using non-static member function as argument to free function
 
-using complex = std::complex<double>;
-using cxfunc  = std::function<arma::cx_mat(arma::cx_vec theta)>;
 
 pyarray expit(pyarray &x) {
-  arma::mat res = glm::expit(pymat(x));
+  arma::mat res = target::expit(pymat(x));
   return matpy(res);
 }
 
-arma::mat deriv(cxfunc f, arma::vec theta) {
-  arma::cx_vec thetac = arma::conv_to<arma::cx_vec>::from(theta);
-  arma::cx_mat val0 = f(thetac);
-  unsigned n = val0.n_elem;
-  unsigned p = theta.n_elem;
-  arma::mat res(n,p);
-  double h = DBL_MIN;
-  complex h0 = complex(0, h);
-  for (unsigned i=0; i<p; i++) {
-    arma::cx_vec theta0 = thetac;
-    theta0[i] += h0;
-    arma::mat val = imag(f(theta0))/h;
-    for (unsigned j=0; j<n; j++)
-      res(j,i) = val[j];      
-  }
-  return(res);
-}
-
 class RiskReg {
+ 
+  
 public:
+  using cx_dbl = target::cx_dbl;
+  using cx_func = target::cx_func;
+
   RiskReg(pyarray &y, pyarray &a,
 	  pyarray &x1, pyarray &x2, pyarray &x3,
 	  pyarray &weights, std::string Model) {
@@ -95,19 +78,19 @@ public:
     arma::cx_vec thetac = arma::conv_to<arma::cx_vec>::from(theta);
     arma::cx_vec Wc = arma::conv_to<arma::cx_vec>::from(W);
     if (Model.compare("rr") == 0) {           
-      model_c.reset(new target::RR<complex>(Yc, Ac, X1c, X2c, X3c, thetac, Wc));
+      model_c.reset(new target::RR<cx_dbl>(Yc, Ac, X1c, X2c, X3c, thetac, Wc));
     } else {
-      model_c.reset(new target::RR<complex>(Yc, Ac, X1c, X2c, X3c, thetac, Wc));      
+      model_c.reset(new target::RR<cx_dbl>(Yc, Ac, X1c, X2c, X3c, thetac, Wc));      
     }
     using namespace std::placeholders;
-    arma::mat res = deriv(std::bind(&RiskReg::score, this, _1), theta);
+    arma::mat res = target::deriv(std::bind(&RiskReg::score, this, _1), theta);
     return matpy(res);
   }
 
 
 private:
   std::unique_ptr< target::TargetBinary<double> >   model;
-  std::unique_ptr< target::TargetBinary<complex> >  model_c;
+  std::unique_ptr< target::TargetBinary<cx_dbl> >  model_c;
   arma::vec Y;
   arma::vec A;
   arma::mat X1;
@@ -132,6 +115,4 @@ PYBIND11_MODULE(target_c, m) {
     .def("esteq", &RiskReg::esteq)
     .def("hessian", &RiskReg::hessian)
     .def("loglik", &RiskReg::logl);
-
-
 }

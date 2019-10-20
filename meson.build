@@ -14,7 +14,7 @@ incdir = include_directories('src')
 install_headers(['src/target.hpp',
                  'src/glm.hpp',
                  'src/riskreg.hpp',
-                 'src/util.h'],
+                 'src/utils.hpp'],
                 subdir: 'target')
 srclist = ['src/target.cpp', 'src/glm.cpp']
 targetlib = shared_library('target',

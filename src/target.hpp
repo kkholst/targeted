@@ -18,8 +18,6 @@
 #define ARMA_DONT_USE_OPENMP
 #include <RcppArmadillo.h>
 #endif
-#include <complex>
-typedef std::complex<double> Complex;
 #include "glm.hpp"
 
 namespace target {
@@ -193,7 +191,7 @@ namespace target {
 
   ////////////////////////////////////////////////////////////////////////////////
 
-  class ACE : public Target<Complex> {
+  class ACE : public Target<cx_dbl> {
   protected:
     bool binary;
 
@@ -210,10 +208,10 @@ namespace target {
 
     arma::cx_mat est(arma::cx_vec par,
 		     bool indiv = false,
-		     const Complex &value = 1);
+		     const cx_dbl &value = 1);
     arma::cx_mat est(bool indiv = false,
-		     const Complex &value = 1);
-    arma::mat deriv(const Complex &value = 1);
+		     const cx_dbl &value = 1);
+    arma::mat deriv(const cx_dbl &value = 1);
   };
 
 

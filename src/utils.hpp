@@ -1,14 +1,13 @@
 /*!
-  @file util.h
+  @file utils.hpp
   @author Klaus K. Holst
   @copyright 2019, Klaus Kähler Holst
 
   @brief Various utility functions and constants
 
 */
+#pragma once
 
-#ifndef SRC_UTIL_H_
-#define SRC_UTIL_H_
 
 // Foreground colors are in form of 3x, bacground are 4x
 const char* COL_RESET = "\x1b[0m";
@@ -30,4 +29,4 @@ const char* LMAGENTA  = "\x1b[95m";
 const char* LCYAN     = "\x1b[96m";
 const char* LWHITE    = "\x1b[97m";
 
-#endif  // SRC_UTIL_H_
+

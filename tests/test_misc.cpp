@@ -9,7 +9,7 @@
 
 #include <UnitTest++/UnitTest++.h>
 #include "target.hpp"
-#include "util.h"
+#include "utils.hpp"
 
 using arma::arma_rng;
 using arma::vec;

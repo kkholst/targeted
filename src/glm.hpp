@@ -21,9 +21,15 @@
 #endif
 #include <cmath>
 #include <complex>
-typedef std::complex<double> Complex;
+#include <cfloat>     // precision of double (DBL_MIN)
+#include <functional> // std::bind for using non-static member function as argument to free function
 
-namespace glm {
+
+namespace target {
+  using cx_dbl  = std::complex<double>;
+  using cx_func = std::function<arma::cx_mat(arma::cx_vec theta)>;
+
+  arma::mat deriv(cx_func f, arma::vec theta);
   
   class IID {
   public:
@@ -51,7 +57,7 @@ namespace glm {
   arma::cx_mat expit(arma::cx_mat x);
 
 
-}  // namespace glm
+}  // namespace target
 
 #endif  // SRC_GLM_H_
 

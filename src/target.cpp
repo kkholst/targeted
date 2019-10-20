@@ -10,8 +10,8 @@
 
 */
 
-#include "target.hpp"
 #include <limits>
+#include "target.hpp"
 #include "glm.hpp"
 
 namespace target {
@@ -111,7 +111,7 @@ namespace target {
       this->nuisance = Target<T>::X2()*Target<T>::beta; 
     if (propensity && Target<T>::gamma.n_elem > 0) {  // Propensity
       this->propensity = Target<T>::X3()*Target<T>::gamma;
-      this->propensity = glm::expit(this->propensity);
+      this->propensity = target::expit(this->propensity);
     }
   }
 
@@ -370,19 +370,19 @@ namespace target {
 	   const arma::cx_vec &parameter,
 	   const arma::cx_vec &weights,
 	   bool binary) :
-    Target<Complex>(y, a, arma::cx_mat(1, 1), x2, x3, parameter, weights) {
+    Target<cx_dbl>(y, a, arma::cx_mat(1, 1), x2, x3, parameter, weights) {
     this->binary = binary;
     ACE::calculate(true, true);
   }
 
   void ACE::calculate(bool target, bool nuisance, bool propensity) {
-    Target<Complex>::calculate(false, nuisance, propensity);
+    Target<cx_dbl>::calculate(false, nuisance, propensity);
     if (nuisance && this->binary) {
-      this->nuisance = glm::expit(this->nuisance);  // Outcome regression model
+      this->nuisance = target::expit(this->nuisance);  // Outcome regression model
     }
   }
 
-  arma::cx_mat ACE::est(bool indiv, const Complex &value) {
+  arma::cx_mat ACE::est(bool indiv, const cx_dbl &value) {
     arma::cx_vec a1 = A();
     for (unsigned i=0; i < a1.n_elem; i++) a1[i] = (a1[i] == value);
     arma::cx_vec U = Y()%a1/(propensity) -
@@ -392,8 +392,8 @@ namespace target {
     return(sum(U, 0));
   }
 
-  arma::cx_mat ACE::est(arma::cx_vec par, bool indiv, const Complex &value) {
-    Target<Complex>::updatePar(par);
+  arma::cx_mat ACE::est(arma::cx_vec par, bool indiv, const cx_dbl &value) {
+    Target<cx_dbl>::updatePar(par);
     ACE::calculate();
     return(ACE::est(indiv, value));
   }
@@ -406,7 +406,7 @@ namespace target {
     @param value Matrix with partial derivatives of estimating function
     @return arma::mat
   */
-  arma::mat ACE::deriv(const Complex &value) {
+  arma::mat ACE::deriv(const cx_dbl &value) {
     unsigned n1 = this->alpha.n_elem;
     unsigned n2 = this->beta.n_elem;
     unsigned n3 = this->gamma.n_elem;
@@ -415,9 +415,9 @@ namespace target {
     // int n = Y().n_elem;
     res[0] = -sum(real(weights()));
     double eps = std::numeric_limits<float>::denorm_min();
-    Complex delta(0, eps);
+    cx_dbl delta(0, eps);
     unsigned pos = 1;
-    Complex tmp;
+    cx_dbl tmp;
     for (unsigned i=0; i < n2; i++) {
       tmp = this->beta[i];
       this->beta[i] += delta;
