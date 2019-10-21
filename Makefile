@@ -60,7 +60,7 @@ uninstall:
 
 .PHONY: r cleanr
 r: cleanr
-	@$(R) -e "devtools::install_cran(c('Rcpp','RcppArmadillo','DEoptim'))"
+	@$(R) -e "devtools::install_cran(c('Rcpp','RcppArmadillo','lava','DEoptim'))"
 	@$(R) CMD INSTALL R-package
 	cd examples; $(R) --no-save -f test.R
 
