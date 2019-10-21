@@ -1,12 +1,12 @@
-PKG:=rls
-PIP:=/usr/bin/env pip
+PKG:=target
+PIP:=/usr/bin/env pip3
 PYTHON:=/usr/bin/env python3
 
 default: install
 
 .PHONY: update
 update:
-	$(PIB) install wheel setuptools twine --user --upgrade
+	$(PIP) install wheel setuptools twine --user --upgrade
 
 UID := $(shell id -u)
 PWD := $(shell pwd)
@@ -31,7 +31,6 @@ upload:
 .PHONY: install
 install:
 	$(PYTHON) setup.py install
-#	$(PIP)	 install -e . --user --upgrade
 	rm -Rf *.egg-info
 
 .PHONY: check

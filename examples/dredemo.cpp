@@ -7,7 +7,7 @@
 
 */
 
-#define ARMA_USE_HDF5
+//#define ARMA_USE_HDF5
 #define MATHLIB_STANDALONE
 #include <armadillo>
 #include <cstdio>  // remove
@@ -58,14 +58,14 @@ int main(int argc, char **argv) {
   std::cout << "pp=\n" << pp << std::endl;
 
 
-  const char *filen = "tmp/a.h5";
-  std::remove(filen);
-  y.save(hdf5_name(filen, "y", hdf5_opts::append+hdf5_opts::trans));
-  a.save(hdf5_name(filen, "a", hdf5_opts::append+hdf5_opts::trans));
-  w.save(hdf5_name(filen, "w", hdf5_opts::append+hdf5_opts::trans));
-  x1.save(hdf5_name(filen, "x1", hdf5_opts::append+hdf5_opts::trans));
-  x2.save(hdf5_name(filen, "x2", hdf5_opts::append+hdf5_opts::trans));
-  p.save(hdf5_name(filen, "p", hdf5_opts::append+hdf5_opts::trans));
+  // const char *filen = "tmp/a.h5";
+  // std::remove(filen);
+  // y.save(hdf5_name(filen, "y", hdf5_opts::append+hdf5_opts::trans));
+  // a.save(hdf5_name(filen, "a", hdf5_opts::append+hdf5_opts::trans));
+  // w.save(hdf5_name(filen, "w", hdf5_opts::append+hdf5_opts::trans));
+  // x1.save(hdf5_name(filen, "x1", hdf5_opts::append+hdf5_opts::trans));
+  // x2.save(hdf5_name(filen, "x2", hdf5_opts::append+hdf5_opts::trans));
+  // p.save(hdf5_name(filen, "p", hdf5_opts::append+hdf5_opts::trans));
 
   return 0;
 }

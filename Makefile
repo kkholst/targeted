@@ -12,7 +12,8 @@ MESON = meson $(ARG)
 # CXX = clang++
 # CC = g++
 OPEN = $(shell which xdg-open || which gnome-open || which open)
-PYTHON = /usr/bin/env python
+PYTHON = /usr/bin/env python3
+PIP = /usr/bin/env pip3
 R = /usr/bin/env R
 CMAKE = /usr/bin/env cmake
 
@@ -59,7 +60,8 @@ uninstall:
 
 .PHONY: r cleanr
 r: cleanr
-	$(R) CMD INSTALL R-package
+	@$(R) -e "devtools::install_cran(c('Rcpp','RcppArmadillo','DEoptim'))"
+	@$(R) CMD INSTALL R-package
 	cd examples; $(R) --no-save -f test.R
 
 cleanr:
