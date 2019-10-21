@@ -11,7 +11,7 @@ if(CCACHE_FOUND)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
 endif(CCACHE_FOUND)
 
-find_package(Armadillo QUIET)
+find_package(Armadillo 9.500 QUIET)
 if (ARMADILLO_FOUND)	
   MESSAGE ([Main]  " Armadillo FOUND")
 else()
