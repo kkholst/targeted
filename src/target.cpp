@@ -442,11 +442,14 @@ namespace target {
   
   // specific template instantiations:
   template class RR<double>;
+  template class RR<cx_dbl>; 
   template class RD<double>;
+  template class RD<cx_dbl>;
   template class Target<double>;
+  template class Target<cx_dbl>;  
   template class TargetBinary<double>;
-  template class RR<std::complex<double> >;
-  template class RD<std::complex<double> >;
-
+  template class TargetBinary<cx_dbl>;
+  
+ 
 
 }  // namespace target
