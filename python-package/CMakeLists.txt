@@ -5,7 +5,7 @@ project(${target})
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
+#set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
 
 find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)
@@ -19,7 +19,7 @@ message(STATUS "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
 message(STATUS "PYTHON_EXECUTABLE = ${PYTHON_EXECUTABLE}")
 message(STATUS "PYTHON_INCLUDE_DIRS = ${PYTHON_INCLUDE_DIRS}")
 
-find_package(Armadillo QUIET)
+find_package(Armadillo 9.500 QUIET)
 if (ARMADILLO_FOUND)	
   MESSAGE ([Main]  " Armadillo FOUND")
 else()
@@ -31,12 +31,6 @@ endif ()
 MESSAGE( [Main] " ARMADILLO_LIBRARIES = ${ARMADILLO_LIBRARIES}")
 MESSAGE( [Main] " ARMADILLO_INCLUDE_DIRS = ${ARMADILLO_INCLUDE_DIRS}")
 
-SET(LIBTARGET_DIR "${CMAKE_SOURCE_DIR}/src/target-cpp")
-FILE(GLOB LIBTARGET_SRC ${LIBTARGET_DIR}/*.cpp)
-FILE(GLOB LIBTARGET_HDR ${LIBTARGET_DIR}/*.hpp)
-include_directories(${LIBTARGET_DIR} LIBTARGET)
-add_library(libtarget ${LIBTARGET_SRC} ${LIBTARGET_HDR})
-MESSAGE( [Main] " LIBTARGET_DIR = ${LIBTARGET_DIR}")
 
 ################################################################################
 # Tests
@@ -75,10 +69,18 @@ else()
   add_subdirectory(src/pybind11)
 endif()
 
+SET(LIBTARGET_DIR "${CMAKE_SOURCE_DIR}/src/target-cpp")
+FILE(GLOB LIBTARGET_SRC ${LIBTARGET_DIR}/*.cpp)
+FILE(GLOB LIBTARGET_HDR ${LIBTARGET_DIR}/*.hpp)
+MESSAGE( [Main] " LIBTARGET_DIR = ${LIBTARGET_DIR}")
+include_directories(${LIBTARGET_DIR} LIBTARGET)
+
 pybind11_add_module(${target}
-  ${LIBTARGET_SRC}
+  ${LIBTARGET_SRC} ${LIBTARGET_HDR}
   src/target/interface.cpp
-  )
+ )
+
+target_link_libraries(${target} PRIVATE armadillo)
  
 if(APPLE)
   set_target_properties(${target} PROPERTIES INSTALL_NAME_DIR "@rpath")
@@ -87,8 +89,6 @@ else()
   set_target_properties(${target} PROPERTIES INSTALL_RPATH "$ORIGIN")
   #set_target_properties(${target} PROPERTIES LINK_FLAGS "-shared")
 endif()
-
-target_link_libraries(${target} PRIVATE armadillo)
 
 
 
