@@ -49,7 +49,6 @@ namespace target {
 #endif
 
   public:        
-    bool useWeights = false;
     arma::Col<T> alpha;  // Target parameter
     arma::Col<T> beta;  // Nuisance parameter
     arma::Col<T> gamma;  // Propensity parameter
@@ -86,10 +85,10 @@ namespace target {
     arma::Mat<T> X2() { return *_x2; }
     arma::Mat<T> X3() { return *_x3; }
     void update_data(const arma::Col<T> &y,
-		    const arma::Mat<T> &a,
-		    const arma::Mat<T> &x1,
-		    const arma::Mat<T> &x2,
-		    const arma::Mat<T> &x3) {
+		     const arma::Mat<T> &a,
+		     const arma::Mat<T> &x1,
+		     const arma::Mat<T> &x2,
+		     const arma::Mat<T> &x3) {
       _response = &y;
       _exposure = &a;
       _x1 = &x1;
@@ -105,10 +104,10 @@ namespace target {
     arma::Mat<T> X2() { return _x2; }
     arma::Mat<T> X3() { return _x3; }
     void update_data(const arma::Col<T> &y,
-		    const arma::Mat<T> &a,
-		    const arma::Mat<T> &x1,
-		    const arma::Mat<T> &x2,
-		    const arma::Mat<T> &x3) {
+		     const arma::Mat<T> &a,
+		     const arma::Mat<T> &x1,
+		     const arma::Mat<T> &x2,
+		     const arma::Mat<T> &x3) {
       _response = y;
       _exposure = a;
       _x1 = x1;
@@ -119,7 +118,7 @@ namespace target {
     virtual void calculate(bool target = true,
 			   bool nuisance = true,
 			   bool propensity = false);
-    void updatePar(const arma::Col<T> &parameter);
+    void update_par(const arma::Col<T> &parameter);
     
   };
 
@@ -203,9 +202,18 @@ namespace target {
   	const arma::cx_vec &parameter,
   	const arma::cx_vec &weights,
 	bool binary = true);
+    ACE(const arma::vec &y,
+    	const arma::vec &a,
+    	const arma::mat &x2,
+    	const arma::mat &x3,
+    	const arma::vec &parameter,
+    	const arma::vec &weights,
+    	bool binary = true);
 
     void calculate(bool target = true, bool nuisance = true, bool propensity = true);
-
+    void update_par(arma::cx_vec par);
+    void update_par(arma::vec par);
+    
     arma::cx_mat est(arma::cx_vec par,
 		     bool indiv = false,
 		     const cx_dbl &value = 1);

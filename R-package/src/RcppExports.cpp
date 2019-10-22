@@ -256,16 +256,16 @@ RcppExport SEXP _target_bin_esteq_c(SEXP ySEXP, SEXP aSEXP, SEXP x1SEXP, SEXP x2
     return rcpp_result_gen;
 }
 // ace_est
-Rcpp::List ace_est(const arma::cx_vec& y, const arma::cx_vec& a, const arma::cx_mat& x1, const arma::cx_mat& x2, const arma::cx_vec& theta, const arma::cx_vec& weights, bool binary);
+Rcpp::List ace_est(const arma::vec& y, const arma::mat& a, const arma::mat& x1, const arma::mat& x2, const arma::vec& theta, const arma::vec& weights, bool binary);
 static SEXP _target_ace_est_try(SEXP ySEXP, SEXP aSEXP, SEXP x1SEXP, SEXP x2SEXP, SEXP thetaSEXP, SEXP weightsSEXP, SEXP binarySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const arma::cx_vec& >::type y(ySEXP);
-    Rcpp::traits::input_parameter< const arma::cx_vec& >::type a(aSEXP);
-    Rcpp::traits::input_parameter< const arma::cx_mat& >::type x1(x1SEXP);
-    Rcpp::traits::input_parameter< const arma::cx_mat& >::type x2(x2SEXP);
-    Rcpp::traits::input_parameter< const arma::cx_vec& >::type theta(thetaSEXP);
-    Rcpp::traits::input_parameter< const arma::cx_vec& >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type a(aSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type x1(x1SEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type x2(x2SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type theta(thetaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type weights(weightsSEXP);
     Rcpp::traits::input_parameter< bool >::type binary(binarySEXP);
     rcpp_result_gen = Rcpp::wrap(ace_est(y, a, x1, x2, theta, weights, binary));
     return rcpp_result_gen;
@@ -344,7 +344,7 @@ static int _target_RcppExport_validate(const char* sig) {
         signatures.insert("arma::cx_mat(*bin_dlogl_c)(const arma::cx_vec&,const arma::cx_vec&,const arma::cx_mat&,const arma::cx_mat&,const arma::cx_vec,const arma::cx_vec&,std::string,bool)");
         signatures.insert("arma::mat(*bin_esteq)(const arma::vec&,const arma::vec&,const arma::mat&,const arma::mat&,const arma::vec&,arma::vec,arma::vec,const arma::vec&,std::string)");
         signatures.insert("arma::cx_mat(*bin_esteq_c)(const arma::cx_vec&,const arma::cx_vec&,const arma::cx_mat&,const arma::cx_mat&,const arma::cx_mat&,arma::cx_vec,arma::cx_vec,const arma::cx_vec&,std::string)");
-        signatures.insert("Rcpp::List(*ace_est)(const arma::cx_vec&,const arma::cx_vec&,const arma::cx_mat&,const arma::cx_mat&,const arma::cx_vec&,const arma::cx_vec&,bool)");
+        signatures.insert("Rcpp::List(*ace_est)(const arma::vec&,const arma::mat&,const arma::mat&,const arma::mat&,const arma::vec&,const arma::vec&,bool)");
         signatures.insert("arma::mat(*fast_iid)(const arma::vec&,const arma::vec&,const arma::mat&,const arma::vec&,bool)");
     }
     return signatures.find(sig) != signatures.end();

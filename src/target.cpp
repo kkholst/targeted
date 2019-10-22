@@ -39,17 +39,16 @@ namespace target {
 		    const arma::Col<T> &parameter,
 		    const arma::Col<T> &weights) : Target(y, a, x1, x2, x3, parameter) {
     this->weights(weights);
-    useWeights = true;
   }
 
 
   /*!
-    @brief updatePar -
+    @brief update_par -
 
     @param parameter - Description of parameter
   */
   template <typename T>
-  void Target<T>::updatePar(const arma::Col<T> &parameter) {
+  void Target<T>::update_par(const arma::Col<T> &parameter) {
     unsigned pos = 0;
     for (unsigned i=0; i < alpha.n_elem; i++) {
       alpha[i] = parameter[i];
@@ -78,7 +77,7 @@ namespace target {
     alpha = arma::Col<T>(x1.n_cols);
     beta = arma::Col<T>(x2.n_cols);
     gamma = arma::Col<T>(x3.n_cols);
-    updatePar(parameter);
+    update_par(parameter);
   }
 
   template <typename T>
@@ -89,7 +88,6 @@ namespace target {
 			const arma::Col<T> &parameter,
 			const arma::Col<T> &weights) : Target(y, a, x1, x2, x2, parameter) {
     this->weights(weights);    
-    useWeights = true;
   }
 
   template <typename T>
@@ -149,7 +147,7 @@ namespace target {
       (1-Target<T>::A()) + TargetBinary<T>::p(1) % Target<T>::A();
     arma::Col<T> logl = Target<T>::Y() % log(phat) +
       (1-Target<T>::Y()) % log(1-phat);
-    if (Target<T>::useWeights) logl %= Target<T>::weights();
+    logl %= Target<T>::weights();
     if (indiv) return(logl);
     return(sum(logl, 0));
   }
@@ -181,7 +179,7 @@ namespace target {
     // arma::Col<T> a = this->A().col(0);
     arma::Col<T> H = this->H();
     arma::Col<T> S = (this->A()-propensity)%(H-p0);
-    if (this->useWeights) S %= this->weights();
+    S %= this->weights();
     arma::Mat<T> U(S.n_elem, alpha.n_elem);
     for (unsigned i=0; i < alpha.n_elem; i++) {
       U.col(i) = S % this->X1().col(i);
@@ -208,7 +206,7 @@ namespace target {
       this->p(1) % this->A().col(0);
     arma::Mat<T> dp_dlp = dp();
     arma::Col<T> S = (this->Y()-phat) / (phat%(1-phat));
-    if (this->useWeights) S %= this->weights();
+    S %= this->weights();
     for (unsigned i=0; i < dp_dlp.n_cols; i++)
       dp_dlp.col(i) %= S;
     if (indiv) return(dp_dlp);
@@ -375,6 +373,21 @@ namespace target {
     ACE::calculate(true, true);
   }
 
+  ACE::ACE(const arma::vec &y,
+  	   const arma::vec &a,
+  	   const arma::mat &x2,
+  	   const arma::mat &x3,
+  	   const arma::vec &parameter,
+  	   const arma::vec &weights,
+  	   bool binary) :
+    ACE(arma::conv_to<arma::cx_vec>::from(y),
+  	     arma::conv_to<arma::cx_vec>::from(a),
+  	     arma::conv_to<arma::cx_mat>::from(x2),
+  	     arma::conv_to<arma::cx_mat>::from(x3),
+  	     arma::conv_to<arma::cx_vec>::from(parameter),
+  	     arma::conv_to<arma::cx_vec>::from(weights),
+  	     binary) { }
+  
   void ACE::calculate(bool target, bool nuisance, bool propensity) {
     Target<cx_dbl>::calculate(false, nuisance, propensity);
     if (nuisance && this->binary) {
@@ -393,11 +406,18 @@ namespace target {
   }
 
   arma::cx_mat ACE::est(arma::cx_vec par, bool indiv, const cx_dbl &value) {
-    Target<cx_dbl>::updatePar(par);
+    Target<cx_dbl>::update_par(par);
     ACE::calculate();
     return(ACE::est(indiv, value));
   }
 
+  void ACE::update_par(arma::cx_vec par) {
+    this->Target<cx_dbl>::update_par(par);
+  }
+  void ACE::update_par(arma::vec par) {
+    arma::cx_vec parc = arma::conv_to<arma::cx_vec>::from(par);
+    this->Target<cx_dbl>::update_par(parc);
+  }
 
   /*!
     @brief deriv Calculate derivative of estimating function for AIPW estimator

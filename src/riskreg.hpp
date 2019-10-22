@@ -36,7 +36,7 @@ public:
   void update(arma::vec &par) {
     for (unsigned i=0; i<par.n_elem; i++)
       this->theta(i) = par(i);
-    model->updatePar(par);
+    model->update_par(par);
     model->calculate(true, true, true);
   }
   double logl() {
@@ -50,7 +50,7 @@ public:
   }
 
   arma::cx_mat score(arma::cx_vec theta) {
-    model_c->updatePar(theta);
+    model_c->update_par(theta);
     model_c->calculate(true, true, false);
     return model_c->score(false);
   }

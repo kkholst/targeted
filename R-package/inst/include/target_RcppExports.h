@@ -151,11 +151,11 @@ namespace target {
         return Rcpp::as<arma::cx_mat >(rcpp_result_gen);
     }
 
-    inline Rcpp::List ace_est(const arma::cx_vec& y, const arma::cx_vec& a, const arma::cx_mat& x1, const arma::cx_mat& x2, const arma::cx_vec& theta, const arma::cx_vec& weights, bool binary = true) {
+    inline Rcpp::List ace_est(const arma::vec& y, const arma::mat& a, const arma::mat& x1, const arma::mat& x2, const arma::vec& theta, const arma::vec& weights, bool binary = true) {
         typedef SEXP(*Ptr_ace_est)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
         static Ptr_ace_est p_ace_est = NULL;
         if (p_ace_est == NULL) {
-            validateSignature("Rcpp::List(*ace_est)(const arma::cx_vec&,const arma::cx_vec&,const arma::cx_mat&,const arma::cx_mat&,const arma::cx_vec&,const arma::cx_vec&,bool)");
+            validateSignature("Rcpp::List(*ace_est)(const arma::vec&,const arma::mat&,const arma::mat&,const arma::mat&,const arma::vec&,const arma::vec&,bool)");
             p_ace_est = (Ptr_ace_est)R_GetCCallable("target", "_target_ace_est");
         }
         RObject rcpp_result_gen;

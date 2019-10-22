@@ -56,6 +56,29 @@ public:
 
 };
 
+// [[Rcpp::export]]
+// Rcpp::List ace_est(const arma::vec &y,
+// 		   const arma::mat &a,
+// 		   const arma::mat &x1,
+// 		   const arma::mat &x2,
+// 		   const arma::vec &theta,
+// 		   const arma::vec &weights,
+// 		   bool binary = true) {
+//   arma::vec par(theta.n_elem+1);
+//   par[0] = 0;
+//   for (unsigned i=0; i < theta.n_elem; i++) par[i+1] = theta[i];
+//   target::ACE model(y, a, x1, x2, par, weights, binary);
+//   double alpha = real(model.est(false)[0])/y.n_elem;
+//   par[0] = alpha;
+//   model.update_par(par);
+//   model.calculate();
+//   arma::vec U = real(model.est(true));
+//   arma::mat dU = model.deriv();
+//   return ( Rcpp::List::create(Rcpp::Named("alpha") = alpha,
+// 			      Rcpp::Named("u") = U,
+// 			      Rcpp::Named("du") = dU) );
+// }
+
 
 PYBIND11_MODULE(target_c, m) {
   m.doc() = "Python bindings for the Target C++ library";
