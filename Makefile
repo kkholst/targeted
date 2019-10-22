@@ -16,6 +16,7 @@ PYTHON = /usr/bin/env python3
 PIP = /usr/bin/env pip3
 R = /usr/bin/env R
 CMAKE = /usr/bin/env cmake
+R_DEP = 1
 
 default: run
 
@@ -61,6 +62,7 @@ uninstall:
 .PHONY: r cleanr
 r: cleanr
 	@$(R) -e "devtools::install_cran(c('Rcpp','RcppArmadillo','lava','DEoptim'))"
+	@$(R) -e "Rcpp::compileAttributes('R-package')"
 	@$(R) CMD INSTALL R-package
 	cd examples; $(R) --no-save -f test.R
 
