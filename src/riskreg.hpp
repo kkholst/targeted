@@ -36,6 +36,10 @@ public:
     }
   }
 
+  void weights(const arma::vec &weights) {
+    model->weights(weights);
+  }
+
   void update(arma::vec &par) {
     for (unsigned i=0; i<par.n_elem; i++)
       this->theta(i) = par(i);
