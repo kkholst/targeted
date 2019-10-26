@@ -14,7 +14,7 @@ MESON = meson $(ARG)
 OPEN = $(shell which xdg-open || which gnome-open || which open)
 PYTHON = /usr/bin/env python3
 PIP = /usr/bin/env pip3
-R = /usr/bin/env R
+R = /usr/bin/env R --no-save --no-restore
 CMAKE = /usr/bin/env cmake
 R_DEP = 1
 
@@ -59,20 +59,22 @@ uninstall:
 ## Python and R packages
 ##################################################
 
-.PHONY: r cleanr
-r: cleanr
-	@$(R) -e "devtools::install_cran(c('Rcpp','RcppArmadillo','lava','DEoptim'))"
-	@$(R) -e "Rcpp::compileAttributes('R-package')"
+.PHONY: r cleanr buildr
+buildr: cleanr
+	@$(R) --slave -e "devtools::install_cran(c('Rcpp','RcppArmadillo','lava','DEoptim'))"
+	@$(R) --slave -e "Rcpp::compileAttributes('R-package')"
 	@$(R) CMD INSTALL R-package
-	cd examples; $(R) --no-save -f test.R
+
+r: buildr
+	@cd examples; $(R) -f test.R
 
 cleanr:
 	@rm -Rf R-package/src/*.o R-package/src/*.so
 
 .PHONY: py cleanpy
 py:
-	cd python-package; $(PYTHON) setup.py install
-	$(PYTHON) examples/test.py
+	@cd python-package; $(PYTHON) setup.py install
+	@$(PYTHON) examples/test.py
 
 cleanpy:
 	@cd python-package; $(MAKE) --no-print-directory clean
