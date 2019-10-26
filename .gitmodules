@@ -7,3 +7,6 @@
 [submodule "lib/unittest-cpp"]
 	path = lib/unittest-cpp
 	url = https://github.com/unittest-cpp/unittest-cpp
+[submodule "lib/spdlog"]
+	path = lib/spdlog
+	url = https://github.com/gabime/spdlog.git

@@ -33,6 +33,15 @@ else()
   include_directories("lib/unittest-cpp")
 endif()
 
+find_package(spdlog QUIET)
+if (spdlog_FOUND)	
+  MESSAGE ([Main]  " spdlog FOUND")
+else()
+  MESSAGE ([Main]  " Using spdlog included in this package")
+  add_subdirectory("lib/spdlog")
+endif()
+
+
 ################################################################################
 
 SET(LIBTARGET_DIR "${CMAKE_SOURCE_DIR}/src")
@@ -63,7 +72,7 @@ SET(TESTS
     # "${TEST_DIR}/test_math.cpp")
 
 add_executable("${PROJECT_NAME}_test" ${TESTS})
-target_link_libraries("${PROJECT_NAME}_test" PRIVATE armadillo UnitTest++ target)
+target_link_libraries("${PROJECT_NAME}_test" PRIVATE armadillo UnitTest++ target spdlog)
 
 find_program( MEMORYCHECK_COMMAND valgrind )
 set( MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full" )

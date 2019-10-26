@@ -10,6 +10,7 @@
 #include <UnitTest++/UnitTest++.h>
 #include "target.hpp"
 #include "utils.hpp"
+#include "spdlog/spdlog.h"    
 
 using arma::arma_rng;
 using arma::vec;
@@ -21,12 +22,14 @@ bool True() { return(true); }
 
 SUITE(TargetClass) {
   TEST(Sanity) {
+    spdlog::info("Sanity checks!");
     CHECK(True());
     CHECK_EQUAL(2, 2);
   }
 
   TEST(Likelihood) {
     // Simulate some data
+    spdlog::info("Testing likelihood!");
     arma_rng::set_seed(1);
     unsigned n = 5;
     colvec y(n, 1);   y.randn();
