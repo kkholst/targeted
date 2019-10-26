@@ -99,7 +99,7 @@ doc:	docs
 ##################################################
 
 .PHONY: test testall
-test:	build
+test:	run
 	@ninja -C $(BUILD_DIR) test
 
 testall: test r py
