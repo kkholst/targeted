@@ -1,10 +1,18 @@
 import target
-import pandas as pd
 import numpy as np
 import patsy
 from scipy import optimize
 import statsmodels.api as sm
 import target.formula as tg
+import logging
+try:
+    import coloredlogs
+    coloredlogs.install(level='INFO')
+except ModuleNotFoundError:
+    logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+################################################################################
 
 d = target.get_data()
 n = d.shape[0]
@@ -20,18 +28,16 @@ m = target.riskregmodel(y, a, X1, X2, X2, w, 'rr')
 
 prop_mod = sm.GLM(endog=y, exog=X2, family=sm.families.Binomial())
 prop = prop_mod.fit()
-print(prop.summary())
-print(prop.params)
-print(prop.cov_params())
+logger.info("\n%s", prop.summary())
+logger.info("Parameters\n%s", prop.params)
+logger.info("Asym.variance\n%s", prop.cov_params())
 prop_mod.hessian(prop.params)
-
 
 m.update(theta)
 res = m.loglik()
-print(res)
+logger.info("loglik\n%s", res)
 res = m.hessian()
-print(res)
-
+logger.info("hessian\n%s", res)
 
 def obj(theta):
     m.update(np.matrix(theta))
@@ -45,33 +51,35 @@ def jac(theta):
 
 op = optimize.minimize(obj, theta, method="BFGS", jac=jac)
 cc = op['x']
-print("MLE:", cc)
+logger.info("MLE:\n\t%s", cc)
 
 m.update(cc)
 m.loglik()
 res = m.hessian()
-print(res)
+logger.info("Hessian:\n%s", res)
 
+
+logger.info('-----------------')
 val = target.riskreg(y, a, x2=X2)
-print(val['op'])
+logger.info(val)
 
 val = target.riskreg(y, a, x2=X2, x3=X2)
-print(val['op'])
+logger.info(val)
 
 val = target.riskreg(y, a, x2=X1, x3=X2)
-print(val['op'])
+logger.info(val)
 
-print('risk difference')
 val = target.riskreg(y, a, x2=X2, x3=X2, model='rd')
-print(val['op'])
+logger.info(val)
 
-
-print('-----------------')
-print('Formula syntax')
+logger.info('-----------------')
+logger.info('Formula syntax')
 val = tg.riskreg(d, 'y~a')
-print(val['op'])
+logger.info(val)
+
 val = tg.riskreg(d, 'y~a', nuisance='x+z', propensity='x+z')
-print(val['op'])
-print('Interaction')
+logger.info(val)
+
+logger.info('Interaction')
 val = tg.riskreg(d, 'y~a', interaction='x', nuisance='x+z')
-print(val['op'])
+logger.info(val)

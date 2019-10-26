@@ -13,6 +13,7 @@ sphinx-autobuild = "*"
 sphinx-autodoc-typehints = "*"
 mock = "*"
 autodoc = "*"
+coloredlogs "*"
 
 [packages]
 patsy = ">=0.5.0"
