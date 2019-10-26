@@ -36,7 +36,9 @@ init-meson:
 	@$(MESON) $(BUILD_DIR)
 
 .PHONY: run
-run:
+run: 
+	@if [ -n "$(find lib/armadillo -maxdepth 0 -type d -empty 2>/dev/null)" ]; then \
+	git submodules init && git submodules update; fi
 	@if [ ! -d "$(BUILD_DIR)" ]; then $(MAKE) --no-print-directory init; fi
 	@$(MAKE) --no-print-directory build # > /dev/null
 	@printf "\n"
