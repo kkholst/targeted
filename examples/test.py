@@ -12,7 +12,7 @@ except ModuleNotFoundError:
     logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-################################################################################
+######################################################################
 
 d = target.get_data()
 n = d.shape[0]
@@ -39,6 +39,7 @@ logger.info("loglik\n%s", res)
 res = m.hessian()
 logger.info("hessian\n%s", res)
 
+
 def obj(theta):
     m.update(np.matrix(theta))
     return -m.loglik()
@@ -58,6 +59,8 @@ m.loglik()
 res = m.hessian()
 logger.info("Hessian:\n%s", res)
 
+
+######################################################################
 
 logger.info('-----------------')
 val = target.riskreg(y, a, x2=X2)
