@@ -27,6 +27,10 @@ public:
     RiskReg::setData(Y, A, X1, X2, X3, W);
   }
 
+  void weights(pyarray &weights) {
+    arma::vec w = pymat(weights).as_col();
+    RiskReg::weights(w);
+  }
   void update(pyarray &par) {
     arma::vec theta = pymat(par).as_col();
     RiskReg::update(theta);
@@ -121,6 +125,8 @@ PYBIND11_MODULE(__target_c__, m) {
     .def("hessian", &RiskRegPy::hessian)
     .def("loglik", &RiskRegPy::logl)
     .def("data", &RiskRegPy::data)
+    .def("weights", &RiskRegPy::weights)
+    
     ;
        //  .def("Y",  [](RiskRegPy &a, Data idx) { return a(idx); };)
 }
