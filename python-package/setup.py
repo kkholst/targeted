@@ -75,7 +75,7 @@ class CMakeBuild(build_ext):
                               cwd=self.build_temp, env=env)
         subprocess.check_call(['cmake', '--build', '.'] + build_args,
                               cwd=self.build_temp)
-        #Copy *_test file to tests directory
+        # Copy *_test file to tests directory
         test_bin = os.path.join(self.build_temp, 'target_c_test')
         self.copy_test_file(test_bin)
         print()  # Add an empty line for cleaner output
@@ -84,7 +84,8 @@ class CMakeBuild(build_ext):
         '''
         Copy ``src_file`` to ``dest_file`` ensuring parent directory exists.
         By default, message like `creating directory /path/to/package` and
-        `copying directory /src/path/to/package -> path/to/package` are displayed on standard output. Adapted from scikit-build.
+        `copying directory /src/path/to/package -> path/to/package` are displayed
+        on standard output. Adapted from scikit-build.
         '''
         # Create directory if needed
         dest_dir = os.path.join(os.path.dirname(
@@ -99,7 +100,8 @@ class CMakeBuild(build_ext):
         copyfile(src_file, dest_file)
         copymode(src_file, dest_file)
 
-ext_modules = [CMakeExtension(pkg+'/'+pkg+'_c')]
+
+ext_modules = [CMakeExtension(pkg+'/__'+pkg+'_c__')]
 scripts = list(map(lambda x: 'bin/'+x, os.listdir('bin')))
 
 setuptools.setup(

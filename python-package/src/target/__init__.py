@@ -1,6 +1,6 @@
 
 #from .utils import *
-from .utils import expit
+from .__utils__ import expit, iid, robustse, tcrossprod
 from .get_data import get_data
-from target.target_c import riskregmodel
-from .riskreg import riskreg
+from .__target_c__ import riskregmodel, ace_est
+from .riskreg import riskreg, Riskreg
