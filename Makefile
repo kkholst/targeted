@@ -28,17 +28,19 @@ all: clean run
 clean: cleanr cleanpy
 	@rm -Rf $(BUILD_DIR) $(VALGRIND_DIR) $(DOXYGEN_DIR)/html $(COVERAGE_DIR)	
 
-.PHONY: init init-meson
+.PHONY: init init-meson init-submodules
 init: clean
 	@$(CMAKE) -G Ninja -B build
 
 init-meson:
 	@$(MESON) $(BUILD_DIR)
 
+init-submodules:
+	@if [ -z "`find \"lib/armadillo\" -mindepth 1 -exec echo notempty \; -quit`" ]; then \
+	git submodule init && git submodule update; fi
+
 .PHONY: run
-run: 
-	@if [ -n "$(find lib/armadillo -maxdepth 0 -type d -empty 2>/dev/null)" ]; then \
-	git submodules init && git submodules update; fi
+run: init-submodules
 	@if [ ! -d "$(BUILD_DIR)" ]; then $(MAKE) --no-print-directory init; fi
 	@$(MAKE) --no-print-directory build # > /dev/null
 	@printf "\n"
