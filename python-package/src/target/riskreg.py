@@ -1,7 +1,65 @@
+# encoding: utf-8
+#
+# Copyright (c) 2019 Klaus K. Holst.  All rights reserved.
+
 import target as tg
 import numpy as np
 import statsmodels.api as sm
 from scipy import optimize
+
+class Riskreg:
+    """Documentation for Riskreg
+
+    """
+    model = None
+    propensity = None
+    mle = None
+    modeltype = None
+
+    def stageone(self):
+        b1 = self.propensity.fit().params
+        mle_coef = self.mle['x']
+        pr = tg.expit(np.matmul(x3, b1))
+        par = np.concatenate((mle_coef, b1))
+        self.model.update(par)
+
+        pp = self.model.pr()
+        p0 = pp[:, 1].flatten()
+        p1 = pp[:, 2].flatten()
+        targ = pp[:, 3].flatten()
+        if self.modeltype == 'rd':
+            # E(A drho/(Pa(1-Pa))|V) = pr*drho/[p1(1-p1)]
+            nom = pr*(1-targ**2)/(p1*(1-p1))
+            # E(1/(Pa(1-Pa))|V) =  (1-pr)/[p0(1-p0)] + pr/[p1(1-p1)]
+            denom = (1-pr)/(p0*(1-p0)) + pr/(p1*(1-p1))
+            omega = nom/denom / (pr*p0*(1-p0))
+        else:  # rr
+            # E(A pa/(1-Pa) |V) = pr*drho/[p1(1-p1)]
+            nom = pr*p1/(1-p1)
+            # E(A pa/(1-Pa) |V) = pr*drho/[p1(1-p1)]
+            denom = (1-pr)*p0/(1-p0) + pr*p1/(1-p1)
+            omega = nom/denom / (pr*(1-p0))
+        w = np.multiply(w.flatten(), omega).reshape(n, 1)
+        self.model = tg.riskregmodel(y, a, x1, x2, x3, w, self.modeltype)
+        self.model.update(par)
+
+    def __init__(self, y, a, **kwargs):
+        n = y.size
+        one = np.matrix(np.repeat(1.0, n)).transpose()
+        x1 = kwargs.get('x1', one)
+        x2 = kwargs.get('x2', one)
+        x3 = kwargs.get('x3', one)
+        w = kwargs.get('weights', one)
+        self.modeltype = kwargs.get('model', 'rr')
+        self.model = tg.riskregmodel(y, a, x1, x2, x3, w, self.modeltype)
+
+        self.propensity = sm.GLM(endog=a, exog=x3, weights=w, family=sm.families.Binomial())
+        self.mle = riskreg_mle(y, a, x2=x2, x1=x1, weights=w, model=self.modeltype)
+        #self.stageone()
+
+    def print(self):
+        print("hej")
+
 
 def riskreg_mle(y, a, x2, *args, **kwargs):
     one = np.matrix(np.repeat(1.0, len(y))).transpose()
@@ -27,7 +85,7 @@ def riskreg_mle(y, a, x2, *args, **kwargs):
         op = optimize.minimize(obj, init, method='Nelder-Mead', jac=jac)
     if not op['success']:
         op = optimize.minimize(obj, init, method='TNC', jac=jac)
-    
+
     return op
 
 def riskreg(y, a, optimal=True, *args, **kwargs):
@@ -83,6 +141,7 @@ def riskreg(y, a, optimal=True, *args, **kwargs):
         m.update(par)
 
     alpha0 = mle_coef[:x1.shape[1]].reshape(x1.shape[1], 1)
+
     def obj(alpha):
         return sum(sum(m.esteq(alpha, pr))**2)
 

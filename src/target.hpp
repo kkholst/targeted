@@ -19,6 +19,7 @@
 #include <RcppArmadillo.h>
 #endif
 #include "glm.hpp"
+#define TARGET_DATA_NOTREF
 
 namespace target {
 
@@ -39,7 +40,7 @@ namespace target {
     const arma::Mat<T> *_x2;
     const arma::Mat<T> *_x3;
     const arma::Col<T> *_weights = nullptr;
-#elif
+#else
     arma::Col<T> _response;
     arma::Mat<T> _exposure;
     arma::Mat<T> _x1;
@@ -95,7 +96,7 @@ namespace target {
       _x2 = &x2;
       _x3 = &x3;
     }
-#elif
+#else
     void weights(const arma::Col<T> &weights) { _weights = weights; }
     arma::Col<T> weights() { return (_weights); }
     arma::Col<T> A() { return (_exposure); }

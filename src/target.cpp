@@ -396,7 +396,7 @@ namespace target {
   }
 
   arma::cx_mat ACE::est(bool indiv, const cx_dbl &value) {
-    arma::cx_vec a1 = A();
+    arma::cx_vec a1 = A().as_col();
     for (unsigned i=0; i < a1.n_elem; i++) a1[i] = (a1[i] == value);
     arma::cx_vec U = Y()%a1/(propensity) -
       (a1-propensity)%nuisance/(propensity) - alpha[0];
@@ -414,6 +414,7 @@ namespace target {
   void ACE::update_par(arma::cx_vec par) {
     this->Target<cx_dbl>::update_par(par);
   }
+  
   void ACE::update_par(arma::vec par) {
     arma::cx_vec parc = arma::conv_to<arma::cx_vec>::from(par);
     this->Target<cx_dbl>::update_par(parc);
@@ -438,6 +439,7 @@ namespace target {
     cx_dbl delta(0, eps);
     unsigned pos = 1;
     cx_dbl tmp;
+    
     for (unsigned i=0; i < n2; i++) {
       tmp = this->beta[i];
       this->beta[i] += delta;

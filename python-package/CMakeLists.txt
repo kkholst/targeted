@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.12)
-set(target "__target_c__")
+set(target "target_c")
 project(${target})
 
 #set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -76,18 +76,18 @@ FILE(GLOB LIBTARGET_HDR ${LIBTARGET_DIR}/*.hpp)
 MESSAGE( [Main] " LIBTARGET_DIR = ${LIBTARGET_DIR}")
 include_directories(${LIBTARGET_DIR} LIBTARGET)
 
-pybind11_add_module(${target}
+pybind11_add_module(__${target}__
   ${LIBTARGET_SRC} ${LIBTARGET_HDR}
   src/target/interface.cpp
  )
 
-target_link_libraries(${target} PRIVATE armadillo)
+target_link_libraries(__${target}__ PRIVATE armadillo)
  
 if(APPLE)
-  set_target_properties(${target} PROPERTIES INSTALL_NAME_DIR "@rpath")
-  set_target_properties(${target} PROPERTIES INSTALL_RPATH "@loader_path")
+  set_target_properties(__${target}__ PROPERTIES INSTALL_NAME_DIR "@rpath")
+  set_target_properties(__${target}__ PROPERTIES INSTALL_RPATH "@loader_path")
 else()
-  set_target_properties(${target} PROPERTIES INSTALL_RPATH "$ORIGIN")
+  set_target_properties(__${target}__ PROPERTIES INSTALL_RPATH "$ORIGIN")
   #set_target_properties(${target} PROPERTIES LINK_FLAGS "-shared")
 endif()
 
