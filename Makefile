@@ -65,7 +65,8 @@ uninstall:
 
 .PHONY: r cleanr buildr
 buildr: cleanr
-	@$(R) --slave -e "devtools::install_cran(c('Rcpp','RcppArmadillo','lava','DEoptim'))"
+	@$(R) --slave -e "source('examples/utilities.R'); \
+	load_packages(c('Rcpp', 'RcppArmadillo', 'lava', 'DEoptim'))"
 	@$(R) --slave -e "Rcpp::compileAttributes('R-package')"
 	@$(R) CMD INSTALL R-package
 
@@ -103,7 +104,7 @@ test:	run
 	@ninja -C $(BUILD_DIR) test
 
 testall: test r py
-	cd R-package; $(R) -e 'devtools::test()'
+	$(R) -e 'testthat::test_package("R-package")'
 	cd python-package; $(MAKE) test
 
 .PHONY: cov
@@ -134,3 +135,25 @@ valgrind-meson:
 	@cd $(VALGRIND_DIR); ninja test & meson test --wrap='valgrind  --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes '
 	@less $(VALGRIND_DIR)/meson-logs/testlog-valgrind.txt
 	@ninja -C build test_memcheck
+
+##################################################
+## Docker
+##################################################
+
+.PHONY: dockerbuild docker export
+dockerbuild:
+	@docker build . -t target_test
+
+export:
+	@rm -Rf ${PWD}/tmp/target
+	@mkdir -p ${PWD}/tmp/target
+	@git archive HEAD | (cd ${PWD}/tmp/target; tar x)
+	@git submodule foreach 'curdir=${PWD} cd ${PWD}/$$path; git archive HEAD | tar -x -C ${PWD}/tmp/target/$$path'
+	@echo "Exported to '${PWD}/tmp/target'"
+
+
+docker: dockerbuild export
+	docker run -ti --rm --privileged -v ${PWD}/tmp/target:/data target_test
+
+
+
