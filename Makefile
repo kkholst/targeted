@@ -151,9 +151,8 @@ export:
 	@git submodule foreach 'curdir=${PWD} cd ${PWD}/$$path; git archive HEAD | tar -x -C ${PWD}/tmp/target/$$path'
 	@echo "Exported to '${PWD}/tmp/target'"
 
+dockerrun: 
+	docker run -ti --rm --privileged -v ${PWD}/tmp/target:/data target_test ${CMD}
 
-docker: dockerbuild export
-	docker run -ti --rm --privileged -v ${PWD}/tmp/target:/data target_test
-
-
+docker: dockerbuild export dockerrun
 
