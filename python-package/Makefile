@@ -22,7 +22,7 @@ source:
 
 .PHONY: clean
 clean:
-	@rm -Rf dist/* *.egg-info build *.so *.so.*
+	@rm -Rf dist/* *.egg-info build *.so *.so.* src/*.egg-info tests/bin/*
 
 .PHONY: upload
 upload:	
