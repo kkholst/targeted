@@ -1,0 +1,11 @@
+install.packages(
+    c("lava",
+      "optimx",
+      "Rcpp",
+      "RcppArmadillo",
+      "crayon",
+      "futile.logger",
+      "testthat",
+      "devtools"),
+    repos="https://cloud.r-project.org/"
+    )

@@ -17,6 +17,7 @@ PIP = /usr/bin/env pip3
 R = /usr/bin/env R --no-save --no-restore
 CMAKE = /usr/bin/env cmake
 R_DEP = 1
+TEST = test
 
 default: run
 
@@ -60,26 +61,47 @@ uninstall:
 	ninja -C $(BUILD_DIR) uninstall
 
 ##################################################
-## Python and R packages
+## R package
 ##################################################
 
-.PHONY: r cleanr buildr
+.PHONY: r cleanr buildr runr testr roxygen
+
 buildr: cleanr
 	@$(R) --slave -e "source('examples/utilities.R'); \
-	load_packages(c('Rcpp', 'RcppArmadillo', 'lava', 'DEoptim'))"
+	load_packages(c('Rcpp', 'RcppArmadillo', 'lava', 'optimx', 'futile.logger'))"
 	@$(R) --slave -e "Rcpp::compileAttributes('R-package')"
 	@$(R) CMD INSTALL R-package
 
-r: buildr
-	@cd examples; $(R) -f test.R
+testr:
+	@$(R) -e 'testthat::test_package("R-package")'
+
+runr:
+	@cd examples; $(R) --silent -f $(TEST).R
+
+roxygen:
+	@$(R) -e 'roxygen2::roxygenize("R-package")'
+
+r: buildr runr
 
 cleanr:
 	@rm -Rf R-package/src/*.o R-package/src/*.so
 
-.PHONY: py cleanpy
-py:
+##################################################
+## Python package
+##################################################
+
+.PHONY: py cleanpy buildpy runpy testpy
+
+buildpy:
 	@cd python-package; $(PYTHON) setup.py install
-	@$(PYTHON) examples/test.py
+
+testpy:
+	@cd python-package; $(MAKE) test
+
+runpy:
+	@$(PYTHON) examples/$(TEST).py
+
+py: buildpy runpy
 
 cleanpy:
 	@cd python-package; $(MAKE) --no-print-directory clean
@@ -103,9 +125,7 @@ doc:	docs
 test:	run
 	@ninja -C $(BUILD_DIR) test
 
-testall: test r py
-	$(R) -e 'testthat::test_package("R-package")'
-	cd python-package; $(MAKE) test
+testall: test r py testr testpy
 
 .PHONY: cov
 cov:

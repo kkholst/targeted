@@ -10,9 +10,9 @@ Depends:
     R (>= 3.3),
     lava (>= 1.6.3)
 Suggests:
-    testthat (>= 0.11)    
+    testthat (>= 0.11) 
 License: GPL (>= 2)
-Imports: Rcpp (>= 1.0.0), DEoptim
+Imports: Rcpp (>= 1.0.0), optimx, futile.logger
 LinkingTo: Rcpp, RcppArmadillo
 LazyLoad: yes
 NeedsCompilation: yes

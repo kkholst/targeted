@@ -165,16 +165,21 @@ riskreg_semi <- function(y, a,
         if (!indiv) val <- as.vector(colSums(val))
         return(val)
     }
-    opt <- nlminb(alpha0, function(x) sum(u(x)^2), control=control)
-    if (opt$objective>1e-1) {
-        ## sdx <- apply(x1,2,sd)
-        lo <- rep(-50,length(alpha0))
-        up <- rep(50,length(alpha0))
-        opt <- DEoptim::DEoptim(function(x) sum(u(x)^2), lo, up, control=DEoptim.control(trace=0))
-        opt$objective <- opt$optime$bestval
-        opt$par <- opt$optim$bestmem
-    }
 
+    f <- function(x) sqrt(sum(u(x))^2)
+    opt <- nlminb(alpha0, f, control=control)
+    if (opt$objective>1e-3) {
+        suppressWarnings(
+            op <- optimx::optimx(alpha0, f,
+                                 method=c("Nelder-Mead", "BFGS", "nlminb", "Rcgmin"),
+                                 control=control))
+        op1 <- head(summary(op, order="value"),1)
+        opt <- list(objective=op1[,"value",drop=TRUE],
+                    par=unlist(op1[,seq_along(alpha0),drop=TRUE]))
+    }
+    if (opt$objective>1e-3) {
+        futile.logger::flog.warn("riskreg optimization: convergence issues")
+    }
     Vprop <- NULL
     if (std.err) {
         thetahat <- c(theta0,gamma)

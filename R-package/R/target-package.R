@@ -9,7 +9,8 @@
 ##' @importFrom lava iid getoutcome estimate Inverse
 ##' @importFrom stats as.formula update binomial deriv
 ##'  	glm.fit lm.fit glm lm coef vcov model.frame model.matrix nlminb predict 
-##' @importFrom DEoptim DEoptim DEoptim.control
+##' @importFrom optimx optimx
+##' @importFrom futile.logger flog.warn flog.debug flog.info
 ##' @importFrom utils tail head
 ##' @useDynLib target, .registration=TRUE
 ##' @aliases target-package target
