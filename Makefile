@@ -24,6 +24,7 @@ ifneq ($(NINJA),)
 endif
 # R package:
 pkg = gof
+PKG = $(shell $(GETVER) R-package/$(pkg))
 R_DEP = 1
 TESTR = $(pkg)_test
 # python package
@@ -97,21 +98,26 @@ roxygen:
 	@$(R) -e 'roxygen2::roxygenize("R-package/${pkg}")'
 
 exportr:
-	@rm -Rf $(BUILD_DIR)/R/$(TARGET)
-	@mkdir -p $(BUILD_DIR)/R/$(TARGET)
-	cd R-package/${pkg}; $(GIT) archive HEAD | (cd ../../$(BUILD_DIR)/R/$(TARGET); tar x)
-	cp src/*.cpp $(BUILD_DIR)/R/$(TARGET)/src
-	cp src/*.hpp $(BUILD_DIR)/R/$(TARGET)/inst/include
-	sed -i '/^OBJECTS\|SOURCES/d' $(BUILD_DIR)/R/$(TARGET)/src/Makevars
-	cd $(BUILD_DIR)/R; $(R) CMD build $(TARGET) --compact-vignettes=gs+qpdf --resave-data=best
+	@rm -Rf $(BUILD_DIR)/R/$(pkg)
+	@mkdir -p $(BUILD_DIR)/R/$(pkg)
+	cd R-package/${pkg}; $(GIT) archive HEAD | (cd ../../$(BUILD_DIR)/R/$(pkg); tar x)
+	cp src/*.cpp $(BUILD_DIR)/R/$(pkg)/src
+	cp src/*.hpp $(BUILD_DIR)/R/$(pkg)/inst/include
+	sed -i '/^OBJECTS\|SOURCES/d' $(BUILD_DIR)/R/$(pkg)/src/Makevars
+	cd $(BUILD_DIR)/R; $(R) CMD build $(pkg) --compact-vignettes=gs+qpdf --resave-data=best
 
 checkr: exportr
-	cd $(BUILD_DIR)/R; $(R) CMD check `../../$(GETVER) $(TARGET)` --timings --as-cran --no-multiarch --run-donttest
+	cd $(BUILD_DIR)/R; $(R) CMD check `../../$(GETVER) $(pkg)` --timings --as-cran --no-multiarch --run-donttest
 
 r: buildr runr
 
 cleanr:
 	@rm -Rf R-package/${pkg}/src/*.o R-package/${pkg}/src/*.so
+
+.PHONY: syncr
+syncr: exportr
+	@if [ -d "../$(pkg)" ]; then \
+	cp -rfv $(BUILD_DIR)/R/$(pkg)/.	 ../gof/; fi
 
 ##################################################
 ## Python package
