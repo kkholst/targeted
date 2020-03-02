@@ -18,6 +18,8 @@ R = /usr/bin/env R --no-save --no-restore
 CMAKE = /usr/bin/env cmake
 R_DEP = 1
 TEST = test
+BUILD=debug
+#BUILD=release
 
 default: run
 
@@ -34,7 +36,7 @@ init: clean
 	@$(CMAKE) -G Ninja -B build
 
 init-meson:
-	@$(MESON) $(BUILD_DIR)
+	@$(MESON) $(BUILD_DIR) --buildtype=$(BUILD)
 
 init-submodules:
 	@if [ -z "`find \"lib/armadillo\" -mindepth 1 -exec echo notempty \; -quit`" ]; then \
@@ -155,6 +157,8 @@ valgrind-meson:
 	@cd $(VALGRIND_DIR); ninja test & meson test --wrap='valgrind  --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes '
 	@less $(VALGRIND_DIR)/meson-logs/testlog-valgrind.txt
 	@ninja -C build test_memcheck
+
+
 
 ##################################################
 ## Docker

@@ -199,7 +199,7 @@ RCPP_MODULE(riskregmodels){
     // expose the constructor
       .constructor<arma::vec , arma::vec ,
 		   arma::mat , arma::mat , arma::mat ,
-		   arma::vec , std::string>("Constructor")      
+		   arma::vec , std::string>("Constructor")
       
       .method("logl",   &RiskReg::logl,   "log-likelihood")
       .method("dlogl",  &RiskReg::dlogl,  "score function")

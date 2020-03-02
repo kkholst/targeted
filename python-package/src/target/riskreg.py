@@ -116,4 +116,3 @@ def riskreg_mle(y, a, x2, *args, **kwargs):
         op = optimize.minimize(obj, init, method='TNC', jac=jac)
 
     return op
-

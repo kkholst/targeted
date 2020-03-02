@@ -10,7 +10,7 @@
 #include <UnitTest++/UnitTest++.h>
 #include "target.hpp"
 #include "utils.hpp"
-#include "spdlog/spdlog.h"    
+#include <spdlog/spdlog.h>
 
 using arma::arma_rng;
 using arma::vec;

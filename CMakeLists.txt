@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.12)
 project("target")
 
+set(CMAKE_BUILD_TYPE Debug) # non-optimized code with debug symbols
+#set(CMAKE_BUILD_TYPE RelWithDebInfo)
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -23,7 +25,17 @@ endif ()
 MESSAGE( [Main] " ARMADILLO_LIBRARIES = ${ARMADILLO_LIBRARIES}")
 MESSAGE( [Main] " ARMADILLO_INCLUDE_DIRS = ${ARMADILLO_INCLUDE_DIRS}")
 
-find_package(UnitTest++ QUIET)
+# find_package(UnitTest++ QUIET)
+# if (UnitTest++_FOUND)	
+#   MESSAGE ([Main]  " UnitTest++ FOUND")
+# else()
+#   MESSAGE ([Main]  " Using UnitTest++ included in this package")
+#   set(UTPP_INCLUDE_TESTS_IN_BUILD OFF CACHE BOOL "unit test building disabled" FORCE)  
+#   add_subdirectory("lib/unittest-cpp")
+#   include_directories("lib/unittest-cpp")
+# endif()
+
+find_package(Cathc2 QUIET)
 if (UnitTest++_FOUND)	
   MESSAGE ([Main]  " UnitTest++ FOUND")
 else()
@@ -33,13 +45,14 @@ else()
   include_directories("lib/unittest-cpp")
 endif()
 
-find_package(spdlog QUIET)
-if (spdlog_FOUND)	
-  MESSAGE ([Main]  " spdlog FOUND")
-else()
-  MESSAGE ([Main]  " Using spdlog included in this package")
-  add_subdirectory("lib/spdlog")
-endif()
+# find_package(spdlog QUIET)
+# if (spdlog_FOUND)	
+#   MESSAGE ([Main]  " spdlog FOUND")
+# else()
+MESSAGE ([Main]  " Using spdlog included in this package")
+add_subdirectory("lib/spdlog")
+include_directories("lib/spdlog")
+# endif()
 
 
 ################################################################################
@@ -72,7 +85,9 @@ SET(TESTS
     # "${TEST_DIR}/test_math.cpp")
 
 add_executable("${PROJECT_NAME}_test" ${TESTS})
-target_link_libraries("${PROJECT_NAME}_test" PRIVATE armadillo UnitTest++ target spdlog)
+##target_link_libraries("${PROJECT_NAME}_test" PRIVATE armadillo UnitTest++ spdlog target)
+target_link_libraries("${PROJECT_NAME}_test" PRIVATE armadillo Catch2 spdlog target)
+
 
 find_program( MEMORYCHECK_COMMAND valgrind )
 set( MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full" )

@@ -40,23 +40,40 @@ MESSAGE( [Main] " ARMADILLO_INCLUDE_DIRS = ${ARMADILLO_INCLUDE_DIRS}")
 SET(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/target")
 SET(TEST_DIR "tests")
 SET(TESTS
-  #"${SOURCE_DIR}/lib.cpp" 
+  #"${SOURCE_DIR}/lib.cpp"
+  "${TEST_DIR}/test_main.cpp")
   "${TEST_DIR}/test_c.cpp")
-    # "${TEST_DIR}/test_main.cpp"
-    # "${TEST_DIR}/test_math.cpp")
+SET(RUN_TESTS TRUE)   
 
-find_package(UnitTest++ QUIET)
-if (UnitTest++_FOUND)	
-  MESSAGE ([Main]  " UnitTest++ FOUND")
-else()
-  MESSAGE ([Main]  " Using UnitTest++ included in this package")
-  set(UTPP_INCLUDE_TESTS_IN_BUILD OFF CACHE BOOL "unit test building disabled" FORCE)  
-  add_subdirectory(src/unittest-cpp)
-  include_directories(src/unittest-cpp)
+if (RUN_TESTS) 
+
+  # find_package(UnitTest++ QUIET)
+  # if (UnitTest++_FOUND)	
+  #   MESSAGE ([Main]  " UnitTest++ FOUND")
+  # else()
+  #   MESSAGE ([Main]  " Using UnitTest++ included in this package")
+  #   set(UTPP_INCLUDE_TESTS_IN_BUILD OFF CACHE BOOL "unit test building disabled" FORCE)  
+  #   add_subdirectory(src/unittest-cpp)
+  #   include_directories(src/unittest-cpp)
+  # endif()
+
+  # add_executable("${PROJECT_NAME}_test" ${TESTS})
+  # target_link_libraries("${PROJECT_NAME}_test" PRIVATE armadillo UnitTest++)
+
+  find_package(Catch2 QUIET)
+  if (UnitTest++_FOUND)	
+    MESSAGE ([Main]  " UnitTest++ FOUND")
+  else()
+    MESSAGE ([Main]  " Using UnitTest++ included in this package")
+    set(UTPP_INCLUDE_TESTS_IN_BUILD OFF CACHE BOOL "unit test building disabled" FORCE)  
+    add_subdirectory(src/unittest-cpp)
+    include_directories(src/unittest-cpp)
+  endif()
+
+  # add_executable("${PROJECT_NAME}_test" ${TESTS})
+  # target_link_libraries("${PROJECT_NAME}_test" PRIVATE armadillo UnitTest++)
+  
 endif()
-
-add_executable("${PROJECT_NAME}_test" ${TESTS})
-target_link_libraries("${PROJECT_NAME}_test" PRIVATE armadillo UnitTest++)
 
 ################################################################################
 # Python bindings
