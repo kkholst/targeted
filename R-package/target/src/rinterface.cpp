@@ -15,7 +15,6 @@
 
 #include <RcppArmadillo.h>
 #include "riskreg.hpp"
-//#include <Rmath.h>
 #include <cmath>
 #include <string>
 #include <complex>

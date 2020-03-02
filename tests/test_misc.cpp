@@ -1,86 +1,51 @@
 /*!
   @file test_misc.cpp
   @author Klaus K. Holst
-  @copyright 2018, Klaus Kähler Holst
+  @copyright 2020, Klaus Kähler Holst
 
   @brief Unit tests
 
 */
 
-#include <UnitTest++/UnitTest++.h>
-#include "target.hpp"
-#include "utils.hpp"
+#include <catch2/catch.hpp>
 #include <spdlog/spdlog.h>
+#include "utils.hpp"
 
-using arma::arma_rng;
-using arma::vec;
-using arma::colvec;
-using arma::mat;
-using arma::mat;
+using namespace arma;
+
+TEST_CASE("Armadillo check", "[arma]") {
+  vec x = {1,2,3};
+  spdlog::info("Size: {:d}", x.n_elem);
+  std::cout << trans(x) << std::endl;
+  REQUIRE(x.n_elem == 3);
+}
+
+TEST_CASE("Cluster-id", "[utils]") {
+  
+  SECTION("Test clusterid") {    
+    uvec inp = {1,1,2,2,2};
+    umat res = target::clusterid(inp);
+    REQUIRE(res.n_rows == 2);
+    REQUIRE(res(0,1) == 2); // size
+    REQUIRE(res(1,1) == 3);
+    REQUIRE(res(0,0) == 0); // index of first element in cluster
+    REQUIRE(res(1,0) == 2);
+  }
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 bool True() { return(true); }
 
-SUITE(TargetClass) {
-  TEST(Sanity) {
-    spdlog::info("Sanity checks!");
-    CHECK(True());
-    CHECK_EQUAL(2, 2);
-  }
-
-  TEST(Likelihood) {
-    // Simulate some data
-    spdlog::info("Testing likelihood!");
-    arma_rng::set_seed(1);
-    unsigned n = 5;
-    colvec y(n, 1);   y.randn();
-    colvec w(n, 1);  w.fill(1);
-    mat a = arma::randi<mat>(n, 1, arma::distr_param(0, 1));
-    mat x2(n, 2); x2.randn();
-    mat x1(n, 1); x1.fill(1);
-
-    colvec p(4); p.fill(0.5);
-    target::RD <double> model(y, a, x1, x2, x2, p, w);
-    vec res = model.loglik();
-
-    mat pp = model.pa();
-    double logl = sum(y%log(pp.col(0)) + (1-y)%log(1-pp.col(0)));
-    std::cout << RED << res[0] << std::endl << COL_RESET;
-    std::cout << BLUE << logl << std::endl << COL_RESET;
-    CHECK_CLOSE(logl, res[0], 1e-9);
-
-    vec w2 = w*2;
-    model = target::RD<double>(y, a, x1, x2, x2, p, w2);
-    CHECK_CLOSE(2*logl, model.loglik()[0], 1e-9);
-  }
-
-  TEST(Score) {
-    arma_rng::set_seed(1);
-    unsigned n = 5;
-    colvec y(n, 1);   y.randn();
-    colvec w(n, 1);  w.fill(1);
-    mat a = arma::randi<mat>(n, 1, arma::distr_param(0, 1));
-    mat x1(n, 2); x1.randn();
-    mat x2 = x1, x3 = x1;
-
-    colvec p(6); p.fill(0.5);
-    colvec alpha(2); p.fill(1);
-    target::RR <double> model(y, a, x1, x2, x2, p, w);
-
-    mat pp0 = model.TargetBinary::pa();
-    mat U = model.score(false);
-    mat res = model.est(alpha);
-
-    colvec gamma = {p[4], p[5]};
-    vec pr = x2*gamma;
-    mat res2 = model.est(alpha, pr);
-    std::cout << std::endl << RED << res[0] << std::endl << COL_RESET;
-    std::cout << std::endl << RED << res2[0] << std::endl << COL_RESET;
-
-    CHECK_CLOSE(2, 2, 1e-9);
-  }
+TEST_CASE("Sanity check", "[sanity]") {
+  spdlog::info("Sanity checks!");
+  REQUIRE(True());
+  REQUIRE(2 == 2);
+  CHECK(1 == 1); // Continue even if test fails
+  REQUIRE(100.5 == Approx(100).epsilon(0.01)); // Allow 1% difference
+  REQUIRE(100 == Approx(100));
 }
 
 
-int main() {
-    return UnitTest::RunAllTests();
-}
+

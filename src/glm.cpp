@@ -1,12 +1,9 @@
 /*!
   @file glm.cpp
   @author Klaus K. Holst
-  @copyright 2019, Klaus Kähler Holst
+  @copyright 2018-2020, Klaus Kähler Holst
 
   @brief Utility functions for Generalized Linear Models
-
-  Includes implementation of risk-difference estimator with nuisance
-  model for log odds-product (MLE and DR estimator).
 
 */
 
@@ -14,9 +11,28 @@
 
 namespace target {
 
+    // Softmax transformation using sum-log-exp trick to avoid overflow
+  arma::mat softmax(arma::mat lp, bool ref=true, bool log=false) {
+    if (ref) lp.insert_cols(0, arma::zeros(lp.n_rows));
+    arma::colvec lpmax = arma::max(lp, 1);
+    lp.each_col() -= lpmax;
+    arma::colvec denom = sum(exp(lp), 1);
+    lp.each_col() -= arma::log(denom);
+    if (log) return(lp);
+    return(exp(lp));
+  }
+
+  // Softmax transformation using sum-log-exp trick to avoid overflow
+  arma::vec softmax(arma::vec u) {
+    double umax = u.max();
+    u -= umax;
+    double denom = sum(exp(u));  
+    return u - log(denom);
+  }
+
   // template arma::mat expit<double>(const arma::mat&);
   // template arma::cx_mat expit<Complex>(const arma::cx_mat&);
-    
+  
   arma::mat expit(arma::mat x) {
     for (unsigned i=0; i<x.n_elem; i++) {
       double z = x(i);
@@ -29,45 +45,14 @@ namespace target {
     }
     return(x);
   }
+
   arma::cx_mat expit(arma::cx_mat x) {
     return 1.0/(1+exp(-x));
   }
-  
-  arma::vec softmax(arma::vec u) {
-    double umax = u.max();
-    u -= umax;
-    double denom = sum(exp(u));  
-    return u - log(denom);
-  }
 
-  arma::mat softmax(arma::mat &lp, bool ref=true, bool log=false) {
-    if (ref) lp.insert_cols(0, arma::zeros(lp.n_rows));
-    arma::colvec lpmax = arma::max(lp, 1);
-    lp.each_col() -= lpmax;
-    arma::colvec denom = sum(exp(lp), 1);
-    lp.each_col() -= arma::log(denom);
-    if (log) return(lp);
-    return(exp(lp));
-  }
+  // template arma::mat expit<double>(const arma::mat&);
+  // template arma::cx_mat expit<Complex>(const arma::cx_mat&);
 
-
-  arma::mat deriv(cx_func f, arma::vec theta) {
-    arma::cx_vec thetac = arma::conv_to<arma::cx_vec>::from(theta);
-    arma::cx_mat val0 = f(thetac);
-    unsigned n = val0.n_elem;
-    unsigned p = theta.n_elem;
-    arma::mat res(n,p);
-    double h = DBL_MIN;
-    cx_dbl h0 = cx_dbl(0, h);
-    for (unsigned i=0; i<p; i++) {
-      arma::cx_vec theta0 = thetac;
-      theta0[i] += h0;
-      arma::mat val = imag(f(theta0))/h;
-      for (unsigned j=0; j<n; j++)
-	res(j,i) = val[j];      
-    }
-    return(res);
-  }  
 
   IID logistic_iid(const arma::vec &y,
 		   const arma::vec &p,

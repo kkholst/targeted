@@ -1,6 +1,5 @@
 import target
 
-
 def test_is_string(caplog):
     '''
     Example test

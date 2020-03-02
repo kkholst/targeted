@@ -1,4 +1,4 @@
-import target.__target_c__ as tc
+import target.__target_c__ as targetc
 import numpy as np
 import numpy.linalg as npl
 import statsmodels.api as sm
@@ -51,4 +51,4 @@ def expit(x):
     :rtype: numpy array
 
     """
-    return tc.expit(np.matrix(x))
+    return targetc.expit(np.matrix(x))

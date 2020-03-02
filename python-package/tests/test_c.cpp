@@ -7,31 +7,20 @@
 
 */
 
-#include <UnitTest++/UnitTest++.h>
-
+#include <catch2/catch.hpp>
 
 bool True() { return(true); }
 
-SUITE(TargetMethods) {
-  TEST(Sanity) {
+TEST_CASE("Target methods", "[target]") {
+  
+  SECTION("Sanity") {
     CHECK(True());
-    CHECK_EQUAL(2, 2);
+    CHECK(2 == 2);
   }
 
-  TEST(dummy1) {
+  SECTION("dummy1") {
     CHECK(2 == 2);    
   }
-  
-  TEST(dummy2) {
-    // arma_rng::set_seed(1);
-    // unsigned n = 5;
-    // colvec y(n, 1);   y.randn();
-    // colvec w(n, 1);  w.fill(1);
-    CHECK_CLOSE(2, 2, 1e-9);
-  }
 }
 
 
-int main() {
-    return UnitTest::RunAllTests();
-}

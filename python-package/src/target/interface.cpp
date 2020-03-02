@@ -1,5 +1,8 @@
 #include <pybind11/stl.h>
 #include "armapy.hpp"
+#include "cumres.hpp"
+#include "utils.hpp"
+#include "glm.hpp"
 #include "riskreg.hpp"
 #include <string>
 #include <complex>
@@ -97,10 +100,12 @@ matrices ace_est(pyarray &y,
   return res;
 }
 
+
 PYBIND11_MODULE(__target_c__, m) {
-  m.doc() = "Python bindings for the Target C++ library";
+  m.doc() = "Python bindings for the target C++ library";
 
   m.def("expit", &expit, "Sigmoid function (inverse logit)");
+  //m.def("expit", [](arma::mat &x) { return target::expit(x); }, "Sigmoid function (inverse logit)");
 
   m.def("ace_est", &ace_est, "Average Causal Effect estimation");
  

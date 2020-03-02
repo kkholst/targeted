@@ -3,6 +3,7 @@
 
 #include "target.hpp"
 #include "glm.hpp"
+#include "utils.hpp"
 #include <string>
 #include <complex>
 #include <memory>     // smart pointers (unique_ptr)

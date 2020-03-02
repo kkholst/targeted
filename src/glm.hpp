@@ -1,14 +1,13 @@
 /*!
   @file glm.hpp
   @author Klaus K. Holst
-  @copyright 2019, Klaus Kähler Holst
+  @copyright 2018-2020, Klaus Kähler Holst
 
   @brief Utility functions for Generalized Linear Models
 
 */
 
-#ifndef SRC_GLM_H_
-#define SRC_GLM_H_
+#pragma once
 
 #ifndef ARMA_R
 #define MATHLIB_STANDALONE
@@ -16,7 +15,6 @@
 //#include "Rmath.h"
 #endif
 #if defined(ARMA_R)
-#define ARMA_DONT_USE_OPENMP
 #include <RcppArmadillo.h>
 #endif
 #include <cmath>
@@ -24,13 +22,24 @@
 #include <cfloat>     // precision of double (DBL_MIN)
 #include <functional> // std::bind for using non-static member function as argument to free function
 
+using cx_dbl  = std::complex<double>;
+using cx_func = std::function<arma::cx_mat(arma::cx_vec theta)>;
+using matlist = std::vector<arma::mat>;
 
 namespace target {
-  using cx_dbl  = std::complex<double>;
-  using cx_func = std::function<arma::cx_mat(arma::cx_vec theta)>;
 
-  arma::mat deriv(cx_func f, arma::vec theta);
+  arma::mat expit(arma::mat x);
+  arma::cx_mat expit(arma::cx_mat x);
+  arma::vec softmax(arma::vec u);
+  arma::mat softmax(arma::mat lp, bool ref, bool log);
   
+  // template<typename T>
+  // arma::Mat<T> expit(const arma::Mat<T> &x) {
+  //   return 1.0/(1+exp(-x));
+  // }
+  arma::mat expit(arma::mat x);
+  arma::cx_mat expit(arma::cx_mat x);
+
   class IID {
   public:
     arma::mat iid;
@@ -49,15 +58,4 @@ namespace target {
 		 const arma::mat &x,
 		 const arma::vec &w);
 
-  // template<typename T>
-  // arma::Mat<T> expit(const arma::Mat<T> &x) {
-  //   return 1.0/(1+exp(-x));
-  // }
-  arma::mat expit(arma::mat x);
-  arma::cx_mat expit(arma::cx_mat x);
-
-
 }  // namespace target
-
-#endif  // SRC_GLM_H_
-

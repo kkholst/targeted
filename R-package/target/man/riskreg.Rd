@@ -6,8 +6,17 @@
 \alias{riskreg_mle}
 \title{Risk regression}
 \usage{
-riskreg(formula, exposure = NULL, data, weights, type = "rr",
-  optimal = TRUE, std.err = TRUE, start = NULL, ...)
+riskreg(
+  formula,
+  exposure = NULL,
+  data,
+  weights,
+  type = "rr",
+  optimal = TRUE,
+  std.err = TRUE,
+  start = NULL,
+  ...
+)
 }
 \arguments{
 \item{formula}{formula (see details below)}

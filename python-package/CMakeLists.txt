@@ -1,11 +1,22 @@
 cmake_minimum_required(VERSION 2.8.12)
 set(target "target_c")
-project(${target})
 
-#set(CMAKE_VERBOSE_MAKEFILE ON)
+if (CMAKE_VERSION VERSION_LESS 3.0)
+  project(${target})
+  set(PROJECT_VERSION 0.0.1)
+else()
+  cmake_policy(SET CMP0048 NEW)
+  project(${target})
+endif()
+
+set(RUN_TESTS TRUE)   
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
+
+################################################################################
+# Libraries
+################################################################################
 
 find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)
@@ -22,57 +33,37 @@ message(STATUS "PYTHON_INCLUDE_DIRS = ${PYTHON_INCLUDE_DIRS}")
 
 find_package(Armadillo 9.500 QUIET)
 if (ARMADILLO_FOUND)	
-  MESSAGE ([Main]  " Armadillo FOUND")
+  message ([Main]  " Armadillo FOUND")
 else()
-  MESSAGE ([Main]  " Using Armadillo included in this package")
+  message ([Main]  " Using Armadillo included in this package")
   find_package(LAPACK REQUIRED)
   add_subdirectory(src/armadillo)
   include_directories(src/armadillo/include)
 endif ()
-MESSAGE( [Main] " ARMADILLO_LIBRARIES = ${ARMADILLO_LIBRARIES}")
-MESSAGE( [Main] " ARMADILLO_INCLUDE_DIRS = ${ARMADILLO_INCLUDE_DIRS}")
-
+message( [Main] " ARMADILLO_LIBRARIES = ${ARMADILLO_LIBRARIES}")
+message( [Main] " ARMADILLO_INCLUDE_DIRS = ${ARMADILLO_INCLUDE_DIRS}")
 
 ################################################################################
 # Tests
 ################################################################################
 
-SET(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/target")
-SET(TEST_DIR "tests")
-SET(TESTS
-  #"${SOURCE_DIR}/lib.cpp"
-  "${TEST_DIR}/test_main.cpp")
+set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/target")
+set(TEST_DIR "tests")
+set(TESTS
+  "${TEST_DIR}/test_main.cpp"
   "${TEST_DIR}/test_c.cpp")
-SET(RUN_TESTS TRUE)   
 
 if (RUN_TESTS) 
-
-  # find_package(UnitTest++ QUIET)
-  # if (UnitTest++_FOUND)	
-  #   MESSAGE ([Main]  " UnitTest++ FOUND")
-  # else()
-  #   MESSAGE ([Main]  " Using UnitTest++ included in this package")
-  #   set(UTPP_INCLUDE_TESTS_IN_BUILD OFF CACHE BOOL "unit test building disabled" FORCE)  
-  #   add_subdirectory(src/unittest-cpp)
-  #   include_directories(src/unittest-cpp)
-  # endif()
-
-  # add_executable("${PROJECT_NAME}_test" ${TESTS})
-  # target_link_libraries("${PROJECT_NAME}_test" PRIVATE armadillo UnitTest++)
-
   find_package(Catch2 QUIET)
-  if (UnitTest++_FOUND)	
-    MESSAGE ([Main]  " UnitTest++ FOUND")
+  if (Catch2_FOUND)	
+    message ([Main]  " Catch2 FOUND")
   else()
-    MESSAGE ([Main]  " Using UnitTest++ included in this package")
-    set(UTPP_INCLUDE_TESTS_IN_BUILD OFF CACHE BOOL "unit test building disabled" FORCE)  
-    add_subdirectory(src/unittest-cpp)
-    include_directories(src/unittest-cpp)
+    message ([Main]  " Using Catch2 included in this package")
+    add_subdirectory("src/catch2")
+    include_directories("src/catch2/include")
   endif()
-
-  # add_executable("${PROJECT_NAME}_test" ${TESTS})
-  # target_link_libraries("${PROJECT_NAME}_test" PRIVATE armadillo UnitTest++)
-  
+  add_executable("${PROJECT_NAME}_test" ${TESTS})
+  target_link_libraries("${PROJECT_NAME}_test" PRIVATE armadillo Catch2::Catch2)  
 endif()
 
 ################################################################################
@@ -81,16 +72,16 @@ endif()
 
 find_package(pybind11 QUIET)
 if (pybind11_FOUND)	
-  MESSAGE ([Main]  " pybind11 FOUND")
+  message([Main]  " pybind11 FOUND")
 else()
-  MESSAGE ([Main]  " Using pybind11 included in this package")
+  message([Main]  " Using pybind11 included in this package")
   add_subdirectory(src/pybind11)
 endif()
 
-SET(LIBTARGET_DIR "${CMAKE_SOURCE_DIR}/src/target-cpp")
-FILE(GLOB LIBTARGET_SRC ${LIBTARGET_DIR}/*.cpp)
-FILE(GLOB LIBTARGET_HDR ${LIBTARGET_DIR}/*.hpp)
-MESSAGE( [Main] " LIBTARGET_DIR = ${LIBTARGET_DIR}")
+set(LIBTARGET_DIR "${CMAKE_SOURCE_DIR}/src/target-cpp")
+file(GLOB LIBTARGET_SRC ${LIBTARGET_DIR}/*.cpp)
+file(GLOB LIBTARGET_HDR ${LIBTARGET_DIR}/*.hpp)
+message( [Main] " LIBTARGET_DIR = ${LIBTARGET_DIR}")
 include_directories(${LIBTARGET_DIR} LIBTARGET)
 
 pybind11_add_module(__${target}__

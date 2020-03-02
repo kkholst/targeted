@@ -1,23 +1,13 @@
 /*!
   @file target.hpp
   @author Klaus K. Holst
-  @copyright 2019, Klaus Kähler Holst
+  @copyright 2019-2020, Klaus Kähler Holst
 
   @brief Classes for targeted inference models
 
 */
 
-#ifndef SRC_TARGET_H_
-#define SRC_TARGET_H_
-
-#ifndef ARMA_R
-#define MATHLIB_STANDALONE
-#include <armadillo>
-#endif
-#if defined(ARMA_R)
-#define ARMA_DONT_USE_OPENMP
-#include <RcppArmadillo.h>
-#endif
+#pragma once
 #include "glm.hpp"
 #define TARGET_DATA_NOTREF
 
@@ -234,4 +224,3 @@ namespace target {
 
 }  // namespace target
 
-#endif  // SRC_TARGET_H_

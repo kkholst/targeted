@@ -1,0 +1,19 @@
+## -*- mode: makefile; -*-
+
+## Make this C++11 so that we get better int64 support and much more
+CXX_STD=CXX11
+
+## Configure tells us about locations for ## both Rcpp (ie libRcpp.so and Rcpp.h) and 
+## ProtoBuf headers and library via these variables
+# PKG_CPPFLAGS=@PKG_CPPFLAGS@
+# PKG_LIBS=@PKG_LIBS@ 
+# PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) @CXXFLAGS@ -I../inst/include @EXTRA_CFLAGS@
+# PKG_LIBS = $(SHLIB_OPENMP_CFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) @EXTRA_LIBS@
+# PKG_CXXFLAGS = $(SHLIB_CXXFLAGS) @CXXFLAGS@ -I../inst/include @EXTRA_CFLAGS@
+# PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` $(SHLIB_CFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) @EXTRA_LIBS@
+
+PKG_CXXFLAGS = -I. -I../inst/include @EXTRA_CFLAGS@ $(SHLIB_CXXFLAGS)
+#-DRARMA
+PKG_LIBS =  $(SHLIB_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+# @EXTRA_LIBS@
+

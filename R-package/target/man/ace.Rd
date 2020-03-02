@@ -5,8 +5,17 @@
 \alias{aipw}
 \title{AIPW estimator for Average Causal Effect}
 \usage{
-ace(formula, exposure = NULL, data, weights, binary = TRUE, all,
-  missing = FALSE, labels = NULL, ...)
+ace(
+  formula,
+  exposure = NULL,
+  data,
+  weights,
+  binary = TRUE,
+  all,
+  missing = FALSE,
+  labels = NULL,
+  ...
+)
 }
 \arguments{
 \item{formula}{Formula (see details below)}

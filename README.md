@@ -1,18 +1,28 @@
 
+|                     |                                                                                                      |                                                                                                                                     |                                                                                                            |                                                                                                              |
+|:--------------------|:-----------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------|
+| ``gof`` (R-package) | [<img src="https://travis-ci.org/kkholst/gof.svg?branch=master">](https://travis-ci.org/kkholst/gof) | [<img src="https://codecov.io/github/kkholst/gof/coverage.svg?branch=master">](https://codecov.io/github/kkholst/gof?branch=master) | [<img src="http://www.r-pkg.org/badges/version/gof">](http://cran.rstudio.com/web/packages/gof/index.html) | [<img src="http://cranlogs.r-pkg.org/badges/gof">](http://cranlogs.r-pkg.org/downloads/total/last-month/gof) |
+|                     |                                                                                                      |                                                                                                                                     |                                                                                                            |                                                                                                              |
+
 # Introduction
 
 This library provides C++ classes for [targeted
 inference](doc/targeted.md) and semi-parametric efficient estimators
-as well as bindings for *python* and *R*. Relevant models includes
-models binary regression models with binary exposure and with nuisance
-models defined by additional covariates. Models for the relative risk
-and risk differences where examined by (Richardson et al 2018) and the
-odds ratio in (Tchetgen-Tchetgen et al. 2010). Various missing data
-estimators and causal inference models (Tsiatis 2006) also fits into
-this framework.
+as well as bindings for *python* and *R*. The library also contains
+implementation of parametric models (including different
+discrete choice models) and model diagnostics tools.
 
-![](doc/images/targeted.jpg)
+R
+elevant models includes models binary regression models with binary
+exposure and with nuisance models defined by additional
+covariates. Models for the relative risk and risk differences where
+examined by (Richardson et al 2018) and the odds ratio in
+(Tchetgen-Tchetgen et al. 2010). Various missing data estimators and
+causal inference models (Tsiatis 2006) also fits into this framework.
 
+<p align="center">
+  <img width="200"  src="doc/images/targeted.jpg">
+</p>
 
 ## R
 ```r
@@ -107,16 +117,17 @@ make py
 
 ### Dependencies
 
-To build the shared library meson and ninja are needed.
+To build the shared library ninja(s) are needed.
 ```
-pip install meson ninja cclint 
+pip install ninja cclint 
 
 ```
 
 The following are included as submodules:
 1. Armadillo <http://arma.sourceforge.net/docs.html>
-2. UnitTest++ (unit tests only) <https://unittest-cpp.github.io/>
+2. Catch2 (unit tests only) <https://github.com/catchorg/Catch2/blob/master/docs/Readme.md#top>
 3. pybind11++ (python bindings only) <https://pybind11.readthedocs.io>
+4. spdlog (logging) <https://github.com/gabime/spdlog>
 ```
 git init
 git submodules update
