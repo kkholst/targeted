@@ -1,12 +1,12 @@
 /*!
-  @file rinterface.cpp
+  @file riskreg_interface.cpp
   @author Klaus K. Holst
-  @copyright 2018, Klaus Kähler Holst
+  @copyright 2018-2020, Klaus Kähler Holst
 
   @brief R interface for the TargetedBinary subclasses. 
 
   The relevant bindings are created in \c RcppExports.cpp, \c RcppExports.h
-  \c Rcpp::compileAttributes()
+  with \c Rcpp::compileAttributes()
 */
 
 // [[Rcpp::depends(RcppArmadillo)]]
