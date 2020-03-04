@@ -1,6 +1,10 @@
 # -*- mode: org -*-
 
-* Version 1.0 <2020-02-17 Mon>
+* Version 1.0.1 <2020-03-02 Mon>
+ - Some compatbility with Solaris fixed
+ - 
+
+* Version 1.0.0 <2020-02-17 Mon>
  - Faster implementation in RcppArmadillo with improved algorithms
  - Method for proportional hazard model (coxph) removed from this
    version (methods are available in the timereg package)
@@ -20,12 +24,12 @@
  - Fixed bug introduced by new model.matrix implementation for 'coxph' objects
  - Initial support added for structural equation models (lava)
 
-* Version 0.6.4 <2009-04-08 Wed> (8/4-2009)
+* Version 0.6.4 <2009-04-08 Wed>
  - Fixed bug in cumres.coxph appearing for models with only one
    predictor (stupid [...,drop=FALSE] missing)
  - CITATION added
 
-* Version 0.6.3 <2009-02-26 Thu> (26/2-2009)
+* Version 0.6.3 <2009-02-26 Thu>
  - Windows compilation fix
  - onload function added
 
@@ -55,7 +59,7 @@
  - Major bug corrected. For a glm dginv(yhat) was used 
    instead of dginv(Xb).
 
-* Version 0.5.3 <2008-11-11 Tue> (11/11-2008)
+* Version 0.5.3 
  - Bug fixes in particularily in the cumres method for the coxph-class.
  - Documentation
 

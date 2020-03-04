@@ -2,7 +2,7 @@
 print.cumres <- function(x,...) {
     cat("\n")
     print(coef(x), ...)
-    cat("\nR =",x$R,"\n")
+    cat("\nBased on ", x$R, " realizations.\n",sep="")
     invisible(x)
 }
 

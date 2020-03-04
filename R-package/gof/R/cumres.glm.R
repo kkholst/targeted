@@ -1,34 +1,3 @@
-subset_t <- function(t, n.qt=50, n.eq=50) {    
-    t <- sort(t)
-    t1a <- t[mets::fast.approx(t, seq(t[1], t[length(t)], length.out=n.eq))]
-    t1b <- quantile(t, seq(0,1,length.out=n.qt))
-    t1 <- sort(union(t1a, t1b))
-    pos <- 1
-    idx <- numeric(length(t)) # grouping
-    for (i in seq_along(idx)) {
-        if (t[i]>t1[pos]) {
-            pos <- pos+1        
-        }
-        idx[i] <- pos
-    }
-    idx1 <- mets::dby(data.frame(id=idx, pos=seq_along(idx)), pos~id, pos=max, REDUCE=T)$pos
-    return( list(t=t, group=idx, subset=idx1) )
-}
-
-
-gof_samplestat <- function(cumres_obj, R=1e3, x=NULL, idx=seq_along(x)-1) {
-    if (!is.null(x)) cumres_obj$reorder(x)        
-    teststat <- cumres_obj$samplestat(R, idx, FALSE)
-    W0 <- cumres_obj$obs()
-    t0 <- cumres_obj$t
-    ks0 <- SupTest(W0)
-    cvm0 <- L2Test(W0,t0)
-    return(list(pval.ks=mean(teststat[,1]>ks0), ks=ks0,
-                pval.cvm=mean(teststat[,2]>cvm0), cvm=cvm0,
-                t=t0, w=W0))
-}
-
-
 ##' @export
 `cumres.lm` <- function(model,...) {
   cumres.glm(model,...)
@@ -54,7 +23,6 @@ gof_samplestat <- function(cumres_obj, R=1e3, x=NULL, idx=seq_along(x)-1) {
 ##' cumulated residuals)
 ##' @param plots Number of realizations to save for use in the plot-routine
 ##' @param breakties Add unif[0,breakties] to observations
-##' @param seed Random seed
 ##' @param ... additional arguments
 ##' @return Returns an object of class 'cumres'.
 ##' @note Currently linear (normal), logistic and poisson regression models with
@@ -94,8 +62,8 @@ gof_samplestat <- function(cumres_obj, R=1e3, x=NULL, idx=seq_along(x)-1) {
 `cumres.glm` <- function(model,
                   variable=c("predicted",colnames(model.matrix(model))),
                   data=data.frame(model.matrix(model)), 
-                  R=1000, b=0, plots=min(R,50),breakties=1e-12,
-                  seed=round(runif(1,1,1e9)),...) {
+                  R=1000, b=0, plots=min(R,50),
+                  ...) {
   dginv <- function(z) 1
   a.phi <- 1
   switch(class(model)[1],
@@ -151,15 +119,12 @@ gof_samplestat <- function(cumres_obj, R=1e3, x=NULL, idx=seq_along(x)-1) {
  
   dr <- -(as.numeric(dginv(Xbeta))*X)
   ic <- lava::iid(model)
-  cr <- new(CumRes, r, dr, ic) 
 
   if (!is.na(match(response, variable))) variable[match(response, variable)] <- "predicted"
   variable <- unique(variable)
   UsedData <- X[,na.omit(match(variable, colnames(X))),drop=FALSE]
   myvars <- colnames(UsedData)[apply(UsedData,2,function(x) length(unique(x))>2)] ## Only consider variables with more than two levels
-  if ("predicted"%in%variable) myvars <- c("predicted",myvars)
-  untie <- runif(n,0,breakties)
-  
+  if ("predicted"%in%variable) myvars <- c("predicted",myvars)  
   W <- c()
   What <- c()
   KS <- c()
@@ -167,44 +132,25 @@ gof_samplestat <- function(cumres_obj, R=1e3, x=NULL, idx=seq_along(x)-1) {
   mytype <- c()
   UsedVars <- c()
   UsedData <- c()
-  
+
+  variable <- c()
   for (v in myvars) {
     x <- NULL
     if (v=="predicted") {
-      x <- yhat ## Xbeta
-    } else if (v %in% colnames(X)) {
-      x <- X[,v]       
-    }
-    if (!is.null(x)) {
-        UsedVars <- c(UsedVars, v)
-        cr$reorder(x+untie)
-        idx <- seq(n)-1
-        teststat <- gof_samplestat(cr, R=R, x=x, idx=idx)
-        KS <- c(KS, teststat$pval.ks)
-        CvM <- c(CvM, teststat$pval.cvm)
-        UsedData <- cbind(UsedData, teststat$t);
-        W <- cbind(W, teststat$w)        
-        What0 <- matrix(0, length(idx), plots)
-        for (i in seq(plots)) What0[,i] <- cr$sample1(idx)
-        What <- c(What, list(What0))
-        ##Wsd <- cbind(Wsd, onesim$output$Wsd)
-        ##allcvalues <- cbind(allcvalues, onesim$output$cvalues)
-        mytype <- c(mytype,"residual")
+        x <- yhat ## Xbeta
+    } else  if (v %in% colnames(X)) {
+        x <- X[,v]    
     } else warning("Variable '", v , "' not found.\n",sep="")
-  }
-
-  if (length(UsedVars)<1) 
-    return(NULL)
+    if (!is.null(x)) {
+        variable <- cbind(variable, x)
+        colnames(variable)[ncol(variable)] <- v
+    }
+}
   
-  res <- list(W=W, What=What,
-              x=UsedData,
-              KS=KS, CvM=CvM,
-              R=R, n=nrow(UsedData),
-              sd=NULL, cvalues=NULL,
-              variable=UsedVars,
-              type=mytype, untie=untie,
-              model=class(model)[1])
-  class(res) <- "cumres"
-  res
+  res <- cumres.default(NULL, variable=variable,
+                        r=r, dr=dr, ic=ic, coef=NULL,
+                        R=R, plots=plots, b=b, ...)
+  
+  return(res)
 }
 

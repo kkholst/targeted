@@ -13,7 +13,7 @@ cumres.ordreg <- function(model,variable,R=100,plot=FALSE,aggregate=sum,...) {
     Y0[cbind(seq(n),env$y)] <- 1
     pr <- predict(model,type="prob")
     r0 <- (Y0-pr)[,-nc,drop=FALSE]
-    
+
     Res <- r ## For now we only use residuals defined from the cum.prob.
     if (missing(variable) || variable=="predicted") {
         variable <- "predicted"
@@ -62,7 +62,7 @@ cumres.ordreg <- function(model,variable,R=100,plot=FALSE,aggregate=sum,...) {
         ## legend("topright",legend=paste("Category",seq(nc-1)),lty=seq(n-1))     
         ## for (i in 1:ncol(W)) lines(x,W[,i],lty=i,type="s")
     }
-    
+
     KS <- c()
     KSagr <- c()
     for (k in seq_len(ncol(Wagr))) KSagr <- c(KSagr,list(NULL))

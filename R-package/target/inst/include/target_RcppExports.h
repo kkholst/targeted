@@ -193,6 +193,69 @@ namespace target {
         return Rcpp::as<arma::mat >(rcpp_result_gen);
     }
 
+    inline Rcpp::List _clusterid(const arma::uvec& id) {
+        typedef SEXP(*Ptr__clusterid)(SEXP);
+        static Ptr__clusterid p__clusterid = NULL;
+        if (p__clusterid == NULL) {
+            validateSignature("Rcpp::List(*_clusterid)(const arma::uvec&)");
+            p__clusterid = (Ptr__clusterid)R_GetCCallable("target", "_target__clusterid");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p__clusterid(Shield<SEXP>(Rcpp::wrap(id)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<Rcpp::List >(rcpp_result_gen);
+    }
+
+    inline arma::mat _groupsum(const arma::mat& x, const arma::uvec& cluster, bool reduce = true) {
+        typedef SEXP(*Ptr__groupsum)(SEXP,SEXP,SEXP);
+        static Ptr__groupsum p__groupsum = NULL;
+        if (p__groupsum == NULL) {
+            validateSignature("arma::mat(*_groupsum)(const arma::mat&,const arma::uvec&,bool)");
+            p__groupsum = (Ptr__groupsum)R_GetCCallable("target", "_target__groupsum");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p__groupsum(Shield<SEXP>(Rcpp::wrap(x)), Shield<SEXP>(Rcpp::wrap(cluster)), Shield<SEXP>(Rcpp::wrap(reduce)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<arma::mat >(rcpp_result_gen);
+    }
+
+    inline arma::mat _softmax(arma::mat& lp, bool ref = true, bool log = false) {
+        typedef SEXP(*Ptr__softmax)(SEXP,SEXP,SEXP);
+        static Ptr__softmax p__softmax = NULL;
+        if (p__softmax == NULL) {
+            validateSignature("arma::mat(*_softmax)(arma::mat&,bool,bool)");
+            p__softmax = (Ptr__softmax)R_GetCCallable("target", "_target__softmax");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p__softmax(Shield<SEXP>(Rcpp::wrap(lp)), Shield<SEXP>(Rcpp::wrap(ref)), Shield<SEXP>(Rcpp::wrap(log)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<arma::mat >(rcpp_result_gen);
+    }
+
 }
 
 #endif // RCPP_target_RCPPEXPORTS_H_GEN_

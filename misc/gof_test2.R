@@ -1,5 +1,5 @@
 library(lava)
-devtools::load_all("../R-package")
+devtools::load_all("../R-package/gof")
 
 m <- lvm(list(c(y1,y2,y3)~eta,eta~x)); latent(m) <- ~eta
 ## simulate some data with non-linear covariate effect
@@ -63,8 +63,8 @@ for (i in seq(R)) {
 }
 
 W0 <- cumsum(r0)/sqrt(n)
-matplot(t0, Ws, type="s", col=lava::Col(1,0.3), ylim=range(c(W0,Ws)))
-lines(t0, W0, type="s", lwd=3, col=lava::Col("darkred",.5))
+matplot(t0, Ws, type="s", col=lava::Col("purple",0.3), ylim=range(c(W0,Ws)))
+lines(t0, W0, type="s", lwd=2, col=lava::Col("black",1))
 
 ##################################################
 

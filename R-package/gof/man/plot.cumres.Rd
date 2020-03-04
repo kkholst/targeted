@@ -8,11 +8,7 @@
   x,
   idx = 1:length(x$variable),
   col = "grey",
-  ci = TRUE,
-  col.ci = "darkblue",
   col.alpha = 0.3,
-  lty.ci = 0,
-  level = 0.95,
   legend = c("type1", "type2", "none"),
   xlab,
   ylab,
@@ -32,17 +28,7 @@ from the \code{x} to plot.}
 or \code{NULL} no realizations will be drawn. The number of realizations is
 determined by the \code{cumres}-object.}
 
-\item{ci}{Type of prediction bands to plot. Defaults to none. Set to
-\code{TRUE} to obtain simultaneous prediction bands under the null (pointwise
-can be obtained by setting to "pointwise").}
-
-\item{col.ci}{Color of prediction band.}
-
-\item{col.alpha}{Degree of transparency (0-1) of the prediction bands.}
-
-\item{lty.ci}{Line type of prediction band.}
-
-\item{level}{The required prediction level.}
+\item{col.alpha}{Transparency-level of plotted sample processes}
 
 \item{legend}{Type of legend where "type1" gives p-values of GoF-tests and
 "type2" gives usual type of legends.}
@@ -61,7 +47,7 @@ can be obtained by setting to "pointwise").}
 }
 \description{
 \code{plot} displays the observed cumulative residual process with
-realizations under the null. 95\% prediction bands
+realizations under the null.
 }
 \examples{
 

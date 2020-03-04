@@ -1,4 +1,4 @@
-devtools::load_all("~/Software/target/R-package")
+devtools::load_all("~/Software/target/R-package/target")
 
 
 m <- lvm(a[-2] ~ 1*x,
@@ -7,14 +7,20 @@ m <- lvm(a[-2] ~ 1*x,
 distribution(m,~a) <- binomial.lvm("logit")
 m <- binomial.rr(m, "y","a","linpred.target","linpred.nuisance")
 
+d <- sim(m,1e4)
+a <- riskreg(y ~ a | 1 | x | x, data=d, type="rr")
+a
 
-d <- sim(m,5e3,seed=2)
-a <- riskreg(y ~ a | 1 | a+x | x, data=d, type="rr")
+data(iris)
+g <- condlogit(Species ~ Sepal.Width*Petal.Length, data=iris)
+pr <- predict(g, newdata=iris, wide=TRUE)
+cl <- colnames(pr)[apply(pr, 1, which.max)]
+table(iris$Species, cl)
 a
 
 
-library("tmle")
 
+library("tmle")
 W = cbind(X=d$x)
 system.time(a1 <- with(d, tmle(y, a, W, Qform="Y~A+X", gform="A~X", family="binomial")))
 

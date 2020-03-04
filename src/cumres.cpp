@@ -39,7 +39,7 @@ namespace target {
   arma::vec cumres::rnorm() {
 #ifdef ARMA_R
     Rcpp::RNGScope scope;
-    return Rcpp::as<arma::vec>(Rcpp::rnorm(n));    
+    return Rcpp::as<arma::vec>(Rcpp::rnorm(n));
 #else
     return arma::randn<arma::vec>(n);
 #endif    
@@ -50,18 +50,15 @@ namespace target {
   }
 
   // Sample single process 
-  arma::vec cumres::sample(arma::uvec idx) { 
+  arma::vec cumres::sample(arma::uvec idx) {
+    arma::vec g(n); // = rnorm();
+    arma::vec w1 = arma::cumsum(r%g);
     unsigned N = n;
     if (!idx.is_empty()) {
       N = idx.n_elem;
+      w1 = w1.elem(idx);      
     }    
-    arma::vec g = rnorm();
-    arma::vec w1 = arma::cumsum(r%g);
-    if (!idx.is_empty()) {
-      N = idx.n_elem;
-      w1 = w1.elem(idx); 
-    }
-    arma::rowvec B = arma::sum(ic.each_col()%g, 0);
+    arma::rowvec B = arma::sum(ic.each_col()%g, 0); // colsum
     arma::vec w2(N);
     if (!idx.is_empty()) {
       for (unsigned i=0; i<N; i++) {
@@ -71,36 +68,31 @@ namespace target {
       for (unsigned i=0; i<n; i++) {
 	w2(i) = arma::as_scalar(B*eta.row(i).t());
       }
-    }    
+    }
     return (w1+w2)/std::sqrt((double)n);
   }
 
   // Sample 'r' processes
   arma::mat cumres::sample(unsigned R, arma::uvec idx, bool quantiles) {
-    qt.fill(0);    
-    unsigned n = this->n;
-    // arma::vec t0 = this->t;
-    // if (!idx.is_empty()) {
-    //   n = idx.n_elem;
-    //   t0 = t0.elem(idx);
-    // }
-    arma::vec t0 = t;
-    arma::mat qt(n, std::ceil(R*0.05));
-    arma::mat res(R,2);
+    arma::vec t0 = t.elem(idx);
+    arma::mat res(R,2);    
+    // qt.fill(0);
+    // unsigned n = this->n;
+    // arma::mat qt(n, std::ceil(R*0.05));
     for (unsigned i=0; i<R; i++) {
       arma::vec wi = this->sample(idx);
       res(i,0) = SupTest(wi);
       res(i,1) = L2Test(wi, t0);
-      if (false) {
-	for (unsigned j=0; j<n; j++) {
-	  wi = abs(wi);
-	  arma::rowvec qtj = qt.row(j);
-	  unsigned i = qtj.index_min();
-	  if (wi(j)>qt(j,i)) qt(j,i) = wi(j);
-	}
-      }
+      /* if (quantiles) { // TODO: Disable for now. Capture quantiles
+	 for (unsigned j=0; j<n; j++) {
+	 wi = abs(wi);
+	 arma::rowvec qtj = qt.row(j);
+	 unsigned i = qtj.index_min();
+	 if (wi(j)>qt(j,i)) qt(j,i) = wi(j);
+	 }
+	 } */
     }
-    this->qt = qt;
+    // this->qt = qt;
     return res;
   }
 
