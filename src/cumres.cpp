@@ -18,12 +18,26 @@ namespace target {
     arma::arma_rng::set_seed_random();
 #endif
     n = r.n_elem;
-    arma::vec inp(n);
+    arma::vec inp(n,1);
     for (unsigned i=0; i<n; i++) inp(i) = i;
-    this->ord = arma::conv_to<arma::uvec>::from(inp);    
+    this->ord = arma::conv_to<arma::uvec>::from(inp);
     this->reorder(inp);
   }
- 
+
+  void cumres::reorder(const arma::mat &inp) {
+    arma::umat revord(inp.n_rows, inp.n_cols);
+    for (unsigned j=0; j<inp.n_cols; j++) { // back to original order of input data
+      revord.col(i) = arma::stable_sort_index(ord.col(i));
+      ord.col(i) = arma::stable_sort_index(inp.col(i)); // new order
+      revord.col(i) = revord.col(i).elem(ord);
+    }
+    arma::vec tt = t;
+    r = r.elem(revord);
+    dr = dr.rows(revord);
+    eta = arma::cumsum(dr, 0); // cumulative sum of each column 
+    ic = ic.rows(revord);
+  }
+
   void cumres::reorder(const arma::vec &inp) {    
     arma::uvec revord = arma::stable_sort_index(ord); // back to original order of input data
     ord = arma::stable_sort_index(inp); // new order

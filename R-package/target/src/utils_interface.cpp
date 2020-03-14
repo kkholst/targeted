@@ -31,6 +31,7 @@ Rcpp::List clusterid(const arma::uvec &id) {
 arma::mat groupsum(const arma::mat &x,
 		   const arma::uvec &cluster,
 		   bool reduce=true) {
+  
   return target::groupsum(x, cluster, reduce);
 }
 

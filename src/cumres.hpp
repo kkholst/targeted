@@ -15,17 +15,17 @@ namespace target {
   class cumres {
   public:
     unsigned n;
-    arma::vec r;    // Residuals
+    arma::vec r;    // Residuals    
     arma::mat dr;   // Derivative of residuals wrt model parameters
     arma::mat eta;    // Cumulative derivative of residuals
     arma::mat ic;   // Influence curve
-    arma::vec t;    // Variable to order after
-    arma::uvec ord; // Order
-    arma::mat qt;   //  
+    arma::umat ord; // Stores order of observations to cumulate after
+    arma::mat qt;   // Stores data for calculations of quantiles of residual processes
 
     
     cumres(const arma::vec &r, const arma::mat &dr, const arma::mat &ic); //constructor    
     void reorder(const arma::vec &ord);
+    void reorder(const arma::mat &inp);
     arma::vec rnorm();
     arma::vec obs();
     arma::vec sample(arma::uvec idx=arma::uvec());
