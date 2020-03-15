@@ -43,7 +43,7 @@ clean: cleanr cleanpy
 	@rm -Rf $(BUILD_DIR) $(VALGRIND_DIR) $(DOXYGEN_DIR)/html $(COVERAGE_DIR)
 
 .PHONY: init init-submodules
-init: clean
+init: init-submodules clean
 	@echo "Build options: $(BUILD)"
 	@$(CMAKE) -B build $(BUILD)
 
@@ -52,7 +52,7 @@ init-submodules:
 	git submodule init && git submodule update; fi
 
 .PHONY: run
-run: init-submodules
+run: 
 	@if [ ! -d "$(BUILD_DIR)" ]; then $(MAKE) --no-print-directory init; fi
 	@$(MAKE) --no-print-directory build # > /dev/null
 	@printf "\n-----\n"
@@ -91,7 +91,6 @@ testr:
 	@$(R) -e 'testthat::test_package("./R-package/${pkg}/")'
 
 runr:
-	echo "Test: $(TEST)"
 	@cd misc; $(R) --silent -f $(TESTR).R
 
 roxygen:
@@ -117,7 +116,7 @@ cleanr:
 .PHONY: syncr
 syncr: exportr
 	@if [ -d "../$(pkg)" ]; then \
-	cp -rfv $(BUILD_DIR)/R/$(pkg)/.	 ../gof/; fi
+	cp -rfv $(BUILD_DIR)/R/$(pkg)/.	 ../$(pkg)/; fi
 
 ##################################################
 ## Python package

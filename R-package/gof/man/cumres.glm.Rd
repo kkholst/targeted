@@ -13,8 +13,6 @@
   R = 1000,
   b = 0,
   plots = min(R, 50),
-  breakties = 1e-12,
-  seed = round(runif(1, 1, 1e+09)),
   ...
 )
 }
@@ -32,11 +30,9 @@ cumulated residuals)}
 
 \item{plots}{Number of realizations to save for use in the plot-routine}
 
-\item{breakties}{Add unif[0,breakties] to observations}
-
-\item{seed}{Random seed}
-
 \item{...}{additional arguments}
+
+\item{breakties}{Add unif[0,breakties] to observations}
 }
 \value{
 Returns an object of class 'cumres'.

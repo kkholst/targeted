@@ -1,8 +1,8 @@
 # -*- mode: org -*-
 
-* Version 1.0.1 <2020-03-02 Mon>
- - Some compatbility with Solaris fixed
- - 
+* Version 1.0.1 <2020-03-15 Sun>
+ - Optimization of C++ code
+ - Some compatibility with Solaris fixed
 
 * Version 1.0.0 <2020-02-17 Mon>
  - Faster implementation in RcppArmadillo with improved algorithms

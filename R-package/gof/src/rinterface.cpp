@@ -34,18 +34,18 @@ RCPP_MODULE(gofmod) {
       .constructor<arma::vec, 
 		   arma::mat,
 		   arma::mat>("Constructor")
-      .field( "t", &target::cumres::t )
+      .field( "inp", &target::cumres::inp )
       .field( "ord", &target::cumres::ord )
-      .field( "r", &target::cumres::r )
-      .field( "qt", &target::cumres::qt )
+      .field( "r",   &target::cumres::r )
+      .field( "qt",  &target::cumres::qt )
 
-      .method("samplestat", (arma::mat (target::cumres::*)(unsigned, arma::uvec, bool ) )( &target::cumres::sample),
+      .method("samplestat", (arma::mat (target::cumres::*)(unsigned, const arma::umat&, bool ) )( &target::cumres::sample),
       	       "sample process and return Sup and L2 statistic")
-      .method("sample1", (arma::vec (target::cumres::*)(arma::uvec) )( &target::cumres::sample),
+      .method("sample1",    (arma::mat (target::cumres::*)(const arma::umat&) )( &target::cumres::sample),
 	       "sample process")      
-      .method("obs",    &target::cumres::obs,   "Return observed process")      
+      .method("obs",    &target::cumres::obs,   "Return observed process")
       .method("rnorm",  &target::cumres::rnorm,   "Sample from Gaussian")
-      .method("reorder",  &target::cumres::reorder,  "Order observations after input variable")
+      .method("order",  &target::cumres::order,  "Order observations after input variable")
       ;
 }
 

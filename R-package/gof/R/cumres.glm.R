@@ -125,19 +125,12 @@
   UsedData <- X[,na.omit(match(variable, colnames(X))),drop=FALSE]
   myvars <- colnames(UsedData)[apply(UsedData,2,function(x) length(unique(x))>2)] ## Only consider variables with more than two levels
   if ("predicted"%in%variable) myvars <- c("predicted",myvars)  
-  W <- c()
-  What <- c()
-  KS <- c()
-  CvM <- c()
-  mytype <- c()
-  UsedVars <- c()
-  UsedData <- c()
 
   variable <- c()
   for (v in myvars) {
     x <- NULL
     if (v=="predicted") {
-        x <- yhat ## Xbeta
+        x <- yhat
     } else  if (v %in% colnames(X)) {
         x <- X[,v]    
     } else warning("Variable '", v , "' not found.\n",sep="")

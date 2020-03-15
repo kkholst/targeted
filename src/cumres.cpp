@@ -21,33 +21,23 @@ namespace target {
     arma::vec inp(n,1);
     for (unsigned i=0; i<n; i++) inp(i) = i;
     this->ord = arma::conv_to<arma::uvec>::from(inp);
-    this->reorder(inp);
+    this->inp = inp;
+    this->order(inp);
   }
 
-  void cumres::reorder(const arma::mat &inp) {
-    arma::umat revord(inp.n_rows, inp.n_cols);
-    for (unsigned j=0; j<inp.n_cols; j++) { // back to original order of input data
-      revord.col(i) = arma::stable_sort_index(ord.col(i));
-      ord.col(i) = arma::stable_sort_index(inp.col(i)); // new order
-      revord.col(i) = revord.col(i).elem(ord);
+  void cumres::order(const arma::mat &inp) {
+    unsigned p = inp.n_cols;
+    arma::umat ord(inp.n_rows, p);    
+    this->inp = arma::mat(inp.n_rows, p);    
+    for (unsigned j=0; j<p; j++) {
+      arma::vec inpj = inp.col(j);
+      ord.col(j) = arma::stable_sort_index(inpj);
+      this->inp.col(j) = inpj.elem(ord.col(j));
     }
-    arma::vec tt = t;
-    r = r.elem(revord);
-    dr = dr.rows(revord);
-    eta = arma::cumsum(dr, 0); // cumulative sum of each column 
-    ic = ic.rows(revord);
-  }
-
-  void cumres::reorder(const arma::vec &inp) {    
-    arma::uvec revord = arma::stable_sort_index(ord); // back to original order of input data
-    ord = arma::stable_sort_index(inp); // new order
-    arma::vec tt = t;
-    t = inp.elem(ord);
-    revord = revord.elem(ord);
-    r = r.elem(revord);
-    dr = dr.rows(revord);
-    eta = arma::cumsum(dr, 0); // cumulative sum of each column 
-    ic = ic.rows(revord);
+    this->ord = ord;
+    if (p==1) {
+      eta = arma::cumsum(dr.rows(ord), 0);
+    }
   }
 
   arma::vec cumres::rnorm() {
@@ -59,44 +49,74 @@ namespace target {
 #endif    
   }
   
-  arma::vec cumres::obs() {
-    return arma::cumsum(r)/std::sqrt((double)n);
+  arma::mat cumres::obs() {
+    arma::mat res(n, inp.n_cols);
+    for (unsigned i=0; i<inp.n_cols; i++) {
+      arma::vec ri = arma::cumsum(r.elem(ord.col(i)))/std::sqrt((double)n);
+      res.col(i) = ri;
+    }
+    return res;
   }
 
   // Sample single process 
-  arma::vec cumres::sample(arma::uvec idx) {
-    arma::vec g(n); // = rnorm();
-    arma::vec w1 = arma::cumsum(r%g);
+  arma::mat cumres::sample(const arma::umat &idx) {    
+    arma::vec g = rnorm();
     unsigned N = n;
+    unsigned p = ord.n_cols;
     if (!idx.is_empty()) {
-      N = idx.n_elem;
-      w1 = w1.elem(idx);      
-    }    
-    arma::rowvec B = arma::sum(ic.each_col()%g, 0); // colsum
-    arma::vec w2(N);
-    if (!idx.is_empty()) {
-      for (unsigned i=0; i<N; i++) {
-	w2(i) = arma::as_scalar(B*eta.row(idx(i)).t());
-      }
-    } else {
-      for (unsigned i=0; i<n; i++) {
-	w2(i) = arma::as_scalar(B*eta.row(i).t());
-      }
+	N = idx.n_rows;
     }
-    return (w1+w2)/std::sqrt((double)n);
+    arma::mat res(N, p);    
+    for (unsigned i=0; i<p; i++) {
+      arma::uvec curord = ord.col(i);
+      arma::vec w1 = arma::cumsum(r.elem(curord)%g);
+      if (p>1) {
+	// Cumulative derivative of residuals (cumsum for each column):
+	eta = arma::cumsum(dr.rows(curord), 0);
+      }
+      arma::rowvec B(ic.n_cols);
+      for (unsigned j=0; j<ic.n_cols; j++) {
+	arma::vec tmp = ic.col(j);
+       	B(j) = sum(tmp.elem(curord)%g);
+      }
+      arma::vec w2(N);
+      if (!idx.is_empty()) {
+	w1 = w1.elem(idx.col(i));
+	for (unsigned j=0; j<N; j++) {
+	  w2(j) = arma::as_scalar(B*eta.row(idx(j,i)).t());
+	}
+      } else {
+	for (unsigned j=0; j<n; j++) {
+	  w2(j) = arma::as_scalar(B*eta.row(j).t());
+	}
+      }
+      res.col(i) = (w1+w2)/std::sqrt((double)n);
+    }
+    
+    return res;
   }
 
   // Sample 'r' processes
-  arma::mat cumres::sample(unsigned R, arma::uvec idx, bool quantiles) {
-    arma::vec t0 = t.elem(idx);
-    arma::mat res(R,2);    
+  arma::mat cumres::sample(unsigned R,     // Number of samples
+			   const arma::umat &idx, // subset of 'time-points' of process to sample
+			   bool quantiles) {
+
+    unsigned p = ord.n_cols;
+    arma::mat res(R, 2*p);
     // qt.fill(0);
     // unsigned n = this->n;
     // arma::mat qt(n, std::ceil(R*0.05));
     for (unsigned i=0; i<R; i++) {
-      arma::vec wi = this->sample(idx);
-      res(i,0) = SupTest(wi);
-      res(i,1) = L2Test(wi, t0);
+      arma::mat wi = this->sample(idx);
+      for (unsigned j=0; j<p; j++ ) {
+	arma::vec t0 = inp.col(j);
+	if (!idx.is_empty()) {
+	  std::cout << "t0\n";
+	  t0 = t0.elem(idx.col(j));
+	}
+	res(i, j*2) = SupTest(wi.col(j));	
+	res(i, j*2+1) = L2Test(wi.col(j), t0);
+      }
       /* if (quantiles) { // TODO: Disable for now. Capture quantiles
 	 for (unsigned j=0; j<n; j++) {
 	 wi = abs(wi);

@@ -57,7 +57,7 @@ g <- cumres(l, R=500)
 plot(g, idx=1, legend="type2")
 }
 \author{
-Klaus K. Holst <kkho@biostat.ku.dk>
+Klaus K. Holst
 }
 \keyword{hplot}
 \keyword{regression}
