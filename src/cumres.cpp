@@ -111,7 +111,6 @@ namespace target {
       for (unsigned j=0; j<p; j++ ) {
 	arma::vec t0 = inp.col(j);
 	if (!idx.is_empty()) {
-	  std::cout << "t0\n";
 	  t0 = t0.elem(idx.col(j));
 	}
 	res(i, j*2) = SupTest(wi.col(j));	
