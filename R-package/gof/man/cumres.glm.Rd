@@ -31,8 +31,6 @@ cumulated residuals)}
 \item{plots}{Number of realizations to save for use in the plot-routine}
 
 \item{...}{additional arguments}
-
-\item{breakties}{Add unif[0,breakties] to observations}
 }
 \value{
 Returns an object of class 'cumres'.

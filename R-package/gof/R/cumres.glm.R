@@ -22,7 +22,6 @@
 ##' @param b Moving average bandwidth (0 corresponds to infinity = standard
 ##' cumulated residuals)
 ##' @param plots Number of realizations to save for use in the plot-routine
-##' @param breakties Add unif[0,breakties] to observations
 ##' @param ... additional arguments
 ##' @return Returns an object of class 'cumres'.
 ##' @note Currently linear (normal), logistic and poisson regression models with
