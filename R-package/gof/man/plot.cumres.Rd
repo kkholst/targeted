@@ -6,8 +6,8 @@
 \usage{
 \method{plot}{cumres}(
   x,
-  idx = 1:length(x$variable),
-  col = "grey",
+  idx = seq_along(x$W),
+  col = "purple",
   col.alpha = 0.3,
   legend = c("type1", "type2", "none"),
   xlab,
