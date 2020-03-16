@@ -19,7 +19,7 @@ Suggests:
     futile.logger,
     testthat (>= 0.11),
     numDeriv
-License: GPL (>=2)
+License: Apache License (== 2.0) | file LICENSE
 LinkingTo: Rcpp, RcppArmadillo
 LazyLoad: yes
 NeedsCompilation: yes
