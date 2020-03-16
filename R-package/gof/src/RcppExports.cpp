@@ -78,6 +78,77 @@ RcppExport SEXP _gof_L2Test(SEXP xSEXP, SEXP tSEXP) {
     UNPROTECT(1);
     return rcpp_result_gen;
 }
+// FastApprox
+arma::umat FastApprox(arma::vec& time, arma::vec& newtime, bool equal, unsigned type);
+static SEXP _gof_FastApprox_try(SEXP timeSEXP, SEXP newtimeSEXP, SEXP equalSEXP, SEXP typeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< arma::vec& >::type time(timeSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type newtime(newtimeSEXP);
+    Rcpp::traits::input_parameter< bool >::type equal(equalSEXP);
+    Rcpp::traits::input_parameter< unsigned >::type type(typeSEXP);
+    rcpp_result_gen = Rcpp::wrap(FastApprox(time, newtime, equal, type));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _gof_FastApprox(SEXP timeSEXP, SEXP newtimeSEXP, SEXP equalSEXP, SEXP typeSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_gof_FastApprox_try(timeSEXP, newtimeSEXP, equalSEXP, typeSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error(CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
+// ClusterIndex
+arma::umat ClusterIndex(const arma::uvec& t);
+static SEXP _gof_ClusterIndex_try(SEXP tSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const arma::uvec& >::type t(tSEXP);
+    rcpp_result_gen = Rcpp::wrap(ClusterIndex(t));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _gof_ClusterIndex(SEXP tSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_gof_ClusterIndex_try(tSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error(CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
 
 // validate (ensure exported C++ functions exist before calling them)
 static int _gof_RcppExport_validate(const char* sig) { 
@@ -85,6 +156,8 @@ static int _gof_RcppExport_validate(const char* sig) {
     if (signatures.empty()) {
         signatures.insert("double(*SupTest)(const arma::vec&)");
         signatures.insert("double(*L2Test)(const arma::vec&,const arma::vec&)");
+        signatures.insert("arma::umat(*.fastapprox)(arma::vec&,arma::vec&,bool,unsigned)");
+        signatures.insert("arma::umat(*.clusterindex)(const arma::uvec&)");
     }
     return signatures.find(sig) != signatures.end();
 }
@@ -93,6 +166,8 @@ static int _gof_RcppExport_validate(const char* sig) {
 RcppExport SEXP _gof_RcppExport_registerCCallable() { 
     R_RegisterCCallable("gof", "_gof_SupTest", (DL_FUNC)_gof_SupTest_try);
     R_RegisterCCallable("gof", "_gof_L2Test", (DL_FUNC)_gof_L2Test_try);
+    R_RegisterCCallable("gof", "_gof_.fastapprox", (DL_FUNC)_gof_FastApprox_try);
+    R_RegisterCCallable("gof", "_gof_.clusterindex", (DL_FUNC)_gof_ClusterIndex_try);
     R_RegisterCCallable("gof", "_gof_RcppExport_validate", (DL_FUNC)_gof_RcppExport_validate);
     return R_NilValue;
 }
@@ -102,6 +177,8 @@ RcppExport SEXP _rcpp_module_boot_gofmod();
 static const R_CallMethodDef CallEntries[] = {
     {"_gof_SupTest", (DL_FUNC) &_gof_SupTest, 1},
     {"_gof_L2Test", (DL_FUNC) &_gof_L2Test, 2},
+    {"_gof_FastApprox", (DL_FUNC) &_gof_FastApprox, 4},
+    {"_gof_ClusterIndex", (DL_FUNC) &_gof_ClusterIndex, 1},
     {"_rcpp_module_boot_gofmod", (DL_FUNC) &_rcpp_module_boot_gofmod, 0},
     {"_gof_RcppExport_registerCCallable", (DL_FUNC) &_gof_RcppExport_registerCCallable, 0},
     {NULL, NULL, 0}

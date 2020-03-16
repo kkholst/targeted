@@ -9,6 +9,14 @@ L2Test <- function(x, t) {
     .Call('_gof_L2Test', PACKAGE = 'gof', x, t)
 }
 
+.fastapprox <- function(time, newtime, equal = FALSE, type = 0L) {
+    .Call('_gof_FastApprox', PACKAGE = 'gof', time, newtime, equal, type)
+}
+
+.clusterindex <- function(t) {
+    .Call('_gof_ClusterIndex', PACKAGE = 'gof', t)
+}
+
 # Register entry points for exported C++ functions
 methods::setLoadAction(function(ns) {
     .Call('_gof_RcppExport_registerCCallable', PACKAGE = 'gof')

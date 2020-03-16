@@ -27,6 +27,20 @@ double L2Test(const arma::vec &x, const arma::vec &t) {
   return target::L2Test(x, t);
 }
 
+// [[Rcpp::export(name=.fastapprox)]]
+arma::umat FastApprox(arma::vec &time, arma::vec &newtime,
+		      bool equal  = false, unsigned type = 0) {
+  return target::fastapprox(time, newtime, equal, type)+1;
+}
+
+// [[Rcpp::export(name=.clusterindex)]]
+arma::umat ClusterIndex(const arma::uvec &t) {
+  arma::umat res = target::clusterid(t);
+  res.col(0) += 1;
+  return res;
+}
+
+
 RCPP_MODULE(gofmod) {
     using namespace Rcpp;
     class_<target::cumres>("CumRes")
