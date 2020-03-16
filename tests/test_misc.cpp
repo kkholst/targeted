@@ -20,9 +20,9 @@ TEST_CASE("Armadillo check", "[arma]") {
   REQUIRE(x.n_elem == 3);
 }
 
-TEST_CASE("Cluster-id", "[utils]") {
-  
-  SECTION("Test clusterid") {    
+TEST_CASE("Utilities", "[utils]") {
+
+  SECTION("Test clusterid") {
     uvec inp = {1,1,2,2,2};
     umat res = target::clusterid(inp);
     REQUIRE(res.n_rows == 2);
@@ -32,7 +32,18 @@ TEST_CASE("Cluster-id", "[utils]") {
     REQUIRE(res(1,0) == 2);
   }
 
+  SECTION("Fastapprox") {
+    vec time = {1.0, 2.0, 3.0, 4.0};
+    vec newtime = {3.1, 0.1};
+    umat res = target::fastapprox(time, newtime, false, 0);
+    REQUIRE(res.n_rows == 2);
+    REQUIRE(res.n_cols == 1);
+    REQUIRE(res(0) == 2);
+    REQUIRE(res(1) == 0);
+  }
+
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -46,6 +57,4 @@ TEST_CASE("Sanity check", "[sanity]") {
   REQUIRE(100.5 == Approx(100).epsilon(0.01)); // Allow 1% difference
   REQUIRE(100 == Approx(100));
 }
-
-
 

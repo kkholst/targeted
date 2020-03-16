@@ -8,9 +8,10 @@
 
 */
 #include "utils.hpp"
+#include <algorithm>
 
 namespace target {
-  
+
   // Complex step derivative
   arma::mat deriv(cx_func f, arma::vec theta) {
     arma::cx_vec thetac = arma::conv_to<arma::cx_vec>::from(theta);
@@ -25,10 +26,10 @@ namespace target {
       theta0[i] += h0;
       arma::mat val = imag(f(theta0))/h;
       for (unsigned j=0; j<n; j++)
-	res(j,i) = val[j];      
+	res(j,i) = val[j];
     }
     return(res);
-  }  
+  }
 
 
   // Find index of clusters/ids in sorted integer vector
@@ -57,7 +58,7 @@ namespace target {
     return res;
   }
 
-  
+
   arma::mat groupsum(const arma::mat &x,
 		     const arma::uvec &cluster,
 		     bool reduce=true) {
@@ -69,14 +70,14 @@ namespace target {
     unsigned start, stop;
     arma::mat res(n, x.n_cols);
     arma::rowvec tmp(x.n_cols);
-    for (unsigned i=0; i<ncl; i++) { // Iterate over individuals 
+    for (unsigned i=0; i<ncl; i++) { // Iterate over individuals
       start = cluster(i);
       if (i==(ncl-1)) {
 	stop = x.n_rows;
       } else {
 	stop = cluster(i+1);
       }
-      tmp.fill(0);      
+      tmp.fill(0);
       for (unsigned j=start; j<stop; j++) {
 	tmp += x.row(j);
       }
@@ -89,6 +90,84 @@ namespace target {
       }
     }
     return(res);
+  }
+
+
+  void fastpattern(const arma::umat &y, arma::umat &pattern,
+		   arma::uvec &group, unsigned categories /*=2*/) {
+    unsigned n = y.n_rows;
+    unsigned k = y.n_cols;
+
+    arma::uvec mygroup(n);
+    double lognpattern = k*std::log((double) categories);
+    unsigned npattern = n;
+    if (lognpattern<std::log((double)npattern)) {
+      npattern = (unsigned) pow((double) categories,(double) k);
+    }
+    arma::umat mypattern(npattern,k);
+    mypattern.fill(1);
+    unsigned K=0;
+
+    for (unsigned i=0; i<n; i++) {
+      arma::urowvec ri = y.row(i);
+      bool found = false;
+      for (unsigned j=0; j<K; j++) {
+	if (sum(ri!=mypattern.row(j))==0) {
+	  found = true;
+	  mygroup(i) = j;
+	  break;
+	}
+
+      }
+      if (!found) {
+	K++;
+	mypattern.row(K-1) = ri;
+	mygroup(i) = K-1;
+      }
+    }
+    pattern = mypattern.rows(0,K-1);
+    group = mygroup;
+  }
+
+
+  arma::umat fastapprox(arma::vec &time, // sorted times
+			arma::vec &newtime,
+			bool equal,
+			// type: (0: nearedst, 1: right, 2: left)
+			unsigned type) {
+
+    arma::uvec idx(newtime.n_elem);
+    arma::uvec eq(newtime.n_elem);
+
+    double vmax = time(time.n_elem-1);
+    arma::mat::iterator it;
+    double upper=0.0; int pos=0;
+    for (unsigned i=0; i<newtime.n_elem; i++) {
+      eq[i] = 0;
+      if (newtime(i)>vmax) {
+	pos = time.n_elem-1;
+      } else {
+	it = std::lower_bound(time.begin(), time.end(), newtime(i));
+	upper = *it;
+	if (it == time.begin()) {
+	  pos = 0;
+	  if (equal && (newtime(i)==upper)) { eq(i) = 1; }
+	}
+	else {
+	  pos = int(it-time.begin());
+	  if (type==0 && std::fabs(newtime(i)-time(pos-1))<
+	      std::fabs(newtime(i)-time(pos)))
+	    pos -= 1;
+	  if (equal && (newtime(i)==upper)) { eq[i] = pos+1; }
+	}
+      }
+      if (type==2 && newtime(i)<upper) pos--;
+      idx(i) = pos;
+    }
+    if (equal) {
+      return( arma::join_horiz(idx, eq) );
+    }
+    return( idx );
   }
 
 
@@ -105,22 +184,22 @@ namespace target {
 
   // Comparison of ECDF of (x1,...,xn) with null CDF evaluated in G = (G(x1),...,G(xn))
   double CramerVonMises(const arma::vec &x, arma::vec G) {
-    arma::uvec ord = arma::stable_sort_index(x); // back to original order of input data    
+    arma::uvec ord = arma::stable_sort_index(x); // back to original order of input data
     G = G.elem(ord);
     unsigned n = G.n_elem;
     double res = 1/(12*n);
     for (unsigned i=0; i<G.n_elem; i++) {
       double val = (2*i-1)/(2*n)-G(i);
-	res += val*val;
+      res += val*val;
     }
     return res;
   }
- 
-  
-  arma::mat const EmptyMat = arma::mat();
-  arma::vec const EmptyVec = arma::vec();  
 
-  
+
+  arma::mat const EmptyMat = arma::mat();
+  arma::vec const EmptyVec = arma::vec();
+
+
   // Foreground colors are in form of 3x, bacground are 4x
   const char* COL_RESET = "\x1b[0m";
   const char* COL_DEF   = "\x1b[39m";

@@ -30,6 +30,14 @@ namespace target {
 
   arma::umat clusterid(const arma::uvec &id);  
   arma::mat groupsum(const arma::mat &x, const arma::uvec &cluster, bool reduce);  
+  void fastpattern(const arma::umat &y, arma::umat &pattern,
+		   arma::uvec &group, unsigned categories);
+  arma::umat fastapprox(arma::vec &time, // sorted times
+			arma::vec &newtime,
+			bool equal  = false,
+			// type: (0: nearedst, 1: right, 2: left)
+			unsigned type = 0);
+
   
   double SupTest(const arma::vec &D);
   double L2Test(const arma::vec &D, const arma::vec &t);  
