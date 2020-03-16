@@ -32,7 +32,7 @@ TESTPY = target_test
 
 ##################################################
 
-default: build runr
+default: checkinit build runr
 
 all: clean run
 
@@ -42,10 +42,13 @@ all: clean run
 clean: cleanr cleanpy
 	@rm -Rf $(BUILD_DIR) $(VALGRIND_DIR) $(DOXYGEN_DIR)/html $(COVERAGE_DIR)
 
-.PHONY: init init-submodules
+.PHONY: init init-submodules checkinit
 init: init-submodules clean
 	@echo "Build options: $(BUILD)"
 	@$(CMAKE) -B build $(BUILD)
+
+checkinit:
+	@if [ ! -f "$(BUILD_DIR)/build.ninja" ]; then $(MAKE) init; fi
 
 init-submodules:
 	@if [ -z "`find \"lib/armadillo\" -mindepth 1 -exec echo notempty \; -quit`" ]; then \
