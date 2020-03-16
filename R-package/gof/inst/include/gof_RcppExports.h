@@ -67,6 +67,48 @@ namespace gof {
         return Rcpp::as<double >(rcpp_result_gen);
     }
 
+    inline arma::umat _fastapprox(arma::vec& time, arma::vec& newtime, bool equal = false, unsigned type = 0) {
+        typedef SEXP(*Ptr__fastapprox)(SEXP,SEXP,SEXP,SEXP);
+        static Ptr__fastapprox p__fastapprox = NULL;
+        if (p__fastapprox == NULL) {
+            validateSignature("arma::umat(*_fastapprox)(arma::vec&,arma::vec&,bool,unsigned)");
+            p__fastapprox = (Ptr__fastapprox)R_GetCCallable("gof", "_gof__fastapprox");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p__fastapprox(Shield<SEXP>(Rcpp::wrap(time)), Shield<SEXP>(Rcpp::wrap(newtime)), Shield<SEXP>(Rcpp::wrap(equal)), Shield<SEXP>(Rcpp::wrap(type)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<arma::umat >(rcpp_result_gen);
+    }
+
+    inline arma::umat _clusterindex(const arma::uvec& t) {
+        typedef SEXP(*Ptr__clusterindex)(SEXP);
+        static Ptr__clusterindex p__clusterindex = NULL;
+        if (p__clusterindex == NULL) {
+            validateSignature("arma::umat(*_clusterindex)(const arma::uvec&)");
+            p__clusterindex = (Ptr__clusterindex)R_GetCCallable("gof", "_gof__clusterindex");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p__clusterindex(Shield<SEXP>(Rcpp::wrap(t)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<arma::umat >(rcpp_result_gen);
+    }
+
 }
 
 #endif // RCPP_gof_RCPPEXPORTS_H_GEN_

@@ -19,7 +19,6 @@
 ##' @importFrom graphics lines polygon
 ##' @importFrom grDevices col2rgb rgb
 ##' @importFrom methods new
-##' @importFrom mets fast.approx dby
 ##' @keywords package
 ##' @examples
 ##' example(cumres)

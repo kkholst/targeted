@@ -1,5 +1,11 @@
 # -*- mode: org -*-
 
+* Version 1.0.2 <2020-04-01 Wed>
+ - New c++ functions with R-wrappers:
+   .fastapprox, .clusterindex, ...
+ - Removed mets dependency
+ - More unit tests (c++ code only)
+
 * Version 1.0.1 <2020-03-15 Sun>
  - Optimization of C++ code
  - Some compatibility with Solaris fixed

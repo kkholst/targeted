@@ -1,7 +1,7 @@
 subset_t <- function(t, n.qt=250L, n.eq=250L) {
     if (length(t)<= n.qt+n.eq) return(seq_along(t))
     t <- sort(t)
-    t1a <- t[mets::fast.approx(t, seq(t[1], t[length(t)], length.out=n.eq))]
+    t1a <- t[.fastapprox(t, seq(t[1], t[length(t)], length.out=n.eq))[,1]+1]
     t1b <- quantile(t, seq(0,1,length.out=n.qt))
     t1 <- sort(union(t1a, t1b))
     pos <- 1
@@ -12,7 +12,7 @@ subset_t <- function(t, n.qt=250L, n.eq=250L) {
         }
         idx[i] <- pos
     }
-    idx1 <- mets::dby(data.frame(id=idx, pos=seq_along(idx)), pos~id, pos=max, REDUCE=T)$pos
+    idx1 <- c((.clusterindex(idx)[,1]-1)[-1],length(idx))
     if (length(idx1)<n.qt+n.eq) {
         ## Add extra random points to fill up
         idx1 <- c(idx1, sample(setdiff(seq_along(t), idx1), (n.qt+n.eq)-length(idx1), replace=FALSE))
