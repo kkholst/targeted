@@ -17,7 +17,8 @@ CMAKE = /usr/bin/env cmake
 GETVER = config/getrversion.py
 NINJA = /usr/bin/env ninja
 NINJA_BUILD_OPT = -v
-BUILD = -DUSE_PKG_LIB=0 -DNO_COTIRE=1 -DCMAKE_BUILD_TYPE=Debug \
+PKGLIB = 0
+BUILD = -DUSE_PKG_LIB=$(PKGLIB) -DNO_COTIRE=1 -DCMAKE_BUILD_TYPE=Debug \
   -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON
 ifneq ($(NINJA),)
   BUILD := $(BUILD) -GNinja

@@ -12,8 +12,7 @@ as well as bindings for *python* and *R*. The library also contains
 implementation of parametric models (including different
 discrete choice models) and model diagnostics tools.
 
-R
-elevant models includes models binary regression models with binary
+Relevant models includes binary regression models with binary
 exposure and with nuisance models defined by additional
 covariates. Models for the relative risk and risk differences where
 examined by (Richardson et al 2018) and the odds ratio in
@@ -76,23 +75,23 @@ void main() {
 
 ### Installation
 
-This program may be compiled as a shared library or as stand-alone python and R
-libraries.
+This program may be compiled as a shared library or as stand-alone
+python and R libraries.
 
 
-To compile and run the test program (depends on meson and ninja)
+To compile and run the test program (depends on CMake and ninja)
 ```
 make
 ```	
 
 Unit tests and code coverage
 ```
-make test cov
+make test coverage
 ```
 
 Syntax check (requires *cppcheck* and *cclint*) 
 ```
-make check cov
+make check
 ```
 
 Code inspection (memory leaks, requires *valgrind*)
@@ -129,11 +128,6 @@ The following are included as submodules:
 3. pybind11++ (python bindings only) <https://pybind11.readthedocs.io>
 4. spdlog (logging) <https://github.com/gabime/spdlog>
 ```
-git init
-git submodules update
+make init
 ```
 
-```
-make py r
-mkdir build; cd build; cmake .. -G Ninja && ninja
-```
