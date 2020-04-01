@@ -1,3 +1,4 @@
+*.tmp
 misc/*.csv
 misc/functional
 
