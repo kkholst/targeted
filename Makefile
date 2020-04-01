@@ -197,7 +197,7 @@ valgrind:
 ## Docker
 ##################################################
 
-.PHONY: dockerbuild docker export
+.PHONY: dockerbuild dockerrun docker export
 dockerbuild:
 	@docker build . -t $(TARGET)_test
 
@@ -211,6 +211,7 @@ export:
 
 dockerrun:
 	docker run --user `id -u` -ti --rm --privileged -v ${PWD}/tmp/$(TARGET):/data $(TARGET)_test ${CMD}
+
 
 docker: export dockerrun
 
