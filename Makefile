@@ -8,6 +8,7 @@ BUILD_DIR = build
 INSTALL_DIR = $(HOME)/local
 ARG =  -Db_coverage=true $(ASAN) -Dprefix=$(INSTALL_DIR)
 LINTER = cclint
+UNAME := $(shell uname -s)
 OPEN = $(shell which xdg-open || which gnome-open || which open)
 PYTHON = /usr/bin/env python3
 PIP = /usr/bin/env pip3
@@ -15,6 +16,12 @@ R = /usr/bin/env R --no-save --no-restore
 GIT = /usr/bin/env git
 CMAKE = /usr/bin/env cmake
 GETVER = config/getrversion.py
+FINDEXEC :=
+ifeq ($(UNAME),Darwin)
+  FINDEXEC +=  -perm +111
+else
+  FINDEXEC +=  -executable
+endif
 NINJA = /usr/bin/env ninja
 NINJA_BUILD_OPT = -v
 PKGLIB = 0
@@ -60,7 +67,7 @@ run:
 	@if [ ! -d "$(BUILD_DIR)" ]; then $(MAKE) --no-print-directory init; fi
 	@$(MAKE) --no-print-directory build # > /dev/null
 	@printf "\n-----\n"
-	@find build/ -maxdepth 1 -iname "*demo" -executable -type f \
+	@find build/ -maxdepth 1 -iname "*demo" $(FINDEXEC) \
 	-exec {} \; 
 
 
