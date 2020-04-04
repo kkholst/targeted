@@ -109,7 +109,6 @@ ace <- function(formula, exposure=NULL,
     bprop <- NULL
     Vprop <- NULL
     nlabels <- labels
-
     for (trt in treatments) { 
         count <- count+1
         a0 <- (a==trt)
@@ -119,7 +118,7 @@ ace <- function(formula, exposure=NULL,
         gamma <- l2$coef        
         data0[,exposure] <- factor(trt,levels=treatments)
         x1 <- model.matrix(xf[[2]],data=data0)
-        val <- ace_est(y=y,a=a0,x1=x1,x2=x2,theta=c(beta,gamma),weights=weights,binary=binary)
+        val <- ace_est(y=cbind(y),a=cbind(a0),x1=cbind(x1),x2=cbind(x2),theta=c(beta,gamma),weights=weights,binary=binary)
         alpha.index <- 1
         beta.index <- seq_along(beta) + length(alpha.index)
         gamma.index <- seq_along(gamma) + length(alpha.index) + length(beta.index)
