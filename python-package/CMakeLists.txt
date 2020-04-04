@@ -1,20 +1,19 @@
 cmake_minimum_required(VERSION 2.8.12)
 set(target "targeted_c")
 
+set(RUN_TESTS TRUE)   
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+#set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
+
 if (CMAKE_VERSION VERSION_LESS 3.0)
   project(${target})
-  set(PROJECT_VERSION 0.0.1)
+  set(PROJECT_VERSION 0.0.7)
 else()
   cmake_policy(SET CMP0048 NEW)
   project(${target})
 endif()
-
-set(RUN_TESTS TRUE)   
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-#set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
 
 ################################################################################
 # Libraries
