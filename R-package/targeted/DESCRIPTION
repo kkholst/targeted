@@ -18,6 +18,6 @@ LazyLoad: yes
 NeedsCompilation: yes
 SystemRequirements: C++11
 ByteCompile: yes
-RcppModules: riskregmodels, mlogit
+RcppModules: riskregmodel, dcmodel
 Encoding: UTF-8
 RoxygenNote: 7.1.0

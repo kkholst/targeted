@@ -1,6 +1,6 @@
 # -*- mode: makefile; -*-
 
-TARGET = target
+TARGET = targeted
 VALGRIND_DIR = build/codetest
 DOXYGEN_DIR = doc
 COVERAGE_DIR = build
@@ -36,7 +36,7 @@ PKG = $(shell $(GETVER) R-package/$(pkg))
 R_DEP = 1
 TESTR = $(pkg)_test
 # python package
-TESTPY = target_test
+TESTPY = targeted_test
 
 ##################################################
 
@@ -206,7 +206,7 @@ valgrind:
 
 .PHONY: dockerbuild dockerrun docker export
 dockerbuild:
-	@docker build . --network=host -t $(TARGET)_test
+	@docker build . --network=host -t target_test
 
 export:
 	@rm -Rf ${PWD}/tmp/$(TARGET)
@@ -217,7 +217,7 @@ export:
 	@chmod -R 777 ${PWD}/tmp/$(TARGET)
 
 dockerrun:
-	docker run --user `id -u` -ti --rm --privileged -v ${PWD}/tmp/$(TARGET):/data $(TARGET)_test ${CMD}
+	docker run --user `id -u` -ti --rm --privileged -v ${PWD}/tmp/$(TARGET):/data target_test ${CMD}
 
 
 docker: export dockerrun

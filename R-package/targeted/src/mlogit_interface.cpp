@@ -40,10 +40,10 @@ public:
 };
 
 
-RCPP_MODULE(mlogit) {
+RCPP_MODULE(dcmodel) {
     using namespace target ;
 
-    class_<MLogitR>("MLogitR")
+    class_<MLogitR>("dcmodel")
       .constructor<uvec, // choice
 		   uvec, // alt
 		   uvec, // id_idx

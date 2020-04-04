@@ -192,7 +192,7 @@ arma::mat fast_iid(const arma::vec &y,
 
 
 
-RCPP_MODULE(riskregmodels){
+RCPP_MODULE(riskregmodel){
     using namespace Rcpp ;
     class_<RiskReg>("RiskReg")
     // expose the constructor

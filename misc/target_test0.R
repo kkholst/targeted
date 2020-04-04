@@ -1,4 +1,4 @@
-devtools::load_all("~/Software/target/R-package/target")
+devtools::load_all("~/Software/target/R-package/targeted")
 
 
 m <- lvm(a[-2] ~ 1*x,

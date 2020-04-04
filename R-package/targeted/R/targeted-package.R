@@ -23,7 +23,8 @@
 ##'
 ##' example(ace)
 ##'
-loadModule("riskregmodels", TRUE)
+loadModule("riskregmodel", TRUE)
+loadModule("dcmodel", TRUE)
 NULL
 
 ##' For internal use
