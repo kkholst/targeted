@@ -6,34 +6,44 @@
 # targeted test program
 #
 
-import targeted.utils as ru
-import numpy as np
-import numpy.linalg as la
+import targeted as tg
+import targeted.formula as tgf
+import logging
+try:
+    import coloredlogs
+    coloredlogs.install(level='INFO')
+except ModuleNotFoundError:
+    logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 import argparse
 
-def test(n=5):
-    z = np.random.normal(0, size=n*n)
-    z = np.resize(z, [n, n])
-    x = np.matrix(z) + np.eye(n)
-    y = np.matrix(ru.inv(x))
-    print("x:\n", x, "\n")
-    print("Inv(x):\n", y, "\n")
-    print("Inv(x)-Inv2(x):\n", (y-la.inv(x)).round(5), "\n")
-    print("X*Inv(x):\n", np.dot(x, y).round(5))
+d = tg.get_data()
 
+def test(n=1):
+    if n==0:
+        print("Interaction term, correct nuisance model")
+        val = tgf.riskreg(d, 'y~a', interaction='x', nuisance='x+z')
+    elif n==1:
+        print("Correct nuisance model")
+        val = tgf.riskreg(d, 'y~a', nuisance='x+z')
+    elif n==2:
+        print("Incorrect nuisance model")        
+        val = tgf.riskreg(d, 'y~a', nuisance='x')
+    else:
+        print("Incorrect nuisance model")        
+        val = tgf.riskreg(d, 'y~a', nuisance='z')        
+    logger.info(val)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("n",
                         type=int,
                         nargs='?',  # optional argument
-                        default=5,
-                        help="size of matrix")
+                        default=0,
+                        help="type of model")
     parser.add_argument("-a", "--all",
                         action="store_true",
                         help="run all tests")
 
     args = parser.parse_args()
     test(args.n)
-
-#    if (args.all):
