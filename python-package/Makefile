@@ -31,7 +31,7 @@ upload_test:
 
 	$(PYTHON) -m twine upload --repository pypitest dist/*
 .PHONY: upload 
-upload:	
+upload:	source
 	$(PYTHON) -m twine upload dist/* --verbose --repository-url https://upload.pypi.org/legacy/
 
 .PHONY: uninstall
