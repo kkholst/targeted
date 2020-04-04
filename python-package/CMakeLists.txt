@@ -8,7 +8,7 @@ set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
 
 if (CMAKE_VERSION VERSION_LESS 3.0)
   project(${target})
-  set(PROJECT_VERSION 0.0.7)
+  set(PROJECT_VERSION 0.1)
 else()
   cmake_policy(SET CMP0048 NEW)
   project(${target})

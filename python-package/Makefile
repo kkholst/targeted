@@ -15,7 +15,7 @@ PWD := $(shell pwd)
 DOCKERRUN = docker run -ti --rm --privileged --user $(UID):0 --network=host -v $(PWD):/io buildmany
 
 build: clean docker
-	$(DOCKERRUN)
+#	$(DOCKERRUN)
 	mv wheelhouse/* dist/; rmdir wheelhouse
 	$(MAKE) sourcebuild
 
@@ -64,13 +64,13 @@ installpypi: uninstall
 
 .PHONY: dockerbuild
 dockerbuild:
-	docker build  --build-arg UID=${UID} --network=host . -t  buildmany
+	docker build  --build-arg UID=${UID} --network=host . -t target_test
 
-.PHONY: dockertest
-dockertest:
-	docker run -ti --rm --privileged --network=host -v $(PWD):/io buildmany bash
-
-DOCKERTEST=kkholst/stat:python
 .PHONY: docker
 docker:
+	docker run -ti --rm --privileged --network=host -v $(PWD):/io target_test bash
+
+DOCKERTEST=kkholst/stat:python
+.PHONY: dockertest
+dockertest:
 	docker run -ti --rm --privileged --network=host -u 0:0 -v $(PWD):/data ${DOCKERTEST} bash

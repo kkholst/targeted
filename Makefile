@@ -206,7 +206,7 @@ valgrind:
 
 .PHONY: dockerbuild dockerrun docker export
 dockerbuild:
-	@docker build . -t $(TARGET)_test
+	@docker build . --network=host -t $(TARGET)_test
 
 export:
 	@rm -Rf ${PWD}/tmp/$(TARGET)

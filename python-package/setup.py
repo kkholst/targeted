@@ -131,7 +131,7 @@ setuptools.setup(
     install_requires=[
         'pandas',
         'scipy>=1.3.2',
-        'statsmodels>=0.10',
+        'statsmodels>=0.10.2',
         'patsy>=0.5',
         'numpy>=1.15'
     ],
