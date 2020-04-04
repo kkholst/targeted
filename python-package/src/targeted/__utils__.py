@@ -1,4 +1,4 @@
-import target.__target_c__ as targetc
+import targeted.__targeted_c__ as targetc
 import numpy as np
 import numpy.linalg as npl
 import statsmodels.api as sm

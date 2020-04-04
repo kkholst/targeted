@@ -1,6 +1,6 @@
 # coding: utf-8
 
-__name__        = "target"
+__name__        = "targeted"
 __version__     = "0.0.1"
 __license__     = "Apache Software License"
 __description__ = "Targeted inference"

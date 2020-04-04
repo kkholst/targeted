@@ -2,8 +2,8 @@
 #
 # Copyright (c) 2019 Klaus K. Holst.  All rights reserved.
 
-import target as tg
-from target import datatype as inp
+import targeted as tg
+from targeted import datatype as inp
 import numpy as np
 import statsmodels.api as sm
 from scipy import optimize

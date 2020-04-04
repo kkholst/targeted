@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.12)
-set(target "target_c")
+set(target "targeted_c")
 
 if (CMAKE_VERSION VERSION_LESS 3.0)
   project(${target})
@@ -86,7 +86,7 @@ include_directories(${LIBTARGET_DIR} LIBTARGET)
 
 pybind11_add_module(__${target}__
   ${LIBTARGET_SRC} ${LIBTARGET_HDR}
-  src/target/interface.cpp
+  src/targeted/interface.cpp
  )
 
 target_link_libraries(__${target}__ PRIVATE armadillo)

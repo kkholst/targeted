@@ -1,4 +1,4 @@
-PKG:=target
+PKG:=targeted
 PIP:=/usr/bin/env pip3
 PYTHON:=/usr/bin/env python3
 

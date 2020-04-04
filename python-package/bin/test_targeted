@@ -3,10 +3,10 @@
 #
 # Author: Klaus K. Holst
 #
-# target test program
+# targeted test program
 #
 
-import target.utils as ru
+import targeted.utils as ru
 import numpy as np
 import numpy.linalg as la
 import argparse

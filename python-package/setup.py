@@ -10,7 +10,7 @@ import setuptools
 from setuptools.command.test import test as TestCommand
 from shutil import copyfile, copymode
 
-pkg = "target"
+pkg = "targeted"
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -76,7 +76,7 @@ class CMakeBuild(build_ext):
         subprocess.check_call(['cmake', '--build', '.'] + build_args,
                               cwd=self.build_temp)
         # Copy *_test file to tests directory
-        test_bin = os.path.join(self.build_temp, 'target_c_test')
+        test_bin = os.path.join(self.build_temp, pkg . '_c_test')
         if os.path.exists(test_bin):
             self.copy_test_file(test_bin)
         print()  # Add an empty line for cleaner output

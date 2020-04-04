@@ -1,4 +1,4 @@
-import target as tg
+import targeted as tg
 import numpy as np
 import patsy
 
