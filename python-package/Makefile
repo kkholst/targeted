@@ -34,8 +34,12 @@ upload_test:
 upload:	
 	$(PYTHON) -m twine upload dist/* --verbose --repository-url https://upload.pypi.org/legacy/
 
+.PHONY: uninstall
+uninstall:
+	$(PIP) uninstall $(PKG) -y
+
 .PHONY: install
-install:
+install: uninstall
 	$(PYTHON) setup.py install
 	rm -Rf *.egg-info
 
@@ -52,8 +56,8 @@ installpypi_test:
 	$(PIP) install --upgrade --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ ${PKG}
 
 .PHONY: installpypi
-installpypi:
-	$(PIP) install --upgrade ${PKG}
+installpypi: uninstall
+	$(PIP) install --upgrade $(PKG) --no-binary :all:
 
 
 ################################################################################
