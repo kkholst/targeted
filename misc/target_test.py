@@ -1,9 +1,9 @@
-import target
+import targeted as tg
 import numpy as np
 import patsy
 from scipy import optimize
 import statsmodels.api as sm
-import target.formula as tg
+import targeted.formula as tgf
 import logging
 try:
     import coloredlogs
@@ -14,15 +14,15 @@ logger = logging.getLogger(__name__)
 
 ######################################################################
 
-d = target.get_data()
+d = tg.get_data()
 n = d.shape[0]
 y, X2 = patsy.dmatrices('y ~ x+z', d)
 a = d['a'].values.reshape(n, 1)
 w = np.repeat(1, n).reshape(n, 1)
 X1 = w
 theta = [[1, 1, 1, 1]]
-m = target.riskregmodel(y, a, X1, X2, X2, w, 'rr')
-# m = target.riskregmodel(y, a, X2, X2, X2, w, 'rr')
+m = tg.riskregmodel(y, a, X1, X2, X2, w, 'rr')
+# m = tg.riskregmodel(y, a, X2, X2, X2, w, 'rr')
 # par = np.matrix([[1,2,3]]).transpose()
 # m.esteq(par, w)
 
@@ -63,26 +63,26 @@ logger.info("Hessian:\n%s", res)
 ######################################################################
 
 logger.info('-----------------')
-val = target.riskreg(y, a, x2=X2)
+val = tg.riskreg(y, a, x2=X2)
 logger.info(val)
 
-val = target.riskreg(y, a, x2=X2, x3=X2)
+val = tg.riskreg(y, a, x2=X2, x3=X2)
 logger.info(val)
 
-val = target.riskreg(y, a, x2=X1, x3=X2)
+val = tg.riskreg(y, a, x2=X1, x3=X2)
 logger.info(val)
 
-val = target.riskreg(y, a, x2=X2, x3=X2, model='rd')
+val = tg.riskreg(y, a, x2=X2, x3=X2, model='rd')
 logger.info(val)
 
 logger.info('-----------------')
 logger.info('Formula syntax')
-val = tg.riskreg(d, 'y~a')
+val = tgf.riskreg(d, 'y~a')
 logger.info(val)
 
-val = tg.riskreg(d, 'y~a', nuisance='x+z', propensity='x+z')
+val = tgf.riskreg(d, 'y~a', nuisance='x+z', propensity='x+z')
 logger.info(val)
 
 logger.info('Interaction')
-val = tg.riskreg(d, 'y~a', interaction='x', nuisance='x+z')
+val = tgf.riskreg(d, 'y~a', interaction='x', nuisance='x+z')
 logger.info(val)

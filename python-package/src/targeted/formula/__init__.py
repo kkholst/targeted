@@ -1,3 +1,1 @@
-
-#from .utils import *
-from .riskreg import riskreg
+from .riskreg import riskreg  # noqa, F401

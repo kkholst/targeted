@@ -1,4 +1,4 @@
-import target
+import targeted
 
 def test_is_string(caplog):
     '''

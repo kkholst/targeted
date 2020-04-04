@@ -101,7 +101,7 @@ matrices ace_est(pyarray &y,
 }
 
 
-PYBIND11_MODULE(__target_c__, m) {
+PYBIND11_MODULE(__targeted_c__, m) {
   m.doc() = "Python bindings for the target C++ library";
 
   m.def("expit", &expit, "Sigmoid function (inverse logit)");

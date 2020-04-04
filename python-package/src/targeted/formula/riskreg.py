@@ -1,21 +1,20 @@
 import targeted as tg
-import numpy as np
 import patsy
 
 def riskreg(data, target, model='rr', **kwargs):
     """Risk regression with binary exposure
 
-    :param data: 
-    :param target: 
-    :param model: 
-    :returns: 
-    :rtype: 
+    :param data:
+    :param target:
+    :param model:
+    :returns:
+    :rtype:
 
     """
     interaction = kwargs.get('interaction', '1')
-    nuisance    = kwargs.get('nuisance',    '1')
-    propensity  = kwargs.get('propensity',  '1')
-    weights     = kwargs.get('weights',     '1')
+    nuisance    = kwargs.get('nuisance', '1')
+    propensity  = kwargs.get('propensity', '1')
+    weights     = kwargs.get('weights', '1')
 
     target = target + '-1'
     y, a = patsy.dmatrices(target, data)

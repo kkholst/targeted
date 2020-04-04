@@ -1,18 +1,20 @@
 PKG:=targeted
-PIP:=/usr/bin/env pip3
+PIPARG:= # e.g., --user
+PIP:=/usr/bin/env pip3 $(PIPARG)
 PYTHON:=/usr/bin/env python3
 
 default: install
 
 .PHONY: update
 update:
-	$(PIP) install wheel setuptools twine --user --upgrade
+	$(PIP) install wheel setuptools twine --upgrade
 
 UID := $(shell id -u)
 PWD := $(shell pwd)
-.PHONY: build sourcebuild
+.PHONY: build source
 DOCKERRUN = docker run -ti --rm --privileged --user $(UID):0 --network=host -v $(PWD):/io buildmany
-build: clean dockerbuild
+
+build: clean docker
 	$(DOCKERRUN)
 	mv wheelhouse/* dist/; rmdir wheelhouse
 	$(MAKE) sourcebuild
@@ -24,9 +26,13 @@ source:
 clean:
 	@rm -Rf dist/* *.egg-info build *.so *.so.* src/*.egg-info tests/bin/*
 
-.PHONY: upload
-upload:	
+.PHONY: upload_test
+upload_test:
+
 	$(PYTHON) -m twine upload --repository pypitest dist/*
+.PHONY: upload 
+upload:	
+	$(PYTHON) -m twine upload dist/* --verbose --repository-url https://upload.pypi.org/legacy/
 
 .PHONY: install
 install:
@@ -41,19 +47,26 @@ check:
 test:
 	$(PYTHON) setup.py test
 
+.PHONY: installpypi_test
+installpypi_test:
+	$(PIP) install --upgrade --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ ${PKG}
+
 .PHONY: installpypi
 installpypi:
-	$(PIP) install --upgrade --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ ${PKG}
+	$(PIP) install --upgrade ${PKG}
+
+
+################################################################################
 
 .PHONY: dockerbuild
 dockerbuild:
-	docker build  --build-arg UID=${UID} . -t buildmany
+	docker build  --build-arg UID=${UID} --network=host . -t  buildmany
 
 .PHONY: dockertest
 dockertest:
 	docker run -ti --rm --privileged --network=host -v $(PWD):/io buildmany bash
 
-DOCKERTEST=kkholst/rdbase:base
+DOCKERTEST=kkholst/stat:python
 .PHONY: docker
 docker:
 	docker run -ti --rm --privileged --network=host -u 0:0 -v $(PWD):/data ${DOCKERTEST} bash
