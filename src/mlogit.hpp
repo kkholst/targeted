@@ -51,8 +51,8 @@ public:
 	 unsigned nalt=0,
 	 arma::vec weights=arma::vec());
   
-  arma::mat hessian(bool update);
-  arma::mat score(bool update, bool indiv);
+  arma::mat hessian(bool update=false);
+  arma::mat score(bool update=false, bool indiv=true);
   double loglik();
   void updateZX();
   void updateRef(unsigned basealt);

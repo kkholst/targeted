@@ -11,7 +11,6 @@
 #ifndef ARMA_R
 #define MATHLIB_STANDALONE
 #include <armadillo>
-//#include "Rmath.h"
 #endif
 #if defined(ARMA_R)
 #include <RcppArmadillo.h>
@@ -29,7 +28,7 @@ namespace target {
   arma::mat deriv(cx_func f, arma::vec theta);
 
   arma::umat clusterid(const arma::uvec &id);  
-  arma::mat groupsum(const arma::mat &x, const arma::uvec &cluster, bool reduce);  
+  arma::mat groupsum(const arma::mat &x, const arma::uvec &cluster, bool reduce=true);  
   void fastpattern(const arma::umat &y, arma::umat &pattern,
 		   arma::uvec &group, unsigned categories);
   arma::umat fastapprox(arma::vec &time, // sorted times

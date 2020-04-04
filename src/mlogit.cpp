@@ -59,7 +59,7 @@ namespace target {
     return as_scalar(sum(logpr%(*Choice())%(*Weights())));
   }
   
-  mat MLogit::score(bool update=false, bool indiv=true) {
+  mat MLogit::score(bool update, bool indiv) {
     if (update) MLogit::updateZX();
     vec pr = exp(logpr);
     mat xp = zx;
@@ -72,7 +72,7 @@ namespace target {
     return score;
   }
   
-  mat MLogit::hessian(bool update=false) {
+  mat MLogit::hessian(bool update) {
     if (update) MLogit::updateZX();
     vec pr = exp(logpr);
     mat xp = zx;

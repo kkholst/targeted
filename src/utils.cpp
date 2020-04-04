@@ -61,7 +61,7 @@ namespace target {
 
   arma::mat groupsum(const arma::mat &x,
 		     const arma::uvec &cluster,
-		     bool reduce=true) {
+		     bool reduce) {
     unsigned ncl = cluster.n_elem;
     unsigned n = ncl;
     if (!reduce) {

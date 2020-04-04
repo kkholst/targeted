@@ -3,7 +3,7 @@
 ##'
 ##' Semi-parametric regression models with nuisance parameters.
 ##'
-##' @name target-package
+##' @name targeted-package
 ##' @import Rcpp
 ##' @importFrom graphics plot points
 ##' @importFrom lava iid getoutcome estimate Inverse
@@ -12,8 +12,8 @@
 ##' @importFrom optimx optimx
 ##' @importFrom futile.logger flog.warn flog.debug flog.info
 ##' @importFrom utils tail head
-##' @useDynLib target, .registration=TRUE
-##' @aliases target-package target
+##' @useDynLib targeted, .registration=TRUE
+##' @aliases targeted-package targeted
 ##' @docType package
 ##' @author Klaus K. Holst Maintainer: <klaus@@holst.it>
 ##' @keywords package

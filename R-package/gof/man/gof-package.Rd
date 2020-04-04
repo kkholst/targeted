@@ -5,9 +5,6 @@
 \alias{gof-package}
 \alias{gof}
 \title{Model-diagnostics based on cumulative residuals}
-\description{
-Model-diagnostics based on cumulative residuals
-}
 \examples{
 example(cumres)
 
