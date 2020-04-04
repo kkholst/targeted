@@ -1,2 +1,2 @@
 suppressPackageStartupMessages(library("testthat"))
-test_check("target")
+test_check("targeted")

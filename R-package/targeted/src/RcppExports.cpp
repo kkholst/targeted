@@ -490,7 +490,7 @@ RcppExport SEXP _targeted_RcppExport_registerCCallable() {
     return R_NilValue;
 }
 
-RcppExport SEXP _rcpp_module_boot_MLogit();
+RcppExport SEXP _rcpp_module_boot_mlogit();
 RcppExport SEXP _rcpp_module_boot_riskregmodels();
 
 static const R_CallMethodDef CallEntries[] = {
@@ -506,7 +506,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_targeted_clusterid", (DL_FUNC) &_targeted_clusterid, 1},
     {"_targeted_groupsum", (DL_FUNC) &_targeted_groupsum, 3},
     {"_targeted_softmax", (DL_FUNC) &_targeted_softmax, 3},
-    {"_rcpp_module_boot_MLogit", (DL_FUNC) &_rcpp_module_boot_MLogit, 0},
+    {"_rcpp_module_boot_mlogit", (DL_FUNC) &_rcpp_module_boot_mlogit, 0},
     {"_rcpp_module_boot_riskregmodels", (DL_FUNC) &_rcpp_module_boot_riskregmodels, 0},
     {"_targeted_RcppExport_registerCCallable", (DL_FUNC) &_targeted_RcppExport_registerCCallable, 0},
     {NULL, NULL, 0}

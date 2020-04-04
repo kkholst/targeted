@@ -7,56 +7,55 @@
 #include <cmath>
 #include <string>
 #include <complex>
+#include <vector>
 #include <memory>     // smart pointers (unique_ptr)
 #include <cfloat>     // precision of double (DBL_MIN)
 #include <functional> // std::bind for using non-static member function as argument to free function
 
 using namespace Rcpp;
 using namespace arma;
-
+using namespace std;
 
 class MLogitR : public target::MLogit {
 public:
-  MLogitR(const arma::uvec &choice,
-	  const arma::uvec &alt,
-	  const arma::uvec &id_idx,
-	  const arma::mat &z1,
-	  const arma::mat &z2,
-	  const arma::mat &x
+  MLogitR(uvec choice,
+	  uvec alt,
+	  uvec id_idx,
+	  vector<mat> design_matrices,
+	  vec weights
 	  ) :
-    
-    MLogit(choice, alt, id_idx, z1, z2, x, 0, vec()) {
-  }
+    MLogit(choice, alt, id_idx,
+	   design_matrices[0], // z1
+	   design_matrices[1], // z2
+	   design_matrices[2], // x
+	   0, weights) {}
 
-  void update(const arma::vec &theta, unsigned basealt=0) {
+  double loglik() { return MLogit::loglik(); }
+  mat hessian() { return MLogit::hessian(); }
+  mat score(bool indiv=true) { return MLogit::score(false, indiv); }  
+  void update(const vec &theta, unsigned basealt=0) {
     updateProb(theta);
     updateRef(basealt);
   }
 };
 
 
-
-RCPP_MODULE(MLogit) {
-    using namespace Rcpp ;
+RCPP_MODULE(mlogit) {
     using namespace target ;
 
-    class_<MLogit>("MLogitR")
-      .constructor<const arma::uvec&, // choice
-		   const arma::uvec&, // alt
-		   const arma::uvec, // id_idx
-		   const arma::mat&,  // z1
-		   const arma::mat&,  // z2
-		   const arma::mat&  // x
+    class_<MLogitR>("MLogitR")
+      .constructor<uvec, // choice
+		   uvec, // alt
+		   uvec, // id_idx
+		   vector<mat>,
+		   vec // weights
 		   >("Constructor")
-
       .method("logl",   &MLogitR::loglik,   "log-likelihood")
-      .method("score",   &MLogitR::score,   "score")
-      .method("hess",   &MLogitR::hessian,   "hessian")
-      // .method("update", (void (MLogitR::*)(arma::vec, unsigned) )( &MLogitR::updateProb),
-	      // "Update model parameters")
+      .method("score",  &MLogitR::score,    "score")
+      .method("hess",   &MLogitR::hessian,  "hessian")
+      .method("update", &MLogitR::update,   "update model parameters")
       ;
 }
-
 
 // Expand data from short to long form
 // [[Rcpp::export(name=".mlogit_expand")]]
@@ -91,9 +90,9 @@ Rcpp::List mlogit_expand(const arma::uvec &alt,
 		       Named("id_idx")=_id_idx) );
 }
 
-/*
 
-  
+
+/*  
 // [[Rcpp::export(name=".mlogit_loglik")]]
 double mlogit_loglik(arma::vec theta,
 	       const arma::uvec &choice,
