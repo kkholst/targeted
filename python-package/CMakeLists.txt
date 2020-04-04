@@ -4,8 +4,7 @@ set(target "targeted_c")
 set(RUN_TESTS TRUE)   
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-#set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
 
 if (CMAKE_VERSION VERSION_LESS 3.0)
   project(${target})
@@ -91,16 +90,14 @@ pybind11_add_module(__${target}__
   src/targeted/interface.cpp
  )
 
-target_link_libraries(__${target}__ PRIVATE armadillo)
- 
 if(APPLE)
-#  set_target_properties(__${target}__ PROPERTIES INSTALL_NAME_DIR "@rpath")
-#  set_target_properties(__${target}__ PROPERTIES INSTALL_RPATH "@loader_path")
+  set_target_properties(__${target}__ PROPERTIES INSTALL_NAME_DIR "@rpath")
+  set_target_properties(__${target}__ PROPERTIES INSTALL_RPATH "@loader_path")
 else()
-# set_target_properties(__${target}__ PROPERTIES INSTALL_RPATH "$ORIGIN")
-# set_target_properties(${target} PROPERTIES LINK_FLAGS "-shared")
+  set_target_properties(__${target}__ PROPERTIES INSTALL_RPATH "$ORIGIN")
+  set_target_properties(__${target}__ PROPERTIES LINK_FLAGS "-shared")
 endif()
 
-
+target_link_libraries(__${target}__ PRIVATE armadillo)
 
 
