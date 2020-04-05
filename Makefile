@@ -1,40 +1,28 @@
 # -*- mode: makefile; -*-
 
+include $(wildcard config/*.mk)
+
 TARGET = targeted
+
 VALGRIND_DIR = build/codetest
 DOXYGEN_DIR = doc
 COVERAGE_DIR = build
 BUILD_DIR = build
 INSTALL_DIR = $(HOME)/local
 ARG =  -Db_coverage=true $(ASAN) -Dprefix=$(INSTALL_DIR)
-LINTER = cclint
-UNAME := $(shell uname -s)
-OPEN = $(shell which xdg-open || which gnome-open || which open)
-PYTHON = /usr/bin/env python3
-PIP = /usr/bin/env pip3
-R = /usr/bin/env R --no-save --no-restore
-GIT = /usr/bin/env git
-CMAKE = /usr/bin/env cmake
-GETVER = config/getrversion.py
-FINDEXEC :=
-ifeq ($(UNAME),Darwin)
-  FINDEXEC +=  -perm +111
-else
-  FINDEXEC +=  -executable
-endif
-NINJA = /usr/bin/env ninja
-NINJA_BUILD_OPT = -v
 PKGLIB = 0
 BUILD = -DUSE_PKG_LIB=$(PKGLIB) -DNO_COTIRE=1 -DCMAKE_BUILD_TYPE=Debug \
   -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON
 ifneq ($(NINJA),)
   BUILD := $(BUILD) -GNinja
 endif
+
 # R package:
 pkg = gof
 PKG = $(shell $(GETVER) R-package/$(pkg))
 R_DEP = 1
 TESTR = $(pkg)_test
+
 # python package
 TESTPY = targeted_test
 
@@ -206,7 +194,7 @@ valgrind:
 
 .PHONY: dockerbuild dockerrun docker export
 dockerbuild:
-	@docker build . --network=host -t target_test
+	@$(CONTAINER_RUNTIME) build . --network=host -t target_test
 
 export:
 	@rm -Rf ${PWD}/tmp/$(TARGET)
@@ -217,7 +205,7 @@ export:
 	@chmod -R 777 ${PWD}/tmp/$(TARGET)
 
 dockerrun:
-	docker run --user `id -u` -ti --rm --privileged -v ${PWD}/tmp/$(TARGET):/data target_test ${CMD}
+	$(CONTAINER_RUNTIME) run --user `id -u` -ti --rm --privileged -v ${PWD}/tmp/$(TARGET):/data target_test ${CMD}
 
 
 docker: export dockerrun

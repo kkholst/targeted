@@ -1,7 +1,8 @@
+# -*- mode: makefile; -*-
+
+include $(wildcard ../config/*.mk)
+
 PKG:=targeted
-PIPARG:= # e.g., --user
-PIP:=/usr/bin/env pip3 $(PIPARG)
-PYTHON:=/usr/bin/env python3
 
 default: install
 
@@ -12,7 +13,7 @@ update:
 UID := $(shell id -u)
 PWD := $(shell pwd)
 .PHONY: build source
-DOCKERRUN = docker run -ti --rm --privileged --user $(UID):0 --network=host -v $(PWD):/io buildmany
+DOCKERRUN = $(CONTAINER_RUNTIME) run -ti --rm --privileged --user $(UID):0 --network=host -v $(PWD):/io buildmany
 
 build: clean docker
 #	$(DOCKERRUN)
@@ -64,13 +65,13 @@ installpypi: uninstall
 
 .PHONY: dockerbuild
 dockerbuild:
-	docker build  --build-arg UID=${UID} --network=host . -t target_test
+	$(CONTAINER_RUNTIME) build  --build-arg UID=${UID} --network=host . -t target_test
 
 .PHONY: docker
 docker:
-	docker run -ti --rm --privileged --network=host -v $(PWD):/io target_test bash
+	$(CONTAINER_RUNTIME) run -ti --rm --privileged --network=host -v $(PWD):/io target_test bash
 
 DOCKERTEST=kkholst/stat:python
 .PHONY: dockertest
 dockertest:
-	docker run -ti --rm --privileged --network=host -u 0:0 -v $(PWD):/data ${DOCKERTEST} bash
+	$(CONTAINER_RUNTIME) run -ti --rm --privileged --network=host -u 0:0 -v $(PWD):/data ${DOCKERTEST} bash
