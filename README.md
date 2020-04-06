@@ -1,9 +1,4 @@
 
-|                     |                                                                                                      |                                                                                                                                     |                                                                                                            |                                                                                                              |
-|:--------------------|:-----------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------|
-| ``gof`` (R-package) | [<img src="https://travis-ci.org/kkholst/gof.svg?branch=master">](https://travis-ci.org/kkholst/gof) | [<img src="https://codecov.io/github/kkholst/gof/coverage.svg?branch=master">](https://codecov.io/github/kkholst/gof?branch=master) | [<img src="http://www.r-pkg.org/badges/version/gof">](http://cran.rstudio.com/web/packages/gof/index.html) | [<img src="http://cranlogs.r-pkg.org/badges/gof">](http://cranlogs.r-pkg.org/downloads/total/last-month/gof) |
-|                     |                                                                                                      |                                                                                                                                     |                                                                                                            |                                                                                                              |
-
 # Introduction
 
 This library provides C++ classes for [targeted
@@ -25,38 +20,47 @@ causal inference models (Tsiatis 2006) also fits into this framework.
 
 ## R
 ```r
-library('target')
+library('targeted')
 
-m <- lvm(exposure[-2] ~ 1*confounder,
+m <- lvm(y[-2] ~ 1*x,
          linpred.target[1] ~ 1,
-         linpred.nuisance[-1] ~ 2*confounder)
-distribution(m, ~exposure) <- binomial.lvm('logit')
-m <- binomial.rr(m, 'response', 'exposure', 'linpred.target', 'linpred.nuisance')
+         linpred.nuisance[-1] ~ 2*x)
+distribution(m, ~a) <- binomial.lvm('logit')
+m <- binomial.rr(m, 'y', 'a', 'linpred.target', 'linpred.nuisance')
 dd <- sim(m,5e2,seed=1)
-y <- dd$response; x <- dd$exposure; x1 <- x2 <- x3 <- cbind(1,dd$confounder); weights <- rep(1,length(y))
+
+summary(fit <- targeted::riskreg(y ~ a | 1 | x | x, data=dd, type="rr"))
 ```
 
-```r
-summary(fit <- target::riskreg(y ~ a | 1 | x+z | 1, data=d, type="rr"))
+```
+Relative risk model
+  Response:  y 
+  Exposure:  a 
+
+             Estimate Std.Err    2.5%    97.5%   P-value
+log(RR):                                                
+ (Intercept)  0.86136 0.11574  0.6345  1.08820 9.895e-14
+log(OP):                                                
+ (Intercept) -0.88518 0.22802 -1.3321 -0.43827 1.036e-04
+ x            2.35193 0.28399  1.7953  2.90854 1.213e-16
+logit(Pr):                                              
+ (Intercept) -0.07873 0.08857 -0.2523  0.09485 3.740e-01
+ x            0.02894 0.08291 -0.1336  0.19145 7.270e-01
 ```
 
 ## Python
 ```python
-import target
+import targeted as tg
+from targeted.formula import riskreg
 
-inp = pkg_resources.resource_filename('target', '/data/d.csv')
-d = pd.read_csv(inp, sep=',', header=0)
-n = d.shape[0]
-y, X2 = patsy.dmatrices('y ~ x+z', d)
-a = d['a'].values.reshape(n, 1)
-w = np.repeat(1, n).reshape(n, 1)
-X1 = w
-m = target.riskregmodel(y, a, X1, X2, X2, w, 'rr')
+d = tg.get_data()
+val = riskreg(d, 'y~a', interaction='x', nuisance='x+z')
+print(val)
 
-theta = [[1, 1, 1, 1]]
-m.update(theta)
-m.loglik()
+```
 
+```
+Riskreg. Estimate: [ 1.17486406 -0.23623467]
 ```
 
 ## C++
