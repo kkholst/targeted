@@ -105,7 +105,7 @@ exportr:
 	cd $(BUILD_DIR)/R; $(R) CMD build $(pkg) --compact-vignettes=gs+qpdf --resave-data=best
 
 checkr: exportr
-	cd $(BUILD_DIR)/R; $(R) CMD check `../../$(GETVER) $(pkg)` --timings --as-cran --no-multiarch --run-donttest
+	cd $(BUILD_DIR)/R; $(R) CMD check `$(GETVER) $(pkg)` --timings --as-cran --no-multiarch --run-donttest
 
 r: buildr runr
 
