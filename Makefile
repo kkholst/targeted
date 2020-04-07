@@ -2,12 +2,11 @@
 
 include $(wildcard config/*.mk)
 
-TARGET = targeted
-
+TARGET = target
+BUILD_DIR = build
 VALGRIND_DIR = build/codetest
 DOXYGEN_DIR = doc
 COVERAGE_DIR = build
-BUILD_DIR = build
 INSTALL_DIR = $(HOME)/local
 ARG =  -Db_coverage=true $(ASAN) -Dprefix=$(INSTALL_DIR)
 PKGLIB = 0
@@ -19,8 +18,6 @@ endif
 
 # R package:
 pkg = gof
-PKG = $(shell $(GETVER) R-package/$(pkg))
-R_DEP = 1
 TESTR = $(pkg)_test
 
 # python package
@@ -48,7 +45,7 @@ checkinit:
 
 init-submodules:
 	@if [ -z "`find \"lib/armadillo\" -mindepth 1 -exec echo notempty \; -quit`" ]; then \
-	git submodule init && git submodule update; fi
+	$(GIT) submodule init && $(GIT) submodule update; fi
 
 .PHONY: run
 run: 
@@ -95,22 +92,10 @@ runr:
 roxygen:
 	@$(R) -e 'roxygen2::roxygenize("R-package/${pkg}")'
 
-
-
 dep_file = R-package/${pkg}/src/dependencies
 pkg_dep := $(shell if [ -f "$(dep_file)" ]; then cat ${dep_file}; fi)
 pkg_cpp = $(foreach module, ${pkg_dep}, $(patsubst %, src/%.cpp, $(module)))
 pkg_hpp = $(foreach module, $(pkg_dep), $(patsubst %, src/%.hpp, $(module)))
-
-#	@if [ ! -f "$(dep_file)" ]; then \
-
-tt:
-	@if [ -z "$(pkg_dep)" ]; then \
-	echo "Hej"; \
-	else \
-	echo "$(pkg_cpp)"; \
-	echo "$(pkg_hpp)"; \
-	fi
 
 exportr:
 	@rm -Rf $(BUILD_DIR)/R/$(pkg)
@@ -165,13 +150,15 @@ cleanpy:
 
 .PHONY: docs doc
 docs:
-	@cd $(DOXYGEN_DIR); doxygen
+	@cd $(DOXYGEN_DIR); $(DOXYGEN)
 
 doc:	docs
 	@$(OPEN) $(DOXYGEN_DIR)/html/index.html
 
 markdown:
-	@grip 1313 -b
+	@if [ -z "command -v grip" ]; then \
+	echo "Install dependency: pip install grip"; \
+	else grip 1313 -b; fi
 
 ##################################################
 ## Unit tests
@@ -179,7 +166,7 @@ markdown:
 
 .PHONY: t test testall
 t:	run
-	@ninja -C $(BUILD_DIR) test
+	@$(NINJA) -C $(BUILD_DIR) test
 
 test:	build
 	build/$(TARGET)_test -s
@@ -208,10 +195,10 @@ check:
 .PHONY: valgrind
 ## Alternatively, enable Address Sanitizer (ASAN =-Db_sanitize=address)
 valgrind:
-	@ninja -C build test_memcheck
+	@$(NINJA) -C build test_memcheck
 
 ##################################################
-## Docker
+## Container
 ##################################################
 
 .PHONY: dockerbuild dockerrun docker export
@@ -227,8 +214,6 @@ export:
 	@chmod -R 777 ${PWD}/tmp/$(TARGET)
 
 dockerrun:
-	$(CONTAINER_RUNTIME) run --user `id -u` -ti --rm --privileged -v ${PWD}/tmp/$(TARGET):/data target_test ${CMD}
-
+	$(CONTAINER_RUNTIME) run --user `id -u` -ti --rm --privileged -v ${PWD}/tmp/$(TARGET):/data $(TARGET)_test ${CMD}
 
 docker: export dockerrun
-
