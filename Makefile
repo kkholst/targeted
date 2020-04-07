@@ -95,12 +95,34 @@ runr:
 roxygen:
 	@$(R) -e 'roxygen2::roxygenize("R-package/${pkg}")'
 
+
+
+dep_file = R-package/${pkg}/src/dependencies
+pkg_dep := $(shell if [ -f "$(dep_file)" ]; then cat ${dep_file}; fi)
+pkg_cpp = $(foreach module, ${pkg_dep}, $(patsubst %, src/%.cpp, $(module)))
+pkg_hpp = $(foreach module, $(pkg_dep), $(patsubst %, src/%.hpp, $(module)))
+
+#	@if [ ! -f "$(dep_file)" ]; then \
+
+tt:
+	@if [ -z "$(pkg_dep)" ]; then \
+	echo "Hej"; \
+	else \
+	echo "$(pkg_cpp)"; \
+	echo "$(pkg_hpp)"; \
+	fi
+
 exportr:
 	@rm -Rf $(BUILD_DIR)/R/$(pkg)
 	@mkdir -p $(BUILD_DIR)/R/$(pkg)
 	cd R-package/${pkg}; $(GIT) archive HEAD | (cd ../../$(BUILD_DIR)/R/$(pkg); tar x)
-	cp src/*.cpp $(BUILD_DIR)/R/$(pkg)/src
-	cp src/*.hpp $(BUILD_DIR)/R/$(pkg)/inst/include
+	@if [ -z "$(pkg_dep)" ]; then \
+	cp src/*.cpp $(BUILD_DIR)/R/$(pkg)/src; \
+	cp src/*.hpp $(BUILD_DIR)/R/$(pkg)/inst/include; \
+	else \
+	cp $(pkg_cpp) $(BUILD_DIR)/R/$(pkg)/src; \
+	cp $(pkg_hpp) $(BUILD_DIR)/R/$(pkg)/inst/include; \
+	fi
 	sed -i '/^OBJECTS\|SOURCES/d' $(BUILD_DIR)/R/$(pkg)/src/Makevars
 	cd $(BUILD_DIR)/R; $(R) CMD build $(pkg) --compact-vignettes=gs+qpdf --resave-data=best
 
