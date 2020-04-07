@@ -2,20 +2,21 @@
 # Introduction
 
 This library provides C++ classes for [targeted
-inference](doc/targeted.md) and semi-parametric efficient estimators
-as well as bindings for *python* and *R*. The library also contains
-implementation of parametric models (including different
-discrete choice models) and model diagnostics tools.
+inference](targeted.md) and semi-parametric efficient estimators as
+well as bindings for *python* and *R*. The library also contains
+implementation of parametric models (including different discrete
+choice models) and model diagnostics tools.
 
-Relevant models includes binary regression models with binary
-exposure and with nuisance models defined by additional
-covariates. Models for the relative risk and risk differences where
-examined by (Richardson et al 2018) and the odds ratio in
-(Tchetgen-Tchetgen et al. 2010). Various missing data estimators and
-causal inference models (Tsiatis 2006) also fits into this framework.
+Relevant models includes binary regression models with binary exposure
+and with nuisance models defined by additional covariates. Models for
+the relative risk and risk differences where examined by (Richardson
+et al 2018) and the odds ratio in (Tchetgen-Tchetgen et
+al. 2010). Various missing data estimators and causal inference models
+(Tsiatis 2006) also fits into this framework.
 
 <p align="center">
   <img width="200"  src="doc/images/targeted.jpg">
+  <img width="200"  src="images/targeted.jpg">
 </p>
 
 ## R

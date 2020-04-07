@@ -2,6 +2,7 @@
 
 UNAME := $(shell uname -s)
 CONTAINER_RUNTIME := $(shell command -v podman 2> /dev/null || echo docker)
+DOXYGEN = doxygen
 OPEN = $(shell which xdg-open || which gnome-open || which open)
 PYTHON = /usr/bin/env python3
 PIPARG:= # e.g., --user
