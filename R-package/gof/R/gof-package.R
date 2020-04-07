@@ -1,5 +1,6 @@
 ##' Model-diagnostics based on cumulative residuals
-##' 
+##'
+##' @description Model-diagnostics based on cumulative residuals
 ##' @name gof-package
 ##' @import utils stats
 ##' @aliases gof-package gof
