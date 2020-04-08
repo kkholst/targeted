@@ -16,14 +16,8 @@ import sys
 # from datetime import date
 
 file_loc = os.path.split(__file__)[0]
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(file_loc), '..')))
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(file_loc), '../src/targeted')))
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(file_loc), '../src/targeted/formula')))
-
-print(sys.path)
-
-import targeted  # noqa 
-
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(file_loc), '../../src/targeted')))
+# sys.path.insert(0, os.path.abspath('../../src/'))
 
 # -- Project information -----------------------------------------------------
 
@@ -33,7 +27,7 @@ author = 'Klaus Kähler Holst'
 # The full version, including alpha/beta/rc tags
 release = '0.0.18'
 
-html_logo = '../../targeted.svgz'
+html_logo = '../../../doc/images/targeted.png'
 
 # -- General configuration ---------------------------------------------------
 
@@ -46,7 +40,8 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
-    'sphinx.ext.napoleon'  # Support for numpy or google docstrings
+    'sphinx.ext.napoleon',  # Support for numpy or google docstrings
+    'recommonmark',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -55,8 +50,9 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'tmp']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'tmp', 'armadillo', 'catch2', 'pybind11', 'target-cpp']
 
+source_suffix = ['.rst', '.md', '.txt']
 
 # -- Options for HTML output -------------------------------------------------
 
