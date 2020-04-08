@@ -11,9 +11,12 @@ pytest-cov = "*"
 sphinx = "*"
 sphinx-autobuild = "*"
 sphinx-autodoc-typehints = "*"
+sphinx-rtd-theme = "*"
+m2r = "*"
 mock = "*"
 autodoc = "*"
-coloredlogs "*"
+coloredlogs = "*"
+recommonmark = "*"
 
 [packages]
 patsy = ">=0.5.0"

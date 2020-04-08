@@ -1,8 +1,8 @@
 
 # Introduction
 
-This library provides C++ classes for [targeted
-inference](targeted.md) and semi-parametric efficient estimators as
+This library provides C++ classes for [targeted inference](targeted.md) 
+and semi-parametric efficient estimators as
 well as bindings for *python* and *R*. The library also contains
 implementation of parametric models (including different discrete
 choice models) and model diagnostics tools.
@@ -13,11 +13,6 @@ the relative risk and risk differences where examined by (Richardson
 et al 2018) and the odds ratio in (Tchetgen-Tchetgen et
 al. 2010). Various missing data estimators and causal inference models
 (Tsiatis 2006) also fits into this framework.
-
-<p align="center">
-  <img width="200"  src="doc/images/targeted.jpg">
-  <img width="200"  src="images/targeted.jpg">
-</p>
 
 ## R
 ```r
@@ -33,21 +28,21 @@ dd <- sim(m,5e2,seed=1)
 summary(fit <- targeted::riskreg(y ~ a | 1 | x | x, data=dd, type="rr"))
 ```
 
-```
-Relative risk model
-  Response:  y 
-  Exposure:  a 
-
-             Estimate Std.Err    2.5%    97.5%   P-value
-log(RR):                                                
- (Intercept)  0.86136 0.11574  0.6345  1.08820 9.895e-14
-log(OP):                                                
- (Intercept) -0.88518 0.22802 -1.3321 -0.43827 1.036e-04
- x            2.35193 0.28399  1.7953  2.90854 1.213e-16
-logit(Pr):                                              
- (Intercept) -0.07873 0.08857 -0.2523  0.09485 3.740e-01
- x            0.02894 0.08291 -0.1336  0.19145 7.270e-01
-```
+> ```output
+>  Relative risk model
+>   Response:  y
+>   Exposure:  a
+>
+>             Estimate Std.Err    2.5%    97.5%   P-value
+> log(RR):                                                
+>  (Intercept)  0.86136 0.11574  0.6345  1.08820 9.895e-14
+> log(OP):                                                
+>  (Intercept) -0.88518 0.22802 -1.3321 -0.43827 1.036e-04
+>  x            2.35193 0.28399  1.7953  2.90854 1.213e-16
+> logit(Pr):                                              
+>  (Intercept) -0.07873 0.08857 -0.2523  0.09485 3.740e-01
+>  x            0.02894 0.08291 -0.1336  0.19145 7.270e-01
+> ```
 
 ## Python
 ```python
@@ -57,12 +52,11 @@ from targeted.formula import riskreg
 d = tg.get_data()
 val = riskreg(d, 'y~a', interaction='x', nuisance='x+z')
 print(val)
-
 ```
 
-```
-Riskreg. Estimate: [ 1.17486406 -0.23623467]
-```
+> ```
+> Riskreg. Estimate: [ 1.17486406 -0.23623467]
+> ```
 
 ## C++
 ```cpp

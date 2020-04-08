@@ -1,4 +1,4 @@
-# encoding: utf-8
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2019-2020 Klaus K. Holst.  All rights reserved.
 
@@ -21,7 +21,7 @@ class riskreg:
     modeltype = None
     estimate = None
 
-    def stageone(self, pr):
+    def __stageone(self, pr):
         n = pr.size
         par = np.concatenate((self.mle_coef, self.propensity_coef))
         self.model.update(par)
@@ -88,7 +88,7 @@ class riskreg:
         self.mle_coef = self.mle['x']
 
         pr = tg.expit(np.matmul(self.model.data(inp.x3), self.propensity_coef))
-        self.stageone(pr)
+        self.__stageone(pr)
         alpha0 = self.mle_coef[:x1.shape[1]].reshape(x1.shape[1], 1)
 
         def obj(alpha):
@@ -117,12 +117,14 @@ def riskreg_mle(y, a, x2, *args, **kwargs):
         Response vector (0,1)
     a: list or numpy.matrix
         Exposure vector (0,1)
+    x2: numpy.matrix
+        Design matrix for nuisance parameter regression (odds-product)
     x1: numpy.matrix, optional
         Design matrix for linear interactions with exposure 'a'
-    x2: numpy.matrix, optional
-        Design matrix for nuisance parameter regression (odds-product)
-    x3: numpy.matrix, optional
-        Design matrix for propoensity model
+    w: list or numpy.matrix, optional
+        Weights vector
+    model: str
+        rr: relative risk. rd: risk difference
 
     Returns
     -------
@@ -151,7 +153,6 @@ def riskreg_mle(y, a, x2, *args, **kwargs):
        modelling of the Highland Haggis using object-oriented, fuzzy-logic
        and neural-network techniques," Computers & Geosciences, vol. 22,
        pp. 585-588, 1996.
-
     """
     one = np.matrix(np.repeat(1.0, len(y))).transpose()
     x1 = kwargs.get('x1', one)
