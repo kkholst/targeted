@@ -15,5 +15,7 @@ pytest-cov
 sphinx
 sphinx-autobuild
 sphinx-autodoc-typehints
+sphinx-rtd-theme
+m2r
 mock
 autodoc

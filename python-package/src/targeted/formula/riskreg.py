@@ -1,19 +1,40 @@
+# -*- coding: utf-8 -*-
+
 import targeted as tg
 import patsy
 
-def riskreg(data, target, model='rr', **kwargs):
+def riskreg(data: str, target: str, model='rr', **kwargs):
     """Risk regression with binary exposure
 
-    :param data:
-    :param target:
-    :param model:
-    :returns:
-    :rtype:
+    Examples
+    --------
+    >>> import numpy.random
+    >>> np.random.rand(2)
+    array([ 0.35773152,  0.38568979])  #random
 
+    Parameters
+    ----------
+    data: pandas.DataFrame
+    target: str
+       Formula describing respone and exposure/treatment of the form 'response ~ exposure'
+    model: str
+       Type of model (rr: relative risk, rd: risk difference)
+    nuisance: str, optional
+       nuisance (odds-product) regression formula (string: 'x1+x2+...')
+    propensity: str, optional
+       propensity model (default: same as nuisance)
+    interaction:
+       interactions (string: 'x1+x2+...', default: none)
+
+    Returns
+    -------
+    Riskreg
+       Riskreg object
     """
+
     interaction = kwargs.get('interaction', '1')
     nuisance    = kwargs.get('nuisance', '1')
-    propensity  = kwargs.get('propensity', '1')
+    propensity  = kwargs.get('propensity', nuisance)
     weights     = kwargs.get('weights', '1')
 
     target = target + '-1'

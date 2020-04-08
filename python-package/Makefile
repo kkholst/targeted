@@ -60,6 +60,17 @@ installpypi_test:
 installpypi: uninstall
 	$(PIP) install --upgrade $(PKG) --no-binary :all:
 
+################################################################################
+
+.PHONY: markdown
+markdown:
+	@if [ -z "command -v grip" ]; then \
+	echo "Install dependency: pip install grip"; \
+	else grip 1313 -b; fi
+
+.PHONY: doc
+doc:
+	cd doc; $(MAKE)
 
 ################################################################################
 

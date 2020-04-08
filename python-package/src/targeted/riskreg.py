@@ -1,6 +1,6 @@
 # encoding: utf-8
 #
-# Copyright (c) 2019 Klaus K. Holst.  All rights reserved.
+# Copyright (c) 2019-2020 Klaus K. Holst.  All rights reserved.
 
 import targeted as tg
 from targeted import datatype as inp
@@ -12,6 +12,7 @@ class riskreg:
     """Documentation for Riskreg
 
     """
+
     model = None
     propensity = None
     mle = None
@@ -50,13 +51,26 @@ class riskreg:
     def __init__(self, y, a, **kwargs):
         """Risk regression with binary exposure
 
-        :param y: Response vector (0,1)
-        :param a: Exposure vector (0,1)
-        :param x1: Design matrix for linear interactions with exposure 'a'
-        :param x2: Design matrix for nuisance parameter (odds-product)
-        :param x3: Design matrix for propoensity modle
-        :returns: Riskreg object
-        :rtype: Riskreg
+        Examples
+        --------
+
+        Parameters
+        ----------
+        y: list or numpy.matrix
+            Response vector (0,1)
+        a: list or numpy.matrix
+            Exposure vector (0,1)
+        x1: numpy.matrix, optional
+            Design matrix for linear interactions with exposure 'a'
+        x2: numpy.matrix, optional
+            Design matrix for nuisance parameter regression (odds-product)
+        x3: numpy.matrix, optional
+            Design matrix for propoensity model
+
+        Returns
+        -------
+        Riskreg
+            Riskreg object
 
         """
 
@@ -91,6 +105,54 @@ class riskreg:
 
 
 def riskreg_mle(y, a, x2, *args, **kwargs):
+    """Maximum Likelihood estimation of risk-regression model
+
+    The parameter of interest is either a risk difference or relative
+    risk parameter with the effect of confounders decsribed on a log
+    odds-product scale.
+
+    Parameters
+    ----------
+    y: list or numpy.matrix
+        Response vector (0,1)
+    a: list or numpy.matrix
+        Exposure vector (0,1)
+    x1: numpy.matrix, optional
+        Design matrix for linear interactions with exposure 'a'
+    x2: numpy.matrix, optional
+        Design matrix for nuisance parameter regression (odds-product)
+    x3: numpy.matrix, optional
+        Design matrix for propoensity model
+
+    Returns
+    -------
+    Riskreg
+        Riskreg object
+
+    Notes
+    -----
+    Notes about the implementation algorithm (if needed).
+
+    This can have multiple paragraphs.
+
+    You may include some math:
+
+    .. math:: X(e^{j\omega } ) = x(n)e^{ - j\omega n}
+
+    And even use a greek symbol like :math:`omega` inline.
+
+    References
+    ----------
+    Cite the relevant literature, e.g. [1]_.  You may also cite these
+    references in the notes section above.
+
+    .. [1] O. McNoleg, "The integration of GIS, remote sensing,
+       expert systems and adaptive co-kriging for environmental habitat
+       modelling of the Highland Haggis using object-oriented, fuzzy-logic
+       and neural-network techniques," Computers & Geosciences, vol. 22,
+       pp. 585-588, 1996.
+
+    """
     one = np.matrix(np.repeat(1.0, len(y))).transpose()
     x1 = kwargs.get('x1', one)
     w = kwargs.get('weights', one)

@@ -13,23 +13,27 @@
 
 import os
 import sys
-from datetime import date
+# from datetime import date
 
 file_loc = os.path.split(__file__)[0]
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(file_loc), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(file_loc), '../src/targeted')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(file_loc), '../src/targeted/formula')))
 
-import rls
+print(sys.path)
+
+import targeted  # noqa 
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'rls'
-copyright = '2019, Klaus Holst'
-author = 'Klaus Holst'
-
+project = 'targeted'
+copyright = '2020, Klaus Kähler Holst'
+author = 'Klaus Kähler Holst'
 # The full version, including alpha/beta/rc tags
-release = '0.0.1'
+release = '0.0.18'
 
+html_logo = '../../targeted.svgz'
 
 # -- General configuration ---------------------------------------------------
 
@@ -42,6 +46,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
+    'sphinx.ext.napoleon'  # Support for numpy or google docstrings
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -50,7 +55,7 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'tmp']
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -58,7 +63,8 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+#html_theme = 'alabaster'
+html_theme = 'sphinx_rtd_theme'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
