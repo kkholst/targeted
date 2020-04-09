@@ -40,7 +40,7 @@ init: clean
 	@echo "Build options: $(BUILD)"
 	@mkdir -p build
 	@cd build; $(CMAKE) .. $(BUILD)
-.
+
 checkinit:
 	@if [ ! -f "$(BUILD_DIR)/build.ninja" ]; then $(MAKE) init; fi
 

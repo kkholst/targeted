@@ -10,15 +10,12 @@ matrix:
           # and a mac build
           - os: osx
             language: shell
-            before_install:
-              - cd python-package            
           # and a windows build
           - os: windows
             language: shell
             before_install:
               - choco install python --version 3.8.0
               - export PATH="/c/Python38:/c/Python38/Scripts:$PATH"
-              - cd python-package              
       env:
         global:
           - TWINE_USERNAME=__token__
@@ -27,7 +24,7 @@ matrix:
         - python3 -m pip install cibuildwheel==1.3.0
       script:
         # build the wheels, put them into './wheelhouse'
-        - python3 -m cibuildwheel --output-dir wheelhouse
+        - cd python-package; python3 -m cibuildwheel --output-dir wheelhouse
       after_success:
         # if the release was tagged, upload them to PyPI
         - |
