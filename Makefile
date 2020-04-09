@@ -42,7 +42,7 @@ init: clean
 	mkdir -p build
 	@echo "$(CMAKE) -B build $(BUILD)"
 	@echo "ls : $(shell ls -la CMake*)"
-	@echo $(shell cmake --version)
+	@echo "$(shell cmake --version)"
 	$(CMAKE) -B build $(BUILD)
 
 checkinit:
