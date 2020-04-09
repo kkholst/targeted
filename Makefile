@@ -34,6 +34,7 @@ all: clean run
 .PHONY: clean
 clean: cleanr cleanpy
 	@rm -Rf $(BUILD_DIR) $(VALGRIND_DIR) $(DOXYGEN_DIR)/html $(COVERAGE_DIR)
+	@rm -Rf src/*.o src/*.so
 
 .PHONY: init init-submodules checkinit
 init: clean
@@ -55,7 +56,6 @@ run:
 	@printf "\n-----\n"
 	@find build/ -maxdepth 1 -iname "*demo" $(FINDEXEC) \
 	-exec {} \; 
-
 
 .PHONY: build
 build:
@@ -141,6 +141,14 @@ runpy:
 	@$(PYTHON) misc/$(TESTPY).py
 
 py: buildpy runpy
+
+PYTHON_EXPORT = $(BUILD_DIR)/python
+exportpy: clean
+	@rm -Rf $(PYTHON_EXPORT); mkdir -p $(PYTHON_EXPORT)
+	@cd python-package; $(GIT) archive HEAD | (cd ../$(PYTHON_EXPORT); tar x)
+	@cd $(PYTHON_EXPORT)/src; grep "path =" ../../../.gitmodules | cut -d'=' -f2 | cut -d'/' -f2 | xargs rm -Rf; rm target-cpp
+	cp -a src $(PYTHON_EXPORT)/src
+	cp -a lib/* $(PYTHON_EXPORT)/src
 
 cleanpy:
 	@cd python-package; $(MAKE) --no-print-directory clean
