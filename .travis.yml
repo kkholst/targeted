@@ -6,6 +6,8 @@ matrix:
         include:
           # perform a linux build
           - services: docker
+            env:
+              - CIBW_BEFORE_BUILD="yum install -y make lapack-devel git blas-devel;"
           # and a mac build
           - os: osx
             language: shell
@@ -24,7 +26,7 @@ matrix:
       script:
         # build the wheels, put them into './wheelhouse'
         - make exportpy
-        - cd build/python; CIBW_BEFORE_BUILD="yum install -y lapack-devel git blas-devel; " python3 -m cibuildwheel --output-dir wheelhouse
+        - cd build/python; CIBW_SKIP="cp27-* cp35-* cp36-*" CIBW_BEFORE_BUILD="yum install -y make lapack-devel git blas-devel python-devel;" python3 -m cibuildwheel --output-dir wheelhouse
       after_success:
         # if the release was tagged, upload them to PyPI
         - |

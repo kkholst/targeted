@@ -39,7 +39,9 @@ clean: cleanr cleanpy
 .PHONY: init init-submodules checkinit
 init: clean
 	@echo "Build options: $(BUILD)"
+	@echo $(shell pwd)
 	@mkdir -p build
+	@echo "Comfiguration..."
 	@cd build; $(CMAKE) .. $(BUILD)
 
 checkinit:
@@ -147,7 +149,7 @@ exportpy: clean
 	@rm -Rf $(PYTHON_EXPORT); mkdir -p $(PYTHON_EXPORT)
 	@cd python-package; $(GIT) archive HEAD | (cd ../$(PYTHON_EXPORT); tar x)
 	@cd $(PYTHON_EXPORT)/src; grep "path =" ../../../.gitmodules | cut -d'=' -f2 | cut -d'/' -f2 | xargs rm -Rf; rm target-cpp
-	cp -a src $(PYTHON_EXPORT)/src
+	cp -a src $(PYTHON_EXPORT)/src/target-cpp
 	cp -a lib/* $(PYTHON_EXPORT)/src
 
 cleanpy:
