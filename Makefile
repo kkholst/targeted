@@ -38,6 +38,7 @@ clean: cleanr cleanpy
 .PHONY: init init-submodules checkinit
 init: clean
 	@echo "Build options: $(BUILD)"
+	@mkdir -p build
 	@$(CMAKE) -B build $(BUILD)
 
 checkinit:
