@@ -6,9 +6,7 @@ matrix:
         include:
           # perform a linux build
           - services: docker
-            env: CIBW_BEFORE_BUILD="yum install -y liblapack-devel blas-devel"
-            before_install:
-              - cd python-package      
+            env: CIBW_BEFORE_BUILD="yum install -y liblapack-devel blas-devel; cd python-package"
           # and a mac build
           - os: osx
             language: shell
@@ -18,9 +16,9 @@ matrix:
           - os: windows
             language: shell
             before_install:
-              - cd python-package
               - choco install python --version 3.8.0
               - export PATH="/c/Python38:/c/Python38/Scripts:$PATH"
+              - cd python-package              
       env:
         global:
           - TWINE_USERNAME=__token__
