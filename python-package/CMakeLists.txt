@@ -34,7 +34,37 @@ if (UNIX AND NOT APPLE)
   endif()
 endif()
 
-find_package(PythonLibs QUIET)
+
+# find Python
+FIND_PACKAGE(PythonInterp REQUIRED)
+
+# Get Python version
+EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} --version OUTPUT_VARIABLE PYTHON_VERSION_RAW ERROR_VARIABLE PYTHON_VERSION_RAW)
+STRING(REPLACE "\n" "" PYTHON_VERSION_RAW "${PYTHON_VERSION_RAW}")
+STRING(REGEX MATCH "[0-9]\\.[0-9]" PYTHON_VERSION "${PYTHON_VERSION_RAW}")
+STRING(REGEX MATCH "[0-9]\\.[0-9]\\.[0-9]" PYTHON_VERSION_WITH_PATCH "${PYTHON_VERSION_RAW}")
+
+# Unset the previous values of the CMake cache variables related to Python libraries
+# in case the value of PYTHON_EXECUTABLE CMake variable changed
+UNSET(PYTHONLIBS_FOUND CACHE)
+UNSET(PYTHON_LIBRARY CACHE)
+UNSET(PYTHON_INCLUDE_DIR CACHE)
+UNSET(PYTHON_INCLUDE_PATH CACHE)
+
+# Find the Python library with the same version as the interpreter
+# Python 3.2 library is suffixed by mu and Python >= 3.3 by m on some systems, also handle these cases
+SET(Python_ADDITIONAL_VERSIONS ${PYTHON_VERSION}mu ${PYTHON_VERSION}m ${PYTHON_VERSION})
+
+GET_FILENAME_COMPONENT(PYTHON_HOME_PATH ${PYTHON_EXECUTABLE} PATH)
+
+# Ensure that correct Python include path and library are selected by CMake on Linux (in case of non standard installation)
+SET(CMAKE_INCLUDE_PATH ${PYTHON_HOME_PATH}/../include ${CMAKE_INCLUDE_PATH})
+SET(CMAKE_LIBRARY_PATH ${PYTHON_HOME_PATH}/../lib ${CMAKE_LIBRARY_PATH})
+
+# Find Python includes and library
+FIND_PACKAGE(PythonLibs REQUIRED)
+  
+##find_package(PythonLibs QUIET)
 include_directories(${PYTHON_INCLUDE_DIRS})
 message(STATUS "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
 message(STATUS "PYTHON_EXECUTABLE = ${PYTHON_EXECUTABLE}")
