@@ -36,7 +36,7 @@ clean: cleanr cleanpy
 	@rm -Rf $(BUILD_DIR) $(VALGRIND_DIR) $(DOXYGEN_DIR)/html $(COVERAGE_DIR)
 
 .PHONY: init init-submodules checkinit
-init: init-submodules clean
+init: clean
 	@echo "Build options: $(BUILD)"
 	@$(CMAKE) -B build $(BUILD)
 
