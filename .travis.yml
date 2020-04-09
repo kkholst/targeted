@@ -5,7 +5,7 @@ matrix:
       addons:
         apt:
           packages:
-            - lapack-dev
+            - liblapack-dev
             - cmake
       before_install:
         - cd python-package      
@@ -68,6 +68,6 @@ matrix:
           packages:
             - cmake
             - ninja
-            - lapack-dev
+            - liblapack-dev
       script:
         - make init test
