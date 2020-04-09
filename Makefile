@@ -43,7 +43,7 @@ init: clean
 	@echo "$(CMAKE) -B build $(BUILD)"
 	@echo "ls : $(shell ls -la CMake*)"
 	@echo "$(shell cmake --version)"
-	$(CMAKE) -B build $(BUILD)
+	$(CMAKE) -B build $(BUILD) .
 
 checkinit:
 	@if [ ! -f "$(BUILD_DIR)/build.ninja" ]; then $(MAKE) init; fi
