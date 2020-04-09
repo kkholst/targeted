@@ -16,8 +16,9 @@ matrix:
             before_install:
               - choco install python --version 3.8.0
               - export PATH="/c/Python38:/c/Python38/Scripts:$PATH"
-      env:
+      env:        
         global:
+          - CIBW_BEFORE_BUILD="yum install -y lapack-devel blas-devel; cd python-package"
           - TWINE_USERNAME=__token__
           # Note: TWINE_PASSWORD is set to a PyPI API token in Travis settings
       install:
@@ -65,5 +66,5 @@ matrix:
             - liblapack-dev
             - libblas-dev
       script:
-        - make init
+        - NINJA="" make init
         - make test
