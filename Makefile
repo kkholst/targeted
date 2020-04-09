@@ -38,8 +38,11 @@ clean: cleanr cleanpy
 .PHONY: init init-submodules checkinit
 init: clean
 	@echo "Build options: $(BUILD)"
-	@mkdir -p build
-	@$(CMAKE) -B build $(BUILD)
+	@echo "I AM HERE: $(shell pwd)"
+	mkdir -p build
+	@echo "$(CMAKE) -B build $(BUILD)"
+	$(CMAKE) -B build $(BUILD)
+
 
 checkinit:
 	@if [ ! -f "$(BUILD_DIR)/build.ninja" ]; then $(MAKE) init; fi
