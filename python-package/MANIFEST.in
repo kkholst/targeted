@@ -1,7 +1,6 @@
 include CMakeLists.txt
 include README.md
 include Pipfile
-#include docs/index.rst
 recursive-include src/ *
 recursive-include tests/ *.py *.cpp *.hpp *.h
 recursive-exclude src/armadillo *.pdf *.html *.png *.md *.lib *.dll
@@ -12,6 +11,7 @@ prune src/armadillo/tests
 prune src/pybind11/doc
 prune src/pybind11/tests
 prune build
+prune doc/build
 prune dist
 #prune src/unittest-cpp/tests
 recursive-exclude * *.o *.so *.pyc *.egg *.egg-info .git* __pycache__
