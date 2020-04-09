@@ -22,10 +22,11 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(file_loc), '../.
 # -- Project information -----------------------------------------------------
 
 project = 'targeted'
-copyright = '2020, Klaus Kähler Holst'
+copyright = '2019-2020, Klaus Kähler Holst'
 author = 'Klaus Kähler Holst'
 # The full version, including alpha/beta/rc tags
-release = '0.0.18'
+import targeted
+release = targeted.__version__
 
 html_logo = '../../../doc/images/targeted.png'
 
@@ -50,7 +51,7 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'tmp', 'armadillo', 'catch2', 'pybind11', 'target-cpp']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'tmp']
 
 source_suffix = ['.rst', '.md', '.txt']
 
@@ -59,8 +60,12 @@ source_suffix = ['.rst', '.md', '.txt']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-#html_theme = 'alabaster'
-html_theme = 'sphinx_rtd_theme'
+
+html_theme = 'default'
+# html_theme = 'sphinx_rtd_theme'
+pygments_style = 'sphinx'
+
+htmlhelp_basename = 'targeteddoc'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
