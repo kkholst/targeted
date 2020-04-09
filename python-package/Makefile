@@ -2,9 +2,11 @@
 
 include $(wildcard ../config/*.mk)
 
-PKG:=targeted
+PKG = targeted
 
 default: install
+	@echo "-----------------------"
+	@$(PYTHON) -m $(PKG)
 
 .PHONY: update
 update:
@@ -43,6 +45,10 @@ uninstall:
 install: uninstall
 	$(PYTHON) setup.py install
 	rm -Rf *.egg-info
+
+.PHONY: installdev
+installdev:
+	$(PIP) install -e .
 
 .PHONY: check
 check:
