@@ -6,7 +6,7 @@ matrix:
         include:
           # perform a linux build
           - services: docker
-            env: CIBW_BEFORE_BUILD="yum install -y liblapack-devel blas-devel; cd python-package"
+            env: CIBW_BEFORE_BUILD="yum install -y lapack-devel blas-devel; cd python-package"
           # and a mac build
           - os: osx
             language: shell
