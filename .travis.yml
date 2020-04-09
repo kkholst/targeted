@@ -2,17 +2,17 @@ matrix:
   include:
     
     - language: python
-      addons:
-        apt:
-          packages:
-            - liblapack-dev
-            - cmake
       before_install:
         - cd python-package      
       jobs:        
         include:
           # perform a linux build
           - services: docker
+            addons:
+              apt:
+                packages:
+                  - liblapack-dev
+                  - cmake
           # and a mac build
           - os: osx
             language: shell
@@ -70,4 +70,5 @@ matrix:
             - ninja
             - liblapack-dev
       script:
-        - make init test
+        - make init
+        - make test
