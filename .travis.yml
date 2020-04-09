@@ -12,6 +12,7 @@ matrix:
               apt:
                 packages:
                   - liblapack-dev
+                  - libblas-dev
                   - cmake
           # and a mac build
           - os: osx
@@ -69,6 +70,7 @@ matrix:
             - cmake
             - ninja
             - liblapack-dev
+            - libblas-dev
       script:
         - make init
         - make test
