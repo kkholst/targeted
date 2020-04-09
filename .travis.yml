@@ -6,7 +6,7 @@ matrix:
         include:
           # perform a linux build
           - services: docker
-            env: CIBW_BEFORE_BUILD="yum install -y lapack-devel blas-devel; cd python-package"
+            env: CIBW_BEFORE_BUILD="yum install -y lapack-devel blas-devel"
           # and a mac build
           - os: osx
             language: shell
@@ -18,7 +18,7 @@ matrix:
               - export PATH="/c/Python38:/c/Python38/Scripts:$PATH"
       env:        
         global:
-          - CIBW_BEFORE_BUILD="yum install -y lapack-devel blas-devel; cd python-package"
+          - CIBW_BEFORE_BUILD="yum install -y lapack-devel blas-devel"
           - TWINE_USERNAME=__token__
           # Note: TWINE_PASSWORD is set to a PyPI API token in Travis settings
       install:
@@ -62,9 +62,8 @@ matrix:
         apt:
           packages:
             - cmake
-            - ninja
             - liblapack-dev
             - libblas-dev
       script:
-        - NINJA="" make init
+        - make init
         - make test
