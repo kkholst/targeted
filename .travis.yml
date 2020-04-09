@@ -2,6 +2,11 @@ matrix:
   include:
     
     - language: python
+      addons:
+        apt:
+          packages:
+            - lapack-dev
+            - cmake
       before_install:
         - cd python-package      
       jobs:        
@@ -48,7 +53,7 @@ matrix:
             - r-cran-optimx          
             - r-cran-rcpp
             - r-cran-rcpparmadillo
-            - r-cran-testthat          
+            - r-cran-testthat
       install:
         - echo    
       script:
@@ -63,5 +68,6 @@ matrix:
           packages:
             - cmake
             - ninja
+            - lapack-dev
       script:
         - make init test
