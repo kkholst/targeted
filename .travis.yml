@@ -2,30 +2,27 @@ matrix:
   include:
     
     - language: python
-      before_install:
-        - cd python-package      
       jobs:        
         include:
           # perform a linux build
           - services: docker
-            addons:
-              apt:
-                packages:
-                  - liblapack-dev
-                  - libblas-dev
-                  - cmake
+            env: CIBW_BEFORE_BUILD="yum install -y liblapack-devel blas-devel"
+            before_install:
+              - cd python-package      
           # and a mac build
           - os: osx
             language: shell
+            before_install:
+              - cd python-package            
           # and a windows build
           - os: windows
             language: shell
             before_install:
+              - cd python-package
               - choco install python --version 3.8.0
               - export PATH="/c/Python38:/c/Python38/Scripts:$PATH"
       env:
         global:
-          - CIBW_BEFORE_BUILD= yum install -y liblapack-devel blas-devel
           - TWINE_USERNAME=__token__
           # Note: TWINE_PASSWORD is set to a PyPI API token in Travis settings
       install:
