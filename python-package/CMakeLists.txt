@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.0)
 set(target "targeted_c")
 
 set(RUN_TESTS FALSE)
@@ -7,12 +7,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
 
 if (CMAKE_VERSION VERSION_LESS 3.0)
-  project(${target})
+  project(${target} CXX)
   set(PROJECT_VERSION 0.1)
 else()
   cmake_policy(SET CMP0048 NEW)
-  project(${target})
+  project(${target} CXX)
 endif()
+
+
 
 ################################################################################
 # Libraries
@@ -34,11 +36,9 @@ if (UNIX AND NOT APPLE)
   endif()
 endif()
 
-find_package(PythonLibs QUIET)
-include_directories(${PYTHON_INCLUDE_DIRS})
-message(STATUS "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
-message(STATUS "PYTHON_EXECUTABLE = ${PYTHON_EXECUTABLE}")
-message(STATUS "PYTHON_INCLUDE_DIRS = ${PYTHON_INCLUDE_DIRS}")
+# find Python
+FIND_PACKAGE(PythonInterp REQUIRED 3)
+FIND_PACKAGE(PythonLibs REQUIRED 3)
 
 find_package(Armadillo 9.500 QUIET)
 if (ARMADILLO_FOUND)	
@@ -53,6 +53,11 @@ endif ()
 message( [Main] " ARMADILLO_LIBRARIES = ${ARMADILLO_LIBRARIES}")
 message( [Main] " ARMADILLO_INCLUDE_DIRS = ${ARMADILLO_INCLUDE_DIRS}")
 
+
+message(STATUS "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
+message(STATUS "PYTHON_EXECUTABLE = ${PYTHON_EXECUTABLE}")
+message(STATUS "PYTHON_INCLUDE_DIRS = ${PYTHON_INCLUDE_DIRS}")
+
 ################################################################################
 # Tests
 ################################################################################
@@ -65,7 +70,7 @@ set(TESTS
 
 if (RUN_TESTS) 
   find_package(Catch2 QUIET)
-  if (Catch2_FOUND)	
+  if (Catch2_FOUND)
     message ([Main]  " Catch2 FOUND")
   else()
     message ([Main]  " Using Catch2 included in this package")
