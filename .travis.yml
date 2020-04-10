@@ -1,82 +1,70 @@
 matrix:
   include:
-    language: python
-
-    jobs:
-      include:
-        # perform a linux build
-        - services: docker
-        # and a mac build
-        - os: osx
-          language: shell
-        # and a windows build
-        - os: windows
-          language: shell
-          before_install:
-            - choco install python --version 3.8.0
-            - export PATH="/c/Python38:/c/Python38/Scripts:$PATH"
-        before_install:
-          - cd python-package
-
-    env:
-      global:
-        - TWINE_USERNAME=__token__
-        # Note: TWINE_PASSWORD is set to a PyPI API token in Travis settings
-
-    install:
-      - python3 -m pip install cibuildwheel==1.3.0
-
-    script:
-      # build the wheels, put them into './wheelhouse'
-      - python3 -m cibuildwheel --output-dir wheelhouse
-
-    after_success:
-    # if the release was tagged, upload them to PyPI
-    - |
-      if [[ $TRAVIS_TAG ]]; then
-      python3 -m pip install twine
-      python3 -m twine upload wheelhouse/*.whl
-      fi
-
-      
-  include:
-    language: r    
-    r:
-      - release
-    sudo: false
-    warnings_are_errors: true
-    cache: packages
     
-    addons:
-      apt:
-        packages:
-          - r-cran-covr
-          - r-cran-devtools
-          - r-cran-futile.logger
-          - r-cran-lava
-          - r-cran-optimx          
-          - r-cran-rcpp
-          - r-cran-rcpparmadillo
-          - r-cran-testthat
-          
-    install:
-      - echo    
-    script:
-      - make checkr pkg=targeted
+    - language: python
+      jobs:        
+        include:
+          # perform a linux build
+          - services: docker
+          # and a mac build
+          - os: osx
+            language: shell
+          # and a windows build
+          - os: windows
+            language: shell
+            before_install:
+              - choco install python --version 3.8.0
+              - export PATH="/c/Python38:/c/Python38/Scripts:$PATH"
+      env:        
+        global:
+          - TWINE_USERNAME=__token__
+          # Note: TWINE_PASSWORD is set to a PyPI API token in Travis settings
+      install:
+        - python3 -m pip install cibuildwheel==1.3.0
+      script:
+        # build the wheels, put them into './wheelhouse'
+        - make exportpy
+        - cd build/python; CIBW_SKIP="cp27-* cp35-* cp36-* cp37-*" CIBW_BEFORE_BUILD="yum install -y make lapack-devel git blas-devel SuperLU-devel python-devel; pip install cmake" python -m cibuildwheel --output-dir wheelhouse
+      after_success:
+        # if the release was tagged, upload them to PyPI
+        - |
+          if [[ $TRAVIS_TAG ]]; then
+          python3 -m pip install twine
+          python3 -m twine upload wheelhouse/*.whl
+          fi
 
-      
-  include:
-    language: cpp
-    sudo: required    
-    os:
-      - linux
-    compiler:
-      - clang
-      - gcc
-    addons:
-      apt:
-        packages:
-          - cmake
-          - ninja
-    script:
-      - make init test
+    - language: r    
+      r: release
+      warnings_are_errors: true
+      cache: packages    
+      addons:
+        apt:
+          packages:
+            - r-cran-covr
+            - r-cran-devtools
+            - r-cran-futile.logger
+            - r-cran-lava
+            - r-cran-optimx          
+            - r-cran-rcpp
+            - r-cran-rcpparmadillo
+            - r-cran-testthat
+      install:
+        - echo    
+      script:
+        - make checkr pkg=targeted
+
+    - language: cpp
+      os:
+        - linux
+      compiler:
+        - clang
+        - g++
+      addons:
+        apt:
+          packages:
+            - cmake
+            - liblapack-dev
+            - libblas-dev
+      script:
+        - make init
+        - make test

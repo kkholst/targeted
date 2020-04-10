@@ -34,18 +34,22 @@ all: clean run
 .PHONY: clean
 clean: cleanr cleanpy
 	@rm -Rf $(BUILD_DIR) $(VALGRIND_DIR) $(DOXYGEN_DIR)/html $(COVERAGE_DIR)
+	@rm -Rf src/*.o src/*.so
 
 .PHONY: init init-submodules checkinit
-init: init-submodules clean
+init: clean
 	@echo "Build options: $(BUILD)"
-	@$(CMAKE) -B build $(BUILD)
+	@echo $(shell pwd)
+	@mkdir -p build
+	@echo "Comfiguration..."
+	@cd build; $(CMAKE) .. $(BUILD)
 
 checkinit:
 	@if [ ! -f "$(BUILD_DIR)/build.ninja" ]; then $(MAKE) init; fi
 
 init-submodules:
 	@if [ -z "`find \"lib/armadillo\" -mindepth 1 -exec echo notempty \; -quit`" ]; then \
-	$(GIT) submodule init && $(GIT) submodule update; fi
+	$(GIT) submodule update --init --recursive; fi
 
 .PHONY: run
 run: 
@@ -54,7 +58,6 @@ run:
 	@printf "\n-----\n"
 	@find build/ -maxdepth 1 -iname "*demo" $(FINDEXEC) \
 	-exec {} \; 
-
 
 .PHONY: build
 build:
@@ -140,6 +143,14 @@ runpy:
 	@$(PYTHON) misc/$(TESTPY).py
 
 py: buildpy runpy
+
+PYTHON_EXPORT = $(BUILD_DIR)/python
+exportpy: clean
+	@rm -Rf $(PYTHON_EXPORT); mkdir -p $(PYTHON_EXPORT)
+	@cd python-package; $(GIT) archive HEAD | (cd ../$(PYTHON_EXPORT); tar x)
+	@cd $(PYTHON_EXPORT)/src; grep "path =" ../../../.gitmodules | cut -d'=' -f2 | cut -d'/' -f2 | xargs rm -Rf; rm target-cpp
+	cp -a src $(PYTHON_EXPORT)/src/target-cpp
+	cp -a lib/* $(PYTHON_EXPORT)/src
 
 cleanpy:
 	@cd python-package; $(MAKE) --no-print-directory clean
