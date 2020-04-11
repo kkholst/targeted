@@ -1,0 +1,4 @@
+src/armadillo export-ignore
+src/catch2 export-ignore
+src/pybind11 export-ignore
+src/target-cpp export-ignore
