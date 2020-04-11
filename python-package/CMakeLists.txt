@@ -1,28 +1,18 @@
 cmake_minimum_required(VERSION 3.0)
 set(target "targeted_c")
 
-set(RUN_TESTS FALSE)
-set(CMAKE_CXX_STANDARD 14)
+set(RUN_TESTS TRUE)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
+ 
+project(${target} CXX)
 
-if (CMAKE_VERSION VERSION_LESS 3.0)
-  project(${target} CXX)
-  set(PROJECT_VERSION 0.1)
-else()
-  cmake_policy(SET CMP0048 NEW)
-  project(${target} CXX)
-endif()
-
-
-
-################################################################################
-# Libraries
 ################################################################################
 
 find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)
-    message(STATUS "******************** Using ccache")
+    message(STATUS "[Main] Using ccache")
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
 endif(CCACHE_FOUND)
@@ -35,6 +25,10 @@ if (UNIX AND NOT APPLE)
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=gold -Wl,--disable-new-dtags")
   endif()
 endif()
+
+################################################################################
+# Libraries
+################################################################################
 
 # find Python
 FIND_PACKAGE(PythonInterp REQUIRED 3)
@@ -50,13 +44,13 @@ else()
   add_subdirectory(src/armadillo)
   include_directories(src/armadillo/include)
 endif ()
-message( [Main] " ARMADILLO_LIBRARIES = ${ARMADILLO_LIBRARIES}")
-message( [Main] " ARMADILLO_INCLUDE_DIRS = ${ARMADILLO_INCLUDE_DIRS}")
 
+message([Main] " ARMADILLO_LIBRARIES = ${ARMADILLO_LIBRARIES}")
+message([Main] " ARMADILLO_INCLUDE_DIRS = ${ARMADILLO_INCLUDE_DIRS}")
 
-message(STATUS "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
-message(STATUS "PYTHON_EXECUTABLE = ${PYTHON_EXECUTABLE}")
-message(STATUS "PYTHON_INCLUDE_DIRS = ${PYTHON_INCLUDE_DIRS}")
+message([Main] "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
+message([Main] "PYTHON_EXECUTABLE = ${PYTHON_EXECUTABLE}")
+message([Main] "PYTHON_INCLUDE_DIRS = ${PYTHON_INCLUDE_DIRS}")
 
 ################################################################################
 # Tests
@@ -105,6 +99,8 @@ pybind11_add_module(__${target}__
  )
 
 if(APPLE)
+  # set_target_properties(__${target}__ PROPERTIES MACOSX_RPATH TRUE)
+  # set_target_properties(__${target}__ PROPERTIES CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
   set_target_properties(__${target}__ PROPERTIES INSTALL_NAME_DIR "@rpath")
   set_target_properties(__${target}__ PROPERTIES INSTALL_RPATH "@loader_path")
 else()
@@ -114,4 +110,12 @@ endif()
 
 target_link_libraries(__${target}__ PRIVATE armadillo)
 
-
+#set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+# if(APPLE)
+#   set(CMAKE_INSTALL_RPATH "@executable_path")
+#   set(CMAKE_INSTALL_NAME_DIR "@executable_path")
+#   set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
+# else()
+#   set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
+#   set(CMAKE_INSTALL_RPATH "$ORIGIN")
+# endif()
