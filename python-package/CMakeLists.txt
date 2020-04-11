@@ -42,8 +42,8 @@ else()
   message ([Main]  " Using Armadillo included in this package")
   find_package(LAPACK REQUIRED)
   set(DETECT_HDF5 OFF CACHE BOOL "Disable Armadillo HDF5 support")
-  add_subdirectory(src/armadillo)
-  include_directories(src/armadillo/include)
+  add_subdirectory(lib/armadillo)
+  include_directories(lib/armadillo/include)
 endif ()
 
 message([Main] " ARMADILLO_LIBRARIES = ${ARMADILLO_LIBRARIES}")
@@ -57,7 +57,7 @@ message([Main] "PYTHON_INCLUDE_DIRS = ${PYTHON_INCLUDE_DIRS}")
 # Tests
 ################################################################################
 
-set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/target")
+set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/target")
 set(TEST_DIR "tests")
 set(TESTS
   "${TEST_DIR}/test_main.cpp"
@@ -69,8 +69,8 @@ if (RUN_TESTS)
     message ([Main]  " Catch2 FOUND")
   else()
     message ([Main]  " Using Catch2 included in this package")
-    add_subdirectory("src/catch2")
-    include_directories("src/catch2/include")
+    add_subdirectory("lib/catch2")
+    include_directories("lib/catch2/include")
   endif()
   add_executable("${PROJECT_NAME}_test" ${TESTS})
   target_link_libraries("${PROJECT_NAME}_test" PRIVATE armadillo Catch2::Catch2)  
@@ -85,14 +85,16 @@ if (pybind11_FOUND)
   message([Main]  " pybind11 FOUND")
 else()
   message([Main]  " Using pybind11 included in this package")
-  add_subdirectory(src/pybind11)
+  add_subdirectory(lib/pybind11)
 endif()
 
-set(LIBTARGET_DIR "${CMAKE_SOURCE_DIR}/src/target-cpp")
-file(GLOB LIBTARGET_SRC ${LIBTARGET_DIR}/*.cpp)
-file(GLOB LIBTARGET_HDR ${LIBTARGET_DIR}/*.hpp)
-message( [Main] " LIBTARGET_DIR = ${LIBTARGET_DIR}")
-include_directories(${LIBTARGET_DIR} LIBTARGET)
+set(LIBTARGET_CPP "${CMAKE_SOURCE_DIR}/lib/target-cpp")
+set(LIBTARGET_INC "${CMAKE_SOURCE_DIR}/lib/target-inc")
+file(GLOB LIBTARGET_SRC ${LIBTARGET_CPP}/*.*pp)
+file(GLOB LIBTARGET_HDR ${LIBTARGET_INC}/*.hpp)
+message( [Main] " LIBTARGET_CPP = ${LIBTARGET_CPP}")
+message( [Main] " LIBTARGET_INC = ${LIBTARGET_INC}")
+include_directories(${LIBTARGET_INC} LIBTARGET)
 
 pybind11_add_module(__${target}__
   ${LIBTARGET_SRC} ${LIBTARGET_HDR}

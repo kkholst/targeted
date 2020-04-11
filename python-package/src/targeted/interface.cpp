@@ -1,9 +1,8 @@
 #include <pybind11/stl.h>
 #include "armapy.hpp"
-#include "cumres.hpp"
-#include "utils.hpp"
-#include "glm.hpp"
-#include "riskreg.hpp"
+#include <target/utils.hpp>
+#include <target/glm.hpp>
+#include <target/riskreg.hpp>
 #include <string>
 #include <complex>
 #include <memory>     // smart pointers (unique_ptr)
