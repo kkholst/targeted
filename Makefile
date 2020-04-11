@@ -11,7 +11,7 @@ INSTALL_DIR = $(HOME)/local
 ARG =  -Db_coverage=true $(ASAN) -Dprefix=$(INSTALL_DIR)
 PKGLIB = 0
 BUILD = -DUSE_PKG_LIB=$(PKGLIB) -DNO_COTIRE=1 -DCMAKE_BUILD_TYPE=Debug \
-  -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON
+  -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON -Wno-dev 
 ifneq ($(NINJA),)
   BUILD := $(BUILD) -GNinja
 endif
@@ -98,7 +98,7 @@ roxygen:
 dep_file = R-package/${pkg}/src/dependencies
 pkg_dep := $(shell if [ -f "$(dep_file)" ]; then cat ${dep_file}; fi)
 pkg_cpp = $(foreach module, ${pkg_dep}, $(patsubst %, src/%.cpp, $(module)))
-pkg_hpp = $(foreach module, $(pkg_dep), $(patsubst %, src/%.hpp, $(module)))
+pkg_hpp = $(foreach module, $(pkg_dep), $(patsubst %, include/target/%.hpp, $(module)))
 
 exportr:
 	@rm -Rf $(BUILD_DIR)/R/$(pkg)
@@ -106,10 +106,11 @@ exportr:
 	cd R-package/${pkg}; $(GIT) archive HEAD | (cd ../../$(BUILD_DIR)/R/$(pkg); tar x)
 	@if [ -z "$(pkg_dep)" ]; then \
 	cp src/*.cpp $(BUILD_DIR)/R/$(pkg)/src; \
-	cp src/*.hpp $(BUILD_DIR)/R/$(pkg)/inst/include; \
+	cp -a include/target/ $(BUILD_DIR)/R/$(pkg)/inst/include/; \
 	else \
 	cp $(pkg_cpp) $(BUILD_DIR)/R/$(pkg)/src; \
-	cp $(pkg_hpp) $(BUILD_DIR)/R/$(pkg)/inst/include; \
+	mkdir -p $(BUILD_DIR)/R/$(pkg)/inst/include/target; \
+	cp $(pkg_hpp) $(BUILD_DIR)/R/$(pkg)/inst/include/target; \
 	fi
 	sed -i '/^OBJECTS\|SOURCES/d' $(BUILD_DIR)/R/$(pkg)/src/Makevars
 	cd $(BUILD_DIR)/R; $(R) CMD build $(pkg) --compact-vignettes=gs+qpdf --resave-data=best
