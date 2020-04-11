@@ -2,18 +2,18 @@
 
 UNAME := $(shell uname -s)
 CONTAINER_RUNTIME = $(shell command -v podman 2> /dev/null || echo docker)
-DOXYGEN = $(shell command -v doxygen)
+DOXYGEN = doxygen
 OPEN = $(shell which xdg-open || which gnome-open || which open)
-PYTHON := /usr/bin/env python3
+PYTHON = /usr/bin/env python3
 PIPARG = # e.g., --user
-PIP = /usr/bin/env pip3 $(PIPARG)
+PIP = $(PYTHON) -m pip $(PIPARG)
 R = /usr/bin/env R --no-save --no-restore
-GIT = $(shell command -v git)
-CMAKE = $(shell command -v cmake)
+GIT = git
+CMAKE = /usr/bin/env cmake
 SELF_DIR = $(dir $(lastword $(MAKEFILE_LIST)))
 GETVER = $(abspath $(SELF_DIR))/getrversion.py
-LINTER = $(shell command -v cclint)
-NINJA =  $(shell command -v ninja)
+LINTER = cclint
+NINJA := $(shell command -v ninja 2> /dev/null)
 NINJA_BUILD_OPT = -v
 FINDEXEC :=
 ifeq ($(UNAME),Darwin)

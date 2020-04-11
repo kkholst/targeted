@@ -1,13 +1,12 @@
-import os
-import re
-import sys
-import platform
-import subprocess
+import sys, os, subprocess, sysconfig
+from distutils import sysconfig
+import setuptools
 from setuptools import Extension
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
-import setuptools
 from shutil import copyfile, copymode
+import re
+import platform
 
 pkg = "targeted"
 
@@ -25,6 +24,16 @@ class CMakeExtension(Extension):
         Extension.__init__(self, name, sources=[])
         self.sourcedir = os.path.abspath(sourcedir)
 
+def get_python_library(python_lib_dir):
+    if python_version[0] == 2:
+        python_lib_name = 'libpython{}.{}'
+    else:
+        python_lib_name = 'libpython{}m.{}'
+
+    python_lib_name = python_lib_name.format(python_version, library_extension)
+    python_library = os.path.join(python_lib_dir, python_lib_name)
+    return python_library
+       
 
 class CMakeBuild(build_ext):
     def run(self):
@@ -48,7 +57,8 @@ class CMakeBuild(build_ext):
         extdir = os.path.abspath(
             os.path.dirname(self.get_ext_fullpath(ext.name)))
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
-                      '-DPYTHON_EXECUTABLE=' + sys.executable]
+                      '-DPYTHON_EXECUTABLE=' + sys.executable,
+                      '-DPYTHON_INCLUDE_DIR=' + sysconfig.get_python_inc()]
 
         cfg = 'Debug' if self.debug else 'Release'
         build_args = ['--config', cfg]

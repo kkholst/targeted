@@ -1,26 +1,19 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.0)
 set(target "targeted_c")
 
-set(RUN_TESTS FALSE)
-set(CMAKE_CXX_STANDARD 14)
+set(RUN_TESTS TRUE)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
+if(APPLE)
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
+endif() 
+project(${target} CXX)
 
-if (CMAKE_VERSION VERSION_LESS 3.0)
-  project(${target})
-  set(PROJECT_VERSION 0.1)
-else()
-  cmake_policy(SET CMP0048 NEW)
-  project(${target})
-endif()
-
-################################################################################
-# Libraries
 ################################################################################
 
 find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)
-    message(STATUS "******************** Using ccache")
+    message(STATUS "[Main] Using ccache")
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
 endif(CCACHE_FOUND)
@@ -34,41 +27,13 @@ if (UNIX AND NOT APPLE)
   endif()
 endif()
 
+################################################################################
+# Libraries
+################################################################################
 
 # find Python
-FIND_PACKAGE(PythonInterp REQUIRED)
-
-# Get Python version
-EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} --version OUTPUT_VARIABLE PYTHON_VERSION_RAW ERROR_VARIABLE PYTHON_VERSION_RAW)
-STRING(REPLACE "\n" "" PYTHON_VERSION_RAW "${PYTHON_VERSION_RAW}")
-STRING(REGEX MATCH "[0-9]\\.[0-9]" PYTHON_VERSION "${PYTHON_VERSION_RAW}")
-STRING(REGEX MATCH "[0-9]\\.[0-9]\\.[0-9]" PYTHON_VERSION_WITH_PATCH "${PYTHON_VERSION_RAW}")
-
-# Unset the previous values of the CMake cache variables related to Python libraries
-# in case the value of PYTHON_EXECUTABLE CMake variable changed
-UNSET(PYTHONLIBS_FOUND CACHE)
-UNSET(PYTHON_LIBRARY CACHE)
-UNSET(PYTHON_INCLUDE_DIR CACHE)
-UNSET(PYTHON_INCLUDE_PATH CACHE)
-
-# Find the Python library with the same version as the interpreter
-# Python 3.2 library is suffixed by mu and Python >= 3.3 by m on some systems, also handle these cases
-SET(Python_ADDITIONAL_VERSIONS ${PYTHON_VERSION}mu ${PYTHON_VERSION}m ${PYTHON_VERSION})
-
-GET_FILENAME_COMPONENT(PYTHON_HOME_PATH ${PYTHON_EXECUTABLE} PATH)
-
-# Ensure that correct Python include path and library are selected by CMake on Linux (in case of non standard installation)
-SET(CMAKE_INCLUDE_PATH ${PYTHON_HOME_PATH}/../include ${CMAKE_INCLUDE_PATH})
-SET(CMAKE_LIBRARY_PATH ${PYTHON_HOME_PATH}/../lib ${CMAKE_LIBRARY_PATH})
-
-# Find Python includes and library
-FIND_PACKAGE(PythonLibs REQUIRED)
-  
-##find_package(PythonLibs QUIET)
-include_directories(${PYTHON_INCLUDE_DIRS})
-message(STATUS "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
-message(STATUS "PYTHON_EXECUTABLE = ${PYTHON_EXECUTABLE}")
-message(STATUS "PYTHON_INCLUDE_DIRS = ${PYTHON_INCLUDE_DIRS}")
+FIND_PACKAGE(PythonInterp REQUIRED 3)
+FIND_PACKAGE(PythonLibs REQUIRED 3)
 
 find_package(Armadillo 9.500 QUIET)
 if (ARMADILLO_FOUND)	
@@ -80,8 +45,13 @@ else()
   add_subdirectory(src/armadillo)
   include_directories(src/armadillo/include)
 endif ()
-message( [Main] " ARMADILLO_LIBRARIES = ${ARMADILLO_LIBRARIES}")
-message( [Main] " ARMADILLO_INCLUDE_DIRS = ${ARMADILLO_INCLUDE_DIRS}")
+
+message([Main] " ARMADILLO_LIBRARIES = ${ARMADILLO_LIBRARIES}")
+message([Main] " ARMADILLO_INCLUDE_DIRS = ${ARMADILLO_INCLUDE_DIRS}")
+
+message([Main] "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
+message([Main] "PYTHON_EXECUTABLE = ${PYTHON_EXECUTABLE}")
+message([Main] "PYTHON_INCLUDE_DIRS = ${PYTHON_INCLUDE_DIRS}")
 
 ################################################################################
 # Tests
@@ -95,7 +65,7 @@ set(TESTS
 
 if (RUN_TESTS) 
   find_package(Catch2 QUIET)
-  if (Catch2_FOUND)	
+  if (Catch2_FOUND)
     message ([Main]  " Catch2 FOUND")
   else()
     message ([Main]  " Using Catch2 included in this package")
@@ -138,5 +108,3 @@ else()
 endif()
 
 target_link_libraries(__${target}__ PRIVATE armadillo)
-
-

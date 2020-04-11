@@ -1,7 +1,7 @@
 /*!
   @file test_c.cpp
   @author Klaus K. Holst
-  @copyright 2019, Klaus Kähler Holst
+  @copyright 2019-2020, Klaus Kähler Holst
 
   @brief Unit tests
 
