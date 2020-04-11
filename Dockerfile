@@ -1,15 +1,14 @@
-FROM kkholst/stat:default
+FROM r-base:3.6.3
 
-RUN     R -e 'install.packages(c("lava", "DEoptim"), repos="https://cloud.r-project.org/")'
+RUN apt-get update && \
+	apt-get install -y python3 python3-pip tmux mg git && \
+	rm -rf /var/lib/apt/lists/*
 
-RUN	pip3 install --no-binary :all: --upgrade-strategy only-if-needed \
-	patsy statsmodels==0.10.2 && \
-	rm -Rf /tmp/* /root/.cache
+RUN git clone https://github.com/kkholst/target /root/target && \
+	cd /root/target; make init-submodules
 
-RUN	apk add --no-cache tmux mg git  && \ 
- 	rm -Rf /tmp/* /root/.cache /var/cache/apk/*
+RUN pip3 install cmake ninja
 
-ENV CCACHE_DIR=/tmp/ccache
-WORKDIR /data
+WORKDIR /root/target
 
-CMD make init test
+CMD bash

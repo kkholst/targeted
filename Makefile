@@ -213,7 +213,7 @@ valgrind:
 
 .PHONY: dockerbuild dockerrun docker export
 dockerbuild:
-	@$(CONTAINER_RUNTIME) build . --network=host -t target_test
+	@$(CONTAINER_RUNTIME) build . --network=host -t $(TARGET)
 
 export:
 	@rm -Rf ${PWD}/tmp/$(TARGET)
@@ -224,6 +224,6 @@ export:
 	@chmod -R 777 ${PWD}/tmp/$(TARGET)
 
 dockerrun:
-	$(CONTAINER_RUNTIME) run --user `id -u` -ti --rm --privileged -v ${PWD}/tmp/$(TARGET):/data $(TARGET)_test ${CMD}
+	$(CONTAINER_RUNTIME) run --user `id -u` -ti --rm --privileged -v ${PWD}/tmp/$(TARGET):/data $(TARGET) ${CMD}
 
 docker: export dockerrun
