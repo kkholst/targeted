@@ -12,8 +12,8 @@
 #include <armadillo>
 #include <cstdio>  // remove
 #include <algorithm> // max
-#include "target.hpp"
-#include "utils.hpp"
+#include <target/target.hpp>
+#include <target/utils.hpp>
 
 using namespace arma;
 using namespace target;

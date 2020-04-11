@@ -9,7 +9,7 @@
 
 #include <catch2/catch.hpp>
 #include <spdlog/spdlog.h>
-#include "utils.hpp"
+#include <target/utils.hpp>
 
 using namespace arma;
 

@@ -11,8 +11,8 @@
 */
 
 #include <limits>
-#include "target.hpp"
-#include "glm.hpp"
+#include <target/target.hpp>
+#include <target/glm.hpp>
 
 namespace target {
   

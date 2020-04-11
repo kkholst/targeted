@@ -9,7 +9,7 @@
 */
 
 #include <catch2/catch.hpp>
-#include "mlogit.hpp"
+#include <target/mlogit.hpp>
 
 TEST_CASE("Multinomial logit", "[model]") {
   
