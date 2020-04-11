@@ -1,30 +1,15 @@
-matrix:
+language: python
+
+jobs:
   include:
-    
-    - language: python
-      jobs:        
-        include:
-          # perform a linux build
-          - services: docker
-          # and a mac build
-          - os: osx
-            language: shell
-          # and a windows build
-          - os: windows
-            language: shell
-            before_install:
-              - choco install python --version 3.8.0
-              - export PATH="/c/Python38:/c/Python38/Scripts:$PATH"
-      env:        
-        global:
-          - TWINE_USERNAME=__token__
-          # Note: TWINE_PASSWORD is set to a PyPI API token in Travis settings
+# --------------------------------------------------------------------------------    
+    - services: docker
+      name: "Python: linux wheels"
       install:
         - python3 -m pip install cibuildwheel==1.3.0
       script:
-        # build the wheels, put them into './wheelhouse'
-        - make exportpy
-        - cd build/python; CIBW_SKIP="cp27-* cp35-* cp36-* cp37-*" CIBW_BEFORE_BUILD="yum install -y make lapack-devel git blas-devel SuperLU-devel python-devel; pip install cmake" python -m cibuildwheel --output-dir wheelhouse
+        - make exportpy  
+        - cd build/python; CIBW_SKIP="cp27-* cp35-*" CIBW_BEFORE_BUILD="yum install -y make lapack-devel git blas-devel SuperLU-devel python-devel; pip install cmake" python3 -m cibuildwheel --output-dir wheelhouse
       after_success:
         # if the release was tagged, upload them to PyPI
         - |
@@ -32,16 +17,64 @@ matrix:
           python3 -m pip install twine
           python3 -m twine upload wheelhouse/*.whl
           fi
-
+# --------------------------------------------------------------------------------    
+    - os: osx
+      name: "Python: osx wheels"
+      language: shell
+      install:
+        - python3 -m pip install cibuildwheel==1.3.0      
+      script:
+        - make exportpy  
+        - cd build/python; CIBW_SKIP="cp27-* cp35-*" CIBW_BEFORE_BUILD="pip install cmake" python3 -m cibuildwheel --output-dir wheelhouse
+      after_success:
+        # if the release was tagged, upload them to PyPI
+        - |
+          if [[ $TRAVIS_TAG ]]; then
+          python3 -m pip install twine
+          python3 -m twine upload wheelhouse/*.whl
+          fi
+# --------------------------------------------------------------------------------            
+    # - os: windows
+    #   name: "Python: windows wheels"
+    #   language: shell
+    #   before_install:
+    #     - choco install python --version 3.8.0
+    #     - choco install make
+    #     - choco install cmake
+    #     - export PATH="/c/Python38:/c/Python38/Scripts:$PATH"
+    #   install:
+    #     - python -m pip install cibuildwheel==1.3.0        
+    #   script:
+    #     - make exportpy
+    #     - cp lib/armadillo/examples/lib_win64/* lib/armadillo/
+    #     - cd build/python; CIBW_SKIP="cp27-* cp35-* cp36-* cp37-*" python -m cibuildwheel --output-dir wheelhouse
+# --------------------------------------------------------------------------------       
+    - language: cpp
+      name: "C++ library"
+      os:
+        - linux
+      compiler:
+        - clang
+        - gcc
+      addons:
+        apt:
+          packages:
+            - cmake
+            - liblapack-dev
+            - libblas-dev
+      script:
+        - make init
+        - make test
+# --------------------------------------------------------------------------------            
     - language: r    
       r: release
+      name: "R: targeted"
       warnings_are_errors: true
       cache: packages    
       addons:
         apt:
           packages:
             - r-cran-covr
-            - r-cran-devtools
             - r-cran-futile.logger
             - r-cran-lava
             - r-cran-optimx          
@@ -52,19 +85,50 @@ matrix:
         - echo    
       script:
         - make checkr pkg=targeted
-
-    - language: cpp
+# --------------------------------------------------------------------------------    
+    - language: r    
+      r: release
+      name: "R: gof"
+      warnings_are_errors: true
+      cache: packages    
+      addons:
+        apt:
+          packages:
+            - r-cran-covr
+            - r-cran-futile.logger
+            - r-cran-lava
+            - r-cran-numDeriv
+            - r-cran-rcpp
+            - r-cran-rcpparmadillo
+            - r-cran-testthat
+      script:
+        - make checkr pkg=gof
+# --------------------------------------------------------------------------------            
+    - language: python
+      name: "python: release"
       os:
         - linux
-      compiler:
-        - clang
-        - g++
       addons:
         apt:
           packages:
             - cmake
             - liblapack-dev
             - libblas-dev
+            - python3-scipy
+            - python3-pytest
+            - python3-patsy
+            - python3-numpy
+            - python3-pandas
+            - python3-numpy
+      install:
+        - pip3 install pytest-runner pytest-cov 
       script:
-        - make init
-        - make test
+        - cd python-package; python3 setup.py install
+        - bin/test_targeted
+# --------------------------------------------------------------------------------            
+        
+env:
+  global:
+    # - TWINE_USERNAME=__token__
+    
+

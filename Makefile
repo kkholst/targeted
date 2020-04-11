@@ -148,7 +148,6 @@ PYTHON_EXPORT = $(BUILD_DIR)/python
 exportpy: clean
 	@rm -Rf $(PYTHON_EXPORT); mkdir -p $(PYTHON_EXPORT)
 	@cd python-package; $(GIT) archive HEAD | (cd ../$(PYTHON_EXPORT); tar x)
-	@cd $(PYTHON_EXPORT)/src; grep "path =" ../../../.gitmodules | cut -d'=' -f2 | cut -d'/' -f2 | xargs rm -Rf; rm target-cpp
 	cp -a src $(PYTHON_EXPORT)/src/target-cpp
 	cp -a lib/* $(PYTHON_EXPORT)/src
 
