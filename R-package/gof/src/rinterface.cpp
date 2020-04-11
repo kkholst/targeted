@@ -13,7 +13,7 @@
 // [[Rcpp::interfaces(r, cpp)]]
 // [[Rcpp::plugins(cpp11)]]
 
-#include "cumres.hpp"
+#include <target/cumres.hpp>
 #include <RcppArmadillo.h>
 #include <cmath>
 
