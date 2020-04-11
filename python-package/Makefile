@@ -17,10 +17,9 @@ PWD := $(shell pwd)
 .PHONY: build source
 DOCKERRUN = $(CONTAINER_RUNTIME) run -ti --rm --privileged --user $(UID):0 --network=host -v $(PWD):/io buildmany
 
-build: clean docker
-#	$(DOCKERRUN)
-	mv wheelhouse/* dist/; rmdir wheelhouse
-	$(MAKE) sourcebuild
+build: clean
+	$(PYTHON) setup.py bdist_wheel -d dist
+	$(MAKE) source
 
 source:
 	$(PYTHON) setup.py sdist
