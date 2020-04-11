@@ -1,15 +1,16 @@
-language: python      
+language: generic
 
 jobs:
   include:
     # --------------------------------------------------------------------------------
     - services: docker
+      language: python
       name: "linux wheels"
       install:
         - python3 -m pip install cibuildwheel==1.3.0
       script:
         - make exportpy
-        - cd build/python; CIBW_SKIP="cp27-* cp35-*" CIBW_BEFORE_BUILD="yum install -y make lapack-devel git blas-devel SuperLU-devel python-devel; pip install cmake" python3 -m cibuildwheel --output-dir wheelhouse
+        - cd build/python; CIBW_SKIP="cp27-* cp35-*" CIBW_BEFORE_BUILD="yum install -y make lapack-devel blas-devel SuperLU-devel python-devel; pip install cmake" python3 -m cibuildwheel --output-dir wheelhouse
       after_success:
         # if the release was tagged, upload them to PyPI
         - |
@@ -150,6 +151,3 @@ jobs:
 
     # --------------------------------------------------------------------------------
 
-env:
-  global:
-    # - TWINE_USERNAME=__token__

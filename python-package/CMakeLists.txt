@@ -6,6 +6,10 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if(APPLE)
   set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
+else()
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH OFF)
+  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH ON)
+  set(CMAKE_SKIP_INSTALL_RPATH OFF)
 endif() 
 project(${target} CXX)
 
@@ -80,7 +84,7 @@ endif()
 # Python bindings
 ################################################################################
 
-find_package(pybind11 QUIET)
+find_package(pybind11 QnhbgvfttrUIET)
 if (pybind11_FOUND)	
   message([Main]  " pybind11 FOUND")
 else()
@@ -102,8 +106,6 @@ pybind11_add_module(__${target}__
  )
 
 if(APPLE)
-  # set_target_properties(__${target}__ PROPERTIES MACOSX_RPATH TRUE)
-  # set_target_properties(__${target}__ PROPERTIES CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
   set_target_properties(__${target}__ PROPERTIES INSTALL_NAME_DIR "@rpath")
   set_target_properties(__${target}__ PROPERTIES INSTALL_RPATH "@loader_path")
 else()
