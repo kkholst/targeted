@@ -10,7 +10,7 @@
 #   CMAKE_VERBOSE_MAKEFILE: ON
 ################################################################################
 cmake_minimum_required(VERSION 3.3) # Was 2.8.12
-project("target")
+project(target VERSION 0.1 DESCRIPTION "Targeted Inference Library" LANGUAGES CXX)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/config")
@@ -69,15 +69,27 @@ endif()
 ################################################################################
 
 set(LIBTARGET_DIR "${CMAKE_SOURCE_DIR}/src")
+set(LIBTARGET_INC "${CMAKE_SOURCE_DIR}/include")
 file(GLOB LIBTARGET_SRC ${LIBTARGET_DIR}/*.cpp)
 file(GLOB LIBTARGET_HDR ${LIBTARGET_DIR}/*.hpp)
-include_directories(${LIBTARGET_DIR})
-add_library(target ${LIBTARGET_SRC} ${LIBTARGET_HDR})
+file(GLOB LIBTARGET_PUBLIC ${LIBTARGET_INC}/target/*.hpp)
+add_library(target SHARED ${LIBTARGET_SRC} ${LIBTARGET_HDR} ${LIBTARGET_PUBLIC})
 if(NOT NO_COTIRE)
   cotire(target) # precompile headers
 endif()
 message( [Main] " LIBTARGET_DIR = ${LIBTARGET_DIR}")
 target_link_libraries(target PRIVATE armadillo)
+set_target_properties(target PROPERTIES VERSION ${PROJECT_VERSION})
+target_include_directories(target PUBLIC ${LIBTARGET_INC})
+set_target_properties(target PROPERTIES PUBLIC_HEADER ${LIBTARGET_PUBLIC})
+include(GNUInstallDirs)
+configure_file(target.pc.in target.pc @ONLY)
+
+install(TARGETS target
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(FILES ${CMAKE_BINARY_DIR}/target.pc
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
 
 ################################################################################
 # Executables

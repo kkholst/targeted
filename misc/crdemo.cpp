@@ -8,9 +8,9 @@
 */
 
 //#define ARMA_USE_HDF5
-#include "cumres.hpp"
-#include "glm.hpp"
-#include "pava.hpp"
+#include <target/cumres.hpp>
+#include <target/glm.hpp>
+#include <target/pava.hpp>
 #include <cstdio>  // remove
 #include <algorithm> // max
 

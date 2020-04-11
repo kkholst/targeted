@@ -1,4 +1,4 @@
-#include "mlogit.hpp"
+#include <target/mlogit.hpp>
 
 using namespace arma;
 

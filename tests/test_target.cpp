@@ -10,8 +10,8 @@
 
 #include <catch2/catch.hpp>
 #include <spdlog/spdlog.h>
-#include "target.hpp"
-#include "utils.hpp"
+#include <target/target.hpp>
+#include <target/utils.hpp>
 
 using namespace arma;
 using namespace target;
