@@ -4,8 +4,9 @@ set(target "targeted_c")
 set(RUN_TESTS TRUE)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
- 
+if(APPLE)
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
+endif() 
 project(${target} CXX)
 
 ################################################################################
@@ -99,8 +100,6 @@ pybind11_add_module(__${target}__
  )
 
 if(APPLE)
-  # set_target_properties(__${target}__ PROPERTIES MACOSX_RPATH TRUE)
-  # set_target_properties(__${target}__ PROPERTIES CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
   set_target_properties(__${target}__ PROPERTIES INSTALL_NAME_DIR "@rpath")
   set_target_properties(__${target}__ PROPERTIES INSTALL_RPATH "@loader_path")
 else()
@@ -109,13 +108,3 @@ else()
 endif()
 
 target_link_libraries(__${target}__ PRIVATE armadillo)
-
-#set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-# if(APPLE)
-#   set(CMAKE_INSTALL_RPATH "@executable_path")
-#   set(CMAKE_INSTALL_NAME_DIR "@executable_path")
-#   set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
-# else()
-#   set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
-#   set(CMAKE_INSTALL_RPATH "$ORIGIN")
-# endif()
