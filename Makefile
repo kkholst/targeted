@@ -49,7 +49,7 @@ checkinit:
 
 init-submodules:
 	@if [ -z "`find \"lib/armadillo\" -mindepth 1 -exec echo notempty \; -quit`" ]; then \
-	$(GIT) submodule init && $(GIT) submodule update; fi
+	$(GIT) submodule update --init --recursive; fi
 
 .PHONY: run
 run: 
@@ -148,7 +148,6 @@ PYTHON_EXPORT = $(BUILD_DIR)/python
 exportpy: clean
 	@rm -Rf $(PYTHON_EXPORT); mkdir -p $(PYTHON_EXPORT)
 	@cd python-package; $(GIT) archive HEAD | (cd ../$(PYTHON_EXPORT); tar x)
-	@cd $(PYTHON_EXPORT)/src; grep "path =" ../../../.gitmodules | cut -d'=' -f2 | cut -d'/' -f2 | xargs rm -Rf; rm target-cpp
 	cp -a src $(PYTHON_EXPORT)/src/target-cpp
 	cp -a lib/* $(PYTHON_EXPORT)/src
 
