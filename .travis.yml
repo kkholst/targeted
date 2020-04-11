@@ -97,7 +97,7 @@ jobs:
             - r-cran-covr
             - r-cran-futile.logger
             - r-cran-lava
-            - r-cran-numDeriv
+            - r-cran-numderiv
             - r-cran-rcpp
             - r-cran-rcpparmadillo
             - r-cran-testthat
