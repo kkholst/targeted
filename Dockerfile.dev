@@ -1,15 +1,18 @@
 FROM quay.io/pypa/manylinux2010_x86_64
 
-RUN yum install -y lapack-devel SuperLU-devel blas-devel \
+RUN yum install -y lapack-devel SuperLU-devel blas-devel python-devel \
 	tmux mg && \
 	rm -rf /tmp/*
 
 RUN git clone https://github.com/kkholst/target /root/target && \
-	cd /root/target; make init-submodules && \
-	export OLDPATH=$PATH; export PATH=/opt/python/cp38-cp38/bin:$OLDPATH
+	cd /root/target; make init-submodules
 
-RUN pip install cmake ninja auditwheel
+ENV VER=cp38-cp38
+ENV PYPATH=/opt/python/$VER/bin
+
+RUN $PYPATH/pip install cmake ninja auditwheel
 
 WORKDIR /root/target
 
 CMD bash
+
