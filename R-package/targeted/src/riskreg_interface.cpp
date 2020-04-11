@@ -14,7 +14,7 @@
 // [[Rcpp::plugins(cpp11)]]
 
 #include <RcppArmadillo.h>
-#include "riskreg.hpp"
+#include <target/riskreg.hpp>
 #include <cmath>
 #include <string>
 #include <complex>
