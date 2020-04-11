@@ -100,6 +100,8 @@ pybind11_add_module(__${target}__
  )
 
 if(APPLE)
+  # set_target_properties(__${target}__ PROPERTIES MACOSX_RPATH TRUE)
+  # set_target_properties(__${target}__ PROPERTIES CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
   set_target_properties(__${target}__ PROPERTIES INSTALL_NAME_DIR "@rpath")
   set_target_properties(__${target}__ PROPERTIES INSTALL_RPATH "@loader_path")
 else()
