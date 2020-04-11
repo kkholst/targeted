@@ -1,6 +1,3 @@
-language: generic
-os: linux
-
 env:
   global:
     # - TWINE_USERNAME=__token__

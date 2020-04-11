@@ -149,11 +149,12 @@ PYTHON_EXPORT = $(BUILD_DIR)/python
 exportpy: clean
 	@rm -Rf $(PYTHON_EXPORT); mkdir -p $(PYTHON_EXPORT)
 	@cd python-package; $(GIT) archive HEAD | (cd ../$(PYTHON_EXPORT); tar x)
-	cp -a src $(PYTHON_EXPORT)/lib/target-cpp
-	cp -a include $(PYTHON_EXPORT)/lib/target-inc
-	cp -a lib/armadillo $(PYTHON_EXPORT)/lib
-	cp -a lib/catch2 $(PYTHON_EXPORT)/lib
-	cp -a lib/pybind11 $(PYTHON_EXPORT)/lib
+	@cp -a src $(PYTHON_EXPORT)/lib/target-cpp
+	@cp -a include $(PYTHON_EXPORT)/lib/target-inc
+	@cp -a lib/armadillo $(PYTHON_EXPORT)/lib
+	@cp -a lib/catch2 $(PYTHON_EXPORT)/lib
+	@cp -a lib/pybind11 $(PYTHON_EXPORT)/lib
+	@echo "Python package exported to: ${PYTHON_EXPORT}"
 
 cleanpy:
 	@cd python-package; $(MAKE) --no-print-directory clean
