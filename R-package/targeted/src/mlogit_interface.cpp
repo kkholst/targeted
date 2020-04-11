@@ -2,8 +2,8 @@
 // [[Rcpp::plugins(cpp11)]]
 
 #include <RcppArmadillo.h>
-#include "mlogit.hpp"
-#include "utils.hpp"
+#include <target/mlogit.hpp>
+#include <target/utils.hpp>
 #include <cmath>
 #include <string>
 #include <complex>

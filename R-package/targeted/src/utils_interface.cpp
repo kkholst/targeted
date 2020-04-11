@@ -15,8 +15,8 @@
 
 #include <RcppArmadillo.h>
 #include "utils_interface.hpp"
-#include "utils.hpp"
-#include "glm.hpp"
+#include <target/utils.hpp>
+#include <target/glm.hpp>
 
 
 // [[Rcpp::export(name=".clusterid")]]

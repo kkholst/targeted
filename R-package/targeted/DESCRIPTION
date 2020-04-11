@@ -1,11 +1,11 @@
 Package: targeted
 Type: Package
-Title: What the Package Does Using Title Case
+Title: Targeted inference
 Version: 0.1
-Date: 2019-10-16
+Date: 2020-04-11
 Author: Klaus Holst
 Maintainer: Klaus Holst <klaus.holst@maersk.com>
-Description: More details about what the package does.
+Description: Various methods for targeted and semiparametric inference
 Depends:
     R (>= 3.3),
     lava (>= 1.6.3)
