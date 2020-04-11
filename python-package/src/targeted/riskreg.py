@@ -153,6 +153,7 @@ def riskreg_mle(y, a, x2, *args, **kwargs):
        American Statistical Association, 112(519),
        1121–1130. http://dx.doi.org/10.1080/01621459.2016.1192546
     """
+    
     one = np.matrix(np.repeat(1.0, len(y))).transpose()
     x1 = kwargs.get('x1', one)
     w = kwargs.get('weights', one)
