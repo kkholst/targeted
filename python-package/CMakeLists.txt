@@ -4,13 +4,7 @@ set(target "targeted_c")
 set(RUN_TESTS TRUE)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-if(APPLE)
-  set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
-else()
-  set(CMAKE_BUILD_WITH_INSTALL_RPATH OFF)
-  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH ON)
-  set(CMAKE_SKIP_INSTALL_RPATH OFF)
-endif() 
+set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
 project(${target} CXX)
 
 ################################################################################
@@ -52,10 +46,9 @@ endif ()
 
 message([Main] " ARMADILLO_LIBRARIES = ${ARMADILLO_LIBRARIES}")
 message([Main] " ARMADILLO_INCLUDE_DIRS = ${ARMADILLO_INCLUDE_DIRS}")
-
-message([Main] "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
-message([Main] "PYTHON_EXECUTABLE = ${PYTHON_EXECUTABLE}")
-message([Main] "PYTHON_INCLUDE_DIRS = ${PYTHON_INCLUDE_DIRS}")
+message([Main] " PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
+message([Main] " PYTHON_EXECUTABLE = ${PYTHON_EXECUTABLE}")
+message([Main] " PYTHON_INCLUDE_DIRS = ${PYTHON_INCLUDE_DIRS}")
 
 ################################################################################
 # Tests
