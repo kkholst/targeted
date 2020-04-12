@@ -2,8 +2,8 @@ language: generic
 
 branches:
   only:
-  - master
-  - test
+    - master
+    - test
 
 jobs:
   include:
