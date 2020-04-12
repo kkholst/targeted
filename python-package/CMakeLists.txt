@@ -84,7 +84,7 @@ endif()
 # Python bindings
 ################################################################################
 
-find_package(pybind11 QnhbgvfttrUIET)
+find_package(pybind11 QUIET)
 if (pybind11_FOUND)	
   message([Main]  " pybind11 FOUND")
 else()
