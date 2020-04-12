@@ -12,6 +12,9 @@
 cmake_minimum_required(VERSION 3.3) # Was 2.8.12
 project(target VERSION 0.1 DESCRIPTION "Targeted Inference Library" LANGUAGES CXX)
 
+option(NO_COTIRE  "Disable precompiled headers" OFF)
+option(USE_PKG_LIB  "Force use of libraries supplied with this package instead of system librariesDisable precompiled headers" OFF)
+
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/config")
 set(CMAKE_CXX_STANDARD 14)
