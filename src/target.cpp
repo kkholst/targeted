@@ -15,7 +15,7 @@
 #include <target/glm.hpp>
 
 namespace target {
-  
+
   // typedef Target<T> B;
 
   /*!
@@ -73,7 +73,7 @@ namespace target {
 		    const arma::Mat<T> &x2,
 		    const arma::Mat<T> &x3,
 		    const arma::Col<T> &parameter) {
-    this->update_data(y,a,x1,x2,x3);
+    this->update_data(y, a, x1, x2, x3);
     alpha = arma::Col<T>(x1.n_cols);
     beta = arma::Col<T>(x2.n_cols);
     gamma = arma::Col<T>(x3.n_cols);
@@ -87,7 +87,7 @@ namespace target {
 			const arma::Mat<T> &x2,
 			const arma::Col<T> &parameter,
 			const arma::Col<T> &weights) : Target(y, a, x1, x2, x2, parameter) {
-    this->weights(weights);    
+    this->weights(weights);
   }
 
   template <typename T>
@@ -104,9 +104,8 @@ namespace target {
   void Target<T>::calculate(bool target, bool nuisance, bool propensity) {
     if (target)  // Target, linear predictor
       this->target = Target<T>::X1()*Target<T>::alpha;
-    arma::Mat<T> tt = Target<T>::X2()*Target<T>::beta;
     if (nuisance)  // Nuisance, linear predictor
-      this->nuisance = Target<T>::X2()*Target<T>::beta; 
+      this->nuisance = Target<T>::X2()*Target<T>::beta;
     if (propensity && Target<T>::gamma.n_elem > 0) {  // Propensity
       this->propensity = Target<T>::X3()*Target<T>::gamma;
       this->propensity = target::expit(this->propensity);
@@ -114,7 +113,6 @@ namespace target {
   }
 
   ////////////////////////////////////////////////////////////////////////////////
-
 
   /*!
     @brief Calculate risk probabilities conditional on exposure
@@ -134,7 +132,7 @@ namespace target {
     res.col(4) = this->nuisance;
     return(res);
   }
- 
+
   /*!
     @brief log likelihood
 
@@ -234,9 +232,9 @@ namespace target {
 	    const arma::Col<T> &parameter,
 	    const arma::Col<T> &weights) :
     TargetBinary<T>(y, a, x1, x2, x3, parameter, weights) {
-    calculate();
+    RR::calculate();
   }
-  
+
   template <typename T>
   RD<T>::RD(const arma::Col<T> &y,
 	    const arma::Mat<T> &a,
@@ -246,7 +244,7 @@ namespace target {
 	    const arma::Col<T> &parameter,
 	    const arma::Col<T> &weights) :
     TargetBinary<T>(y, a, x1, x2, x3, parameter, weights) {
-    calculate();
+    RD::calculate();
   }
 
   template <typename T>
@@ -350,7 +348,7 @@ namespace target {
 
     Assume we have iid observations \f$(Y_i,A_i,X_i)\f$
     \f[
-    E(Y^\ast) = \sum_{i=1}^n 
+    E(Y^\ast) = \sum_{i=1}^n
     \f]
     @param y Response variable
     @param a Exposure variable
@@ -367,10 +365,10 @@ namespace target {
 	   const arma::cx_mat &x3,
 	   const arma::cx_vec &parameter,
 	   const arma::cx_vec &weights,
-	   bool binary) :
+	   bool bin) :
     Target<cx_dbl>(y, a, arma::cx_mat(1, 1), x2, x3, parameter, weights) {
-    this->binary = binary;
     ACE::calculate(true, true);
+    this->binary = bin;
   }
 
   ACE::ACE(const arma::vec &y,
@@ -381,17 +379,17 @@ namespace target {
   	   const arma::vec &weights,
   	   bool binary) :
     ACE(arma::conv_to<arma::cx_vec>::from(y),
-  	     arma::conv_to<arma::cx_vec>::from(a),
-  	     arma::conv_to<arma::cx_mat>::from(x2),
-  	     arma::conv_to<arma::cx_mat>::from(x3),
-  	     arma::conv_to<arma::cx_vec>::from(parameter),
-  	     arma::conv_to<arma::cx_vec>::from(weights),
-  	     binary) { }
-  
+	arma::conv_to<arma::cx_vec>::from(a),
+	arma::conv_to<arma::cx_mat>::from(x2),
+	arma::conv_to<arma::cx_mat>::from(x3),
+	arma::conv_to<arma::cx_vec>::from(parameter),
+	arma::conv_to<arma::cx_vec>::from(weights),
+	binary) { }
+
   void ACE::calculate(bool target, bool nuisance, bool propensity) {
     Target<cx_dbl>::calculate(false, nuisance, propensity);
     if (nuisance && this->binary) {
-      this->nuisance = target::expit(this->nuisance);  // Outcome regression model
+      this->nuisance = target::expit(this->nuisance);  // outcome regression
     }
   }
 
@@ -414,7 +412,7 @@ namespace target {
   void ACE::update_par(arma::cx_vec par) {
     this->Target<cx_dbl>::update_par(par);
   }
-  
+
   void ACE::update_par(arma::vec par) {
     arma::cx_vec parc = arma::conv_to<arma::cx_vec>::from(par);
     this->Target<cx_dbl>::update_par(parc);
@@ -439,7 +437,7 @@ namespace target {
     cx_dbl delta(0, eps);
     unsigned pos = 1;
     cx_dbl tmp;
-    
+
     for (unsigned i=0; i < n2; i++) {
       tmp = this->beta[i];
       this->beta[i] += delta;
@@ -461,17 +459,17 @@ namespace target {
 
   ////////////////////////////////////////////////////////////////////////////////
 
-  
+
   // specific template instantiations:
   template class RR<double>;
-  template class RR<cx_dbl>; 
+  template class RR<cx_dbl>;
   template class RD<double>;
   template class RD<cx_dbl>;
   template class Target<double>;
-  template class Target<cx_dbl>;  
+  template class Target<cx_dbl>;
   template class TargetBinary<double>;
   template class TargetBinary<cx_dbl>;
-  
- 
+
+
 
 }  // namespace target

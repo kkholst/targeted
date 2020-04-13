@@ -12,7 +12,6 @@
 #ifndef ARMA_R
 #define MATHLIB_STANDALONE
 #include <armadillo>
-//#include "Rmath.h"
 #endif
 #if defined(ARMA_R)
 #include <RcppArmadillo.h>
@@ -20,7 +19,8 @@
 #include <cmath>
 #include <complex>
 #include <cfloat>     // precision of double (DBL_MIN)
-#include <functional> // std::bind for using non-static member function as argument to free function
+#include <functional>  // std::bind for using non-static member function as argument to free function
+#include <vector>
 
 using cx_dbl  = std::complex<double>;
 using cx_func = std::function<arma::cx_mat(arma::cx_vec theta)>;
@@ -32,7 +32,7 @@ namespace target {
   arma::cx_mat expit(arma::cx_mat x);
   arma::vec softmax(arma::vec u);
   arma::mat softmax(arma::mat lp, bool ref, bool log);
-  
+
   // template<typename T>
   // arma::Mat<T> expit(const arma::Mat<T> &x) {
   //   return 1.0/(1+exp(-x));

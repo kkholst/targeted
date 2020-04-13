@@ -18,15 +18,15 @@ namespace target {
     arma::cx_mat val0 = f(thetac);
     unsigned n = val0.n_elem;
     unsigned p = theta.n_elem;
-    arma::mat res(n,p);
+    arma::mat res(n, p);
     double h = DBL_MIN;
     cx_dbl h0 = cx_dbl(0, h);
-    for (unsigned i=0; i<p; i++) {
+    for (unsigned i=0; i < p; i++) {
       arma::cx_vec theta0 = thetac;
       theta0[i] += h0;
       arma::mat val = imag(f(theta0))/h;
-      for (unsigned j=0; j<n; j++)
-	res(j,i) = val[j];
+      for (unsigned j=0; j < n; j++)
+	res(j, i) = val[j];
     }
     return(res);
   }
@@ -37,23 +37,23 @@ namespace target {
     unsigned ncl = 1;
     unsigned n = id.size();
     unsigned id0 = id(0);
-    for (unsigned i=0; i<n; i++) {
-      if (id(i)!=id0) {
+    for (unsigned i=0; i < n; i++) {
+      if (id(i) != id0) {
 	ncl++;
 	id0 = id(i);
       }
     }
-    arma::umat res(ncl,2); // column 1: index, column 2: size
+    arma::umat res(ncl, 2);  // column 1: index, column 2: size
     res.fill(0);
     unsigned cl = 0;
     id0 = id(0);
-    for (unsigned i=0; i<n; i++) {
-      if (id(i)!=id0) {
+    for (unsigned i=0; i < n; i++) {
+      if (id(i) != id0) {
 	cl++;
-	res(cl,0) = i; // index
+	res(cl, 0) = i;  // index
 	id0 = id(i);
       }
-      res(cl,1)++; // size
+      res(cl, 1)++;  // size
     }
     return res;
   }
@@ -67,24 +67,24 @@ namespace target {
     if (!reduce) {
       n = x.n_rows;
     }
-    unsigned start, stop;
+    unsigned stop;
     arma::mat res(n, x.n_cols);
     arma::rowvec tmp(x.n_cols);
-    for (unsigned i=0; i<ncl; i++) { // Iterate over individuals
-      start = cluster(i);
-      if (i==(ncl-1)) {
+    for (unsigned i=0; i < ncl; i++) {  // Iterate over individuals
+      unsigned start = cluster(i);
+      if (i == (ncl-1)) {
 	stop = x.n_rows;
       } else {
 	stop = cluster(i+1);
       }
       tmp.fill(0);
-      for (unsigned j=start; j<stop; j++) {
+      for (unsigned j=start; j < stop; j++) {
 	tmp += x.row(j);
       }
       if (reduce) {
 	res.row(i) = tmp;
       } else {
-	for (unsigned j=start; j<stop; j++) {
+	for (unsigned j=start; j < stop; j++) {
 	  res.row(j) = tmp;
 	}
       }
@@ -93,31 +93,33 @@ namespace target {
   }
 
 
-  void fastpattern(const arma::umat &y, arma::umat &pattern,
-		   arma::uvec &group, unsigned categories /*=2*/) {
+  void fastpattern(const arma::umat &y,
+		   arma::umat &pattern,
+		   arma::uvec &group,
+		   unsigned categories) {
     unsigned n = y.n_rows;
     unsigned k = y.n_cols;
 
     arma::uvec mygroup(n);
-    double lognpattern = k*std::log((double) categories);
+    double lognpattern = k*std::log(static_cast<double>(categories));
     unsigned npattern = n;
-    if (lognpattern<std::log((double)npattern)) {
-      npattern = (unsigned) pow((double) categories,(double) k);
+    if (lognpattern<std::log(static_cast<double>(npattern))) {
+      npattern = (unsigned) pow(static_cast<double>(categories),
+				static_cast<double>(k));
     }
-    arma::umat mypattern(npattern,k);
+    arma::umat mypattern(npattern, k);
     mypattern.fill(1);
-    unsigned K=0;
+    unsigned K = 0;
 
-    for (unsigned i=0; i<n; i++) {
+    for (unsigned i=0; i < n; i++) {
       arma::urowvec ri = y.row(i);
       bool found = false;
-      for (unsigned j=0; j<K; j++) {
-	if (sum(ri!=mypattern.row(j))==0) {
+      for (unsigned j=0; j < K; j++) {
+	if (sum(ri != mypattern.row(j)) == 0) {
 	  found = true;
 	  mygroup(i) = j;
 	  break;
 	}
-
       }
       if (!found) {
 	K++;
@@ -125,43 +127,42 @@ namespace target {
 	mygroup(i) = K-1;
       }
     }
-    pattern = mypattern.rows(0,K-1);
+    pattern = mypattern.rows(0, K-1);
     group = mygroup;
   }
 
 
-  arma::umat fastapprox(arma::vec &time, // sorted times
-			arma::vec &newtime,
+  arma::umat fastapprox(arma::vec &time,  // sorted times
+			const arma::vec &newtime,
 			bool equal,
 			// type: (0: nearedst, 1: right, 2: left)
 			unsigned type) {
-
     arma::uvec idx(newtime.n_elem);
     arma::uvec eq(newtime.n_elem);
 
     double vmax = time(time.n_elem-1);
     arma::mat::iterator it;
-    double upper=0.0; int pos=0;
-    for (unsigned i=0; i<newtime.n_elem; i++) {
+    double upper = 0.0;
+    int pos;
+    for (unsigned i=0; i < newtime.n_elem; i++) {
       eq[i] = 0;
-      if (newtime(i)>vmax) {
+      if (newtime(i) > vmax) {
 	pos = time.n_elem-1;
       } else {
 	it = std::lower_bound(time.begin(), time.end(), newtime(i));
 	upper = *it;
 	if (it == time.begin()) {
 	  pos = 0;
-	  if (equal && (newtime(i)==upper)) { eq(i) = 1; }
-	}
-	else {
-	  pos = int(it-time.begin());
-	  if (type==0 && std::fabs(newtime(i)-time(pos-1))<
-	      std::fabs(newtime(i)-time(pos)))
+	  if (equal && (newtime(i) == upper)) { eq(i) = 1; }
+	} else {
+	  pos = static_cast<int>(it-time.begin());
+	  if (type == 0 && std::fabs(newtime(i)-time(pos-1)) <
+                            std::fabs(newtime(i)-time(pos)))
 	    pos -= 1;
-	  if (equal && (newtime(i)==upper)) { eq[i] = pos+1; }
+	  if (equal && (newtime(i) == upper)) { eq[i] = pos+1; }
 	}
       }
-      if (type==2 && newtime(i)<upper) pos--;
+      if (type == 2 && newtime(i) < upper) pos--;
       idx(i) = pos;
     }
     if (equal) {
@@ -173,22 +174,24 @@ namespace target {
 
   double SupTest(const arma::vec &D) {
     return arma::max(arma::abs(D));
-  };
+  }
 
   double L2Test(const arma::vec &D, const arma::vec &t) {
     arma::vec delta(t.n_elem);
-    for (unsigned i=0; i<t.n_elem-1; i++) delta(i) = t[i+1]-t[i];
+    for (unsigned i=0; i < t.n_elem-1; i++) delta(i) = t[i+1]-t[i];
     delta(delta.n_elem-1) = 0;
     return std::sqrt(sum(delta % D % D));
   }
 
-  // Comparison of ECDF of (x1,...,xn) with null CDF evaluated in G = (G(x1),...,G(xn))
+  // Comparison of ECDF of (x1,...,xn) with null CDF
+  // evaluated in G = (G(x1),...,G(xn))
   double CramerVonMises(const arma::vec &x, arma::vec G) {
-    arma::uvec ord = arma::stable_sort_index(x); // back to original order of input data
+    // back to original order of input data:
+    arma::uvec ord = arma::stable_sort_index(x);
     G = G.elem(ord);
     unsigned n = G.n_elem;
     double res = 1/(12*n);
-    for (unsigned i=0; i<G.n_elem; i++) {
+    for (unsigned i=0; i < G.n_elem; i++) {
       double val = (2*i-1)/(2*n)-G(i);
       res += val*val;
     }
@@ -220,4 +223,4 @@ namespace target {
   const char* LCYAN     = "\x1b[96m";
   const char* LWHITE    = "\x1b[97m";
 
-} // namespace target
+}  // namespace target

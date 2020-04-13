@@ -39,7 +39,7 @@ namespace target {
     arma::Col<T> _weights;
 #endif
 
-  public:        
+  public:
     arma::Col<T> alpha;  // Target parameter
     arma::Col<T> beta;  // Nuisance parameter
     arma::Col<T> gamma;  // Propensity parameter
@@ -56,7 +56,7 @@ namespace target {
 	   const arma::Mat<T> &x1, const arma::Mat<T> &x2,
 	   const arma::Col<T> &parameter,
 	   const arma::Col<T> &weights);
-    
+
     Target(const arma::Col<T> &y, const arma::Mat<T> &a,
 	   const arma::Mat<T> &x1, const arma::Mat<T> &x2, const arma::Mat<T> &x3,
 	   const arma::Col<T> &parameter);
@@ -64,11 +64,11 @@ namespace target {
     Target(const arma::Col<T> &y, const arma::Mat<T> &a,
 	   const arma::Mat<T> &x1, const arma::Mat<T> &x2,
 	   const arma::Col<T> &parameter);
-    
-    virtual ~Target() {} // Abstract class
+
+    virtual ~Target() {}  // Abstract class
 
 #ifndef TARGET_DATA_NOTREF
-    void weights(const arma::Col<T> &weights) { _weights = &weights; }    
+    void weights(const arma::Col<T> &weights) { _weights = &weights; }
     arma::Col<T> weights() { return *(_weights); }
     arma::Col<T> A() { return *(_exposure); }
     arma::Col<T> Y() { return *(_response); }
@@ -103,14 +103,13 @@ namespace target {
       _exposure = a;
       _x1 = x1;
       _x2 = x2;
-      _x3 = x3;    
-    }    
+      _x3 = x3;
+    }
 #endif
     virtual void calculate(bool target = true,
 			   bool nuisance = true,
 			   bool propensity = false);
     void update_par(const arma::Col<T> &parameter);
-    
   };
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -201,10 +200,12 @@ namespace target {
     	const arma::vec &weights,
     	bool binary = true);
 
-    void calculate(bool target = true, bool nuisance = true, bool propensity = true);
+    void calculate(bool target = true,
+		   bool nuisance = true,
+		   bool propensity = true) override;
     void update_par(arma::cx_vec par);
     void update_par(arma::vec par);
-    
+
     arma::cx_mat est(arma::cx_vec par,
 		     bool indiv = false,
 		     const cx_dbl &value = 1);
@@ -223,4 +224,3 @@ namespace target {
   arma::Mat<T> rr2prob(const arma::Col<T> &rd, const arma::Col<T> &op);
 
 }  // namespace target
-
