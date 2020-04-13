@@ -3,8 +3,39 @@ language: generic
 jobs:
   include:
     # --------------------------------------------------------------------------------
-    - name: "linux wheels"      
-      if: (branch IN (deploy)) OR (tag =~ ^v))
+
+    - name: "python: source"
+      language: python
+      if: (branch IN (deploy)) OR (tag =~ ^py:v))
+      cache: pip
+      addons:
+        apt:
+          packages:
+            - cmake
+            - liblapack-dev
+            - libblas-dev
+      install:
+        - pip3 install pytest pytest-runner pytest-cov scipy patsy numpy pandas statsmodels
+      script:
+        - cd python-package
+        - python3 setup.py install
+        - python3 setup.py test
+        - bin/test_targeted
+        - python3 -m targeted
+      after_success:
+        # if the release was tagged, upload them to PyPI
+        - |
+          if [[ $TRAVIS_TAG ]]; then
+          python3 setup.py sdist
+          python3 -m pip install twine
+          python3 -m twine upload dist/*.tar.gz
+          fi
+          
+    # --------------------------------------------------------------------------------
+
+    - name: "python: linux wheels"
+      # Only run on deploy branch or commits tagged 'py:v...'
+      if: (branch IN (deploy)) OR (tag =~ ^py:v))
       services: docker
       language: python      
       install:
@@ -24,9 +55,9 @@ jobs:
           fi
 
     # --------------------------------------------------------------------------------
-
-    - name: "osx wheels"
-      if: (branch IN (deploy)) OR (tag =~ ^v))
+   
+    - name: "python: osx wheels"
+      if: (branch IN (deploy)) OR (tag =~ ^py:v))
       os: osx
       language: shell
       install:
@@ -70,6 +101,7 @@ jobs:
       compiler:
         - clang
         - gcc
+      cache: ccache
       addons:
         apt:
           packages:
@@ -86,17 +118,17 @@ jobs:
       language: r
       r: release
       warnings_are_errors: true
-      cache: packages
-      addons:
-        apt:
-          packages:
-            - r-cran-covr
-            - r-cran-futile.logger
-            - r-cran-lava
-            - r-cran-optimx
-            - r-cran-rcpp
-            - r-cran-rcpparmadillo
-            - r-cran-testthat
+      cache:
+        packages: true
+        ccache: true
+      r_packages:
+        - covr
+        - futile.logger
+        - lava
+        - optimx
+        - rcpp
+        - rcpparmadillo
+        - testthat
       install:
         - echo
       script:
@@ -108,17 +140,17 @@ jobs:
       language: r
       r: release
       warnings_are_errors: true
-      cache: packages
-      addons:
-        apt:
-          packages:
-            - r-cran-covr
-            - r-cran-futile.logger
-            - r-cran-lava
-            - r-cran-numderiv
-            - r-cran-rcpp
-            - r-cran-rcpparmadillo
-            - r-cran-testthat
+      cache:
+        packages: true
+        ccache: true
+      r_packages:
+        - covr
+        - futile.logger
+        - lava
+        - optimx
+        - rcpp
+        - rcpparmadillo
+        - testthat
       install:
         - echo
       script:
@@ -134,28 +166,15 @@ jobs:
             - cmake
             - liblapack-dev
             - libblas-dev
-            - python3-scipy
-            - python3-pytest
-            - python3-patsy
-            - python3-numpy
-            - python3-pandas
-            - python3-numpy
+      cache: pip            
       install:
-        - pip3 install pytest-runner pytest-cov
+        - pip3 install pytest pytest-runner pytest-cov scipy patsy numpy pandas statsmodels            
       script:
         - cd python-package
         - python3 setup.py install
         - python3 setup.py test
         - bin/test_targeted
         - python3 -m targeted
-      after_success:
-        # if the release was tagged, upload them to PyPI
-        - |
-          if [[ $TRAVIS_TAG ]]; then
-          python3 setup.py sdist
-          python3 -m pip install twine
-          python3 -m twine upload dist/*.tar.gz
-          fi
 
     # --------------------------------------------------------------------------------
 
