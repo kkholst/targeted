@@ -1,6 +1,6 @@
 FROM quay.io/pypa/manylinux2010_x86_64
 
-RUN yum install -y lapack-devel SuperLU-devel blas-devel python-devel \
+RUN yum install -y make lapack-devel SuperLU-devel blas-devel python-devel \
 	tmux mg && \
 	rm -rf /tmp/*
 
