@@ -210,8 +210,8 @@ coverage:
 
 .PHONY: check
 check:
-	-cclint src/*.cpp src/*.h
-	-cppcheck --enable=all src/
+	-@cclint src/*.cpp include/target/*.h*
+	-@cppcheck --enable=warning,style,performance,portability,information,missingInclude --language=c++ --std=c11 -Isrc -Iinclude -Iinclude/target src/
 
 .PHONY: valgrind
 ## Alternatively, enable Address Sanitizer (ASAN =-Db_sanitize=address)

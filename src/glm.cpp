@@ -12,7 +12,7 @@
 namespace target {
 
     // Softmax transformation using sum-log-exp trick to avoid overflow
-  arma::mat softmax(arma::mat lp, bool ref=true, bool log=false) {
+  arma::mat softmax(arma::mat lp, bool ref = true, bool log = false) {
     if (ref) lp.insert_cols(0, arma::zeros(lp.n_rows));
     arma::colvec lpmax = arma::max(lp, 1);
     lp.each_col() -= lpmax;
@@ -26,17 +26,17 @@ namespace target {
   arma::vec softmax(arma::vec u) {
     double umax = u.max();
     u -= umax;
-    double denom = sum(exp(u));  
+    double denom = sum(exp(u));
     return u - log(denom);
   }
 
   // template arma::mat expit<double>(const arma::mat&);
   // template arma::cx_mat expit<Complex>(const arma::cx_mat&);
-  
+
   arma::mat expit(arma::mat x) {
-    for (unsigned i=0; i<x.n_elem; i++) {
+    for (unsigned i=0; i < x.n_elem; i++) {
       double z = x(i);
-      if (z>=0) {
+      if (z >= 0) {
 	x(i) = 1/(1+exp(-z));
       } else {
 	z = exp(z);
