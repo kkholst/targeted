@@ -1,16 +1,12 @@
 language: generic
 
-branches:
-  only:
-    - master
-    - test
-
 jobs:
   include:
     # --------------------------------------------------------------------------------
-    - services: docker
+    - if branch: deploy
+      services: docker
       language: python
-      name: "linux wheels"
+      name: "linux wheels"      
       install:
         - python3 -m pip install cibuildwheel==1.3.0
       env:
@@ -29,7 +25,8 @@ jobs:
 
     # --------------------------------------------------------------------------------
 
-    - name: "osx wheels"
+    - if branch: deploy
+      name: "osx wheels"
       os: osx
       language: shell
       install:
@@ -50,7 +47,8 @@ jobs:
 
     # --------------------------------------------------------------------------------
 
-    # - name: "Python: windows wheels"
+    # - if branch: deploy
+    #   name: "Python: windows wheels"
     #   os: windows
     #   language: shell
     #   before_install:
