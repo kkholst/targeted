@@ -1,0 +1,9 @@
+language: r
+r:
+ - release
+ - devel
+sudo: false
+r_check_args: --as-cran --run-donttest
+warnings_are_errors: true
+cache: packages
+
