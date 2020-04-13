@@ -12,7 +12,7 @@ Depends:
 Suggests:
     testthat (>= 0.11)
 License: Apache License (== 2.0) | file LICENSE
-Imports: Rcpp (>= 1.0.0), optimx, futile.logger
+Imports: methods, Rcpp (>= 1.0.0), optimx, futile.logger
 LinkingTo: Rcpp, RcppArmadillo
 LazyLoad: yes
 NeedsCompilation: yes

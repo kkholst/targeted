@@ -18,6 +18,7 @@ aipw <- function(formula, data, ...) {
 ##' @param binary Binary response (default TRUE)
 ##' @param all If TRUE all standard errors are calculated (default TRUE when exposure only has two levels)
 ##' @param missing If TRUE a missing data (AIPW) estimator is returned 
+##' @param labels Optional treatment labels
 ##' @param ... Additional arguments to lower level functions
 ##' @export 
 ##' @author Klaus K. Holst
