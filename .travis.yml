@@ -101,7 +101,9 @@ jobs:
       compiler:
         - clang
         - gcc
-      cache: ccache
+      cache:
+        - ccache: true
+        - apt: true
       addons:
         apt:
           packages:
@@ -121,14 +123,17 @@ jobs:
       cache:
         packages: true
         ccache: true
-      r_binary_packages:
-        - covr
-        - futile.logger
-        - lava
-        - optimx
-        - rcpp
-        - rcpparmadillo
-        - testthat
+        apt: true
+      addons:
+        apt:
+          packages:
+            - r-cran-covr
+            - r-cran-futile.logger
+            - r-cran-lava
+            - r-cran-numderiv
+            - r-cran-rcpp
+            - r-cran-rcpparmadillo
+            - r-cran-testthat        
       script:
         - make checkr pkg=targeted
 
@@ -141,14 +146,25 @@ jobs:
       cache:
         packages: true
         ccache: true
-      r_binary_packages:
-        - covr
-        - futile.logger
-        - lava
-        - optimx
-        - rcpp
-        - rcpparmadillo
-        - testthat
+        apt: true
+      addons:
+        apt:
+          packages:
+            - r-cran-covr
+            - r-cran-futile.logger
+            - r-cran-lava
+            - r-cran-numderiv
+            - r-cran-rcpp
+            - r-cran-rcpparmadillo
+            - r-cran-testthat                
+      # r_binary_packages:
+      #   - covr
+      #   - futile.logger
+      #   - lava
+      #   - optimx
+      #   - rcpp
+      #   - rcpparmadillo
+      #   - testthat
       script:
         - make checkr pkg=gof
 
@@ -162,7 +178,9 @@ jobs:
             - cmake
             - liblapack-dev
             - libblas-dev
-      cache: pip            
+      cache:
+        - pip: true
+        - apt: true
       install:
         - pip3 install pytest pytest-runner pytest-cov scipy patsy numpy pandas statsmodels            
       script:
