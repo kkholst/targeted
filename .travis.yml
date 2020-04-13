@@ -129,8 +129,6 @@ jobs:
         - rcpp
         - rcpparmadillo
         - testthat
-      install:
-        - echo
       script:
         - make checkr pkg=targeted
 
@@ -151,8 +149,6 @@ jobs:
         - rcpp
         - rcpparmadillo
         - testthat
-      install:
-        - echo
       script:
         - make checkr pkg=gof
 
