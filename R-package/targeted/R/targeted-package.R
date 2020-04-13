@@ -4,11 +4,12 @@
 ##' Semi-parametric regression models with nuisance parameters.
 ##'
 ##' @name targeted-package
-##' @import Rcpp
+##' @import Rcpp methods
 ##' @importFrom graphics plot points
-##' @importFrom lava iid getoutcome estimate Inverse
+##' @importFrom lava iid getoutcome estimate Inverse na.pass0
 ##' @importFrom stats as.formula update binomial deriv
-##'  	glm.fit lm.fit glm lm coef vcov model.frame model.matrix nlminb predict 
+##'  	glm.fit lm.wfit lm.fit glm lm coef vcov
+##'     model.frame model.matrix na.pass nlminb predict
 ##' @importFrom optimx optimx
 ##' @importFrom futile.logger flog.warn flog.debug flog.info
 ##' @importFrom utils tail head

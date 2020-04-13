@@ -32,6 +32,8 @@ ace(
 
 \item{missing}{If TRUE a missing data (AIPW) estimator is returned}
 
+\item{labels}{Optional treatment labels}
+
 \item{...}{Additional arguments to lower level functions}
 }
 \description{
