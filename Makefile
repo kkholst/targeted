@@ -10,8 +10,9 @@ COVERAGE_DIR = build
 INSTALL_DIR = $(HOME)/local
 ARG =  -Db_coverage=true $(ASAN) -Dprefix=$(INSTALL_DIR)
 PKGLIB = OFF
+IMG=# Dockerfile postfix
 BUILD = -DUSE_PKG_LIB=$(PKGLIB) -DCOTIRE=OFF -DCMAKE_BUILD_TYPE=Debug \
-  -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON -Wno-dev 
+  -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON -Wno-dev
 ifneq ($(NINJA),)
   BUILD := $(BUILD) -GNinja
 endif
@@ -54,12 +55,12 @@ init-submodules:
 	$(GIT) submodule update --init --recursive; fi
 
 .PHONY: run
-run: 
+run:
 	@if [ ! -d "$(BUILD_DIR)" ]; then $(MAKE) --no-print-directory init; fi
 	@$(MAKE) --no-print-directory build # > /dev/null
 	@printf "\n-----\n"
 	@find build/ -maxdepth 1 -iname "*demo" $(FINDEXEC) \
-	-exec {} \; 
+	-exec {} \;
 
 .PHONY: build
 build:
@@ -121,7 +122,7 @@ checkr: exportr
 	cd $(BUILD_DIR)/R; $(R) CMD check `$(GETVER) $(pkg)` --timings --as-cran --no-multiarch --run-donttest
 
 
-rcheck: 
+rcheck:
 	cd R-package; $(R) CMD check $(pkg) --no-multiarch
 
 r: buildr runr
@@ -222,9 +223,19 @@ valgrind:
 ## Container
 ##################################################
 
+DOCKER=Dockerfile
+DOCKERTAG=$(TARGET)
+ifdef ($IMG)
+	DOCKER := '$(DOCKER).$(IMG)'
+	DOCKERTAG := '$(DOCKERTAG).$(IMG)'
+endif
+
 .PHONY: dockerbuild dockerrun docker export
 dockerbuild:
-	@$(CONTAINER_RUNTIME) build . --network=host -t $(TARGET)
+	@rm -Rf $(BUILD_DIR)/export;
+	$(GIT) clone . $(BUILD_DIR)/export
+	$(GIT) submodule foreach '$(GIT) clone . ../../$(BUILD_DIR)/export/$(TARGET)/$$path'
+	@$(CONTAINER_RUNTIME) build . -f Dockerfile --network=host -t $(DOCKERTAG)
 
 export:
 	@rm -Rf ${PWD}/tmp/$(TARGET)
@@ -234,7 +245,5 @@ export:
 	@echo "Exported to '${PWD}/tmp/$(TARGET)'"
 	@chmod -R 777 ${PWD}/tmp/$(TARGET)
 
-dockerrun:
-	$(CONTAINER_RUNTIME) run --user `id -u` -ti --rm --privileged -v ${PWD}/tmp/$(TARGET):/data $(TARGET) ${CMD}
-
-docker: export dockerrun
+docker:
+	$(CONTAINER_RUNTIME) run --user `id -u` -ti --rm --privileged -v ${PWD}:/data $(TARGET) ${CMD}
