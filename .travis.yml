@@ -129,6 +129,7 @@ jobs:
             - r-cran-futile.logger
             - r-cran-lava
             - r-cran-numderiv
+            - r-cran-optimx            
             - r-cran-rcpp
             - r-cran-rcpparmadillo
             - r-cran-testthat
