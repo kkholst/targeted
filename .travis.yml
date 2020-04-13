@@ -1,9 +1,9 @@
 language: r
 r:
- - release
- - devel
-sudo: false
+  - release
+  - devel
 r_check_args: --as-cran --run-donttest
 warnings_are_errors: true
 cache: packages
-
+  
+  

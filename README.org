@@ -61,13 +61,18 @@ head(d)
 : 6 0 0 -0.8204684 -1.66264885
 
 
-#+BEGIN_SRC R
-  fit <- targeted::riskreg(y ~ a | 1 | x+z | x+z, data=d, type="rr")
-  
+#+BEGIN_SRC R :exports both :results output
+  fit <- targeted::riskreg(y ~ a | 1 | x+z | x+z, data=d, type="rr")  
   fit
 #+END_SRC
 
 #+RESULTS:
+: 
+: targeted::riskreg(formula = y ~ a | 1 | x
+: z | x
+: z, data = d, 
+:     type = "rr")
+: 
 :             Estimate Std.Err     2.5%  97.5% P-value
 : (Intercept)   0.0576 0.07056 -0.08069 0.1959  0.4143
 
