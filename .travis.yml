@@ -4,7 +4,7 @@ jobs:
   include:
     # --------------------------------------------------------------------------------
     - name: "linux wheels"      
-      if: branch IN (deploy)
+      if: (branch IN (deploy)) OR (tag =~ ^v))
       services: docker
       language: python      
       install:
@@ -26,7 +26,7 @@ jobs:
     # --------------------------------------------------------------------------------
 
     - name: "osx wheels"
-      if: branch IN (deploy)
+      if: (branch IN (deploy)) OR (tag =~ ^v))
       os: osx
       language: shell
       install:
@@ -46,9 +46,8 @@ jobs:
           fi
 
     # --------------------------------------------------------------------------------
-
-    # - if: branch=deploy
-    #   name: "Python: windows wheels"
+         
+    # - name: "Python: windows wheels"
     #   os: windows
     #   language: shell
     #   before_install:
@@ -127,7 +126,7 @@ jobs:
 
     # --------------------------------------------------------------------------------
 
-    - name: "Python: release"
+    - name: "Python: targeted"
       language: python
       addons:
         apt:
