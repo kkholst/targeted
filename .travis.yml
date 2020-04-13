@@ -3,14 +3,18 @@ language: generic
 jobs:
   include:
     # --------------------------------------------------------------------------------
-    - services: docker
+    - if branch: deploy
+      services: docker
       language: python
-      name: "linux wheels"
+      name: "linux wheels"      
       install:
         - python3 -m pip install cibuildwheel==1.3.0
+      env:
+        - CIBW_SKIP="cp27-* cp35-*"
+        - CIBW_BEFORE_BUILD="yum install -y make lapack-devel blas-devel python-devel; pip install cmake; cd lib/armadillo; cmake -B build && cd build; make install; cd ../../.."
       script:
         - make exportpy
-        - cd build/python; CIBW_SKIP="cp27-* cp35-*" CIBW_BEFORE_BUILD="yum install -y make lapack-devel blas-devel SuperLU-devel python-devel; pip install cmake" python3 -m cibuildwheel --output-dir wheelhouse
+        - cd build/python; python3 -m cibuildwheel --output-dir wheelhouse
       after_success:
         # if the release was tagged, upload them to PyPI
         - |
@@ -21,14 +25,18 @@ jobs:
 
     # --------------------------------------------------------------------------------
 
-    - name: "osx wheels"
+    - if branch: deploy
+      name: "osx wheels"
       os: osx
       language: shell
       install:
         - python3 -m pip install cibuildwheel==1.3.0
+      env:
+        - CIBW_SKIP="cp27-* cp35-*"
+        - CIBW_BEFORE_BUILD="pip install cmake"
       script:
         - make exportpy
-        - cd build/python; CIBW_SKIP="cp27-* cp35-*" CIBW_BEFORE_BUILD="pip install cmake" python3 -m cibuildwheel --output-dir wheelhouse
+        - cd build/python; python3 -m cibuildwheel --output-dir wheelhouse
       after_success:
         # if the release was tagged, upload them to PyPI
         - |
@@ -39,7 +47,8 @@ jobs:
 
     # --------------------------------------------------------------------------------
 
-    # - name: "Python: windows wheels"
+    # - if branch: deploy
+    #   name: "Python: windows wheels"
     #   os: windows
     #   language: shell
     #   before_install:

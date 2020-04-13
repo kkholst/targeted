@@ -6,11 +6,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if(APPLE)
   set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
-else()
-  set(CMAKE_BUILD_WITH_INSTALL_RPATH OFF)
-  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH ON)
-  set(CMAKE_SKIP_INSTALL_RPATH OFF)
-endif() 
+endif()
 project(${target} CXX)
 
 ################################################################################
@@ -47,15 +43,13 @@ else()
   find_package(LAPACK REQUIRED)
   set(DETECT_HDF5 OFF CACHE BOOL "Disable Armadillo HDF5 support")
   add_subdirectory(lib/armadillo)
-  include_directories(lib/armadillo/include)
 endif ()
 
 message([Main] " ARMADILLO_LIBRARIES = ${ARMADILLO_LIBRARIES}")
 message([Main] " ARMADILLO_INCLUDE_DIRS = ${ARMADILLO_INCLUDE_DIRS}")
-
-message([Main] "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
-message([Main] "PYTHON_EXECUTABLE = ${PYTHON_EXECUTABLE}")
-message([Main] "PYTHON_INCLUDE_DIRS = ${PYTHON_INCLUDE_DIRS}")
+message([Main] " PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
+message([Main] " PYTHON_EXECUTABLE = ${PYTHON_EXECUTABLE}")
+message([Main] " PYTHON_INCLUDE_DIRS = ${PYTHON_INCLUDE_DIRS}")
 
 ################################################################################
 # Tests
@@ -109,8 +103,9 @@ if(APPLE)
   set_target_properties(__${target}__ PROPERTIES INSTALL_NAME_DIR "@rpath")
   set_target_properties(__${target}__ PROPERTIES INSTALL_RPATH "@loader_path")
 else()
-  set_target_properties(__${target}__ PROPERTIES INSTALL_RPATH "$ORIGIN")
+  set_target_properties(__${target}__ PROPERTIES INSTALL_RPATH "$ORIGIN;.")
   set_target_properties(__${target}__ PROPERTIES LINK_FLAGS "-shared")
+  #set_target_properties(__${target}__ PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN")
 endif()
 
 target_link_libraries(__${target}__ PRIVATE armadillo)
