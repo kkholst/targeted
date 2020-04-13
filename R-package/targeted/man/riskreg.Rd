@@ -2,26 +2,33 @@
 % Please edit documentation in R/riskreg.R
 \name{riskreg}
 \alias{riskreg}
-\alias{riskreg_semi}
+\alias{riskreg_fit}
 \alias{riskreg_mle}
 \title{Risk regression}
 \usage{
 riskreg(
   formula,
-  exposure = NULL,
+  target = NULL,
+  nuisance = NULL,
+  propensity = nuisance,
   data,
   weights,
   type = "rr",
   optimal = TRUE,
   std.err = TRUE,
   start = NULL,
+  semi = TRUE,
   ...
 )
 }
 \arguments{
 \item{formula}{formula (see details below)}
 
-\item{exposure}{formula or character}
+\item{target}{(optional) target model (formula)}
+
+\item{nuisance}{nuisance model (formula)}
+
+\item{propensity}{propensity model (formula)}
 
 \item{data}{data.frame}
 
@@ -35,6 +42,8 @@ riskreg(
 
 \item{start}{optional starting values}
 
+\item{semi}{Semi-parametric (double-robust) estimate (FALSE gives MLE)}
+
 \item{...}{additional arguments to unconstrained optimization routine (nlminb)}
 }
 \description{
@@ -44,18 +53,33 @@ Risk regression with binary exposure
 Risk regression with binary exposure and nuisance model for the odds-product
 
 
-The formula should be given as
+The 'formula' argument should be given as
 response ~ exposure | target | nuisance
+or
+response ~ exposure | target | nuisance | propensity
 }
 \examples{
-m <- lvm(a[-2] ~ 1*x,
-        linpred.target[1] ~ 1,
-        linpred.nuisance[-1] ~ 2*x)
+m <- lvm(a[-2] ~ x,
+        lp.target[1] ~ 1,
+        lp.nuisance[-1] ~ 2*x)
 distribution(m,~a) <- binomial.lvm("logit")
-m <- binomial.rr(m, "y","a","linpred.target","linpred.nuisance")
+m <- binomial.rr(m, "y","a","lp.target","lp.nuisance")
 d <- sim(m,5e2,seed=1)
-a <- riskreg(y ~ a | 1 | x, a~x, data=d, type="rr")
+
+I <- model.matrix(~1, d)
+X <- model.matrix(~1+x, d)
+with(d, riskreg_mle(y, a, I, X, type="rr"))
+
+with(d, riskreg_fit(y, a, nuisance=X, propensity=I, type="rr"))
+riskreg(y ~ a | 1 | x ,  data=d, type="rr")
+
+## Model with same design matrix for nuisance and propensity model:
+with(d, riskreg_fit(y, a, nuisance=X, type="rr"))
+
+a <- riskreg(y ~ a | 1 | x ,  data=d, type="rr")
 a
+
+
 }
 \author{
 Klaus K. Holst

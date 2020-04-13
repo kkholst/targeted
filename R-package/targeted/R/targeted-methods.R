@@ -1,14 +1,12 @@
 ##' @export
 print.targeted <- function(x, ...) {
-    print(x$call)
-    cat("\n")
     print(x$estimate, ...)
 }
 
-
+##' @export
 print.summary.targeted <- function(x, ...) {
     print(x$call)
-    cat("\n")    
+    cat("\n")
     print(x$estimate, ...)
 }
 
