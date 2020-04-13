@@ -6,7 +6,7 @@ jobs:
 
     - name: "python: source"
       language: python
-      if: (branch IN (deploy)) OR (tag =~ ^py:v))
+      if: (branch IN (deploy)) OR (tag =~ ^py:v)
       cache: pip
       addons:
         apt:
@@ -35,7 +35,7 @@ jobs:
 
     - name: "python: linux wheels"
       # Only run on deploy branch or commits tagged 'py:v...'
-      if: (branch IN (deploy)) OR (tag =~ ^py:v))
+      if: (branch IN (deploy)) OR (tag =~ ^py:v)
       services: docker
       language: python      
       install:
@@ -57,7 +57,7 @@ jobs:
     # --------------------------------------------------------------------------------
    
     - name: "python: osx wheels"
-      if: (branch IN (deploy)) OR (tag =~ ^py:v))
+      if: (branch IN (deploy)) OR (tag =~ ^py:v)
       os: osx
       language: shell
       install:
