@@ -94,7 +94,7 @@ public:
     }
     arma::mat res = target::deriv(std::bind(&RiskReg::score,
 					    this,
-					    std::placeholders_1), theta);
+					    std::placeholders::_1), theta);
     return res;
   }
 
