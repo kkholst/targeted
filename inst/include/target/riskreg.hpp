@@ -1,18 +1,25 @@
 
+/*!
+  @file riskreg.hpp
+  @author Klaus K. Holst
+  @copyright 2020, Klaus Kähler Holst
+
+  @brief Risk regression model
+
+*/
 #pragma once
 
-#include "target.hpp"
-#include "glm.hpp"
-#include "utils.hpp"
 #include <string>
 #include <complex>
 #include <memory>     // smart pointers (unique_ptr)
+#include "target.hpp"
+#include "glm.hpp"
+#include "utils.hpp"
 
 
 enum Data {Y, A, X1, X2, X3, W};
 
 class RiskReg {
-
 public:
   using cx_dbl = target::cx_dbl;
   using cx_func = target::cx_func;
@@ -31,9 +38,13 @@ public:
 	       const arma::vec &weights) {
     theta = arma::zeros(x1.n_cols + x2.n_cols + x3.n_cols);
     if (this->type.compare("rr") == 0) {
-      this->model.reset(new target::RR<double>(y, a, x1, x2, x3, theta, weights));
+      this->model.reset(new target::RR<double>(y, a,
+					      x1, x2, x3,
+					      theta, weights));
     } else {
-      this->model.reset(new target::RD<double>(y, a, x1, x2, x3, theta, weights));
+      this->model.reset(new target::RD<double>(y, a,
+					      x1, x2, x3,
+					      theta, weights));
     }
   }
 
@@ -42,7 +53,7 @@ public:
   }
 
   void update(arma::vec &par) {
-    for (unsigned i=0; i<par.n_elem; i++)
+    for (unsigned i=0; i < par.n_elem; i++)
       this->theta(i) = par(i);
     model->update_par(par);
     model->calculate(true, true, true);
@@ -50,7 +61,7 @@ public:
   double logl() {
     return model->loglik(false)[0];
   }
-  arma::mat dlogl(bool indiv=false) {
+  arma::mat dlogl(bool indiv = false) {
     return model->score(indiv);
   }
   arma::mat pr() {
@@ -81,13 +92,14 @@ public:
     } else {
       model_c.reset(new target::RD<cx_dbl>(Yc, Ac, X1c, X2c, X3c, thetac, Wc));
     }
-    using namespace std::placeholders;
-    arma::mat res = target::deriv(std::bind(&RiskReg::score, this, _1), theta);
+    arma::mat res = target::deriv(std::bind(&RiskReg::score,
+					    this,
+					    std::placeholders::_1), theta);
     return res;
   }
 
   arma::mat operator()(Data index) const {
-    switch(index) {
+    switch (index) {
     case Y:
       return model->Y();
     case A:
