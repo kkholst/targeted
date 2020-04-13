@@ -2,9 +2,8 @@
 # Copyright 2020 Klaus Holst (http://holst.it)
 ################################################################################
 # CMake Properties:
-#   NO_COTIRE: Disable precompiled headers.
-#   USE_PKG_LIB: Force use of libraries supplied with this package instead of
-#  	         system libraries.
+#   COTIRE: Precompiled headers.
+#   USE_PKG_LIB: Force use of libraries supplied with this package.
 # Cmake specific settings:
 #   CMAKE_BUILD_TYPE: Debug (non-optimized code with debug symbols), RelWithDebInfo
 #   CMAKE_VERBOSE_MAKEFILE: ON
@@ -12,8 +11,8 @@
 cmake_minimum_required(VERSION 3.3) # Was 2.8.12
 project(target VERSION 0.1 DESCRIPTION "Targeted Inference Library" LANGUAGES CXX)
 
-option(NO_COTIRE  "Disable precompiled headers" OFF)
-option(USE_PKG_LIB  "Force use of libraries supplied with this package instead of system librariesDisable precompiled headers" OFF)
+option(COTIRE  "precompiled headers" OFF)
+option(USE_PKG_LIB  "Force use of libraries supplied with this package instead of system libraries" OFF)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/config")
@@ -26,7 +25,7 @@ if(CCACHE_FOUND)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)    
 endif(CCACHE_FOUND)
 
-if(NOT NO_COTIRE)
+if(COTIRE)
   set(ENV{CCACHE_SLOPPINESS} "pch_defines,time_macros") ## For precompiled headers to work with ccache:
   include(cotire)
 endif()
@@ -77,7 +76,7 @@ file(GLOB LIBTARGET_SRC ${LIBTARGET_DIR}/*.cpp)
 file(GLOB LIBTARGET_HDR ${LIBTARGET_DIR}/*.hpp)
 file(GLOB LIBTARGET_PUBLIC ${LIBTARGET_INC}/target/*.hpp)
 add_library(target SHARED ${LIBTARGET_SRC} ${LIBTARGET_HDR} ${LIBTARGET_PUBLIC})
-if(NOT NO_COTIRE)
+if(COTIRE)
   cotire(target) # precompile headers
 endif()
 message( [Main] " LIBTARGET_DIR = ${LIBTARGET_DIR}")
@@ -86,7 +85,7 @@ set_target_properties(target PROPERTIES VERSION ${PROJECT_VERSION})
 target_include_directories(target PUBLIC ${LIBTARGET_INC})
 set_target_properties(target PROPERTIES PUBLIC_HEADER ${LIBTARGET_PUBLIC})
 include(GNUInstallDirs)
-configure_file(target.pc.in target.pc @ONLY)
+configure_file(config/target.pc.in target.pc @ONLY)
 
 install(TARGETS target
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
