@@ -17,7 +17,7 @@ ifneq ($(NINJA),)
 endif
 
 # R package:
-pkg = gof
+pkg = targeted
 TESTR = $(pkg)_test
 
 # python package
@@ -32,8 +32,10 @@ all: clean run
 ##################################################
 
 .PHONY: clean
-clean: cleanr cleanpy
+clean: cleanpy
 	@rm -Rf $(BUILD_DIR) $(VALGRIND_DIR) $(DOXYGEN_DIR)/html $(COVERAGE_DIR)
+	@$(MAKE) pkg=gof cleanr
+	@$(MAKE) pkg=targeted cleanr
 	@rm -Rf src/*.o src/*.so
 
 .PHONY: init init-submodules checkinit
@@ -79,7 +81,7 @@ uninstall:
 ## R package
 ##################################################
 
-.PHONY: r cleanr buildr runr testr roxygen
+.PHONY: r cleanr buildr runr testr roxygen checkr rcheck
 buildr: cleanr
 	@$(R) --slave -e "source('config/utilities.R'); \
 	load_packages(c('Rcpp', 'RcppArmadillo', 'lava', 'optimx', 'futile.logger'))"
@@ -118,10 +120,14 @@ exportr:
 checkr: exportr
 	cd $(BUILD_DIR)/R; $(R) CMD check `$(GETVER) $(pkg)` --timings --as-cran --no-multiarch --run-donttest
 
+
+rcheck: 
+	cd R-package; $(R) CMD check $(pkg) --no-multiarch
+
 r: buildr runr
 
 cleanr:
-	@rm -Rf R-package/${pkg}/src/*.o R-package/${pkg}/src/*.so
+	@rm -Rf R-package/${pkg}/src/*.o R-package/${pkg}/src/*.so R-package/${pkg}.Rcheck
 
 .PHONY: syncr
 syncr: exportr
@@ -132,7 +138,7 @@ syncr: exportr
 ## Python package
 ##################################################
 
-.PHONY: py cleanpy buildpy runpy testpy
+.PHONY: py cleanpy buildpy runpy testpy exportpy
 
 buildpy:
 	@cd python-package; $(PYTHON) setup.py install
@@ -163,7 +169,7 @@ cleanpy:
 ## Documentation
 ##################################################
 
-.PHONY: docs doc
+.PHONY: docs doc markdown
 docs:
 	@cd $(DOXYGEN_DIR); $(DOXYGEN)
 

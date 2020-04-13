@@ -1,8 +1,11 @@
+citest
 notes.org
 *.tmp
 misc/*.csv
 misc/functional
 
+*.Rcheck
+symbols.rds
 Rplots*
 .#*
 examples/functional
