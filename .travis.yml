@@ -6,6 +6,7 @@ jobs:
 
     - name: "python: source"
       language: python
+      # Only run on deploy branch or commits tagged 'py:v...'      
       if: (branch IN (deploy)) OR (tag =~ ^py:v)
       cache: pip
       addons:
@@ -34,7 +35,6 @@ jobs:
     # --------------------------------------------------------------------------------
 
     - name: "python: linux wheels"
-      # Only run on deploy branch or commits tagged 'py:v...'
       if: (branch IN (deploy)) OR (tag =~ ^py:v)
       services: docker
       language: python      
@@ -47,7 +47,6 @@ jobs:
         - make exportpy
         - cd build/python; python3 -m cibuildwheel --output-dir wheelhouse
       after_success:
-        # if the release was tagged, upload them to PyPI
         - |
           if [[ $TRAVIS_TAG ]]; then
           python3 -m pip install twine
@@ -69,7 +68,6 @@ jobs:
         - make exportpy
         - cd build/python; python3 -m cibuildwheel --output-dir wheelhouse
       after_success:
-        # if the release was tagged, upload them to PyPI
         - |
           if [[ $TRAVIS_TAG ]]; then
           python3 -m pip install twine
@@ -133,7 +131,9 @@ jobs:
             - r-cran-numderiv
             - r-cran-rcpp
             - r-cran-rcpparmadillo
-            - r-cran-testthat        
+            - r-cran-testthat
+      install:
+        - echo
       script:
         - make checkr pkg=targeted
 
@@ -156,15 +156,9 @@ jobs:
             - r-cran-numderiv
             - r-cran-rcpp
             - r-cran-rcpparmadillo
-            - r-cran-testthat                
-      # r_binary_packages:
-      #   - covr
-      #   - futile.logger
-      #   - lava
-      #   - optimx
-      #   - rcpp
-      #   - rcpparmadillo
-      #   - testthat
+            - r-cran-testthat
+      install:
+        - echo            
       script:
         - make checkr pkg=gof
 
