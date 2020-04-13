@@ -3,33 +3,54 @@
 ##' Risk regression with binary exposure and nuisance model for the odds-product
 ##' @title Risk regression
 ##' @param formula formula (see details below)
-##' @param exposure formula or character
+##' @param target (optional) target model (formula)
+##' @param nuisance nuisance model (formula)
+##' @param propensity propensity model (formula)
 ##' @param data data.frame
 ##' @param weights optional weights
 ##' @param type type of association measure (rd og rr)
 ##' @param optimal If TRUE optimal weights are calculated
 ##' @param std.err If TRUE standard errors are calculated
 ##' @param start optional starting values
+##' @param semi Semi-parametric (double-robust) estimate (FALSE gives MLE)
 ##' @param ... additional arguments to unconstrained optimization routine (nlminb)
 ##' @details
-##' The formula should be given as
+##' The 'formula' argument should be given as
 ##' response ~ exposure | target | nuisance
+##' or
+##' response ~ exposure | target | nuisance | propensity
 ##'
 ##' @export
-##' @aliases riskreg riskreg_semi riskreg_mle
+##' @aliases riskreg riskreg_fit riskreg_mle
 ##' @author Klaus K. Holst
 ##' @examples
-##' m <- lvm(a[-2] ~ 1*x,
-##'         linpred.target[1] ~ 1,
-##'         linpred.nuisance[-1] ~ 2*x)
+##' m <- lvm(a[-2] ~ x,
+##'         lp.target[1] ~ 1,
+##'         lp.nuisance[-1] ~ 2*x)
 ##' distribution(m,~a) <- binomial.lvm("logit")
-##' m <- binomial.rr(m, "y","a","linpred.target","linpred.nuisance")
+##' m <- binomial.rr(m, "y","a","lp.target","lp.nuisance")
 ##' d <- sim(m,5e2,seed=1)
-##' a <- riskreg(y ~ a | 1 | x, a~x, data=d, type="rr")
+##'
+##' I <- model.matrix(~1, d)
+##' X <- model.matrix(~1+x, d)
+##' with(d, riskreg_mle(y, a, I, X, type="rr"))
+##'
+##' with(d, riskreg_fit(y, a, nuisance=X, propensity=I, type="rr"))
+##' riskreg(y ~ a | 1 | x ,  data=d, type="rr")
+##'
+##' ## Model with same design matrix for nuisance and propensity model:
+##' with(d, riskreg_fit(y, a, nuisance=X, type="rr"))
+##'
+##' a <- riskreg(y ~ a | 1 | x ,  data=d, type="rr")
 ##' a
-riskreg <- function(formula, exposure=NULL,
+##'
+##'
+riskreg <- function(formula,
+             target=NULL,
+             nuisance=NULL,
+             propensity=nuisance,
              data, weights, type="rr",
-             optimal=TRUE, std.err=TRUE, start=NULL, ...) {
+             optimal=TRUE, std.err=TRUE, start=NULL, semi=TRUE, ...) {
     if (is.list(formula)) {
         yf <- getoutcome(formula[[1]],sep="|")
         xf <- formula
@@ -42,33 +63,44 @@ riskreg <- function(formula, exposure=NULL,
     }
     xx <- lapply(xf, function(x) model.matrix(x, data))
     y <- model.frame(xf[[1]],data=data)[,yf]
-    if (NCOL(xx[[1]])>1) stop("First part of formula should specify exposure variable only")
     a <- xx[[1]]
-    x1 <- xx[[2]]
-    x2 <- xx[[3]]
-    if (length(xx)>3) {
-        x3 <- xx[[4]]
-    }
-    nn <- list(yf[1], colnames(a), colnames(x1), colnames(x2))
-    semi  <- !is.null(exposure) || length(xx)>3
-    rm(xx)
-    if (semi) {
-        if (inherits(exposure,"formula")) {
-            x3 <- model.matrix(exposure,data)
+    if (length(xx)>1) {
+        if (NCOL(xx[[1]])>1) stop("First part of formula should specify exposure variable only")
+        x1 <- xx[[2]]
+        x2 <- xx[[3]]
+        if (length(xx)>3) {
+            x3 <- xx[[4]]
+        } else x3 <- x2
+    } else {
+        ones <- cbind(rep(1,length(y))); colnames(ones) <- "(Intercept)"
+        if (!is.null(target)) {
+            x1 <- model.matrix(target, data)
+        } else {
+            x1 <- ones
         }
-        nn <- c(nn, list(colnames(x3)))
-
+        if (!is.null(nuisance)) {
+            x2 <- model.matrix(nuisance, data)
+        } else {
+            x2 <- ones
+        }
+        if (!is.null(propensity)) {
+            x3 <- model.matrix(propensity, data)
+        } else {
+            x3 <- ones
+        }
     }
+    nn <- list(yf[1], colnames(a), colnames(x1), colnames(x2), colnames(x3))
+    rm(xx)
     if (missing(weights)) weights <- rep(1,length(y))
     if (inherits(weights,"formula")) weights <- all.vars(weights)
     if (is.character(weights)) weights <- as.vector(data[,weights])
     val <- riskreg_mle(y=y,a=a,x1=x1,x2=x2,weights=weights,std.err=std.err,type=type,start=start,labels=c(nn[[3]],nn[[4]]),...)
     val$labels <- nn[1:4]
     if (semi) {
-        val <- riskreg_semi(y=y,a=a,x1=x1,x2=x2,x3=x3,
-                            weights=weights,std.err=std.err,type=type,
-                            optimal=optimal,start=start,labels=nn[[3]],
-                            mle=val, ...)
+        val <- riskreg_fit(y=y,a=a,target=x1,nuisance=x2,propensity=x3,
+                           weights=weights,std.err=std.err,type=type,
+                           optimal=optimal,start=start,labels=nn[[3]],
+                           mle=val, ...)
         val$prop <- estimate(val$prop, labels=nn[[5]])
     }
 
@@ -79,7 +111,7 @@ riskreg <- function(formula, exposure=NULL,
 
 
 ##' @export
-riskreg_mle <- function(y,a,x1,x2=x1,weights=rep(1,length(y)), std.err=TRUE, type="rd", start=NULL, control=list(), ...) {
+riskreg_mle <- function(y,a,x1,x2=x1,weights=rep(1,length(y)), std.err=TRUE, type="rr", start=NULL, control=list(), ...) {
     x1 <- cbind(x1)
     x2 <- cbind(x2)
     type <- substr(type,1,2)
@@ -112,36 +144,37 @@ riskreg_mle <- function(y,a,x1,x2=x1,weights=rep(1,length(y)), std.err=TRUE, typ
 
 
 ##' @export
-riskreg_semi <- function(y, a,
-                  x1, x2=x1, x3=x2,
-                  weights=rep(1,length(y)), optimal=TRUE,
-                  std.err=TRUE, type="rd",start=NULL, control=list(),
-                  mle, ...) {
-    x1 <- cbind(x1)
-    x2 <- cbind(x2)
-    x3 <- cbind(x3)
+riskreg_fit <- function(y, a,
+                 target=NULL, nuisance=NULL, propensity=nuisance,
+                 weights=rep(1,length(y)), optimal=TRUE,
+                 std.err=TRUE, type="rr",start=NULL, control=list(),
+                 mle, ...) {
+    ones <- cbind(rep(1,length(y))); colnames(ones) <- c("(Intercept)")
+    if (is.null(target)) target <- ones
+    if (is.null(nuisance)) nuisance <- ones
+    if (is.null(propensity)) propensity <- ones
+    target <- cbind(target)
+    nuisance <- cbind(nuisance)
+    propensity <- cbind(propensity)
     if (missing(mle))
-        mle <- riskreg_mle(y,a,x1,x2,weights=weights,std.err=std.err,type=type)
+        mle <- riskreg_mle(y,a,target,nuisance,weights=weights,std.err=std.err,type=type)
     theta0 <- coef(mle$estimate)
     alpha0 <- start
     if (is.null(alpha0)) {
-        alpha0 <- theta0[seq(NCOL(x1))]
+        alpha0 <- theta0[seq(NCOL(target))]
     }
-    ## propmod <- glm(a ~ -1 + x3, family=binomial, weights=weights)
-    ## gamma <- coef(propmod)
-    ## pr <- predict(propmod, type="response")
-    propmod <- glm.fit(y=a, x=x3, weights=weights, family=binomial("logit"))
+    propmod <- glm.fit(y=a, x=propensity, weights=weights, family=binomial("logit"))
     gamma <- propmod$coefficients
     pr <- propmod$fitted
     omega <- 1
     Alt <- length(grep("2",type))>0
     type <- gsub("[0-9]","",type)
     if (optimal) {
-        pp <- bin_pa(y=y,a=a,x1=x1,x2=x2,par=theta0,type=type)
-        p0 <- pp[,2]; p1 <- pp[,3]; target <- pp[,4]
+        pp <- bin_pa(y=y,a=a,x1=target,x2=nuisance,par=theta0,type=type)
+        p0 <- pp[,2]; p1 <- pp[,3]; targetpar <- pp[,4]
         if (type=="rd" || type=="rd2") {
             ## E(A drho/(Pa(1-Pa))|V) = pr*drho/[p1(1-p1)]
-            nom <- pr*(1-target^2)/(p1*(1-p1))
+            nom <- pr*(1-targetpar^2)/(p1*(1-p1))
             ## E(1/(Pa(1-Pa))|V) =  (1-pr)/[p0(1-p0)] + pr/[p1(1-p1)]
             denom <- (1-pr)/(p0*(1-p0)) + pr/(p1*(1-p1))
             omega <- nom/denom / ( pr*p0*(1-p0) )
@@ -158,7 +191,8 @@ riskreg_semi <- function(y, a,
         pp <- theta0
         if (Alt) pp[seq_along(p)] <- p
         val <- bin_esteq(y=y, a=a,
-                         x1=x1, x2=x2,
+                         x1=target,
+                         x2=nuisance,
                          pr=pr,
                          alpha=p, par=pp,
                          weights=weights1, type=type)
@@ -189,14 +223,14 @@ riskreg_semi <- function(y, a,
         gamma.index <- seq_along(gamma) + length(alpha.index) + length(theta.index)
         pp <- c(alphahat, thetahat)
         U <- function(p) bin_esteq_c(y=y, a=a,
-                              x1=x1, x2=x2, x3=x3,
+                              x1=target, x2=nuisance, x3=propensity,
                               alpha=p[seq_along(alphahat)],
                               par=p[seq_along(thetahat)+length(alphahat)],
                               weights=weights1, type=type)
         DU  <- deriv(U, pp)
         U0 <- u(alphahat, indiv=TRUE)
         ## iid.gamma <- iid(propmod)
-        iid.gamma <- fast_iid(y,pr,x3,weights)
+        iid.gamma <- fast_iid(y,pr,propensity,weights)
         Vprop <- crossprod(iid.gamma)
         iid.theta <- iid(mle$estimate)
         ii <- ( U0 + iid.theta %*% t(DU[,theta.index,drop=FALSE]) +
@@ -208,16 +242,15 @@ riskreg_semi <- function(y, a,
     est <- estimate(coef=opt$par,vcov=V,...)
     est$iid  <- ii
     propmod <- estimate(coef=coef(propmod), vcov=Vprop)
-    structure(list(estimate=est,opt=opt, npar=c(ncol(x1),ncol(x2),ncol(x3)), nobs=length(y),
+    structure(list(estimate=est,opt=opt, npar=c(ncol(target),ncol(nuisance),ncol(propensity)), nobs=length(y),
                    mle=mle, prop=propmod, type=type, estimator="dre"),
               class=c("riskreg.targeted","targeted"))
 }
 
 
-
 ##' @export
 print.summary.riskreg.targeted <- function(x, ...) {
-    print(x$call)
+    if (!is.null(x$call)) print(x$call)
     nam <- x$names
     if (x$type=="rr") {
         cat("\nRelative risk model\n")

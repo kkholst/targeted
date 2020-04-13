@@ -1,12 +1,12 @@
 #+TITLE: Targeted inference (targeted)
 #+AUTHOR: Klaus K. Holst
 #+PROPERTY: header-args:R  :session *R* :cache no :width 550 :height 450
-#+PROPERTY: header-args  :eval never-export :exports results :results output :tangle yes :comments yes 
+#+PROPERTY: header-args  :eval never-export :exports results :results output :tangle yes :comments yes
 #+PROPERTY: header-args:R+ :colnames yes :rownames no :hlines yes
-#+OPTIONS: timestamp:t title:t date:t author:t creator:nil toc:nil 
+#+OPTIONS: timestamp:t title:t date:t author:t creator:nil toc:nil
 #+OPTIONS: h:4 num:t tags:nil d:t
-#+PROPERTY: comments yes 
-#+STARTUP: hideall 
+#+PROPERTY: comments yes
+#+STARTUP: hideall
 #+OPTIONS: toc:t h:4 num:nil tags:nil
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="http://www.biostat.ku.dk/~kkho/styles/orgmode2.css"/>
 #+HTML_HEAD: <link rel="icon" type="image/x-icon" href="http://www.biostat.ku.dk/~kkho/styles/logo.ico"/>
@@ -33,6 +33,8 @@ devtools::install_github("kkholst/targeted")
   library(magrittr)
 #+END_SRC
 
+#+RESULTS:
+
 Simulate some data:
 
 #+BEGIN_SRC R :exports both :results output
@@ -43,7 +45,7 @@ m <- lvm() %>%
     distribution('a', binomial.lvm("logit")) %>%
     binomial.rr('y', 'a', 'lp.target', 'lp.nuisance')
 
-par <- c(a=-2, linpred.target=1, linpred.nuisance=-1, 'lp.nuisance~x'=2)
+par <- c('a'=-2, 'lp.target'=1, 'lp.nuisance'=-1, 'lp.nuisance~x'=2)
 d <- lava::sim(m, n=1e3, seed=1, p=par) %>%
     subset(select=c('y', 'a','x','z'))
 
@@ -51,29 +53,49 @@ head(d)
 #+END_SRC
 
 #+RESULTS:
-: 
+:
 :   y a          x           z
 : 1 0 0 -0.6264538  1.13496509
-: 2 1 0  0.1836433  1.11193185
+: 2 0 0  0.1836433  1.11193185
 : 3 0 0 -0.8356286 -0.87077763
-: 4 0 0  1.5952808  0.21073159
+: 4 1 0  1.5952808  0.21073159
 : 5 1 1  0.3295078  0.06939565
 : 6 0 0 -0.8204684 -1.66264885
 
 
 #+BEGIN_SRC R :exports both :results output
-  fit <- targeted::riskreg(y ~ a | 1 | x+z | x+z, data=d, type="rr")  
+  fit <- targeted::riskreg(y ~ a | 1 | x+z, data=d, type="rr")
   fit
 #+END_SRC
 
 #+RESULTS:
-: 
-: targeted::riskreg(formula = y ~ a | 1 | x
-: z | x
-: z, data = d, 
-:     type = "rr")
-: 
-:             Estimate Std.Err     2.5%  97.5% P-value
-: (Intercept)   0.0576 0.07056 -0.08069 0.1959  0.4143
+:
+:             Estimate Std.Err   2.5% 97.5%   P-value
+: (Intercept)    1.044 0.09489 0.8578  1.23 3.828e-28
 
 
+#+BEGIN_SRC R :exports both
+summary(fit)
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+targeted::riskreg(formula = y ~ a | 1 | x
+z, data = d, type = "rr")
+
+Relative risk model
+  Response:  y
+  Exposure:  a
+
+             Estimate Std.Err     2.5%   97.5%   P-value
+log(RR):
+ (Intercept)  0.05760 0.07056 -0.08069  0.1959 4.143e-01
+log(OP):
+ (Intercept)  0.03552 0.15171 -0.26183  0.3329 8.149e-01
+ x            1.78720 0.16288  1.46797  2.1064 5.171e-28
+ z            0.94609 0.14449  0.66290  1.2293 5.838e-11
+logit(Pr):
+ (Intercept) -1.91430 0.24732 -2.39904 -1.4296 9.938e-15
+ x            1.19242 0.20091  0.79864  1.5862 2.938e-09
+ z            0.86735 0.18617  0.50246  1.2322 3.179e-06
+#+end_example
