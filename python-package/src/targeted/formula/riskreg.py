@@ -6,12 +6,6 @@ import patsy
 def riskreg(data: str, target: str, model='rr', **kwargs):
     """Risk regression with binary exposure
 
-    Examples
-    --------
-    >>> import numpy.random
-    >>> np.random.rand(2)
-    array([ 0.35773152,  0.38568979])  #random
-
     Parameters
     ----------
     data: pandas.DataFrame

@@ -124,36 +124,23 @@ def riskreg_mle(y, a, x2, *args, **kwargs):
     w: list or numpy.matrix, optional
         Weights vector
     model: str
-        rr: relative risk. rd: risk difference
+        Relative risk: ``rr``, Risk difference: ``rd``
 
     Returns
     -------
     Riskreg
         Riskreg object
 
-    Notes
-    -----
-    Notes about the implementation algorithm (if needed).
-
-    This can have multiple paragraphs.
-
-    You may include some math:
-
-    .. math:: X(e^{j\omega } ) = x(n)e^{ - j\omega n}
-
-    And even use a greek symbol like :math:`\omega` inline.
-
     References
     ----------
-    Cite the relevant literature, e.g. [1]_.  You may also cite these
-    references in the notes section above.
+    Details behind the method can be found in [1]_.
 
     .. [1] Richardson, T. S., Robins, J. M., & Wang, L. (2017). On modeling and
        estimation for the relative risk and risk difference. Journal of the
        American Statistical Association, 112(519),
        1121–1130. http://dx.doi.org/10.1080/01621459.2016.1192546
     """
-    
+
     one = np.matrix(np.repeat(1.0, len(y))).transpose()
     x1 = kwargs.get('x1', one)
     w = kwargs.get('weights', one)

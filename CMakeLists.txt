@@ -22,7 +22,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
-  set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)    
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
 endif(CCACHE_FOUND)
 
 if(COTIRE)
@@ -31,11 +31,11 @@ if(COTIRE)
 endif()
 
 ################################################################################
-# Libraries 
+# Libraries
 ################################################################################
 
 find_package(Armadillo 9.500 QUIET)
-if (ARMADILLO_FOUND AND NOT USE_PKG_LIB)	
+if (ARMADILLO_FOUND AND NOT USE_PKG_LIB)
   message ([Main]  " Armadillo FOUND")
 else()
   message ([Main]  " Using Armadillo included in this package")
@@ -47,7 +47,7 @@ message( [Main] " ARMADILLO_LIBRARIES = ${ARMADILLO_LIBRARIES}")
 message( [Main] " ARMADILLO_INCLUDE_DIRS = ${ARMADILLO_INCLUDE_DIRS}")
 
 find_package(Catch2 QUIET)
-if (Catch2_FOUND AND NOT USE_PKG_LIB)	
+if (Catch2_FOUND AND NOT USE_PKG_LIB)
   message ([Main]  " Catch2 FOUND")
 else()
   message ([Main]  " Using Catch2 included in this package")
@@ -56,11 +56,11 @@ else()
 endif()
 
 find_package(spdlog QUIET)
-if (spdlog_FOUND AND NOT USE_PKG_LIB)	
+if (spdlog_FOUND AND NOT USE_PKG_LIB)
   message ([Main]  " spdlog FOUND")
  else()
   set(SPDLOG_BUILD_TESTS OFF)
-  set(SPDLOG_BUILD_TESTS_HO OFF)   
+  set(SPDLOG_BUILD_TESTS_HO OFF)
   message ([Main]  " Using spdlog included in this package")
   add_subdirectory("lib/spdlog")
   include_directories("lib/spdlog/include")
@@ -83,15 +83,17 @@ message( [Main] " LIBTARGET_DIR = ${LIBTARGET_DIR}")
 target_link_libraries(target PRIVATE armadillo)
 set_target_properties(target PROPERTIES VERSION ${PROJECT_VERSION})
 target_include_directories(target PUBLIC ${LIBTARGET_INC})
-set_target_properties(target PROPERTIES PUBLIC_HEADER ${LIBTARGET_PUBLIC})
+set_target_properties(target PROPERTIES PUBLIC_HEADER "${LIBTARGET_PUBLIC}")
 include(GNUInstallDirs)
 configure_file(config/target.pc.in target.pc @ONLY)
 
 install(TARGETS target
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/target)
 install(FILES ${CMAKE_BINARY_DIR}/target.pc
-    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
 ################################################################################
 # Executables
@@ -111,7 +113,7 @@ set(TESTS
   "${TEST_DIR}/test_main.cpp"
   "${TEST_DIR}/test_misc.cpp"
   "${TEST_DIR}/test_mlogit.cpp"
-  "${TEST_DIR}/test_target.cpp"  
+  "${TEST_DIR}/test_target.cpp"
   )
 
 add_executable("${PROJECT_NAME}_test" ${TESTS})
@@ -123,7 +125,7 @@ include( CTest )
 add_test(NAME "${PROJECT_NAME}_test" COMMAND "${PROJECT_NAME}_test")
 
 add_custom_target(test_memcheck
-    COMMAND ${CMAKE_CTEST_COMMAND} 
+    COMMAND ${CMAKE_CTEST_COMMAND}
         --force-new-ctest-process --test-action memcheck
     COMMAND cat "${CMAKE_BINARY_DIR}/Testing/Temporary/MemoryChecker.*.log")
 
@@ -146,6 +148,3 @@ endif()
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   message([DEBUG])
 endif()
-
-
-

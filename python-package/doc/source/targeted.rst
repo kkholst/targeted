@@ -12,13 +12,6 @@ Subpackages
 Submodules
 ----------
 
-targeted.get\_data module
--------------------------
-
-.. automodule:: targeted.get_data
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 
 targeted.riskreg module
