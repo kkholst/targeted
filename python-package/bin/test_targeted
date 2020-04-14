@@ -17,7 +17,7 @@ except ModuleNotFoundError:
 logger = logging.getLogger(__name__)
 import argparse
 
-d = tg.get_data()
+d = tg.getdata()
 
 def test(n=1):
     if n==0:
@@ -27,11 +27,11 @@ def test(n=1):
         print("Correct nuisance model")
         val = tgf.riskreg(d, 'y~a', nuisance='x+z')
     elif n==2:
-        print("Incorrect nuisance model")        
+        print("Incorrect nuisance model")
         val = tgf.riskreg(d, 'y~a', nuisance='x')
     else:
-        print("Incorrect nuisance model")        
-        val = tgf.riskreg(d, 'y~a', nuisance='z')        
+        print("Incorrect nuisance model")
+        val = tgf.riskreg(d, 'y~a', nuisance='z')
     logger.info(val)
 
 if __name__ == '__main__':
