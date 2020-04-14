@@ -1,7 +1,7 @@
 
 # Introduction
 
-This library provides C++ classes for [targeted inference](targeted.md) 
+This library provides C++ classes for [targeted inference](targeted.md)
 and semi-parametric efficient estimators as
 well as bindings for *python* and *R*. The library also contains
 implementation of parametric models (including different discrete
@@ -19,11 +19,11 @@ al. 2010). Various missing data estimators and causal inference models
 library('targeted')
 
 m <- lvm(y[-2] ~ 1*x,
-         linpred.target[1] ~ 1,
-         linpred.nuisance[-1] ~ 2*x)
+         lp.target[1] ~ 1,
+         lp.nuisance[-1] ~ 2*x)
 distribution(m, ~a) <- binomial.lvm('logit')
-m <- binomial.rr(m, 'y', 'a', 'linpred.target', 'linpred.nuisance')
-dd <- sim(m,5e2,seed=1)
+m <- binomial.rr(m, 'y', 'a', 'lp.target', 'lp.nuisance')
+dd <- sim(m, 5e2, seed=1)
 
 summary(fit <- targeted::riskreg(y ~ a | 1 | x | x, data=dd, type="rr"))
 ```
@@ -34,12 +34,12 @@ summary(fit <- targeted::riskreg(y ~ a | 1 | x | x, data=dd, type="rr"))
 >   Exposure:  a
 >
 >             Estimate Std.Err    2.5%    97.5%   P-value
-> log(RR):                                                
+> log(RR):
 >  (Intercept)  0.86136 0.11574  0.6345  1.08820 9.895e-14
-> log(OP):                                                
+> log(OP):
 >  (Intercept) -0.88518 0.22802 -1.3321 -0.43827 1.036e-04
 >  x            2.35193 0.28399  1.7953  2.90854 1.213e-16
-> logit(Pr):                                              
+> logit(Pr):
 >  (Intercept) -0.07873 0.08857 -0.2523  0.09485 3.740e-01
 >  x            0.02894 0.08291 -0.1336  0.19145 7.270e-01
 > ```
@@ -49,7 +49,7 @@ summary(fit <- targeted::riskreg(y ~ a | 1 | x | x, data=dd, type="rr"))
 import targeted as tg
 from targeted.formula import riskreg
 
-d = tg.get_data()
+d = tg.getdata()
 val = riskreg(d, 'y~a', interaction='x', nuisance='x+z')
 print(val)
 ```
@@ -61,9 +61,11 @@ print(val)
 ## C++
 ```cpp
 #include <target/target.h>
-
 using namespace arma;
 void main() {
+
+    ...
+
 	targeted::RR<double> model(y, a, x1, x2, x3, p, w);
 	mat pp0 = model.TargetedBinary::pa();
     mat U = model.score(false);
@@ -81,14 +83,14 @@ python and R libraries.
 To compile and run the test program (depends on CMake and ninja)
 ```
 make
-```	
+```
 
 Unit tests and code coverage
 ```
 make test coverage
 ```
 
-Syntax check (requires *cppcheck* and *cclint*) 
+Syntax check (requires *cppcheck* and *cclint*)
 ```
 make check
 ```
@@ -117,7 +119,7 @@ make py
 
 To build the shared library ninja(s) are needed.
 ```
-pip install ninja cclint 
+pip install ninja cclint
 
 ```
 
@@ -129,4 +131,3 @@ The following are included as submodules:
 ```
 make init
 ```
-

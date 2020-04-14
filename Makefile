@@ -11,7 +11,7 @@ INSTALL_DIR = $(HOME)/local
 ARG =  -Db_coverage=true $(ASAN) -Dprefix=$(INSTALL_DIR)
 PKGLIB = OFF
 IMG=# Dockerfile postfix
-BUILD = -DUSE_PKG_LIB=$(PKGLIB) -DCOTIRE=OFF -DCMAKE_BUILD_TYPE=Debug \
+BUILD = -DUSE_PKG_LIB=$(PKGLIB) -DCOTIRE=OFF -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) -DCMAKE_BUILD_TYPE=Debug \
   -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON -Wno-dev
 ifneq ($(NINJA),)
   BUILD := $(BUILD) -GNinja
@@ -26,7 +26,7 @@ TESTPY = targeted_test
 
 ##################################################
 
-default: checkinit build runr
+default: build runr
 
 all: clean run
 
@@ -39,19 +39,19 @@ clean: cleanpy
 	@$(MAKE) pkg=targeted cleanr
 	@rm -Rf src/*.o src/*.so
 
-.PHONY: init init-submodules checkinit
+.PHONY: init
 init: clean
 	@echo "Build options: $(BUILD)"
-	@echo $(shell pwd)
-	@mkdir -p build
-	@echo "Comfiguration..."
+	@mkdir -p $(BUILD_DIR)
 	@cd build; $(CMAKE) .. $(BUILD)
 
-checkinit:
-	@if [ ! -f "$(BUILD_DIR)/build.ninja" ]; then $(MAKE) init; fi
+.PHONY: checkinit
+checkinit: init-submodules
+	@if [ ! -f "$(BUILD_DIR)/CMakeCache.txt" ]; then $(MAKE) init; fi
 
+.PHONY: init-submodules
 init-submodules:
-	@if [ -z "`find \"lib/armadillo\" -mindepth 1 -exec echo notempty \; -quit`" ]; then \
+	@if [ ! -f "lib/armadillo/.git" ]; then \
 	$(GIT) submodule update --init --recursive; fi
 
 .PHONY: run
@@ -63,7 +63,7 @@ run:
 	-exec {} \;
 
 .PHONY: build
-build:
+build: checkinit
 	@if [ -f $(BUILD_DIR)/build.ninja ]; then \
 	$(NINJA) -C $(BUILD_DIR) $(NINJA_BUILD_OPT); \
 	else \
@@ -82,19 +82,22 @@ uninstall:
 ## R package
 ##################################################
 
-.PHONY: r cleanr buildr runr testr roxygen checkr rcheck
+.PHONY: buildr
 buildr: cleanr
 	@$(R) --slave -e "source('config/utilities.R'); \
 	load_packages(c('Rcpp', 'RcppArmadillo', 'lava', 'optimx', 'futile.logger'))"
 	@$(R) --slave -e "Rcpp::compileAttributes('R-package/${pkg}')"
 	@$(R) CMD INSTALL R-package/${pkg}
 
+.PHONY: testr
 testr:
 	@$(R) -e 'testthat::test_package("./R-package/${pkg}/")'
 
+.PHONY: runr
 runr:
 	@cd misc; $(R) --silent -f $(TESTR).R
 
+.PHONY: roxygen
 roxygen:
 	@$(R) -e 'roxygen2::roxygenize("R-package/${pkg}")'
 
@@ -103,6 +106,7 @@ pkg_dep := $(shell if [ -f "$(dep_file)" ]; then cat ${dep_file}; fi)
 pkg_cpp = $(foreach module, ${pkg_dep}, $(patsubst %, src/%.cpp, $(module)))
 pkg_hpp = $(foreach module, $(pkg_dep), $(patsubst %, include/target/%.hpp, $(module)))
 
+.PHONY: exportr
 exportr:
 	@rm -Rf $(BUILD_DIR)/R/$(pkg)
 	@mkdir -p $(BUILD_DIR)/R/$(pkg)
@@ -118,15 +122,18 @@ exportr:
 	sed -i '/^OBJECTS\|SOURCES/d' $(BUILD_DIR)/R/$(pkg)/src/Makevars
 	cd $(BUILD_DIR)/R; $(R) CMD build $(pkg) --compact-vignettes=gs+qpdf --resave-data=best
 
+.PHONY: checkr
 checkr: exportr
 	cd $(BUILD_DIR)/R; $(R) CMD check `$(GETVER) $(pkg)` --timings --as-cran --no-multiarch --run-donttest
 
-
+.PHONY: rcheck
 rcheck:
 	cd R-package; $(R) CMD check $(pkg) --no-multiarch
 
+.PHONY: r
 r: buildr runr
 
+.PHONY: cleanr
 cleanr:
 	@rm -Rf R-package/${pkg}/src/*.o R-package/${pkg}/src/*.so R-package/${pkg}.Rcheck
 
@@ -187,10 +194,10 @@ markdown:
 ##################################################
 
 .PHONY: t test testall
-t:	run
+t:	checkinit run
 	@$(NINJA) -C $(BUILD_DIR) test
 
-test:	build
+test:	checkinit build
 	build/$(TARGET)_test -s
 
 testall: test r py testr testpy
