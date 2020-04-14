@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 ######################################################################
 
-d = tg.get_data()
+d = tg.getdata()
 n = d.shape[0]
 y, X2 = patsy.dmatrices('y ~ x+z', d)
 a = d['a'].values.reshape(n, 1)
