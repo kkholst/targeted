@@ -29,7 +29,7 @@ author = u'Klaus Kähler Holst'
 
 release = targeted.__version__
 
-html_logo = '../../../doc/images/targeted.png'
+html_logo = '../../../doc/images/small.png'
 
 # -- General configuration ---------------------------------------------------
 

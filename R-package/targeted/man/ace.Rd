@@ -7,10 +7,11 @@
 \usage{
 ace(
   formula,
-  exposure = NULL,
   data,
   weights,
   binary = TRUE,
+  nuisance = NULL,
+  propensity = nuisance,
   all,
   missing = FALSE,
   labels = NULL,
@@ -20,13 +21,15 @@ ace(
 \arguments{
 \item{formula}{Formula (see details below)}
 
-\item{exposure}{optional exposure formula}
-
 \item{data}{data.frame}
 
 \item{weights}{optional frequency weights}
 
 \item{binary}{Binary response (default TRUE)}
+
+\item{nuisance}{outcome regression formula}
+
+\item{propensity}{propensity model formula}
 
 \item{all}{If TRUE all standard errors are calculated (default TRUE when exposure only has two levels)}
 
@@ -35,15 +38,28 @@ ace(
 \item{labels}{Optional treatment labels}
 
 \item{...}{Additional arguments to lower level functions}
+
+\item{exposure}{optional exposure formula}
 }
 \description{
 Augmented Inverse Probability Weighting estimator for the Average Causal Effect.
+}
+\details{
+The formula may either be specified as:
+response ~ treatment | nuisance-formula | propensity-formula
+
+For example: \code{ace(y~a | x+z | x*z, data=...)}
+
+Alternatively, as a list: \code{ace(list(y~a, ~x+z, ~x*z), data=...)}
+
+Or using the nuisance (and propensity argument): \code{ace(y~a, nuisance=~x+z, ...)}
 }
 \examples{
 m <- lvm(y ~ a+x, a~x)
 distribution(m,~ a+y) <- binomial.lvm()
 d <- sim(m,1e3,seed=1)
-a <- ace(y ~ a|x|x, data=d)
+
+a <- ace(y ~ a, nuisance=~x, data=d)
 summary(a)
 
 # Multiple treatments
