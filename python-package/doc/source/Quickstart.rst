@@ -23,9 +23,25 @@ Risk regression
 
 As an illustration data is loaded from the package
 
+.. ipython:: python
+
+   import targeted as tg
+   d = tg.getdata() # returns a Pandas DataFrame
+   print(d.head())
+
+.. ipython:: python
+
+   import numpy as np
+   from patsy import dmatrices
+
+   y, X = dmatrices('y ~ x+z', d)
+   a = d['a']
+   ones = np.ones((y.size,1))
+   tg.riskreg(y=y, a=a, x1=ones, x2=X)
+
 .. code:: python
 
-    import target as tg
+    import targeted as tg
 
     d = tg.getdata() # returns a Pandas DataFrame
     print(d.head())

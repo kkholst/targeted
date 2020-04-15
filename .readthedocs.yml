@@ -18,6 +18,5 @@ formats:
 python:
   version: 3.7
   install:
-    - requirements: config/requirements.txt
+    - requirements: python-package/doc/source/requirements.txt
     - method: pip
-      path: python-package
