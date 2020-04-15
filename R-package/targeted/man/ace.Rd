@@ -38,8 +38,6 @@ ace(
 \item{labels}{Optional treatment labels}
 
 \item{...}{Additional arguments to lower level functions}
-
-\item{exposure}{optional exposure formula}
 }
 \description{
 Augmented Inverse Probability Weighting estimator for the Average Causal Effect.
@@ -67,7 +65,7 @@ m <- lvm(y ~ a+x, a~x)
 distribution(m,~ y) <- binomial.lvm()
 m <- ordinal(m, K=4, ~a)
 transform(m, ~a) <- factor
-d <- sim(m,1e5)
+d <- sim(m,1e4)
 (a <- ace(y~a|a*x|x, data=d))
 
 # Comparison with randomized experiment
