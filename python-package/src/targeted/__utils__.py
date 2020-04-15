@@ -1,7 +1,11 @@
-import targeted.__targeted_c__ as targetc
 import numpy as np
 import numpy.linalg as npl
 import statsmodels.api as sm
+try:
+    import targeted.__targeted_c__ as targetc
+except ImportError:
+    pass
+
 
 def iid(x):
     """Returns the estimated influence function (iid decomposition)

@@ -3,7 +3,6 @@
 # Copyright (c) 2019-2020 Klaus K. Holst.  All rights reserved.
 
 import targeted as tg
-from targeted import datatype as inp
 import numpy as np
 import statsmodels.api as sm
 from scipy import optimize
@@ -43,7 +42,7 @@ class riskreg:
             denom = (1-pr)*p0/(1-p0) + pr*p1/(1-p1)
             omega = nom/denom / (pr*(1-p0))
 
-        w = self.model.data(inp.w)
+        w = self.model.data(tg.datatype.w)
         w = np.multiply(w.flatten(), omega).reshape(n, 1)
         self.model.weights(w)
         self.model.update(par)
@@ -87,7 +86,7 @@ class riskreg:
         self.mle = riskreg_mle(y, a, x2=x2, x1=x1, weights=w, model=self.modeltype)
         self.mle_coef = self.mle['x']
 
-        pr = tg.expit(np.matmul(self.model.data(inp.x3), self.propensity_coef))
+        pr = tg.expit(np.matmul(self.model.data(tg.datatype.x3), self.propensity_coef))
         self.__stageone(pr)
         alpha0 = self.mle_coef[:x1.shape[1]].reshape(x1.shape[1], 1)
 

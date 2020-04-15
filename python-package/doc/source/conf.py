@@ -13,7 +13,6 @@
 
 import os
 import sys
-# from datetime import date
 import targeted
 
 
