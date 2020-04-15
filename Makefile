@@ -238,19 +238,19 @@ ifdef ($IMG)
 endif
 
 .PHONY: dockerbuild dockerrun docker export
-dockerbuild:
-	@rm -Rf $(BUILD_DIR)/export;
-	$(GIT) clone . $(BUILD_DIR)/export
-	$(GIT) submodule foreach '$(GIT) clone . ../../$(BUILD_DIR)/export/$(TARGET)/$$path'
+dockerbuild: export
 	@$(CONTAINER_RUNTIME) build . -f Dockerfile --network=host -t $(DOCKERTAG)
 
 export:
-	@rm -Rf ${PWD}/tmp/$(TARGET)
-	@mkdir -p ${PWD}/tmp/$(TARGET)
-	@git archive HEAD | (cd ${PWD}/tmp/$(TARGET); tar x)
-	@git submodule foreach 'curdir=${PWD} cd ${PWD}/$$path; git archive HEAD | tar -x -C ${PWD}/tmp/$(TARGET)/$$path'
-	@echo "Exported to '${PWD}/tmp/$(TARGET)'"
-	@chmod -R 777 ${PWD}/tmp/$(TARGET)
+	@rm -Rf $(BUILD_DIR)/export;
+	$(GIT) clone . $(BUILD_DIR)/export
+	$(GIT) submodule foreach '$(GIT) clone . ../../$(BUILD_DIR)/export/$(TARGET)/$$path'
+# @rm -Rf ${PWD}/tmp/$(TARGET)
+# @mkdir -p ${PWD}/tmp/$(TARGET)
+# @git archive HEAD | (cd ${PWD}/tmp/$(TARGET); tar x)
+# @git submodule foreach 'curdir=${PWD} cd ${PWD}/$$path; git archive HEAD | tar -x -C ${PWD}/tmp/$(TARGET)/$$path'
+# @echo "Exported to '${PWD}/tmp/$(TARGET)'"
+# @chmod -R 777 ${PWD}/tmp/$(TARGET)
 
 docker:
 	$(CONTAINER_RUNTIME) run --user `id -u` -ti --rm --privileged -v ${PWD}:/data $(TARGET) ${CMD}
