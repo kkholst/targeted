@@ -3,7 +3,7 @@
   @author Klaus K. Holst
   @copyright 2018-2020, Klaus Kähler Holst
 
-  @brief R bindings for utility functions. 
+  @brief R bindings for utility functions.
 
   The relevant bindings are created in \c RcppExports.cpp, \c RcppExports.h
   with \c Rcpp::compileAttributes()
@@ -14,7 +14,7 @@
 // [[Rcpp::plugins(cpp11)]]
 
 #include <RcppArmadillo.h>
-#include "utils_interface.hpp"
+#include "utils_interface.h"
 #include <target/utils.hpp>
 #include <target/glm.hpp>
 
@@ -31,7 +31,7 @@ Rcpp::List clusterid(const arma::uvec &id) {
 arma::mat groupsum(const arma::mat &x,
 		   const arma::uvec &cluster,
 		   bool reduce=true) {
-  
+
   return target::groupsum(x, cluster, reduce);
 }
 
@@ -39,5 +39,3 @@ arma::mat groupsum(const arma::mat &x,
 arma::mat softmax(arma::mat &lp, bool ref=true, bool log=false) {
   return target::softmax(lp, ref, log);
 }
-
-  
