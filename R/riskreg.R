@@ -14,11 +14,22 @@
 ##' @param start optional starting values
 ##' @param semi Semi-parametric (double-robust) estimate (FALSE gives MLE)
 ##' @param ... additional arguments to unconstrained optimization routine (nlminb)
+##' @references  Richardson, T. S., Robins, J. M., & Wang, L. (2017). On modeling and
+##'  estimation for the relative risk and risk difference. Journal of the
+##'  American Statistical Association, 112(519),
+##'  1121–1130. http://dx.doi.org/10.1080/01621459.2016.1192546
 ##' @details
 ##' The 'formula' argument should be given as
-##' response ~ exposure | target | nuisance
+##' \code{response ~ exposure | target-formula | nuisance-formula}
 ##' or
-##' response ~ exposure | target | nuisance | propensity
+##' \code{response ~ exposure | target | nuisance | propensity}
+##'
+##' E.g., \code{riskreg(y ~ a | 1 | x+z | x+z, data=...)}
+##'
+##' Alternatively, the model can specifed using the target, nuisance and propensity arguments:
+##' \code{riskreg(y ~ a, target=~1, nuisance=~x+z, ...)}
+##'
+##' The \code{riskreg_fit} function can be used with matrix inputs rather than formulas.
 ##'
 ##' @export
 ##' @aliases riskreg riskreg_fit riskreg_mle

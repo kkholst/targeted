@@ -1,5 +1,5 @@
 
-##' Targeted inference 
+##' Targeted inference
 ##'
 ##' Semi-parametric regression models with nuisance parameters.
 ##'
@@ -26,16 +26,4 @@
 ##'
 loadModule("riskregmodel", TRUE)
 loadModule("dcmodel", TRUE)
-NULL
-
-##' For internal use
-##'
-##' @title For internal use
-##' @name Us
-##' @rdname internal
-##' @author Klaus K. Holst
-##' @keywords utilities
-##' @export
-##' @aliases
-##' Us
 NULL
