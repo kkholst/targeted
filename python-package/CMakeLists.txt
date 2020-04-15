@@ -36,11 +36,10 @@ FIND_PACKAGE(PythonInterp REQUIRED 3)
 FIND_PACKAGE(PythonLibs REQUIRED 3)
 
 find_package(Armadillo 9.500 QUIET)
-if (ARMADILLO_FOUND)	
+if (ARMADILLO_FOUND)
   message ([Main]  " Armadillo FOUND")
 else()
   message ([Main]  " Using Armadillo included in this package")
-  find_package(LAPACK REQUIRED)
   set(DETECT_HDF5 OFF CACHE BOOL "Disable Armadillo HDF5 support")
   add_subdirectory(lib/armadillo)
 endif ()
@@ -61,7 +60,7 @@ set(TESTS
   "${TEST_DIR}/test_main.cpp"
   "${TEST_DIR}/test_c.cpp")
 
-if (RUN_TESTS) 
+if (RUN_TESTS)
   find_package(Catch2 QUIET)
   if (Catch2_FOUND)
     message ([Main]  " Catch2 FOUND")
@@ -71,7 +70,7 @@ if (RUN_TESTS)
     include_directories("lib/catch2/include")
   endif()
   add_executable("${PROJECT_NAME}_test" ${TESTS})
-  target_link_libraries("${PROJECT_NAME}_test" PRIVATE armadillo Catch2::Catch2)  
+  target_link_libraries("${PROJECT_NAME}_test" PRIVATE armadillo Catch2::Catch2)
 endif()
 
 ################################################################################
@@ -79,7 +78,7 @@ endif()
 ################################################################################
 
 find_package(pybind11 QUIET)
-if (pybind11_FOUND)	
+if (pybind11_FOUND)
   message([Main]  " pybind11 FOUND")
 else()
   message([Main]  " Using pybind11 included in this package")
