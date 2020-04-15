@@ -14,6 +14,7 @@
 import os
 import sys
 # from datetime import date
+#import targeted
 
 autodoc_mock_imports = ['targeted']
 
@@ -28,7 +29,9 @@ copyright = u'2019-2020, Klaus Kähler Holst'
 author = u'Klaus Kähler Holst'
 # The full version, including alpha/beta/rc tags
 
-release = targeted.__version__
+#import .../src/targeted/__about__.py
+release = '0.0.25'
+#__version__
 
 html_logo = '../../../doc/images/targeted.png'
 
