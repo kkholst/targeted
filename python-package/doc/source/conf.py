@@ -14,9 +14,8 @@
 import os
 import sys
 # from datetime import date
-#import targeted
+import targeted
 
-autodoc_mock_imports = ['targeted']
 
 file_loc = os.path.split(__file__)[0]
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(file_loc), '../../src/targeted')))
@@ -29,9 +28,7 @@ copyright = u'2019-2020, Klaus Kähler Holst'
 author = u'Klaus Kähler Holst'
 # The full version, including alpha/beta/rc tags
 
-#import .../src/targeted/__about__.py
-release = '0.0.25'
-#__version__
+release = targeted.__version__
 
 html_logo = '../../../doc/images/targeted.png'
 
