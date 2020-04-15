@@ -4,7 +4,7 @@ Title: Targeted inference
 Version: 0.1
 Date: 2020-04-15
 Authors@R: c(person("Klaus K.", "Holst", email="klaus@holst.it", role=c("aut", "cre")))
-Author: Klaus K. Holst
+Author: Klaus K. Holst [aut, cre]
 Maintainer: Klaus K. Holst <klaus@holst.it>
 Description: Various methods for targeted and semiparametric inference including
 	     augmented inverse probability weighted estimators for missing data and
