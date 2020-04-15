@@ -112,7 +112,7 @@ library(targeted)
 ```
 
 This automatically imports [lava](https://arxiv.org/abs/1206.3421)
-[(CRAN)](https://cran.r-project.org/web/packages/lava/)
+[(CRAN)](https://CRAN.R-project.org/package=lava)
 which we can use to simulate from the Relative-Risk Odds-Product (RR-OP) model.
 
 ```{r}
