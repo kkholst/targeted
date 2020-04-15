@@ -9,7 +9,7 @@ ENV PYPATH=/opt/python/$VER/bin
 
 RUN $PYPATH/pip install cmake ninja auditwheel
 
-COPY build/export/target /root/
+COPY build/export/target /root/target
 
 WORKDIR /root/target
 
