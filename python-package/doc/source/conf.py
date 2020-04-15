@@ -15,6 +15,8 @@ import os
 import sys
 # from datetime import date
 
+autodoc_mock_imports = ['targeted']
+
 file_loc = os.path.split(__file__)[0]
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(file_loc), '../../src/targeted')))
 # sys.path.insert(0, os.path.abspath('../../src/'))
@@ -25,7 +27,7 @@ project = 'targeted'
 copyright = u'2019-2020, Klaus Kähler Holst'
 author = u'Klaus Kähler Holst'
 # The full version, including alpha/beta/rc tags
-import targeted
+
 release = targeted.__version__
 
 html_logo = '../../../doc/images/targeted.png'
@@ -72,7 +74,6 @@ htmlhelp_basename = 'targeteddoc'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-
 # -- Extension configuration -------------------------------------------------
 
 # -- Options for todo extension ----------------------------------------------
@@ -82,7 +83,6 @@ todo_include_todos = True
 
 # use RTFD theme locally
 # on_rtd is whether we are on readthedocs.org, this line of code grabbed from docs.readthedocs.org
-import os
 
 on_rtd = os.environ.get("READTHEDOCS", None) == "True"
 
