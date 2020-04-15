@@ -120,7 +120,7 @@ exportr:
 	cp $(pkg_hpp) $(BUILD_DIR)/R/$(pkg)/inst/include/target; \
 	fi
 	sed -i '/^OBJECTS\|SOURCES/d' $(BUILD_DIR)/R/$(pkg)/src/Makevars
-	cd $(BUILD_DIR)/R; $(R) CMD build $(pkg) --compact-vignettes=gs+qpdf --resave-data=best
+#cd $(BUILD_DIR)/R; $(R) CMD build $(pkg) --compact-vignettes=gs+qpdf --resave-data=best
 
 .PHONY: checkr
 checkr: exportr

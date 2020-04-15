@@ -6,7 +6,7 @@ jobs:
 
     - name: "python: source"
       language: python
-      # Only run on deploy branch or commits tagged 'py_v...'      
+      # Only run on deploy branch or commits tagged 'py_v...'
       if: (branch IN (deploy)) OR (tag =~ ^py_v)
       cache: pip
       addons:
@@ -31,13 +31,13 @@ jobs:
           python3 -m pip install twine
           python3 -m twine upload dist/*.tar.gz
           fi
-          
+
     # --------------------------------------------------------------------------------
 
     - name: "python: linux wheels"
       if: (branch IN (deploy)) OR (tag =~ ^py_v)
       services: docker
-      language: python      
+      language: python
       install:
         - python3 -m pip install cibuildwheel==1.3.0
       env:
@@ -54,7 +54,7 @@ jobs:
           fi
 
     # --------------------------------------------------------------------------------
-   
+
     - name: "python: osx wheels"
       if: (branch IN (deploy)) OR (tag =~ ^py_v)
       os: osx
@@ -75,7 +75,7 @@ jobs:
           fi
 
     # --------------------------------------------------------------------------------
-         
+
     # - name: "Python: windows wheels"
     #   os: windows
     #   language: shell
@@ -127,9 +127,10 @@ jobs:
           packages:
             - r-cran-covr
             - r-cran-futile.logger
+            - r-cran-knitr
             - r-cran-lava
             - r-cran-numderiv
-            - r-cran-optimx            
+            - r-cran-optimx
             - r-cran-rcpp
             - r-cran-rcpparmadillo
             - r-cran-testthat
@@ -159,7 +160,7 @@ jobs:
             - r-cran-rcpparmadillo
             - r-cran-testthat
       install:
-        - echo            
+        - echo
       script:
         - make checkr pkg=gof
 
@@ -177,7 +178,7 @@ jobs:
         - pip: true
         - apt: true
       install:
-        - pip3 install pytest pytest-runner pytest-cov scipy patsy numpy pandas statsmodels            
+        - pip3 install pytest pytest-runner pytest-cov scipy patsy numpy pandas statsmodels
       script:
         - cd python-package
         - python3 setup.py install
@@ -186,4 +187,3 @@ jobs:
         - python3 -m targeted
 
     # --------------------------------------------------------------------------------
-
