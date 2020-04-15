@@ -24,17 +24,6 @@ class CMakeExtension(Extension):
         Extension.__init__(self, name, sources=[])
         self.sourcedir = os.path.abspath(sourcedir)
 
-def get_python_library(python_lib_dir):
-    if python_version[0] == 2:
-        python_lib_name = 'libpython{}.{}'
-    else:
-        python_lib_name = 'libpython{}m.{}'
-
-    python_lib_name = python_lib_name.format(python_version, library_extension)
-    python_library = os.path.join(python_lib_dir, python_lib_name)
-    return python_library
-       
-
 class CMakeBuild(build_ext):
     def run(self):
         try:
@@ -113,6 +102,13 @@ class CMakeBuild(build_ext):
 
 ext_modules = [CMakeExtension(pkg+'/__'+pkg+'_c__')]
 scripts = list(map(lambda x: 'bin/'+x, os.listdir('bin')))
+cmdclass = dict(build_ext=CMakeBuild)
+
+# do not require installation of extensions if built by ReadTheDocs
+if 'READTHEDOCS' in os.environ and os.environ['READTHEDOCS'] == 'True':
+    ext_modules = []
+    if 'build_ext' in cmdclass:
+        del cmdclass['build_ext']
 
 setuptools.setup(
     name=about["__name__"],
@@ -126,7 +122,7 @@ setuptools.setup(
     packages=setuptools.find_packages('src'),
     package_dir={'': 'src'},
     ext_modules=ext_modules,
-    cmdclass=dict(build_ext=CMakeBuild),
+    cmdclass=cmdclass,
     zip_safe=False,
     license=about["__license__"],
     classifiers=[
