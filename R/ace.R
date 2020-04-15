@@ -29,7 +29,6 @@ aipw <- function(formula, data, propensity=NULL, ...) {
 ##' @param missing If TRUE a missing data (AIPW) estimator is returned
 ##' @param labels Optional treatment labels
 ##' @param ... Additional arguments to lower level functions
-##' @param exposure optional exposure formula
 ##' @details
 ##' The formula may either be specified as:
 ##' response ~ treatment | nuisance-formula | propensity-formula
@@ -55,7 +54,7 @@ aipw <- function(formula, data, propensity=NULL, ...) {
 ##' distribution(m,~ y) <- binomial.lvm()
 ##' m <- ordinal(m, K=4, ~a)
 ##' transform(m, ~a) <- factor
-##' d <- sim(m,1e5)
+##' d <- sim(m,1e4)
 ##' (a <- ace(y~a|a*x|x, data=d))
 ##'
 ##' # Comparison with randomized experiment
