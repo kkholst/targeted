@@ -19,5 +19,5 @@ python:
   version: 3.7
   install:
     - requirements: config/requirements.txt
-    - method: setuptools
-    - path: python-package
+    - method: pip
+      path: python-package
