@@ -10,7 +10,7 @@ warnings_are_errors: true
 
 cache: packages
 
-r_binary_packages:
+r_packages:
   - covr
 
 after_success:
