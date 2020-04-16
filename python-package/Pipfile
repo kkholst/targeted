@@ -4,11 +4,13 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+breathe = ">=4.13.0"
+exhale
 pytest = "*"
 flake8 = "*"
 pytest-runner = "*"
 pytest-cov = "*"
-sphinx = "*"
+sphinx = ">=2.0"
 sphinx-autobuild = "*"
 sphinx-autodoc-typehints = "*"
 sphinx-rtd-theme = "*"
