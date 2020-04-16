@@ -13,16 +13,16 @@
 #+HTML: <a href="http://cran.rstudio.com/web/packages/targeted/index.html"><img src="http://www.r-pkg.org/badges/version/targeted"></a>
 #+HTML: <a href="http://cranlogs.r-pkg.org/downloads/total/last-month/targeted"><img src="http://cranlogs.r-pkg.org/badges/targeted"></a>
 
-** Installation
+* Installation
 
 The development version can be installed directly from =github=:
 #+BEGIN_SRC R :exports both :eval never
 remotes::install_github("kkholst/targeted")
 #+END_SRC
 
-** Examples
+* Examples
 
-*** Targeted risk regression
+** Targeted risk regression
 #+BEGIN_SRC R
   library(targeted)
   library(magrittr)
@@ -68,7 +68,7 @@ head(d)
 Here the same design matrix is used for both the propensity model and
 the nuisance parameter (odds-product) model
 
-#+BEGIN_SRC R :exports both
+#+BEGIN_SRC R :exports both :results output
 summary(fit)
 #+END_SRC
 
@@ -113,7 +113,7 @@ Or vice-versa
 : (Intercept)   0.9931 0.03597 0.9226 1.064 8.286e-168
 
 Whereas the MLE yields a biased estimate of the relative risk:
-#+BEGIN_SRC R
+#+BEGIN_SRC R :exports both :results output
   fit_mle <- with(d, riskreg_mle(y, a, x1=model.matrix(~1,d), x2=model.matrix(~z, d)))
   estimate(fit_mle, 1)
 #+END_SRC
@@ -129,7 +129,7 @@ Whereas the MLE yields a biased estimate of the relative risk:
 
 To obtain an estimate of the risk-difference (here wrong model) we simply chance the =type= argument
 
-#+BEGIN_SRC R
+#+BEGIN_SRC R :exports both :results output
 riskreg(y ~ a, nuisance=~x+z, data=d, type="rd")
 #+END_SRC
 
@@ -138,11 +138,11 @@ riskreg(y ~ a, nuisance=~x+z, data=d, type="rd")
 : (Intercept)   0.5102 0.01613 0.4786 0.5418 1.135e-219
 
 
-*** Interactions
+** Interactions
 
 Interactions with the exposure can be examined with the =target= argument
 
-#+BEGIN_SRC R
+#+BEGIN_SRC R :exports both :results output
 riskreg(y ~ a, target=a~x, nuisance=~x+z, data=d, type="rr")
 #+END_SRC
 
