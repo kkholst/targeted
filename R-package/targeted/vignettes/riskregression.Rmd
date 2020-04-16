@@ -188,9 +188,8 @@ d <- sim(m, 1e4, p=p, seed=1)
 head(d)
 ```
 
-Notice, that in this simulated data the **target parameter
-\(\mu_{RR}\) **
-has been set to `lp.target =` `r p['lp.target']`.
+Notice, that in this simulated data the **target parameter**
+\(\mu_{RR}\) has been set to `lp.target =` `r p['lp.target']`.
 
 Estimation
 ============
