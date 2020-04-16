@@ -89,7 +89,7 @@ make check coverage
 make valgrind
 ```
 
-The documentation is based on Doxygen and can be compiled by
+The documentation is based on ``doxygen`` and can be compiled by
 ```
 make doc
 ```
