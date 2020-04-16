@@ -46,7 +46,6 @@ head(d)
 #+END_SRC
 
 #+RESULTS:
-:
 :   y a          x          z
 : 1 0 0 -0.6264538 -0.8043316
 : 2 0 0  0.1836433 -1.0565257
@@ -119,7 +118,6 @@ Whereas the MLE yields a biased estimate of the relative risk:
 #+END_SRC
 
 #+RESULTS:
-:
 :      Estimate Std.Err  2.5% 97.5% P-value
 : [p1]    1.289 0.02855 1.233 1.345       0
 :
