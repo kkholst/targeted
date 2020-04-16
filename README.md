@@ -1,9 +1,6 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-
 [![Build Status](https://travis-ci.org/kkholst/target.svg?branch=master)](https://travis-ci.org/kkholst/target)
-
 [![Build Status (dev)](https://travis-ci.org/kkholst/target.svg?branch=develop)](https://travis-ci.org/kkholst/target)
-
 [![Test](https://travis-ci.org/kkholst/citest.svg?branch=master)](https://travis-ci.org/kkholst/citest)
 
 # Introduction
