@@ -1,18 +1,19 @@
 import numpy as np
 import numpy.linalg as npl
 import statsmodels.api as sm
-try:
-    import targeted.__targeted_c__ as targetc
-except ImportError:
-    pass
+import targeted.__targeted_c__ as targetc
 
 
 def iid(x):
     """Returns the estimated influence function (iid decomposition)
 
-    :param x: statsmodels.GLM object
-    :returns: matrix
-    :rtype: numpy.matirx
+    Parameters
+    ----------
+    x: statsmodels.GLM
+
+    Returns
+    -------
+    numpy.array
 
     """
     if not isinstance(x, sm.GLM):
@@ -20,28 +21,39 @@ def iid(x):
     beta = x.fit().params
     H = x.hessian(beta)
     U = x.score_obs(beta)
-    return np.matmul(npl.pinv(H), U.transpose()).transpose()
+    return (npl.pinv(H) @ U.transpose()).transpose()
 
 def tcrossprod(x):
     """Return crossprod x'x
 
-    :param x: matrix
-    :returns: matrix
-    :rtype: numpy.matrix
+    Parameters
+    ----------
+    x: numpy.array
+
+    Returns
+    -------
+    numpy.array
 
     """
+
     if not isinstance(x, (list, tuple, np.ndarray)):
         raise TypeError("Expected a numpy array (matrix) object")
-    return np.matrix(np.matmul(x.transpose(), x))
+    return x.transpose() @ x
 
 def robustse(x):
     """Robust standard errors
 
-    :param x: statsmodels.GLM object
-    :returns: array with standard errors
-    :rtype: numpy.array
+    Parameters
+    ----------
+    x: statsmodels.GLM
+
+    Returns
+    -------
+    numpy.array
+       matrix with standard errors
 
     """
+
     if not isinstance(x, sm.GLM):
         raise TypeError("Expected a 'statsmodels.GLM' object")
     return np.array(tcrossprod(iid(x)).diagonal())**.5
@@ -50,9 +62,19 @@ def robustse(x):
 def expit(x):
     """Sigmoid function (Inverse Logit)
 
-    :param x: numpy matrix/array
-    :returns: Inverse logit
-    :rtype: numpy array
+    Parameters
+    ----------
+    x: numpy.array
+
+    Returns
+    -------
+    numpy.array
+        matrix with elementwise inverse logit
 
     """
-    return targetc.expit(np.matrix(x))
+
+#    print(x)
+    val = np.array(x)
+#    print(val)
+#    print(np.array(x))
+    return targetc.expit(val)

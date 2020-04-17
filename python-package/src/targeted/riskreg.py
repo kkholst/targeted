@@ -21,6 +21,7 @@ class riskreg:
     estimate = None
 
     def __stageone(self, pr):
+        pr = pr.flatten()
         n = pr.size
         par = np.concatenate((self.mle_coef, self.propensity_coef))
         self.model.update(par)
@@ -31,7 +32,7 @@ class riskreg:
         targ = pp[:, 3].flatten()
         if self.modeltype == 'rd':
             # E(A drho/(Pa(1-Pa))|V) = pr*drho/[p1(1-p1)]
-            nom = pr*(1-targ**2)/(p1*(1-p1))
+            nom = pr*(1-targ*targ)/(p1*(1-p1))
             # E(1/(Pa(1-Pa))|V) =  (1-pr)/[p0(1-p0)] + pr/[p1(1-p1)]
             denom = (1-pr)/(p0*(1-p0)) + pr/(p1*(1-p1))
             omega = nom/denom / (pr*p0*(1-p0))
@@ -55,16 +56,18 @@ class riskreg:
 
         Parameters
         ----------
-        y: list or numpy.matrix
+        y: list or numpy.array
             Response vector (0,1)
-        a: list or numpy.matrix
+        a: list or numpy.array
             Exposure vector (0,1)
-        x1: numpy.matrix, optional
+        x1: numpy.array, optional
             Design matrix for linear interactions with exposure 'a'
-        x2: numpy.matrix, optional
+        x2: numpy.array, optional
             Design matrix for nuisance parameter regression (odds-product)
-        x3: numpy.matrix, optional
+        x3: numpy.array, optional
             Design matrix for propoensity model
+        model: str
+            Relative risk: 'rr', Risk difference: 'rd'
 
         Returns
         -------
@@ -74,7 +77,7 @@ class riskreg:
         """
 
         n = y.size
-        one = np.matrix(np.repeat(1.0, n)).transpose()
+        one = np.repeat(1.0, n).reshape(n,1)
         x1 = kwargs.get('x1', one)
         x2 = kwargs.get('x2', one)
         x3 = kwargs.get('x3', one)
@@ -112,15 +115,15 @@ def riskreg_mle(y, a, x2, *args, **kwargs):
 
     Parameters
     ----------
-    y: list or numpy.matrix
+    y: list or numpy.array
         Response vector (0,1)
-    a: list or numpy.matrix
+    a: list or numpy.array
         Exposure vector (0,1)
-    x2: numpy.matrix
+    x2: numpy.array
         Design matrix for nuisance parameter regression (odds-product)
-    x1: numpy.matrix, optional
+    x1: numpy.array, optional
         Design matrix for linear interactions with exposure 'a'
-    w: list or numpy.matrix, optional
+    w: list or numpy.array, optional
         Weights vector
     model: str
         Relative risk: ``rr``, Risk difference: ``rd``
@@ -140,18 +143,18 @@ def riskreg_mle(y, a, x2, *args, **kwargs):
        1121–1130. http://dx.doi.org/10.1080/01621459.2016.1192546
     """
 
-    one = np.matrix(np.repeat(1.0, len(y))).transpose()
+    one = np.repeat(1.0, len(y)).reshape(len(y), 1)
     x1 = kwargs.get('x1', one)
     w = kwargs.get('weights', one)
     model = kwargs.get('model', 'rr')
     m = tg.riskregmodel(y, a, x1, x2, one, w, model)
 
     def obj(theta):
-        m.update(np.matrix(theta))
+        m.update(theta.reshape(theta.size, 1))
         return -m.loglik()
 
     def jac(theta):
-        m.update(np.matrix(theta))
+        m.update(theta.reshape(theta.size, 1))
         return -m.score().flatten()
 
     p = x1.shape[1]+x2.shape[1]
