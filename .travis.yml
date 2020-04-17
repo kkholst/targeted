@@ -111,11 +111,11 @@ jobs:
             - lcov
       script:
         - make test
-#        - make coverage
-#        - cd build/coverage
-#        - ./test_targeted -s
-#      after_success:
-#        - bash <(curl -s https://codecov.io/bash)
+        - make coverage
+        - cd build/coverage
+        - ./test_targeted -s
+      after_success:
+        - bash <(curl -s https://codecov.io/bash)
 
     # --------------------------------------------------------------------------------
 
