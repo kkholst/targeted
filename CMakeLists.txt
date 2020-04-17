@@ -6,13 +6,14 @@
 #   USE_PKG_LIB: Force use of libraries supplied with this package.
 # Cmake specific settings:
 #   CMAKE_BUILD_TYPE: Debug (non-optimized code with debug symbols), RelWithDebInfo
-#   CMAKE_VERBOSE_MAKEFILE: ON
 ################################################################################
 cmake_minimum_required(VERSION 3.3) # Was 2.8.12
 project(target VERSION 0.1 DESCRIPTION "Targeted Inference Library" LANGUAGES CXX)
 
 option(COTIRE  "precompiled headers" OFF)
 option(USE_PKG_LIB  "Force use of libraries supplied with this package instead of system libraries" OFF)
+option(CODE_COVERAGE "Enable coverage reporting" OFF)
+option (BUILD_TESTING "Build the testing tree." ON)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/config")
@@ -108,40 +109,65 @@ target_link_libraries("dredemo" PRIVATE armadillo target)
 # Tests
 ################################################################################
 
-set(TEST_DIR "tests")
-set(TESTS
-  "${TEST_DIR}/test_main.cpp"
-  "${TEST_DIR}/test_misc.cpp"
-  "${TEST_DIR}/test_mlogit.cpp"
-  "${TEST_DIR}/test_target.cpp"
+
+# Only build tests if we are the top-level project
+# Allows this to be used by super projects with `add_subdirectory`
+if (BUILD_TESTING AND (PROJECT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR))
+  enable_testing()
+
+  set(TESTS
+  "tests/test_main.cpp"
+  "tests/test_misc.cpp"
+  "tests/test_mlogit.cpp"
+  "tests/test_target.cpp"
   )
+  add_executable("${PROJECT_NAME}_test" ${TESTS})
 
-add_executable("${PROJECT_NAME}_test" ${TESTS})
-target_link_libraries("${PROJECT_NAME}_test" PRIVATE armadillo Catch2::Catch2 target spdlog::spdlog)
+  find_program( MEMORYCHECK_COMMAND valgrind )
+  set( MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full" )
+  include( CTest )
+  add_test(NAME "${PROJECT_NAME}_test" COMMAND "${PROJECT_NAME}_test")
 
-find_program( MEMORYCHECK_COMMAND valgrind )
-set( MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full" )
-include( CTest )
-add_test(NAME "${PROJECT_NAME}_test" COMMAND "${PROJECT_NAME}_test")
+  target_link_libraries("${PROJECT_NAME}_test" PRIVATE armadillo Catch2::Catch2 target spdlog::spdlog)
 
-add_custom_target(test_memcheck
+  add_custom_target(test_memcheck
     COMMAND ${CMAKE_CTEST_COMMAND}
-        --force-new-ctest-process --test-action memcheck
+    --force-new-ctest-process --test-action memcheck
     COMMAND cat "${CMAKE_BINARY_DIR}/Testing/Temporary/MemoryChecker.*.log")
+
+endif()
 
 ################################################################################
 # Code coverage
 ################################################################################
 
-if(COVERAGE_BUILD AND CMAKE_COMPILER_IS_GNUCXX)
-  message([CODECOVERAGE])
+if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  message([Main] " Checking code coverage")
   include(CodeCoverage)
   append_coverage_compiler_flags()
-  setup_target_for_coverage_lcov(
-          NAME coverage
-          EXECUTABLE ${PROJECT_NAME}_test
-          EXCLUDE "./lib/*" "${PROJECT_SOURCE_DIR}/lib/*")
+  # find_program(LCOV lcov)
+  # if(LCOV)
+  # setup_target_for_coverage_lcov(
+    # NAME coverage
+    # EXECUTABLE ${PROJECT_NAME}_test
+    # EXCLUDE "./lib/*" "${PROJECT_SOURCE_DIR}/lib/*")
+  # else()
+  add_library(coverage_config INTERFACE)
+  #   # Add required flags (GCC & LLVM/Clang)
+  #   target_compile_options(coverage_config INTERFACE
+  #     -O0        # no optimization
+  #     -g         # generate debug info
+  #     --coverage # sets all required flags
+  #     )
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
+    target_link_options(coverage_config INTERFACE --coverage)
+  else()
+    target_link_libraries(coverage_config INTERFACE --coverage)
+  endif()
+  #add_custom_target(coverage DEPENDS default)
+  # endif()
 endif()
+
 
 ################################################################################
 
