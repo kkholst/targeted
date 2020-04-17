@@ -144,30 +144,28 @@ endif()
 if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   message([Main] " Checking code coverage")
   include(CodeCoverage)
-  append_coverage_compiler_flags()
-  # find_program(LCOV lcov)
-  # if(LCOV)
-  # setup_target_for_coverage_lcov(
-    # NAME coverage
-    # EXECUTABLE ${PROJECT_NAME}_test
-    # EXCLUDE "./lib/*" "${PROJECT_SOURCE_DIR}/lib/*")
-  # else()
   add_library(coverage_config INTERFACE)
-  #   # Add required flags (GCC & LLVM/Clang)
-  #   target_compile_options(coverage_config INTERFACE
-  #     -O0        # no optimization
-  #     -g         # generate debug info
-  #     --coverage # sets all required flags
-  #     )
-  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-    target_link_options(coverage_config INTERFACE --coverage)
+  append_coverage_compiler_flags()
+  if(LCOV_PATH)
+    setup_target_for_coverage_lcov(
+      NAME coverage
+      EXECUTABLE ${PROJECT_NAME}_test
+      EXCLUDE "./lib/*" "${PROJECT_SOURCE_DIR}/lib/*")
   else()
-    target_link_libraries(coverage_config INTERFACE --coverage)
+    # Add required flags (GCC & LLVM/Clang)
+    target_compile_options(coverage_config INTERFACE
+      -O0        # no optimization
+      -g         # generate debug info
+      --coverage # sets all required flags
+      )
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
+      target_link_options(coverage_config INTERFACE --coverage)
+    else()
+      target_link_libraries(coverage_config INTERFACE --coverage)
+    endif()
+    #add_custom_target(coverage DEPENDS default)
   endif()
-  #add_custom_target(coverage DEPENDS default)
-  # endif()
 endif()
-
 
 ################################################################################
 
