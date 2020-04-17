@@ -110,11 +110,12 @@ jobs:
             - libblas-dev
             - lcov
       script:
-        - make coverage
-        - cd build/coverage
-        - ./test_targeted -s
-      after_success:
-        - bash <(curl -s https://codecov.io/bash)
+        - make test
+#        - make coverage
+#        - cd build/coverage
+#        - ./test_targeted -s
+#      after_success:
+#        - bash <(curl -s https://codecov.io/bash)
 
     # --------------------------------------------------------------------------------
 
@@ -186,9 +187,11 @@ jobs:
       script:
         - cd python-package
         - python3 setup.py install
-        - python3 setup.py test
-        - codecov
+        - pytest --cov
+        - pytest
         - bin/test_targeted
         - python3 -m targeted
+      after_success:
+        - codecov
 
     # --------------------------------------------------------------------------------
