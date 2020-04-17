@@ -51,7 +51,7 @@ checkinit: init-submodules
 
 .PHONY: init-submodules
 init-submodules:
-	@if [ ! -f "lib/armadillo/.git" ]; then \
+	@if [ ! -e "lib/armadillo/.git" ]; then \
 	$(GIT) submodule update --init --recursive; fi
 
 .PHONY: run

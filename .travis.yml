@@ -113,7 +113,7 @@ jobs:
         - make test
         - make coverage
         - cd build/coverage
-        - ./test_targeted -s
+        - ./target_test -s
       after_success:
         - bash <(curl -s https://codecov.io/bash)
 
