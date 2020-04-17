@@ -12,7 +12,7 @@ ARG =  -Db_coverage=true $(ASAN) -Dprefix=$(INSTALL_DIR)
 PKGLIB = OFF
 IMG=# Dockerfile postfix
 BUILD = -DUSE_PKG_LIB=$(PKGLIB) -DCOTIRE=OFF -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) -DCMAKE_BUILD_TYPE=Debug \
-  -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON -Wno-dev
+  -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON -Wno-dev -DCMAKE_VERBOSE_MAKEFILE=ON
 ifneq ($(NINJA),)
   BUILD := $(BUILD) -GNinja
 endif
@@ -205,12 +205,16 @@ testall: test r py testr testpy
 ##################################################
 ## Code coverage
 ##################################################
+
+.PHONY: cov
+cov: coverage
+	cd build/coverage; $(MAKE) coverage
+	$(OPEN) build/coverage/coverage/index.html
+
 .PHONY: coverage
 coverage:
-	rm -Rf build/coverage
-	mkdir -p build/coverage
-	cd build/coverage; cmake -DCMAKE_BUILD_TYPE=Debug -DCOVERAGE_BUILD=1 ../../ && make coverage
-	$(OPEN) build/coverage/coverage/index.html
+	rm -Rf build/coverage; mkdir -p build/coverage
+	cd build/coverage; $(CMAKE) -Wno-dev -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON ../../ && $(MAKE)
 
 ##################################################
 ## Debugging, profiling, and memory inspection

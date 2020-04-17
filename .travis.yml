@@ -108,9 +108,13 @@ jobs:
             - cmake
             - liblapack-dev
             - libblas-dev
+            - lcov
       script:
-        - make init
-        - make test
+        - make coverage
+        - cd build/coverage
+        - ./test_targeted -s
+      after_success:
+        - bash <(curl -s https://codecov.io/bash)
 
     # --------------------------------------------------------------------------------
 
@@ -178,11 +182,12 @@ jobs:
         - pip: true
         - apt: true
       install:
-        - pip3 install pytest pytest-runner pytest-cov scipy patsy numpy pandas statsmodels
+        - pip3 install pytest pytest-runner pytest-cov scipy patsy numpy pandas statsmodels codecov
       script:
         - cd python-package
         - python3 setup.py install
         - python3 setup.py test
+        - codecov
         - bin/test_targeted
         - python3 -m targeted
 
