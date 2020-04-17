@@ -110,9 +110,9 @@ jobs:
             - libblas-dev
             - lcov
       script:
-        - make test
         - make coverage
         - cd build/coverage
+        - make coverage
         - ./target_test -s
       after_success:
         - bash <(curl -s https://codecov.io/bash)
