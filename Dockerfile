@@ -6,7 +6,7 @@ RUN apt-get update && \
 
 RUN pip3 install cmake ninja
 
-COPY build/export/target /root/target
+COPY build/export /root/target
 
 WORKDIR /root/target
 
