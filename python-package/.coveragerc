@@ -1,3 +1,7 @@
 [run]
-include = src/targeted/*
-omit = *migrations*, *tests*, *lib*
+
+omit =
+        *__init__*
+        *__main__*
+        *_c__*
+        *tests*
