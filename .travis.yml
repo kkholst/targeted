@@ -111,8 +111,7 @@ jobs:
             - lcov
       script:
         - make coverage
-        - cd build/coverage
-        - make coverage
+        - cd build/coverage; make coverage
         - ./target_test -s
       after_success:
         - bash <(curl -s https://codecov.io/bash)
@@ -139,10 +138,14 @@ jobs:
             - r-cran-rcpp
             - r-cran-rcpparmadillo
             - r-cran-testthat
+      r_packages:
+        - covr
       install:
         - echo
       script:
         - make checkr pkg=targeted
+      after_success:
+        - Rscript -e 'library("covr"); codecov(type="all")'
 
     # --------------------------------------------------------------------------------
 
@@ -187,10 +190,9 @@ jobs:
       script:
         - cd python-package
         - python3 setup.py install
-        - pytest --cov=targeted tests/
-        - pytest
-        - bin/test_targeted
         - python3 -m targeted
+        - pytest --cov=targeted tests/
+        - bin/test_targeted
       after_success:
         - codecov
 
