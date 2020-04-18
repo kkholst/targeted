@@ -94,19 +94,12 @@ jobs:
 
     # --------------------------------------------------------------------------------
 
-    - name: "C++ library (clang)"
+    - name: "C++ library (clang, osx)"
+      os: osx
       language: cpp
       compiler: clang
       cache:
         - ccache: true
-        - apt: true
-      addons:
-        apt:
-          packages:
-            - cmake
-            - liblapack-dev
-            - libblas-dev
-            - lcov
       script:
         - make test
 
