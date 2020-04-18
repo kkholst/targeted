@@ -19,9 +19,8 @@ choice models) and model diagnostics tools.
 Relevant models includes binary regression models with binary exposure
 and with nuisance models defined by additional covariates. Models for
 the relative risk and risk differences where examined by (Richardson
-et al 2017) and the odds ratio in (Tchetgen-Tchetgen et
-al. 2010). Various missing data estimators and causal inference models
-(Tsiatis 2006) also fits into this framework.
+et al 2017). Various missing data estimators and causal inference models
+(Bang & Robins 2005, Tsiatis 2006) also fits into this framework.
 
 ## Examples
 ### R
