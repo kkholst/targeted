@@ -32,7 +32,7 @@ clean:
 upload_test:
 
 	$(PYTHON) -m twine upload --repository pypitest dist/*
-.PHONY: upload 
+.PHONY: upload
 upload:	source
 	$(PYTHON) -m twine upload dist/* --verbose --repository-url https://upload.pypi.org/legacy/
 
@@ -56,6 +56,14 @@ check:
 .PHONY: test
 test:
 	$(PYTHON) setup.py test
+
+.PHONY: cov
+cov: coverage
+	@$(OPEN) tests/htmlcov/index.html
+
+.PHONY: coverage
+coverage:
+	pytest --cov=targeted tests/ --cov-report=html:tests/htmlcov $(TESTOPT)
 
 .PHONY: installpypi_test
 installpypi_test:
