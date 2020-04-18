@@ -1,5 +1,3 @@
 ignore:
-  - "tests/**/*"
-  - "misc/**/*"
-  - "R-package/**/*"
-  - "python-package/**/*"
+  - "tests"
+  - "misc"
