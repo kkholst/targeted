@@ -223,3 +223,8 @@ jobs:
         - codecov
 
     # --------------------------------------------------------------------------------
+
+
+notifications:
+  slack:
+    secure: cdMbTUvOkgXJz7M5005t27XxfVOOerWfCl8q5SIOTn8q91uOxoi29O3JewimUAsKIi8SyarD5HFt09CRViQL01tQiEEFcoKZ2VzJ4lhB2U3icW+f755ZbGDso8hgQfyCQbsu3v3u+c7UqnfdHT7KubfC2G8rX7LKcJmksLolt5NWOUPX1v6D0HzIDXUfz/a9231FiY3C5QGjGc71q8ZfwdTQhckHY2iSs/0usEunJzAu2Miqft07KpuYpjNavSlfuEZGEp0tKqUTh3+O+wnnpyyzsW2/qC2x2sORpij9A/h+thazUC7zJjqsV+8MiDEIh5wj4NsiC5/zhuGkHZZur2jOeab46OenELZlb7ppQUrTYeYGGt7gXziQndJtMWokoLow/N+aDEv0M0Lg/Ua8y/4TggK2zETjIvME2lukvF568XklPlLq8zUaZQMwDkNl273Y0aPxSJcdN0qQL7/X8aPLoneUoEdaO4SJHEWbGexPNMQhOSnoAUtln8kuiLYZMaIaTAynFoG7R5Bv3DUOqa3ESZ+wYWqrrnYhFfl9zEmERF78fhhDGX78H/hVrp/2ltX9o7g2fnDWr/AmtsQyzHn3L0JO7Nyz57toIT1LddXQDWF8wuKeMguMi6HtEoNdiPADnLsxDc+7MjVhgKIJ82Cvzg8yOQanYO9dKJeTYJ0
