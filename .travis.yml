@@ -94,11 +94,25 @@ jobs:
 
     # --------------------------------------------------------------------------------
 
-    - name: "C++ library"
+    - name: "C++ library (clang)"
       language: cpp
-      compiler:
-        - clang
-        - gcc
+      compiler: clang
+      cache:
+        - ccache: true
+        - apt: true
+      addons:
+        apt:
+          packages:
+            - cmake
+            - liblapack-dev
+            - libblas-dev
+            - lcov
+      script:
+        - make test
+
+    - name: "C++ library (gcc)"
+      language: cpp
+      compiler: gcc
       cache:
         - ccache: true
         - apt: true
@@ -145,7 +159,7 @@ jobs:
       script:
         - make checkr pkg=targeted
       after_success:
-        - Rscript -e 'library("covr"); codecov(type="all")'
+        - cd R-package/targeted; Rscript -e 'library("covr"); codecov(type="all")'
 
     # --------------------------------------------------------------------------------
 
@@ -167,10 +181,14 @@ jobs:
             - r-cran-rcpp
             - r-cran-rcpparmadillo
             - r-cran-testthat
+      r_packages:
+        - covr
       install:
         - echo
       script:
         - make checkr pkg=gof
+      after_success:
+        - cd R-package/gof; Rscript -e 'library("covr"); codecov(type="all")'
 
     # --------------------------------------------------------------------------------
 
