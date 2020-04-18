@@ -1,6 +1,6 @@
 #+HTML: <a href="https://travis-ci.org/kkholst/gof"><img src="https://travis-ci.org/kkholst/gof.svg?branch=master"></a>
 #+HTML: <a href="https://codecov.io/github/kkholst/gof?branch=master"><img src="https://codecov.io/github/kkholst/gof/coverage.svg?branch=master"></a>
-#+HTML: <a href="http://cran.rstudio.com/web/packages/gof/index.html"><img src="http://www.r-pkg.org/badges/version/gof"></a>
+#+HTML: <a href="https://cran.r-project.org/package=gof"><img src="http://www.r-pkg.org/badges/version/gof"></a>
 #+HTML: <a href="http://cranlogs.r-pkg.org/downloads/total/last-month/gof"><img src="http://cranlogs.r-pkg.org/badges/gof"></a>
 
 
@@ -20,9 +20,9 @@ devtools::install_github("kkholst/gof")
 To cite that =gof= package please use the following reference
 
 #+BEGIN_QUOTE
-  Klaus K. Holst and Esben Budtz-Joergensen (2013). 
-  Linear Latent Variable Models: The lava-package. 
-  Computational Statistics 28 (4), pp 1385-1453. 
+  Klaus K. Holst and Esben Budtz-Joergensen (2013).
+  Linear Latent Variable Models: The lava-package.
+  Computational Statistics 28 (4), pp 1385-1453.
   http://dx.doi.org/10.1007/s00180-012-0344-y
 #+END_QUOTE
 
@@ -48,14 +48,13 @@ To cite that =gof= package please use the following reference
 #+TITLE: Cumulative Residuals (gof)
 #+AUTHOR: Klaus K. Holst
 #+PROPERTY: header-args:R  :session *R* :cache no :width 550 :height 450
-#+PROPERTY: header-args  :eval never-export :exports results :results output :tangle yes :comments yes 
+#+PROPERTY: header-args  :eval never-export :exports results :results output :tangle yes :comments yes
 #+PROPERTY: header-args:R+ :colnames yes :rownames no :hlines yes
-#+OPTIONS: timestamp:t title:t date:t author:t creator:nil toc:nil 
+#+OPTIONS: timestamp:t title:t date:t author:t creator:nil toc:nil
 #+OPTIONS: h:4 num:t tags:nil d:t
-#+PROPERTY: comments yes 
-#+STARTUP: hideall 
+#+PROPERTY: comments yes
+#+STARTUP: hideall
 #+OPTIONS: toc:t h:4 num:nil tags:nil
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="http://www.biostat.ku.dk/~kkho/styles/orgmode2.css"/>
 #+HTML_HEAD: <link rel="icon" type="image/x-icon" href="http://www.biostat.ku.dk/~kkho/styles/logo.ico"/>
 #+HTML_HEAD: <style type="text/css">body { background-image: url(http://www.biostat.ku.dk/~kkho/styles/logo.png); }</style>
-
