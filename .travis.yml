@@ -108,6 +108,13 @@ jobs:
       compiler: clang
       cache:
         - ccache: true
+        - apt: true
+      addons:
+        apt:
+          packages:
+            - cmake
+            - liblapack-dev
+            - libblas-dev
       script:
         - make test
 
