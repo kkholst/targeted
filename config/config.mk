@@ -7,6 +7,7 @@ OPEN = $(shell which xdg-open || which gnome-open || which open)
 PYTHON = /usr/bin/env python3
 PIPARG = # e.g., --user
 PIP = $(PYTHON) -m pip $(PIPARG)
+PYTEST = /usr/bin/env pytest
 R = /usr/bin/env R --no-save --no-restore
 GIT = git
 CMAKE = /usr/bin/env cmake
