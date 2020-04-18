@@ -167,7 +167,7 @@ jobs:
       script:
         - make checkr pkg=targeted
       after_success:
-        - cd R-package/targeted; Rscript -e 'library("covr"); codecov(type="all")'
+        - Rscript -e 'library("covr"); codecov(path="R-package/targeted", type="all")'
 
     # --------------------------------------------------------------------------------
 
@@ -196,7 +196,7 @@ jobs:
       script:
         - make checkr pkg=gof
       after_success:
-        - cd R-package/gof; Rscript -e 'library("covr"); codecov(type="all")'
+        - Rscript -e 'library("covr"); codecov(path="R-package/gof", type="all")'
 
     # --------------------------------------------------------------------------------
 
