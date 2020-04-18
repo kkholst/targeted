@@ -196,7 +196,8 @@ jobs:
       script:
         - make checkr pkg=gof
       after_success:
-        - Rscript -e 'library("covr"); codecov(path="R-package/gof", type="all")'
+        - Rscript -e 'library("covr"); codecov(path="R-package/gof", \
+        flags="gof", type="all")'
 
     # --------------------------------------------------------------------------------
 
