@@ -11,7 +11,7 @@
 #+HTML: <a href="https://travis-ci.org/kkholst/targeted"><img src="https://travis-ci.org/kkholst/targeted.svg?branch=master"></a>
 #+HTML: <a href="https://codecov.io/github/kkholst/targeted?branch=master"><img src="https://codecov.io/github/kkholst/targeted/coverage.svg?branch=master"></a>
 #+HTML: <a href="https://cran.r-project.org/package=targeted"><img src="http://www.r-pkg.org/badges/version/targeted"></a>
-#+HTML: <a href="http://cranlogs.r-pkg.org/downloads/total/last-month/targeted"><img src="http://cranlogs.r-pkg.org/badges/targeted"></a>
+#+HTML: <a href="http://cranlogs.r-pkg.org/downloads/total/last-month/targeted"><img src="https://www.r-pkg.org/badges/version-last-release/targeted"></a>
 #+HTML: <a href=""https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg"></a>
 
 * Installation

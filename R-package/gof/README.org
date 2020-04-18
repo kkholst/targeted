@@ -1,8 +1,8 @@
 #+HTML: <a href="https://travis-ci.org/kkholst/gof"><img src="https://travis-ci.org/kkholst/gof.svg?branch=master"></a>
 #+HTML: <a href="https://codecov.io/github/kkholst/gof?branch=master"><img src="https://codecov.io/github/kkholst/gof/coverage.svg?branch=master"></a>
-#+HTML: <a href="https://cran.r-project.org/package=gof"><img src="http://www.r-pkg.org/badges/version/gof"></a>
+#+HTML: <a href="https://cran.r-project.org/package=gof"><img src="https://www.r-pkg.org/badges/version-last-release/gof"></a>
 #+HTML: <a href="http://cranlogs.r-pkg.org/downloads/total/last-month/gof"><img src="http://cranlogs.r-pkg.org/badges/gof"></a>
-
+#+HTML: <a href=""https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg"></a>
 
 ** Installation
 #+BEGIN_SRC R :exports both :eval never
