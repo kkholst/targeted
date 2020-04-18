@@ -94,8 +94,16 @@ jobs:
 
     # --------------------------------------------------------------------------------
 
-    - name: "C++ library (clang, osx)"
-      os: osx
+    # - name: "C++ library (clang, osx)"
+    #   os: osx
+    #   language: cpp
+    #   compiler: clang
+    #   cache:
+    #     - ccache: true
+    #   script:
+    #     - make test
+
+    - name: "C++ library (clang)"
       language: cpp
       compiler: clang
       cache:
