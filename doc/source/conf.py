@@ -14,6 +14,7 @@
 import os
 import sys
 import targeted
+import subprocess
 
 file_loc = os.path.split(__file__)[0]
 curr_path = os.path.dirname(os.path.abspath(os.path.expanduser(__file__)))
@@ -145,24 +146,7 @@ if not on_rtd:  # only import and set the theme if we're building docs locally
     html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 
-
-# hook for doxygen
-def run_doxygen(folder):
-    """Run the doxygen make command in the designated folder."""
-    try:
-        retcode = subprocess.call("cd %s; make doxygen" % folder, shell=True)
-        if retcode < 0:
-            sys.stderr.write("doxygen terminated by signal %s" % (-retcode))
-    except OSError as e:
-        sys.stderr.write("doxygen execution failed: %s" % e)
-
-
-def generate_doxygen_xml(app):
-    """Run the doxygen make commands if we're on the ReadTheDocs server"""
-    read_the_docs_build = os.environ.get('READTHEDOCS', None) == 'True'
-    if read_the_docs_build:
-        run_doxygen('..')
-
+subprocess.call('cd .. ; doxygen', shell=True)
 
 def setup(app):
     app.add_stylesheet('custom.css')

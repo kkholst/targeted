@@ -5,7 +5,6 @@ include $(wildcard config/*.mk)
 TARGET = target
 BUILD_DIR = build
 VALGRIND_DIR = build/codetest
-DOXYGEN_DIR = doc
 COVERAGE_DIR = build
 INSTALL_DIR = $(HOME)/local
 ARG =  -Db_coverage=true $(ASAN) -Dprefix=$(INSTALL_DIR)
@@ -179,7 +178,7 @@ cleanpy:
 
 .PHONY: docs doc markdown
 doc:
-	@cd $(DOXYGEN_DIR); $(DOXYGEN); $(MAKE) html
+	@cd doc; $(MAKE) html
 
 docs:	doc
 	@$(OPEN) $(DOXYGEN_DIR)/build/html/index.html
