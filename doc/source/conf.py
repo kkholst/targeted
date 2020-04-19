@@ -14,8 +14,6 @@
 import os
 import sys
 import targeted
-#import guzzle_sphinx_theme
-import pylons_sphinx_themes
 
 file_loc = os.path.split(__file__)[0]
 curr_path = os.path.dirname(os.path.abspath(os.path.expanduser(__file__)))
