@@ -1,0 +1,48 @@
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS: [a4paper,12pt]
+#+PROPERTY: header-args:python :session :results value
+#+PROPERTY: header-args:julia :session *julia*
+#+PROPERTY: header-args:R :session *R* :cache no :width 550 :height 450
+#+PROPERTY: header-args:R+ :colnames yes :rownames no :hlines yes
+#+PROPERTY: header-args :eval never-export :exports both :results output :tangle yes :comments yes
+#+OPTIONS: timestamp:nil title:t date:t author:t creator:nil toc:nil
+#+OPTIONS: h:4 num:t tags:nil d:t ^:{}
+
+
+#+BEGIN_SRC R
+summary(lm(Sepal.Length ~ Petal.Length, iris))
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+
+Call:
+lm(formula = Sepal.Length ~ Petal.Length, data = iris)
+
+Residuals:
+     Min       1Q   Median       3Q      Max
+-1.24675 -0.29657 -0.01515  0.27676  1.00269
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)
+(Intercept)   4.30660    0.07839   54.94   <2e-16 ***
+Petal.Length  0.40892    0.01889   21.65   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.4071 on 148 degrees of freedom
+Multiple R-squared:   0.76,	Adjusted R-squared:  0.7583
+F-statistic: 468.6 on 1 and 148 DF,  p-value: < 2.2e-16
+#+end_example
+
+#+NAME:  testfig
+#+BEGIN_SRC R :exports results :results output graphics :file testfig.png
+plot(1:10)
+#+END_SRC
+
+#+RESULTS: testfig
+
+#+CAPTION: ... label:fig:testfig
+#+ATTR_LATEX: :width 10cm :options :center t
+#+RESULTS:
+[[file:testfig.png]]

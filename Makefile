@@ -178,11 +178,11 @@ cleanpy:
 ##################################################
 
 .PHONY: docs doc markdown
-docs:
-	@cd $(DOXYGEN_DIR); $(DOXYGEN)
+doc:
+	@cd $(DOXYGEN_DIR); $(DOXYGEN); $(MAKE) html
 
-doc:	docs
-	@$(OPEN) $(DOXYGEN_DIR)/html/index.html
+docs:	doc
+	@$(OPEN) $(DOXYGEN_DIR)/build/html/index.html
 
 markdown:
 	@if [ -z "command -v grip" ]; then \
