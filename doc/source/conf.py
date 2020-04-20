@@ -87,18 +87,18 @@ html_logo = '../images/small.png'
 # html_theme = 'default'
 # html_theme = 'sphinx_rtd_theme'
 
-import guzzle_sphinx_theme
-html_theme_path = guzzle_sphinx_theme.html_theme_path()
-html_theme = 'guzzle_sphinx_theme'
-# Register the theme as an extension to generate a sitemap.xml
-extensions.append("guzzle_sphinx_theme")
 
 # use RTFD theme locally
 on_rtd = os.environ.get("READTHEDOCS", None) == "True"
 if not on_rtd:  # only import and set the theme if we're building docs locally
-    import sphinx_rtd_theme
-    html_theme = "sphinx_rtd_theme"
-    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+    import guzzle_sphinx_theme
+    html_theme_path = guzzle_sphinx_theme.html_theme_path()
+    html_theme = 'guzzle_sphinx_theme'
+    # Register the theme as an extension to generate a sitemap.xml
+    extensions.append("guzzle_sphinx_theme")
+    #import sphinx_rtd_theme
+    #html_theme = "sphinx_rtd_theme"
+    #html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # html_theme_path = pylons_sphinx_themes.get_html_themes_path()
 # html_theme = 'pylons'
