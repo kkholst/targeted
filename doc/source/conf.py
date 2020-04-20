@@ -130,7 +130,7 @@ latex_logo = '../images/small.png'
 
 subprocess.call('cd .. ; doxygen', shell=True)
 
-if not on_rtd:
+if on_rtd:
     subprocess.call('cd ../latex ; make', shell=True)
 
 def setup(app):
