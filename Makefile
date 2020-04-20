@@ -145,20 +145,23 @@ syncr: exportr
 ## Python package
 ##################################################
 
-.PHONY: py cleanpy buildpy runpy testpy exportpy
-
+.PHONY: buildpy
 buildpy:
 	@cd python-package; $(PYTHON) setup.py install
 
+.PHONY: testpy
 testpy:
 	@cd python-package; $(MAKE) test
 
+.PHONY: runpy
 runpy:
 	@$(PYTHON) misc/$(TESTPY).py
 
+.PHONY: py
 py: buildpy runpy
 
 PYTHON_EXPORT = $(BUILD_DIR)/python
+.PHONY: exportpy
 exportpy: clean
 	@rm -Rf $(PYTHON_EXPORT); mkdir -p $(PYTHON_EXPORT)
 	@cd python-package; $(GIT) archive HEAD | (cd ../$(PYTHON_EXPORT); tar x)
@@ -169,6 +172,7 @@ exportpy: clean
 	@cp -a lib/pybind11 $(PYTHON_EXPORT)/lib
 	@echo "Python package exported to: ${PYTHON_EXPORT}"
 
+.PHONY: cleanpy
 cleanpy:
 	@cd python-package; $(MAKE) --no-print-directory clean
 
@@ -176,13 +180,18 @@ cleanpy:
 ## Documentation
 ##################################################
 
-.PHONY: docs doc markdown
+.PHONY: doc
 doc:
 	@cd doc; $(MAKE) html
 
-docs:	doc
-	@$(OPEN) $(DOXYGEN_DIR)/build/html/index.html
+.PHONY: html
+html: doc
 
+.PHONY: docs
+docs:	doc
+	@$(OPEN) doc/build/html/index.html
+
+.PHONY: markdown
 markdown:
 	@if [ -z "command -v grip" ]; then \
 	echo "Install dependency: pip install grip"; \
@@ -192,13 +201,15 @@ markdown:
 ## Unit tests
 ##################################################
 
-.PHONY: t test testall
+.PHONY: t
 t:	checkinit run
 	@$(NINJA) -C $(BUILD_DIR) test
 
+.PHONY: test
 test:	checkinit build
 	build/$(TARGET)_test -s
 
+.PHONY: testall
 testall: test r py testr testpy
 
 ##################################################

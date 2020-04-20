@@ -18,7 +18,11 @@ pytest-runner>=5.0
 pytest>=5.2.0
 python-dateutil==2.8.0
 recommonmark
-sphinx
+sphinx>=2
 sphinx-autobuild
 sphinx-autodoc-typehints
 sphinx-rtd-theme
+sphinx-sitemap>=2.0.0
+sphinx-gitstamp>=0.3.1
+sphinx-notfound-page>=0.4
+guzzle_sphinx_theme
