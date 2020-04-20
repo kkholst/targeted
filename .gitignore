@@ -12,6 +12,7 @@ examples/functional
 examples/test
 .Rhistory
 examples/*.csv
+doc/latex
 doc/html
 doc/xml
 build
