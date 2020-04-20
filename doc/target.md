@@ -1,5 +1,5 @@
 
-# Targeted library
+# Target library
 
 Classes for *targeted inference* and semi-parametric efficient estimators.
 

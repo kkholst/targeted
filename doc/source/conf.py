@@ -25,7 +25,7 @@ print(libpath)
 
 # -- Project information -----------------------------------------------------
 
-project = 'targeted'
+project = 'target'
 copyright = u'2019-2020, Klaus Kähler Holst'
 author = u'Klaus Kähler Holst'
 
@@ -62,6 +62,10 @@ templates_path = ['_templates']
 exclude_patterns = ['build', 'Thumbs.db', '.DS_Store', 'tmp']
 
 source_suffix = ['.rst', '.md', '.txt']
+
+# If true, `todo` and `todoList` produce output, else they produce nothing.
+todo_include_todos = True
+
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -102,14 +106,32 @@ if not on_rtd:  # only import and set the theme if we're building docs locally
 # extensions.append("pylons_sphinx_themes")
 
 
-# -- Options for todo extension ----------------------------------------------
+# -- Options for LaTeX output ------------------------------------------------
 
-# If true, `todo` and `todoList` produce output, else they produce nothing.
-todo_include_todos = True
+latex_additional_files = ['../latex/refman.pdf']
+latex_engine = 'pdflatex'
+latex_theme = 'manual'
+latex_elements = {
+# The paper size ('letterpaper' or 'a4paper').
+#
+'papersize': 'a4paper',
+'preamble': r'''
+\usepackage{pdfpages}
 
+'''}
+latex_logo = '../images/small.png'
 
+# latex_documents = [
+# (master_doc, 'main.tex', 'Sphinx format for Latex and HTML',
+# 'Klaus Kähler Holst', 'report')
+# ]
+
+# ----------------------------------------------------------------------------
 
 subprocess.call('cd .. ; doxygen', shell=True)
+
+if not on_rtd:
+    subprocess.call('cd ../latex ; make', shell=True)
 
 def setup(app):
     app.add_stylesheet('custom.css')

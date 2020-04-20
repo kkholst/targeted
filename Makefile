@@ -183,9 +183,10 @@ cleanpy:
 .PHONY: doc
 doc:
 	@cd doc; $(MAKE) html
+	@cd doc/latex; $(MAKE)
 
 .PHONY: html
-html: doc
+html: @cd doc; $(MAKE) html
 
 .PHONY: docs
 docs:	doc
