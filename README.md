@@ -19,11 +19,18 @@ the relative risk and risk differences where examined by (Richardson
 et al 2017). Various missing data estimators and causal inference models
 (Bang & Robins 2005, Tsiatis 2006) also fits into this framework.
 
+# Documentation
+
+The main documentation can be found here: https://target.readthedocs.io/en/latest
+
 ## Examples
+
 ### R
+
 ```r
 library('targeted')
 
+# Simulation
 m <- lvm(y[-2] ~ 1*x,
          lp.target[1] ~ 1,
          lp.nuisance[-1] ~ 2*x)
@@ -31,6 +38,7 @@ distribution(m, ~a) <- binomial.lvm('logit')
 m <- binomial.rr(m, 'y', 'a', 'lp.target', 'lp.nuisance')
 dd <- sim(m, 5e2, seed=1)
 
+# Double-robust estimator
 summary(fit <- targeted::riskreg(y ~ a | 1 | x | x, data=dd, type="rr"))
 #
 #  Relative risk model
@@ -49,6 +57,7 @@ summary(fit <- targeted::riskreg(y ~ a | 1 | x | x, data=dd, type="rr"))
 ```
 
 ### Python
+
 ```python
 import targeted as tg
 from targeted.formula import riskreg
@@ -61,6 +70,7 @@ print(val)
 ```
 
 ### C++
+
 ```cpp
 #include <target/target.h>
 using namespace arma;
@@ -94,11 +104,6 @@ make check coverage
 make valgrind
 ```
 
-The documentation is based on ``doxygen`` and can be compiled by
-```
-make doc
-```
-
 ### R
 
 The R package can be built and installed with
@@ -108,7 +113,8 @@ make r
 
 ### Python
 
-The python package can be installed directly from PyPi:
+The python package can be installed directly from PyPi (wheels
+available for Mac OS X and Linux):
 ```
 pip install targeted
 ```
