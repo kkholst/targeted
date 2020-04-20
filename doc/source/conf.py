@@ -23,17 +23,16 @@ sys.path.insert(0, libpath)
 sys.path.insert(0, curr_path)
 print(libpath)
 
-# sys.path.insert(0, os.path.abspath('../../src/'))
-
 # -- Project information -----------------------------------------------------
 
 project = 'targeted'
 copyright = u'2019-2020, Klaus Kähler Holst'
 author = u'Klaus Kähler Holst'
-# The full version, including alpha/beta/rc tags
 
+# The full version, including alpha/beta/rc tags
 release = targeted.__version__
-html_logo = '../images/small.png'
+
+master_doc = 'index'
 
 # -- General configuration ---------------------------------------------------
 
@@ -54,18 +53,6 @@ extensions = [
     'IPython.sphinxext.ipython_directive',
     'IPython.sphinxext.ipython_console_highlighting']
 
-# graphviz_output_format = 'png'
-# plot_formats = [('svg', 300), ('png', 100), ('hires.png', 300)]
-# plot_html_show_source_link = False
-# plot_html_show_formats = False
-
-# extensions.append("breathe")
-# breathe_projects = {
-#     "target" : "../xml/",
-#     }
-# breathe_default_project = "target"
-master_doc = 'index'            #
-
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -78,33 +65,36 @@ source_suffix = ['.rst', '.md', '.txt']
 
 # -- Options for HTML output -------------------------------------------------
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-#
-
-html_theme = 'default'
-# html_theme = 'sphinx_rtd_theme'
 pygments_style = 'sphinx'
+
+# Output file base name for HTML help builder.
+htmlhelp_basename = project + 'doc'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-
 html_extra_path = ['../tmp']
+html_logo = '../images/small.png'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-# html_theme_path = guzzle_sphinx_theme.html_theme_path()
-# html_theme = 'guzzle_sphinx_theme'
-# Register the theme as an extension to generate a sitemap.xml
-# extensions.append("guzzle_sphinx_theme")
 
-# Guzzle theme options (see theme.conf for more information)
-# html_theme_options = {
-#     # Set the name of the project to appear in the sidebar
-#     "project_nav_name": "Target"
-# }
+# html_theme = 'default'
+# html_theme = 'sphinx_rtd_theme'
+
+import guzzle_sphinx_theme
+html_theme_path = guzzle_sphinx_theme.html_theme_path()
+html_theme = 'guzzle_sphinx_theme'
+# Register the theme as an extension to generate a sitemap.xml
+extensions.append("guzzle_sphinx_theme")
+
+# use RTFD theme locally
+on_rtd = os.environ.get("READTHEDOCS", None) == "True"
+if not on_rtd:  # only import and set the theme if we're building docs locally
+    import sphinx_rtd_theme
+    html_theme = "sphinx_rtd_theme"
+    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # html_theme_path = pylons_sphinx_themes.get_html_themes_path()
 # html_theme = 'pylons'
@@ -112,38 +102,11 @@ html_extra_path = ['../tmp']
 # extensions.append("pylons_sphinx_themes")
 
 
-# html_sidebars = {
-#   '**': ['logo-text.html', 'globaltoc.html', 'searchbox.html']
-# }
-
-# html_sidebars = {               #
-#     '**': [
-#         'relations.html',  # needs 'show_related': True theme option to display
-#         'searchbox.html',
-#     ]
-# }
-
-# Output file base name for HTML help builder.
-htmlhelp_basename = project + 'doc'
-
-
-# -- Extension configuration -------------------------------------------------
-
 # -- Options for todo extension ----------------------------------------------
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
 
-# use RTFD theme locally
-# on_rtd is whether we are on readthedocs.org, this line of code grabbed from docs.readthedocs.org
-
-on_rtd = os.environ.get("READTHEDOCS", None) == "True"
-
-if not on_rtd:  # only import and set the theme if we're building docs locally
-    import sphinx_rtd_theme
-
-    html_theme = "sphinx_rtd_theme"
-    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 
 subprocess.call('cd .. ; doxygen', shell=True)
