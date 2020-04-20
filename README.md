@@ -3,7 +3,9 @@
 [![codecov](https://codecov.io/gh/kkholst/target/branch/develop/graph/badge.svg)](https://codecov.io/gh/kkholst/target)
 
 [![CRAN](https://www.r-pkg.org/badges/version-last-release/targeted)](https://CRAN.R-project.org/package=targeted)
-[![PyPI version](https://badge.fury.io/py/targeted.svg)](https://badge.fury.io/py/targeted)
+[![PyPIversion](https://badge.fury.io/py/targeted.svg)](https://badge.fury.io/py/targeted)
+[![RTD](https://readthedocs.org/projects/target/badge/?version=latest&style=flat)](https://target.readthedocs.io/en/latest/)
+
 
 # Introduction
 
