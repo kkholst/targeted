@@ -9,7 +9,7 @@
 
 # Introduction
 
-This library provides C++ classes for [targeted inference](targeted.md)
+This library provides C++ classes for targeted inference
 and semi-parametric efficient estimators as
 well as bindings for python and R. The library also contains
 implementation of parametric models (including different discrete
@@ -23,7 +23,8 @@ et al 2017). Various missing data estimators and causal inference models
 
 # Documentation
 
-The main documentation can be found here: https://target.readthedocs.io/en/latest
+The main documentation can be found here:
+https://target.readthedocs.io/en/latest ([PDF version](https://target.readthedocs.io/_/downloads/en/latest/pdf/))
 
 ## Examples
 

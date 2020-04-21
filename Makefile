@@ -186,7 +186,8 @@ doc:
 	@cd doc/latex; $(MAKE)
 
 .PHONY: html
-html: @cd doc; $(MAKE) html
+html:
+	@cd doc; $(MAKE) html
 
 .PHONY: docs
 docs:	doc

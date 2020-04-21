@@ -79,31 +79,25 @@ htmlhelp_basename = project + 'doc'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 html_extra_path = ['../tmp']
-html_logo = '../images/small.png'
+html_logo = '../images/targeted.png'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 
-# html_theme = 'default'
-# html_theme = 'sphinx_rtd_theme'
-
+html_theme = 'default'
 
 # use RTFD theme locally
 on_rtd = os.environ.get("READTHEDOCS", None) == "True"
 if not on_rtd:  # only import and set the theme if we're building docs locally
-    import guzzle_sphinx_theme
-    html_theme_path = guzzle_sphinx_theme.html_theme_path()
-    html_theme = 'guzzle_sphinx_theme'
+    html_theme = "nature"
+    #import guzzle_sphinx_theme
+    # html_theme_path = guzzle_sphinx_theme.html_theme_path()
+    # html_theme = 'guzzle_sphinx_theme'
     # Register the theme as an extension to generate a sitemap.xml
-    extensions.append("guzzle_sphinx_theme")
+    # extensions.append("guzzle_sphinx_theme")
     #import sphinx_rtd_theme
     #html_theme = "sphinx_rtd_theme"
     #html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-
-# html_theme_path = pylons_sphinx_themes.get_html_themes_path()
-# html_theme = 'pylons'
-# # Register the theme as an extension to generate a sitemap.xml
-# extensions.append("pylons_sphinx_themes")
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -112,19 +106,11 @@ latex_additional_files = ['../latex/refman.pdf']
 latex_engine = 'pdflatex'
 latex_theme = 'manual'
 latex_elements = {
-# The paper size ('letterpaper' or 'a4paper').
-#
 'papersize': 'a4paper',
 'preamble': r'''
 \usepackage{pdfpages}
-
 '''}
-latex_logo = '../images/small.png'
-
-# latex_documents = [
-# (master_doc, 'main.tex', 'Sphinx format for Latex and HTML',
-# 'Klaus Kähler Holst', 'report')
-# ]
+latex_logo = '../images/targeted.pdf'
 
 # ----------------------------------------------------------------------------
 
@@ -134,4 +120,4 @@ if on_rtd:
     subprocess.call('cd ../latex ; make', shell=True)
 
 def setup(app):
-    app.add_stylesheet('custom.css')
+    app.add_css_file('custom.css')

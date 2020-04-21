@@ -1,12 +1,13 @@
-#+LATEX_CLASS: article
-#+LATEX_CLASS_OPTIONS: [a4paper,12pt]
 #+PROPERTY: header-args:python :session :results value
 #+PROPERTY: header-args:julia :session *julia*
 #+PROPERTY: header-args:R :session *R* :cache no :width 550 :height 450
 #+PROPERTY: header-args:R+ :colnames yes :rownames no :hlines yes
 #+PROPERTY: header-args :eval never-export :exports both :results output :tangle yes :comments yes
-#+OPTIONS: timestamp:nil title:t date:t author:t creator:nil toc:nil
-#+OPTIONS: h:4 num:t tags:nil d:t ^:{}
+
+* Quickstart
+  :PROPERTIES:
+  :UNNUMBERED: t
+  :END:
 
 
 #+BEGIN_SRC R
