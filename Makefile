@@ -31,15 +31,18 @@ all: clean run
 
 ##################################################
 
-.PHONY: clean
-clean: cleanpy cleandoc
-	@rm -Rf $(BUILD_DIR) $(VALGRIND_DIR) $(DOXYGEN_DIR)/html $(COVERAGE_DIR)
-	@$(MAKE) pkg=gof cleanr
-	@$(MAKE) pkg=targeted cleanr
+.PHONY: cleansrc
+cleansrc:
+	@rm -Rf $(BUILD_DIR) $(VALGRIND_DIR) $(COVERAGE_DIR)
 	@rm -Rf src/*.o src/*.so
 
+.PHONY: clean
+cleanall: cleansrc cleanpy cleandoc
+	@$(MAKE) pkg=gof cleanr
+	@$(MAKE) pkg=targeted cleanr
+
 .PHONY: init
-init: clean
+init: cleansrc
 	@echo "Build options: $(BUILD)"
 	@mkdir -p $(BUILD_DIR)
 	@cd build; $(CMAKE) .. $(BUILD)
@@ -162,7 +165,7 @@ py: buildpy runpy
 
 PYTHON_EXPORT = $(BUILD_DIR)/python
 .PHONY: exportpy
-exportpy: clean
+exportpy: cleansrc cleanpy
 	@rm -Rf $(PYTHON_EXPORT); mkdir -p $(PYTHON_EXPORT)
 	@cd python-package; $(GIT) archive HEAD | (cd ../$(PYTHON_EXPORT); tar x)
 	@cp -a src $(PYTHON_EXPORT)/lib/target-cpp
