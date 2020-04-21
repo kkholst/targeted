@@ -32,7 +32,7 @@ all: clean run
 ##################################################
 
 .PHONY: clean
-clean: cleanpy
+clean: cleanpy cleandoc
 	@rm -Rf $(BUILD_DIR) $(VALGRIND_DIR) $(DOXYGEN_DIR)/html $(COVERAGE_DIR)
 	@$(MAKE) pkg=gof cleanr
 	@$(MAKE) pkg=targeted cleanr
@@ -192,6 +192,12 @@ html:
 .PHONY: docs
 docs:	doc
 	@$(OPEN) doc/build/html/index.html
+
+.PHONY: cleandoc
+cleandoc:
+	@cd doc; $(MAKE) clean
+	@rm -Rf doc/latex doc/html doc/xml
+
 
 .PHONY: markdown
 markdown:
