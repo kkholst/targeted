@@ -15,19 +15,22 @@ import os
 import sys
 import targeted
 import subprocess
+from datetime import date
 
 file_loc = os.path.split(__file__)[0]
 curr_path = os.path.dirname(os.path.abspath(os.path.expanduser(__file__)))
-libpath = os.path.abspath(os.path.join(os.path.dirname(file_loc), '../../python-package/src/targeted'))
+libpath = os.path.abspath(os.path.join(
+    os.path.dirname(file_loc), '../../python-package/src/targeted'))
 sys.path.insert(0, libpath)
 sys.path.insert(0, curr_path)
-print(libpath)
+cyear = str(date.today().year)
 
 # -- Project information -----------------------------------------------------
 
+
 project = 'target library'
-copyright = u'2019-2020, Klaus Kähler Holst'
 author = u'Klaus Kähler Holst'
+copyright = '2019-' + cyear + ', ' + author
 
 # The full version, including alpha/beta/rc tags
 release = targeted.__version__
@@ -78,7 +81,7 @@ htmlhelp_basename = project + 'doc'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-html_extra_path = ['../tmp'] ## This is where the doxygen 'html' directory should be located (link)
+html_extra_path = ['../tmp']  # doxygen 'html' (link)
 html_copy_source = False
 html_show_copyright = False
 html_show_sphinx = False
@@ -102,10 +105,15 @@ html_theme = 'default'
 on_rtd = os.environ.get("READTHEDOCS", None) == "True"
 # if not on_rtd:  # only import and set the theme if we're building docs locally
 
+html_theme_options = {
+}
+
+sys.path.insert(0, "_theme")
 import sphinx_typo3_theme
 html_theme = "sphinx_typo3_theme"
 html_theme_path = [sphinx_typo3_theme.get_html_theme_path()]
 extensions.append("sphinx_typo3_theme")
+
 
 # import pydata_sphinx_theme
 # html_theme = "pydata_sphinx_theme"
