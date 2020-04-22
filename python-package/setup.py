@@ -141,6 +141,6 @@ setuptools.setup(
         'patsy>=0.5',
         'numpy>=1.15'
     ],
-    package_data={pkg: ['data/*.dat', 'data/*.dat', 'data/*.gz']},
+    package_data={pkg: ['data/*.dat', 'data/*.gz']},
     tests_require=['pytest'],
 )
