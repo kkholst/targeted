@@ -3,7 +3,7 @@
 import targeted as tg
 import patsy
 
-def riskreg(data: str, target: str, model='rr', **kwargs):
+def riskreg(data: str, target: str, type='rr', **kwargs):
     """Risk regression with binary exposure
 
     Parameters
@@ -11,7 +11,7 @@ def riskreg(data: str, target: str, model='rr', **kwargs):
     data: pandas.DataFrame
     target: str
        Formula describing respone and exposure/treatment of the form 'response ~ exposure'
-    model: str
+    type: str
        Type of model (rr: relative risk, rd: risk difference)
     nuisance: str, optional
        nuisance (odds-product) regression formula (string: 'x1+x2+...')
@@ -37,5 +37,5 @@ def riskreg(data: str, target: str, model='rr', **kwargs):
     x2 = patsy.dmatrix(nuisance, data)
     x3 = patsy.dmatrix(propensity, data)
     w = patsy.dmatrix(weights, data)
-    res = tg.riskreg(y, a, x1=x1, x2=x2, x3=x3, weights=w, model=model)
+    res = tg.riskreg(y, a, x1=x1, x2=x2, x3=x3, weights=w, type=type)
     return res
