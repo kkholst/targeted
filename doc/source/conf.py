@@ -69,7 +69,8 @@ todo_include_todos = True
 
 # -- Options for HTML output -------------------------------------------------
 
-pygments_style = 'sphinx'
+#pygments_style = 'sphinx'
+pygments_style = 'tango'
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = project + 'doc'
@@ -83,6 +84,12 @@ html_logo = '../images/target.svg'
 html_copy_source = False
 html_show_copyright = False
 html_show_sphinx = False
+# These paths are either relative to html_static_path
+# or fully qualified paths (eg. https://...)
+html_css_files = [
+    'css/custom.css',
+]
+# html_style = '_static/css/custom.css'
 # html_math_renderer = 'mathjax'
 # html_favicon = ''
 # html_baseurl = ''
