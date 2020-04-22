@@ -69,8 +69,7 @@ todo_include_todos = True
 
 # -- Options for HTML output -------------------------------------------------
 
-#pygments_style = 'sphinx'
-pygments_style = 'tango'
+pygments_style = 'sphinx'
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = project + 'doc'
@@ -80,7 +79,6 @@ htmlhelp_basename = project + 'doc'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 html_extra_path = ['../tmp'] ## This is where the doxygen 'html' directory should be located (link)
-html_logo = '../images/target.svg'
 html_copy_source = False
 html_show_copyright = False
 html_show_sphinx = False
@@ -89,6 +87,7 @@ html_show_sphinx = False
 html_css_files = [
     'css/custom.css',
 ]
+# html_logo = '../images/target.svg'
 # html_style = '_static/css/custom.css'
 # html_math_renderer = 'mathjax'
 # html_favicon = ''

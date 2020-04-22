@@ -20,12 +20,12 @@ def test_riskreg1(caplog):
     '''
 
     d = tg.getdata()
-    est1 = tg.riskreg(y=d['y'], a=d['a'], model='rd').estimate
+    est1 = tg.riskreg(y=d['y'], a=d['a'], type='rd').estimate
     assert len(est1) == 1, "Expecting a single parameter"
 
     rd = ey(d, 1) - ey(d, 0)
     assert abs(tanh(est1) - rd) < 1e-6
 
-    est2 = tg.riskreg(y=d['y'], a=d['a'], model='rr').estimate
+    est2 = tg.riskreg(y=d['y'], a=d['a'], type='rr').estimate
     rr = ey(d, 1) / ey(d, 0)
     assert abs(exp(est2) - rr) < 1e-6
