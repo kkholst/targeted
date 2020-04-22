@@ -3,6 +3,7 @@
 #+PROPERTY: header-args:R :session *R* :cache no :width 550 :height 450
 #+PROPERTY: header-args:R+ :colnames yes :rownames no :hlines yes
 #+PROPERTY: header-args :eval never-export :exports both :results output :tangle yes :comments yes
+#+OPTIONS: author: nil
 
 * Quickstart
   :PROPERTIES:
@@ -47,3 +48,20 @@ plot(1:10)
 #+ATTR_LATEX: :width 10cm :options :center t
 #+RESULTS:
 [[file:testfig.png]]
+
+
+#+BEGIN_note
+This document is work in progress
+#+END_note
+
+#+BEGIN_important
+This document is work in progress.
+#+END_important
+
+#+BEGIN_tip
+This document is work in progress.
+#+END_tip
+
+#+BEGIN_warning
+This document is work in progress.
+#+END_warning
