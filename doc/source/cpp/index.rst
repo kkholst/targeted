@@ -2,7 +2,7 @@
 Target C++ API
 ###############
 
-* `C++ interface documentation <cppdocs/files.html>`_
+* `C++ interface documentation <../cppapi/files.html>`_
 
 .. raw:: latex
 
