@@ -1,8 +1,11 @@
-###############
-Target C++ API
-###############
+#######################
+Target C++ Library
+#######################
 
-* `C++ interface documentation <../cppapi/files.html>`_
+
+`C++ interface documentation <../cppapi/files.html>`_
+
+Suggestions and bug report: https://github.com/kkholst/target/issues
 
 .. raw:: latex
 
