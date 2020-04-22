@@ -1,6 +1,3 @@
-    :Author: Klaus Holst
-
-.. contents::
 
 
 
@@ -35,3 +32,20 @@ Quickstart
 .. figure:: testfig.png
 
     ... `fig:testfig <fig:testfig>`_
+
+
+.. note::
+
+    This document is work in progress
+
+.. important::
+
+    This document is work in progress.
+
+.. tip::
+
+    This document is work in progress.
+
+.. warning::
+
+    This document is work in progress.

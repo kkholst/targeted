@@ -1,12 +1,5 @@
-
-#####################
 Target Documentation
-#####################
-
-**Target**
-******************
-Contents
-******************
+=====================
 
 The ``target`` library provides C++ classes for targeted inference and
 semi-parametric estimation with bindings for python and R.  The
@@ -20,16 +13,16 @@ the relative risk and risk differences where examined by
 [Richardson_2018]_. Various missing data estimators and causal
 inference models [Tsiatis_2006]_ also fits into this framework.
 
-.. note:: This document is work in progress.
+.. attention:: This document is work in progress.
 
+Contents
+------------------
 
 .. toctree::
-  :maxdepth: 2
-  :titlesonly:
+  :maxdepth: 3
 
-
-  Create a GitHub issue <https://github.com/kkholst/target/issues>
   Python package <python/index>
   R package <r/index>
-  cpp
-  ref
+  C++ API <cpp/index>
+  development
+  references

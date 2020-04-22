@@ -25,7 +25,7 @@ print(libpath)
 
 # -- Project information -----------------------------------------------------
 
-project = 'target'
+project = 'target library'
 copyright = u'2019-2020, Klaus Kähler Holst'
 author = u'Klaus Kähler Holst'
 
@@ -78,8 +78,14 @@ htmlhelp_basename = project + 'doc'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-html_extra_path = ['../tmp']
-html_logo = '../images/targeted.png'
+html_extra_path = ['../tmp'] ## This is where the doxygen 'html' directory should be located (link)
+html_logo = '../images/target.svg'
+html_copy_source = False
+html_show_copyright = False
+html_show_sphinx = False
+# html_math_renderer = 'mathjax'
+# html_favicon = ''
+# html_baseurl = ''
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
@@ -88,16 +94,12 @@ html_theme = 'default'
 
 # use RTFD theme locally
 on_rtd = os.environ.get("READTHEDOCS", None) == "True"
-if not on_rtd:  # only import and set the theme if we're building docs locally
-    html_theme = "nature"
-    #import guzzle_sphinx_theme
-    # html_theme_path = guzzle_sphinx_theme.html_theme_path()
-    # html_theme = 'guzzle_sphinx_theme'
-    # Register the theme as an extension to generate a sitemap.xml
-    # extensions.append("guzzle_sphinx_theme")
-    #import sphinx_rtd_theme
-    #html_theme = "sphinx_rtd_theme"
-    #html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+# if not on_rtd:  # only import and set the theme if we're building docs locally
+
+import sphinx_typo3_theme
+html_theme = "sphinx_typo3_theme"
+html_theme_path = [sphinx_typo3_theme.get_html_theme_path()]
+extensions.append("sphinx_typo3_theme")
 
 
 # -- Options for LaTeX output ------------------------------------------------

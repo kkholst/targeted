@@ -26,3 +26,4 @@ sphinx-notfound-page>=0.4
 
 sphinx-rtd-theme
 guzzle_sphinx_theme
+sphinx_typo3_theme
