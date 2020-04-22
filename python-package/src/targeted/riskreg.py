@@ -66,7 +66,7 @@ class riskreg:
             Design matrix for nuisance parameter regression (odds-product)
         x3: numpy.array, optional
             Design matrix for propoensity model
-        model: str
+        type: str
             Relative risk: 'rr', Risk difference: 'rd'
 
         Returns
@@ -82,11 +82,11 @@ class riskreg:
         x2 = kwargs.get('x2', one)
         x3 = kwargs.get('x3', one)
         w = kwargs.get('weights', one)
-        self.modeltype = kwargs.get('model', 'rr')
+        self.modeltype = kwargs.get('type', 'rr')
         self.model = tg.riskregmodel(y, a, x1, x2, x3, w, self.modeltype)
         self.propensity = sm.GLM(endog=a, exog=x3, weights=w, family=sm.families.Binomial())
         self.propensity_coef = self.propensity.fit().params
-        self.mle = riskreg_mle(y, a, x2=x2, x1=x1, weights=w, model=self.modeltype)
+        self.mle = riskreg_mle(y, a, x2=x2, x1=x1, weights=w, type=self.modeltype)
         self.mle_coef = self.mle['x']
 
         pr = tg.expit(np.matmul(self.model.data(tg.datatype.x3), self.propensity_coef))
@@ -125,7 +125,7 @@ def riskreg_mle(y, a, x2, *args, **kwargs):
         Design matrix for linear interactions with exposure 'a'
     w: list or numpy.array, optional
         Weights vector
-    model: str
+    type: str
         Relative risk: ``rr``, Risk difference: ``rd``
 
     Returns
@@ -146,8 +146,8 @@ def riskreg_mle(y, a, x2, *args, **kwargs):
     one = np.repeat(1.0, len(y)).reshape(len(y), 1)
     x1 = kwargs.get('x1', one)
     w = kwargs.get('weights', one)
-    model = kwargs.get('model', 'rr')
-    m = tg.riskregmodel(y, a, x1, x2, one, w, model)
+    modeltype = kwargs.get('type', 'rr')
+    m = tg.riskregmodel(y, a, x1, x2, one, w, modeltype)
 
     def obj(theta):
         m.update(theta.reshape(theta.size, 1))
