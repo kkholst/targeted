@@ -107,6 +107,9 @@ html_theme = "sphinx_typo3_theme"
 html_theme_path = [sphinx_typo3_theme.get_html_theme_path()]
 extensions.append("sphinx_typo3_theme")
 
+# import pydata_sphinx_theme
+# html_theme = "pydata_sphinx_theme"
+
 
 # -- Options for LaTeX output ------------------------------------------------
 
@@ -114,8 +117,8 @@ latex_additional_files = ['../latex/refman.pdf']
 latex_engine = 'pdflatex'
 latex_theme = 'manual'
 latex_elements = {
-'papersize': 'a4paper',
-'preamble': r'''
+    'papersize': 'a4paper',
+    'preamble': r'''
 \usepackage{pdfpages}
 '''}
 latex_logo = '../images/targeted.pdf'
