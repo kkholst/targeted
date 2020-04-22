@@ -193,14 +193,13 @@ html:
 	@cd doc; $(MAKE) html
 
 .PHONY: docs
-docs:	doc
-	@$(OPEN) doc/build/html/index.html
+docs:
+	sphinx-autobuild --open-browser doc/source doc/build
 
 .PHONY: cleandoc
 cleandoc:
 	@cd doc; $(MAKE) clean
 	@rm -Rf doc/latex doc/html doc/xml
-
 
 .PHONY: markdown
 markdown:
