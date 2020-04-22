@@ -1,4 +1,4 @@
-targeted package
+targeted module
 ================
 
 Subpackages
