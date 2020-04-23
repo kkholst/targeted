@@ -1,3 +1,4 @@
+LICENSE
 dependencies
 ^tmp$
 ^\.travis\.yml$
@@ -8,3 +9,6 @@ dependencies
 TODO
 ^doc$
 ^Meta$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
