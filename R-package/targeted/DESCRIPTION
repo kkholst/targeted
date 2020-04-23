@@ -20,7 +20,7 @@ Suggests:
     rmarkdown
 URL: https://github.com/kkholst/targeted
 BugReports: https://github.com/kkholst/targeted/issues
-License: Apache License (== 2.0) | file LICENSE
+License: Apache License (== 2.0)
 Imports: methods, Rcpp (>= 1.0.0), optimx, futile.logger
 LinkingTo: Rcpp, RcppArmadillo
 LazyLoad: yes
