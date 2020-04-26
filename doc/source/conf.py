@@ -113,7 +113,7 @@ import sphinx_typo3_theme
 html_theme = "sphinx_typo3_theme"
 html_theme_path = [sphinx_typo3_theme.get_html_theme_path()]
 extensions.append("sphinx_typo3_theme")
-
+html_favicon = 'favicon.png'
 
 # import pydata_sphinx_theme
 # html_theme = "pydata_sphinx_theme"
@@ -129,7 +129,7 @@ latex_elements = {
     'preamble': r'''
 \usepackage{pdfpages}
 '''}
-latex_logo = '../images/targeted.pdf'
+latex_logo = '../images/target.pdf'
 
 # ----------------------------------------------------------------------------
 

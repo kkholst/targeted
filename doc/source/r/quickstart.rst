@@ -1,3 +1,6 @@
+    :Author: Klaus Holst
+
+.. contents::
 
 
 
@@ -49,3 +52,10 @@ Quickstart
 .. warning::
 
     This document is work in progress.
+
+
+
+```dr`` <http://www.dr.dk>`_
+
+
+`dr <http://www.dr.dk>`_
