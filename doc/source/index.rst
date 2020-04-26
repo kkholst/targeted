@@ -24,8 +24,9 @@ Contents
 
 .. toctree:: :maxdepth: 2
 
+  installation
+  development
   Python package <python/index>
   R package <r/index>
   C++ Library <cpp/index>
-  development
   references
