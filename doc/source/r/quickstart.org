@@ -3,7 +3,7 @@
 #+PROPERTY: header-args:R :session *R* :cache no :width 550 :height 450
 #+PROPERTY: header-args:R+ :colnames yes :rownames no :hlines yes
 #+PROPERTY: header-args :eval never-export :exports both :results output :tangle yes :comments yes
-#+OPTIONS: author: nil
+#+OPTIONS:  :author nil
 
 * Quickstart
   :PROPERTIES:
@@ -65,3 +65,6 @@ This document is work in progress.
 #+BEGIN_warning
 This document is work in progress.
 #+END_warning
+
+
+aaaaa.
