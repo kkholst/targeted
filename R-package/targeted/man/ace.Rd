@@ -41,7 +41,7 @@ only has two levels)}
 \item{...}{Additional arguments to lower level functions}
 }
 \value{
-An object of class '\code{ace-targeted}' is returned. See \code{\link{targeted-class}}
+An object of class '\code{ace.targeted}' is returned. See \code{\link{targeted-class}}
 for more details about this class and its generic functions.
 }
 \description{

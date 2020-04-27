@@ -45,7 +45,7 @@ randomization. For example
 
 \[
 E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
-\alpha X + \beta Z ) \mid X] 
+\alpha X + \beta Z ) \mid X]
 \neq \operatorname{expit}[\mu + \alpha X + \beta E(Z\mid X)],
 \]
 
@@ -200,7 +200,7 @@ We start by fitting the model using the maximum likelihood estimator.
 args(riskreg_mle)
 ```
 
-The ``riskreg_mle``function takes vectors/matrices as input arguments
+The ``riskreg_mle`` function takes vectors/matrices as input arguments
 with the response ``y``, exposure ``a``, target parameter design
 matrix ``x1`` (i.e., the matrix \(W\) at the start of this text), and
 the nuisance model design matrix ``x2`` (odds product).

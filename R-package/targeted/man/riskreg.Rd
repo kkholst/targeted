@@ -47,16 +47,35 @@ riskreg(
 \item{...}{additional arguments to unconstrained optimization routine (nlminb)}
 }
 \value{
-@return An object of class '\code{riskreg-targeted}' is returned. See \code{\link{targeted-class}}
+An object of class '\code{riskreg.targeted}' is returned. See \code{\link{targeted-class}}
 for more details about this class and its generic functions.
 }
 \description{
-Risk regression with binary exposure
+Risk regression with binary exposure and nuisance model for the odds-product.
+
+Let \eqn{A} be the binary exposure, \eqn{L} the set of covariates, and \eqn{Y} the binary response variable, and define
+\eqn{p_a(v) = P(Y=1 \mid A=a, V=v), a\in\{0,1\}}{pa(v) = P(Y=1|A=a,V=v), a=0,1}.
+
+The \bold{target parameter} is either the \emph{relative risk}
+\deqn{\mathrm{RR}(v) = \frac{p_1(v)}{p_0(v)}}{RR(v) = p1(v)/p0(v)}
+or the \emph{risk difference}
+
+We assume a target parameter model given by either
+\deqn{\log\{RR(v)\} = \alpha^t v}{log[RR(v)] = alpha'v}
+or
+\deqn{\mathrm{arctanh}\{RD(v)\} = \alpha^t v}{arctanh[RD(v)] = alpha'v}
+and similarly a working linear \bold{nuisance model} for the \emph{odds-product}
+\deqn{\phi(v) = \log\left(\frac{p_{0}(v)p_{1}(v)}{(1-p_{0}(v))(1-p_{1}(v))}\right)}
+{phi(v) = log[p0(v)p1(v)/{(1-p0(v))(1-p1(v))}]}.
+
+A \bold{propensity model} for \eqn{E(A=1|V)} is also fitted using a logistic regression working model.
+
+If both the odds-product model and the propensity model are correct the estimator is assymptotically efficient.
+Further, the estimator is consistent in the union model, i.e., the estimator is
+double-robust in the sense that only one of the two models needs to be correctly specified
+to get a consistent estimate.
 }
 \details{
-Risk regression with binary exposure and nuisance model for the odds-product
-
-
 The 'formula' argument should be given as
 \code{response ~ exposure | target-formula | nuisance-formula}
 or
