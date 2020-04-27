@@ -21,6 +21,7 @@
 ##' Further, the estimator is consistent in the union model, i.e., the estimator is
 ##' double-robust in the sense that only one of the two models needs to be correctly specified
 ##' to get a consistent estimate.
+##'
 ##' @title Risk regression
 ##' @param formula formula (see details below)
 ##' @param target (optional) target model (formula)

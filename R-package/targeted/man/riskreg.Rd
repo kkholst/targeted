@@ -59,14 +59,14 @@ Let \eqn{A} be the binary exposure, \eqn{L} the set of covariates, and \eqn{Y} t
 The \bold{target parameter} is either the \emph{relative risk}
 \deqn{\mathrm{RR}(v) = \frac{p_1(v)}{p_0(v)}}{RR(v) = p1(v)/p0(v)}
 or the \emph{risk difference}
+\deqn{\mathrm{RD}(v) = p_1(v)-p_0(v)}{RD(v)=p1(v)-p0(v)}
 
 We assume a target parameter model given by either
 \deqn{\log\{RR(v)\} = \alpha^t v}{log[RR(v)] = alpha'v}
 or
 \deqn{\mathrm{arctanh}\{RD(v)\} = \alpha^t v}{arctanh[RD(v)] = alpha'v}
 and similarly a working linear \bold{nuisance model} for the \emph{odds-product}
-\deqn{\phi(v) = \log\left(\frac{p_{0}(v)p_{1}(v)}{(1-p_{0}(v))(1-p_{1}(v))}\right)}
-{phi(v) = log[p0(v)p1(v)/{(1-p0(v))(1-p1(v))}]}.
+\deqn{\phi(v) = \log\left(\frac{p_{0}(v)p_{1}(v)}{(1-p_{0}(v))(1-p_{1}(v))}\right)}{phi(v) = log[p0(v)p1(v)/{(1-p0(v))(1-p1(v))}]}.
 
 A \bold{propensity model} for \eqn{E(A=1|V)} is also fitted using a logistic regression working model.
 
