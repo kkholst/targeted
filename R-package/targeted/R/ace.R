@@ -16,7 +16,7 @@ aipw <- function(formula, data, propensity=NULL, ...) {
     res
 }
 
-##' Augmented Inverse Probability Weighting estimator for the Average Causal Effect.
+##' Augmented Inverse Probability Weighting estimator for the Average Causal Treatment Effect.
 ##'
 ##' @title AIPW estimator for Average Causal Effect
 ##' @param formula Formula (see details below)
