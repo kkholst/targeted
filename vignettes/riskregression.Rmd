@@ -69,9 +69,11 @@ risk as the **target parameter**
 \]
 
 Let \(p_a(V) = P(Y \mid A=a, V), a\in\{0,1\}\), the idea is then to
- posit a linear model for \[ \theta(v) = \log \big(RR(v)\big) \] and a
-**nuisance model** for the *odds-product*
+posit a linear model for \[ \theta(v) = \log \big(RR(v)\big) \],
+i.e.,
+\[\log \big(RR(v)\big) = \alpha^Tv,\]
 
+and a **nuisance model** for the *odds-product*
 \[ \phi(v) =
 \log\left(\frac{p_{0}(v)p_{1}(v)}{(1-p_{0}(v))(1-p_{1}(v))}\right) \]
 
