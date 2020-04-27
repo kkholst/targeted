@@ -1,11 +1,10 @@
 #' @title targeted class object
 #'
 #' @description The functions \code{\link{riskreg}} and \code{\link{ace}}
-#' return objects of the S3 class '\code{targeted}'
 #'
-#' @return An object of class '\code{targeted}' is a list with at least the following components:
+#' An object of class '\code{targeted}' is a list with at least the following components:
 #' \describe{
-#'   \item{estimate}{An \code{estimate} object with the target parameter estimates (see \code{\link[lava}{estimate.default}})}
+#'   \item{estimate}{An \code{estimate} object with the target parameter estimates (see \code{\link[lava]{estimate.default}})}
 #'   \item{opt}{Object returned from the applied optimization routine}
 #'   \item{npar}{number of parameters of the model (target and nuisance)}
 #'   \item{type}{String describing the model}
@@ -23,9 +22,8 @@
 #'
 #' @aliases targeted-class riskreg.targeted ace.targeted
 #' @seealso \code{\link{riskreg}}, \code{\link{ace}}
-#'
+#' @return objects of the S3 class '\code{targeted}'
 #' @examples ## See example(riskreg) for examples
-#'
 #' @docType class
 #' @name targeted-class
 NULL
