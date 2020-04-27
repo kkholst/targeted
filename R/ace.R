@@ -25,10 +25,13 @@ aipw <- function(formula, data, propensity=NULL, ...) {
 ##' @param binary Binary response (default TRUE)
 ##' @param nuisance outcome regression formula
 ##' @param propensity propensity model formula
-##' @param all If TRUE all standard errors are calculated (default TRUE when exposure only has two levels)
+##' @param all If TRUE all standard errors are calculated (default TRUE when exposure
+##' only has two levels)
 ##' @param missing If TRUE a missing data (AIPW) estimator is returned
 ##' @param labels Optional treatment labels
 ##' @param ... Additional arguments to lower level functions
+##' @return An object of class '\code{ace-targeted}' is returned. See \code{\link{targeted-class}}
+##' for more details about this class and its generic functions.
 ##' @details
 ##' The formula may either be specified as:
 ##' response ~ treatment | nuisance-formula | propensity-formula

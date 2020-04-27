@@ -20,10 +20,6 @@ library(lava)
 Introduction
 ============
 
-\newcommand{\pr}{\mathbb{P}}
-\newcommand{\E}{\mathbb{E}}
-
-
 Let \(Y\) be a *binary response*, \(A\) a *binary exposure*, and \(V\)
 a *vector of covariates*.
 
@@ -47,10 +43,11 @@ The canonical link (logit) leads to nice computational properties
 interpretation. But ORs are not *collapsible* even under
 randomization. For example
 
-\begin{align*}
-\E(Y\mid X) = \E[ E(Y\mid X,Z) \mid X ] &= \E[\operatorname{expit}( \mu + \alpha X + \beta Z ) \mid X] \\
-	&\neq \operatorname{expit}[\mu + \alpha X + \beta \E(Z\mid X)],
-\end{align*}
+\[
+E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
+\alpha X + \beta Z ) \mid X] 
+\neq \operatorname{expit}[\mu + \alpha X + \beta E(Z\mid X)],
+\]
 
 i.e., When marginalizing we leave the class of logistic
 regression. This non-collapsibility makes it hard to interpret
@@ -67,11 +64,11 @@ log-link function (or identify link for the risk difference) to obtain
 such parameter estimates. In the following we consider the relative
 risk as the **target parameter**
 
-\begin{align*}
-&\mathrm{RR}(v) = \frac{\pr(Y=1\mid A=1, V=v)}{\pr(Y=1\mid A=0, V=v)}.
-\end{align*}
+\[
+\mathrm{RR}(v) = \frac{P(Y=1\mid A=1, V=v)}{P(Y=1\mid A=0, V=v)}.
+\]
 
-Let \(p_a(V) = \pr(Y \mid A=a, V), a\in\{0,1\}\), the idea is then to
+Let \(p_a(V) = P(Y \mid A=a, V), a\in\{0,1\}\), the idea is then to
  posit a linear model for \[ \theta(v) = \log \big(RR(v)\big) \] and a
 **nuisance model** for the *odds-product*
 
@@ -94,7 +91,7 @@ by the below L'Abbé plot.
   p1 <- function(p0,rr) rr*p0
   plot(0, type="n", xlim=c(0,1), ylim=c(0,1),
      xlab="P(Y=1|A=0)", ylab="P(Y=1|A=1)", main="Constant relative risk")
-  for (rr in exp(seq(-3,3,by=.25))) lines(p0,p1(p0,rr), col=2)
+  for (rr in exp(seq(-3,3,by=.25))) lines(p0,p1(p0,rr), col="lightblue")
 ```
 
 Similarly, a model can be constructed for the risk-difference on the
@@ -145,14 +142,14 @@ args(binomial.rr)
 
 then defines the link functions, i.e.,
 
-\[\operatorname{logit}(\E[A\mid X,Z]) = \mu_A + \alpha X,\]
+\[\operatorname{logit}(E[A\mid X,Z]) = \mu_A + \alpha X,\]
 
-\[\operatorname{log}(\E[Y\mid X,Z, A=1]/\E[Y\mid X, A=0]) = \mu_{RR},\]
+\[\operatorname{log}(E[Y\mid X,Z, A=1]/E[Y\mid X, A=0]) = \mu_{RR},\]
 
 \[\operatorname{log}\{p_1(X,Z)p_0(X,Z)/[(1-p_1(X,Z))(1-p_0(X,Z))]\} =
 \mu_{OP}+\beta_x X + \beta_z Z\]
 
-with \(p_a(X,Z)=\E(Y\mid A=a,X,Z)\).
+with \(p_a(X,Z)=E(Y\mid A=a,X,Z)\).
 
 The risk-difference model with the RD parameter modeled on the
 \(\operatorname{arctanh}\) scale can be defined similarly using the `binomial.rd`
@@ -231,7 +228,7 @@ estimate(fit1, keep=1)
 DRE
 ------------
 We next fit the model using a double robust estimator (DRE) which introduces
-a model for the exposure \(\E(A=1\mid V)\) (propensity model). The double-robustness
+a model for the exposure \(E(A=1\mid V)\) (propensity model). The double-robustness
 stems from the fact that the this estimator remains consistent in the
 union model where either the odds-product model or the propensity
 model is correctly specified. With both models correctly specified the

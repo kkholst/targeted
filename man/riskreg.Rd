@@ -46,6 +46,10 @@ riskreg(
 
 \item{...}{additional arguments to unconstrained optimization routine (nlminb)}
 }
+\value{
+@return An object of class '\code{riskreg-targeted}' is returned. See \code{\link{targeted-class}}
+for more details about this class and its generic functions.
+}
 \description{
 Risk regression with binary exposure
 }
