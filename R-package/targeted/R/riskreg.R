@@ -1,6 +1,26 @@
-##' Risk regression with binary exposure
+##' @description Risk regression with binary exposure and nuisance model for the odds-product.
 ##'
-##' Risk regression with binary exposure and nuisance model for the odds-product
+##' Let \eqn{A} be the binary exposure, \eqn{L} the set of covariates, and \eqn{Y} the binary response variable, and define
+##' \eqn{p_a(v) = P(Y=1 \mid A=a, V=v), a\in\{0,1\}}{pa(v) = P(Y=1|A=a,V=v), a=0,1}.
+##'
+##' The \bold{target parameter} is either the \emph{relative risk}
+##' \deqn{\mathrm{RR}(v) = \frac{p_1(v)}{p_0(v)}}{RR(v) = p1(v)/p0(v)}
+##' or the \emph{risk difference}
+##' \deqn{\mathrm{RD}(v) = p_1(v)-p_0(v)}{RD(v)=p1(v)-p0(v)}
+##'
+##' We assume a target parameter model given by either
+##' \deqn{\log\{RR(v)\} = \alpha^t v}{log[RR(v)] = alpha'v}
+##' or
+##' \deqn{\mathrm{arctanh}\{RD(v)\} = \alpha^t v}{arctanh[RD(v)] = alpha'v}
+##' and similarly a working linear \bold{nuisance model} for the \emph{odds-product}
+##' \deqn{\phi(v) = \log\left(\frac{p_{0}(v)p_{1}(v)}{(1-p_{0}(v))(1-p_{1}(v))}\right)}{phi(v) = log[p0(v)p1(v)/{(1-p0(v))(1-p1(v))}]}.
+##'
+##' A \bold{propensity model} for \eqn{E(A=1|V)} is also fitted using a logistic regression working model.
+##'
+##' If both the odds-product model and the propensity model are correct the estimator is assymptotically efficient.
+##' Further, the estimator is consistent in the union model, i.e., the estimator is
+##' double-robust in the sense that only one of the two models needs to be correctly specified
+##' to get a consistent estimate.
 ##' @title Risk regression
 ##' @param formula formula (see details below)
 ##' @param target (optional) target model (formula)
@@ -14,7 +34,7 @@
 ##' @param start optional starting values
 ##' @param semi Semi-parametric (double-robust) estimate (FALSE gives MLE)
 ##' @param ... additional arguments to unconstrained optimization routine (nlminb)
-##' @return @return An object of class '\code{riskreg-targeted}' is returned. See \code{\link{targeted-class}}
+##' @return An object of class '\code{riskreg.targeted}' is returned. See \code{\link{targeted-class}}
 ##' for more details about this class and its generic functions.
 ##' @references  Richardson, T. S., Robins, J. M., & Wang, L. (2017). On modeling and
 ##'  estimation for the relative risk and risk difference. Journal of the
@@ -255,7 +275,7 @@ riskreg_fit <- function(y, a,
     est <- estimate(coef=opt$par,vcov=V,...)
     est$iid  <- ii
     propmod <- estimate(coef=coef(propmod), vcov=Vprop)
-    structure(list(estimate=est,opt=opt, npar=c(ncol(target),ncol(nuisance),ncol(propensity)), nobs=length(y),
+    structure(list(estimate=est, opt=opt, npar=c(ncol(target),ncol(nuisance),ncol(propensity)), nobs=length(y),
                    mle=mle, prop=propmod, type=type, estimator="dre"),
               class=c("riskreg.targeted","targeted"))
 }
@@ -307,6 +327,6 @@ summary.riskreg.targeted <- function(object, ...) {
         cc[seq_len(object$npar[1]),] <- object$estimate$coefmat
         cc <- estimate(coef=cc[,1], vcov=diag(cc[,2]^2,ncol=nrow(cc)),labels=rownames(cc))
     }
-    structure(list(estimate=cc, object$npar, estimator=object$estimator, call=object$call,
+    structure(list(estimate=cc, npar=object$npar, estimator=object$estimator, call=object$call,
                    model=model, type=type, names=nam), class="summary.riskreg.targeted")
 }
