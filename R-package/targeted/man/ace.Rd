@@ -31,13 +31,18 @@ ace(
 
 \item{propensity}{propensity model formula}
 
-\item{all}{If TRUE all standard errors are calculated (default TRUE when exposure only has two levels)}
+\item{all}{If TRUE all standard errors are calculated (default TRUE when exposure
+only has two levels)}
 
 \item{missing}{If TRUE a missing data (AIPW) estimator is returned}
 
 \item{labels}{Optional treatment labels}
 
 \item{...}{Additional arguments to lower level functions}
+}
+\value{
+An object of class '\code{ace-targeted}' is returned. See \code{\link{targeted-class}}
+for more details about this class and its generic functions.
 }
 \description{
 Augmented Inverse Probability Weighting estimator for the Average Causal Effect.
