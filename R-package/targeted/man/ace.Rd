@@ -45,7 +45,7 @@ An object of class '\code{ace.targeted}' is returned. See \code{\link{targeted-c
 for more details about this class and its generic functions.
 }
 \description{
-Augmented Inverse Probability Weighting estimator for the Average Causal Effect.
+Augmented Inverse Probability Weighting estimator for the Average Causal Treatment Effect.
 }
 \details{
 The formula may either be specified as:
