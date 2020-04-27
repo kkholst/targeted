@@ -14,6 +14,8 @@
 ##' @param start optional starting values
 ##' @param semi Semi-parametric (double-robust) estimate (FALSE gives MLE)
 ##' @param ... additional arguments to unconstrained optimization routine (nlminb)
+##' @return @return An object of class '\code{riskreg-targeted}' is returned. See \code{\link{targeted-class}}
+##' for more details about this class and its generic functions.
 ##' @references  Richardson, T. S., Robins, J. M., & Wang, L. (2017). On modeling and
 ##'  estimation for the relative risk and risk difference. Journal of the
 ##'  American Statistical Association, 112(519),

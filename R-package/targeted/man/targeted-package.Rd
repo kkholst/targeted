@@ -6,7 +6,9 @@
 \alias{targeted}
 \title{Targeted inference}
 \description{
-Semi-parametric regression models with nuisance parameters.
+Methods for targeted and semiparametric inference including
+augmented inverse probability weighted estimators for missing data and
+causal inference.
 }
 \examples{
 

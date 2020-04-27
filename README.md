@@ -26,9 +26,12 @@ et al 2017). Various missing data estimators and causal inference models
 The main documentation can be found here:
 https://target.readthedocs.io/en/latest ([PDF version](https://target.readthedocs.io/_/downloads/en/latest/pdf/))
 
+
 ## Examples
 
 ### R
+
+https://github.com/kkholst/targeted
 
 ```r
 library('targeted')
@@ -128,13 +131,8 @@ make py
 
 ### Dependencies
 
-To build the shared library ninja(s) are needed.
-```
-pip install cmake ninja
-
-```
-
 The following dependencies are included as submodules:
+
 1. Armadillo <http://arma.sourceforge.net/docs.html>
 2. Catch2 (unit tests only) <https://github.com/catchorg/Catch2/blob/master/docs/Readme.md#top>
 3. pybind11++ (python bindings only) <https://pybind11.readthedocs.io>
