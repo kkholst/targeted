@@ -5,9 +5,7 @@ include $(wildcard config/*.mk)
 TARGET = target
 BUILD_DIR = build
 VALGRIND_DIR = build/codetest
-COVERAGE_DIR = build
 INSTALL_DIR = $(HOME)/local
-ARG =  -Db_coverage=true $(ASAN) -Dprefix=$(INSTALL_DIR)
 PKGLIB = OFF
 IMG=# Dockerfile postfix
 BUILD = -DUSE_PKG_LIB=$(PKGLIB) -DCOTIRE=OFF -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) -DCMAKE_BUILD_TYPE=Debug \
@@ -33,7 +31,7 @@ all: clean run
 
 .PHONY: cleansrc
 cleansrc:
-	@rm -Rf $(BUILD_DIR) $(VALGRIND_DIR) $(COVERAGE_DIR)
+	@rm -Rf $(BUILD_DIR) $(VALGRIND_DIR)
 	@rm -Rf src/*.o src/*.so
 
 .PHONY: clean
@@ -61,7 +59,7 @@ run:
 	@if [ ! -d "$(BUILD_DIR)" ]; then $(MAKE) --no-print-directory init; fi
 	@$(MAKE) --no-print-directory build # > /dev/null
 	@printf "\n-----\n"
-	@find build/ -maxdepth 1 -iname "*demo" $(FINDEXEC) \
+	@find $(BUILD_DIR)/ -maxdepth 1 -iname "*demo" $(FINDEXEC) \
 	-exec {} \;
 
 .PHONY: build
@@ -217,7 +215,7 @@ t:	checkinit run
 
 .PHONY: test
 test:	checkinit build
-	build/$(TARGET)_test -s
+	$(BUILD_DIR)/$(TARGET)_test -s
 
 .PHONY: testall
 testall: test r py testr testpy
@@ -228,13 +226,13 @@ testall: test r py testr testpy
 
 .PHONY: cov
 cov: coverage
-	cd build/coverage; $(MAKE) coverage
-	$(OPEN) build/coverage/coverage/index.html
+	cd $(BUILD_DIR)/coverage; $(MAKE) coverage
+	$(OPEN) $(BUILD_DIR)/coverage/coverage/index.html
 
 .PHONY: coverage
 coverage:
-	rm -Rf build/coverage; mkdir -p build/coverage
-	cd build/coverage; $(CMAKE) -Wno-dev -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON ../../ && $(MAKE)
+	rm -Rf $(BUILD_DIR)/coverage; mkdir -p $(BUILD_DIR)/coverage
+	cd $(BUILD_DIR)/coverage; $(CMAKE) -Wno-dev -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON ../../ && $(MAKE)
 
 ##################################################
 ## Debugging, profiling, and memory inspection
