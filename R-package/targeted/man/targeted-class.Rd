@@ -7,11 +7,18 @@
 \alias{ace.targeted}
 \title{targeted class object}
 \value{
-
+objects of the S3 class '\code{targeted}'
 }
 \description{
 The functions \code{\link{riskreg}} and \code{\link{ace}}
-return objects of the S3 class '\code{targeted}'
+
+An object of class '\code{targeted}' is a list with at least the following components:
+\describe{
+  \item{estimate}{An \code{estimate} object with the target parameter estimates (see \code{\link[lava]{estimate.default}})}
+  \item{opt}{Object returned from the applied optimization routine}
+  \item{npar}{number of parameters of the model (target and nuisance)}
+  \item{type}{String describing the model}
+}
 }
 \section{S3 generics}{
 
@@ -27,7 +34,6 @@ The following S3 generic functions are available for an object of class \code{ta
 
 \examples{
 ## See example(riskreg) for examples
-
 }
 \seealso{
 \code{\link{riskreg}}, \code{\link{ace}}
