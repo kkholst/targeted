@@ -12,6 +12,13 @@
 
 namespace target {
 
+  /*!
+  Constructor for the cumres class.
+
+  @param r column vector of residuals
+  @param dr matrix of partial deriatives of the residuals wrt to the parameter vector
+  @param ic matrix with the estimated influence functions for the parametric model
+  */
   cumres::cumres(const arma::vec &r,
 		 const arma::mat &dr,
 		 const arma::mat &ic)
@@ -25,9 +32,10 @@ namespace target {
     this->ord = arma::conv_to<arma::uvec>::from(inp);
     this->inp = inp;
     this->order(inp);
+    this->b = arma::vec();
   }
 
-  void cumres::order(const arma::mat &inp) {
+  void cumres::order(const arma::mat &inp, arma::vec b) {
     unsigned p = inp.n_cols;
     arma::umat ord(inp.n_rows, p);
     this->inp = arma::mat(inp.n_rows, p);
@@ -37,11 +45,22 @@ namespace target {
       this->inp.col(j) = inpj.elem(ord.col(j));
     }
     this->ord = ord;
-    if (p == 1) {
+    if (p == 1 && b.n_elem==0) {
       eta = arma::cumsum(dr.rows(ord), 0);
+    }
+    if (b.n_elem>0) {
+      if (b.n_elem<p) {
+	arma::vec newb = arma::vec(p);
+	for (unsigned i=0; i<p; i++) newb(i) = b(0);
+	b = newb;
+      }
+      this->b = b;
     }
   }
 
+  /*!
+    Sample n independent standard normal distributed variables.
+  */
   arma::vec cumres::rnorm() {
 #ifdef ARMA_R
     Rcpp::RNGScope scope;
@@ -51,17 +70,50 @@ namespace target {
 #endif
   }
 
+
+  /*!
+    Calculate the observed cumulative residual process
+
+    \f[ W(t) = n^{-1/2}\sum_{i=1}^n 1\{t-b<X_i\leq t\}r_i, \f]
+
+    where \f$r_i\f$ is the the residual corresponding to the \f$i\f$th
+    observation and \f$X_i\f$ is the variable which the process is
+    ordered against (as defined by the \c inp argument to cumres::order).
+
+    When \c b is not set (i.e., an empty vector) the standard
+    cumulative residual process is calculated (corresponding to \f$b=\infty\f$):
+
+    \f[ W(t) = n^{-1/2}\sum_{i=1}^n 1\{X_i\leq t\}r_i.\f]
+
+  */
   arma::mat cumres::obs() {
     arma::mat res(n, inp.n_cols);
-    for (unsigned i=0; i < inp.n_cols; i++) {
-      arma::vec ri = arma::cumsum(r.elem(ord.col(i))) /
-	std::sqrt(static_cast<double>(n));
-      res.col(i) = ri;
+    double scale = std::sqrt(static_cast<double>(n));
+    for (unsigned j=0; j < inp.n_cols; j++) {
+      if (b.n_elem>0) { // Moving average
+	arma::vec ro = r.elem(ord.col(j));
+	arma::vec rj = arma::cumsum(ro);
+	unsigned pos = 0;
+	double lval = 0.0;
+	for (unsigned i=0; i < ro.n_elem; i++) {
+	  if (inp(i)-b(j)<lval)
+	  while (inp(pos) >= inp(i)-b(j)) pos++;
+	  res(i,j) = (rj(i) - rj(pos)) / scale;
+	}
+      } else { // Standard cumulative sum
+	arma::vec rj = arma::cumsum(r.elem(ord.col(j))) / scale;
+	res.col(j) = rj;
+      }
     }
     return res;
   }
 
-  // Sample single process
+  /*!
+    Obtain a single sample of the residual process under the null hypothesis (true model).
+
+    @param idx indices in which to evaluate the process.
+               If this is an empty vector the process is evaluated in all observed points.
+  */
   arma::mat cumres::sample(const arma::umat &idx) {
     arma::vec g = rnorm();
     unsigned N = n;
@@ -99,9 +151,16 @@ namespace target {
     return res;
   }
 
-  // Sample 'r' processes
+  /*!
+    Draw R samples from the cumulative residual process under the null hypothesis (true model)
+
+    @param R Number of process to sample
+    @param idx subset of indices to evalute the process in
+    @param quantiles Boolean that defines whether quantiles of the sampled process is to be estimated
+    @return arma::mat \f$R\times 2p\f$ matrix with Supremum and L2 test statistics for each of the \f$p\f$ variables (columns in the \c inp variable defined in cumres::order)
+   */
   arma::mat cumres::sample(unsigned R,             // Number of samples
-			   const arma::umat &idx,  // subset of 'time-points' of process to sample
+			   const arma::umat &idx,
 			   bool quantiles) {
     unsigned p = ord.n_cols;
     arma::mat res(R, 2*p);
@@ -132,4 +191,3 @@ namespace target {
   }
 
 }  // namespace target
-

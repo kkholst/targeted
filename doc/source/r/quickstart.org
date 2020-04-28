@@ -65,6 +65,3 @@ This document is work in progress.
 #+BEGIN_warning
 This document is work in progress.
 #+END_warning
-
-
-aaaaa.
