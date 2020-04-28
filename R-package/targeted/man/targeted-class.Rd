@@ -10,7 +10,7 @@
 objects of the S3 class '\code{targeted}'
 }
 \description{
-The functions \code{\link{riskreg}} and \code{\link{ace}}
+The functions \code{\link{riskreg}} and \code{\link{ace}} returns an object of the type \code{targeted}.
 
 An object of class '\code{targeted}' is a list with at least the following components:
 \describe{
