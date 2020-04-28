@@ -119,8 +119,7 @@ namespace target {
 
     \f$p_a(V) = E(Y \mid A=a, V), a\in\{0,1\}\f$
 
-    \todo write more
-    @return arma::Mat
+    @return arma::mat
   */
   template <typename T>
   arma::Mat<T> TargetBinary<T>::pa() {
@@ -159,7 +158,6 @@ namespace target {
     \omega(V)\Big(A-e(V;\widehat{\gamma})\Big)\left (H(\alpha)-p_{0}(V;\widehat{\alpha},\widehat{\beta})\right)
     \f]
 
-    Note that
     1. Inital estimates \f$\widehat{\alpha},\widehat{\beta}\f$ obtained from MLE.
     2. Similarly, \f$\widehat{\gamma}\f$ obtained from regular asymptotic linear model (e.g., logistic regression MLE).
     3. Plugin estimates to obtain \f$\widehat{\omega}_{\mathrm{eff}}\f$. Also, note that \f$p_0\f$ is calculated wrt initial MLE.
@@ -170,7 +168,7 @@ namespace target {
   */
   template <typename T>
   arma::Mat<T> TargetBinary<T>::est(arma::Col<T> alpha,
-				      const arma::Col<T> &propensity) {
+				    const arma::Col<T> &propensity) {
     arma::Col<T> p0 = this->p(0);
     for (unsigned i=0; i < alpha.n_elem; i++) this->alpha[i] = alpha[i];
     calculate(true, false, false);
@@ -193,9 +191,9 @@ namespace target {
 
 
   /*!
-    @brief score -
+    @brief score function
 
-    @param indiv - Description of indiv
+    @param indiv - If \c true the individual score contributions are returned, otherwise the sum is returned
     @return arma::Mat
   */
   template <typename T>
@@ -347,9 +345,6 @@ namespace target {
     @brief ACE AIPW for Average Causal Effects
 
     Assume we have iid observations \f$(Y_i,A_i,X_i)\f$
-    \f[
-    E(Y^\ast) = \sum_{i=1}^n
-    \f]
     @param y Response variable
     @param a Exposure variable
     @param x2 Design matrix for outcome regression. Note must be calculated for fixed A=a (to derive distribution of potential outcome Y^*(a))
