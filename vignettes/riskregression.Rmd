@@ -2,7 +2,14 @@
 title: "Estimating a relative risk or risk difference with a binary exposure"
 author: Klaus Kähler Holst
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output:
+  knitr:::html_vignette:
+    toc: true
+    css: custom.css
+    fig_caption: yes
+  pdf_document:
+    highlight: null
+    number_sections: yes
 vignette: >
   %\VignetteIndexEntry{riskregression}
   %\VignetteEngine{knitr::rmarkdown}
@@ -234,7 +241,7 @@ a model for the exposure \(E(A=1\mid V)\) (propensity model). The double-robustn
 stems from the fact that the this estimator remains consistent in the
 union model where either the odds-product model or the propensity
 model is correctly specified. With both models correctly specified the
-estimator asymptomatically attains the semi-parametric efficiency bounds.
+estimator is efficient.
 
 ```{r}
 with(d, riskreg_fit(y, a, target=x1, nuisance=x2, propensity=x2, type="rr"))
