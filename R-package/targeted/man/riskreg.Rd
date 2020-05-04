@@ -62,15 +62,17 @@ or the \emph{risk difference}
 \deqn{\mathrm{RD}(v) = p_1(v)-p_0(v)}{RD(v)=p1(v)-p0(v)}
 
 We assume a target parameter model given by either
-\deqn{\log\{RR(v)\} = \alpha^t v}{log[RR(v)] = alpha'v}
+\deqn{\log\{RR(v)\} = \alpha^t v}{log[RR(v)] = a'v}
 or
 \deqn{\mathrm{arctanh}\{RD(v)\} = \alpha^t v}{arctanh[RD(v)] = alpha'v}
 and similarly a working linear \bold{nuisance model} for the \emph{odds-product}
-\deqn{\phi(v) = \log\left(\frac{p_{0}(v)p_{1}(v)}{(1-p_{0}(v))(1-p_{1}(v))}\right)}{phi(v) = log[p0(v)p1(v)/{(1-p0(v))(1-p1(v))}]}.
+\deqn{\phi(v) = \log\left(\frac{p_{0}(v)p_{1}(v)}{(1-p_{0}(v))(1-p_{1}(v))}\right) = \beta^t v}
+{phi(v) = log[p0(v)p1(v)/{(1-p0(v))(1-p1(v))}] = b'v}.
 
 A \bold{propensity model} for \eqn{E(A=1|V)} is also fitted using a logistic regression working model.
+\deqn{\mathrm{logit}\{E(A=1\mid V=v)\} = \gamma^t v}{logit[E(A=1|V=v)] = c'v}
 
-If both the odds-product model and the propensity model are correct the estimator is assymptotically efficient.
+If both the odds-product model and the propensity model are correct the estimator is efficient.
 Further, the estimator is consistent in the union model, i.e., the estimator is
 double-robust in the sense that only one of the two models needs to be correctly specified
 to get a consistent estimate.
@@ -106,7 +108,7 @@ riskreg(y ~ a | 1 | x ,  data=d, type="rr")
 ## Model with same design matrix for nuisance and propensity model:
 with(d, riskreg_fit(y, a, nuisance=X, type="rr"))
 
-a <- riskreg(y ~ a | 1 | x ,  data=d, type="rr")
+a <- riskreg(y ~ a, nuisance=~x,  data=d, type="rr")
 a
 
 
