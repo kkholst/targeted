@@ -51,9 +51,9 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 \neq \operatorname{expit}[\mu + \alpha X + \beta E(Z\mid X)],
 \]
 
-i.e., When marginalizing we leave the class of logistic
-regression. This non-collapsibility makes it hard to interpret
-odds-ratios and to compare results from *different studies*
+When marginalizing we leave the class of logistic regression. This
+non-collapsibility makes it hard to interpret odds-ratios and to
+compare results from *different studies*
 
 
 **Relative risks** (and risk differences) are collapsible and

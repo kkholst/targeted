@@ -64,13 +64,12 @@ or the \emph{risk difference}
 We assume a target parameter model given by either
 \deqn{\log\{RR(v)\} = \alpha^t v}{log[RR(v)] = a'v}
 or
-\deqn{\mathrm{arctanh}\{RD(v)\} = \alpha^t v}{arctanh[RD(v)] = alpha'v}
+\deqn{\mathrm{arctanh}\{RD(v)\} = \alpha^t v}{arctanh[RD(v)] = a'v}
 and similarly a working linear \bold{nuisance model} for the \emph{odds-product}
-\deqn{\phi(v) = \log\left(\frac{p_{0}(v)p_{1}(v)}{(1-p_{0}(v))(1-p_{1}(v))}\right) = \beta^t v}
-{phi(v) = log[p0(v)p1(v)/{(1-p0(v))(1-p1(v))}] = b'v}.
+\deqn{\phi(v) = \log\left(\frac{p_{0}(v)p_{1}(v)}{(1-p_{0}(v))(1-p_{1}(v))}\right) = \beta^t v}{phi(v) = log[p0(v)p1(v)/{(1-p0(v))(1-p1(v))}] = b'v}.
 
-A \bold{propensity model} for \eqn{E(A=1|V)} is also fitted using a logistic regression working model.
-\deqn{\mathrm{logit}\{E(A=1\mid V=v)\} = \gamma^t v}{logit[E(A=1|V=v)] = c'v}
+A \bold{propensity model} for \eqn{E(A=1|V)} is also fitted using a logistic regression working model
+\deqn{\mathrm{logit}\{E(A=1\mid V=v)\} = \gamma^t v.}{logit[E(A=1|V=v)] = c'v.}
 
 If both the odds-product model and the propensity model are correct the estimator is efficient.
 Further, the estimator is consistent in the union model, i.e., the estimator is
