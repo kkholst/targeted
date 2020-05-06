@@ -1,6 +1,7 @@
 docs
 inst/doc
 vignettes/*.html
+vignettes/figure/*chunk*
 vignettes/*.R
 src/dependencies
 *.gcno
@@ -37,3 +38,5 @@ test
 *.dvi
 _region*
 symbols.rds
+doc
+Meta

@@ -4,12 +4,7 @@ author: Klaus Kähler Holst
 date: "`r Sys.Date()`"
 output:
   knitr:::html_vignette:
-    toc: true
-    css: custom.css
     fig_caption: yes
-  pdf_document:
-    highlight: null
-    number_sections: yes
 vignette: >
   %\VignetteIndexEntry{riskregression}
   %\VignetteEngine{knitr::rmarkdown}
