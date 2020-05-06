@@ -1,6 +1,6 @@
 ##' @description Risk regression with binary exposure and nuisance model for the odds-product.
 ##'
-##' Let \eqn{A} be the binary exposure, \eqn{L} the set of covariates, and \eqn{Y} the binary response variable, and define
+##' Let \eqn{A} be the binary exposure, \eqn{V} the set of covariates, and \eqn{Y} the binary response variable, and define
 ##' \eqn{p_a(v) = P(Y=1 \mid A=a, V=v), a\in\{0,1\}}{pa(v) = P(Y=1|A=a,V=v), a=0,1}.
 ##'
 ##' The \bold{target parameter} is either the \emph{relative risk}
@@ -13,7 +13,7 @@
 ##' or
 ##' \deqn{\mathrm{arctanh}\{RD(v)\} = \alpha^t v}{arctanh[RD(v)] = a'v}
 ##' and similarly a working linear \bold{nuisance model} for the \emph{odds-product}
-##' \deqn{\phi(v) = \log\left(\frac{p_{0}(v)p_{1}(v)}{(1-p_{0}(v))(1-p_{1}(v))}\right) = \beta^t v}{phi(v) = log[p0(v)p1(v)/{(1-p0(v))(1-p1(v))}] = b'v}.
+##' \deqn{\phi(v) = \log\left(\frac{p_{0}(v)p_{1}(v)}{(1-p_{0}(v))(1-p_{1}(v))}\right) = \beta^t v}{log[p0(v)p1(v)/{(1-p0(v))(1-p1(v))}] = b'v}.
 ##'
 ##' A \bold{propensity model} for \eqn{E(A=1|V)} is also fitted using a logistic regression working model
 ##' \deqn{\mathrm{logit}\{E(A=1\mid V=v)\} = \gamma^t v.}{logit[E(A=1|V=v)] = c'v.}
