@@ -85,6 +85,8 @@ html_extra_path = ['../tmp']  # doxygen 'html' (link)
 html_copy_source = False
 html_show_copyright = False
 html_show_sphinx = False
+html_logo = '../images/target.svg'
+
 # These paths are either relative to html_static_path
 # or fully qualified paths (eg. https://...)
 html_css_files = [
@@ -106,17 +108,34 @@ on_rtd = os.environ.get("READTHEDOCS", None) == "True"
 # if not on_rtd:  # only import and set the theme if we're building docs locally
 
 html_theme_options = {
+     "logo": "../images/target.svg",
 }
 
-sys.path.insert(0, "_theme")
-import sphinx_typo3_theme
-html_theme = "sphinx_typo3_theme"
-html_theme_path = [sphinx_typo3_theme.get_html_theme_path()]
-extensions.append("sphinx_typo3_theme")
-html_favicon = 'favicon.png'
+# sys.path.insert(0, "_theme")
+# import sphinx_typo3_theme
+# html_theme = "sphinx_typo3_theme"
+# html_theme_path = [sphinx_typo3_theme.get_html_theme_path()]
+# extensions.append("sphinx_typo3_theme")
+# html_favicon = 'favicon.png'
 
 # import pydata_sphinx_theme
 # html_theme = "pydata_sphinx_theme"
+
+# import oe_sphinx_theme
+# html_theme = 'oe_sphinx'
+# html_theme_path = [oe_sphinx_theme.get_theme_dir()]
+
+# html_sidebars = {}
+
+# html_theme = 'sphinx_catalystcloud_theme'
+# import sphinx_catalystcloud_theme
+# html_theme_path = [sphinx_catalystcloud_theme.get_html_theme_path()]
+
+import sphinx_rtd_theme
+html_theme = "sphinx_rtd_theme"
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+# import sphinx_catalystcloud_theme
+# html_theme_path = [sphinx_catalystcloud_theme.get_html_theme_path()]
 
 
 # -- Options for LaTeX output ------------------------------------------------
