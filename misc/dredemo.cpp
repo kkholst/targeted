@@ -1,7 +1,7 @@
 /*!
   @file main.cpp
   @author Klaus K. Holst
-  @copyright 2018, Klaus Kähler Holst
+  @copyright 2018-2020, Klaus Kähler Holst
 
   @brief Example file
 
@@ -70,6 +70,3 @@ int main(int argc, char **argv) {
 
   return 0;
 }
-
-
-

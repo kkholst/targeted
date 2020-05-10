@@ -257,8 +257,9 @@ valgrind:
 	@$(NINJA) -C build test_memcheck
 
 .PHONY: sanitizer
-sanitizer: cleansrc
-	$(MAKE) run test EXTRA="-DCMAKE_CXX_FLAGS='-fsanitize=address -fsanitize=undefined -fsanitize=leak' -DCMAKE_CXX_COMPILER=clang++"
+sanitizer:
+	$(MAKE) run test EXTRA="-DCMAKE_CXX_FLAGS='-fsanitize=address -fsanitize=leak -fsanitize=undefined -fsanitize=bool,signed-integer-overflow,null,alignment,float-divide-by-zero,bool' -DCMAKE_CXX_COMPILER=clang++"
+	./build/sanitizer_check
 
 
 ##################################################

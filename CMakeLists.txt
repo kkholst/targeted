@@ -120,8 +120,10 @@ install(FILES ${CMAKE_BINARY_DIR}/target.pc
 
 add_executable("crdemo" "misc/crdemo.cpp")
 add_executable("dredemo" "misc/dredemo.cpp")
+add_executable("sanitizer_check" "misc/sanitizer_check.cpp")
 target_link_libraries("crdemo" PRIVATE armadillo target)
 target_link_libraries("dredemo" PRIVATE armadillo target)
+target_link_libraries("sanitizer_check" PRIVATE armadillo target)
 
 ################################################################################
 # Tests
