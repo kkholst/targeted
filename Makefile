@@ -8,8 +8,14 @@ VALGRIND_DIR = build/codetest
 INSTALL_DIR = $(HOME)/local
 PKGLIB = OFF
 IMG=# Dockerfile postfix
-BUILD = -DUSE_PKG_LIB=$(PKGLIB) -DCOTIRE=OFF -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) -DCMAKE_BUILD_TYPE=Debug \
+CXX=
+EXTRA=
+BUILD=-DUSE_PKG_LIB=$(PKGLIB) -DCOTIRE=OFF -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) -DCMAKE_BUILD_TYPE=Debug \
   -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON -Wno-dev -DCMAKE_VERBOSE_MAKEFILE=ON
+BUILD+=$(EXTRA)
+ifneq ($(CXX),)
+   BUILD += -DCMAKE_CXX_COMPILER=$(CXX)
+endif
 ifneq ($(NINJA),)
   BUILD := $(BUILD) -GNinja
 endif
@@ -35,6 +41,9 @@ cleansrc:
 	@rm -Rf src/*.o src/*.so
 
 .PHONY: clean
+clean: cleansrc
+
+.PHONY: cleanall
 cleanall: cleansrc cleanpy cleandoc
 	@$(MAKE) pkg=gof cleanr
 	@$(MAKE) pkg=targeted cleanr
@@ -241,12 +250,16 @@ coverage:
 .PHONY: check
 check:
 	-@cclint src/*.cpp include/target/*.h*
-	-@cppcheck --enable=warning,style,performance,portability,information,missingInclude --language=c++ --std=c11 -Isrc -Iinclude -Iinclude/target src/
+	-@cppcheck --enable=warning,style,performance,portability,information,missingInclude --language=c++ --std=c11 -Isrc -Iinclude src/
 
 .PHONY: valgrind
-## Alternatively, enable Address Sanitizer (ASAN =-Db_sanitize=address)
 valgrind:
 	@$(NINJA) -C build test_memcheck
+
+.PHONY: sanitizer
+sanitizer: cleansrc
+	$(MAKE) run test EXTRA="-DCMAKE_CXX_FLAGS='-fsanitize=address -fsanitize=undefined -fsanitize=leak' -DCMAKE_CXX_COMPILER=clang++"
+
 
 ##################################################
 ## Container
@@ -259,7 +272,7 @@ ifdef ($IMG)
 	DOCKERTAG := '$(DOCKERTAG).$(IMG)'
 endif
 
-.PHONY: dockerbuild dockerrun docker export
+.PHONY: dockerbuild dockerrun docker export dockersan
 dockerbuild: export
 	@$(CONTAINER_RUNTIME) build . -f Dockerfile --network=host -t $(DOCKERTAG)
 
@@ -271,3 +284,8 @@ export:
 
 docker:
 	$(CONTAINER_RUNTIME) run --user `id -u` -ti --rm --privileged -v ${PWD}:/data $(TARGET) ${CMD}
+
+## Use 'RD' instead of 'R'
+dockersan: exportr
+	$(CONTAINER_RUNTIME) run -ti --rm --privileged -v ./build/R/:/data \
+	rocker/r-devel-san ${CMD}
