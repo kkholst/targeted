@@ -362,8 +362,8 @@ namespace target {
 	   const arma::cx_vec &weights,
 	   bool bin) :
     Target<cx_dbl>(y, a, arma::cx_mat(1, 1), x2, x3, parameter, weights) {
-    ACE::calculate(true, true);
     this->binary = bin;
+    ACE::calculate(true, true);
   }
 
   ACE::ACE(const arma::vec &y,
@@ -372,14 +372,14 @@ namespace target {
   	   const arma::mat &x3,
   	   const arma::vec &parameter,
   	   const arma::vec &weights,
-  	   bool binary) :
+  	   bool bin) :
     ACE(arma::conv_to<arma::cx_vec>::from(y),
 	arma::conv_to<arma::cx_vec>::from(a),
 	arma::conv_to<arma::cx_mat>::from(x2),
 	arma::conv_to<arma::cx_mat>::from(x3),
 	arma::conv_to<arma::cx_vec>::from(parameter),
 	arma::conv_to<arma::cx_vec>::from(weights),
-	binary) { }
+	bin) { }
 
   void ACE::calculate(bool target, bool nuisance, bool propensity) {
     Target<cx_dbl>::calculate(false, nuisance, propensity);
