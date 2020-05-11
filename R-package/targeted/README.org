@@ -4,7 +4,7 @@
 #+PROPERTY: header-args:julia :session *julia*
 #+PROPERTY: header-args:R :session *R* :cache no :width 550 :height 450
 #+PROPERTY: header-args:R+ :colnames yes :rownames no :hlines yes
-#+PROPERTY: header-args :eval never-export :exports both :results output :tangle yes :comments yes
+#+PROPERTY: header-args :eval yes :exports both :Cresults output :tangle yes :comments yes
 #+OPTIONS: timestamp:nil title:t date:t author:t creator:nil toc:nil
 #+OPTIONS: h:4 num:t tags:nil d:t ^:{}
 
@@ -14,20 +14,18 @@
 #+HTML: <a href="http://cranlogs.r-pkg.org/downloads/total/last-month/targeted"><img src="https://www.r-pkg.org/badges/version-last-release/targeted"></a>
 #+HTML: <a href=""https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg"></a>
 
-* Installation
-
-The development version can be installed directly from =github=:
-#+BEGIN_SRC R :exports both :eval never
-remotes::install_github("kkholst/targeted")
-#+END_SRC
-
 * Examples
 
 ** Targeted risk regression
+
+#+ATTR_RAVEL: eval=FALSE
 #+BEGIN_SRC R
   library(targeted)
   library(magrittr)
 #+END_SRC
+
+#+RESULTS:
+: Loading required package: lava
 
 Simulate some data:
 
@@ -47,6 +45,7 @@ head(d)
 #+END_SRC
 
 #+RESULTS:
+:
 :   y a          x          z
 : 1 0 0 -0.6264538 -0.8043316
 : 2 0 0  0.1836433 -1.0565257
@@ -62,6 +61,7 @@ head(d)
 #+END_SRC
 
 #+RESULTS:
+:
 :             Estimate Std.Err   2.5% 97.5%    P-value
 : (Intercept)   0.9722 0.02896 0.9155 1.029 4.281e-247
 
@@ -74,7 +74,8 @@ summary(fit)
 
 #+RESULTS:
 #+begin_example
-riskreg(formula = y ~ a | 1 | x+z, data = d, type = "rr")
+riskreg(formula = y ~ a, nuisance = ~x
+z, data = d, type = "rr")
 
 Relative risk model
   Response:  y
@@ -119,6 +120,7 @@ Whereas the MLE yields a biased estimate of the relative risk:
 #+END_SRC
 
 #+RESULTS:
+:
 :      Estimate Std.Err  2.5% 97.5% P-value
 : [p1]    1.289 0.02855 1.233 1.345       0
 :
