@@ -160,11 +160,10 @@ jobs:
             - r-cran-rcpp
             - r-cran-rcpparmadillo
             - r-cran-testthat
-            - r-cran-pkgdown
       r_packages:
         - covr
       install:
-        - echo
+        - Rscript -e 'install.packages("pkgdown", repos="https://cloud.r-project.org/")'
       script:
         - make checkr pkg=targeted
       after_success:
