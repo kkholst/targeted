@@ -1,25 +1,50 @@
 ---
-# YAML header created by ox-ravel
-title: Targeted inference (targeted)
-author: Klaus K. Holst
+output: github_document
 ---
-<a href="https://travis-ci.org/kkholst/targeted"><img src="https://travis-ci.org/kkholst/targeted.svg?branch=master"></a>
 
-<a href="https://codecov.io/github/kkholst/targeted?branch=master"><img src="https://codecov.io/github/kkholst/targeted/coverage.svg?branch=master"></a>
-
-<a href="https://cran.r-project.org/package=targeted"><img src="http://www.r-pkg.org/badges/version/targeted"></a>
-
-<a href="http://cranlogs.r-pkg.org/downloads/total/last-month/targeted"><img src="https://www.r-pkg.org/badges/version-last-release/targeted"></a>
-
-<a href=""https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg"></a>
+<!-- README.md is generated from README.Rmd. Please edit that file -->
 
 
-# Examples
+```{r  include=FALSE }
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+<!-- badges: start -->
+  [![travis](https://travis-ci.org/kkholst/targeted.svg?branch=master)](https://travis-ci.org/kkholst/targeted)
+  [![coverage](https://codecov.io/github/kkholst/targeted/coverage.svg?branch=master)](https://codecov.io/github/kkholst/targeted?branch=master)
+  [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+  [![cran](https://www.r-pkg.org/badges/version-last-release/targeted)](http://cranlogs.r-pkg.org/downloads/total/last-month/targeted)
+<!-- badges: end -->
 
 
-## Targeted risk regression
+# Targeted Inference in R: targeted <a href='https://target.readthedocs.io/en/latest/r/index.html'><img src='man/figures/logo.svg' align="right" height="75" /></a>
+
+## Installation
+
+You can install the released version of targeted from [CRAN](<https://CRAN.R-project.org>) with:
+
+```{r  install, eval=FALSE }
+install.packages("targeted")
+```
+
+And the development version from [GitHub](<https://github.com/>) with:
 
 ```{r  eval=FALSE }
+# install.packages("devtools")
+remotes::install_github("kkholst/targeted")
+```
+
+## Examples
+
+
+### Targeted risk regression
+
+```{r  results='hide' }
 library(targeted)
 library(magrittr)
 ```
@@ -79,8 +104,6 @@ To obtain an estimate of the risk-difference (here wrong model) we simply chance
 riskreg(y ~ a, nuisance=~x+z, data=d, type="rd")
 ```
 
-
-## Interactions
 
 Interactions with the exposure can be examined with the `target` argument
 
