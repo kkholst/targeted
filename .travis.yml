@@ -163,11 +163,37 @@ jobs:
       r_packages:
         - covr
       install:
-        - Rscript -e 'install.packages("pkgdown", repos="https://cloud.r-project.org/")'
+        - echo
       script:
         - make checkr pkg=targeted
       after_success:
         - Rscript -e 'covr::codecov(path="R-package/targeted", type="all")'
+
+    - name: "docs: targeted"
+      language: 3.6.3
+      cache:
+        packages: true
+        ccache: true
+        apt: true
+      addons:
+        apt:
+          packages:
+            - r-cran-covr
+            - r-cran-futile.logger
+            - r-cran-knitr
+            - r-cran-lava
+            - r-cran-numderiv
+            - r-cran-optimx
+            - r-cran-rcpp
+            - r-cran-rcpparmadillo
+            - r-cran-testthat
+      r_packages:
+        - covr
+      install:
+        - Rscript -e 'install.packages("pkgdown", repos="https://cloud.r-project.org/")'
+      script:
+        - make checkr pkg=targeted
+      after_success:
         - Rscript -e 'pkgdown::build_site("R-package/targeted")'
       deploy:
         provider: pages
