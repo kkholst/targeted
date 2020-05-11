@@ -119,7 +119,7 @@ pkg_hpp = $(foreach module, $(pkg_dep), $(patsubst %, include/target/%.hpp, $(mo
 exportr:
 	@rm -Rf $(BUILD_DIR)/R/$(pkg)
 	@mkdir -p $(BUILD_DIR)/R/$(pkg)
-	cd R-package/${pkg}; $(GIT) archive HEAD | (cd ../../$(BUILD_DIR)/R/$(pkg); tar x)
+	cd R-package/${pkg}; $(GIT) archive HEAD | (cd ../../$(BUILD_DIR)/R/$(pkg); tar -x --dereference )
 	@if [ -z "$(pkg_dep)" ]; then \
 	cp src/*.cpp $(BUILD_DIR)/R/$(pkg)/src; \
 	cp -a include/target/ $(BUILD_DIR)/R/$(pkg)/inst/include/; \
