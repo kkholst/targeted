@@ -170,7 +170,8 @@ jobs:
         - Rscript -e 'covr::codecov(path="R-package/targeted", type="all")'
 
     - name: "docs: targeted"
-      language: 3.6.3
+      language: r
+      r: 3.6.3
       cache:
         packages: true
         ccache: true
