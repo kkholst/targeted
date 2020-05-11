@@ -160,6 +160,7 @@ jobs:
             - r-cran-rcpp
             - r-cran-rcpparmadillo
             - r-cran-testthat
+            - r-cran-pkgdown
       r_packages:
         - covr
       install:
@@ -167,7 +168,16 @@ jobs:
       script:
         - make checkr pkg=targeted
       after_success:
-        - Rscript -e 'library("covr"); codecov(path="R-package/targeted", type="all")'
+        - Rscript -e 'covr::codecov(path="R-package/targeted", type="all")'
+        - Rscript -e 'pkgdown::build_site("R-package/targeted")'
+      deploy:
+        provider: pages
+        skip-cleanup: true
+        github-token: $GITHUB_TOKEN
+        keep-history: true
+        local-dir: R-packages/targeted/docs
+        on:
+          branch: master
 
     # --------------------------------------------------------------------------------
 
