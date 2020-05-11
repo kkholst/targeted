@@ -148,7 +148,7 @@ latex_elements = {
     'preamble': r'''
 \usepackage{pdfpages}
 '''}
-latex_logo = '../images/target.pdf'
+latex_logo = '../images/target.png'
 
 # ----------------------------------------------------------------------------
 

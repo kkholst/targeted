@@ -139,6 +139,13 @@ From the root directory run
 Sanitizers
 ~~~~~~~~~~~~~~~~~~~~
 
+The Undefined Behaviour Sanitizer via ``clang++`` can be executed with
+
+.. code:: sh
+
+  make sanitizer
+
+which runs the unit-tests and examples from the directory ``misc``.
 
 Roadmap
 --------------------
