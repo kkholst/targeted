@@ -160,8 +160,6 @@ jobs:
             - r-cran-rcpp
             - r-cran-rcpparmadillo
             - r-cran-testthat
-      r_packages:
-        - covr
       install:
         - echo
       script:
@@ -176,7 +174,7 @@ jobs:
         packages: true
         ccache: true
         apt: true
-      r_packages:
+      r_binary_packages:
         - covr
         - futile.logger
         - knitr
@@ -187,7 +185,11 @@ jobs:
         - RcppArmadillo
         - testthat
         - pkgdown
+      repos:
+        CRAN: https://cloud.r-project.org
       install:
+        - echo
+      before_install:
         - Rscript -e 'install.packages("pkgdown", repos="https://cloud.r-project.org/")'
       script:
         - make checkr pkg=targeted
@@ -198,7 +200,7 @@ jobs:
         skip-cleanup: true
         github-token: $GITHUB_TOKEN
         keep-history: true
-        local-dir: R-packages/targeted/docs
+        local-dir: R-package/targeted/docs
         on:
           branch: master
 
