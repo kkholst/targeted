@@ -167,43 +167,6 @@ jobs:
       after_success:
         - Rscript -e 'covr::codecov(path="R-package/targeted", type="all")'
 
-    - name: "docs: targeted"
-      language: r
-      r: 3.6.3
-      cache:
-        packages: true
-        ccache: true
-        apt: true
-      r_binary_packages:
-        - covr
-        - futile.logger
-        - knitr
-        - lava
-        - numDeriv
-        - optimx
-        - Rcpp
-        - RcppArmadillo
-        - testthat
-        - pkgdown
-      repos:
-        CRAN: https://cloud.r-project.org
-      install:
-        - echo
-      before_install:
-        - Rscript -e 'install.packages("pkgdown", repos="https://cloud.r-project.org/")'
-      script:
-        - make checkr pkg=targeted
-      after_success:
-        - Rscript -e 'pkgdown::build_site("R-package/targeted")'
-      deploy:
-        provider: pages
-        skip-cleanup: true
-        github-token: $GITHUB_TOKEN
-        keep-history: true
-        local-dir: R-package/targeted/docs
-        on:
-          branch: master
-
     # --------------------------------------------------------------------------------
 
     - name: "R: gof"
