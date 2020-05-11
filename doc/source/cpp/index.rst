@@ -5,7 +5,7 @@ Target C++ Library
 
 `C++ interface documentation <../cppapi/files.html>`_
 
-Suggestions and bug report: https://github.com/kkholst/target/issues
+Suggestions and bug reports: https://github.com/kkholst/target/issues
 
 .. raw:: latex
 
