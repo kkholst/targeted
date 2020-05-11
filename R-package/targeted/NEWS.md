@@ -1,0 +1,10 @@
+# Version 0.1.1  <2020-05-19 Wed>
+- Maintenance release.
+
+# Version 0.1.0  <2020-04-15 Wed>
+
+- Initialization of the new package 'targeted' with implementation
+  of augmented inverse probability weighting methods for estimation
+  with missing data and causal inference (functions: aipw, ace), and
+  double robust methods for risk regression with binary exposure
+  variables.
