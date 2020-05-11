@@ -175,20 +175,17 @@ jobs:
         packages: true
         ccache: true
         apt: true
-      addons:
-        apt:
-          packages:
-            - r-cran-covr
-            - r-cran-futile.logger
-            - r-cran-knitr
-            - r-cran-lava
-            - r-cran-numderiv
-            - r-cran-optimx
-            - r-cran-rcpp
-            - r-cran-rcpparmadillo
-            - r-cran-testthat
       r_packages:
         - covr
+        - futile.logger
+        - knitr
+        - lava
+        - numDeriv
+        - optimx
+        - Rcpp
+        - RcppArmadillo
+        - testthat
+        - pkgdown
       install:
         - Rscript -e 'install.packages("pkgdown", repos="https://cloud.r-project.org/")'
       script:
