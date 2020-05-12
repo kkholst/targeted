@@ -2,7 +2,7 @@
 
 - Maintenance release.
 
-# targeted 0.1.0
+# targeted 0.1
 
 - Initialization of the new package `targeted` with implementation
   of augmented inverse probability weighting methods for estimation
