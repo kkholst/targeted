@@ -1,5 +1,5 @@
 /*!
-  @file utils.hpp
+  @file pava.hpp
   @author Klaus K. Holst
   @copyright 2020, Klaus Kähler Holst
 
@@ -14,6 +14,6 @@ namespace target {
 
   arma::mat pava(arma::vec y,
 		 const arma::vec &x = arma::vec(),
-		 arma::vec w = arma::vec());
+		 arma::vec w = arma::vec());  ///< Weighted Pooled Adjacent Violator Algorithm
 
 }  // namespace target
