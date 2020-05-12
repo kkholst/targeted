@@ -5,7 +5,7 @@ dependencies
 ^\.git$
 .gitignore$
 ^README\.Rmd$ 
-^README\.org$
+^README\.md$
 ^examples$
 TODO
 ^doc$
