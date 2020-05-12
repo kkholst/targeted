@@ -1,5 +1,5 @@
 
-Target Documentation
+Target Library
 ======================
 
 The ``target`` library provides C++ classes for targeted inference and

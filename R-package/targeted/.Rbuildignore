@@ -3,7 +3,7 @@
 ^tmp$
 ^\.travis\.yml$
 ^\.git$
-.gitignore$
+^.gitignore$
 ^README\.Rmd$
 ^examples$
 ^TODO$
