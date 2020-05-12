@@ -14,10 +14,12 @@ the relative risk and risk differences where examined by
 [Richardson_2018]_. Various missing data estimators and causal
 inference models [Tsiatis_2006]_ also fits into this framework.
 
+.. image:: _static/img/mascot.svg
+   :width: 100px
+
 .. note::
 
    This document is work in progress.
-
 
 Contents
 ----------

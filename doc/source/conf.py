@@ -106,10 +106,10 @@ on_rtd = os.environ.get("READTHEDOCS", None) == "True"
 html_theme_options = {
     "logo": "../images/target.svg",
     "logo_alt": "Target logo",
-    "logo_height": 130,
+    "logo_height": 100,
     "logo_title": "Target Documentation",
     "logo_url": "https://target.readthedocs.io/",
-    "logo_width": 384,
+    "logo_width": 100,
     "show_sourcelink": "",
     "github_branch": "",
     "github_commit_hash": "",
