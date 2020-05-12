@@ -95,8 +95,6 @@ html_favicon = 'favicon.png'
 # or fully qualified paths (eg. https://...)
 html_css_files = [
     'css/custom.css',
-    'custom.css',
-    'https://gist.githubusercontent.com/eirikbakke/1059266/raw/d81dba46c76169c2b253de0baed790677883c221/gistfile1.css'
 ]
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -170,4 +168,4 @@ if on_rtd:
     subprocess.call('cd ../latex ; make', shell=True)
 
 def setup(app):
-    app.add_css_file('custom.css')
+    app.add_css_file('css/custom.css')

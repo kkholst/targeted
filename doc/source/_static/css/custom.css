@@ -1,18 +1,25 @@
 @import 'theme.css';
 
 body {
-    color: red;
+    /* color: #083e8c; */
 }
 
-h1 {
-    color: red;
+h1, h2, h3, h4, a, .page-item, .page-link, .pre {
+    color: #083e8c;
+}
+a.current.reference.internal, span.toctree.epxand, a:hover, .page-link:hover {
+    color: #5bc0de;
+}
+.frame-background-dark a:not(.btn):not(.toc-toggle) {
+    color: black;
+}
+.footer-meta-copyright {
+    display: inline-block;
+    margin-bottom: 0;
+    color: #5bc0de
 }
 
-h2 {
-    color: red;
-}
-
-:root{
+.root{
     --blue: #007bff;
     --indigo: #6610f2;
     --purple: #6f42c1;
@@ -27,7 +34,6 @@ h2 {
     --gray: #6c6c6c;
     --gray-dark: #313131;
     --primary: #ff8700;
-    --primary: #5bc0de
     --secondary: #6c6c6c;
     --success: #5cb85c;
     --info: #5bc0de;
