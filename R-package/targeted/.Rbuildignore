@@ -4,8 +4,8 @@ dependencies
 ^\.travis\.yml$
 ^\.git$
 .gitignore$
-^README\.Rmd$ 
-^README\.org$
+^README\.Rmd$
+^README\.md$
 ^examples$
 TODO
 ^doc$

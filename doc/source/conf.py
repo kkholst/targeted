@@ -88,13 +88,15 @@ html_show_sphinx = False
 html_logo = '../images/target.svg'
 html_favicon = 'favicon.png'
 # html_baseurl = ''
-# html_style = '_static/css/custom.css'
+# html_style = 'css/custom.css'
 # html_math_renderer = 'mathjax'
 
 # These paths are either relative to html_static_path
 # or fully qualified paths (eg. https://...)
 html_css_files = [
     'css/custom.css',
+    'custom.css',
+    'https://gist.githubusercontent.com/eirikbakke/1059266/raw/d81dba46c76169c2b253de0baed790677883c221/gistfile1.css'
 ]
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -109,8 +111,13 @@ html_theme_options = {
     "logo_height": 130,
     "logo_title": "Target Documentation",
     "logo_url": "https://target.readthedocs.io/",
-    "logo_width": 484,
+    "logo_width": 384,
     "show_sourcelink": "",
+    "github_branch": "",
+    "github_commit_hash": "",
+    "github_repository": "",
+    "github_revision_msg": "",
+    "github_sphinx_locale": "",
 }
 
 import sphinx_typo3_theme

@@ -1,27 +1,38 @@
-div.breathe-sectiondef.container {
-  width: 100%;
+@import 'theme.css';
+
+body {
+    color: red;
 }
 
-div.literal-block-wrapper.container {
-  width: 100%;
+h1 {
+    color: red;
 }
 
-.red {
-  color: red;
+h2 {
+    color: red;
 }
 
-table {
-  border: 0;
-}
-
-.py {
-    color: #000;
-}
-
-td, th {
-  padding: 1px 8px 1px 5px;
-  border-top: 0;
-  border-bottom: 1px solid #aaa;
-  border-left: 0;
-  border-right: 0;
+:root{
+    --blue: #007bff;
+    --indigo: #6610f2;
+    --purple: #6f42c1;
+    --pink: #e83e8c;
+    --red: #dc3545;
+    --orange: #fd7e14;
+    --yellow: #ffc107;
+    --green: #28a745;
+    --teal: #20c997;
+    --cyan: #17a2b8;
+    --white: #fff;
+    --gray: #6c6c6c;
+    --gray-dark: #313131;
+    --primary: #ff8700;
+    --primary: #5bc0de
+    --secondary: #6c6c6c;
+    --success: #5cb85c;
+    --info: #5bc0de;
+    --warning: #f0ad4e;
+    --danger: #d9534f;
+    --light: #f2f2f2;
+    --dark: #313131;
 }
