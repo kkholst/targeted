@@ -3,9 +3,7 @@
   @author Klaus K. Holst
   @copyright 2020, Klaus Kähler Holst
 
-  @brief Pooled violator algorithms
-
-  Test statistics
+  @brief Pooled Adjacent Violator Algorithms
 
 */
 #include <cmath>
@@ -14,9 +12,16 @@
 
 namespace target {
 
+  /*!
+    Pooled Adjacent Violator Algorithm for
+
+    @param y Response variable
+    @param x Optional covariate to order the response variable after
+    @param w Optional weight vector
+  */
   arma::mat pava(arma::vec y,
-		 const arma::vec &x = arma::vec(),
-		 arma::vec w = arma::vec()) {
+		 const arma::vec &x,
+		 arma::vec w) {
     unsigned n = y.n_elem;
     unsigned nb = n;  // Number of blocks
     if (!x.is_empty()) {
@@ -71,18 +76,6 @@ namespace target {
                                    // previous pool ends
     }
     return res;
-
-    // std::vector<unsigned> b(nb);
-    // dvec res(nb);
-    // for (unsigned i=0; i<nb; i++) {
-    //   res[i] = y[poolEnd[i]];
-    // }
-    // b[0] = 1;
-    // for (unsigned i=0; i<(nb-1); i++) {
-    //   b[i+1] = poolEnd[i]+2; // Beginning of each pool right after
-    // 			   // previous pool end + 1 since array index
-    // 			   // starts at zero
-    // }
   }
 
 }  // namespace target
