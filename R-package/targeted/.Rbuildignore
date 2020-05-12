@@ -1,13 +1,12 @@
-LICENSE
-dependencies
+^LICENSE$
+^dependencies$
 ^tmp$
 ^\.travis\.yml$
 ^\.git$
 .gitignore$
 ^README\.Rmd$
-^README\.md$
 ^examples$
-TODO
+^TODO$
 ^doc$
 ^Meta$
 ^_pkgdown\.yml$
