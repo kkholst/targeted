@@ -86,46 +86,61 @@ html_copy_source = False
 html_show_copyright = False
 html_show_sphinx = False
 html_logo = '../images/target.svg'
+html_favicon = 'favicon.png'
+# html_baseurl = ''
+# html_style = '_static/css/custom.css'
+# html_math_renderer = 'mathjax'
 
 # These paths are either relative to html_static_path
 # or fully qualified paths (eg. https://...)
 html_css_files = [
     'css/custom.css',
 ]
-# html_style = '_static/css/custom.css'
-# html_math_renderer = 'mathjax'
-# html_favicon = ''
-# html_baseurl = ''
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 
-html_theme = 'default'
-
 # use RTFD theme locally
 on_rtd = os.environ.get("READTHEDOCS", None) == "True"
-if not on_rtd:  # only import and set the theme if we're building docs locally
 
-    html_theme_options = {
-        "logo": "../images/target.svg",
-    }
+html_theme_options = {
+    "logo": "../images/target.svg",
+    "logo_alt": "Target logo",
+    "logo_height": 130,
+    "logo_title": "Target Documentation",
+    "logo_url": "https://target.readthedocs.io/",
+    "logo_width": 484,
+    "show_sourcelink": "",
+}
 
-    #sys.path.insert(0, "_theme")
-    #import sphinx_typo3_theme
-    #html_theme = "sphinx_typo3_theme"
-    #html_theme_path = [sphinx_typo3_theme.get_html_theme_path()]
-    # extensions.append("sphinx_typo3_theme")
-    # html_favicon = 'favicon.png'
+import sphinx_typo3_theme
+html_theme = "sphinx_typo3_theme"
+html_theme_path = [sphinx_typo3_theme.get_html_theme_path()]
+extensions.append("sphinx_typo3_theme")
 
-    import pydata_sphinx_theme
-    html_theme = "pydata_sphinx_theme"
+# html_theme = 'default'
 
+# if not on_rtd:  # only import and set the theme if we're building docs locally
+# html_theme_options = {
+#     "logo": "../images/target.svg",
+#     "logo_alt": "Target logo",
+#     "logo_height": 230,
+#     "logo_title": "Target Documentation",
+#     "logo_url": "https://target.readthedocs.io/",
+#     "logo_width": 484,
+# }
 
-    #import sphinx_rtd_theme
-    #html_theme = "sphinx_rtd_theme"
-    #html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-    # import sphinx_catalystcloud_theme
-    # html_theme_path = [sphinx_catalystcloud_theme.get_html_theme_path()]
+# import sphinx_typo3_theme
+# html_theme = "sphinx_typo3_theme"
+# html_theme_path = [sphinx_typo3_theme.get_html_theme_path()]
+# extensions.append("sphinx_typo3_theme")
+
+#import pydata_sphinx_theme
+#html_theme = "pydata_sphinx_theme"
+
+#import sphinx_rtd_theme
+#html_theme = "sphinx_rtd_theme"
+#html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 
 # -- Options for LaTeX output ------------------------------------------------

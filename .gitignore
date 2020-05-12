@@ -12,6 +12,7 @@ examples/functional
 examples/test
 .Rhistory
 examples/*.csv
+doc/*guide*pdf
 doc/latex
 doc/html
 doc/xml
