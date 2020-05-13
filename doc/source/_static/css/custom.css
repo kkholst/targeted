@@ -7,7 +7,10 @@ body {
 h1, h2, h3, h4, a, .page-item, .page-link, .pre {
     color: #083e8c ;
 }
-a.reference.internal, a.current.reference.internal, span.toctree.epxand, a:hover, .page-link:hover {
+a.current.reference.internal, span.toctree.epxand, a:hover, .page-link:hover {
+    color: #5bc0de;
+}
+.toc .current>a {
     color: #5bc0de;
 }
 .frame-background-dark a:not(.btn):not(.toc-toggle) {
