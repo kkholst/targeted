@@ -12,10 +12,7 @@ Relevant models includes binary regression models with binary exposure
 and with nuisance models defined by additional covariates. Models for
 the relative risk and risk differences where examined by
 [Richardson_2018]_. Various missing data estimators and causal
-inference models [Tsiatis_2006]_ also fits into this framework.
-
-.. image:: _static/img/mascot.svg
-   :width: 100px
+inference models [Bang_2005]_, [Tsiatis_2006]_ also fits into this framework.
 
 .. note::
 

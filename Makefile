@@ -80,7 +80,7 @@ build: checkinit
 	fi
 
 .PHONY: install
-install:
+install: checkinit
 	$(NINJA) -C $(BUILD_DIR) install
 
 .PHONY: uninstall

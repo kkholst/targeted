@@ -28,7 +28,7 @@ cyear = str(date.today().year)
 # -- Project information -----------------------------------------------------
 
 
-project = 'target library'
+project = 'Target library'
 author = u'Klaus Kähler Holst'
 copyright = '2019-' + cyear + ', ' + author
 
