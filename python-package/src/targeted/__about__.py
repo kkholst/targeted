@@ -20,7 +20,7 @@ The implemention currently includes
 """
 __author__      = u"Klaus Kähler Holst"
 __email__       = "klaus.holst@maersk.com"
-__url__         = "https://target.readthedocs.io/en/latest/"
+__url__         = "https://targetlib.org/python/"
 __copyright__   = u"Copyright 2019-2020, Klaus Kähler Holst"
 __summary__     = "Targeted inference"
 __keywords__    = "semi-parametric inference, double robust estimator,\
