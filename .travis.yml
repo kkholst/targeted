@@ -148,18 +148,9 @@ jobs:
         packages: true
         ccache: true
         apt: true
-      addons:
-        apt:
-          packages:
-            - r-cran-covr
-            - r-cran-futile.logger
-            - r-cran-knitr
-            - r-cran-lava
-            - r-cran-numderiv
-            - r-cran-optimx
-            - r-cran-rcpp
-            - r-cran-rcpparmadillo
-            - r-cran-testthat
+      r_packages:
+        - covr
+        - pkgdown
       install:
         - echo
       script:
@@ -177,18 +168,9 @@ jobs:
         packages: true
         ccache: true
         apt: true
-      addons:
-        apt:
-          packages:
-            - r-cran-covr
-            - r-cran-futile.logger
-            - r-cran-lava
-            - r-cran-numderiv
-            - r-cran-rcpp
-            - r-cran-rcpparmadillo
-            - r-cran-testthat
       r_packages:
         - covr
+        - pkgdown
       install:
         - echo
       script:
