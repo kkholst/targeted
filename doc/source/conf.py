@@ -108,7 +108,7 @@ html_theme_options = {
     "logo_alt": "Target logo",
     "logo_height": 100,
     "logo_title": "Target Documentation",
-    "logo_url": "https://target.readthedocs.io/",
+    "logo_url": "https://targetlib.org/",
     "logo_width": 100,
     "show_sourcelink": "",
     "github_branch": "",
