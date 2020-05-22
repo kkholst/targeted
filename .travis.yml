@@ -150,7 +150,7 @@ jobs:
         apt: true
       install:
         - R -e 'install.packages(c("remotes","covr","pkgdown"), repos="https://cloud.r-project.org")'
-        - R -e 'remotes::install_deps("r-package/targeted", dep=T, upgrade=T)'
+        - R -e 'remotes::install_deps("R-package/targeted", dep=T, upgrade=T)'
       script:
         - make checkr pkg=targeted
       after_success:
@@ -168,7 +168,7 @@ jobs:
         apt: true
       install:
         - R -e 'install.packages(c("remotes","covr","pkgdown"), repos="https://cloud.r-project.org")'
-        - R -e 'remotes::install_deps("r-package/gof", dep=T, upgrade=T)'
+        - R -e 'remotes::install_deps("R-package/gof", dep=T, upgrade=T)'
       script:
         - make checkr pkg=gof
       after_success:
