@@ -8,15 +8,15 @@ from shutil import copyfile, copymode
 import re
 import platform
 
-pkg = "targeted"
+pkg = 'targeted'
 
-with open("README.md", "r") as fh:
+with open('README.md', 'r', encoding='utf-8') as fh:
     long_description = fh.read()
 
 base_dir = os.path.dirname(__file__)
 
 about = {}
-with open(os.path.join(base_dir, "src", pkg, "__about__.py")) as f:
+with open(os.path.join(base_dir, 'src', pkg, '__about__.py')) as f:
     exec(f.read(), about)
 
 class CMakeExtension(Extension):
@@ -30,14 +30,14 @@ class CMakeBuild(build_ext):
             out = subprocess.check_output(['cmake', '--version'])
         except OSError:
             raise RuntimeError(
-                "CMake must be installed to build the following extensions: " +
-                ", ".join(e.name for e in self.extensions))
+                'CMake must be installed to build the following extensions: ' +
+                ', '.join(e.name for e in self.extensions))
 
-        if platform.system() == "Windows":
+        if platform.system() == 'Windows':
             cmake_version = LooseVersion(re.search(r'version\s*([\d.]+)',
                                          out.decode()).group(1))
             if cmake_version < '3.1.0':
-                raise RuntimeError("CMake >= 3.1.0 is required on Windows")
+                raise RuntimeError('CMake >= 3.1.0 is required on Windows')
 
         for ext in self.extensions:
             self.build_extension(ext)
@@ -52,7 +52,7 @@ class CMakeBuild(build_ext):
         cfg = 'Debug' if self.debug else 'Release'
         build_args = ['--config', cfg]
 
-        if platform.system() == "Windows":
+        if platform.system() == 'Windows':
             cmake_args += ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(
                 cfg.upper(),
                 extdir)]
@@ -89,13 +89,13 @@ class CMakeBuild(build_ext):
         # Create directory if needed
         dest_dir = os.path.join(os.path.dirname(
             os.path.abspath(__file__)), 'tests', 'bin')
-        if dest_dir != "" and not os.path.exists(dest_dir):
-            print("creating directory {}".format(dest_dir))
+        if dest_dir != '' and not os.path.exists(dest_dir):
+            print('creating directory {}'.format(dest_dir))
             os.makedirs(dest_dir)
 
         # Copy file
         dest_file = os.path.join(dest_dir, os.path.basename(src_file))
-        print("copying {} -> {}".format(src_file, dest_file))
+        print('copying {} -> {}'.format(src_file, dest_file))
         copyfile(src_file, dest_file)
         copymode(src_file, dest_file)
 
@@ -111,27 +111,27 @@ if 'READTHEDOCS' in os.environ and os.environ['READTHEDOCS'] == 'True':
         del cmdclass['build_ext']
 
 setuptools.setup(
-    name=about["__name__"],
-    version=about["__version__"],
-    author=about["__author__"],
-    author_email=about["__email__"],
-    url=about["__url__"],
-    description=about["__description__"],
+    name=about['__name__'],
+    version=about['__version__'],
+    author=about['__author__'],
+    author_email=about['__email__'],
+    url=about['__url__'],
+    description=about['__description__'],
     long_description=long_description,
-    long_description_content_type="text/markdown",
+    long_description_content_type='text/markdown',
     packages=setuptools.find_packages('src'),
     package_dir={'': 'src'},
     ext_modules=ext_modules,
     cmdclass=cmdclass,
     zip_safe=False,
-    license=about["__license__"],
+    license=about['__license__'],
     classifiers=[
-        "Programming Language :: Python :: 3",
-        "Programming Language :: C++",
+        'Programming Language :: Python :: 3',
+        'Programming Language :: C++',
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Mathematics',
-        "License :: OSI Approved :: Apache Software License",
-        "Operating System :: OS Independent"
+        'License :: OSI Approved :: Apache Software License',
+        'Operating System :: OS Independent'
     ],
     scripts=scripts,
     install_requires=[
