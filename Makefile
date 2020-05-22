@@ -119,7 +119,7 @@ pkg_hpp = $(foreach module, $(pkg_dep), $(patsubst %, include/target/%.hpp, $(mo
 exportr:
 	@rm -Rf $(BUILD_DIR)/R/$(pkg)
 	@mkdir -p $(BUILD_DIR)/R/$(pkg)
-	cd R-package/${pkg}; $(GIT) archive HEAD | (cd ../../$(BUILD_DIR)/R/$(pkg); tar -x --dereference )
+	cd R-package/${pkg}; $(GIT) archive HEAD | (cd ../../$(BUILD_DIR)/R/$(pkg); tar x )
 	@if [ -z "$(pkg_dep)" ]; then \
 	cp src/*.cpp $(BUILD_DIR)/R/$(pkg)/src; \
 	cp -a include/target/ $(BUILD_DIR)/R/$(pkg)/inst/include/; \
@@ -129,14 +129,14 @@ exportr:
 	cp $(pkg_hpp) $(BUILD_DIR)/R/$(pkg)/inst/include/target; \
 	fi
 	sed -i '/^OBJECTS\|SOURCES/d' $(BUILD_DIR)/R/$(pkg)/src/Makevars
-#cd $(BUILD_DIR)/R; $(R) CMD build $(pkg) --compact-vignettes=gs+qpdf --resave-data=best
 
 .PHONY: checkr
 checkr: exportr
+	cd $(BUILD_DIR)/R; $(R) CMD build $(pkg) --compact-vignettes=gs+qpdf --resave-data=best
 	cd $(BUILD_DIR)/R; $(R) CMD check `$(GETVER) $(pkg)` --timings --as-cran --no-multiarch --run-donttest
 
-.PHONY: rcheck
-rcheck:
+.PHONY: r_check
+r_check:
 	cd R-package; $(R) CMD check $(pkg) --no-multiarch
 
 .PHONY: r

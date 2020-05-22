@@ -1,3 +1,7 @@
+# targeted 0.1.2
+
+- Curent development...
+
 # targeted 0.1.1
 
 - Maintenance release.

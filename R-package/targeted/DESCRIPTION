@@ -1,7 +1,7 @@
 Package: targeted
 Type: Package
 Title: Targeted Inference
-Version: 0.1.1
+Version: 0.1.2
 Date: 2020-05-10
 Authors@R: c(person("Klaus K.", "Holst", email="klaus@holst.it", role=c("aut", "cre")))
 Author: Klaus K. Holst [aut, cre]
