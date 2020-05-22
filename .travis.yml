@@ -151,6 +151,7 @@ jobs:
       r_packages:
         - covr
         - pkgdown
+        - knitr
       install:
         - echo
       script:
@@ -171,6 +172,7 @@ jobs:
       r_packages:
         - covr
         - pkgdown
+        - knitr
       install:
         - echo
       script:
