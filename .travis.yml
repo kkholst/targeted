@@ -149,10 +149,8 @@ jobs:
         ccache: true
         apt: true
       install:
-        - R -e 'remotes::install_deps(dep = T)'
-      r_packages:
-        - covr
-        - pkgdown
+        - R -e 'install.packages(c("remotes","covr","pkgdown"), repos="https://cloud.r-project.org")'
+        - R -e 'remotes::install_deps(dep=T, upgrade=T)'
       script:
         - make checkr pkg=targeted
       after_success:
