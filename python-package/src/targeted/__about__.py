@@ -3,9 +3,7 @@
 __name__        = "targeted"
 __version__     = "0.0.26"
 __license__     = "Apache Software License"
-__description__ = """
-Python package for targeted inference.
-"""
+__description__ = "Python package for targeted inference."
 __author__      = u"Klaus Kähler Holst"
 __email__       = "klaus.holst@maersk.com"
 __url__         = "https://targetlib.org/python/"
