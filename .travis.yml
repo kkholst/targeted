@@ -148,12 +148,11 @@ jobs:
         packages: true
         ccache: true
         apt: true
+      install:
+        - R -e 'devtools::install_deps(dep = T)'
       r_packages:
         - covr
         - pkgdown
-        - knitr
-      install:
-        - echo
       script:
         - make checkr pkg=targeted
       after_success:
