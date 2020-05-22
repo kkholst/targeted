@@ -24,14 +24,14 @@ et al 2017). Various missing data estimators and causal inference models
 # Documentation
 
 The main documentation can be found here:
-https://target.readthedocs.io/en/latest ([PDF version](https://target.readthedocs.io/_/downloads/en/latest/pdf/))
+https://targetlib.org/ ([PDF version](https://target.readthedocs.io/_/downloads/en/latest/pdf/))
 
 
 ## Examples
 
 ### R
 
-https://github.com/kkholst/targeted
+https://kkholst.github.io/targeted
 
 ```r
 library('targeted')
@@ -64,6 +64,8 @@ summary(fit <- targeted::riskreg(y ~ a | 1 | x | x, data=dd, type="rr"))
 
 ### Python
 
+https://pypi.org/project/targeted/
+
 ```python
 import targeted as tg
 from targeted.formula import riskreg
@@ -76,6 +78,8 @@ print(val)
 ```
 
 ### C++
+
+https://www.targetlib.org/cppapi/
 
 ```cpp
 #include <target/target.h>
