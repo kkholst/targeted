@@ -149,7 +149,7 @@ jobs:
         ccache: true
         apt: true
       install:
-        - R -e 'devtools::install_deps(dep = T)'
+        - R -e 'remotes::install_deps(dep = T)'
       r_packages:
         - covr
         - pkgdown
