@@ -16,3 +16,5 @@ The implemention currently includes
 - Model diagnostics based on **cumulative residuals** methods
 - Efficient weighted **Pooled Adjacent Violator Algorithms**
 - **Nested multinomial logit** models
+
+Documentation and tutorials can be found at https://targetlib.org/python/.
