@@ -1,44 +1,62 @@
+---
+output: github_document
+---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-<!-- badges: start -->
 
-[![travis](https://travis-ci.org/kkholst/targeted.svg?branch=master)](https://travis-ci.org/kkholst/targeted)
-[![coverage](https://codecov.io/github/kkholst/targeted/coverage.svg?branch=master)](https://codecov.io/github/kkholst/targeted?branch=master)
-[![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![cran](https://www.r-pkg.org/badges/version-last-release/targeted)](http://cranlogs.r-pkg.org/downloads/total/last-month/targeted)
+
+
+<!-- badges: start -->
+  [![travis](https://travis-ci.org/kkholst/targeted.svg?branch=master)](https://travis-ci.org/kkholst/targeted)
+  [![coverage](https://codecov.io/github/kkholst/targeted/coverage.svg?branch=master)](https://codecov.io/github/kkholst/targeted?branch=master)
+  [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+  [![cran](https://www.r-pkg.org/badges/version-last-release/targeted)](http://cranlogs.r-pkg.org/downloads/total/last-month/targeted)
 <!-- badges: end -->
 
-# Targeted Inference in R: targeted <a href='https://target.readthedocs.io/en/latest/r/index.html'><img src='man/figures/logo.svg' align="right" height="75" /></a>
+
+# Targeted Inference in R: targeted <a href='https://targetlib.org/r/><img src='man/figures/logo.svg' align="right" height="75" /></a>
+
+Various methods for targeted and semiparametric inference including
+augmented inverse probability weighted estimators for missing data and
+causal inference (Bang and Robins (2005)
+<doi:10.1111/j.1541-0420.2005.00377.x>) and estimators for risk
+differences and relative risks (Richardson et al. (2017)
+<doi:10.1080/01621459.2016.1192546>).
 
 ## Installation
 
-You can install the released version of targeted from
-[CRAN](https://CRAN.R-project.org) with:
+You can install the released version of targeted from [CRAN](<https://CRAN.R-project.org>) with:
 
-``` r
+
+```r
 install.packages("targeted")
 ```
 
-And the development version from [GitHub](https://github.com/) with:
+And the development version from [GitHub](<https://github.com/>) with:
 
-``` r
+
+```r
 # install.packages("devtools")
 remotes::install_github("kkholst/targeted")
 ```
 
 ## Examples
 
+
 ### Targeted risk regression
 
-``` r
+
+```r
 library(targeted)
+#> Loading required package: lava
 library(magrittr)
 ```
 
 Simulate some data:
 
-``` r
+
+```r
 m <- lvm() %>%
     regression(a ~ x+z) %>%
     regression(lp.target ~ 1) %>%
@@ -60,7 +78,8 @@ head(d)
 #> 6 0 0 -0.8204684 -0.5249887
 ```
 
-``` r
+
+```r
 fit <- riskreg(y ~ a, nuisance=~x+z, data=d, type="rr")
 fit
 #>             Estimate Std.Err   2.5% 97.5%    P-value
@@ -70,7 +89,8 @@ fit
 Here the same design matrix is used for both the propensity model and
 the nuisance parameter (odds-product) model
 
-``` r
+
+```r
 summary(fit)
 #> riskreg(formula = y ~ a, nuisance = ~x + z, data = d, type = "rr")
 #> 
@@ -91,10 +111,11 @@ summary(fit)
 #>  z             1.0336 0.04878  0.9380  1.1292  1.187e-99
 ```
 
-Double-robustness illustrated by using a wrong propensity model but a
-correct nuisance paramter (odds-product) model:
+Double-robustness illustrated by using a wrong propensity
+model but a correct nuisance paramter (odds-product) model:
 
-``` r
+
+```r
 riskreg(y ~ a, nuisance=~x+z, propensity=~z, data=d, type="rr")
 #>             Estimate Std.Err   2.5% 97.5%    P-value
 #> (Intercept)   0.9709 0.02893 0.9142 1.028 7.053e-247
@@ -102,7 +123,8 @@ riskreg(y ~ a, nuisance=~x+z, propensity=~z, data=d, type="rr")
 
 Or vice-versa
 
-``` r
+
+```r
 riskreg(y ~ a, nuisance=~z, propensity=~x+z, data=d, type="rr")
 #>             Estimate Std.Err   2.5% 97.5%    P-value
 #> (Intercept)   0.9931 0.03597 0.9226 1.064 8.286e-168
@@ -110,7 +132,8 @@ riskreg(y ~ a, nuisance=~z, propensity=~x+z, data=d, type="rr")
 
 Whereas the MLE yields a biased estimate of the relative risk:
 
-``` r
+
+```r
 fit_mle <- with(d, riskreg_mle(y, a, x1=model.matrix(~1,d), x2=model.matrix(~z, d)))
 estimate(fit_mle, 1)
 #>      Estimate Std.Err  2.5% 97.5% P-value
@@ -120,19 +143,20 @@ estimate(fit_mle, 1)
 #>   [p1] = 0
 ```
 
-To obtain an estimate of the risk-difference (here wrong model) we
-simply chance the `type` argument
+To obtain an estimate of the risk-difference (here wrong model) we simply chance the `type` argument
 
-``` r
+
+```r
 riskreg(y ~ a, nuisance=~x+z, data=d, type="rd")
 #>             Estimate Std.Err   2.5%  97.5%    P-value
 #> (Intercept)   0.5102 0.01613 0.4786 0.5418 1.135e-219
 ```
 
-Interactions with the exposure can be examined with the `target`
-argument
 
-``` r
+Interactions with the exposure can be examined with the `target` argument
+
+
+```r
 riskreg(y ~ a, target=a~x, nuisance=~x+z, data=d, type="rr")
 #>             Estimate Std.Err    2.5%    97.5%    P-value
 #> (Intercept)   1.0241 0.03659  0.9524  1.09584 1.986e-172

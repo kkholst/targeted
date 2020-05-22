@@ -10,7 +10,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.path = "man/figures/README-",
-  out.width = "100%"
+  out.width = "50%"
 )
 ```
 
@@ -22,7 +22,14 @@ knitr::opts_chunk$set(
 <!-- badges: end -->
 
 
-# Targeted Inference in R: targeted <a href='https://target.readthedocs.io/en/latest/r/index.html'><img src='man/figures/logo.svg' align="right" height="75" /></a>
+# Targeted Inference in R: targeted <a href='https://targetlib.org/r/><img src='man/figures/logo.svg' align="right" height="75" /></a>
+
+Various methods for targeted and semiparametric inference including
+augmented inverse probability weighted estimators for missing data and
+causal inference (Bang and Robins (2005)
+<doi:10.1111/j.1541-0420.2005.00377.x>) and estimators for risk
+differences and relative risks (Richardson et al. (2017)
+<doi:10.1080/01621459.2016.1192546>).
 
 ## Installation
 
