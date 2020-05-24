@@ -31,7 +31,6 @@ deploy:
   github_token: $GITHUB_TOKEN
   keep_history: true
   local_dir: docs
-  script: travis_wait 30 Rscript -e 'pkgdown::deploy_site_github()'
   on:
     branch: master
     condition: "$TRAVIS_R_VERSION_STRING = devel"
