@@ -16,8 +16,7 @@ Depends:
     lava (>= 1.6.6)
 Suggests:
     testthat (>= 0.11),
-    knitr,
-    rmarkdown
+    knitr
 URL: https://targetlib.org/r/
 BugReports: https://github.com/kkholst/targeted/issues
 License: Apache License (== 2.0)
