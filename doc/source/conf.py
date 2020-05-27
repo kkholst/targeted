@@ -88,7 +88,7 @@ html_show_sphinx = False
 html_logo = '../images/target.svg'
 html_favicon = 'favicon.png'
 # html_baseurl = ''
-# html_style = 'css/custom.css'
+# html_style = 'css/custom.css' # This overrides the theme css
 # html_math_renderer = 'mathjax'
 
 # These paths are either relative to html_static_path
@@ -99,7 +99,6 @@ html_css_files = [
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-
 # use RTFD theme locally
 on_rtd = os.environ.get("READTHEDOCS", None) == "True"
 

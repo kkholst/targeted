@@ -26,6 +26,10 @@ a.current.reference.internal, span.toctree.epxand, a:hover, .page-link:hover {
     color: #fff;
 }
 
+.py {
+    color: #333333;
+}
+
 .root{
     --blue: #007bff;
     --indigo: #6610f2;
