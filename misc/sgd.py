@@ -42,7 +42,7 @@ class SGD:
 
     def _glm_im(self, n, x, y, w): return w - self._a[n] * ( y - self._transfer_func( (self._theta @ x) + (np.linalg.norm(x) ** 2) * w ) )
 
-    def _update_ls(self): self._a = self._alpha / np.arange(self._N)
+    def set_a(self, new_a): self._a = new_a
 
     def opt_alpha(self):
         pass
