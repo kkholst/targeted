@@ -6,23 +6,22 @@ import statsmodels.api as sm
 import pandas as pd
 import os
 
-class DataLoader:
-    def __init__(self, dbcon = None, data_path = None, data_uri = None):
-        self._dbcon = dbcon,
-        self._data_path = data_path
-        self_data_uri = data_uri
-
-    def load_from_file(self, path):
-        pass
-
-    def load_from_query(self, query_str):
-        pass
-
-    def load_from_uri(self, uri):
-        pass
-
 
 class SGD:
+    def __init__(self):
+        pass
+
+    def convergence(self, theta_new: np.ndarray, theta_old: np.ndarray) -> bool:
+        pass
+
+    def __setattr__(self, theta_new: np.ndarray):
+        pass
+
+    def early_stop(self):
+        pass
+
+
+class Implicit_SGD(SGD):
     def __init__(self, X, Y, guess, transfer_func = lambda x: x, alpha = 1.0):
         self._N = len(X)
         self._X = np.array(X)
@@ -42,13 +41,6 @@ class SGD:
 
     def _glm_im(self, n, x, y, w): return w - self._a[n] * ( y - self._transfer_func( (self._theta @ x) + (np.linalg.norm(x) ** 2) * w ) )
 
-    def set_a(self, new_a): self._a = new_a
-
-    def opt_alpha(self):
-        pass
-
-    def print(self):
-        pass
 
     @staticmethod
     def example(func, bounds = (-1, 1)):
@@ -71,7 +63,7 @@ if __name__ == "__main__":
     X = data.exog
     Y = data.endog
 
-    tester = SGD(X, Y, np.ones(X.shape[1]), alpha = 1.0)
+    tester = Implicit_SGD(X, Y, np.ones(X.shape[1]), alpha = 1.0)
     print(tester._theta)
     tester.optimize()
     print(tester._theta)
