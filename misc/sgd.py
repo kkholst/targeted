@@ -5,16 +5,42 @@ from scipy.stats import invgamma
 import statsmodels.api as sm
 import pandas as pd
 import os
+import time
 
 
 class SGD:
-    def __init__(self):
-        pass
+    def __init__(self, n_samples: int, timer: time, **details):
+        self._name = details["method"]
+        self._n_params = details["nparams"]
+        self._reltol = details["reltol"]    # relative tolerance for convergence
+        self._n_passes = details["npasses"] # number of passes over data
+        self._size = details["size"]        # number of estimates to be recorded (log-uniformly)
+        self._estimates = np.zeros((self._n_params, self._size))
+        self._last_estimate = None
+        self._times = np.zeros(self._size)
+        self._timer = timer
+        self._t = 0
+        self._n_recorded = 0              # number of coefs that have been recorded
+        self._pos = np.zeros(self._size)  # the iteration of recorded coefs
+        self._pass = details["pass"]      # force running for n_passes on data
+        self._check = details["check"]
+
+        if self._check: self._truth = details["truth"]
+
+        ## Select the iterations to store estimates
+        n_iters = n_samples * self._n_passes
+        self._pos = (10.0 ** (np.arange(self._size) * np.log10(float(n_iters)) / (self._size-1))).astype(int)
+        if self._pos[-1] != n_iters: self._pos[-1] = n_iters
+
+        ## TODO: Set learning rate
+        ## ...
+
+
+    def get_value_of(self, attribute: str):
+        try: return self.__dict__["_" + attribute]
+        except KeyError as e: print(attribute + " is not an attribute of the caller.")
 
     def convergence(self, theta_new: np.ndarray, theta_old: np.ndarray) -> bool:
-        pass
-
-    def __setattr__(self, theta_new: np.ndarray):
         pass
 
     def early_stop(self):
@@ -50,23 +76,28 @@ class Implicit_SGD(SGD):
 if __name__ == "__main__":
     print("hi")
 
+    details = {"method": "implicit", "nparams": 5, "reltol": 1e-10, "npasses": 10,\
+               "size": 10, "pass": True, "check": True, "truth": np.array([1.0, 1.0, 1.25, 0.5, 0.25]) }
+    tester = SGD(100000, time, **details)
+
+
     # data = sm.datasets.scotland.load(as_pandas=True)
     # data.exog = sm.add_constant(data.exog, prepend=False)
     # data.exog.to_csv(os.path.join(os.getcwd(), 'glm_test.csv'), index=False, header = True)
 
-    data = sm.datasets.scotland.load()
-    data.exog = sm.add_constant(data.exog, prepend=False)
-    data.exog["Response"] = data.endog
+    # data = sm.datasets.scotland.load()
+    # data.exog = sm.add_constant(data.exog, prepend=False)
+    # data.exog["Response"] = data.endog
     # print(data.exog)
 
 
-    X = data.exog
-    Y = data.endog
+    # X = data.exog
+    # Y = data.endog
 
-    tester = Implicit_SGD(X, Y, np.ones(X.shape[1]), alpha = 1.0)
-    print(tester._theta)
-    tester.optimize()
-    print(tester._theta)
+    # tester = Implicit_SGD(X, Y, np.ones(X.shape[1]), alpha = 1.0)
+    # print(tester._theta)
+    # tester.optimize()
+    # print(tester._theta)
 
 
 

@@ -10,13 +10,13 @@ class DataLoader:
         self._data_path = data_path
         self_data_uri = data_uri
 
-    def load_from_file(self, path):
+    def load_from_file(self, path: str):
         pass
 
-    def load_from_query(self, query_str):
+    def load_from_query(self, query_str: str):
         pass
 
-    def load_from_uri(self, uri):
+    def load_from_uri(self, uri: str):
         pass
 
 
