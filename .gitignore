@@ -4,6 +4,7 @@ citest
 notes.org
 *.tmp
 misc/*.csv
+misc/sgd/*.csv
 misc/functional
 
 *.Rcheck
