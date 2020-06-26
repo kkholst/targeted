@@ -31,6 +31,7 @@ class data_set:
 
     ## Replace this with a dunder call
     def get_data_point(self, t: int) -> data_point:
+        t = (t-1) % self._n
         return data_point(self._X[t], self._Y[t], t)
 
 

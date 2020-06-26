@@ -16,7 +16,7 @@ class SGD:
         self._n_passes = details["npasses"] # number of passes over data
         self._size = details["size"]        # number of estimates to be recorded (log-uniformly)
         self._estimates = np.zeros((self._n_params, self._size))
-        self._last_estimate = None
+        self._last_estimate = np.zeros(self._n_params)
         self._times = np.zeros(self._size)
         self._timer = timer
         self._t = 0
@@ -41,7 +41,26 @@ class SGD:
         except KeyError as e: print(attribute + " is not an attribute of the caller.")
 
     def convergence(self, theta_new: np.ndarray, theta_old: np.ndarray) -> bool:
-        pass
+        if self._check:
+            qe = np.mean(np.mean((theta_new - self._truth) ** 2))
+            print(qe)
+            if qe < 0.001: return True
+        elif not self._pass:
+            qe = np.mean(np.mean(np.abs(theta_new - theta_old))) / np.mean(np.mean(np.abs(theta_old)))
+            if qe < self._reltol: return True
+        return False
+
+    def sync_members(self, theta_new: np.ndarray):
+        self._last_estimate = theta_new
+        self._t += 1
+        if self._t == self._pos[self._n_recorded]:
+            self._estimates[:, self._n_recorded] = theta_new
+            ## TODO record elapsed time
+            self._n_recorded += 1
+            while (self._n_recorded < self._size) and (self._pos[self._n_recorded-1] == self._pos[self._n_recorded]):
+                self._estimates[:, self._n_recorded] = theta_new
+                ## TODO record elapsed time
+                self._n_recorded += 1
 
     def early_stop(self):
         pass
