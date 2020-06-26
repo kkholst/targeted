@@ -57,7 +57,7 @@ class Logistic(Transfer):
     def __sigmoid(self, x): return 1.0 / (1.0 + np.exp(-x))
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
     # tester = Transfer(lambda x: x ** 2)
     # print(all(tester.h_vec(np.array([4])) == 16))
     # print(all(tester.h_vec(np.array([1,2,4,5])) == [1,4,16,25]))
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     # print(all(tester.h_vec(np.array([1,2,4,5])) == [-1.0 / 1, -1.0 / 2, -1.0 / 4, -1.0 / 5]))
     # print(all([tester.first_deriv(10.0) == 1.0/ 10.0**2, tester.second_deriv(101) == -2.0 / 101**3, tester.first_deriv(0) == 0.0]))
 
-    tester = Exponential()
+    # tester = Exponential()
     # print(all([tester.h_vec(10) == np.exp(10), tester.g(10) == np.log(10)]))
     # print(all(tester.h_vec(np.array([10])) == np.exp(10)))
     # print(tester.h_vec(10) == np.exp(10))

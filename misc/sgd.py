@@ -43,7 +43,7 @@ class SGD:
     def convergence(self, theta_new: np.ndarray, theta_old: np.ndarray) -> bool:
         if self._check:
             qe = np.mean(np.mean((theta_new - self._truth) ** 2))
-            print(qe)
+            # print(qe)
             if qe < 0.001: return True
         elif not self._pass:
             qe = np.mean(np.mean(np.abs(theta_new - theta_old))) / np.mean(np.mean(np.abs(theta_old)))

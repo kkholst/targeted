@@ -18,11 +18,11 @@ class ExplicitSGD(SGD):
         return self
 
 
-if __name__ == "__main__":
-    print("hi")
+# if __name__ == "__main__":
+#     print("hi")
 
-    details = {"method": "implicit", "nparams": 5, "reltol": 1e-10, "npasses": 10,\
-               "size": 10, "pass": True, "check": True, "truth": np.array([1.0, 1.0, 1.25, 0.5, 0.25]) }
-    tester = SGD(100000, time, **details)
+#     details = {"method": "implicit", "nparams": 5, "reltol": 1e-10, "npasses": 10,\
+#                "size": 10, "pass": True, "check": True, "truth": np.array([1.0, 1.0, 1.25, 0.5, 0.25]) }
+#     tester = SGD(100000, time, **details)
 
 
