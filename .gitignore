@@ -5,6 +5,9 @@ notes.org
 *.tmp
 misc/*.csv
 misc/functional
+misc/sgd_test.ipynb
+misc/sgd_test.R
+misc/.ipynb_checkpoints/
 
 *.Rcheck
 symbols.rds
