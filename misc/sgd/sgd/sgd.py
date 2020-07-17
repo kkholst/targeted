@@ -66,38 +66,38 @@ class SGD:
         pass
 
 
-class Implicit_SGD(SGD):
-    def __init__(self, X, Y, guess, transfer_func = lambda x: x, alpha = 1.0):
-        self._N = len(X)
-        self._X = np.array(X)
-        self._Y = np.array(Y)
-        self._a = np.array(alpha / np.arange(1, self._N + 1))
-        self._theta = np.array(guess)
-        self._alpha = alpha
-        self._transfer_func = transfer_func
+# class Implicit_SGD(SGD):
+#     def __init__(self, X, Y, guess, transfer_func = lambda x: x, alpha = 1.0):
+#         self._N = len(X)
+#         self._X = np.array(X)
+#         self._Y = np.array(Y)
+#         self._a = np.array(alpha / np.arange(1, self._N + 1))
+#         self._theta = np.array(guess)
+#         self._alpha = alpha
+#         self._transfer_func = transfer_func
 
-    def optimize(self):
-        for n, (x, y) in enumerate(zip(self._X, self._Y)):
-            r = self._a[n] * (y - self._transfer_func(self._theta @ x))
-            lb, ub = 0, r
-            if r < 0: lb, ub = ub, lb
-            ksi = brentq(partial(self._glm_im, n, x, y), lb, ub, maxiter = 100)
-            self._theta += ksi * x
+#     def optimize(self):
+#         for n, (x, y) in enumerate(zip(self._X, self._Y)):
+#             r = self._a[n] * (y - self._transfer_func(self._theta @ x))
+#             lb, ub = 0, r
+#             if r < 0: lb, ub = ub, lb
+#             ksi = brentq(partial(self._glm_im, n, x, y), lb, ub, maxiter = 100)
+#             self._theta += ksi * x
 
-    def _glm_im(self, n, x, y, w): return w - self._a[n] * ( y - self._transfer_func( (self._theta @ x) + (np.linalg.norm(x) ** 2) * w ) )
-
-
-    @staticmethod
-    def example(func, bounds = (-1, 1)):
-        return brentq(func, bounds[0], bounds[1])
+#     def _glm_im(self, n, x, y, w): return w - self._a[n] * ( y - self._transfer_func( (self._theta @ x) + (np.linalg.norm(x) ** 2) * w ) )
 
 
-if __name__ == "__main__":
-    print("hi")
+#     @staticmethod
+#     def example(func, bounds = (-1, 1)):
+#         return brentq(func, bounds[0], bounds[1])
 
-    details = {"method": "implicit", "nparams": 5, "reltol": 1e-10, "npasses": 10,\
-               "size": 10, "pass": True, "check": True, "truth": np.array([1.0, 1.0, 1.25, 0.5, 0.25]) }
-    tester = SGD(100000, time, **details)
+
+# if __name__ == "__main__":
+#     print("hi")
+
+#     details = {"method": "implicit", "nparams": 5, "reltol": 1e-10, "npasses": 10,\
+#                "size": 10, "pass": True, "check": True, "truth": np.array([1.0, 1.0, 1.25, 0.5, 0.25]) }
+#     tester = SGD(100000, time, **details)
 
 
     # data = sm.datasets.scotland.load(as_pandas=True)
