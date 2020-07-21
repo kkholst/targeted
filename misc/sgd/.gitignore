@@ -1,0 +1,7 @@
+*.csv
+sgd_test.R
+.ipynb_checkpoints
+.ropeproject/
+tests/__pycache__
+sgd/__pycache__
+sgd/.ropeproject

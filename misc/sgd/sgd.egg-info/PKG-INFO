@@ -1,0 +1,18 @@
+Metadata-Version: 1.2
+Name: sgd
+Version: 0.0.0
+Summary: A fast python library for Stochastic Gradient Descent
+Home-page: UNKNOWN
+Author: George Vassos
+Author-email: georgios.vassos1@maersk.com
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Build Tools
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3 :: Only
+Requires-Python: >=3.7
