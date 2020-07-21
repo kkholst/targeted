@@ -7,7 +7,6 @@ misc/*.csv
 misc/sgd/*.csv
 misc/functional
 misc/sgd/.ipynb_checkpoints/sgd_test-checkpoint.ipynb
-misc/sgd/sgd_test.ipynb
 misc/sgd/sgd/.ropeproject/
 
 *.Rcheck
