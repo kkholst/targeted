@@ -2,6 +2,7 @@
 sgd_test.R
 .ipynb_checkpoints
 .ropeproject/
+sgd.egg-info/
 tests/__pycache__
 sgd/__pycache__
 sgd/.ropeproject
