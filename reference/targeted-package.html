@@ -146,10 +146,14 @@ causal inference.</p>
 
 
 
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Klaus K. Holst Maintainer: &lt;klaus@holst.it&gt;</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-<span class='fu'><a href='https://rdrr.io/r/utils/example.html'>example</a></span>(<span class='no'>riskreg</span>)</div><div class='output co'>#&gt; 
+<span class='fu'><a href='https://rdrr.io/r/utils/example.html'>example</a></span>(<span class='kw'>riskreg</span>)
+</div><div class='output co'>#&gt; 
 #&gt; riskrg&gt; m &lt;- lvm(a[-2] ~ x,
 #&gt; riskrg+         lp.target[1] ~ 1,
 #&gt; riskrg+         lp.nuisance[-1] ~ 2*x)
@@ -188,7 +192,8 @@ causal inference.</p>
 #&gt; riskrg&gt; a
 #&gt;             Estimate Std.Err   2.5% 97.5%  P-value
 #&gt; (Intercept)   0.9397  0.1193 0.7058 1.174 3.38e-15</div><div class='input'>
-<span class='fu'><a href='https://rdrr.io/r/utils/example.html'>example</a></span>(<span class='no'>ace</span>)</div><div class='output co'>#&gt; 
+<span class='fu'><a href='https://rdrr.io/r/utils/example.html'>example</a></span>(<span class='kw'>ace</span>)
+</div><div class='output co'>#&gt; 
 #&gt; ace&gt; m &lt;- lvm(y ~ a+x, a~x)
 #&gt; 
 #&gt; ace&gt; distribution(m,~ a+y) &lt;- binomial.lvm()
@@ -294,7 +299,7 @@ causal inference.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.0.</p>
 </div>
 
       </footer>

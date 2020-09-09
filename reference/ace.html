@@ -141,16 +141,16 @@
     </div>
 
     <pre class="usage"><span class='fu'>ace</span>(
-  <span class='no'>formula</span>,
-  <span class='no'>data</span>,
-  <span class='no'>weights</span>,
-  <span class='kw'>binary</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>nuisance</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>propensity</span> <span class='kw'>=</span> <span class='no'>nuisance</span>,
-  <span class='no'>all</span>,
-  <span class='kw'>missing</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>labels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='no'>...</span>
+  <span class='kw'>formula</span>,
+  <span class='kw'>data</span>,
+  <span class='kw'>weights</span>,
+  binary = <span class='fl'>TRUE</span>,
+  nuisance = <span class='kw'>NULL</span>,
+  propensity = <span class='kw'>nuisance</span>,
+  <span class='kw'>all</span>,
+  missing = <span class='fl'>FALSE</span>,
+  labels = <span class='kw'>NULL</span>,
+  <span class='kw'>...</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -201,7 +201,7 @@ only has two levels)</p></td>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>An object of class '<code>ace.targeted</code>' is returned. See <code>targeted-class</code>
+    <p>An object of class '<code>ace.targeted</code>' is returned. See <code><a href='targeted-class.html'>targeted-class</a></code>
 for more details about this class and its generic functions.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
@@ -210,14 +210,18 @@ response ~ treatment | nuisance-formula | propensity-formula</p>
 <p>For example: <code>ace(y~a | x+z | x*z, data=...)</code></p>
 <p>Alternatively, as a list: <code>ace(list(y~a, ~x+z, ~x*z), data=...)</code></p>
 <p>Or using the nuisance (and propensity argument): <code>ace(y~a, nuisance=~x+z, ...)</code></p>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Klaus K. Holst</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>m</span> <span class='kw'>&lt;-</span> <span class='fu'>lvm</span>(<span class='no'>y</span> ~ <span class='no'>a</span>+<span class='no'>x</span>, <span class='no'>a</span>~<span class='no'>x</span>)
-<span class='fu'><a href='https://rdrr.io/r/stats/Distributions.html'>distribution</a></span>(<span class='no'>m</span>,~ <span class='no'>a</span>+<span class='no'>y</span>) <span class='kw'>&lt;-</span> <span class='fu'>binomial.lvm</span>()
-<span class='no'>d</span> <span class='kw'>&lt;-</span> <span class='fu'>sim</span>(<span class='no'>m</span>,<span class='fl'>1e3</span>,<span class='kw'>seed</span><span class='kw'>=</span><span class='fl'>1</span>)
+    <pre class="examples"><div class='input'><span class='kw'>m</span> <span class='op'>&lt;-</span> <span class='fu'>lvm</span>(<span class='kw'>y</span> <span class='op'>~</span> <span class='kw'>a</span><span class='op'>+</span><span class='kw'>x</span>, <span class='kw'>a</span><span class='op'>~</span><span class='kw'>x</span>)
+<span class='fu'><a href='https://rdrr.io/r/stats/Distributions.html'>distribution</a></span>(<span class='kw'>m</span>,<span class='op'>~</span> <span class='kw'>a</span><span class='op'>+</span><span class='kw'>y</span>) <span class='op'>&lt;-</span> <span class='fu'>binomial.lvm</span>()
+<span class='kw'>d</span> <span class='op'>&lt;-</span> <span class='fu'>sim</span>(<span class='kw'>m</span>,<span class='fl'>1e3</span>,seed=<span class='fl'>1</span>)
 
-<span class='no'>a</span> <span class='kw'>&lt;-</span> <span class='fu'>ace</span>(<span class='no'>y</span> ~ <span class='no'>a</span>, <span class='kw'>nuisance</span><span class='kw'>=</span>~<span class='no'>x</span>, <span class='kw'>data</span><span class='kw'>=</span><span class='no'>d</span>)
-<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>a</span>)</div><div class='output co'>#&gt; 
+<span class='kw'>a</span> <span class='op'>&lt;-</span> <span class='fu'>ace</span>(<span class='kw'>y</span> <span class='op'>~</span> <span class='kw'>a</span>, nuisance=<span class='op'>~</span><span class='kw'>x</span>, data=<span class='kw'>d</span>)
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='kw'>a</span>)
+</div><div class='output co'>#&gt; 
 #&gt; Augmented Inverse Probability Weighting estimator
 #&gt;   Response y (Outcome model: logistic regression):
 #&gt; 	 y ~ x 
@@ -242,20 +246,22 @@ response ~ treatment | nuisance-formula | propensity-formula</p>
 #&gt; RD  -0.1929 0.03295 -0.2575 -0.1283 4.791e-09
 #&gt; </div><div class='input'>
 <span class='co'># Multiple treatments</span>
-<span class='no'>m</span> <span class='kw'>&lt;-</span> <span class='fu'>lvm</span>(<span class='no'>y</span> ~ <span class='no'>a</span>+<span class='no'>x</span>, <span class='no'>a</span>~<span class='no'>x</span>)
-<span class='fu'><a href='https://rdrr.io/r/stats/Distributions.html'>distribution</a></span>(<span class='no'>m</span>,~ <span class='no'>y</span>) <span class='kw'>&lt;-</span> <span class='fu'>binomial.lvm</span>()
-<span class='no'>m</span> <span class='kw'>&lt;-</span> <span class='fu'>ordinal</span>(<span class='no'>m</span>, <span class='kw'>K</span><span class='kw'>=</span><span class='fl'>4</span>, ~<span class='no'>a</span>)
-<span class='fu'><a href='https://rdrr.io/r/base/transform.html'>transform</a></span>(<span class='no'>m</span>, ~<span class='no'>a</span>) <span class='kw'>&lt;-</span> <span class='no'>factor</span>
-<span class='no'>d</span> <span class='kw'>&lt;-</span> <span class='fu'>sim</span>(<span class='no'>m</span>,<span class='fl'>1e4</span>)
-(<span class='no'>a</span> <span class='kw'>&lt;-</span> <span class='fu'>ace</span>(<span class='no'>y</span>~<span class='no'>a</span><span class='kw'>|</span><span class='no'>a</span>*<span class='no'>x</span><span class='kw'>|</span><span class='no'>x</span>, <span class='kw'>data</span><span class='kw'>=</span><span class='no'>d</span>))</div><div class='output co'>#&gt;     Estimate  Std.Err   2.5%  97.5%    P-value
+<span class='kw'>m</span> <span class='op'>&lt;-</span> <span class='fu'>lvm</span>(<span class='kw'>y</span> <span class='op'>~</span> <span class='kw'>a</span><span class='op'>+</span><span class='kw'>x</span>, <span class='kw'>a</span><span class='op'>~</span><span class='kw'>x</span>)
+<span class='fu'><a href='https://rdrr.io/r/stats/Distributions.html'>distribution</a></span>(<span class='kw'>m</span>,<span class='op'>~</span> <span class='kw'>y</span>) <span class='op'>&lt;-</span> <span class='fu'>binomial.lvm</span>()
+<span class='kw'>m</span> <span class='op'>&lt;-</span> <span class='fu'>ordinal</span>(<span class='kw'>m</span>, K=<span class='fl'>4</span>, <span class='op'>~</span><span class='kw'>a</span>)
+<span class='fu'><a href='https://rdrr.io/r/base/transform.html'>transform</a></span>(<span class='kw'>m</span>, <span class='op'>~</span><span class='kw'>a</span>) <span class='op'>&lt;-</span> <span class='kw'>factor</span>
+<span class='kw'>d</span> <span class='op'>&lt;-</span> <span class='fu'>sim</span>(<span class='kw'>m</span>,<span class='fl'>1e4</span>)
+(<span class='kw'>a</span> <span class='op'>&lt;-</span> <span class='fu'>ace</span>(<span class='kw'>y</span><span class='op'>~</span><span class='kw'>a</span><span class='op'>|</span><span class='kw'>a</span><span class='op'>*</span><span class='kw'>x</span><span class='op'>|</span><span class='kw'>x</span>, data=<span class='kw'>d</span>))
+</div><div class='output co'>#&gt;     Estimate  Std.Err   2.5%  97.5%    P-value
 #&gt; a=0   0.2324 0.019002 0.1951 0.2696  2.196e-34
 #&gt; a=1   0.3352 0.018523 0.2989 0.3715  3.416e-73
 #&gt; a=2   0.4162 0.015837 0.3852 0.4472 3.236e-152
 #&gt; a=3   0.5967 0.008458 0.5801 0.6132  0.000e+00</div><div class='input'>
 <span class='co'># Comparison with randomized experiment</span>
-<span class='no'>m0</span> <span class='kw'>&lt;-</span> <span class='fu'>cancel</span>(<span class='no'>m</span>, <span class='no'>a</span>~<span class='no'>x</span>)
-<span class='no'>d0</span> <span class='kw'>&lt;-</span> <span class='fu'>sim</span>(<span class='no'>m0</span>,<span class='fl'>2e5</span>)
-<span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span>(<span class='no'>y</span>~<span class='no'>a</span>-<span class='fl'>1</span>,<span class='no'>d0</span>)</div><div class='output co'>#&gt; 
+<span class='kw'>m0</span> <span class='op'>&lt;-</span> <span class='fu'>cancel</span>(<span class='kw'>m</span>, <span class='kw'>a</span><span class='op'>~</span><span class='kw'>x</span>)
+<span class='kw'>d0</span> <span class='op'>&lt;-</span> <span class='fu'>sim</span>(<span class='kw'>m0</span>,<span class='fl'>2e5</span>)
+<span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span>(<span class='kw'>y</span><span class='op'>~</span><span class='kw'>a</span><span class='op'>-</span><span class='fl'>1</span>,<span class='kw'>d0</span>)
+</div><div class='output co'>#&gt; 
 #&gt; Call:
 #&gt; lm(formula = y ~ a - 1, data = d0)
 #&gt; 
@@ -264,7 +270,8 @@ response ~ treatment | nuisance-formula | propensity-formula</p>
 #&gt; 0.2243  0.3386  0.4129  0.6195  
 #&gt; </div><div class='input'>
 <span class='co'># Choosing a different contrast for the association measures</span>
-<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>a</span>, <span class='kw'>contrast</span><span class='kw'>=</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>2</span>,<span class='fl'>4</span>))</div><div class='output co'>#&gt; 
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='kw'>a</span>, contrast=<span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>2</span>,<span class='fl'>4</span>))
+</div><div class='output co'>#&gt; 
 #&gt; Augmented Inverse Probability Weighting estimator
 #&gt;   Response y (Outcome model: logistic regression):
 #&gt; 	 y ~ a * x 
@@ -299,7 +306,7 @@ response ~ treatment | nuisance-formula | propensity-formula</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.0.</p>
 </div>
 
       </footer>
