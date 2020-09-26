@@ -66,11 +66,11 @@ namespace target {
       if (stable) break;
     }
 
-    arma::mat res(nb, 2);
+    arma::mat res(nb, 2); // First column value, second colum index
     for (unsigned i=0; i < nb; i++) {
       res(i, 0) = y[poolEnd[i]];
     }
-    res(0, 1) = 1;
+    res(0, 1) = 0; // index
     for (unsigned i=0; i < (nb-1); i++) {
       res(i+1, 1) = poolEnd[i]+1;  // Beginning of each pool right after
                                    // previous pool ends
