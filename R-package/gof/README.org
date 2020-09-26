@@ -1,4 +1,4 @@
-#+HTML: <a href="https://travis-ci.org/kkholst/gof"><img src="https://travis-ci.org/kkholst/gof.svg?branch=master"></a>
+#+HTML: <a href="https://travis-ci.com/kkholst/gof"><img src="https://travis-ci.com/kkholst/gof.svg?branch=master"></a>
 #+HTML: <a href="https://codecov.io/github/kkholst/gof?branch=master"><img src="https://codecov.io/github/kkholst/gof/coverage.svg?branch=master"></a>
 #+HTML: <a href="https://cran.r-project.org/package=gof"><img src="https://www.r-pkg.org/badges/version-last-release/gof"></a>
 #+HTML: <a href="http://cranlogs.r-pkg.org/downloads/total/last-month/gof"><img src="http://cranlogs.r-pkg.org/badges/gof"></a>

@@ -1,7 +1,6 @@
 inst/doc
 vignettes/*.html
 vignettes/*.R
-src/dependencies
 *.gcno
 TAGS
 *.o
