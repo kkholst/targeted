@@ -5,6 +5,10 @@
     .Call(`_targeted_mlogit_expand`, alt, x, weights, alts)
 }
 
+.NB <- function(y, x, xlev, ylev, weights, laplacesmooth = 1.0) {
+    .Call(`_targeted_NB`, y, x, xlev, ylev, weights, laplacesmooth)
+}
+
 bin_logl <- function(y, a, x1, x2, par, weights, type = "rd", indiv = FALSE) {
     .Call(`_targeted_bin_logl`, y, a, x1, x2, par, weights, type, indiv)
 }
@@ -47,6 +51,10 @@ fast_iid <- function(y, p, x1, weights, logistic = TRUE) {
 
 .softmax <- function(lp, ref = TRUE, log = FALSE) {
     .Call(`_targeted_softmax`, lp, ref, log)
+}
+
+.pava <- function(y, x, weights) {
+    .Call(`_targeted_pava`, y, x, weights)
 }
 
 # Register entry points for exported C++ functions

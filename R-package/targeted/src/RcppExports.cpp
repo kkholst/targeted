@@ -23,6 +23,45 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// NB
+Rcpp::List NB(arma::vec y, arma::vec x, arma::uvec xlev, arma::vec ylev, arma::vec weights, double laplacesmooth);
+static SEXP _targeted_NB_try(SEXP ySEXP, SEXP xSEXP, SEXP xlevSEXP, SEXP ylevSEXP, SEXP weightsSEXP, SEXP laplacesmoothSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< arma::vec >::type y(ySEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type x(xSEXP);
+    Rcpp::traits::input_parameter< arma::uvec >::type xlev(xlevSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type ylev(ylevSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< double >::type laplacesmooth(laplacesmoothSEXP);
+    rcpp_result_gen = Rcpp::wrap(NB(y, x, xlev, ylev, weights, laplacesmooth));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _targeted_NB(SEXP ySEXP, SEXP xSEXP, SEXP xlevSEXP, SEXP ylevSEXP, SEXP weightsSEXP, SEXP laplacesmoothSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_targeted_NB_try(ySEXP, xSEXP, xlevSEXP, ylevSEXP, weightsSEXP, laplacesmoothSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error(CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
 // bin_logl
 arma::vec bin_logl(const arma::vec& y, const arma::vec& a, const arma::mat& x1, const arma::mat& x2, const arma::vec par, const arma::vec& weights, std::string type, bool indiv);
 static SEXP _targeted_bin_logl_try(SEXP ySEXP, SEXP aSEXP, SEXP x1SEXP, SEXP x2SEXP, SEXP parSEXP, SEXP weightsSEXP, SEXP typeSEXP, SEXP indivSEXP) {
@@ -348,7 +387,7 @@ RcppExport SEXP _targeted_fast_iid(SEXP ySEXP, SEXP pSEXP, SEXP x1SEXP, SEXP wei
     return rcpp_result_gen;
 }
 // clusterid
-Rcpp::List clusterid(const arma::uvec& id);
+List clusterid(const arma::uvec& id);
 static SEXP _targeted_clusterid_try(SEXP idSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -453,11 +492,48 @@ RcppExport SEXP _targeted_softmax(SEXP lpSEXP, SEXP refSEXP, SEXP logSEXP) {
     UNPROTECT(1);
     return rcpp_result_gen;
 }
+// pava
+List pava(const arma::vec& y, const NumericVector& x, const NumericVector& weights);
+static SEXP _targeted_pava_try(SEXP ySEXP, SEXP xSEXP, SEXP weightsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type weights(weightsSEXP);
+    rcpp_result_gen = Rcpp::wrap(pava(y, x, weights));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _targeted_pava(SEXP ySEXP, SEXP xSEXP, SEXP weightsSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_targeted_pava_try(ySEXP, xSEXP, weightsSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error(CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
 
 // validate (ensure exported C++ functions exist before calling them)
 static int _targeted_RcppExport_validate(const char* sig) { 
     static std::set<std::string> signatures;
     if (signatures.empty()) {
+        signatures.insert("Rcpp::List(*.NB)(arma::vec,arma::vec,arma::uvec,arma::vec,arma::vec,double)");
         signatures.insert("arma::vec(*bin_logl)(const arma::vec&,const arma::vec&,const arma::mat&,const arma::mat&,const arma::vec,const arma::vec&,std::string,bool)");
         signatures.insert("arma::mat(*bin_dlogl)(const arma::vec&,const arma::vec&,const arma::mat&,const arma::mat&,const arma::vec,const arma::vec&,std::string,bool)");
         signatures.insert("arma::mat(*bin_pa)(const arma::vec&,const arma::vec&,const arma::mat&,const arma::mat&,const arma::vec,std::string)");
@@ -466,15 +542,17 @@ static int _targeted_RcppExport_validate(const char* sig) {
         signatures.insert("arma::cx_mat(*bin_esteq_c)(const arma::cx_vec&,const arma::cx_vec&,const arma::cx_mat&,const arma::cx_mat&,const arma::cx_mat&,arma::cx_vec,arma::cx_vec,const arma::cx_vec&,std::string)");
         signatures.insert("Rcpp::List(*ace_est)(const arma::vec&,const arma::mat&,const arma::mat&,const arma::mat&,const arma::vec&,const arma::vec&,bool)");
         signatures.insert("arma::mat(*fast_iid)(const arma::vec&,const arma::vec&,const arma::mat&,const arma::vec&,bool)");
-        signatures.insert("Rcpp::List(*.clusterid)(const arma::uvec&)");
+        signatures.insert("List(*.clusterid)(const arma::uvec&)");
         signatures.insert("arma::mat(*.groupsum)(const arma::mat&,const arma::uvec&,bool)");
         signatures.insert("arma::mat(*.softmax)(arma::mat&,bool,bool)");
+        signatures.insert("List(*.pava)(const arma::vec&,const NumericVector&,const NumericVector&)");
     }
     return signatures.find(sig) != signatures.end();
 }
 
 // registerCCallable (register entry points for exported C++ functions)
 RcppExport SEXP _targeted_RcppExport_registerCCallable() { 
+    R_RegisterCCallable("targeted", "_targeted_.NB", (DL_FUNC)_targeted_NB_try);
     R_RegisterCCallable("targeted", "_targeted_bin_logl", (DL_FUNC)_targeted_bin_logl_try);
     R_RegisterCCallable("targeted", "_targeted_bin_dlogl", (DL_FUNC)_targeted_bin_dlogl_try);
     R_RegisterCCallable("targeted", "_targeted_bin_pa", (DL_FUNC)_targeted_bin_pa_try);
@@ -486,6 +564,7 @@ RcppExport SEXP _targeted_RcppExport_registerCCallable() {
     R_RegisterCCallable("targeted", "_targeted_.clusterid", (DL_FUNC)_targeted_clusterid_try);
     R_RegisterCCallable("targeted", "_targeted_.groupsum", (DL_FUNC)_targeted_groupsum_try);
     R_RegisterCCallable("targeted", "_targeted_.softmax", (DL_FUNC)_targeted_softmax_try);
+    R_RegisterCCallable("targeted", "_targeted_.pava", (DL_FUNC)_targeted_pava_try);
     R_RegisterCCallable("targeted", "_targeted_RcppExport_validate", (DL_FUNC)_targeted_RcppExport_validate);
     return R_NilValue;
 }
@@ -495,6 +574,7 @@ RcppExport SEXP _rcpp_module_boot_riskregmodel();
 
 static const R_CallMethodDef CallEntries[] = {
     {"_targeted_mlogit_expand", (DL_FUNC) &_targeted_mlogit_expand, 4},
+    {"_targeted_NB", (DL_FUNC) &_targeted_NB, 6},
     {"_targeted_bin_logl", (DL_FUNC) &_targeted_bin_logl, 8},
     {"_targeted_bin_dlogl", (DL_FUNC) &_targeted_bin_dlogl, 8},
     {"_targeted_bin_pa", (DL_FUNC) &_targeted_bin_pa, 6},
@@ -506,6 +586,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_targeted_clusterid", (DL_FUNC) &_targeted_clusterid, 1},
     {"_targeted_groupsum", (DL_FUNC) &_targeted_groupsum, 3},
     {"_targeted_softmax", (DL_FUNC) &_targeted_softmax, 3},
+    {"_targeted_pava", (DL_FUNC) &_targeted_pava, 3},
     {"_rcpp_module_boot_dcmodel", (DL_FUNC) &_rcpp_module_boot_dcmodel, 0},
     {"_rcpp_module_boot_riskregmodel", (DL_FUNC) &_rcpp_module_boot_riskregmodel, 0},
     {"_targeted_RcppExport_registerCCallable", (DL_FUNC) &_targeted_RcppExport_registerCCallable, 0},
