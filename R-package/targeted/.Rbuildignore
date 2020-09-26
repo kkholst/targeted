@@ -1,3 +1,5 @@
+^Dockerfile$
+^Makefile$
 ^LICENSE$
 ^dependencies$
 ^tmp$
