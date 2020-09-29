@@ -8,9 +8,6 @@
 #include <string>
 #include <complex>
 #include <vector>
-#include <memory>     // smart pointers (unique_ptr)
-#include <cfloat>     // precision of double (DBL_MIN)
-#include <functional> // std::bind for using non-static member function as argument to free function
 
 using namespace Rcpp;
 using namespace arma;
@@ -30,13 +27,33 @@ public:
 	   design_matrices[2], // x
 	   0, weights) {}
 
-  double loglik() { return MLogit::loglik(); }
-  mat hessian() { return MLogit::hessian(); }
-  mat score(bool indiv=true) { return MLogit::score(false, indiv); }  
-  void update(const vec &theta, unsigned basealt=0) {
-    updateProb(theta);
-    updateRef(basealt);
+  mat    pred(bool logarithm=false) {
+    vec pr = this->logpr;
+    if (logarithm) return pr;
+    return exp(pr);
   }
+  vec    par() { return MLogit::getPar(); }
+  double loglik() { return MLogit::loglik(); }
+  mat    hessian() { return MLogit::hessian(true); }
+  mat    score(bool indiv=true) { return MLogit::score(true, indiv); }
+  void   reference(unsigned basealt=0) { updateRef(basealt); }
+  void   update(const vec &theta) { updateProb(theta); }
+  List obj() {
+    double l = MLogit::loglik();
+    arma::mat s = MLogit::score(true, false);
+    arma::mat h = MLogit::hessian(false);
+    List res = List::create(Named("objective")=l,
+			    Named("gradient")=s,
+			    Named("hessian")=h);
+    return res;
+  }
+  List info() {
+    unsigned ref = this->basealt;
+    List res = List::create(Named("ref")=ref,
+			    Named("par")=MLogit::getPar());
+    return res;
+  }
+
 };
 
 
@@ -44,18 +61,23 @@ RCPP_MODULE(dcmodel) {
     using namespace target ;
 
     class_<MLogitR>("dcmodel")
-      .constructor<uvec, // choice
-		   uvec, // alt
-		   uvec, // id_idx
-		   vector<mat>,
-		   vec // weights
+      .constructor<uvec,        // choice
+		   uvec,        // alt
+		   uvec,        // id_idx
+		   vector<mat>, // z1,z2,x
+		   vec          // weights
 		   >("Constructor")
+      .method("par",    &MLogitR::par,      "parameters")
+      .method("obj",    &MLogitR::obj,      "log-likelihood, score, hessian")
       .method("logl",   &MLogitR::loglik,   "log-likelihood")
       .method("score",  &MLogitR::score,    "score")
       .method("hess",   &MLogitR::hessian,  "hessian")
       .method("update", &MLogitR::update,   "update model parameters")
+      .method("ref",    &MLogitR::reference,"update reference alternative")
+      .method("info",   &MLogitR::info,     "model information (reference, parameter indices)")
       ;
 }
+
 
 // Expand data from short to long form
 // [[Rcpp::export(name=".mlogit_expand")]]
@@ -91,87 +113,17 @@ Rcpp::List mlogit_expand(const arma::uvec &alt,
 }
 
 
-
-/*  
-// [[Rcpp::export(name=".mlogit_loglik")]]
-double mlogit_loglik(arma::vec theta,
-	       const arma::uvec &choice,
-	       const arma::uvec &alt, unsigned basealt, unsigned nalt,
-	       const arma::uvec &id_idx,
-	       const arma::mat &z1, const arma::mat &z2, const arma::mat &x,
-		     const arma::vec &weights) {
-  target::MLogit dcm(alt, id_idx, z1, z2, x, nalt);
-  dcm.updateRef(basealt);
-  dcm.updateProb(theta);
-  return (as_scalar(sum(dcm.logpr%choice%weights)));
-}
-
 // [[Rcpp::export(name=".mlogit_pred")]]
 arma::mat mlogit_pred(arma::vec theta,
-		     const arma::uvec &alt, unsigned basealt, unsigned nalt,
-		     const arma::uvec &id_idx,
-		     const arma::mat &z1, const arma::mat &z2, const arma::mat &x) {
-  target::MLogit dcm(alt, id_idx, z1, z2, x, nalt);
-  dcm.updateRef(basealt);
-  dcm.updateProb(theta);
-  vec pr = exp(dcm.logpr);
-  return pr;
-}
-
-// mlogit_obj: returns the log-likelihood + score (and optionally hessian)
-// [[Rcpp::export(name=".mlogit")]]
-Rcpp::List mlogit_obj(arma::vec theta,
-		      const arma::uvec &choice,
 		      const arma::uvec &alt, unsigned basealt, unsigned nalt,
 		      const arma::uvec &id_idx,
 		      const arma::mat &z1, const arma::mat &z2, const arma::mat &x,
-		      const arma::vec &weights,
-		      bool return_hessian=false, bool onlyindiv=false) {
+		      bool logarithm=false) {
 
-  target::MLogit dcm(choice, alt, id_idx, z1, z2, x, nalt, weights);
-
+  target::MLogit dcm(arma::uvec(), alt, id_idx, z1, z2, x, nalt, arma::vec());  // choice, alternatives, id_idx, z1,z2, x, nalt, weights
   dcm.updateRef(basealt);
   dcm.updateProb(theta);
-  dcm.updateZX();
-
-    // Log-likelihood
-  vec loglik = dcm.logpr%choice%weights;
+  if (logarithm) return dcm.logpr;
   vec pr = exp(dcm.logpr);
-
-  // Score/gradient
-  // vec r = (choice-pr); // raw residuals
-  // mat score = dcm.zx;
-  // score.each_col() %= r;
-  mat xp = dcm.zx;
-  xp.each_col() %= pr;
-  xp = target::groupsum(xp, id_idx);
-  uvec chosen  = find(choice);
-  mat score = dcm.zx.rows(chosen) - xp;
-  score.each_col() %= weights.elem(chosen);
-  rowvec grad = sum(score,0); // Column-sums
-  if (!return_hessian) {
-    score = grad;
-  }
-
-  // Hessian
-  mat hess(0,0);
-  if (return_hessian) {
-    xp = dcm.zx;
-    xp.each_col() %= pr;
-    mat tmp = xp;
-    xp = dcm.zx-target::groupsum(xp, id_idx, false);
-    tmp.each_col() %= target::groupsum(weights%choice, id_idx, false);
-    hess = -xp.t()*tmp;
-    // tmp = xp;
-    // tmp.each_col() %= pr;
-    // hess = -xp.t()*tmp;
-  }
-
-  return( List::create(Named("grad")=score,
-		       Named("hess")=hess,
-		       Named("ll")=sum(loglik)
-		       ));
+  return pr;
 }
-
-
-*/
