@@ -2,12 +2,13 @@
 ##' Calibration for multiclassication methods
 ##'
 ##' @title Calibration (training)
-##' @param pr Matrix with probabilities for each class
-##' @param cl Class variable
-##' @param weights Counts
-##' @param threshold Do not calibrate if less then 'threshold' events
+##' @param pr matrix with probabilities for each class
+##' @param cl class variable
+##' @param weights counts
+##' @param threshold do not calibrate if less then 'threshold' events
 ##' @param method either 'isotonic' (pava), 'logistic', 'mspline' (monotone spline), 'bin' (local constant)
 ##' @param breaks optional number of bins (only for method 'bin')
+##' @param df degrees of freedom (only for spline methods)
 ##' @param ... additional arguments to lower level functions
 ##' @author Klaus K. Holst
 ##' @details ...
@@ -21,7 +22,7 @@
 ##' @examples
 ##' sim1 <- function(n, beta=c(-3, rep(.5,10)), rho=.5) {
 ##'  p <- length(beta)-1
-##'  xx <- mets::rmvn(n,sigma=diag(nrow=p)*(1-rho)+rho)
+##'  xx <- lava::rmvn0(n,sigma=diag(nrow=p)*(1-rho)+rho)
 ##'  y <- rbinom(n, 1, lava::expit(cbind(1,xx)%*%beta))
 ##'  d <- data.frame(y=y, xx)
 ##'  names(d) <- c("y",paste0("x",1:p))
@@ -120,7 +121,11 @@ calibration <- function(pr, cl, weights=NULL, threshold=10, method="bin", breaks
                     m <- glm(y~pr[,i], weights=weights, family=binomial)
                 } else {
                     if (method%in%c("mspline")) {
-                        m <- glm(y~mgcv::mono.con(pr[,i]),weights=weights,family=binomial)
+                        if (requireNamespace("mgcv",quietly=TRUE)) {
+                            m <- glm(y~mgcv::mono.con(pr[,i]),weights=weights,family=binomial)
+                        } else {
+                            method <- "ns"
+                        }
                     }
                     if (method%in%c("ns")) { ## Natural cubic spline
                         m <- glm(y~splines::ns(pr[,i],df=df),weights=weights,family=binomial)
@@ -168,7 +173,6 @@ calibration <- function(pr, cl, weights=NULL, threshold=10, method="bin", breaks
         stepfun=stepfuns,
         classes=classes,
         model=method,
-
         xy=xy),
         class="calibration"))
 }

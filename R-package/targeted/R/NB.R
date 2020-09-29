@@ -88,6 +88,6 @@ function(x,...) {
     cat("\n")
     val <- x$prior
     names(val) <- paste0(seq(length(val)),": ",names(val))
-    print(mets::dlist(data.frame(Prior=val)))
+    print(data.table(Prior=val))
     cat("\n")
 }
