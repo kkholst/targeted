@@ -48,17 +48,19 @@ calibration(
 )
 }
 \arguments{
-\item{pr}{Matrix with probabilities for each class}
+\item{pr}{matrix with probabilities for each class}
 
-\item{cl}{Class variable}
+\item{cl}{class variable}
 
-\item{weights}{Counts}
+\item{weights}{counts}
 
-\item{threshold}{Do not calibrate if less then 'threshold' events}
+\item{threshold}{do not calibrate if less then 'threshold' events}
 
 \item{method}{either 'isotonic' (pava), 'logistic', 'mspline' (monotone spline), 'bin' (local constant)}
 
 \item{breaks}{optional number of bins (only for method 'bin')}
+
+\item{df}{degrees of freedom (only for spline methods)}
 
 \item{...}{additional arguments to lower level functions}
 }

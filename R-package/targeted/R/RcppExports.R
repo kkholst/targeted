@@ -5,6 +5,10 @@
     .Call(`_targeted_mlogit_expand`, alt, x, weights, alts)
 }
 
+.mlogit_pred <- function(theta, alt, basealt, nalt, id_idx, z1, z2, x, logarithm = FALSE) {
+    .Call(`_targeted_mlogit_pred`, theta, alt, basealt, nalt, id_idx, z1, z2, x, logarithm)
+}
+
 .NB <- function(y, x, xlev, ylev, weights, laplacesmooth = 1.0) {
     .Call(`_targeted_NB`, y, x, xlev, ylev, weights, laplacesmooth)
 }

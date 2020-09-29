@@ -23,6 +23,25 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// mlogit_pred
+arma::mat mlogit_pred(arma::vec theta, const arma::uvec& alt, unsigned basealt, unsigned nalt, const arma::uvec& id_idx, const arma::mat& z1, const arma::mat& z2, const arma::mat& x, bool logarithm);
+RcppExport SEXP _targeted_mlogit_pred(SEXP thetaSEXP, SEXP altSEXP, SEXP basealtSEXP, SEXP naltSEXP, SEXP id_idxSEXP, SEXP z1SEXP, SEXP z2SEXP, SEXP xSEXP, SEXP logarithmSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec >::type theta(thetaSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type alt(altSEXP);
+    Rcpp::traits::input_parameter< unsigned >::type basealt(basealtSEXP);
+    Rcpp::traits::input_parameter< unsigned >::type nalt(naltSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type id_idx(id_idxSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type z1(z1SEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type z2(z2SEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< bool >::type logarithm(logarithmSEXP);
+    rcpp_result_gen = Rcpp::wrap(mlogit_pred(theta, alt, basealt, nalt, id_idx, z1, z2, x, logarithm));
+    return rcpp_result_gen;
+END_RCPP
+}
 // NB
 Rcpp::List NB(arma::vec y, arma::vec x, arma::uvec xlev, arma::vec ylev, arma::vec weights, double laplacesmooth);
 static SEXP _targeted_NB_try(SEXP ySEXP, SEXP xSEXP, SEXP xlevSEXP, SEXP ylevSEXP, SEXP weightsSEXP, SEXP laplacesmoothSEXP) {
@@ -574,6 +593,7 @@ RcppExport SEXP _rcpp_module_boot_riskregmodel();
 
 static const R_CallMethodDef CallEntries[] = {
     {"_targeted_mlogit_expand", (DL_FUNC) &_targeted_mlogit_expand, 4},
+    {"_targeted_mlogit_pred", (DL_FUNC) &_targeted_mlogit_pred, 9},
     {"_targeted_NB", (DL_FUNC) &_targeted_NB, 6},
     {"_targeted_bin_logl", (DL_FUNC) &_targeted_bin_logl, 8},
     {"_targeted_bin_dlogl", (DL_FUNC) &_targeted_bin_dlogl, 8},
