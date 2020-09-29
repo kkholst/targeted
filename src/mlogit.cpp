@@ -137,7 +137,6 @@ namespace target {
     }
   }
 
-
   void MLogit::updateZX() {
     for (unsigned i=0; i < n; i++) {
       unsigned pos = 0;
@@ -179,24 +178,24 @@ namespace target {
     	}
       }
     }
-
     // Calculate log-probabilities of choices
     unsigned stop;
     unsigned pos = 0;
     for (unsigned i=0; i < ncl; i++) {  // Iterate over individuals
-    	unsigned start = this->cluster(i);
-    	if (i == (ncl-1)) {
-    	  stop = n-1;
-    	} else {
-    	  stop = this->cluster(i+1)-1;
-    	}
-    	vec a = target::softmax(lp.subvec(start, stop));  // Multinomial logit
-    	for (unsigned j=0; j < a.n_elem; j++) {
-    	  logpr(pos) = a(j);
-    	  pos++;
-    	}
+      unsigned start = this->cluster(i);
+      if (i == (ncl-1)) {
+	stop = n-1;
+      } else {
+	stop = this->cluster(i+1)-1;
+      }
+      vec a = target::softmax(lp.subvec(start, stop));  // Multinomial logit
+      for (unsigned j=0; j < a.n_elem; j++) {
+	logpr(pos) = a(j);
+	pos++;
+      }
     }
   }
+
 
 }  // namespace target
 

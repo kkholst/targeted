@@ -137,7 +137,8 @@ checkr: exportr
 
 .PHONY: r_check
 r_check:
-	cd R-package; $(R) CMD check $(pkg) --no-multiarch
+	@$(R) --slave -e "Rcpp::compileAttributes('R-package/${pkg}')"
+	@cd R-package; $(R) CMD check $(pkg) --no-multiarch
 
 .PHONY: r
 r: buildr runr

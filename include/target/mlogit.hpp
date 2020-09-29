@@ -67,6 +67,7 @@ namespace target {
     void updateZX();
     void updateRef(unsigned basealt);
     void updatePar(arma::vec theta);
+    arma::vec getPar() { return theta; }
     void updateProb();
     void updateProb(arma::vec theta) {
       updatePar(theta);
@@ -107,6 +108,7 @@ namespace target {
       _x = x;
       _id_idx = id_idx;
       _alt = alt;
+      _weights = weights;
       p_z1 = z1.n_cols;
       p_z2 = z2.n_cols;
       p_x = x.n_cols;
