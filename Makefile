@@ -178,7 +178,7 @@ PYTHON_EXPORT = $(BUILD_DIR)/python
 .PHONY: exportpy
 exportpy: cleansrc cleanpy
 	@rm -Rf $(PYTHON_EXPORT); mkdir -p $(PYTHON_EXPORT)
-	@cd python-package/$(pkg); $(GIT) archive HEAD | (cd ../$(PYTHON_EXPORT); tar x)
+	@cd python-package/$(pkg); $(GIT) archive HEAD | (cd ../../$(PYTHON_EXPORT); tar x)
 	@cp -a src $(PYTHON_EXPORT)/lib/target-cpp
 	@cp -a include $(PYTHON_EXPORT)/lib/target-inc
 	@cp -a lib/armadillo $(PYTHON_EXPORT)/lib
