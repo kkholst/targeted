@@ -86,7 +86,7 @@ plot(1:10, pch=16)
 
 #+RESULTS: testfig
 
-#+CAPTION: ...
+#+CAPTION: Caption goes here
 #+ATTR_LATEX: :width 10cm :options :center t
 #+RESULTS:
 [[file:testfig.png]]

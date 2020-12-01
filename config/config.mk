@@ -17,8 +17,10 @@ LINTER = cclint
 NINJA := $(shell command -v ninja 2> /dev/null)
 NINJA_BUILD_OPT = -v
 FINDEXEC :=
+SED_NOBACKUP :=
 ifeq ($(UNAME),Darwin)
   FINDEXEC +=  -perm +111
+  SED_NOBACKUP = ""
 else
   FINDEXEC +=  -executable
 endif

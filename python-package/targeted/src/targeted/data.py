@@ -86,7 +86,7 @@ def sim_bin(n=1e2,
     -----
     The model for the outcome is given by
 
-    .. math:: g(\\mathbb{E}[Y\\mid A, X]) = \\mu_Y + \\theta A + X
+    .. math:: g(\\mathbb{E}[Y\\mid A, X]) = \\mu_Y + \\theta A + \\beta^T X
 
     where :math:`g` is either the identify function (``binary=False``)
     or the logit function (``binary=True``). The exposure effect

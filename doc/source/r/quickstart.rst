@@ -77,4 +77,4 @@ Quickstart
 
 .. figure:: testfig.png
 
-    ...
+    Caption goes here

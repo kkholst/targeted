@@ -25,7 +25,7 @@ pkg = targeted
 TESTR = $(pkg)_test
 
 # python package
-TESTPY = targeted_test
+TESTPY = $(pkg)_test
 
 ##################################################
 
@@ -122,17 +122,20 @@ exportr:
 	cd R-package/${pkg}; $(GIT) archive HEAD | (cd ../../$(BUILD_DIR)/R/$(pkg); tar x )
 	@if [ -z "$(pkg_dep)" ]; then \
 	cp src/*.cpp $(BUILD_DIR)/R/$(pkg)/src; \
-	cp -a include/target/ $(BUILD_DIR)/R/$(pkg)/inst/include/; \
+	cp -a include/target $(BUILD_DIR)/R/$(pkg)/inst/include/; \
 	else \
 	cp $(pkg_cpp) $(BUILD_DIR)/R/$(pkg)/src; \
 	mkdir -p $(BUILD_DIR)/R/$(pkg)/inst/include/target; \
 	cp $(pkg_hpp) $(BUILD_DIR)/R/$(pkg)/inst/include/target; \
 	fi
-	sed -i '/^OBJECTS\|SOURCES/d' $(BUILD_DIR)/R/$(pkg)/src/Makevars
+	sed -i $(SED_NOBACKUP) '/^OBJECTS\|SOURCES/d' $(BUILD_DIR)/R/$(pkg)/src/Makevars
 
 .PHONY: checkr
 checkr: exportr
-	cd $(BUILD_DIR)/R; $(R) CMD build $(pkg) --compact-vignettes=gs+qpdf --resave-data=best
+	@$(R) --slave -e "source('config/utilities.R'); \
+	load_packages(c('devtools'))"
+	@$(R) -e "devtools::build('$(BUILD_DIR)/R/$(pkg)', args='--compact-vignettes=qpdf --resave-data=best')"
+	@$(R) -e "pkgbuild::build('$(BUILD_DIR)/R/$(pkg)', args='--compact-vignettes=qpdf --resave-data=best')"
 	cd $(BUILD_DIR)/R; $(R) CMD check `$(GETVER) $(pkg)` --timings --as-cran --no-multiarch --run-donttest
 
 .PHONY: r_check
@@ -158,11 +161,11 @@ syncr: exportr
 
 .PHONY: buildpy
 buildpy:
-	@cd python-package; $(PYTHON) setup.py install
+	@cd python-package/$(pkg); $(PYTHON) setup.py install
 
 .PHONY: testpy
 testpy:
-	@cd python-package; $(MAKE) test
+	@cd python-package/$(pkg); $(MAKE) test
 
 .PHONY: runpy
 runpy:
@@ -175,7 +178,7 @@ PYTHON_EXPORT = $(BUILD_DIR)/python
 .PHONY: exportpy
 exportpy: cleansrc cleanpy
 	@rm -Rf $(PYTHON_EXPORT); mkdir -p $(PYTHON_EXPORT)
-	@cd python-package; $(GIT) archive HEAD | (cd ../$(PYTHON_EXPORT); tar x)
+	@cd python-package/$(pkg); $(GIT) archive HEAD | (cd ../$(PYTHON_EXPORT); tar x)
 	@cp -a src $(PYTHON_EXPORT)/lib/target-cpp
 	@cp -a include $(PYTHON_EXPORT)/lib/target-inc
 	@cp -a lib/armadillo $(PYTHON_EXPORT)/lib
@@ -185,7 +188,7 @@ exportpy: cleansrc cleanpy
 
 .PHONY: cleanpy
 cleanpy:
-	@cd python-package; $(MAKE) --no-print-directory clean
+	@cd python-package/$(pkg); $(MAKE) --no-print-directory clean
 
 ##################################################
 ## Documentation

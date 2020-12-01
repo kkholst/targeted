@@ -1,6 +1,6 @@
 # -*- mode: makefile; -*-
 
-include $(wildcard ../config/*.mk)
+include $(wildcard ../../config/*.mk)
 
 PKG = targeted
 
