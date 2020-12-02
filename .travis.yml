@@ -28,7 +28,8 @@ jobs:
         - |
           if [[ $TRAVIS_TAG ]]; then
           python3 setup.py sdist
-          python3 -m pip install twine
+          python3 -m pip install -U pip
+          python3 -m pip install --use-feature=2020-resolver -U setuptools twine
           python3 -m twine upload dist/*.tar.gz
           fi
 
@@ -49,7 +50,8 @@ jobs:
       after_success:
         - |
           if [[ $TRAVIS_TAG ]]; then
-          python3 -m pip install twine
+          python3 -m pip install -U pip
+          python3 -m pip install --use-feature=2020-resolver -U setuptools twine
           python3 -m twine upload wheelhouse/*.whl
           fi
 
@@ -70,7 +72,8 @@ jobs:
       after_success:
         - |
           if [[ $TRAVIS_TAG ]]; then
-          python3 -m pip install twine
+          python3 -m pip install -U pip
+          python3 -m pip install --use-feature=2020-resolver -U setuptools twine
           python3 -m twine upload wheelhouse/*.whl
           fi
 
