@@ -44,7 +44,7 @@ jobs:
       env:
         - CIBW_MANYLINUX_X86_64_IMAGE="manylinux2014"
         - CIBW_MANYLINUX_I686_IMAGE="manylinux2014"
-        - CIBW_SKIP="cp27-* cp35-* pp27-*"
+        - CIBW_SKIP="cp27-* cp35-* pp*"
         - CIBW_BEFORE_BUILD="yum install -y make lapack-devel blas-devel python-devel; pip install cmake; cd lib/armadillo; cmake -B build && cd build; make install; cd ../../.."
       script:
         - make exportpy
@@ -66,7 +66,7 @@ jobs:
       install:
         - python3 -m pip install cibuildwheel==1.7.0
       env:
-        - CIBW_SKIP="cp27-* cp35-* pp27-*"
+        - CIBW_SKIP="cp27-* cp35-* pp*"
         - CIBW_BEFORE_BUILD="pip install cmake"
       script:
         - make exportpy
