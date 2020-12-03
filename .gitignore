@@ -8,6 +8,7 @@ misc/sgd/*.csv
 misc/functional
 misc/sgd/.ipynb_checkpoints/sgd_test-checkpoint.ipynb
 misc/sgd/sgd/.ropeproject/
+config/wheel.sh
 
 *.Rcheck
 symbols.rds

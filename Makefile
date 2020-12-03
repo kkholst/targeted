@@ -174,7 +174,7 @@ runpy:
 .PHONY: py
 py: buildpy runpy
 
-PYTHON_EXPORT = $(BUILD_DIR)/python
+PYTHON_EXPORT = $(BUILD_DIR)/python/$(pkg)
 .PHONY: exportpy
 exportpy: cleansrc cleanpy
 	@rm -Rf $(PYTHON_EXPORT); mkdir -p $(PYTHON_EXPORT)

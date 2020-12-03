@@ -4,7 +4,7 @@ jobs:
   include:
     # --------------------------------------------------------------------------------
 
-    - name: "python: source"
+    - name: "python: targeted [source]"
       language: python
       # Only run on deploy branch or commits tagged 'py_v...'
       if: (branch IN (deploy)) OR (tag =~ ^py_v)
@@ -35,7 +35,7 @@ jobs:
 
     # --------------------------------------------------------------------------------
 
-    - name: "python: linux wheels"
+    - name: "python: targeted [linux wheels]"
       if: (branch IN (deploy)) OR (tag =~ ^py_v)
       services: docker
       language: python
@@ -47,8 +47,8 @@ jobs:
         - CIBW_SKIP="cp27-* cp35-* pp*"
         - CIBW_BEFORE_BUILD="yum install -y make lapack-devel blas-devel python-devel; pip install cmake; cd lib/armadillo; cmake -B build && cd build; make install; cd ../../.."
       script:
-        - make exportpy
-        - cd build/python; python3 -m cibuildwheel --output-dir wheelhouse
+        - make exportpy pkg=targeted
+        - cd build/python/targeted; python3 -m cibuildwheel --output-dir wheelhouse
       after_success:
         - |
           if [[ $TRAVIS_TAG ]]; then
@@ -59,7 +59,7 @@ jobs:
 
     # --------------------------------------------------------------------------------
 
-    - name: "python: osx wheels"
+    - name: "python: targeted [osx wheels]"
       if: (branch IN (deploy)) OR (tag =~ ^py_v)
       os: osx
       language: shell
@@ -69,8 +69,8 @@ jobs:
         - CIBW_SKIP="cp27-* cp35-* pp*"
         - CIBW_BEFORE_BUILD="pip install cmake"
       script:
-        - make exportpy
-        - cd build/python; python3 -m cibuildwheel --output-dir wheelhouse
+        - make exportpy pkg=targeted
+        - cd build/python/targeted; python3 -m cibuildwheel --output-dir wheelhouse
       after_success:
         - |
           if [[ $TRAVIS_TAG ]]; then
