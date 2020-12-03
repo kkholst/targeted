@@ -1,0 +1,5 @@
+[build]
+   base = "/doc"
+   command = "make html"
+   publish = "build/html"
+   ignore =  "git log -1 --pretty=%B | grep -iv doc"
