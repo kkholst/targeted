@@ -1,0 +1,17 @@
+include CMakeLists.txt
+include README.md
+include Pipfile
+recursive-include src/ *
+recursive-include tests/ *.py *.cpp *.hpp *.h
+recursive-exclude src/armadillo *.pdf *.html *.png *.md *.lib *.dll
+prune src/armadillo/mex_interface
+prune src/armadillo/build
+prune src/armadillo/tests
+#prune src/armadillo/misc src/armadillo/examples
+prune src/pybind11/doc
+prune src/pybind11/tests
+prune build
+prune doc/build
+prune dist
+#prune src/unittest-cpp/tests
+recursive-exclude * *.o *.so *.pyc *.egg *.egg-info .git* __pycache__
