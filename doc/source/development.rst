@@ -59,9 +59,9 @@ Unit tests
 
 C++ tests are located in the subdirectory `./tests
 <https://github.com/kkholst/target/tree/develop/tests>`_ and written
-using Catch2
+using doctest
 
-- https://github.com/catchorg/Catch2/blob/master/docs/tutorial.md
+- https://github.com/onqtam/doctest/blob/master/doc/markdown/tutorial.md
 
 The unit tests can be compiled and executed from the root directory with
 

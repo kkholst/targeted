@@ -10,7 +10,7 @@
 	path = lib/spdlog
 	shallow = true
 	url = https://github.com/gabime/spdlog.git
-[submodule "lib/catch2"]
-	path = lib/catch2
-	shallow = true
-	url = https://github.com/catchorg/Catch2.git
+[submodule "lib/doctest"]
+	path = lib/doctest
+	shallow = tru
+	url = https://github.com/onqtam/doctest

@@ -1,5 +1,5 @@
 ################################################################################
-# Copyright 2020 Klaus Holst (http://holst.it)
+# Copyright 2020-2021 Klaus Holst (http://holst.it)
 ################################################################################
 # CMake Properties:
 #   COTIRE: Precompiled headers.
@@ -7,7 +7,7 @@
 # Cmake specific settings:
 #   CMAKE_BUILD_TYPE: Debug (non-optimized code with debug symbols), RelWithDebInfo
 ################################################################################
-cmake_minimum_required(VERSION 3.3) # Was 2.8.12
+cmake_minimum_required(VERSION 3.3)
 project(target VERSION 0.1 DESCRIPTION "Targeted Inference Library" LANGUAGES CXX)
 
 option(COTIRE  "precompiled headers" OFF)
@@ -56,6 +56,7 @@ endif()
 find_package(Armadillo 9.500 QUIET)
 if (ARMADILLO_FOUND AND NOT USE_PKG_LIB)
   message ([Main]  " Armadillo FOUND")
+  find_package(Armadillo CONFIG REQUIRED)
 else()
   message ([Main]  " Using Armadillo included in this package")
   find_package(LAPACK REQUIRED)
@@ -65,18 +66,22 @@ endif ()
 message( [Main] " ARMADILLO_LIBRARIES = ${ARMADILLO_LIBRARIES}")
 message( [Main] " ARMADILLO_INCLUDE_DIRS = ${ARMADILLO_INCLUDE_DIRS}")
 
-find_package(Catch2 QUIET)
-if (Catch2_FOUND AND NOT USE_PKG_LIB)
-  message ([Main]  " Catch2 FOUND")
-else()
-  message ([Main]  " Using Catch2 included in this package")
-  add_subdirectory("lib/catch2")
-  include_directories("lib/catch2/include")
-endif()
+# find_package(Catch2 QUIET)
+# if (Catch2_FOUND AND NOT USE_PKG_LIB)
+#   message ([Main]  " Catch2 FOUND")
+#   find_package(Catch2 CONFIG REQUIRED)
+# else()
+#   message ([Main]  " Using Catch2 included in this package")
+#   add_subdirectory("lib/catch2")
+#   include_directories("lib/catch2/src")
+#
+#endif()
+include_directories("lib/doctest")
 
 find_package(spdlog QUIET)
 if (spdlog_FOUND AND NOT USE_PKG_LIB)
   message ([Main]  " spdlog FOUND")
+  find_package(spdlog CONFIG REQUIRED)
  else()
   set(SPDLOG_BUILD_TESTS OFF)
   set(SPDLOG_BUILD_TESTS_HO OFF)
@@ -118,11 +123,20 @@ install(FILES ${CMAKE_BINARY_DIR}/target.pc
 # Executables
 ################################################################################
 
-add_executable("crdemo" "misc/crdemo.cpp")
-add_executable("dredemo" "misc/dredemo.cpp")
+file( GLOB APP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/misc/*demo.cpp )
+foreach( sourcefile ${APP_SOURCES} )
+    file(RELATIVE_PATH filename ${CMAKE_CURRENT_SOURCE_DIR} ${sourcefile})
+    string( REPLACE ".cpp" "" file ${filename} )
+    string( REPLACE "misc/" "" file ${file} )
+    add_executable( ${file} ${sourcefile} )
+    target_link_libraries( ${file} PRIVATE armadillo target )
+endforeach( sourcefile ${APP_SOURCES} )
+
+#add_executable("crdemo" "misc/crdemo.cpp")
+#add_executable("dredemo" "misc/dredemo.cpp")
+#target_link_libraries("crdemo" PRIVATE armadillo target)
+#target_link_libraries("dredemo" PRIVATE armadillo target)
 add_executable("sanitizer_check" "misc/sanitizer_check.cpp")
-target_link_libraries("crdemo" PRIVATE armadillo target)
-target_link_libraries("dredemo" PRIVATE armadillo target)
 target_link_libraries("sanitizer_check" PRIVATE armadillo target)
 
 ################################################################################
@@ -135,12 +149,12 @@ target_link_libraries("sanitizer_check" PRIVATE armadillo target)
 if (BUILD_TESTING AND (PROJECT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR))
   enable_testing()
 
-  set(TESTS
-  "tests/test_main.cpp"
-  "tests/test_misc.cpp"
-  "tests/test_mlogit.cpp"
-  "tests/test_target.cpp"
-  )
+  file(GLOB TESTS tests/test_*.cpp)
+  # set(TESTS
+  # "tests/test_misc.cpp"
+  # "tests/test_mlogit.cpp"
+  # "tests/test_target.cpp"
+  # )
   add_executable("${PROJECT_NAME}_test" ${TESTS})
 
   find_program( MEMORYCHECK_COMMAND valgrind )
@@ -148,7 +162,7 @@ if (BUILD_TESTING AND (PROJECT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR))
   include( CTest )
   add_test(NAME "${PROJECT_NAME}_test" COMMAND "${PROJECT_NAME}_test")
 
-  target_link_libraries("${PROJECT_NAME}_test" PRIVATE armadillo Catch2::Catch2 target spdlog::spdlog)
+  target_link_libraries("${PROJECT_NAME}_test" PRIVATE armadillo target spdlog::spdlog)
 
   add_custom_target(test_memcheck
     COMMAND ${CMAKE_CTEST_COMMAND}

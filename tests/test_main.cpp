@@ -1,9 +1,9 @@
 // tests_main.cpp
 //
-// In a Catch project with multiple files, dedicate one file to
-// compile the source code of Catch itself and reuse the resulting
+// In a doctest project with multiple files, dedicate one file to
+// compile the source code of doctest itself and reuse the resulting
 // object file for linking.
 
-// Let Catch provide main():
-#define CATCH_CONFIG_MAIN
-#include <catch2/catch.hpp>
+// Let doctest provide main():
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include <doctest/doctest.h>

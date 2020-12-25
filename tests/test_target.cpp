@@ -8,7 +8,7 @@
 
 */
 
-#include <catch2/catch.hpp>
+#include <doctest/doctest.h>
 #include <spdlog/spdlog.h>
 #include <target/target.hpp>
 #include <target/utils.hpp>
@@ -16,9 +16,8 @@
 using namespace arma;
 using namespace target;
 
-TEST_CASE("likelihood", "[target]") {
+TEST_CASE("likelihood") {
   
-  SECTION("loglik1") {
     spdlog::info("Testing likelihood!");
     arma_rng::set_seed(1);
     unsigned n = 5;
@@ -41,7 +40,6 @@ TEST_CASE("likelihood", "[target]") {
     vec w2 = w*2;
     model = target::RD<double>(y, a, x1, x2, x2, p, w2);
     REQUIRE(2*logl == model.loglik()[0]);    
-  }
 
 }
 

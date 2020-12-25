@@ -8,13 +8,10 @@
 
 */
 
-#include <catch2/catch.hpp>
+#include <doctest/doctest.h>
 #include <target/mlogit.hpp>
 
-TEST_CASE("Multinomial logit", "[model]") {
-  
-  SECTION("mlogit 1") {
-    REQUIRE(1==1);
-  }
 
+TEST_CASE("Multinomial logit") {
+    REQUIRE(1==1);
 }

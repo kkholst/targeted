@@ -19,7 +19,7 @@ To build the shared library, ninja(s) are needed.
 The following dependencies are included as submodules:
 
 #. Armadillo http://arma.sourceforge.net/docs.html
-#. Catch2 (unit tests only) https://github.com/catchorg/Catch2/blob/master/docs/Readme.md#top
+#. doctest (unit tests only) https://github.com/onqtam/doctest/
 #. pybind11++ (python bindings only) https://pybind11.readthedocs.io
 #. spdlog (logging) https://github.com/gabime/spdlog
 

@@ -1,23 +1,23 @@
 # -*- mode: makefile; -*-
 
 include $(wildcard config/*.mk)
-
 TARGET = target
 BUILD_DIR = build
 VALGRIND_DIR = build/codetest
 INSTALL_DIR = $(HOME)/local
-PKGLIB = OFF
+PKGLIB = ON
 IMG=# Dockerfile postfix
 CXX=
 EXTRA=
 BUILD=-DUSE_PKG_LIB=$(PKGLIB) -DCOTIRE=OFF -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) -DCMAKE_BUILD_TYPE=Debug \
-  -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON -Wno-dev -DCMAKE_VERBOSE_MAKEFILE=ON
+  -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON -Wno-dev -DCMAKE_VERBOSE_MAKEFILE=ON \
+  -DCMAKE_EXPORT_COMPILE_COMMANDS=YES -H.
 BUILD+=$(EXTRA)
 ifneq ($(CXX),)
-   BUILD += -DCMAKE_CXX_COMPILER=$(CXX)
+   BUILD+= -DCMAKE_CXX_COMPILER=$(CXX)
 endif
 ifneq ($(NINJA),)
-  BUILD := $(BUILD) -GNinja
+   BUILD+= -GNinja
 endif
 
 # R package:
@@ -26,6 +26,7 @@ TESTR = $(pkg)_test
 
 # python package
 TESTPY = $(pkg)_test
+
 
 ##################################################
 
@@ -51,8 +52,10 @@ cleanall: cleansrc cleanpy cleandoc
 .PHONY: init
 init: cleansrc
 	@echo "Build options: $(BUILD)"
-	@mkdir -p $(BUILD_DIR)
-	@cd build; $(CMAKE) .. $(BUILD)
+	@$(CMAKE) $(BUILD) -B$(BUILD_DIR)
+	echo $(NINJA)
+	@ln -fs $(BUILD_DIR)/compile_commands.json
+
 
 .PHONY: checkinit
 checkinit: init-submodules
@@ -60,16 +63,17 @@ checkinit: init-submodules
 
 .PHONY: init-submodules
 init-submodules:
-	@if [ ! -e "lib/armadillo/.git" ]; then \
+	@if [ ! -e "lib/armadillo/.git" ] || [ ! -e "lib/doctest/.git" ] \
+	|| [ ! -e "lib/spdlog/.git" ] || [ ! -e "lib/pybind11/.git" ]; then \
 	$(GIT) submodule update --init --recursive; fi
 
 .PHONY: run
 run:
 	@if [ ! -d "$(BUILD_DIR)" ]; then $(MAKE) --no-print-directory init; fi
 	@$(MAKE) --no-print-directory build # > /dev/null
-	@printf "\n-----\n"
-	@find $(BUILD_DIR)/ -maxdepth 1 -iname "*demo" $(FINDEXEC) \
-	-exec {} \;
+	@printf "\n________________________\n"
+	find $(BUILD_DIR)/ -maxdepth 1 -iname "*demo" $(FINDEXEC) \
+	-exec sh -c "echo '____________ {} ____________'; {}" \;
 
 .PHONY: build
 build: checkinit
@@ -134,7 +138,6 @@ exportr:
 checkr: exportr
 	@$(R) --slave -e "source('config/utilities.R'); \
 	load_packages(c('devtools'))"
-	@$(R) -e "devtools::build('$(BUILD_DIR)/R/$(pkg)', args='--compact-vignettes=qpdf --resave-data=best')"
 	@$(R) -e "pkgbuild::build('$(BUILD_DIR)/R/$(pkg)', args='--compact-vignettes=qpdf --resave-data=best')"
 	cd $(BUILD_DIR)/R; $(R) CMD check `$(GETVER) $(pkg)` --timings --as-cran --no-multiarch --run-donttest
 
@@ -182,7 +185,7 @@ exportpy: cleansrc cleanpy
 	@cp -a src $(PYTHON_EXPORT)/lib/target-cpp
 	@cp -a include $(PYTHON_EXPORT)/lib/target-inc
 	@cp -a lib/armadillo $(PYTHON_EXPORT)/lib
-	@cp -a lib/catch2 $(PYTHON_EXPORT)/lib
+	@cp -a lib/doctest $(PYTHON_EXPORT)/lib
 	@cp -a lib/pybind11 $(PYTHON_EXPORT)/lib
 	@echo "Python package exported to: ${PYTHON_EXPORT}"
 
