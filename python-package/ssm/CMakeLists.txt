@@ -61,16 +61,9 @@ set(TESTS
   "${TEST_DIR}/test_c.cpp")
 
 if (RUN_TESTS)
-  find_package(Catch2 QUIET)
-  if (Catch2_FOUND)
-    message ([Main]  " Catch2 FOUND")
-  else()
-    message ([Main]  " Using Catch2 included in this package")
-    add_subdirectory("lib/catch2")
-    include_directories("lib/catch2/include")
-  endif()
+  include_directories("lib/doctest")
   add_executable("${PROJECT_NAME}_test" ${TESTS})
-  target_link_libraries("${PROJECT_NAME}_test" PRIVATE armadillo Catch2::Catch2)
+  target_link_libraries("${PROJECT_NAME}_test" PRIVATE armadillo)
 endif()
 
 ################################################################################

@@ -1,26 +1,17 @@
 /*!
   @file test_c.cpp
   @author Klaus K. Holst
-  @copyright 2019-2020, Klaus Kähler Holst
+  @copyright 2019-2021, Klaus Kähler Holst
 
   @brief Unit tests
 
 */
 
-#include <catch2/catch.hpp>
+#include <doctest/doctest.h>
 
 bool True() { return(true); }
 
-TEST_CASE("Target methods", "[target]") {
-  
-  SECTION("Sanity") {
-    CHECK(True());
-    CHECK(2 == 2);
-  }
-
-  SECTION("dummy1") {
-    CHECK(2 == 2);    
-  }
+TEST_CASE("Target Sanity Check") {
+    REQUIRE(True());
+    REQUIRE(2 == 2);
 }
-
-

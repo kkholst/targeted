@@ -12,5 +12,5 @@
 	url = https://github.com/gabime/spdlog.git
 [submodule "lib/doctest"]
 	path = lib/doctest
-	shallow = tru
+	shallow = true
 	url = https://github.com/onqtam/doctest
