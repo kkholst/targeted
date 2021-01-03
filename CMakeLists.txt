@@ -66,16 +66,6 @@ endif ()
 message( [Main] " ARMADILLO_LIBRARIES = ${ARMADILLO_LIBRARIES}")
 message( [Main] " ARMADILLO_INCLUDE_DIRS = ${ARMADILLO_INCLUDE_DIRS}")
 
-# find_package(Catch2 QUIET)
-# if (Catch2_FOUND AND NOT USE_PKG_LIB)
-#   message ([Main]  " Catch2 FOUND")
-#   find_package(Catch2 CONFIG REQUIRED)
-# else()
-#   message ([Main]  " Using Catch2 included in this package")
-#   add_subdirectory("lib/catch2")
-#   include_directories("lib/catch2/src")
-#
-#endif()
 include_directories("lib/doctest")
 
 find_package(spdlog QUIET)
@@ -123,7 +113,10 @@ install(FILES ${CMAKE_BINARY_DIR}/target.pc
 # Executables
 ################################################################################
 
-file( GLOB APP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/misc/*demo.cpp )
+file( GLOB APP_SOURCES1 ${CMAKE_CURRENT_SOURCE_DIR}/misc/*demo.cpp )
+file( GLOB APP_SOURCES2 ${CMAKE_CURRENT_SOURCE_DIR}/misc/*test.cpp )
+file( GLOB APP_SOURCES3 ${CMAKE_CURRENT_SOURCE_DIR}/misc/*run.cpp )
+set( APP_SOURCES ${APP_SOURCES1} ${APP_SOURCES2} ${APP_SOURCES3} )
 foreach( sourcefile ${APP_SOURCES} )
     file(RELATIVE_PATH filename ${CMAKE_CURRENT_SOURCE_DIR} ${sourcefile})
     string( REPLACE ".cpp" "" file ${filename} )
@@ -133,9 +126,7 @@ foreach( sourcefile ${APP_SOURCES} )
 endforeach( sourcefile ${APP_SOURCES} )
 
 #add_executable("crdemo" "misc/crdemo.cpp")
-#add_executable("dredemo" "misc/dredemo.cpp")
 #target_link_libraries("crdemo" PRIVATE armadillo target)
-#target_link_libraries("dredemo" PRIVATE armadillo target)
 add_executable("sanitizer_check" "misc/sanitizer_check.cpp")
 target_link_libraries("sanitizer_check" PRIVATE armadillo target)
 
