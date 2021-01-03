@@ -1,7 +1,7 @@
 /*!
   @file target.cpp
   @author Klaus K. Holst
-  @copyright 2019-2020, Klaus Kähler Holst
+  @copyright 2019-2021, Klaus Kähler Holst
 
   @brief Classes for targeted inference models
 
@@ -32,12 +32,12 @@ namespace target {
   */
   template <typename T>
   Target<T>::Target(const arma::Col<T> &y,
-		    const arma::Mat<T> &a,
-		    const arma::Mat<T> &x1,
-		    const arma::Mat<T> &x2,
-		    const arma::Mat<T> &x3,
-		    const arma::Col<T> &parameter,
-		    const arma::Col<T> &weights) : Target(y, a, x1, x2, x3, parameter) {
+                    const arma::Mat<T> &a,
+                    const arma::Mat<T> &x1,
+                    const arma::Mat<T> &x2,
+                    const arma::Mat<T> &x3,
+                    const arma::Col<T> &parameter,
+                    const arma::Col<T> &weights) : Target(y, a, x1, x2, x3, parameter) {
     this->weights(weights);
   }
 
@@ -60,7 +60,7 @@ namespace target {
     pos += beta.n_elem;
     if (parameter.n_elem == pos+gamma.n_elem) {
       for (unsigned i=0; i < gamma.n_elem; i++) {
-	gamma[i] = parameter[i+pos];
+        gamma[i] = parameter[i+pos];
       }
     }
   }
@@ -68,11 +68,11 @@ namespace target {
 
   template <typename T>
   Target<T>::Target(const arma::Col<T> &y,
-		    const arma::Mat<T> &a,
-		    const arma::Mat<T> &x1,
-		    const arma::Mat<T> &x2,
-		    const arma::Mat<T> &x3,
-		    const arma::Col<T> &parameter) {
+                    const arma::Mat<T> &a,
+                    const arma::Mat<T> &x1,
+                    const arma::Mat<T> &x2,
+                    const arma::Mat<T> &x3,
+                    const arma::Col<T> &parameter) {
     this->update_data(y, a, x1, x2, x3);
     alpha = arma::Col<T>(x1.n_cols);
     beta = arma::Col<T>(x2.n_cols);
@@ -82,20 +82,20 @@ namespace target {
 
   template <typename T>
   Target<T>::Target(const arma::Col<T> &y,
-			const arma::Mat<T> &a,
-			const arma::Mat<T> &x1,
-			const arma::Mat<T> &x2,
-			const arma::Col<T> &parameter,
-			const arma::Col<T> &weights) : Target(y, a, x1, x2, x2, parameter) {
+                    const arma::Mat<T> &a,
+                    const arma::Mat<T> &x1,
+                    const arma::Mat<T> &x2,
+                    const arma::Col<T> &parameter,
+                    const arma::Col<T> &weights) : Target(y, a, x1, x2, x2, parameter) {
     this->weights(weights);
   }
 
   template <typename T>
   Target<T>::Target(const arma::Col<T> &y,
-			const arma::Mat<T> &a,
-			const arma::Mat<T> &x1,
-			const arma::Mat<T> &x2,
-			const arma::Col<T> &parameter) : Target(y, a, x1, x2, x2, parameter)  {
+                    const arma::Mat<T> &a,
+                    const arma::Mat<T> &x1,
+                    const arma::Mat<T> &x2,
+                    const arma::Col<T> &parameter) : Target(y, a, x1, x2, x2, parameter)  {
   }
 
 
@@ -168,7 +168,7 @@ namespace target {
   */
   template <typename T>
   arma::Mat<T> TargetBinary<T>::est(arma::Col<T> alpha,
-				    const arma::Col<T> &propensity) {
+                                    const arma::Col<T> &propensity) {
     arma::Col<T> p0 = this->p(0);
     for (unsigned i=0; i < alpha.n_elem; i++) this->alpha[i] = alpha[i];
     calculate(true, false, false);
@@ -212,8 +212,8 @@ namespace target {
 
   template <typename T>
   void TargetBinary<T>::calculate(bool target,
-				  bool nuisance,
-				  bool propensity) {
+                                  bool nuisance,
+                                  bool propensity) {
     Target<T>::calculate(target, nuisance, propensity);
     if (nuisance)
       this->nuisance = exp(this->nuisance);  // Odds-product
@@ -223,24 +223,24 @@ namespace target {
 
   template <typename T>
   RR<T>::RR(const arma::Col<T> &y,
-	    const arma::Mat<T> &a,
-	    const arma::Mat<T> &x1,
-	    const arma::Mat<T> &x2,
-	    const arma::Mat<T> &x3,
-	    const arma::Col<T> &parameter,
-	    const arma::Col<T> &weights) :
+            const arma::Mat<T> &a,
+            const arma::Mat<T> &x1,
+            const arma::Mat<T> &x2,
+            const arma::Mat<T> &x3,
+            const arma::Col<T> &parameter,
+            const arma::Col<T> &weights) :
     TargetBinary<T>(y, a, x1, x2, x3, parameter, weights) {
     RR::calculate();
   }
 
   template <typename T>
   RD<T>::RD(const arma::Col<T> &y,
-	    const arma::Mat<T> &a,
-	    const arma::Mat<T> &x1,
-	    const arma::Mat<T> &x2,
-	    const arma::Mat<T> &x3,
-	    const arma::Col<T> &parameter,
-	    const arma::Col<T> &weights) :
+            const arma::Mat<T> &a,
+            const arma::Mat<T> &x1,
+            const arma::Mat<T> &x2,
+            const arma::Mat<T> &x3,
+            const arma::Col<T> &parameter,
+            const arma::Col<T> &weights) :
     TargetBinary<T>(y, a, x1, x2, x3, parameter, weights) {
     RD::calculate();
   }
@@ -355,31 +355,31 @@ namespace target {
     @return ACE
   */
   ACE::ACE(const arma::cx_vec &y,
-	   const arma::cx_mat &a,
-	   const arma::cx_mat &x2,
-	   const arma::cx_mat &x3,
-	   const arma::cx_vec &parameter,
-	   const arma::cx_vec &weights,
-	   bool bin) :
+           const arma::cx_mat &a,
+           const arma::cx_mat &x2,
+           const arma::cx_mat &x3,
+           const arma::cx_vec &parameter,
+           const arma::cx_vec &weights,
+           bool bin) :
     Target<cx_dbl>(y, a, arma::cx_mat(1, 1), x2, x3, parameter, weights) {
     this->binary = bin;
     ACE::calculate(true, true);
   }
 
   ACE::ACE(const arma::vec &y,
-  	   const arma::vec &a,
-  	   const arma::mat &x2,
-  	   const arma::mat &x3,
-  	   const arma::vec &parameter,
-  	   const arma::vec &weights,
-  	   bool bin) :
+           const arma::vec &a,
+           const arma::mat &x2,
+           const arma::mat &x3,
+           const arma::vec &parameter,
+           const arma::vec &weights,
+           bool bin) :
     ACE(arma::conv_to<arma::cx_vec>::from(y),
-	arma::conv_to<arma::cx_vec>::from(a),
-	arma::conv_to<arma::cx_mat>::from(x2),
-	arma::conv_to<arma::cx_mat>::from(x3),
-	arma::conv_to<arma::cx_vec>::from(parameter),
-	arma::conv_to<arma::cx_vec>::from(weights),
-	bin) { }
+        arma::conv_to<arma::cx_vec>::from(a),
+        arma::conv_to<arma::cx_mat>::from(x2),
+        arma::conv_to<arma::cx_mat>::from(x3),
+        arma::conv_to<arma::cx_vec>::from(parameter),
+        arma::conv_to<arma::cx_vec>::from(weights),
+        bin) { }
 
   void ACE::calculate(bool target, bool nuisance, bool propensity) {
     Target<cx_dbl>::calculate(false, nuisance, propensity);

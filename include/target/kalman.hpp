@@ -2,7 +2,7 @@
 /*!
   @file kalman.hpp
   @author Klaus K. Holst
-  @copyright 2020, Klaus
+  @copyright 2020-2021, Klaus
 
   @brief Kalman filter
 
@@ -34,8 +34,6 @@ namespace target {
 		 const arma::mat y): H(H), Q(Q), y(y) {}
 
     arma::mat filter();
-
-
   };  // class KalmanFilter
 
 }  // namespace target

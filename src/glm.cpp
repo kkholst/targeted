@@ -1,7 +1,7 @@
 /*!
   @file glm.cpp
   @author Klaus K. Holst
-  @copyright 2018-2020, Klaus Kähler Holst
+  @copyright 2018-2021, Klaus Kähler Holst
 
   @brief Utility functions for Generalized Linear Models
 
@@ -11,7 +11,7 @@
 
 namespace target {
 
-    // Softmax transformation using sum-log-exp trick to avoid overflow
+  // Softmax transformation using sum-log-exp trick to avoid overflow
   arma::mat softmax(arma::mat lp, bool ref = true, bool log = false) {
     if (ref) lp.insert_cols(0, arma::zeros(lp.n_rows));
     arma::colvec lpmax = arma::max(lp, 1);

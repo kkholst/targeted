@@ -1,5 +1,8 @@
+.clangd
+compile_commands.json
+Debug
 .DS_Store
-
+.cache
 citest
 notes.org
 *.tmp
