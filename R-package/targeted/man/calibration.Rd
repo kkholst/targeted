@@ -73,7 +73,7 @@ Calibration for multiclassication methods
 \examples{
 sim1 <- function(n, beta=c(-3, rep(.5,10)), rho=.5) {
  p <- length(beta)-1
- xx <- mets::rmvn(n,sigma=diag(nrow=p)*(1-rho)+rho)
+ xx <- lava::rmvn0(n,sigma=diag(nrow=p)*(1-rho)+rho)
  y <- rbinom(n, 1, lava::expit(cbind(1,xx)\%*\%beta))
  d <- data.frame(y=y, xx)
  names(d) <- c("y",paste0("x",1:p))

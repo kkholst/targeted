@@ -7,7 +7,7 @@
 \usage{
 ace(
   formula,
-  data,
+  data = parent.frame(),
   weights,
   binary = TRUE,
   nuisance = NULL,
@@ -51,7 +51,7 @@ Augmented Inverse Probability Weighting estimator for the Average Causal Treatme
 The formula may either be specified as:
 response ~ treatment | nuisance-formula | propensity-formula
 
-For example: \code{ace(y~a | x+z | x*z, data=...)}
+For example: \code{ace(y~a | x+z+a | x*z, data=...)}
 
 Alternatively, as a list: \code{ace(list(y~a, ~x+z, ~x*z), data=...)}
 

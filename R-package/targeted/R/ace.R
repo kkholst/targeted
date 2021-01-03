@@ -36,7 +36,7 @@ aipw <- function(formula, data, propensity=NULL, ...) {
 ##' The formula may either be specified as:
 ##' response ~ treatment | nuisance-formula | propensity-formula
 ##'
-##' For example: \code{ace(y~a | x+z | x*z, data=...)}
+##' For example: \code{ace(y~a | x+z+a | x*z, data=...)}
 ##'
 ##' Alternatively, as a list: \code{ace(list(y~a, ~x+z, ~x*z), data=...)}
 ##'
@@ -68,12 +68,18 @@ aipw <- function(formula, data, propensity=NULL, ...) {
 ##' # Choosing a different contrast for the association measures
 ##' summary(a, contrast=c(2,4))
 ace <- function(formula,
-         data, weights, binary=TRUE,
+         data=parent.frame(), weights, binary=TRUE,
          nuisance=NULL,
          propensity=nuisance,
          all, missing=FALSE, labels=NULL, ...) {
+    cl <- match.call()
     if (!is.null(nuisance) && inherits(nuisance, "formula")) {
+        exposure <- attr(getoutcome(formula),"x")
         formula <- list(formula, nuisance, propensity)
+        if (!(exposure%in%all.vars(nuisance)) && length(all.vars(nuisance))>0) {
+            nuisance <- update(nuisance, as.formula(paste0('~ . +',exposure)))
+            formula[[2]] <- nuisance
+        }
     }
     if (is.list(formula)) {
         yf <- getoutcome(formula[[1]])
@@ -86,8 +92,8 @@ ace <- function(formula,
             xf <- attr(yf,"x")
             exposure <- attr(getoutcome(xf[[1]]),"x")
             xf[[1]] <- update(as.formula(paste0(yf,deparse(xf[[1]])) ), .~.-1)
-            ##if (!missing) ## Add exposure indicator to outcome regression model unless we are doing a missing data analysis
-            ##    xf[[2]] <- update(xf[[2]], as.formula(paste0("~ ",exposure," + .")))
+            ## if (!missing) ## Add exposure indicator to outcome regression model unless we are doing a missing data analysis
+                ## xf[[2]] <- update(xf[[2]], as.formula(paste0("~ ",exposure," + .")))
         }
     }
     if (is.list(formula) || inherits(formula,"formula")) {
@@ -105,9 +111,8 @@ ace <- function(formula,
         nn <- list(yf[1], exposure, colnames(x1), colnames(x2))
         rm(yx,xx,yf)
     } else {
-        stop("Expected a formula or a matrix (response,exposure)")
+        stop("Expected a formula") # or a matrix (response,exposure)")
     }
-
     if (base::missing(weights)) weights <- rep(1,length(y))
     if (inherits(weights,"formula")) weights <- all.vars(weights)
     if (is.character(weights)) weights <- as.vector(data[,weights])
@@ -190,7 +195,7 @@ ace <- function(formula,
                    formula=xf,
                    npar=c(length(treatments),ncol(x1),ncol(x2)), nobs=length(y), opt=NULL,
                    all=all,
-                   bread=V, type=ifelse(binary,"binary","linear")), class=c("ace.targeted","targeted"))
+                   bread=V, type=ifelse(binary,"binary ","linear")), class=c("ace.targeted","targeted"))
 }
 
 
@@ -205,9 +210,18 @@ print.summary.ace.targeted <- function(x, ...) {
     cat("\t",paste(nam[[2]],x$formula[[3]]),"\n")
     cat("\n")
     if (x$all) {
+        sep_which <- x$npar[[1]]
+        sep_labels <- NULL
+        if (x$npar[[2]]>0) {
+            sep_labels <- nam[[4]]
+            if (x$npar[[3]]>0)
+                sep_which <- c(sep_which, x$npar[[1]]+x$npar[[2]])
+        }
+        if (x$npar[[3]]>0)
+            sep_labels <- c(sep_labels, nam[[5]])
         print(x$estimate, unique.names=FALSE,
-              sep.which=c(x$npar[[1]],x$npar[[1]]+x$npar[[2]]),
-              sep.labels=paste0(c(nam[[4]],nam[[5]])), ...)
+              sep.which=sep_which,
+              sep.labels=sep_labels, ...)
     } else {
         print(x$estimate, unique.names=FALSE, ...)
     }

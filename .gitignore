@@ -67,3 +67,4 @@ __pycache__
 *.app
 
 # End of https://www.gitignore.io/api/c++
+/R-package/targeted/_test.R
