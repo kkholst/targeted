@@ -30,7 +30,7 @@ TESTPY = $(pkg)_test
 
 ##################################################
 
-default: build runr
+default: build run
 
 all: clean run
 
@@ -53,9 +53,7 @@ cleanall: cleansrc cleanpy cleandoc
 init: cleansrc
 	@echo "Build options: $(BUILD)"
 	@$(CMAKE) $(BUILD) -B$(BUILD_DIR)
-	echo $(NINJA)
 	@ln -fs $(BUILD_DIR)/compile_commands.json
-
 
 .PHONY: checkinit
 checkinit: init-submodules
@@ -71,9 +69,9 @@ init-submodules:
 run:
 	@if [ ! -d "$(BUILD_DIR)" ]; then $(MAKE) --no-print-directory init; fi
 	@$(MAKE) --no-print-directory build # > /dev/null
-	@printf "\n________________________\n"
-	find $(BUILD_DIR)/ -maxdepth 1 -iname "*demo" $(FINDEXEC) \
-	-exec sh -c "echo '____________ {} ____________'; {}" \;
+		@find $(BUILD_DIR)/ -maxdepth 1 \
+	\( -iname "*demo" -o -iname "*run" \) $(FINDEXEC) \
+	-exec sh -c "printf '___ {} ____________________________________________________________________\n'; {}" \;
 
 .PHONY: build
 build: checkinit
@@ -256,7 +254,7 @@ coverage:
 
 .PHONY: check
 check:
-	-@cclint src/*.cpp include/target/*.h*
+	-@cclint src/*.cpp include/target/*.h* # misc/*demo.cpp misc/*run.cpp misc/*test.cpp
 	-@cppcheck --enable=warning,style,performance,portability,information,missingInclude --language=c++ --std=c11 -Isrc -Iinclude src/
 
 .PHONY: valgrind
