@@ -52,7 +52,9 @@ cleanall: cleansrc cleanpy cleandoc
 .PHONY: init
 init: cleansrc
 	@echo "Build options: $(BUILD)"
-	@$(CMAKE) $(BUILD) -B$(BUILD_DIR)
+#	@$(CMAKE) $(BUILD) -B$(BUILD_DIR)
+	@mkdir -p $(BUILD_DIR)
+	@cd $(BUILD_DIR); $(CMAKE) $(BUILD) ..
 	@ln -fs $(BUILD_DIR)/compile_commands.json
 
 .PHONY: checkinit
