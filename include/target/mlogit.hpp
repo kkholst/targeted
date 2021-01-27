@@ -2,7 +2,7 @@
 /*!
   @file mlogit.hpp
   @author Klaus K. Holst
-  @copyright 2020, Klaus Kähler Holst
+  @copyright 2020-2021, Klaus Kähler Holst
 
   @brief Multinomial logit models
 

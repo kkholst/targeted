@@ -94,7 +94,7 @@ condlogit <- function(choice=NULL,
         theta0 <- c(pZ1, pZ2, pX)
     }
     M <- with(env, new(dcmodel,
-                       choice, alternatives-1, cluster$idx,
+                       choice, as.numeric(alternatives)-1, cluster$idx,
                        list(z1,z2,x), weights))
     M$ref(reference-1)
     f2 <- function(theta,...) {
@@ -152,7 +152,6 @@ condlogit <- function(choice=NULL,
     vc <- lava::Inverse(I)
     dimnames(vc) <- list(nam,nam)
 
-    browser()
     formulas <- NULL
     if (all(unlist(lapply(list(x,z1,z2),function(x) inherits(x,"formula"))))) {
         formulas <- list(choice=choice, x=x, z1=z1, z2=z2)
@@ -246,19 +245,43 @@ predict.condlogit <- function(object, newdata, x=NULL, z1=NULL, z2=NULL, id=NULL
         env <- condlogit_prep(x=x, z1=z1, z2=z2, alt=alt, id=id, alt_levels=levels)
     }
     theta <- coef(object)
-    pr <- .mlogit_pred(theta, alt=env$alternatives-1,
-                       basealt=object$reference-1,
-                       nalt=length(env$levels),
-                       id_idx=env$cluster$idx, z1=env$z1, z2=env$z2, x=env$x)
+    pr <- .mlogit_pred(theta,
+                       alt=env$alternatives-1,        # Alternatives
+                       basealt=object$reference-1,    # Base (reference) alternative
+                       nalt=length(env$levels),       # Number of alternatives
+                       id_idx=env$cluster$idx,        # Start of obs for each individual
+                       z1=env$z1, z2=env$z2, x=env$x  # Design matrices
+                       )
     browser()
     res <- data.frame(id=env$id,
                       alt=as.factor(object$alternatives[env$alt0+1]),
                       pred=pr[,1])
     if (!wide) return(res)
+
     res <- subset(mets::fast.reshape(res, id="id", num="alt", sep="."), select=-id)
     names(res) <- gsub("^pred\\.", "", names(res))
     res
 }
+
+## predict.condlogit <- function(object, newdata, x=NULL, z1=NULL, z2=NULL, id=NULL, alt=NULL, wide=FALSE, ...) {
+##     if (!is.null(object$formula)) {
+##         env <- with(object$formula,
+##                     condlogit_prep(choice, x=x, z1=z1, z2=z2,
+##                                    alt_levels=object$alternatives, alt=alt, id=id, data=newdata, basealt=object$basealt))
+##     } else {
+##         if (is.null(alt)) alt <- rep(object$alternatives[1],nrow(x))
+##         env <- condlogit_prep(x=x, z1=z1, z2=z2, alt=alt, id=id, alt_levels=object$alternatives)
+##     }
+##     theta <- coef(object)
+##     pr <- .mlogit_pred(theta, alt=env$alt0, basealt=object$basealt-1, nalt=length(env$alt0.idx),
+##                        id_idx=env$cluster$idx, z1=env$z1, z2=env$z2, x=env$x)
+##     res <- data.frame(id=env$id, alt=as.factor(object$alternatives[env$alt0+1]), pred=pr[,1])
+##     if (!wide) return(res)
+##     res <- subset(mets::fast.reshape(res, id="id", num="alt", sep="."), select=-id)
+##     names(res) <- gsub("^pred\\.", "", names(res))
+##     res
+## }
+
 
 ################################################################################
 
@@ -335,7 +358,8 @@ condlogit_prep <- function(choice=NULL,
     if (length(weights)==0) weights <- rep(1,length(alt))
 
     cl <- .clusterid(id)
-    if (cl$n == n) { ## Data in short form ('standard' multinomial)
+    cl$idx <- cl$idx-1
+    if (cl$n == n) { ##d Data in short form ('standard' multinomial)
         id <- rep(1:n, each=J)
         newd <- .mlogit_expand(alt, x, weights, seq_along(alts))
         order <- FALSE
@@ -352,13 +376,13 @@ condlogit_prep <- function(choice=NULL,
     ord <- NULL
     if (order) {
         ord <- base::order(id)
-        id <- rep(1:cl$n, each=J)
-        choice <- choice[order]
-        alt <- alt[order]
-        weights <- weights[order]
-        x <- x[order,,drop=FALSE]
-        z1 <- z1[order,,drop=FALSE]
-        z2 <- z2[order,,drop=FALSE]
+        id <- id[ord]
+        choice <- choice[ord]
+        alt <- alt[ord]
+        weights <- weights[ord]
+        x <- x[ord,,drop=FALSE]
+        z1 <- z1[ord,,drop=FALSE]
+        z2 <- z2[ord,,drop=FALSE]
     }
 
     par.idx <- list(z1=seq_len(NCOL(z1)),

@@ -1,7 +1,7 @@
 Rcpp::compileAttributes("../R-package/gof")
 devtools::load_all("../R-package/gof")
 
-surgunit <- read.csv("surgunit.csv")
+surgunit <- get(load("../R-package/gof/data/surgunit.rda"))
 l <- lm(log(survival) ~ bloodclot + enzyme + prognostic, surgunit)
 (g <- cumres(l,R=1e4))
 if (interactive()) par(mfrow=c(2,2)); plot(g)
@@ -51,5 +51,3 @@ x <- function(p) predict(e,x=~y2+y3,p=p)[,"eta"]
 cumres(e,y1~eta,R=1000)
 g <- cumres(e,"y1",x=x,R=1000)
 if (interactive()) plot(g)
-
-

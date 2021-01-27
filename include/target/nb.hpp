@@ -1,7 +1,7 @@
 /*!
   @file nb.hpp
   @author Klaus K. Holst
-  @copyright 2020, Klaus Kähler Holst
+  @copyright 2020-2021, Klaus Kähler Holst
 
   @brief Weighted Naive Bayes
 
@@ -20,21 +20,20 @@ namespace target {
 		    const arma::mat    &x,
 		    const arma::uvec   &xlev,
 		    const arma::vec    &weights,
-		    double              laplacesmooth
-		    );
+		    double             laplacesmooth);
 
   std::vector<raggedArray> nb(arma::vec  y,
 			      arma::mat  x,
-			      arma::uvec xlev=arma::uvec(),
-			      arma::vec  ylev=arma::vec(),
-			      arma::vec  weights=arma::vec(),
-			      double     laplacesmooth=1.0);
+			      arma::uvec xlev = arma::uvec(),
+			      arma::vec  ylev = arma::vec(),
+			      arma::vec  weights = arma::vec(),
+			      double     laplacesmooth = 1.0);
 
   arma::mat prednb(const arma::mat &X,
 		   const raggedArray &condprob,
 		   raggedArray xord,
 		   arma::uvec multinomial,
-		   arma::vec  prior=arma::vec(),
-		   double     threshold=1E-3);
+		   arma::vec  prior = arma::vec(),
+		   double     threshold = 1E-3);
 
-} // namespace target
+}  // namespace target

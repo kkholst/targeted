@@ -1,7 +1,7 @@
 /*!
   @file mlogit.cpp
   @author Klaus K. Holst
-  @copyright 2020, Klaus Kähler Holst
+  @copyright 2020-2021, Klaus Kähler Holst
 
   @brief Conditional logit models
 
@@ -18,13 +18,13 @@ namespace target {
   using arma::mat;
 
   MLogit::MLogit(const arma::uvec &choice,
-		 const arma::uvec &alt,
-		 const arma::uvec &id_idx,
-		 const arma::mat &z1,
-		 const arma::mat &z2,
-		 const arma::mat &x,
-		 unsigned nalt,
-		 arma::vec weights) {
+                 const arma::uvec &alt,
+                 const arma::uvec &id_idx,
+                 const arma::mat &z1,
+                 const arma::mat &z2,
+                 const arma::mat &x,
+                 unsigned nalt,
+                 arma::vec weights) {
     n = alt.n_elem;
     J = nalt;
     ncl = id_idx.n_elem;
@@ -91,7 +91,7 @@ namespace target {
     mat tmp = xp;
     xp = zx - target::groupsum(xp, *cluster(), false);
     tmp.each_col() %= target::groupsum((*Weights()) %
-				       (*Choice()), *cluster(), false);
+                                       (*Choice()), *cluster(), false);
     mat hess = -xp.t()*tmp;
     return hess;
   }
@@ -99,12 +99,12 @@ namespace target {
   void MLogit::updateRef(unsigned basealt) {
     // Sets the base/reference alternative
     this->basealt = basealt;
-    alt_idx.fill(0);
-    unsigned pos = 1;
+    alt_idx.fill(0);  //
+    unsigned pos = 0;
     for (unsigned j=0; j < J; j++) {
       if (j != basealt) {
-	this->alt_idx[j] = pos;
-	pos++;
+        this->alt_idx[j] = pos;
+        pos++;
       }
     }
   }
@@ -120,20 +120,20 @@ namespace target {
     unsigned pos = 0;
     if (p_x > 0) {
       for (unsigned j=0; j < J; j++)
-	if (j != basealt) {
-	  for (unsigned i=0; i < p_x; i++) {
-	    theta_x(j, i) = theta(idx_x[pos]);
-	    pos++;
-	  }
-	}
+        if (j != basealt) {
+          for (unsigned i=0; i < p_x; i++) {
+            theta_x(j, i) = theta(idx_x[pos]);
+            pos++;
+          }
+        }
     }
     pos = 0;
     if (p_z2 > 0) {
       for (unsigned j=0; j < J; j++)
-	for (unsigned i=0; i < p_z2; i++) {
-	  theta_z2(j, i) = theta(idx_z2[pos]);
-	  pos++;
-	}
+        for (unsigned i=0; i < p_z2; i++) {
+          theta_z2(j, i) = theta(idx_z2[pos]);
+          pos++;
+        }
     }
   }
 
@@ -141,21 +141,21 @@ namespace target {
     for (unsigned i=0; i < n; i++) {
       unsigned pos = 0;
       if (p_z1 > 0) {
-	for (unsigned j=0; j < p_z1; j++)
-	  zx(i, j) = (*Z1())(i, j);
-	pos = p_z1;
+        for (unsigned j=0; j < p_z1; j++)
+          zx(i, j) = (*Z1())(i, j);
+        pos = p_z1;
       }
       if (p_z2 > 0) {
-	for (unsigned j=0; j < p_z2; j++)
-	  zx(i, j + pos + p_z2*Alt(i)) = (*Z2())(i, j);
-	pos += p_z2*J;
+        for (unsigned j=0; j < p_z2; j++)
+          zx(i, j + pos + p_z2*Alt(i)) = (*Z2())(i, j);
+        pos += p_z2*J;
       }
       if (p_x > 0) {
-	if (Alt(i) != basealt) {
-	  pos += p_x*(alt_idx(Alt(i))-1);
-	  for (unsigned j=0; j < p_x; j++)
-	    zx(i, j+pos) = (*X())(i, j);
-	}
+        if (Alt(i) != basealt) {
+          pos += p_x*(alt_idx(Alt(i)));
+          for (unsigned j=0; j < p_x; j++)
+            zx(i, j+pos) = (*X())(i, j);
+        }
       }
     }
   }
@@ -167,15 +167,15 @@ namespace target {
     }
     if (p_z2 > 0) {
       for (unsigned i=0; i < n; i++) {
-	  rowvec z2 = Z2(i);
-	  lp[i] += as_scalar((*Z2()).row(i)*trans(theta_z2.row(Alt(i))));
+        rowvec z2 = Z2(i);
+        lp[i] += as_scalar((*Z2()).row(i)*trans(theta_z2.row(Alt(i))));
       }
     }
     if (p_x > 0) {
       for (unsigned i=0; i < n; i++) {
-    	if (Alt(i) != basealt) {
-    	  lp[i] += as_scalar((*X()).row(i)*trans(theta_x.row(Alt(i))));
-    	}
+        if (Alt(i) != basealt) {
+          lp[i] += as_scalar((*X()).row(i)*trans(theta_x.row(Alt(i))));
+        }
       }
     }
     // Calculate log-probabilities of choices
@@ -184,14 +184,14 @@ namespace target {
     for (unsigned i=0; i < ncl; i++) {  // Iterate over individuals
       unsigned start = this->cluster(i);
       if (i == (ncl-1)) {
-	stop = n-1;
+        stop = n-1;
       } else {
-	stop = this->cluster(i+1)-1;
+        stop = this->cluster(i+1)-1;
       }
       vec a = target::softmax(lp.subvec(start, stop));  // Multinomial logit
       for (unsigned j=0; j < a.n_elem; j++) {
-	logpr(pos) = a(j);
-	pos++;
+        logpr(pos) = a(j);
+        pos++;
       }
     }
   }

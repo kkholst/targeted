@@ -29,7 +29,7 @@ public:
 
   mat    pred(bool logarithm=false) {
     vec pr = this->logpr;
-    if (logarithm) return pr;
+    if (logarithm) return std::move(pr);
     return exp(pr);
   }
   vec    par() { return MLogit::getPar(); }
@@ -125,5 +125,5 @@ arma::mat mlogit_pred(arma::vec theta,
   dcm.updateProb(theta);
   if (logarithm) return dcm.logpr;
   vec pr = exp(dcm.logpr);
-  return pr;
+  return std::move(pr);
 }
