@@ -113,7 +113,7 @@ calibration <- function(pr, cl, weights=NULL, threshold=10, method="bin", breaks
         ## Check if enough observations falls in class 'i'
         if (any(!is.na(y)) && sy>threshold) {
             if (method=="isotonic") {
-                m <- isoreg(pr[,i],y,weights=weights)
+                m <- isoregw(pr[,i],y,weights=weights)
                 stepfuns <- c(stepfuns, m)
             }
             if (method%in%c("logistic","platt","ns","mspline")) {

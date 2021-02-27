@@ -3,6 +3,7 @@
 \name{pava}
 \alias{pava}
 \alias{isoreg}
+\alias{isoregw}
 \title{Pooled Adjacent Violators Algorithm}
 \usage{
 pava(y, x = numeric(0), weights = numeric(0))
@@ -10,12 +11,14 @@ pava(y, x = numeric(0), weights = numeric(0))
 \arguments{
 \item{y}{response variable}
 
-\item{x}{(optional) predictor vector (otherwise y is assumed to be a priori sorted according to relevant predictor)}
+\item{x}{(optional) predictor vector (otherwise y is assumed
+to be a priori sorted according to relevant predictor)}
 
 \item{weights}{weights (optional) weights}
 }
 \value{
-List with index (idx) of jump points and values (value) at each jump point.
+List with index (idx) of jump points and values (value)
+at each jump point.
 }
 \description{
 Pooled Adjacent Violators Algorithm

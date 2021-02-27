@@ -3,12 +3,14 @@
 ##' @details ...
 ##' @title Pooled Adjacent Violators Algorithm
 ##' @param y response variable
-##' @param x (optional) predictor vector (otherwise y is assumed to be a priori sorted according to relevant predictor)
+##' @param x (optional) predictor vector (otherwise y is assumed
+##' to be a priori sorted according to relevant predictor)
 ##' @param weights weights (optional) weights
-##' @return List with index (idx) of jump points and values (value) at each jump point.
+##' @return List with index (idx) of jump points and values (value)
+##' at each jump point.
 ##' @export
 ##' @author Klaus K. Holst
-##' @aliases pava isoreg
+##' @aliases pava isoreg isoregw
 ##' @examples
 ##' x <- runif(5e3, -5, 5)
 ##' pr <- lava::expit(-1 + x)
@@ -28,22 +30,17 @@ pava <- function(y,x=numeric(0),weights=numeric(0)) {
 }
 
 ##' @export
-isoreg <- function(x,y,weights=NULL,...) {
+isoregw <- function(x, y, weights=NULL,...) {
     ord <- order(x)
     if (is.null(weights)) {
         pv <- pava(y[ord])
     } else {
         ## replication weights
         pv <- try(pava(y[ord], x=numeric(0), weights[ord]), silent=TRUE)
-        if (inherits(pv,"try-error")) return(base::identity)
+        if (inherits(pv, "try-error")) return(base::identity)
     }
-##     xx <- c(0,x[ord[c(1,pv$endindex-1)]],1)
-##     yy <- with(pv, c(0,c(value[1],value),1))
-##     ff2 <- with(pv, approxfun(c(0,x[ord[c(1,endindex-1)]],1),
-##                              c(0,c(value[1],value),1),method="constant",f=1))
-##     ff2
     suppressWarnings(f <- tryCatch(approxfun(x[ord[pv$index]], pv$value,
-                                             rule=2,method="constant"),
+                                             rule=2, method="constant"),
                                    error=function(...) base::identity))
     return(f)
 }
