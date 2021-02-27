@@ -2,6 +2,7 @@
 // Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 #include "../inst/include/targeted.h"
+#include "../inst/include/targeted_types.h"
 #include <RcppArmadillo.h>
 #include <Rcpp.h>
 #include <string>
@@ -62,6 +63,43 @@ RcppExport SEXP _targeted_NB(SEXP ySEXP, SEXP xSEXP, SEXP xlevSEXP, SEXP ylevSEX
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
         rcpp_result_gen = PROTECT(_targeted_NB_try(ySEXP, xSEXP, xlevSEXP, ylevSEXP, weightsSEXP, laplacesmoothSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error(CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
+// ode_solve
+arma::mat ode_solve(odeptr_t f, arma::mat input, arma::mat init, arma::mat par);
+static SEXP _targeted_ode_solve_try(SEXP fSEXP, SEXP inputSEXP, SEXP initSEXP, SEXP parSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< odeptr_t >::type f(fSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type input(inputSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type init(initSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type par(parSEXP);
+    rcpp_result_gen = Rcpp::wrap(ode_solve(f, input, init, par));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _targeted_ode_solve(SEXP fSEXP, SEXP inputSEXP, SEXP initSEXP, SEXP parSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_targeted_ode_solve_try(fSEXP, inputSEXP, initSEXP, parSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -553,6 +591,7 @@ static int _targeted_RcppExport_validate(const char* sig) {
     static std::set<std::string> signatures;
     if (signatures.empty()) {
         signatures.insert("Rcpp::List(*.NB)(arma::vec,arma::vec,arma::uvec,arma::vec,arma::vec,double)");
+        signatures.insert("arma::mat(*.ode_solve)(odeptr_t,arma::mat,arma::mat,arma::mat)");
         signatures.insert("arma::vec(*bin_logl)(const arma::vec&,const arma::vec&,const arma::mat&,const arma::mat&,const arma::vec,const arma::vec&,std::string,bool)");
         signatures.insert("arma::mat(*bin_dlogl)(const arma::vec&,const arma::vec&,const arma::mat&,const arma::mat&,const arma::vec,const arma::vec&,std::string,bool)");
         signatures.insert("arma::mat(*bin_pa)(const arma::vec&,const arma::vec&,const arma::mat&,const arma::mat&,const arma::vec,std::string)");
@@ -572,6 +611,7 @@ static int _targeted_RcppExport_validate(const char* sig) {
 // registerCCallable (register entry points for exported C++ functions)
 RcppExport SEXP _targeted_RcppExport_registerCCallable() { 
     R_RegisterCCallable("targeted", "_targeted_.NB", (DL_FUNC)_targeted_NB_try);
+    R_RegisterCCallable("targeted", "_targeted_.ode_solve", (DL_FUNC)_targeted_ode_solve_try);
     R_RegisterCCallable("targeted", "_targeted_bin_logl", (DL_FUNC)_targeted_bin_logl_try);
     R_RegisterCCallable("targeted", "_targeted_bin_dlogl", (DL_FUNC)_targeted_bin_dlogl_try);
     R_RegisterCCallable("targeted", "_targeted_bin_pa", (DL_FUNC)_targeted_bin_pa_try);
@@ -595,6 +635,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_targeted_mlogit_expand", (DL_FUNC) &_targeted_mlogit_expand, 4},
     {"_targeted_mlogit_pred", (DL_FUNC) &_targeted_mlogit_pred, 9},
     {"_targeted_NB", (DL_FUNC) &_targeted_NB, 6},
+    {"_targeted_ode_solve", (DL_FUNC) &_targeted_ode_solve, 4},
     {"_targeted_bin_logl", (DL_FUNC) &_targeted_bin_logl, 8},
     {"_targeted_bin_dlogl", (DL_FUNC) &_targeted_bin_dlogl, 8},
     {"_targeted_bin_pa", (DL_FUNC) &_targeted_bin_pa, 6},

@@ -91,6 +91,38 @@ namespace target {
     return(res);
   }
 
+  arma::mat interpolate(const arma::mat &input, double tau, bool locf) {
+    arma::vec time = input.col(0);
+    unsigned n = time.n_elem;
+    double t0 = time(0);
+    double tn = time(n-1);
+    unsigned N = std::ceil((tn-t0)/tau)+1;
+    arma::mat input2(N, input.n_cols);
+    unsigned cur = 0;
+    input2.row(0) = input.row(0);
+    double curtime = t0;
+    arma::rowvec slope(input.n_cols);
+    if (locf) {
+      slope.fill(0); slope(0) = 1;
+    } else {
+      slope = (input.row(cur+1)-input.row(cur))/(time(cur+1)-time(cur));
+    }
+    for (unsigned i=0; i < N-1; i++) {
+      while (time(cur+1) < curtime) {
+        cur++;
+        if (cur == (n-1)) break;
+        if (!locf)
+          slope = (input.row(cur+1)-input.row(cur))/(time(cur+1)-time(cur));
+      }
+      double delta = curtime-time(cur);
+      input2.row(i) = input.row(cur) + slope*delta;
+      curtime += tau;
+    }
+    tau = tn-input2(N-2, 0);
+    input2.row(N-1) = input.row(input.n_rows-1);
+    return( input2 );
+  }
+
 
   void fastpattern(const arma::umat &y,
                    arma::umat &pattern,
@@ -130,8 +162,7 @@ namespace target {
     group = mygroup;
   }
 
-
-  arma::umat fastapprox(arma::vec &time,  // sorted times
+  arma::umat fastapprox(arma::vec time,  // sorted times
                         const arma::vec &newtime,
                         bool equal,
                         // type: (0: nearedst, 1: right, 2: left)

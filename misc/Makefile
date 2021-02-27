@@ -3,7 +3,7 @@ MODULES = $(wildcard *demo.cpp)
 BINS    = $(foreach module, $(MODULES), $(patsubst %.cpp, %, $(module)))
 BUILD_DIR = ../build
 
-default: kalmandemo
+default: test
 
 ################################################################################
 
@@ -22,6 +22,11 @@ init:
 	@if [ ! -f $(BUILD_DIR)/build.ninja ] && [ ! -f $(BUILD_DIR)/Makefile ]; then \
 		cd ..; $(MAKE) init; \
 	fi
+
+.PHONY: test
+test: ode_run
+	@/usr/bin/env R --slave -e \
+	"d <- read.csv('y.csv'); lava::idplot(d, type='l', return.data=TRUE)"
 
 .PHONY: clean
 clean:
