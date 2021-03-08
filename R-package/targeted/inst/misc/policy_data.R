@@ -2,6 +2,8 @@
 # Survsplit
 library(data.table)
 
+# baseline Z
+
 smpd <- function(d, tau, lambda, alpha, sigma, beta, gamma, ...){
   stage_vec <- vector("numeric")
   entry_vec <- vector("numeric")
@@ -179,10 +181,10 @@ new_policy_data <- function(mp, os){
   return(object)
 }
 
-set.seed(1)
-policy_data <- simulate_policy_data(2e3, args0)
-policy_data <- new_policy_data(mp = policy_data$mp, os = policy_data$os)
-save(policy_data, file = "policy_data.rda")
+# set.seed(1)
+# policy_data <- simulate_policy_data(2e3, args0)
+# policy_data <- new_policy_data(mp = policy_data$mp, os = policy_data$os)
+# save(policy_data, file = "policy_data.rda")
 
 # Checks:
 

@@ -41,6 +41,8 @@ partial.policy_data <- function(object, K){
 full_stage_history <- function(object, stage)
   UseMethod("full_stage_history")
 
+# add age
+# t_1, t_2, ...
 full_stage_history <- function(object, stage){
   stage_ <- stage
   
@@ -59,6 +61,7 @@ full_stage_history <- function(object, stage){
 markov_stage_history <- function(object, stage)
   UseMethod("markov_stage_history")
 
+# add age
 markov_stage_history <- function(object, stage){
   stage_ <- stage
   
@@ -67,7 +70,7 @@ markov_stage_history <- function(object, stage){
   sh <- sh[stage == stage_, ..sh_names]
   nn <- paste(c("A", object$colnames$mp_X_colnames), stage_, sep = "_")
   setnames(sh, old = c("A", object$colnames$mp_X_colnames), new = nn)
-  sh[, stage := NULL]
+  #sh[, stage := NULL]
   
   return(sh)
 }
@@ -82,6 +85,7 @@ markov_history.policy_data <- function(object){
   sh <- object$mp[event == 0, ]
   sh <- sh[, ..sh_names]
   
+  # alternative form
   # sh <- list(
   #   ref = sh[, c("id", "stage")],
   #   A = sh[, c("A")],
