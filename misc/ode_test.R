@@ -69,36 +69,3 @@ head(cbind(tt,y))
 // }
 
 
-
-code <- '
-#define ARMA_R
-  return par(0) + par(1)*x;
-}
-'
-
-res <- Rcpp::sourceCpp(code=code)
-
-ode(0:10)
-
-
-code <- '
-// [[Rcpp::depends(RcppArmadillo)]]
-// [[Rcpp::plugins(cpp11)]]
-// [[Rcpp::depends(targeted)]]
-#define ARMA_R
-#include <RcppArmadillo.h>
-#include <targeted.h>
-#include <target/odesolver.hpp>
-arma::vec dl(const arma::vec &input,
-             const arma::vec &x,
-             const arma::vec &par) { // (sigma,)
-  return par(0) + par(1)*x;
-}
-// [[Rcpp::export(name="ode")]]
-arma::mat odetest(arma::vec &t) {
-   arma::vec y = targeted::ode(t);
-return(y);
-}
-'
-
-res <- Rcpp::sourceCpp(code=code)
