@@ -1,3 +1,9 @@
+### Notes
+# A is a factor. This can become an issue if not all levels of A are observed in cross-fitting the g_model 
+
+library(data.table)
+
+# Returns a copy of the policy data object.
 copy_policy_data <- function(object){
   
   object$mp <- copy(object$mp)
@@ -9,95 +15,277 @@ copy_policy_data <- function(object){
 partial <- function(object, K)
   UseMethod("partial")
 
+# Returns a policy data object with the same 1-K stages in the marked point data.table as the original object.
+# An additional row is added to the marked point data.table that summarize the information of the remaining stages.
 partial.policy_data <- function(object, K){
+  # copy object to avoid references in data.table
   object <- copy_policy_data(object)
   
-  mp_colnames <- object$colnames$mp_colnames
+  # getting the required column names in mp:
+  mp_names <- object$colnames$mp_names
   
+  # filtering mp rows up till stage K:
   mp_K <- object$mp[stage <= K, ]
-  mp_res <- object$mp[stage > K, ..mp_colnames]
-  
-  mp_res <- mp_res[,
+  # filtering mp rows for stages above K and the required columns:
+  mp_res <- object$mp[stage > K, ..mp_names]
+  # summarizing mp_res as a single row:
+  mp_res_sum <- mp_res[,
     .(
-      stage = min(stage),
-      entry = min(entry),
-      exit = max(exit),
-      event = max(event),
-      U = sum(U),
+      stage = min(stage), # min(stage) is K + 1
+      entry = min(entry), # min(entry) is the time of stage K-1
+      exit = max(exit), # max(exit) is the time of stage K*, where K* is the stochastic number of stages
+      event = max(event), # max(event) is the event at stage K*, which is either 1 or 2
+      U = sum(U), # sum(U) is the sum of the utility contributions from stage K+1 to K*
       U_0 = NA,
       U_1 = NA
     ),
     id
   ]
-  mp <- rbindlist(list(mp_K, mp_res), fill = TRUE, use.names = TRUE)
+  # binding mp_K with mp_res_sum
+  mp <- rbindlist(list(mp_K, mp_res_sum), fill = TRUE, use.names = TRUE)
+  # setting keys
   setkey(mp, id, stage)
   
   object$mp <- mp
-  object$K <- K
+  object$dim$K <- K
   
   return(object)
 }
+# checks
+# data("policy_data")
+# tmp <- partial(policy_data, K = 3)
+# tmp2 <- tmp$os
+
+
+# History functions -------------------------------------------------------
+
+# A history function returns a history object containing
+# - dt: a data.table containing the data
+# - id_names: names of the columns in dt that identify the observation and stage
+# - action_name: name of the column in dt for the action at the given stage (A_k)
+# - history_names: names of the columns in dt for the history at the given stage (H_k)
+# - action_set: the set of possible actions
 
 full_stage_history <- function(object, stage)
   UseMethod("full_stage_history")
 
-# add age
-# t_1, t_2, ...
+# Each row in dt represents the action and full history for an observation at the given stage (including the baseline information).
 full_stage_history <- function(object, stage){
-  stage_ <- stage
+  mp <- object$mp
+  state_names <- object$colnames$state_names
+  os <- object$os
+  baseline_names <- object$colnames$baseline_names
+  action_set <- object$action_set
+  stage_ <- stage; rm(stage)
   
-  sh_names <- c("id", "stage", "A", object$colnames$mp_X_colnames)
-  sh <- object$mp[event == 0, ]
-  sh <- sh[stage <= stage_, ..sh_names]
-  sh <- sh[, if(any(stage == stage_)) .SD, id]
+  # getting stage specific history names:
+  history_names <- c("id", "stage", "exit", "A", state_names)
+  # filtering rows which have an action (event = 0):
+  history <- mp[event == 0, ]
+  # filtering rows up till the given stage number:
+  history <- history[stage <= stage_, ..history_names]
+  # filtering observations with an action at the given stage:
+  history <- history[, if(any(stage == stage_)) .SD, id]
+  # transforming the data from long to wide format:
+  history <- dcast(history, id ~ stage, value.var = history_names[-c(1,2)])
+  # getting the baseline data:
+  baseline_names <- c("id",baseline_names)
+  baseline <- os[, ..baseline_names]
+  # merging the stage specific histories and the the baseline data:
+  history <- merge(history, baseline, all.x = TRUE)
+  # inserting stage column
+  history[, stage := stage_]
+  setcolorder(history, neworder = c(1, ncol(history), 2:(ncol(history) -1)))
   
-  sh <- dcast(sh, id ~ stage, value.var = sh_names[-c(1,2)])
-  #as <- paste("A", stage_, sep = "_")
-  #sh[, (as) := NULL]
+  id_names <- c("id", "stage")
+  action_name <- paste("A", stage_, sep = "_")
+  history_names <- names(history)[!(names(history) %in% c(id_names, action_name))]
   
-  return(sh)
+  history <- list(
+    dt = history,
+    id_names = id_names,
+    action_name = action_name,
+    history_names = history_names,
+    action_set = action_set
+  )
+  class(history) <- "history"
+  
+  return(history)
 }
+# checks:
+# data("policy_data")
+# tmp <- full_stage_history(policy_data, 2)
+# tmp2 <- tmp$dt
+# tmp$action_name
+# tmp$history_names
+# tmp$id_names
 
 markov_stage_history <- function(object, stage)
   UseMethod("markov_stage_history")
 
-# add age
+# Each row in dt represents the action and state for an observation at the given stage (including the baseline information).
 markov_stage_history <- function(object, stage){
+  mp <- object$mp
+  state_names <- object$colnames$state_names
+  os <- object$os
+  baseline_names <- object$colnames$baseline_names
+  action_set <- object$action_set
   stage_ <- stage
   
-  sh_names <- c("id", "stage", "A", object$colnames$mp_X_colnames)
-  sh <- object$mp[event == 0, ]
-  sh <- sh[stage == stage_, ..sh_names]
-  nn <- paste(c("A", object$colnames$mp_X_colnames), stage_, sep = "_")
-  setnames(sh, old = c("A", object$colnames$mp_X_colnames), new = nn)
-  #sh[, stage := NULL]
+  # getting stage specific history names:
+  history_names <- c("id", "stage", "exit", "A", state_names)
+  # filtering rows which have an action (event = 0):
+  history <- mp[event == 0, ]
+  # filtering observations with an action at the given stage:
+  history <- history[stage == stage_, ..history_names]
+  # setting new names:
+  new_names <- paste(c("exit", "A", state_names), stage_, sep = "_")
+  setnames(history, old = c("exit", "A", state_names), new = new_names)
+  # getting the baseline data:
+  baseline_names <- c("id",baseline_names)
+  baseline <- os[, ..baseline_names]
+  # merging the stage specific histories and the the baseline data:
+  history <- merge(history, baseline, all.x = TRUE)
   
-  return(sh)
+  id_names <- c("id", "stage")
+  action_name <- paste("A", stage_, sep = "_")
+  history_names <- names(history)[!(names(history) %in% c(id_names, action_name))]
+  
+  history <- list(
+    dt = history,
+    id_names = id_names,
+    action_name = action_name,
+    history_names = history_names,
+    action_set = action_set
+  )
+  class(history) <- "history"
+  
+  return(history)
 }
+# checks
+# data("policy_data")
+# tmp <- markov_stage_history(policy_data, stage = 2)
+# tmp2 <- tmp$dt
+# tmp$action_name
+# tmp$history_names
+# tmp$action_set
 
 markov_history <- function(object)
   UseMethod("markov_history")
 
+# Each row in dt represents the action and state for an observation (including the baseline information).
+# Each row is identified by the id and stage number.
 markov_history.policy_data <- function(object){
-  mp_X_colnames <- object$colnames$mp_X_colnames
+  mp <- object$mp
+  state_names <- object$colnames$state_names
+  os <- object$os
+  baseline_names <- object$colnames$baseline_names
+  action_set <- object$action_set
   
-  sh_names <- c("id", "stage", "A", mp_X_colnames)
-  sh <- object$mp[event == 0, ]
-  sh <- sh[, ..sh_names]
+  # getting stage specific history names:
+  history_names <- c("id", "stage", "exit", "A", state_names)
+  # filtering rows which have an action (event = 0):
+  history <- mp[event == 0, ]
+  history <- history[, ..history_names]
   
-  # alternative form
-  # sh <- list(
-  #   ref = sh[, c("id", "stage")],
-  #   A = sh[, c("A")],
-  #   X = sh[, ..mp_X_colnames]
-  # )
+  # getting the baseline data:
+  baseline_names <- c("id",baseline_names)
+  baseline <- os[, ..baseline_names]
+  # merging the stage specific histories and the the baseline data:
+  history <- merge(history, baseline, all.x = TRUE)
+  # setting keys
+  setkey(history, id, stage)
   
-  return(sh)
+  id_names <- c("id", "stage")
+  action_name <- "A"
+  history_names <- names(history)[!(names(history) %in% c(id_names, action_name))]
+  
+  history <- list(
+    dt = history,
+    id_names = id_names,
+    action_name = action_name,
+    history_names = history_names,
+    action_set = action_set
+  )
+  class(history) <- "history"
+  
+  return(history)
 }
+# checks
+# data("policy_data")
+# tmp <- markov_history(policy_data)
+# tmp2 <- tmp$dt
+# tmp$history_names
+# tmp$action_name
+
+get_X <- function(object)
+  UseMethod("get_X")
+
+# Returns the model matrix X associated with the history object
+get_X.history <- function(object){
+  dt <- object$dt
+  history_names <- object$history_names
+  
+  # collecting the data:
+  X <- dt[, ..history_names]
+  
+  # dropping character columns with 1 unique element (1 level)
+  character_cols <- names(X)[sapply(X, is.character)]
+  dn <- character_cols[(sapply(X[, ..character_cols], function(x) length(unique(x))) == 1)]
+  if (length(dn) > 0)
+    X[, (dn) := NULL]
+  
+  # constructing the model matrix (without an intercept)
+  X <- model.matrix(~., X)[, -1]
+  
+  return(X)
+}
+# checks
+# data("policy_data")
+# tmp <- markov_history(policy_data)
+# tmp <- markov_stage_history(policy_data, stage = 1)
+# tmp <- full_stage_history(policy_data, stage = 2)
+# colnames(get_X(tmp))
+
+get_A <- function(object)
+  UseMethod("get_A")
+
+# Returns a vector with the action of the given history object
+get_A.history <- function(object){
+  dt <- object$dt
+  action_name <- object$action_name
+  
+  A <- dt[[action_name]]
+  
+  return(A)
+}
+# checks
+# data("policy_data")
+# #tmp <- markov_history(policy_data)
+# tmp <- full_stage_history(policy_data, stage = 2)
+# get_A(tmp)
+
+get_id <- function(object)
+  UseMethod("get_id")
+
+get_id <- function(object){
+  dt <- object$dt
+  id_names <- object$id_names
+  
+  id <- dt[, ..id_names]
+  
+  return(id)
+}
+# data("policy_data")
+# tmp <- full_stage_history(policy_data, stage = 2)
+# get_id(tmp)
+
+# Utility functions -------------------------------------------------------
 
 utility <- function(object)
   UseMethod("utility")
 
+# Returns a data.table with the id and the (total) utility
 utility.policy_data <- function(object){
   mp <- object$mp
   os <- object$os
@@ -108,8 +296,7 @@ utility.policy_data <- function(object){
   
   return(u)
 }
-
-# Checks
+# checks:
 # data("policy_data")
 # tmp <- utility(policy_data)
 # tmp <- policy_data$mp
