@@ -50,14 +50,14 @@ Q_function <- function(object, V, Q_model)
 
 # IPW ---------------------------------------------------------------------
 
-d_index <- Vectorize(
-  function(d, action_set){
-    which(action_set %in% d)
-  },
-  vectorize.args = "d"
-)
+# d_index <- Vectorize(
+#   function(d, action_set){
+#     which(action_set %in% d)
+#   },
+#   vectorize.args = "d"
+# )
 
-# Constructs a boolean matrix. Each column represents an action in the action set.
+# action_matrix: Constructs a boolean matrix. Each column represents an action in the action set.
 # Each row represents an observed action. Each row contains one true value.
 am <- Vectorize(
   function(A, action_set){
@@ -70,7 +70,7 @@ action_matrix <- function(A, action_set){
   t(am(A = A, action_set = action_set))
 }
 # check
-# action_matrix(c("B","B","A","C","D"), c("A","B", "C", "D"))
+action_matrix(c("B","B","A","C","D"), c("A","B", "C", "D"))
 
 IPW <- function(object, ...)
   UseMethod("IPW")
@@ -111,7 +111,7 @@ IPW.policy_data <- function(policy_data, g_model_list, policy, g_full_history = 
   }
   
   # collecting the model data
-  md <- policy_data$mp[event == 0, c("id", "stage", "A"), with = FALSE]
+  md <- policy_data$stage_data[event == 0, c("id", "stage", "A"), with = FALSE]
   # merging the g-function probabilities
   md <- merge(md, gp, all.x = TRUE)
   # merging the policy actions
@@ -197,57 +197,58 @@ policy_0 <- function(history){
   return(pol)
 }
 
-# # history functions
+# history functions
 # data(policy_data)
-# policy_data <- partial(policy_data, K = 8)
-# history <- markov_stage_history(policy_data, stage = 1)
-# history <- full_stage_history(policy_data, stage = 1)
-# history <- markov_stage_history(policy_data, stage = 2)
-# history <- full_stage_history(policy_data, stage = 2)
+# # policy_data <- partial(policy_data, K = 3)
+# # history0 <- markov_stage_history(policy_data, stage = 1)
+# # history0 <- full_stage_history(policy_data, stage = 1)
+# # history0 <- markov_stage_history(policy_data, stage = 2)
+# # history0 <- full_stage_history(policy_data, stage = 2)
 # history0 <- markov_history(policy_data)
-
 # # propensity model parameters
 # get_A(history0)
 # policy_1(history0)
 # gf <- g_function(object = history0, g_model = binom_model)
 # gf$gm
-# args0$beta
-# pred <- predict(gf, new_history = history)
+# gf$X_names
+# gf$action_set
+# # args0$beta
+# pred <- predict(gf, new_history = history0)
 
 # # inverse probability weight check
-# source("~/Projects/target/R-package/targeted/inst/misc/policy_data.R")
-# source("~/Projects/target/R-package/targeted/inst/misc/policy_data_functions.R")
-# pd <- simulate_policy_data(1e5, args0)
-# pd <- new_policy_data(mp = pd$mp, os = pd$os)
-# h <- markov_history(pd)
-# gf <- g_function(object = h, g_model = binom_model)
-# gf$gm
-# args0$beta
-# ipw_1 <- IPW(pd, g_model_list = binom_model, policy = policy_1)
-# mean(ipw_1$ed$ipw) # should be close to 1
-# ipw_0 <- IPW(pd, g_model_list = binom_model, policy = policy_0)
-# mean(ipw_0$ed$ipw) # should be close to 1
-# rm(pd)
+source("~/Projects/target/R-package/targeted/inst/misc/policy_data.R")
+source("~/Projects/target/R-package/targeted/inst/misc/policy_data_functions.R")
+pd <- simulate_policy_data(1e5, args0)
+pd <- new_policy_data(stage_data = pd$stage_data, baseline_data = pd$baseline_data)
+h <- markov_history(pd)
+gf <- g_function(object = h, g_model = binom_model)
+gf$gm
+args0$beta
+ipw_1 <- IPW(pd, g_model_list = binom_model, policy = policy_1)
+mean(ipw_1$ed$ipw) # should be close to 1
+ipw_0 <- IPW(pd, g_model_list = binom_model, policy = policy_0)
+mean(ipw_0$ed$ipw) # should be close to 1
+rm(pd)
 
 # always treat policy:
-# set.seed(1)
-# m <- 1e3
-# ipw_1_est <- vector(mode = "numeric", length = m)
-# for (i in seq_along(ipw_1_est)){
-#   pd <- simulate_policy_data(2e3, args0)
-#   pd <- new_policy_data(mp = pd$mp, os = pd$os)
-#   
-#   ipw <- IPW(pd, g_model_list = binom_model, policy = policy_1)
-#   est <- ipw$ed[,.(mean(U * ipw))][[1]]
-#   rm(ipw)
-#   
-#   ipw_1_est[i] <- est
-# }
-# mean(ipw_1_est)
-# # approximate true value
-# args1 <- args0
-# args1$d <- d_1
-# pd1 <- simulate_policy_data(1e6, args1)
-# pd1 <- new_policy_data(mp = pd1$mp, os = pd1$os)
-# mean(utility(pd1)$U)
+set.seed(1)
+m <- 1e3
+ipw_1_est <- vector(mode = "numeric", length = m)
+for (i in seq_along(ipw_1_est)){
+  pd <- simulate_policy_data(2e3, args0)
+  pd <- new_policy_data(stage_data = pd$stage_data, baseline_data = pd$baseline_data)
+
+  ipw <- IPW(pd, g_model_list = binom_model, policy = policy_1)
+  est <- ipw$ed[,.(mean(U * ipw))][[1]]
+  rm(ipw)
+
+  ipw_1_est[i] <- est
+}
+mean(ipw_1_est)
+# approximate true value
+args1 <- args0
+args1$d <- d_1
+pd1 <- simulate_policy_data(1e5, args1)
+pd1 <- new_policy_data(stage_data = pd1$stage_data, baseline_data = pd1$baseline_data)
+mean(utility(pd1)$U)
 

@@ -37,7 +37,9 @@ smpd <- function(d, tau, lambda, alpha, sigma, beta, gamma, psi, rho, ...){
     if (a == 1){
       entry_vec <- c(entry_vec, t)
     }
-    t_increment <- if(a == 1) rexp(n = 1, 1) / exp(lambda + rho * x)  else Inf # remember that mean(t_increment  = 1 / rate)
+    # the time increment comes from an exponential distribution with mean exp(lambda + rho * x)
+    # remember that mean(t_increment  = 1 / rate)
+    t_increment <- if(a == 1) rexp(n = 1, 1) / exp(lambda + rho * x)  else Inf
     t <- t + t_increment + psi # minimum increment psi
     stage <- stage + 1
     x_lead <- x
@@ -64,13 +66,13 @@ smpd <- function(d, tau, lambda, alpha, sigma, beta, gamma, psi, rho, ...){
     
   }
   
-  mp <- matrix(c(stage_vec, entry_vec, exit_vec, event_vec, a_vec, x_vec, x_lead_vec), ncol = 7, byrow = FALSE)
-  colnames(mp) <- c("stage", "entry", "exit", "event", "A", "X", "X_lead")
+  stage_data <- matrix(c(stage_vec, entry_vec, exit_vec, event_vec, a_vec, x_vec, x_lead_vec), ncol = 7, byrow = FALSE)
+  colnames(stage_data) <- c("stage", "entry", "exit", "event", "A", "X", "X_lead")
   
-  os <- matrix(c(rnorm(n = 1, mean = gamma * last(exit_vec)), z), ncol = 2)
-  colnames(os) <- c("U_os", "Z")
+  baseline_data <- matrix(c(rnorm(n = 1, mean = gamma * last(exit_vec)), z), ncol = 2)
+  colnames(baseline_data) <- c("U_os", "Z")
 
-  return(list(mp = mp, os = os))
+  return(list(stage_data = stage_data, baseline_data = baseline_data))
 }
 
 d_obs <- function(stage, t, x, z, beta){
@@ -91,29 +93,29 @@ simulate_policy_data <- function(n, args){
     1:n,
     function(id){
       d <- do.call(what = "smpd", args)
-      mp <- d$mp
-      os <- d$os
+      stage_data <- d$stage_data
+      baseline_data <- d$baseline_data
       
-      mp <- cbind(id = id, mp)
-      os <- cbind(id = id, os)
+      stage_data <- cbind(id = id, stage_data)
+      baseline_data <- cbind(id = id, baseline_data)
       
-      return(list(mp = mp, os = os))
+      return(list(stage_data = stage_data, baseline_data = baseline_data))
     },
     simplify = "array"
   )
   
-  mp <- do.call(what  = "rbind", l["mp",])
-  mp <- as.data.table(mp)
-  mp[, U := (exit - entry) + shift(ifelse(!is.na(A), -X * A, 0), fill = 0)]
-  mp[event %in% c(0), U_0 := 0]
-  mp[event %in% c(0), U_1 := -X]
-  mp[, A := as.character(A)]
+  stage_data <- do.call(what  = "rbind", l["stage_data",])
+  stage_data <- as.data.table(stage_data)
+  stage_data[, U := (exit - entry) + shift(ifelse(!is.na(A), -X * A, 0), fill = 0)]
+  stage_data[event %in% c(0), U_0 := 0]
+  stage_data[event %in% c(0), U_1 := -X]
+  stage_data[, A := as.character(A)]
   
-  os <- as.data.table(do.call(what  = "rbind", l["os",]))
-  os[, id := as.numeric(id)]
-  os[, U_os := as.numeric(U_os)]
+  baseline_data <- as.data.table(do.call(what  = "rbind", l["baseline_data",]))
+  baseline_data[, id := as.numeric(id)]
+  baseline_data[, U_os := as.numeric(U_os)]
   
-  return(list(mp = mp, os = os))
+  return(list(stage_data = stage_data, baseline_data = baseline_data))
 }
 
 args0 <- list(
@@ -135,8 +137,8 @@ args0 <- list(
   # ),
   beta = c( # distribution of a
     0.3, # intercept
-    0, # t
-    0, # x
+    -0.1, # t
+    -0.1, # x
     0.3 # z == "a"
   ),
   sigma = 1,
@@ -145,63 +147,68 @@ args0 <- list(
   rho = -0.5 # Cox parameter for X_lead (the cost), if negative, the rate will decrease
 )
 
-new_policy_data <- function(mp, os){
+new_policy_data <- function(stage_data, baseline_data, id = "id", stage = "stage", action = "A", utility = "U", entry ="entry", exit = "exit"){
   
+  # check if data.table
   stopifnot(
-    is.data.table(mp),
-    is.data.table(os)
+    is.data.table(stage_data),
+    is.data.table(baseline_data)
   )
-  mp <- copy(mp)
-  os <- copy(os)
-  setkey(mp, id, stage)
-  setkey(os, id)
+  
+  # copy data.table's
+  stage_data <- copy(stage_data)
+  baseline_data <- copy(baseline_data)
+  
+  # setting keys 
+  setkey(stage_data, id, stage)
+  setkey(baseline_data, id)
   
   stopifnot(
-    is.character(mp$A), # A must be a character
-    all(sapply(mp, function(col) !is.factor(col))), # factors in mp are not allowed
-    all(sapply(os, function(col) !is.factor(col))) # factors in os are not allowed
+    is.character(stage_data$A), # A must be a character
+    all(sapply(stage_data, function(col) !is.factor(col))), # factors in stage_data are not allowed
+    all(sapply(baseline_data, function(col) !is.factor(col))) # factors in baseline_data are not allowed
   )
   
   # maximal set of actions:
-  action_set <- sort(unique(mp$A))
+  action_set <- sort(unique(stage_data$A))
   
   # names of columns for the deterministic utility contributions for every action in the action set:
   U_A_colnames <- paste("U", action_set, sep = "_")
-  # required column names in mp:
-  mp_names <- c("id", "stage", "entry", "exit", "event", "A", "U", U_A_colnames)
-  # required column names in os:
+  # required column names in stage_data:
+  stage_data_names <- c("id", "stage", "entry", "exit", "event", "A", "U", U_A_colnames)
+  # required column names in baseline_data:
   os_names <- c("id", "U_os")
   stopifnot(
-    all(mp_names %in% names(mp)), # required column names in mp
-    all(os_names %in% names(os)) # required column names in os
+    all(stage_data_names %in% names(stage_data)), # required column names in stage_data
+    all(os_names %in% names(baseline_data)) # required column names in baseline_data
   )
   
   # names of columns for the stage specific state data (X_k)
-  state_names <- names(mp)[!(names(mp) %in% mp_names)]
+  state_names <- names(stage_data)[!(names(stage_data) %in% stage_data_names)]
   # names of columns for the baseline data
-  baseline_names <- names(os)[!(names(os) %in% os_names)]
+  baseline_names <- names(baseline_data)[!(names(baseline_data) %in% os_names)]
   
   # checks
   stopifnot(
-    anyDuplicated(mp, by = key(mp)) == 0, # no duplicated keys
-    anyDuplicated(os, by = key(os)) == 0, 
-    all(unique(mp$id) == os$id), # id match in mp and os
-    all(mp[ , .(check = all(stage == 1:.N)), by = id]$check), # stages must be on the form 1, 2, ..., k
-    all(mp[, .(check = all(event == c(rep(0, times = (.N-1)), 1) | event == c(rep(0, times = (.N-1)), 2))), id]$check), # events must be on the form 0,0,...,0,j (j in {1,2})
-    all(is.numeric(mp$U) & !is.na(mp$U)), # the utility must be numeric
-    all(sapply(mp[, ..U_A_colnames], function(col) is.numeric(col))),
-    all(is.numeric(os$U_os) & !is.na(os$U_os))
+    anyDuplicated(stage_data, by = key(stage_data)) == 0, # no duplicated keys
+    anyDuplicated(baseline_data, by = key(baseline_data)) == 0, 
+    all(unique(stage_data$id) == baseline_data$id), # id match in stage_data and baseline_data
+    all(stage_data[ , .(check = all(stage == 1:.N)), by = id]$check), # stages must be on the form 1, 2, ..., k
+    all(stage_data[, .(check = all(event == c(rep(0, times = (.N-1)), 1) | event == c(rep(0, times = (.N-1)), 2))), id]$check), # events must be on the form 0,0,...,0,j (j in {1,2})
+    all(is.numeric(stage_data$U) & !is.na(stage_data$U)), # the utility must be numeric
+    all(sapply(stage_data[, ..U_A_colnames], function(col) is.numeric(col))),
+    all(is.numeric(baseline_data$U_os) & !is.na(baseline_data$U_os))
   )
   
   # getting dimensions
-  n <- length(unique(mp$id))
-  K <- mp[event == 0, .(max(stage))][[1]]
+  n <- length(unique(stage_data$id))
+  K <- stage_data[event == 0, .(max(stage))][[1]]
   
   object <- list(
-    mp = mp,
-    os = os,
+    stage_data = stage_data,
+    baseline_data = baseline_data,
     colnames = list(
-      mp_names = mp_names,
+      stage_data_names = stage_data_names,
       state_names = state_names,
       os_names = os_names,
       baseline_names = baseline_names
@@ -218,20 +225,18 @@ new_policy_data <- function(mp, os){
   return(object)
 }
 
-
 # data sample -------------------------------------------------------------
 
 set.seed(1)
 policy_data <- simulate_policy_data(2e3, args0)
-policy_data <- new_policy_data(mp = policy_data$mp, os = policy_data$os)
+policy_data <- new_policy_data(stage_data = policy_data$stage_data, baseline_data = policy_data$baseline_data)
 save(policy_data, file = "policy_data.rda")
-
 
 # checks ------------------------------------------------------------------
 
 # pd <- simulate_policy_data(1e5, args0)
-# pd <- new_policy_data(mp = pd$mp, os = pd$os)
-# tmp <- pd$mp
+# pd <- new_policy_data(stage_data = pd$stage_data, baseline_data = pd$baseline_data)
+# tmp <- pd$stage_data
 # tmp <- tmp[, t := exit - entry - args0$psi][entry != exit, ][event == 0, ]
 # library(survival)
 # coxph(Surv(tmp$t) ~ tmp$X_lead)
@@ -239,7 +244,7 @@ save(policy_data, file = "policy_data.rda")
 
 # set.seed(2)
 # tmp <- do.call(what = "smpd", args0)
-# tmp2 <- tmp$mp
+# tmp2 <- tmp$stage_data
 # tmp2 <- as.data.table(tmp2)
 # tmp2[, U := (exit - entry) + shift(ifelse(!is.na(A), -X * A, 0), fill = 0)]
 # tmp2[event %in% c(0), U_0 := 0]
@@ -247,9 +252,9 @@ save(policy_data, file = "policy_data.rda")
 
 # set.seed(1)
 # policy_data <- simulate_policy_data(2e3, args0)
-# policy_data <- new_policy_data(mp = policy_data$mp, os = policy_data$os)
-# tmp <- policy_data$mp
-# tmp2 <- policy_data$os
+# policy_data <- new_policy_data(stage_data = policy_data$stage_data, baseline_data = policy_data$baseline_data)
+# tmp <- policy_data$stage_data
+# tmp2 <- policy_data$baseline_data
 # tmp[,
 #     .(
 #       u_total = max(exit) - min(entry)  - sum(as.numeric(A) * X, na.rm = TRUE),
