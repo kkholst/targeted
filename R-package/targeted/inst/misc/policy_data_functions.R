@@ -92,14 +92,21 @@ full_stage_history <- function(object, stage){
   history <- history[, if(any(stage == stage_)) .SD, id]
   # transforming the data from long to wide format:
   history <- dcast(history, id ~ stage, value.var = history_names[-c(1,2)])
-  # getting the baseline data:
-  baseline_names <- c("id",baseline_names)
-  baseline <- baseline_data[, ..baseline_names]
-  # merging the stage specific histories and the the baseline data:
-  history <- merge(history, baseline, all.x = TRUE)
-  # inserting stage column
+  
+  # inserting stage column:
   history[, stage := stage_]
-  setcolorder(history, neworder = c(1, ncol(history), 2:(ncol(history) -1)))
+  
+  # merging the stage specific histories and the the baseline data by reference:
+  history[baseline_data, (baseline_names) := (baseline_names)]
+  
+  # getting the entry data for stage 1:
+  ed <- stage_data[.(unique(id), 1), c("id", "entry"), with = FALSE]
+  # merging the stage 1 entry
+  history[ed, entry_1 := i.entry, on = "id"]
+  
+  # setting key and column order
+  setkey(history, id, stage)
+  setcolorder(history, neworder = c("id", "stage", "entry_1"))
   
   id_names <- c("id", "stage")
   action_name <- paste("A", stage_, sep = "_")
@@ -145,11 +152,20 @@ markov_stage_history <- function(object, stage){
   # setting new names:
   new_names <- paste(c("exit", "A", state_names), stage_, sep = "_")
   setnames(history, old = c("exit", "A", state_names), new = new_names)
-  # getting the baseline data:
-  baseline_names <- c("id",baseline_names)
-  baseline <- baseline_data[, ..baseline_names]
-  # merging the stage specific histories and the the baseline data:
-  history <- merge(history, baseline, all.x = TRUE)
+  
+  # merging the stage specific histories and the the baseline data by reference:
+  history[baseline_data, (baseline_names) := (baseline_names)]
+  
+  # getting the entry data for stage 1
+  ed <- stage_data[.(unique(id), 1), c("id", "entry"), with = FALSE]
+  # merging the stage 1 entry
+  history[ed, entry_1 := i.entry, on = "id"]
+  # setting column order
+  setcolorder(history, neworder = c("id", "stage", "entry_1"))
+  
+  stopifnot(
+    all(complete.cases(history))
+  )
   
   id_names <- c("id", "stage")
   action_name <- paste("A", stage_, sep = "_")
@@ -167,12 +183,12 @@ markov_stage_history <- function(object, stage){
   return(history)
 }
 # checks
-data("policy_data")
-tmp <- markov_stage_history(policy_data, stage = 2)
-tmp2 <- tmp$dt
-tmp$action_name
-tmp$history_names
-tmp$action_set
+# data("policy_data")
+# tmp <- markov_stage_history(policy_data, stage = 2)
+# tmp2 <- tmp$dt
+# tmp$action_name
+# tmp$history_names
+# tmp$action_set
 
 markov_history <- function(object)
   UseMethod("markov_history")
@@ -192,13 +208,19 @@ markov_history.policy_data <- function(object){
   history <- stage_data[event == 0, ]
   history <- history[, ..history_names]
   
-  # getting the baseline data:
-  baseline_names <- c("id",baseline_names)
-  baseline <- baseline_data[, ..baseline_names]
-  # merging the stage specific histories and the the baseline data:
-  history <- merge(history, baseline, all.x = TRUE)
-  # setting keys
-  setkey(history, id, stage)
+  # merging the stage specific histories and the the baseline data by reference:
+  history[baseline_data, (baseline_names) := (baseline_names)]
+  
+  # getting the entry data for stage 1
+  ed <- stage_data[.(unique(id), 1), c("id", "entry"), with = FALSE]
+  # merging the stage 1 entry
+  history[ed, entry_1 := i.entry, on = "id"]
+  # setting column order
+  setcolorder(history, neworder = c("id", "stage", "entry_1"))
+  
+  stopifnot(
+    all(complete.cases(history))
+  )
   
   id_names <- c("id", "stage")
   action_name <- "A"
@@ -215,7 +237,7 @@ markov_history.policy_data <- function(object){
   
   return(history)
 }
-# # checks
+# checks
 data("policy_data")
 tmp <- markov_history(policy_data)
 tmp2 <- tmp$dt
