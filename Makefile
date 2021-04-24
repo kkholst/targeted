@@ -178,10 +178,13 @@ py_run:
 py: py_build py_run
 
 PYTHON_EXPORT = $(BUILD_DIR)/python/$(pkg)
+PYTHON_EXPORT_LIBS = $(foreach file, target-cpp target-inc doctest armadillo pybind11, \
+	$(patsubst %, $(PYTHON_EXPORT)/lib/%, $(file)))
 .PHONY: py_export
 py_export: cleansrc py_clean
 	@rm -Rf $(PYTHON_EXPORT); mkdir -p $(PYTHON_EXPORT)
 	@cd python-package/$(pkg); $(GIT) archive HEAD | (cd ../../$(PYTHON_EXPORT); tar x)
+	@rm -Rf $(PYTHON_EXPORT_LIBS)
 	@cp -a src $(PYTHON_EXPORT)/lib/target-cpp
 	@cp -a include $(PYTHON_EXPORT)/lib/target-inc
 	@cp -a lib/armadillo $(PYTHON_EXPORT)/lib

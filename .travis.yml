@@ -40,7 +40,7 @@ jobs:
       services: docker
       language: python
       install:
-        - python3 -m pip install cibuildwheel==1.7.0
+        - python3 -m pip install cibuildwheel==1.10.0
       env:
         - CIBW_MANYLINUX_X86_64_IMAGE="manylinux2014"
         - CIBW_MANYLINUX_I686_IMAGE="manylinux2014"
@@ -64,11 +64,11 @@ jobs:
       os: osx
       language: shell
       install:
-        - python3 -m pip install cibuildwheel==1.7.0
+        - python3 -m pip install cibuildwheel==1.10.0
       env:
         - CIBW_SKIP="cp27-* cp35-* pp*"
         - CIBW_BEFORE_BUILD="pip install cmake"
-        - CIBW_ARCHS_LINUX=x86_64 arm64
+        - CIBW_ARCHS_LINUX="x86_64 arm64"
       script:
         - make py_export pkg=targeted
         - cd build/python/targeted; python3 -m cibuildwheel --output-dir wheelhouse
