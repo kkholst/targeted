@@ -73,8 +73,8 @@ int main(int argc, char **argv) {
   std::cout << " U=\n" << target::RED << U <<
     std::endl << target::COL_RESET;
 
-  arma::mat pp = model.target::TargetBinary<double>::pa();
-  std::cout << "pp=\n" << pp << std::endl;
+  //arma::mat pp = model.target::TargetBinary<double>::pa();
+  //std::cout << "pp=\n" << pp << std::endl;
   // const char *filen = "tmp/a.h5";
   // std::remove(filen);
   // y.save(hdf5_name(filen, "y", hdf5_opts::append+hdf5_opts::trans));

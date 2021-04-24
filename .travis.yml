@@ -62,6 +62,7 @@ jobs:
     - name: "python: targeted [osx wheels]"
       if: (branch IN (deploy)) OR (tag =~ ^py_v)
       os: osx
+      osx_image: xcode12.2
       language: shell
       install:
         - python3 -m pip install cibuildwheel==1.10.0
