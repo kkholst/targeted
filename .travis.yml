@@ -47,7 +47,7 @@ jobs:
         - CIBW_SKIP="cp27-* cp35-* pp*"
         - CIBW_BEFORE_BUILD="yum install -y make lapack-devel blas-devel python-devel; pip install cmake; cd lib/armadillo; cmake -B build && cd build; make install; cd ../../.."
       script:
-        - make exportpy pkg=targeted
+        - make py_export pkg=targeted
         - cd build/python/targeted; python3 -m cibuildwheel --output-dir wheelhouse
       after_success:
         - |
@@ -68,8 +68,9 @@ jobs:
       env:
         - CIBW_SKIP="cp27-* cp35-* pp*"
         - CIBW_BEFORE_BUILD="pip install cmake"
+        - CIBW_ARCHS_LINUX=x86_64 arm64
       script:
-        - make exportpy pkg=targeted
+        - make py_export pkg=targeted
         - cd build/python/targeted; python3 -m cibuildwheel --output-dir wheelhouse
       after_success:
         - |
@@ -139,7 +140,7 @@ jobs:
         - R -e 'install.packages(c("remotes","covr","pkgdown"), repos="https://cloud.r-project.org")'
         - R -e 'remotes::install_deps("R-package/targeted", dep=T, upgrade=T)'
       script:
-        - make checkr pkg=targeted
+        - make r_check pkg=targeted
       after_success:
         - Rscript -e 'covr::codecov(path="R-package/targeted", type="all")'
 
@@ -157,7 +158,7 @@ jobs:
         - R -e 'install.packages(c("remotes","covr","pkgdown"), repos="https://cloud.r-project.org")'
         - R -e 'remotes::install_deps("R-package/gof", dep=T, upgrade=T)'
       script:
-        - make checkr pkg=gof
+        - make r_check pkg=gof
       after_success:
         - Rscript -e 'library("covr"); codecov(path="R-package/gof", flags="gof", type="all")'
 

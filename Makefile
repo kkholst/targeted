@@ -27,7 +27,6 @@ TESTR = $(pkg)_test
 # python package
 TESTPY = $(pkg)_test
 
-
 ##################################################
 
 default: build run
@@ -95,32 +94,33 @@ uninstall:
 ## R package
 ##################################################
 
-.PHONY: buildr
-buildr: cleanr
+.PHONY: r_build
+r_build: r_clean
 	@$(R) --slave -e "source('config/utilities.R'); \
 	load_packages(c('Rcpp', 'RcppArmadillo', 'lava', 'optimx', 'futile.logger'))"
 	@$(R) --slave -e "Rcpp::compileAttributes('R-package/${pkg}')"
 	@$(R) CMD INSTALL R-package/${pkg}
 
-.PHONY: testr
-testr:
+.PHONY: r_test
+r_test:
 	@$(R) -e 'testthat::test_package("./R-package/${pkg}/")'
 
-.PHONY: runr
-runr:
+.PHONY: r_run
+r_run:
 	@cd misc; $(R) --silent -f $(TESTR).R
 
-.PHONY: roxygen
-roxygen:
+.PHONY: r_doc roxygen
+r_doc:
 	@$(R) -e 'roxygen2::roxygenize("R-package/${pkg}")'
+roxygen: r_doc
 
 dep_file = R-package/${pkg}/src/dependencies
 pkg_dep := $(shell if [ -f "$(dep_file)" ]; then cat ${dep_file}; fi)
 pkg_cpp = $(foreach module, ${pkg_dep}, $(patsubst %, src/%.cpp, $(module)))
 pkg_hpp = $(foreach module, $(pkg_dep), $(patsubst %, include/target/%.hpp, $(module)))
 
-.PHONY: exportr
-exportr:
+.PHONY: r_export
+r_export:
 	@rm -Rf $(BUILD_DIR)/R/$(pkg)
 	@mkdir -p $(BUILD_DIR)/R/$(pkg)
 	cd R-package/${pkg}; $(GIT) archive HEAD | (cd ../../$(BUILD_DIR)/R/$(pkg); tar x )
@@ -134,8 +134,8 @@ exportr:
 	fi
 	sed -i $(SED_NOBACKUP) '/^OBJECTS\|SOURCES/d' $(BUILD_DIR)/R/$(pkg)/src/Makevars
 
-.PHONY: checkr
-checkr: exportr
+.PHONY: r_crancheck
+r_crancheck: r_export
 	@$(R) --slave -e "source('config/utilities.R'); \
 	load_packages(c('devtools'))"
 	@$(R) -e "pkgbuild::build('$(BUILD_DIR)/R/$(pkg)', args='--compact-vignettes=qpdf --resave-data=best')"
@@ -147,14 +147,14 @@ r_check:
 	@cd R-package; $(R) CMD check $(pkg) --no-multiarch
 
 .PHONY: r
-r: buildr runr
+r: r_build r_run
 
-.PHONY: cleanr
+.PHONY: r_clean
 cleanr:
 	@rm -Rf R-package/${pkg}/src/*.o R-package/${pkg}/src/*.so R-package/${pkg}.Rcheck
 
-.PHONY: syncr
-syncr: exportr
+.PHONY: r_sync
+r_sync: r_export
 	@if [ -d "../$(pkg)" ]; then \
 	cp -rfv $(BUILD_DIR)/R/$(pkg)/.	 ../$(pkg)/; fi
 
@@ -162,24 +162,24 @@ syncr: exportr
 ## Python package
 ##################################################
 
-.PHONY: buildpy
-buildpy:
+.PHONY: py_build
+py_build:
 	@cd python-package/$(pkg); $(PYTHON) setup.py install
 
-.PHONY: testpy
-testpy:
+.PHONY: py_test
+py_test:
 	@cd python-package/$(pkg); $(MAKE) test
 
-.PHONY: runpy
-runpy:
+.PHONY: py_run
+py_run:
 	@$(PYTHON) misc/$(TESTPY).py
 
 .PHONY: py
-py: buildpy runpy
+py: py_build py_run
 
 PYTHON_EXPORT = $(BUILD_DIR)/python/$(pkg)
-.PHONY: exportpy
-exportpy: cleansrc cleanpy
+.PHONY: py_export
+py_export: cleansrc py_clean
 	@rm -Rf $(PYTHON_EXPORT); mkdir -p $(PYTHON_EXPORT)
 	@cd python-package/$(pkg); $(GIT) archive HEAD | (cd ../../$(PYTHON_EXPORT); tar x)
 	@cp -a src $(PYTHON_EXPORT)/lib/target-cpp
@@ -189,8 +189,8 @@ exportpy: cleansrc cleanpy
 	@cp -a lib/pybind11 $(PYTHON_EXPORT)/lib
 	@echo "Python package exported to: ${PYTHON_EXPORT}"
 
-.PHONY: cleanpy
-cleanpy:
+.PHONY: py_clean
+py_clean:
 	@cd python-package/$(pkg); $(MAKE) --no-print-directory clean
 
 ##################################################
@@ -234,7 +234,7 @@ test:	checkinit build
 	$(BUILD_DIR)/$(TARGET)_test -s
 
 .PHONY: testall
-testall: test r py testr testpy
+testall: test r py r_test py_test
 
 ##################################################
 ## Code coverage
@@ -294,6 +294,6 @@ docker:
 	$(CONTAINER_RUNTIME) run --user `id -u` -ti --rm --privileged -v ${PWD}:/data $(TARGET) ${CMD}
 
 ## Use 'RD' instead of 'R'
-dockersan: exportr
+dockersan: r_export
 	$(CONTAINER_RUNTIME) run -ti --rm --privileged -v ./build/R/:/data \
 	rocker/r-devel-san ${CMD}
