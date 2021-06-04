@@ -1,0 +1,28 @@
+name: targeted python package
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest-runner pytest-cov scipy patsy numpy pandas statsmodels
+      - name: check
+        run: |
+          cd python-package/targeted
+          python setup.py install
+          python setup.py test
+          bin/test_targeted
+          python3 -m targeted
