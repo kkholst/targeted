@@ -116,7 +116,7 @@ jobs:
         env:
           CIBW_BEFORE_BUILD: pip install cmake
           CIBW_SKIP: cp27-* cp35-* pp*
-          CIBW_ARCHS: x86_64 arm64
+          CIBW_ARCHS: x86 amd64
         run: |
           make py_export pkg=targeted
           cd build/python/targeted; python3 -m cibuildwheel --output-dir wheelhouse
