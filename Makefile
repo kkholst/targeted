@@ -44,9 +44,9 @@ cleansrc:
 clean: cleansrc
 
 .PHONY: cleanall
-cleanall: cleansrc cleanpy cleandoc
-	@$(MAKE) pkg=gof cleanr
-	@$(MAKE) pkg=targeted cleanr
+cleanall: cleansrc py_clean cleandoc
+	@$(MAKE) pkg=gof r_clean
+	@$(MAKE) pkg=targeted r_clean
 
 .PHONY: init
 init: cleansrc
@@ -150,7 +150,7 @@ r_check:
 r: r_build r_run
 
 .PHONY: r_clean
-cleanr:
+r_clean:
 	@rm -Rf R-package/${pkg}/src/*.o R-package/${pkg}/src/*.so R-package/${pkg}.Rcheck
 
 .PHONY: r_sync
