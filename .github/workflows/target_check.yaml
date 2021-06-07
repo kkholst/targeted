@@ -32,20 +32,12 @@ jobs:
 
   cpp_library:
     runs-on: ubuntu-latest
-    matrix:
-        config:
-        - {
-            cxx="g++"
-          }
-        - {
-            cxx="clang++"
-          }
     steps:
       - name: Checkout repository incl. submodules
         uses: actions/checkout@v2
         with:
           submodules: recursive
-      - name: Check
+      - name: Unit tests
         run: |
           make test
       - name: Coverage
