@@ -1,0 +1,42 @@
+name: R tests
+
+on: [push]
+
+jobs:
+  r_targeted:
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {os: ubuntu-latest,   r: 'release'}
+
+    runs-on: ${{ matrix.config.os }}
+    steps:
+      - name: Checkout repository incl. submodules
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - uses: r-lib/actions/setup-r@master
+        with:
+          r-version: ${{ matrix.config.r }}
+
+      - name: Cache R packages
+        uses: actions/cache@v1
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
+          restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
+
+      - name: Install dependencies
+        run: |
+          install.packages(c("remotes","covr","pkgdown"), repos="https://cloud.r-project.org")
+          remotes::install_deps("R-package/targeted", dep=T, upgrade=T)
+        shell: Rscript {0}
+      - name: Check
+        run: |
+          make r_check pkg=targeted
+      - name: Upload Coverage to Codecov
+        run: |
+          covr::codecov(path="R-package/targeted", type="all")
+        shell: Rscript {0}
+
