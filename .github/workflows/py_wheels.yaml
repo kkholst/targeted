@@ -9,7 +9,12 @@ jobs:
       matrix:
         python-version: [3.8]
     steps:
-      - uses: actions/checkout@v2
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.9.0
+        with:
+          access_token: ${{ github.token }}
+      - name: Checkout repository incl. submodules
+        uses: actions/checkout@v2
         with:
           submodules: recursive
       - name: Set up Python ${{ matrix.python-version }}
@@ -25,7 +30,7 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
           CIBW_MANYLINUX_I686_IMAGE: manylinux2014"
           CIBW_SKIP: cp27-* cp35-* pp*
-          CIBW_BEFORE_BUILD: yum install -y make lapack-devel blas-devel python-devel; pip install cmake; cd lib/armadillo; cmake -B build && cd build; make install; cd ../../.."
+          CIBW_BEFORE_BUILD: yum install -y make lapack-devel blas-devel python-devel; pip install cmake; cd lib/armadillo; cmake -B build && cd build; make install; cd ../../..
         run: |
           make py_export pkg=targeted
           cd build/python/targeted; python3 -m cibuildwheel --output-dir wheelhouse
