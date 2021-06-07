@@ -56,7 +56,12 @@ jobs:
       matrix:
         python-version: [3.8]
     steps:
-      - uses: actions/checkout@v2
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.9.0
+        with:
+          access_token: ${{ github.token }}
+      - name: Checkout repository incl. submodules
+        uses: actions/checkout@v2
         with:
           submodules: recursive
       - name: Set up Python ${{ matrix.python-version }}
@@ -84,3 +89,34 @@ jobs:
           python3 -m pip install --use-feature=2020-resolver -U setuptools twine
           cd build/python/targeted
           python3 -m twine upload wheelhouse/*.whl
+
+  win_build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        python-version: [3.8]
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.9.0
+        with:
+          access_token: ${{ github.token }}
+      - name: Checkout repository incl. submodules
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install cibuildwheel==1.10.0
+      - name: Build wheels
+        env:
+          CIBW_BEFORE_BUILD: pip install cmake
+          CIBW_SKIP: cp27-* cp35-* pp*
+          CIBW_ARCHS: x86_64 arm64
+        run: |
+          make py_export pkg=targeted
+          cd build/python/targeted; python3 -m cibuildwheel --output-dir wheelhouse
