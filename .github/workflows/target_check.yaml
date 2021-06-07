@@ -1,16 +1,17 @@
-name: targeted python package
+name: target tests
 
 on: [push]
 
 jobs:
-  build:
+  python_package:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.8]
+        python-version: [3.8, 3.9]
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository incl. submodules
+        uses: actions/checkout@v2
         with:
           submodules: recursive
       - name: Set up Python ${{ matrix.python-version }}
@@ -21,10 +22,21 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pytest-runner pytest-cov scipy patsy numpy pandas statsmodels
-      - name: check
+      - name: Check
         run: |
           cd python-package/targeted
           python setup.py install
           python setup.py test
           bin/test_targeted
           python3 -m targeted
+
+  cpp_library:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository incl. submodules
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Check
+        run: |
+          make test
