@@ -307,7 +307,7 @@ and \(\phi_{\mathrm{eff}}\) is the *influence function*.
 The influence function can be extracted using the ``iid`` method
 ```{r}
 head(iid(fit))
-````
+```
 
 SessionInfo
 ============
