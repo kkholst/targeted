@@ -4,7 +4,8 @@
 #'
 #' An object of class '\code{targeted}' is a list with at least the following components:
 #' \describe{
-#'   \item{estimate}{An \code{estimate} object with the target parameter estimates (see \code{\link[lava]{estimate.default}})}
+#'   \item{estimate}{An \code{estimate} object with the target parameter
+#'   estimates (see \code{\link[lava]{estimate.default}})}
 #'   \item{opt}{Object returned from the applied optimization routine}
 #'   \item{npar}{number of parameters of the model (target and nuisance)}
 #'   \item{type}{String describing the model}
@@ -49,7 +50,7 @@ summary.targeted <- function(object, ...) {
 
 ##' @export
 iid.targeted <- function(x, ...) {
-    iid(x$estimate,...)
+    lava::iid(x$estimate, ...)
 }
 
 ##' @export
@@ -61,10 +62,10 @@ logLik.targeted <- function(object, ...) {
 
 ##' @export
 vcov.targeted <- function(object, ...) {
-    vcov(object$estimate,...)
+    vcov(object$estimate, ...)
 }
 
 ##' @export
 coef.targeted <- function(object, ...) {
-    coef(object$estimate,...)
+    coef(object$estimate, ...)
 }

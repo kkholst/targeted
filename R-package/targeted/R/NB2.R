@@ -25,7 +25,7 @@ NB2 <- function(formula, data, weights=NULL,
     if (missing(y)) {
         if (missing(data)) stop("Need data as data.frame or data.table")
         ff <- procform(formula, data=as.data.frame(data))
-        data <- data.table(data)
+        data <- data.table::data.table(data)
         y <- as.factor(as.matrix(with(ff, data[, response, with=FALSE])))
         if (length(ff$filter)>0 && is.null(weights)) {
             weights <- as.matrix(data[, ff$filter[[1]], with=FALSE])[, 1]

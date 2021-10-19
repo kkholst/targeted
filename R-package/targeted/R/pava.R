@@ -1,6 +1,5 @@
 
 ##' @description Pooled Adjacent Violators Algorithm
-##' @details ...
 ##' @title Pooled Adjacent Violators Algorithm
 ##' @param y response variable
 ##' @param x (optional) predictor vector (otherwise y is assumed
@@ -18,19 +17,19 @@
 ##' pv <- pava(y, x)
 ##' plot(pr ~ x, cex=0.3)
 ##' with(pv, lines(sort(x)[index], value, col="red", type="s"))
-pava <- function(y,x=numeric(0),weights=numeric(0)) {
+pava <- function(y, x=numeric(0), weights=numeric(0)) {
     if (length(x)) {
         ord <- order(x)
         y <- y[ord]
         if (length(weights)==length(y)) weights <- weights[ord]
     }
     if (length(weights)!=length(y)) weights <- numeric(0)
-    val <- .pava(y,x,weights)
+    val <- .pava(y, x, weights)
     return(val)
 }
 
 ##' @export
-isoregw <- function(x, y, weights=NULL,...) {
+isoregw <- function(x, y, weights=NULL, ...) {
     ord <- order(x)
     if (is.null(weights)) {
         pv <- pava(y[ord])

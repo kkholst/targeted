@@ -20,7 +20,7 @@ NB(
 
 \item{data}{data.frame}
 
-\item{weights}{optional weights}
+\item{weights}{optional frequency weights}
 
 \item{kernel}{If TRUE a kernel estimator is used for numeric predictors (otherwise a gaussian model is used)}
 
@@ -31,10 +31,7 @@ NB(
 \item{...}{additional arguments to lower level functions}
 }
 \description{
-content for description
-}
-\details{
-content for details
+Naive Bayes Classifier
 }
 \examples{
 data(iris)

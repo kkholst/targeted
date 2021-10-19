@@ -4,7 +4,8 @@
 ##' The following variables are defined bye default (see the argument \code{pname})
 ##' \itemize{
 ##' \item{dy}{Vector with derivatives, i.e. the rhs of the ODE (the result).}
-##' \item{x}{Vector with the first element being the time, and the following elements additional exogenous input variables,}
+##' \item{x}{Vector with the first element being the time, and the following
+##' elements additional exogenous input variables,}
 ##' \item{y}{Vector with the dependent variable}
 ##' \item{p}{Parameter vector}
 ##' }
@@ -45,31 +46,31 @@
 ##' yy <- solve_ode(f, input=tt, init=c(1, 1, 1), par=c(10, 28, 8/3))
 ##' }
 ##' @export
-specify_ode <- function(code, fname=NULL, pname=c('dy','x','y','p')) {
+specify_ode <- function(code, fname=NULL, pname=c("dy", "x", "y", "p")) {
   if (is.null(fname))
     fname <- paste0("dy_", digest::sha1(code))
-  hd <- '// [[Rcpp::depends(RcppArmadillo)]]
+  hd <- "// [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::depends(targeted)]]
 #include <RcppArmadillo.h>
 #include <targeted.h>
 using namespace arma;
-'
-  fun <- paste0('arma::rowvec ', fname,
-                '(const arma::rowvec &', pname[2], ',
-const arma::rowvec &', pname[3], ',
-const arma::rowvec &', pname[4], ') {
-  arma::rowvec ', pname[1], '(', pname[3], '.n_elem, arma::fill::zeros);
-')
-  fptr <- paste0('
-  return ', pname[1], ';
+"
+  fun <- paste0("arma::rowvec ", fname,
+                "(const arma::rowvec &", pname[2], ",
+const arma::rowvec &", pname[3], ",
+const arma::rowvec &", pname[4], ") {
+  arma::rowvec ", pname[1], "(", pname[3], ".n_elem, arma::fill::zeros);
+")
+  fptr <- paste0("
+  return ", pname[1], ";
 }
 // [[Rcpp::export]]
 odeptr_t make_dy() {
-  return odeptr_t(new odefunc_t(')
-  tl <- '));
+  return odeptr_t(new odefunc_t(")
+  tl <- "));
 }
-'
+"
   make_dy <- NULL # Avoid warning about missing global variable
   rcpp_code <- paste(hd, fun, code, fptr, fname, tl)
   res <- Rcpp::sourceCpp(code=rcpp_code)

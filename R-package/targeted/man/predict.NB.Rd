@@ -11,9 +11,12 @@
 
 \item{newdata}{new data on which to make predictions}
 
-\item{expectation}{Variable to calcualte conditional expectation wrt probabilities from NB classifier}
+\item{expectation}{Variable to calcualte conditional expectation wrt
+probabilities from NB classifier}
 
-\item{threshold}{Threshold parameters. First element defines the threshold on the probabilities and the second element the value to set those truncated probabilities to.}
+\item{threshold}{Threshold parameters. First element defines the threshold
+on the probabilities and the second element the value to set those
+truncated probabilities to.}
 
 \item{...}{Additional arguments to lower level functions}
 }
