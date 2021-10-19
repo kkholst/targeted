@@ -12,8 +12,8 @@ Description: Various methods for targeted and semiparametric inference including
 	     and estimators for risk differences and relative risks (Richardson et al. (2017)
 	     <doi:10.1080/01621459.2016.1192546>).
 Depends:
-    R (>= 3.3),
-    lava (>= 1.6.8)
+    R (>= 4.0),
+    lava (>= 1.6.10)
 Imports:
     data.table,
     digest,
