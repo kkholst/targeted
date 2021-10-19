@@ -11,10 +11,10 @@ knitr::opts_chunk$set(
 ```
 
 <!-- badges: start -->
-  [![travis](https://travis-ci.org/kkholst/targeted.svg?branch=master)](https://travis-ci.org/kkholst/targeted)
+  [![travis](https://travis-ci.com/kkholst/targeted.svg?branch=master)](https://travis-ci.com/kkholst/targeted)
   [![coverage](https://codecov.io/github/kkholst/targeted/coverage.svg?branch=master)](https://codecov.io/github/kkholst/targeted?branch=master)
   [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-  [![cran](https://www.r-pkg.org/badges/version-last-release/targeted)](http://cranlogs.r-pkg.org/downloads/total/last-month/targeted)
+  [![cran](https://www.r-pkg.org/badges/version-last-release/targeted)](https://cranlogs.r-pkg.org/downloads/total/last-month/targeted)
 <!-- badges: end -->
 
 
@@ -35,7 +35,7 @@ You can install the released version of targeted from [CRAN](<https://CRAN.R-pro
 install.packages("targeted")
 ```
 
-And the development version from [GitHub](<https://github.com/>) with:
+And the development version from [GitHub](<https://github.com/kkholst/targeted>) with:
 
 ```{r  eval=FALSE }
 # install.packages("devtools")

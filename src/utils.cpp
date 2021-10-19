@@ -1,8 +1,7 @@
-
 /*!
   @file utils.cpp
   @author Klaus K. Holst
-  @copyright 2020, Klaus Kähler Holst
+  @copyright 2020-2021, Klaus Kähler Holst
 
   @brief Various utility functions and constants
 
@@ -26,7 +25,7 @@ namespace target {
       theta0[i] += h0;
       arma::mat val = imag(f(theta0))/h;
       for (unsigned j=0; j < n; j++)
-	res(j, i) = val[j];
+        res(j, i) = val[j];
     }
     return(res);
   }
@@ -39,8 +38,8 @@ namespace target {
     unsigned id0 = id(0);
     for (unsigned i=0; i < n; i++) {
       if (id(i) != id0) {
-	ncl++;
-	id0 = id(i);
+        ncl++;
+        id0 = id(i);
       }
     }
     arma::umat res(ncl, 2);  // column 1: index, column 2: size
@@ -49,9 +48,9 @@ namespace target {
     id0 = id(0);
     for (unsigned i=0; i < n; i++) {
       if (id(i) != id0) {
-	cl++;
-	res(cl, 0) = i;  // index
-	id0 = id(i);
+        cl++;
+        res(cl, 0) = i;  // index
+        id0 = id(i);
       }
       res(cl, 1)++;  // size
     }
@@ -60,8 +59,8 @@ namespace target {
 
 
   arma::mat groupsum(const arma::mat &x,
-		     const arma::uvec &cluster,
-		     bool reduce) {
+                     const arma::uvec &cluster,
+                     bool reduce) {
     unsigned ncl = cluster.n_elem;
     unsigned n = ncl;
     if (!reduce) {
@@ -73,30 +72,62 @@ namespace target {
     for (unsigned i=0; i < ncl; i++) {  // Iterate over individuals
       unsigned start = cluster(i);
       if (i == (ncl-1)) {
-	stop = x.n_rows;
+        stop = x.n_rows;
       } else {
-	stop = cluster(i+1);
+        stop = cluster(i+1);
       }
       tmp.fill(0);
       for (unsigned j=start; j < stop; j++) {
-	tmp += x.row(j);
+        tmp += x.row(j);
       }
       if (reduce) {
-	res.row(i) = tmp;
+        res.row(i) = tmp;
       } else {
-	for (unsigned j=start; j < stop; j++) {
-	  res.row(j) = tmp;
-	}
+        for (unsigned j=start; j < stop; j++) {
+          res.row(j) = tmp;
+        }
       }
     }
     return(res);
   }
 
+  arma::mat interpolate(const arma::mat &input, double tau, bool locf) {
+    arma::vec time = input.col(0);
+    unsigned n = time.n_elem;
+    double t0 = time(0);
+    double tn = time(n-1);
+    unsigned N = std::ceil((tn-t0)/tau)+1;
+    arma::mat input2(N, input.n_cols);
+    unsigned cur = 0;
+    input2.row(0) = input.row(0);
+    double curtime = t0;
+    arma::rowvec slope(input.n_cols);
+    if (locf) {
+      slope.fill(0); slope(0) = 1;
+    } else {
+      slope = (input.row(cur+1)-input.row(cur))/(time(cur+1)-time(cur));
+    }
+    for (unsigned i=0; i < N-1; i++) {
+      while (time(cur+1) < curtime) {
+        cur++;
+        if (cur == (n-1)) break;
+        if (!locf)
+          slope = (input.row(cur+1)-input.row(cur))/(time(cur+1)-time(cur));
+      }
+      double delta = curtime-time(cur);
+      input2.row(i) = input.row(cur) + slope*delta;
+      curtime += tau;
+    }
+    tau = tn-input2(N-2, 0);
+    input2.row(N-1) = input.row(input.n_rows-1);
+    return( input2 );
+  }
+
 
   void fastpattern(const arma::umat &y,
-		   arma::umat &pattern,
-		   arma::uvec &group,
-		   unsigned categories) {
+                   arma::umat &pattern,
+                   arma::uvec &group,
+                   unsigned categories) {
     unsigned n = y.n_rows;
     unsigned k = y.n_cols;
 
@@ -105,7 +136,7 @@ namespace target {
     unsigned npattern = n;
     if (lognpattern<std::log(static_cast<double>(npattern))) {
       npattern = (unsigned) pow(static_cast<double>(categories),
-				static_cast<double>(k));
+                                static_cast<double>(k));
     }
     arma::umat mypattern(npattern, k);
     mypattern.fill(1);
@@ -115,28 +146,27 @@ namespace target {
       arma::urowvec ri = y.row(i);
       bool found = false;
       for (unsigned j=0; j < K; j++) {
-	if (sum(ri != mypattern.row(j)) == 0) {
-	  found = true;
-	  mygroup(i) = j;
-	  break;
-	}
+        if (sum(ri != mypattern.row(j)) == 0) {
+          found = true;
+          mygroup(i) = j;
+          break;
+        }
       }
       if (!found) {
-	K++;
-	mypattern.row(K-1) = ri;
-	mygroup(i) = K-1;
+        K++;
+        mypattern.row(K-1) = ri;
+        mygroup(i) = K-1;
       }
     }
     pattern = mypattern.rows(0, K-1);
     group = mygroup;
   }
 
-
-  arma::umat fastapprox(arma::vec &time,  // sorted times
-			const arma::vec &newtime,
-			bool equal,
-			// type: (0: nearedst, 1: right, 2: left)
-			unsigned type) {
+  arma::umat fastapprox(arma::vec time,  // sorted times
+                        const arma::vec &newtime,
+                        bool equal,
+                        // type: (0: nearedst, 1: right, 2: left)
+                        unsigned type) {
     arma::uvec idx(newtime.n_elem);
     arma::uvec eq(newtime.n_elem);
 
@@ -147,20 +177,20 @@ namespace target {
     for (unsigned i=0; i < newtime.n_elem; i++) {
       eq[i] = 0;
       if (newtime(i) > vmax) {
-	pos = time.n_elem-1;
+        pos = time.n_elem-1;
       } else {
-	it = std::lower_bound(time.begin(), time.end(), newtime(i));
-	upper = *it;
-	if (it == time.begin()) {
-	  pos = 0;
-	  if (equal && (newtime(i) == upper)) { eq(i) = 1; }
-	} else {
-	  pos = static_cast<int>(it-time.begin());
-	  if (type == 0 && std::fabs(newtime(i)-time(pos-1)) <
-                            std::fabs(newtime(i)-time(pos)))
-	    pos -= 1;
-	  if (equal && (newtime(i) == upper)) { eq[i] = pos+1; }
-	}
+        it = std::lower_bound(time.begin(), time.end(), newtime(i));
+        upper = *it;
+        if (it == time.begin()) {
+          pos = 0;
+          if (equal && (newtime(i) == upper)) { eq(i) = 1; }
+        } else {
+          pos = static_cast<int>(it-time.begin());
+          if (type == 0 && std::fabs(newtime(i)-time(pos-1)) <
+              std::fabs(newtime(i)-time(pos)))
+            pos -= 1;
+          if (equal && (newtime(i) == upper)) { eq[i] = pos+1; }
+        }
       }
       if (type == 2 && newtime(i) < upper) pos--;
       idx(i) = pos;
@@ -168,7 +198,7 @@ namespace target {
     if (equal) {
       return( arma::join_horiz(idx, eq) );
     }
-    return( idx );
+    return( std::move(idx) );
   }
 
 
@@ -190,9 +220,9 @@ namespace target {
     arma::uvec ord = arma::stable_sort_index(x);
     G = G.elem(ord);
     unsigned n = G.n_elem;
-    double res = 1/(12*n);
+    double res = 1/(double)(12*n);
     for (unsigned i=0; i < G.n_elem; i++) {
-      double val = (2*i-1)/(2*n)-G(i);
+      double val = (2*i-1)/static_cast<double>((2*n)-G(i));
       res += val*val;
     }
     return res;

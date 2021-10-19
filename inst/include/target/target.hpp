@@ -1,7 +1,7 @@
 /*!
   @file target.hpp
   @author Klaus K. Holst
-  @copyright 2019-2020, Klaus Kähler Holst
+  @copyright 2019-2021, Klaus Kähler Holst
 
   @brief Classes for targeted inference models
 

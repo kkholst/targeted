@@ -1,6 +1,10 @@
 # targeted 0.1.2
 
 - Curent development...
+- Naive Bayes
+- Pava
+- ODE
+
 
 # targeted 0.1.1
 

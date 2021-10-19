@@ -1,8 +1,8 @@
 Package: targeted
 Type: Package
 Title: Targeted Inference
-Version: 0.1.2
-Date: 2020-05-10
+Version: 0.2.0
+Date: 2021-10-19
 Authors@R: c(person("Klaus K.", "Holst", email="klaus@holst.it", role=c("aut", "cre")))
 Author: Klaus K. Holst [aut, cre]
 Maintainer: Klaus K. Holst <klaus@holst.it>
@@ -13,20 +13,28 @@ Description: Various methods for targeted and semiparametric inference including
 	     <doi:10.1080/01621459.2016.1192546>).
 Depends:
     R (>= 3.3),
-    lava (>= 1.6.6)
+    lava (>= 1.6.8)
+Imports:
+    data.table,
+    digest,
+    futile.logger,
+    methods,
+    Rcpp (>= 1.0.0),
+    optimx
 Suggests:
+    mgcv,
     testthat (>= 0.11),
+    rmarkdown,
     knitr
 URL: https://targetlib.org/r/
 BugReports: https://github.com/kkholst/targeted/issues
 License: Apache License (== 2.0)
-Imports: methods, Rcpp (>= 1.0.0), optimx, futile.logger
 LinkingTo: Rcpp, RcppArmadillo
 LazyLoad: yes
 NeedsCompilation: yes
 SystemRequirements: C++11
 ByteCompile: yes
-RcppModules: riskregmodel, dcmodel
+RcppModules: riskregmodel
 Encoding: UTF-8
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 VignetteBuilder: knitr

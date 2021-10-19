@@ -5,14 +5,14 @@ aipw <- function(formula, data, propensity=NULL, ...) {
         yf <- getoutcome(formula,sep="")
         xx <- list(as.formula(paste("~",as.character(formula)[3])))
         if (!is.null(propensity))
-            attr(yf,"x") <- c(xx, list(propensity))
+            attr(yf, "x") <- c(xx, list(propensity))
         else
-            attr(yf,"x") <- c(xx, xx)
+            attr(yf, "x") <- c(xx, xx)
     }
     r <- !is.na(model.frame(as.formula(paste0(yf,"~1")), data=data, na.action=na.pass))*1
     data[,"_R"] <- r[,1]
     formula <- c(list(as.formula(paste(yf[1],"~ `_R`"))), attr(yf,"x"))
-    res <- ace(formula, data=data, ..., missing=TRUE,labels=yf[1])
+    res <- ate(formula, data=data, ..., missing=TRUE,labels=yf[1])
     res
 }
 
@@ -30,26 +30,26 @@ aipw <- function(formula, data, propensity=NULL, ...) {
 ##' @param missing If TRUE a missing data (AIPW) estimator is returned
 ##' @param labels Optional treatment labels
 ##' @param ... Additional arguments to lower level functions
-##' @return An object of class '\code{ace.targeted}' is returned. See \code{\link{targeted-class}}
+##' @return An object of class '\code{ate.targeted}' is returned. See \code{\link{targeted-class}}
 ##' for more details about this class and its generic functions.
 ##' @details
 ##' The formula may either be specified as:
 ##' response ~ treatment | nuisance-formula | propensity-formula
 ##'
-##' For example: \code{ace(y~a | x+z+a | x*z, data=...)}
+##' For example: \code{ate(y~a | x+z+a | x*z, data=...)}
 ##'
-##' Alternatively, as a list: \code{ace(list(y~a, ~x+z, ~x*z), data=...)}
+##' Alternatively, as a list: \code{ate(list(y~a, ~x+z, ~x*z), data=...)}
 ##'
-##' Or using the nuisance (and propensity argument): \code{ace(y~a, nuisance=~x+z, ...)}
+##' Or using the nuisance (and propensity argument): \code{ate(y~a, nuisance=~x+z, ...)}
 ##' @export
 ##' @author Klaus K. Holst
-##' @aliases ace aipw
+##' @aliases ate aipw
 ##' @examples
 ##' m <- lvm(y ~ a+x, a~x)
 ##' distribution(m,~ a+y) <- binomial.lvm()
 ##' d <- sim(m,1e3,seed=1)
 ##'
-##' a <- ace(y ~ a, nuisance=~x, data=d)
+##' a <- ate(y ~ a, nuisance=~x, data=d)
 ##' summary(a)
 ##'
 ##' # Multiple treatments
@@ -58,7 +58,7 @@ aipw <- function(formula, data, propensity=NULL, ...) {
 ##' m <- ordinal(m, K=4, ~a)
 ##' transform(m, ~a) <- factor
 ##' d <- sim(m,1e4)
-##' (a <- ace(y~a|a*x|x, data=d))
+##' (a <- ate(y~a|a*x|x, data=d))
 ##'
 ##' # Comparison with randomized experiment
 ##' m0 <- cancel(m, a~x)
@@ -67,7 +67,7 @@ aipw <- function(formula, data, propensity=NULL, ...) {
 ##'
 ##' # Choosing a different contrast for the association measures
 ##' summary(a, contrast=c(2,4))
-ace <- function(formula,
+ate <- function(formula,
          data=parent.frame(), weights, binary=TRUE,
          nuisance=NULL,
          propensity=nuisance,
@@ -195,12 +195,12 @@ ace <- function(formula,
                    formula=xf,
                    npar=c(length(treatments),ncol(x1),ncol(x2)), nobs=length(y), opt=NULL,
                    all=all,
-                   bread=V, type=ifelse(binary,"binary ","linear")), class=c("ace.targeted","targeted"))
+                   bread=V, type=ifelse(binary,"binary ","linear")), class=c("ate.targeted","targeted"))
 }
 
 
 ##' @export
-print.summary.ace.targeted <- function(x, ...) {
+print.summary.ate.targeted <- function(x, ...) {
     nam <- x$names
     cat("\nAugmented Inverse Probability Weighting estimator\n")
     outreg <- ifelse(x$type=="binary", "logistic regression", "linear regression")
@@ -236,7 +236,7 @@ print.summary.ace.targeted <- function(x, ...) {
 
 
 ##' @export
-summary.ace.targeted <- function(object, contrast=c(1:2), ...) {
+summary.ate.targeted <- function(object, contrast=c(1:2), ...) {
     nn <- lapply(object[c("estimate","outcome.reg","propensity.model")],function(x) length(coef(x)))
     if (object$all) {
         cc <- rbind(object$estimate$coefmat,
@@ -254,10 +254,10 @@ summary.ace.targeted <- function(object, contrast=c(1:2), ...) {
         if (object$type=="binary") {
             asso <- estimate(object$estimate,function(x) c(x[contrast[1]]/x[contrast[2]], lava::OR(x[contrast]), x[contrast[1]]-x[contrast[2]]), labels=c("RR","OR","RD"))
         } else {
-            asso <- estimate(object$estimate,function(x) x[contrast[1]]-x[contrast[2]], labels=c("ACE"))
+            asso <- estimate(object$estimate,function(x) x[contrast[1]]-x[contrast[2]], labels=c("ATE"))
         }
     structure(list(estimate=cc, npar=nn, type=object$type, asso=asso, names=c(object$names,"","Outcome model:","Propensity model:"),
                    all=object$all, formula=gsub("~","~ ",unlist(lapply(object$formula,deparse))),
                    contrast=contrast),
-                   class="summary.ace.targeted")
+                   class="summary.ate.targeted")
 }

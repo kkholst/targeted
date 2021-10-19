@@ -4,13 +4,13 @@
 \name{targeted-class}
 \alias{targeted-class}
 \alias{riskreg.targeted}
-\alias{ace.targeted}
+\alias{ate.targeted}
 \title{targeted class object}
 \value{
 objects of the S3 class '\code{targeted}'
 }
 \description{
-The functions \code{\link{riskreg}} and \code{\link{ace}} returns an object of the type \code{targeted}.
+The functions \code{\link{riskreg}} and \code{\link{ate}} returns an object of the type \code{targeted}.
 
 An object of class '\code{targeted}' is a list with at least the following components:
 \describe{
@@ -36,5 +36,5 @@ The following S3 generic functions are available for an object of class \code{ta
 ## See example(riskreg) for examples
 }
 \seealso{
-\code{\link{riskreg}}, \code{\link{ace}}
+\code{\link{riskreg}}, \code{\link{ate}}
 }
