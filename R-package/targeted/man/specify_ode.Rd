@@ -28,13 +28,13 @@ The following variables are defined bye default (see the argument \code{pname})
 \item{y}{Vector with the dependent variable}
 \item{p}{Parameter vector}
 }
-\[y'(t) = f_{p}(x(t), y(t))\]
+\eqn{y'(t) = f_{p}(x(t), y(t))}
 All variables are treated as Armadillo (http://arma.sourceforge.net/) vectors/matrices.
 
 As an example consider the *Lorenz Equations*
-\[\frac{dx_{t}}{dt} = \sigma(y_{t}-x_{t})\]
-\[\frac{dy_{t}}{dt} = x_{t}(\rho-z_{t})-y_{t}\]
-\[\frac{dz_{t}}{dt} = x_{t}y_{t}-\beta z_{t}\]
+\eqn{\frac{dx_{t}}{dt} = \sigma(y_{t}-x_{t})}
+\eqn{\frac{dy_{t}}{dt} = x_{t}(\rho-z_{t})-y_{t}}
+\eqn{\frac{dz_{t}}{dt} = x_{t}y_{t}-\beta z_{t}}
 
 We can specify this model as
 \code{ode <- 'dy(0) = p(0)*(y(1)-y(0));
@@ -43,7 +43,7 @@ We can specify this model as
 \code{dy <- specify_ode(ode)}
 
 As an example of model with exogenous inputs consider the following ODE:
-\[y'(t) = \beta_{0} + \beta_{1}y(t) + \beta_{2}y(t)x(t) + \beta_{3}x(t)\cdot t\]
+\eqn{y'(t) = \beta_{0} + \beta_{1}y(t) + \beta_{2}y(t)x(t) + \beta_{3}x(t)\cdot t}
 This could be specified as
 \code{mod <- 'double t = x(0);
               dy = p(0) + p(1)*y + p(2)*x(1)*y + p(3)*x(1)*t;'}

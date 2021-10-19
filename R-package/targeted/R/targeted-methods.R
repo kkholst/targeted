@@ -1,6 +1,6 @@
 #' @title targeted class object
 #'
-#' @description The functions \code{\link{riskreg}} and \code{\link{ace}} returns an object of the type \code{targeted}.
+#' @description The functions \code{\link{riskreg}} and \code{\link{ate}} returns an object of the type \code{targeted}.
 #'
 #' An object of class '\code{targeted}' is a list with at least the following components:
 #' \describe{
@@ -20,8 +20,8 @@
 #'   \item{\code{summary}}{Extract information on both target parameters and estimated nuisance model.}'
 #'  }
 #'
-#' @aliases targeted-class riskreg.targeted ace.targeted
-#' @seealso \code{\link{riskreg}}, \code{\link{ace}}
+#' @aliases targeted-class riskreg.targeted ate.targeted
+#' @seealso \code{\link{riskreg}}, \code{\link{ate}}
 #' @return objects of the S3 class '\code{targeted}'
 #' @examples ## See example(riskreg) for examples
 #' @docType class

@@ -10,39 +10,11 @@
 
 using namespace Rcpp;
 
-// mlogit_expand
-Rcpp::List mlogit_expand(const arma::uvec& alt, const arma::mat& x, const arma::vec& weights, arma::uvec alts);
-RcppExport SEXP _targeted_mlogit_expand(SEXP altSEXP, SEXP xSEXP, SEXP weightsSEXP, SEXP altsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::uvec& >::type alt(altSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type weights(weightsSEXP);
-    Rcpp::traits::input_parameter< arma::uvec >::type alts(altsSEXP);
-    rcpp_result_gen = Rcpp::wrap(mlogit_expand(alt, x, weights, alts));
-    return rcpp_result_gen;
-END_RCPP
-}
-// mlogit_pred
-arma::mat mlogit_pred(arma::vec theta, const arma::uvec& alt, unsigned basealt, unsigned nalt, const arma::uvec& id_idx, const arma::mat& z1, const arma::mat& z2, const arma::mat& x, bool logarithm);
-RcppExport SEXP _targeted_mlogit_pred(SEXP thetaSEXP, SEXP altSEXP, SEXP basealtSEXP, SEXP naltSEXP, SEXP id_idxSEXP, SEXP z1SEXP, SEXP z2SEXP, SEXP xSEXP, SEXP logarithmSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec >::type theta(thetaSEXP);
-    Rcpp::traits::input_parameter< const arma::uvec& >::type alt(altSEXP);
-    Rcpp::traits::input_parameter< unsigned >::type basealt(basealtSEXP);
-    Rcpp::traits::input_parameter< unsigned >::type nalt(naltSEXP);
-    Rcpp::traits::input_parameter< const arma::uvec& >::type id_idx(id_idxSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type z1(z1SEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type z2(z2SEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< bool >::type logarithm(logarithmSEXP);
-    rcpp_result_gen = Rcpp::wrap(mlogit_pred(theta, alt, basealt, nalt, id_idx, z1, z2, x, logarithm));
-    return rcpp_result_gen;
-END_RCPP
-}
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // NB
 Rcpp::List NB(arma::vec y, arma::vec x, arma::uvec xlev, arma::vec ylev, arma::vec weights, double laplacesmooth);
 static SEXP _targeted_NB_try(SEXP ySEXP, SEXP xSEXP, SEXP xlevSEXP, SEXP ylevSEXP, SEXP weightsSEXP, SEXP laplacesmoothSEXP) {
@@ -628,12 +600,9 @@ RcppExport SEXP _targeted_RcppExport_registerCCallable() {
     return R_NilValue;
 }
 
-RcppExport SEXP _rcpp_module_boot_dcmodel();
 RcppExport SEXP _rcpp_module_boot_riskregmodel();
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_targeted_mlogit_expand", (DL_FUNC) &_targeted_mlogit_expand, 4},
-    {"_targeted_mlogit_pred", (DL_FUNC) &_targeted_mlogit_pred, 9},
     {"_targeted_NB", (DL_FUNC) &_targeted_NB, 6},
     {"_targeted_ode_solve", (DL_FUNC) &_targeted_ode_solve, 4},
     {"_targeted_bin_logl", (DL_FUNC) &_targeted_bin_logl, 8},
@@ -648,7 +617,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_targeted_groupsum", (DL_FUNC) &_targeted_groupsum, 3},
     {"_targeted_softmax", (DL_FUNC) &_targeted_softmax, 3},
     {"_targeted_pava", (DL_FUNC) &_targeted_pava, 3},
-    {"_rcpp_module_boot_dcmodel", (DL_FUNC) &_rcpp_module_boot_dcmodel, 0},
     {"_rcpp_module_boot_riskregmodel", (DL_FUNC) &_rcpp_module_boot_riskregmodel, 0},
     {"_targeted_RcppExport_registerCCallable", (DL_FUNC) &_targeted_RcppExport_registerCCallable, 0},
     {NULL, NULL, 0}
