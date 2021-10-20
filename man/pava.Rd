@@ -23,9 +23,6 @@ at each jump point.
 \description{
 Pooled Adjacent Violators Algorithm
 }
-\details{
-...
-}
 \examples{
 x <- runif(5e3, -5, 5)
 pr <- lava::expit(-1 + x)

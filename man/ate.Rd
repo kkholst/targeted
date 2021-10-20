@@ -3,7 +3,7 @@
 \name{ate}
 \alias{ate}
 \alias{aipw}
-\title{AIPW estimator for Average Causal Effect}
+\title{AIPW estimator for Average Treatement Effect}
 \usage{
 ate(
   formula,
@@ -45,7 +45,7 @@ An object of class '\code{ate.targeted}' is returned. See \code{\link{targeted-c
 for more details about this class and its generic functions.
 }
 \description{
-Augmented Inverse Probability Weighting estimator for the Average Causal Treatment Effect.
+Augmented Inverse Probability Weighting estimator for the Average (Causal) Treatment Effect.
 }
 \details{
 The formula may either be specified as:

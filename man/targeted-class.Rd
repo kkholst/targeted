@@ -14,7 +14,8 @@ The functions \code{\link{riskreg}} and \code{\link{ate}} returns an object of t
 
 An object of class '\code{targeted}' is a list with at least the following components:
 \describe{
-  \item{estimate}{An \code{estimate} object with the target parameter estimates (see \code{\link[lava]{estimate.default}})}
+  \item{estimate}{An \code{estimate} object with the target parameter
+  estimates (see \code{\link[lava]{estimate.default}})}
   \item{opt}{Object returned from the applied optimization routine}
   \item{npar}{number of parameters of the model (target and nuisance)}
   \item{type}{String describing the model}

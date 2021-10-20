@@ -4,7 +4,7 @@
 ##' @param object density object
 ##' @param xnew New data on which to make predictions for
 ##' @param ... additional arguments to lower level functions
-##' @export 
+##' @export
 ##' @author Klaus K. Holst
 predict.density <-
 function(object, xnew, ...) {
@@ -16,8 +16,8 @@ function(object, xnew, ...) {
         if (j == 0 || j == neval) {
             ynew[i] <- 0  ## don't extrapolate beyond range,set to 0
         } else {
-            ynew[i] <- object$y[j] + (object$y[j + 1] - object$y[j]) / 
-                (object$x[j + 1] - object$x[j]) * 
+            ynew[i] <- object$y[j] + (object$y[j + 1] - object$y[j]) /
+                (object$x[j + 1] - object$x[j]) *
                 (xnew[i] - object$x[j])
         }
     }

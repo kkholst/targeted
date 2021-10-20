@@ -63,7 +63,8 @@
 ##'   plot(cal)
 ##'   plot(cc, add=TRUE, col="blue")
 ##' }
-calibration <- function(pr, cl, weights=NULL, threshold=10, method="bin", breaks=nclass.Sturges, df=3, ...) {
+calibration <- function(pr, cl, weights=NULL, threshold=10,
+                        method="bin", breaks=nclass.Sturges, df=3, ...) {
     if (!is.matrix(pr) && !is.data.frame(pr) && !is.numeric(pr)) {
         pr <- predict(pr, ...)
     }
@@ -71,25 +72,25 @@ calibration <- function(pr, cl, weights=NULL, threshold=10, method="bin", breaks
     if (NCOL(pr)==1) {
         lastcl <- firstcl <- c()
         if (is.factor(cl)) {
-            lastcl <- tail(levels(cl),1)
+            lastcl <- tail(levels(cl), 1)
             firstcl <- levels(cl)[1]
         } else {
-            lastcl <- tail(unique_cl,1)
+            lastcl <- tail(unique_cl, 1)
             firstcl <- unique_cl[1]
         }
         pr <- cbind(pr); colnames(pr) <- lastcl
         if (length(unique_cl)==2) {
-            pr <- cbind(1-pr,pr)
-            colnames(pr) <- c(firstcl,lastcl)
+            pr <- cbind(1-pr, pr)
+            colnames(pr) <- c(firstcl, lastcl)
         }
     }
     classes <- colnames(pr)
     clmis <- !(unique_cl %in% classes) ## Classes not in probability matrix
     if (any(clmis)) { ## Assign 0 probability
-        pr0 <- matrix(0,nrow=nrow(pr),ncol=sum(clmis))
+        pr0 <- matrix(0, nrow=nrow(pr), ncol=sum(clmis))
         colnames(pr0) <- unique_cl[clmis]
-        pr <- cbind(pr,pr0)
-        classes <- c(classes,colnames(pr0))
+        pr <- cbind(pr, pr0)
+        classes <- c(classes, colnames(pr0))
     }
     pr[is.na(pr)] <- 0
     stepfuns <- list()
@@ -103,7 +104,7 @@ calibration <- function(pr, cl, weights=NULL, threshold=10, method="bin", breaks
     }
     if (method=="bin") {
         if (is.function(breaks)) {
-            ncuts <- breaks(pr[,1])
+            ncuts <- breaks(pr[, 1])
             qtl <- seq(0, 1, length.out=ncuts)
         }
     }
@@ -113,27 +114,27 @@ calibration <- function(pr, cl, weights=NULL, threshold=10, method="bin", breaks
         ## Check if enough observations falls in class 'i'
         if (any(!is.na(y)) && sy>threshold) {
             if (method=="isotonic") {
-                m <- isoregw(pr[,i],y,weights=weights)
+                m <- isoregw(pr[, i], y, weights=weights)
                 stepfuns <- c(stepfuns, m)
             }
-            if (method%in%c("logistic","platt","ns","mspline")) {
-                if (method%in%c("logistic","platt")) {
-                    m <- glm(y~pr[,i], weights=weights, family=binomial)
+            if (method%in%c("logistic", "platt", "ns", "mspline")) {
+                if (method%in%c("logistic", "platt")) {
+                    m <- glm(y~pr[, i], weights=weights, family=binomial)
                 } else {
                     if (method%in%c("mspline")) {
-                        if (requireNamespace("mgcv",quietly=TRUE)) {
-                            m <- glm(y~mgcv::mono.con(pr[,i]),weights=weights,family=binomial)
+                        if (requireNamespace("mgcv", quietly=TRUE)) {
+                            m <- glm(y~mgcv::mono.con(pr[, i]), weights=weights, family=binomial)
                         } else {
                             method <- "ns"
                         }
                     }
                     if (method%in%c("ns")) { ## Natural cubic spline
-                        m <- glm(y~splines::ns(pr[,i],df=df),weights=weights,family=binomial)
+                        m <- glm(y~splines::ns(pr[, i], df=df), weights=weights, family=binomial)
                     }
                 }
-                phat <- predict(m,type="response")
+                phat <- predict(m, type="response")
                 f <- function(x) {
-                    a <- approxfun(c(0,pr[,i],1),c(0,phat,1), method="constant")
+                    a <- approxfun(c(0, pr[, i], 1), c(0, phat, 1), method="constant")
                     res <- a(x)
                     res[res<0] <- 0
                     res[res>1] <- 1
@@ -143,22 +144,22 @@ calibration <- function(pr, cl, weights=NULL, threshold=10, method="bin", breaks
             }
             if (method%in%"bin") {
                 if (!is.null(qtl)) {
-                    cpt <- quantile(pr[,i], qtl)
+                    cpt <- quantile(pr[, i], qtl)
                 } else {
                     cpt <- breaks
                 }
                 cpt <- cpt[which(!duplicated(cpt))]
-                val <- cut(pr[,i], breaks=cpt, include.lowest=TRUE)
+                val <- cut(pr[, i], breaks=cpt, include.lowest=TRUE)
                 if (!is.null(weights)) {
-                    phat <- as.vector(by(cbind(y,weights), val, function(z) {
-                        return( weighted.mean(z[,1], z[,2]) )
+                    phat <- as.vector(by(cbind(y, weights), val, function(z) {
+                        return(weighted.mean(z[, 1], z[, 2]))
                     }))
                 } else {
                     phat <- as.vector(by(y, val, mean))
                 }
                 mpt <- diff(cpt)/2+cpt[-length(cpt)] # mid-point
-                xy <- c(xy, list(data.frame(cpt=cpt, pred=c(0,mpt), freq=c(0,phat))))
-                f <- suppressWarnings(approxfun(c(0,cpt,1),c(0,phat,1,1), method="constant", rule=2))
+                xy <- c(xy, list(data.frame(cpt=cpt, pred=c(0, mpt), freq=c(0, phat))))
+                f <- suppressWarnings(approxfun(c(0, cpt, 1), c(0, phat, 1, 1), method="constant", rule=2))
                 stepfuns <- c(stepfuns, f)
             }
         } else {
@@ -179,9 +180,11 @@ calibration <- function(pr, cl, weights=NULL, threshold=10, method="bin", breaks
 
 
 ##' @export
-plot.calibration <- function(x, cl=2, add=FALSE, xlab="Prediction",ylab="Fraction of positives", main="Calibration plot", type="s", ...) {
+plot.calibration <- function(x, cl=2, add=FALSE,
+                             xlab="Prediction", ylab="Fraction of positives",
+                             main="Calibration plot", type="s", ...) {
     if (!add) {
-        plot(0,0, type="n", xlim=c(0,1), ylim=c(0,1), xlab=xlab, ylab=ylab, main=main)
+        plot(0, 0, type="n", xlim=c(0, 1), ylim=c(0, 1), xlab=xlab, ylab=ylab, main=main)
         abline(a=0, b=1, col="lightgray")
     }
     if (length(x$xy)>0) {
@@ -208,30 +211,30 @@ calibrate <- function(object, pr, normalize=TRUE, ...) {
             ## Do not calibrate,
             ## p0 <- rep(epsilon,NROW(pr))
         } else {
-            p0 <- pr[,cl]
+            p0 <- pr[, cl]
             f <- object$stepfun[[cl]]
-            pr[,cl] <- f(p0)
+            pr[, cl] <- f(p0)
         }
     }
     if (normalize)
-        pr <- t(apply(pr,1,function(x) x/sum(x)))
+        pr <- t(apply(pr, 1, function(x) x/sum(x)))
     return(pr)
 }
 
 
 ##' @export
-print.calibration <- function(x,...) {
+print.calibration <- function(x, ...) {
     cat("Call: "); print(x$call)
     cat("\nCalibration model:", x$model, "\n")
     cat("Number of classes:", length(x$classes), "\n")
 }
 
 ##' @export
-predict.calibration <- function(object,newdata, ...) {
+predict.calibration <- function(object, newdata, ...) {
     if (data.table::is.data.table(newdata)) newdata <- as.data.frame(newdata)
     if (NCOL(newdata)==1) {
         pr <- cbind(1-newdata, newdata)
-        res <- calibrate(object, pr, ...)[,2]
+        res <- calibrate(object, pr, ...)[, 2]
         return(res)
     }
     calibrate(object, newdata, ...)
