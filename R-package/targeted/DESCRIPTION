@@ -18,6 +18,8 @@ Imports:
     data.table,
     digest,
     futile.logger,
+    future.apply,
+	progressr,
     methods,
     Rcpp (>= 1.0.0),
     optimx
