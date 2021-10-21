@@ -2,21 +2,30 @@
 % Please edit documentation in R/scoring.R
 \name{scoring}
 \alias{scoring}
-\alias{Scoring}
 \title{Multiclass scoring}
 \usage{
-scoring(class, ..., weights = NULL, names = NULL)
+scoring(
+  obs,
+  ...,
+  weights = NULL,
+  names = NULL,
+  messages = 1,
+  metrics = c("brier", "logscore")
+)
 }
 \arguments{
-\item{weights}{optional frequency weights}
-
-\item{prob}{Model class probabilities (matrix)}
-
 \item{obs}{Observed class}
 
-\item{metrics}{metrics}
+\item{...}{model class probabilities (matrices)}
 
-\item{messages}{Adjust amount of warnings/messages (0 default: none)}
+\item{weights}{optional frequency weights}
+
+\item{names}{optional names of models coments (given as ..., alternatively
+these can be named arguments)}
+
+\item{messages}{controls amount of messages/warnings (0: none)}
+
+\item{metrics}{which metrics to report}
 }
 \description{
 Predictive model scoring

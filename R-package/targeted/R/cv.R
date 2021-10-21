@@ -1,122 +1,204 @@
-##' Cross-validation
-##'
 ##' Generic cross-validation function
+##'
 ##' @title Cross-validation
-##' @param modelList List of fitting functions or models
+##' @param modelList List of fitting functions
 ##' @param data data.frame
+##' @param response Response variable (vector or name of column in `data`)
 ##' @param K Number of folds (default 5, 0 splits in 1:n/2, n/2:n with last part
 ##'   used for testing)
 ##' @param rep Number of repetitions (default 1)
-##' @param perf Performance measure (default RMSE)
+##' @param weights Optional frequency weights
+##' @param modelscore Model scoring metric (default: RMSE / Brier score).
+##'   Must be a function with arguments: response, prediction, weights, ...
 ##' @param seed Optional random seed
-##' @param shared function applied to each fold with results send to each model
-##' @param ... Additional arguments parsed to models in modelList and perf
+##' @param shared Function applied to each fold with results send to each model
+##' @param args.pred Optional arguments to prediction function (see details
+##'   below)
+##' @param ... Additional arguments parsed to models in modelList
 ##' @author Klaus K. Holst
+##' @details ...
 ##' @examples
-##' f0 <- function(data,...) lm(...,data)
-##' f1 <- function(data,...) lm(Sepal.Length~Species,data)
-##' f2 <- function(data,...) lm(Sepal.Length~Species+Petal.Length,data)
+##' f0 <- function(data,...) lm(...,data=data)
+##' f1 <- function(data,...) lm(Sepal.Length~Species,data=data)
+##' f2 <- function(data,...) lm(Sepal.Length~Species+Petal.Length,data=data)
 ##' x <- cv(list(m0=f0,m1=f1,m2=f2),rep=10, data=iris, formula=Sepal.Length~.)
-##' x2 <- cv(list(f0(iris),f1(iris),f2(iris)),rep=10, data=iris)
 ##' @export
-cv <- function(modelList, data, K=5, rep=1, perf, seed=NULL, shared=NULL, ...) {
-    if (is.vector(data)) data <- cbind(data)
-    if (missing(perf)) perf <- rmse1
-    if (!is.list(modelList)) modelList <- list(modelList)
-    nam <- names(modelList)
-    if (is.null(nam)) nam <- paste0("model", seq_along(modelList))
-    args0 <- list(...)
+cv <- function(modelList, data, response = NULL, K = 5, rep = 1,
+               weights = NULL, modelscore,
+               seed = NULL, shared = NULL, args.pred = NULL, ...) {
+  if (is.vector(data)) data <- cbind(data)
+  if (missing(modelscore)) modelscore <- scoring
+  if (!is.list(modelList)) stop("Expected a list of models")
+  nam <- names(modelList)
+  if (is.null(nam)) nam <- paste0("model", seq_along(modelList))
+  args0 <- list(...)
+  args <- args0
+  if (!is.null(shared)) {
+    sharedres <- shared(data, ...)
+    args <- c(args, sharedres)
+  }
+  if (is.character(response) && length(response) == 1) {
+    response <- data[, response, drop = TRUE]
+  }
+
+  for (i in seq_along(modelList)) {
+    if (!is.list(modelList[[i]]) || length(modelList[[i]]) == 1) {
+      ## No predict function provided. Assume 'predict' works on fitted object
+      modelList[[i]] <- list(
+        fit = modelList[[i]][[1]],
+        predict = function(fit, data, ...) {
+          predict(fit, newdata = data, ...)
+        }
+      )
+    }
+  }
+  ## Models run on full data:
+  arglist <- c(list(data = data), args)
+  if (!is.null(weights)) arglist <- c(arglist, list(weights = weights))
+  fit0 <- list()
+
+  for (i in seq_along(modelList)) {
+    f <- modelList[[i]][[1]]
+    if (!is.null(response) && "response" %in% formalArgs(f)) {
+      arglist <- c(arglist, list(response = response))
+    }
+    fit0 <- c(fit0, list(do.call(f, arglist)))
+  }
+  ## In-sample predictive performance:
+  if (is.null(response)) {
+    response <- tryCatch(data[, lava::endogenous(fit0), drop = TRUE],
+      error = function(...) NULL
+    )
+    if (is.null(response)) stop("Provide 'response'")
+  }
+  perf0 <- list()
+  for (i in seq_along(fit0)) {
+    pred <- do.call(
+      modelList[[i]][[2]],
+      c(list(fit0[[i]], data = data), args.pred)
+    )
+    perf0 <- c(perf0, list(
+      do.call(
+        modelscore,
+        c(list(
+          prediction = pred,
+          response = response,
+          weights = weights
+        ))
+      )
+    ))
+  }
+  namPerf <- if (is.vector(perf0[[1]])) {
+    names(perf0[[1]])
+  } else {
+    colnames(perf0[[1]])
+  }
+  names(fit0) <- names(perf0) <- nam
+  n <- NROW(data)
+  M <- length(perf0) # Number of models
+  P <- length(perf0[[1]]) # Number of performance measures
+  if (!is.null(seed)) {
+    if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
+      runif(1)
+    }
+    R.seed <- get(".Random.seed", envir = .GlobalEnv)
+    set.seed(seed)
+    RNGstate <- structure(seed, kind = as.list(RNGkind()))
+    on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
+  }
+  if (K == 0) {
+    rep <- 1
+    K <- 1
+    folds <- list(lava::csplit(seq(n)))
+  } else {
+    folds <- lava::foldr(n, K, rep)
+  }
+  arg <- expand.grid(R = seq(rep), K = seq(K)) # ,M=seq_along(modelList))
+  dim <- c(rep, K, M, P)
+  PerfArr <- array(0, dim)
+  dimnames(PerfArr) <- list(NULL, NULL, nam, namPerf)
+
+  pb <- progressr::progressor(along = seq(nrow(arg)))
+  ff <- function(i) {
+    R <- arg[i, 1]
+    k <- arg[i, 2]
+    fold <- folds[[R]]
+    dtest <- data[fold[[k]], , drop = FALSE]
+    ytest <- response[fold[[k]]]
+    wtest <- weights[fold[[k]]]
+    dtrain <- data[unlist(fold[-k]), , drop = FALSE]
+    ytrain <- response[unlist(fold[-k])]
+    wtrain <- weights[unlist(fold[-k])]
     args <- args0
     if (!is.null(shared)) {
-        sharedres <- shared(data, ...)
-        args <- c(args, sharedres)
+      sharedres <- shared(dtrain, ...)
+      args <- c(args, sharedres)
     }
-    ## Models run on full data:
-    if (is.function(modelList[[1]])) {
-        fit0 <- lapply(modelList, function(f) do.call(f, c(list(data), args)))
-    } else {
-        fit0 <- modelList
+    arglist <- c(list(data = dtrain), args)
+    if (!is.null(weights)) arglist <- c(arglist, list(weights = wtrain))
+    fits <- list()
+    for (i in seq_along(modelList)) {
+      f <- modelList[[i]][[1]]
+      if ("response" %in% formalArgs(f)) {
+        arglist <- c(arglist, list(response = ytrain))
+      }
+      fits <- c(fits, list(do.call(f, arglist)))
     }
-    ## In-sample predictive performance:
-    perf0 <- lapply(fit0, function(fit)
-      do.call(perf, c(list(fit, data=data), args)))
-    namPerf <- names(perf0[[1]])
-    names(fit0) <- names(perf0) <- nam
-    n <- NROW(data)
-    M <- length(perf0)      # Number of models
-    P <- length(perf0[[1]]) # Number of performance measures
-    if (!is.null(seed)) {
-        if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
-            runif(1)
-        R.seed <- get(".Random.seed", envir = .GlobalEnv)
-        set.seed(seed)
-        RNGstate <- structure(seed, kind = as.list(RNGkind()))
-        on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
+    perfs <- list()
+    for (i in seq_along(fits)) {
+      pred <- do.call(
+        modelList[[i]][[2]],
+        c(list(fits[[i]], data = dtest), args.pred)
+      )
+      perfs <- c(perfs, list(
+        do.call(
+          modelscore,
+          c(list(
+            prediction = pred,
+            response = ytest,
+            weights = wtest
+          ))
+        )
+      ))
     }
-    if (K==0) {
-        rep <- 1
-        K <- 1
-        folds <- list(lava::csplit(seq(n)))
-    } else {
-        folds <- lava::foldr(n, K, rep)
-    }
-    arg <- expand.grid(R=seq(rep), K=seq(K)) #,M=seq_along(modelList))
-    dim <- c(rep, K, M, P)
-    PerfArr <- array(0, dim)
-    dimnames(PerfArr) <- list(NULL, NULL, nam, namPerf)
+    pb()
+    do.call(rbind, perfs)
+  }
 
-    pb <- progressr::progressor(along=seq(nrow(arg)))
-    ff <- function(i) {
-        R <- arg[i, 1]
-        k <- arg[i, 2]
-        fold <- folds[[R]]
-        dtest <- data[fold[[k]], , drop=FALSE]
-        dtrain <- data[unlist(fold[-k]), , drop=FALSE]
-        args <- args0
-        if (!is.null(shared)) {
-            sharedres <- shared(dtrain, ...)
-            args <- c(args, sharedres)
-        }
-        if (is.function(modelList[[1]])) {
-            fits <- lapply(modelList, function(f) do.call(f, c(list(dtrain), args)))
-        } else {
-          fits <- lapply(modelList, function(m)
-            do.call(update, c(list(m, data=dtrain), args)))
-        }
-        perfs <- lapply(fits, function(fit)
-          do.call(perf, c(list(fit, data=dtest), args)))
-        pb()
-        do.call(rbind, perfs)
-    }
-    val <- future.apply::future_mapply(ff, seq(nrow(arg)), SIMPLIFY=FALSE)
-    for (i in seq(nrow(arg))) {
-        R <- arg[i, 1]
-        k <- arg[i, 2]
-        PerfArr[R, k, , ] <- val[[i]]
-    }
+  val <- future.apply::future_mapply(ff, seq(nrow(arg)),
+    SIMPLIFY = FALSE, future.seed = TRUE
+  )
+  for (i in seq(nrow(arg))) {
+    R <- arg[i, 1]
+    k <- arg[i, 2]
+    PerfArr[R, k, , ] <- val[[i]]
+  }
 
-    structure(list(cv=PerfArr,
-                   call=match.call(),
-                   names=nam,
-                   rep=rep, folds=K,
-                   fit=fit0),
-              class="cross_validated")
+  structure(list(
+    cv = PerfArr,
+    call = match.call(),
+    names = nam,
+    rep = rep, folds = K,
+    fit = fit0
+  ),
+  class = "cross_validated"
+  )
 }
 
 ##' @export
 summary.cross_validated <- function(object, ...) {
-    return(coef(object))
+  return(coef(object))
 }
 
 ##' @export
 print.cross_validated <- function(x, ...) {
-    res <- coef(x)
-    print(res, quote=FALSE)
+  res <- coef(x)
+  print(res, quote=FALSE)
 }
 
 coef.cross_validated <- function(object, ...) {
-    res <- apply(object$cv, 3:4, function(x) mean(x))
-    if (length(object$names)==nrow(res))
-      rownames(res) <- object$names
-    res
+  res <- apply(object$cv, 3:4, function(x) mean(x))
+  if (length(object$names)==nrow(res))
+    rownames(res) <- object$names
+  res
 }

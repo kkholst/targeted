@@ -1,0 +1,170 @@
+---
+title: "Average Treatment Effects"
+author: Klaus Kähler Holst
+date: "`r Sys.Date()`"
+output:
+  knitr:::html_vignette:
+    fig_caption: yes
+    fig_width: 5.15
+    fig_height: 3.5
+    fig_align: center
+vignette: >
+  %\VignetteIndexEntry{Average Treatment Effects}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+ collapse = TRUE,
+ #dev="png",
+ comment = "#>"
+)
+library(targeted)
+```
+
+Introduction
+============
+
+Let \(Y\) be a *binary response*, \(A\) a *categorical treatment*, and \(W\) a
+*vector of confounders*. Assume that we have observed \(n\) i.i.d. observations
+\((Y_i, W_i, A_i) \sim P, i=1,\ldots,n\).
+In the following we are interested in estimating the target parameter \(\psi(P) = (E[Y(a)]\), where \(Y(a)\) is the *potential outcome* we would have observed if treatment \(a\) had been administered, possibly contrary to the actual treatment that was observed, i.e., \(Y = Y(A)\).
+
+<!-- ```{r plotdag, echo=FALSE, fig.cap="DAG for the statistical model"} -->
+<!-- par(mfrow=c(1, 2)) -->
+<!-- m <- lvm(Y ~ A + W, A ~ W) -->
+<!-- plot(m, plot.engine="Rgraphviz") -->
+<!-- m <- lvm(Y ~ a + W) -->
+<!-- labels(m) <- c("Y" = "Y(a)") -->
+<!-- plot(m, plot.engine="Rgraphviz") -->
+<!-- ``` -->
+
+Under the following assumptions
+
+1) Stable Unit Treatment Values Assumption (the treatment of a specific subject is not affecting the potential outcome of other subjects)
+2) Positivity, \(P(A\mid W)>\epsilon\) for some \(\epsilon>0.\)
+3) No unmeasured confounders, \(Y(a)\perp \!\!\! \perp A|W\)
+
+the target parameter can be identified from the observed data distribution as
+\[E(E[Y|W,A=a]) = E(E[Y(a)|W]) = E[Y(a)]\]
+or
+\[E[Y I(A=a)/P(A=a|W)] = E[Y(a)].\]
+
+This suggests estimation via either *outcome regression* (OR, g-computation)
+or *inverse probability weighting* (IPW). These can eventually also be combined to a doubly-robust augmented inverse probability weighted (AIPW) estimator.
+
+Simulation
+==============
+
+As an illustration we simulate from the following model
+\[Y \sim Bernoulli(\operatorname{expit}\{A+X+Z\})\]
+\[A \sim Bernoulli(\operatorname{expit}\{X+Z\})\]
+\[Z \sim \mathcal{N}(X,1)\]
+```{r simulation}
+m <- lvm(Y ~ A+X+Z, A~X+Z, Z~X)
+m <- distribution(m, ~A+Y, binomial.lvm())
+d <- sim(m, 1e3, seed=1)
+head(d)
+```
+
+<!-- ```{r plotdag, echo=FALSE, fig.cap="DAG for the simulated model."} -->
+<!-- plot(m) -->
+<!-- ``` -->
+
+Estimation
+==============
+
+The target parameter, \(E[Y(a)]\) can be estimated with the `targeted::ate` function:
+```{r syntax}
+args(ate)
+```
+
+The formula should be specified as `formula = response ~ treatment`, and the outcome regression specified as `nuisance = ~ covariates`, and propensity model `propensity = ~ covariates`. Alternatively, the formula can be specified with the notation `formula = response ~ treatment | OR-covariates | propensity-covariates`.  *Parametric models* are assumed for both the outcome regression and the propensity model which defaults to be logistic regression models (as in the simulation). A linear model can be used for the outcome regression part by setting `binary=FALSE`.
+
+To illustrate this, we can estimate the (non-causal) marginal mean of each treatment value
+```{r ate1}
+ate(Y ~ A, data=d, nuisance=~1, propensity=~1)
+```
+
+or equivalently
+```{r ate2}
+ate(Y ~ A | 1 | 1, data=d)
+```
+
+In this simulation we can compare the estimates to the actual expected potential outcomes which can be approximated by Monte Carlo integration by simulating from the model where we intervene on \(A\) (i.e., break the dependence on \(X, Z\)):
+```{r ate_mce}
+mean(sim(intervention(m, "A", 0), 2e5)$Y)
+mean(sim(intervention(m, "A", 1), 2e5)$Y)
+```
+
+
+The IPW estimator can then be estimated
+```{r ate_ipw}
+ate(Y ~ A | 1 | X+Z, data=d)
+```
+
+Similarly, the OR estimator is obtained by
+```{r ate_org}
+ate(Y ~ A | A*(X+Z) | 1, data=d)
+```
+
+Both estimates are in this case consistent though we can see that the OR estimate is much more efficient compared to the IPW estimator. However, both of these models rely on correct model specifications.
+
+```{r ate_ipw_mis}
+ate(Y ~ A | 1 | X, data=d)
+```
+
+```{r ate_or_mis}
+ate(Y ~ A | A*X | 1, data=d)
+```
+
+In contrast, the doubly-robust AIPW estimator is consistent in the *intersection model* where either the propensity model or the outcome regression model is correctly specified
+```{r ate_aipw_mis}
+a <- ate(Y ~ A | A*X | X+Z, data=d)
+summary(a)
+```
+
+From the `summary` output we also get the estimates of the Average Treatment Effects expressed as a causal relative risk (RR), causal odds ratio (OR), or causal risk difference (RD) including the confidence limits.
+
+
+From the model object `a` we can extract the estimated coefficients (expected potential outcomes) and corresponding asympotic variance matrix with the `coef` and `vcov` methods. The estimated *influence function* can extracted with the `iid` method:
+```{r ate_methods}
+coef(a)
+vcov(a)
+head(iid(a))
+```
+
+Multiple treatments
+===================
+
+As an example with multiple treatment levels, we simulate from a new model where the outcome is continuous and the treatment follows a proportional odds model
+```{r sim2}
+m <- lvm(y ~ a+x, a~x)
+m <- ordinal(m, K=4, ~a)
+d <- transform(sim(m, 1e4), a=factor(a))
+```
+
+The AIPW estimator is obtained by estimating a logistic regression model for each treatment level (vs all others) in the propensity model (here a correct model is specified for both the OR and IPW part)
+```{r ate_multiple}
+summary(a2 <- ate(y ~ a | a*x | x, data=d, binary=FALSE))
+```
+
+Choosing a different contrast for the association measures:
+```{r ate_multiple_contrast}
+summary(a2, contrast=c(2,4))
+```
+
+```{r ate_multiple_iid}
+head(iid(a2))
+estimate(a2, function(x) x[2]-x[4])
+```
+
+
+SessionInfo
+============
+
+
+```{r}
+sessionInfo()
+```
