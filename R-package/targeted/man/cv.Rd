@@ -32,15 +32,17 @@ used for testing)}
 
 \item{weights}{Optional frequency weights}
 
-\item{modelscore}{Model scoring metric (default: RMSE)}
+\item{modelscore}{Model scoring metric (default: RMSE / Brier score).
+Must be a function with arguments: response, prediction, weights, ...}
 
-\item{seed}{Optional  random seed}
+\item{seed}{Optional random seed}
 
 \item{shared}{Function applied to each fold with results send to each model}
 
-\item{args.pred}{Optional arguments to prediction funciton (see details below)}
+\item{args.pred}{Optional arguments to prediction function (see details
+below)}
 
-\item{...}{Additional arguments parsed to models in modelList and modelscore}
+\item{...}{Additional arguments parsed to models in modelList}
 }
 \description{
 Generic cross-validation function
@@ -49,9 +51,9 @@ Generic cross-validation function
 ...
 }
 \examples{
-f0 <- function(data,...) lm(...,data)
-f1 <- function(data,...) lm(Sepal.Length~Species,data)
-f2 <- function(data,...) lm(Sepal.Length~Species+Petal.Length,data)
+f0 <- function(data,...) lm(...,data=data)
+f1 <- function(data,...) lm(Sepal.Length~Species,data=data)
+f2 <- function(data,...) lm(Sepal.Length~Species+Petal.Length,data=data)
 x <- cv(list(m0=f0,m1=f1,m2=f2),rep=10, data=iris, formula=Sepal.Length~.)
 }
 \author{
