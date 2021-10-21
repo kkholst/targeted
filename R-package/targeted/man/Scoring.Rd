@@ -17,7 +17,12 @@ scoring(
 \arguments{
 \item{response}{Observed response}
 
-\item{...}{model predictions (continuous predictions or class probabilities (matrices))}
+\item{...}{model predictions (continuous predictions or class probabilities
+(matrices))}
+
+\item{type}{continuous or categorical response (the latter is automatically
+chosen if response is a factor, otherwise a continuous response is
+assumed)}
 
 \item{metrics}{which metrics to report}
 
@@ -42,4 +47,6 @@ pr2 <- predict(g2, newdata=dat[[2]], wide=TRUE)
 table(colnames(pr1)[apply(pr1,1,which.max)], dat[[2]]$Species)
 table(colnames(pr2)[apply(pr2,1,which.max)], dat[[2]]$Species)
 scoring(dat[[2]]$Species, pr1=pr1, pr2=pr2)
+## quantitative response:
+scoring(response=1:10, prediction=rnorm(1:10))
 }

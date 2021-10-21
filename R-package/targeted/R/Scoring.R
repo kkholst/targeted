@@ -61,20 +61,23 @@ multiclass_scoring1 <-
         B <- mean(Bi, na.rm = TRUE)
         L <- mean(Li, na.rm = TRUE)
     }
-    return(list(brier = B, logscore = L))
+    return(list("brier" = B, "-logscore" = -L))
 }
-
 
 ##' Predictive model scoring
 ##'
 ##' @title Predictive model scoring
 ##' @param response Observed response
-##' @param ... model predictions (continuous predictions or class probabilities (matrices))
+##' @param ... model predictions (continuous predictions or class probabilities
+##'   (matrices))
+##' @param type continuous or categorical response (the latter is automatically
+##'   chosen if response is a factor, otherwise a continuous response is
+##'   assumed)
+##' @param metrics which metrics to report
 ##' @param weights optional frequency weights
 ##' @param names optional names of models coments (given as ..., alternatively
 ##'   these can be named arguments)
 ##' @param messages controls amount of messages/warnings (0: none)
-##' @param metrics which metrics to report
 ##' @export
 ##' @examples
 ##' data(iris)
@@ -87,6 +90,8 @@ multiclass_scoring1 <-
 ##' table(colnames(pr1)[apply(pr1,1,which.max)], dat[[2]]$Species)
 ##' table(colnames(pr2)[apply(pr2,1,which.max)], dat[[2]]$Species)
 ##' scoring(dat[[2]]$Species, pr1=pr1, pr2=pr2)
+##' ## quantitative response:
+##' scoring(response=1:10, prediction=rnorm(1:10))
 ##' @export
 scoring <- function(response, ..., type="quantitative", metrics=NULL,
                     weights=NULL, names=NULL, messages=1) {

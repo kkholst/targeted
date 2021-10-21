@@ -38,10 +38,12 @@ cv <- function(modelList, data, response = NULL, K = 5, rep = 1,
   }
 
   for (i in seq_along(modelList)) {
-    if (!is.list(modelList[[i]]) || length(modelList[[i]]) == 1) {
+    f <- modelList[[i]]
+    if (!is.list(f) || length(f) == 1) {
       ## No predict function provided. Assume 'predict' works on fitted object
+      if (is.list(f)) f <- f[[1]]
       modelList[[i]] <- list(
-        fit = modelList[[i]][[1]],
+        fit = f,
         predict = function(fit, data, ...) {
           predict(fit, newdata = data, ...)
         }
@@ -49,7 +51,7 @@ cv <- function(modelList, data, response = NULL, K = 5, rep = 1,
     }
   }
 
-  ## Models run on full data:
+  ## Model (1) run on full data:
   if (!is.null(shared)) {
     sharedres <- shared(data, ...)
     args <- c(args, sharedres)
@@ -73,54 +75,12 @@ cv <- function(modelList, data, response = NULL, K = 5, rep = 1,
     modelList[[1]][[2]],
        c(list(fit0, data = data), args.pred))
   perf0 <- modelscore(prediction=pred0, response=response, weights=weights)
-  namPerf <- if (is.vector(perf0[[1]]))
-               names(perf0[[1]]) else colnames(perf0[[1]])
+  namPerf <- if (is.vector(perf0))
+               names(perf0) else colnames(perf0)
   n <- NROW(data)
   M <- length(modelList) # Number of models
   P <- length(perf0) # Number of performance measures
   rm(fit0, pred0, perf0)
-  ## fit0 <- list()
-  ## for (i in seq_along(modelList)) {
-  ##   f <- modelList[[i]][[1]]
-  ##   if (!is.null(response) && "response" %in% formalArgs(f)) {
-  ##     arglist <- c(arglist, list(response = response))
-  ##   }
-  ##   fit0 <- c(fit0, list(do.call(f, arglist)))
-  ## }
-  ## ## In-sample predictive performance:
-  ## if (is.null(response)) {
-  ##   response <- tryCatch(data[, lava::endogenous(fit0), drop = TRUE],
-  ##     error = function(...) NULL
-  ##   )
-  ##   if (is.null(response)) stop("Provide 'response'")
-  ## }
-  ## perf0 <- list()
-  ## for (i in seq_along(fit0)) {
-  ##   pred <- do.call(
-  ##     modelList[[i]][[2]],
-  ##     c(list(fit0[[i]], data = data), args.pred)
-  ##   )
-  ##   perf0 <- c(perf0, list(
-  ##     do.call(
-  ##       modelscore,
-  ##       c(list(
-  ##         prediction = pred,
-  ##         response = response,
-  ##         weights = weights
-  ##       ))
-  ##     )
-  ##   ))
-  ## }
-  ## namPerf <- if (is.vector(perf0[[1]])) {
-  ##   names(perf0[[1]])
-  ## } else {
-  ##   colnames(perf0[[1]])
-  ## }
-  ## names(fit0) <- names(perf0) <- nam
-  ## rm(fit0)
-  ## n <- NROW(data)
-  ## M <- length(perf0) # Number of models
-  ## P <- length(perf0[[1]]) # Number of performance measures
 
   if (!is.null(seed)) {
     if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
@@ -217,7 +177,7 @@ summary.cross_validated <- function(object, ...) {
 
 ##' @export
 print.cross_validated <- function(x, ...) {
-  cat("Call:")
+  cat("Call: ")
   print(x$call)
   cat("\n", x$fold, "-fold cross-validation", sep="")
   cat(" with ", x$rep, " repetitions\n\n", sep="")
@@ -226,9 +186,12 @@ print.cross_validated <- function(x, ...) {
 }
 
 ##' @export
-coef.cross_validated <- function(object, ...) {
+coef.cross_validated <- function(object, min=FALSE, ...) {
   res <- apply(object$cv, 3:4, function(x) mean(x))
   if (length(object$names)==nrow(res))
     rownames(res) <- object$names
+  if (min) {
+    res <- apply(res, 2, which.min)
+  }
   res
 }
