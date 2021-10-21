@@ -14,8 +14,10 @@ causal inference.
 
 example(riskreg)
 
-example(ace)
+example(ate)
 
+example(calibration
+)
 }
 \author{
 Klaus K. Holst Maintainer: <klaus@holst.it>

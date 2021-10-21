@@ -2,21 +2,36 @@
 % Please edit documentation in R/scoring.R
 \name{scoring}
 \alias{scoring}
-\alias{Scoring}
-\title{Multiclass scoring}
+\title{Predictive model scoring}
 \usage{
-scoring(class, ..., weights = NULL, names = NULL)
+scoring(
+  response,
+  ...,
+  type = "quantitative",
+  metrics = NULL,
+  weights = NULL,
+  names = NULL,
+  messages = 1
+)
 }
 \arguments{
+\item{response}{Observed response}
+
+\item{...}{model predictions (continuous predictions or class probabilities
+(matrices))}
+
+\item{type}{continuous or categorical response (the latter is automatically
+chosen if response is a factor, otherwise a continuous response is
+assumed)}
+
+\item{metrics}{which metrics to report}
+
 \item{weights}{optional frequency weights}
 
-\item{prob}{Model class probabilities (matrix)}
+\item{names}{optional names of models coments (given as ..., alternatively
+these can be named arguments)}
 
-\item{obs}{Observed class}
-
-\item{metrics}{metrics}
-
-\item{messages}{Adjust amount of warnings/messages (0 default: none)}
+\item{messages}{controls amount of messages/warnings (0: none)}
 }
 \description{
 Predictive model scoring
@@ -32,4 +47,6 @@ pr2 <- predict(g2, newdata=dat[[2]], wide=TRUE)
 table(colnames(pr1)[apply(pr1,1,which.max)], dat[[2]]$Species)
 table(colnames(pr2)[apply(pr2,1,which.max)], dat[[2]]$Species)
 scoring(dat[[2]]$Species, pr1=pr1, pr2=pr2)
+## quantitative response:
+scoring(response=1:10, prediction=rnorm(1:10))
 }

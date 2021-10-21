@@ -4,38 +4,57 @@
 \alias{cv}
 \title{Cross-validation}
 \usage{
-cv(modelList, data, K = 5, rep = 1, perf, seed = NULL, shared = NULL, ...)
+cv(
+  modelList,
+  data,
+  response = NULL,
+  K = 5,
+  rep = 1,
+  weights = NULL,
+  modelscore,
+  seed = NULL,
+  shared = NULL,
+  args.pred = NULL,
+  ...
+)
 }
 \arguments{
-\item{modelList}{List of fitting functions or models}
+\item{modelList}{List of fitting functions}
 
 \item{data}{data.frame}
+
+\item{response}{Response variable (vector or name of column in `data`)}
 
 \item{K}{Number of folds (default 5, 0 splits in 1:n/2, n/2:n with last part
 used for testing)}
 
 \item{rep}{Number of repetitions (default 1)}
 
-\item{perf}{Performance measure (default RMSE)}
+\item{weights}{Optional frequency weights}
+
+\item{modelscore}{Model scoring metric (default: RMSE / Brier score).
+Must be a function with arguments: response, prediction, weights, ...}
 
 \item{seed}{Optional random seed}
 
-\item{shared}{function applied to each fold with results send to each model}
+\item{shared}{Function applied to each fold with results send to each model}
 
-\item{...}{Additional arguments parsed to models in modelList and perf}
+\item{args.pred}{Optional arguments to prediction function (see details
+below)}
+
+\item{...}{Additional arguments parsed to models in modelList}
 }
 \description{
-Cross-validation
-}
-\details{
 Generic cross-validation function
 }
+\details{
+...
+}
 \examples{
-f0 <- function(data,...) lm(...,data)
-f1 <- function(data,...) lm(Sepal.Length~Species,data)
-f2 <- function(data,...) lm(Sepal.Length~Species+Petal.Length,data)
+f0 <- function(data,...) lm(...,data=data)
+f1 <- function(data,...) lm(Sepal.Length~Species,data=data)
+f2 <- function(data,...) lm(Sepal.Length~Species+Petal.Length,data=data)
 x <- cv(list(m0=f0,m1=f1,m2=f2),rep=10, data=iris, formula=Sepal.Length~.)
-x2 <- cv(list(f0(iris),f1(iris),f2(iris)),rep=10, data=iris)
 }
 \author{
 Klaus K. Holst

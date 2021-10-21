@@ -5,8 +5,9 @@ date: "`r Sys.Date()`"
 output:
   knitr:::html_vignette:
     fig_caption: yes
-    fig_width: 7.15
-    fig_height: 5.5
+    fig_width: 5.15
+    fig_height: 3.5
+    fig_align: center
 vignette: >
   %\VignetteIndexEntry{Prediction models - scoring and calibration}
   %\VignetteEngine{knitr::rmarkdown}
@@ -25,7 +26,9 @@ library(targeted)
 Introduction
 ============
 
-```{r ex1}
+\(A\) ...
+
+```{r ex1, echo=FALSE, fig.caption="..."}
 plot(1:10)
 ```
 
