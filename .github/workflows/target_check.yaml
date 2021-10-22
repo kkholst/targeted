@@ -31,8 +31,10 @@ jobs:
           pytest --cov=targeted tests/
           bin/test_targeted
       - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v2
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: false
 
   cpp_library:
     runs-on: ubuntu-latest
