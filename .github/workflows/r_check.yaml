@@ -19,6 +19,8 @@ jobs:
       - uses: r-lib/actions/setup-r@master
         with:
           r-version: ${{ matrix.config.r }}
+      - uses: r-lib/actions/setup-tinytex@v1
+      - run: tlmgr --version
 
       - name: Cache R packages
         uses: actions/cache@v1
