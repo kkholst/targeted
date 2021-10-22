@@ -3,3 +3,4 @@
    command = "make html"
    publish = "build/html"
    ignore =  "git log -1 --pretty=%B | grep -ic doc | xargs -I % test % -eq 0"
+   #ignore = "/bin/false"
