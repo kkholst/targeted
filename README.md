@@ -7,18 +7,18 @@
   [![travis](https://travis-ci.org/kkholst/targeted.svg?branch=master)](https://travis-ci.org/kkholst/targeted)
   [![coverage](https://codecov.io/github/kkholst/targeted/coverage.svg?branch=master)](https://codecov.io/github/kkholst/targeted?branch=master)
   [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-  [![cran](https://www.r-pkg.org/badges/version-last-release/targeted)](http://cranlogs.r-pkg.org/downloads/total/last-month/targeted)
+  [![cran](https://www.r-pkg.org/badges/version-last-release/targeted)](https://cranlogs.r-pkg.org/downloads/total/last-month/targeted)
 <!-- badges: end -->
 
 
-# Targeted Inference in R: targeted <a href="https://targetlib.org/r/"><img src="man/figures/logo.svg" align="right" height="75" /></a>
+# Targeted Inference in R: targeted <a href="https://www.targetlib.org/r/"><img src="man/figures/logo.svg" align="right" height="75" /></a>
 
 Various methods for targeted and semiparametric inference including
 augmented inverse probability weighted estimators for missing data and
 causal inference (Bang and Robins (2005)
-<doi:10.1111/j.1541-0420.2005.00377.x>) and estimators for risk
+<10.1111/j.1541-0420.2005.00377.x>) and estimators for risk
 differences and relative risks (Richardson et al. (2017)
-<doi:10.1080/01621459.2016.1192546>).
+<10.1080/01621459.2016.1192546>).
 
 ## Installation
 
