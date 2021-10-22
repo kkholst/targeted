@@ -2,10 +2,10 @@ name: targeted python wheels
 
 on:
   push:
-    branches-ignore:
-      - develop
-#    branches:
-#      - main
+    # branches-ignore:
+      # - develop
+    branches:
+      - deploy
 
 jobs:
   linux_build:
@@ -45,7 +45,7 @@ jobs:
           python3 setup.py sdist
       - name: Upload to PyPi
         # https://packaging.python.org/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+        #if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
