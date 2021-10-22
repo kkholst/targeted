@@ -27,6 +27,7 @@ Suggests:
     mgcv,
     testthat (>= 0.11),
     rmarkdown,
+    scatterplot3d,
     knitr
 URL: https://targetlib.org/r/
 BugReports: https://github.com/kkholst/targeted/issues

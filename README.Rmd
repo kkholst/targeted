@@ -23,9 +23,9 @@ knitr::opts_chunk$set(
 Various methods for targeted and semiparametric inference including
 augmented inverse probability weighted estimators for missing data and
 causal inference (Bang and Robins (2005)
-<doi:10.1111/j.1541-0420.2005.00377.x>) and estimators for risk
+<10.1111/j.1541-0420.2005.00377.x>) and estimators for risk
 differences and relative risks (Richardson et al. (2017)
-<doi:10.1080/01621459.2016.1192546>).
+<10.1080/01621459.2016.1192546>).
 
 ## Installation
 
