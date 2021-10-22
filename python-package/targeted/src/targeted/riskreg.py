@@ -84,7 +84,8 @@ class riskreg:
         w = kwargs.get('weights', one)
         self.modeltype = kwargs.get('type', 'rr')
         self.model = tg.riskregmodel(y, a, x1, x2, x3, w, self.modeltype)
-        self.propensity = sm.GLM(endog=a, exog=x3, weights=w, family=sm.families.Binomial())
+        self.propensity = sm.GLM(endog=a, exog=x3, freq_weights=w.squeeze(),
+                                 family=sm.families.Binomial())
         self.propensity_coef = self.propensity.fit().params
         self.mle = riskreg_mle(y, a, x2=x2, x1=x1, weights=w, type=self.modeltype)
         self.mle_coef = self.mle['x']
