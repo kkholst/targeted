@@ -5,14 +5,25 @@
 
   @brief Classes for Ordinary Differential Equation Solvers
 
-  4th order Runge-Kutta
-  
+  Explicit Runge-Kutta methods
+
 */
 
 #pragma once
 #include "utils.hpp"
 
 namespace target {
+
+
+  class ButcherTableau {
+    public:
+      arma::mat A;
+      arma::mat a;
+
+  };
+
+//
+
 
   // Type definition
   using odefunc = std::function<arma::mat(arma::mat input,

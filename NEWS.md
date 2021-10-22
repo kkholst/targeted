@@ -1,9 +1,9 @@
 # targeted 0.2.0
 
-- Weighted Naive Bayes classifer with `NB`
+- Naive Bayes classifer with `NB`
 - Pooled adjacent violator algorithm `pava`
-- ODE solver `ode_solve`
-- Calibration  `calibration`
+- ODE `ode_solve`
+- Calibration `calibration`
 - Cross-validation `cv`
 - `ace` method updated and renamed to `ate`
 

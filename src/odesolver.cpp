@@ -1,7 +1,7 @@
 /*!
   @file odesolver.h
   @author Klaus K. Holst
-  @copyright 2019, Klaus Kähler Holst
+  @copyright 2019-2021, Klaus Kähler Holst
 
   @brief Classes for Ordinary Differential Equation Solvers
 
@@ -10,17 +10,19 @@
 #include <target/odesolver.hpp>
 #include <target/utils.hpp>
 
-using namespace arma;
-
 namespace target {
 
-  arma::mat RK4::solve(const arma::mat &input,
-                       arma::mat init,
-                       arma::mat theta) {
+  using arma::rowvec;
+  using arma::mat;
+  using arma::uvec;
+
+  arma::mat RK4::solve(mat const &input,
+                       mat init,
+                       mat theta) {
     unsigned n = input.n_rows;
     unsigned p = init.n_elem;
     mat res(n, p);
-    rowvec y = arma::conv_to<arma::rowvec>::from(init);
+    rowvec y = arma::conv_to<rowvec>::from(init);
     res.row(0) = y;
     for (unsigned i=0; i < n-1; i++)  {
       rowvec dinput = input.row(i+1)-input.row(i);
@@ -35,9 +37,9 @@ namespace target {
     return( res );
   }
 
-  arma::mat Solver::solveint(const arma::mat &input,
-                             arma::mat init,
-                             arma::mat theta,
+  mat Solver::solveint(const mat &input,
+                             mat init,
+                             mat theta,
                              double tau, bool reduce) {
     mat newinput = interpolate(input, tau, true);
     mat value = solve(newinput, init, theta);
