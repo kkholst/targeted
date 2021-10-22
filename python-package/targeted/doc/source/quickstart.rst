@@ -36,6 +36,7 @@ and ``x``, ``z`` covariates.
 Next we estimate the *relative risk* of the exposed vs the non-exposed
 
 .. ipython:: python
+   :okwarning:
 
    import numpy as np
    from patsy import dmatrices

@@ -22,12 +22,18 @@ jobs:
       - uses: r-lib/actions/setup-tinytex@v1
       - run: tlmgr --version
 
+      - name: Install dependencies
+        run: |
+          sudo apt-get install -y pandoc libcurl4-openssl-dev libharfbuzz-dev libfribidi-dev
+
       - name: Cache R packages
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
-          path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
-          restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
+          path: |
+            ${{ env.R_LIBS_USER }}
+            !${{ env.R_LIBS_USER }}/pak
+          key: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-${{ hashFiles('.github/r-depends.rds') }}
+          restore-keys: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-
 
       - name: Install dependencies
         run: |
