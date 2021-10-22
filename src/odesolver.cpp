@@ -14,7 +14,6 @@ using namespace arma;
 
 namespace target {
 
-
   arma::mat RK4::solve(const arma::mat &input,
                        arma::mat init,
                        arma::mat theta) {
