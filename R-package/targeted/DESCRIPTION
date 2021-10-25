@@ -24,6 +24,7 @@ Imports:
     Rcpp (>= 1.0.0),
     optimx
 Suggests:
+    grf,
     mgcv,
     testthat (>= 0.11),
     rmarkdown,

@@ -15,6 +15,9 @@ softmax(x, log = FALSE, ref = TRUE, ...)
 
 \item{...}{Additional arguments to lower level functions}
 }
+\value{
+
+}
 \description{
 Softmax transformation
 }
