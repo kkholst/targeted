@@ -13,6 +13,9 @@
 
 \item{...}{additional arguments to lower level functions}
 }
+\value{
+Numeric vector with predictions.
+}
 \description{
 Kernel density estimator predictions
 }

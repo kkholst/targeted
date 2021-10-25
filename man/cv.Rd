@@ -5,21 +5,21 @@
 \title{Cross-validation}
 \usage{
 cv(
-  modelList,
+  models,
   data,
   response = NULL,
   K = 5,
   rep = 1,
   weights = NULL,
   modelscore,
-  seed = NULL,
+  seed = TRUE,
   shared = NULL,
   args.pred = NULL,
   ...
 )
 }
 \arguments{
-\item{modelList}{List of fitting functions}
+\item{models}{List of fitting functions}
 
 \item{data}{data.frame}
 
@@ -32,17 +32,22 @@ used for testing)}
 
 \item{weights}{Optional frequency weights}
 
-\item{modelscore}{Model scoring metric (default: RMSE / Brier score).
-Must be a function with arguments: response, prediction, weights, ...}
+\item{modelscore}{Model scoring metric (default: RMSE / Brier score). Must
+be a function with arguments: response, prediction, weights, ...}
 
-\item{seed}{Optional random seed}
+\item{seed}{Random seed (argument parsed to future_Apply::future_lapply)}
 
 \item{shared}{Function applied to each fold with results send to each model}
 
 \item{args.pred}{Optional arguments to prediction function (see details
 below)}
 
-\item{...}{Additional arguments parsed to models in modelList}
+\item{...}{Additional arguments parsed to models in `models`}
+}
+\value{
+An object of class '\code{cross_validated}' is returned. See
+  \code{\link{cross_validated-class}} for more details about this class and
+  its generic functions.
 }
 \description{
 Generic cross-validation function

@@ -10,6 +10,9 @@
 ##' @param ... additional arguments to lower level functions
 ##' @aliases NB NB2
 ##' @export
+##' @return An object of class '\code{NB}' is returned. See
+##'   \code{\link{NB-class}} for more details about this class and
+##'   its generic functions.
 ##' @author Klaus K. Holst
 ##' @examples
 ##' data(iris)
@@ -75,15 +78,4 @@ NB <- function(formula, data, weights=NULL,
                    model=ff,
                    call=match.call()),
               class="NB")
-}
-
-##' @export
-print.NB <-
-function(x, ...) {
-    print(x$call)
-    cat("\n")
-    val <- x$prior
-    names(val) <- paste0(seq(length(val)), ": ", names(val))
-    print(data.table::data.table(Prior=val))
-    cat("\n")
 }

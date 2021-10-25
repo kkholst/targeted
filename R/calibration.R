@@ -13,11 +13,8 @@
 ##' @author Klaus K. Holst
 ##' @details ...
 ##' @aliases calibration calibrate
-##' Returns a list
-##' - stepfun: estimated step-functions ('stepfun') for each class
-##' - classes: the unique classes
-##' - model: model/method type (string)
-##' - xy: list of data.frame's with predictions (pr) and estimated probabilities of success (only for 'bin' method)
+##' @return An object of class '\code{calibration}' is returned. See \code{\link{calibration-class}}
+##' for more details about this class and its generic functions.
 ##' @export
 ##' @examples
 ##' sim1 <- function(n, beta=c(-3, rep(.5,10)), rho=.5) {
@@ -179,24 +176,34 @@ calibration <- function(pr, cl, weights=NULL, threshold=10,
 }
 
 
-##' @export
-plot.calibration <- function(x, cl=2, add=FALSE,
-                             xlab="Prediction", ylab="Fraction of positives",
-                             main="Calibration plot", type="s", ...) {
-    if (!add) {
-        plot(0, 0, type="n", xlim=c(0, 1), ylim=c(0, 1), xlab=xlab, ylab=ylab, main=main)
-        abline(a=0, b=1, col="lightgray")
-    }
-    if (length(x$xy)>0) {
-        xx <- x$xy[[cl]]$cpt
-        xx[1] <- xx[1]+1e-12
-        xx[length(xx)] <- xx[length(xx)]-1e-12
-        yy <- x$stepfun[[cl]](xx)
-        lines(xx, yy, type=type, ...)
-    } else {
-        plot(x$stepfun[[cl]], add=TRUE, type=type, ...)
-    }
-}
+#' @title calibration class object
+#'
+#' @description The functions \code{\link{calibration}} returns an object of the class \code{calibration}.
+#'
+#' An object of class '\code{calibration}' is a list with at least the following components:
+#' \describe{
+#'   \item{stepfun}{estimated step-functions (see \code{stepfun}) for each class}
+#'   \item{classes}{the unique classes}
+#'   \item{model}{model/method type (string)}
+#'   \item{xy}{list of data.frame's with predictions (pr) and estimated probabilities of success (only for 'bin' method)}
+#' }
+#'
+#' @section S3 generics:
+#' The following S3 generic functions are available for an object of class \code{targeted}:
+#' \itemize{
+#'   \item{\code{predict}}{Apply calibration to new data.}
+#'   \item{\code{plot}}{Plot the calibration curves (reliability plot).}
+#'   \item{\code{print}}{Basic print method.}
+#'  }
+#'
+#' @aliases calibration-class
+#' @seealso \code{\link{calibration}}, \code{\link{calibrate}}
+#' @return objects of the S3 class '\code{calibration}'
+#' @examples ## See example(calibration) for examples
+#' @docType class
+#' @name calibration-class
+NULL
+
 
 ##' @export
 calibrate <- function(object, pr, normalize=TRUE, ...) {
@@ -223,6 +230,25 @@ calibrate <- function(object, pr, normalize=TRUE, ...) {
 
 
 ##' @export
+plot.calibration <- function(x, cl=2, add=FALSE,
+                             xlab="Prediction", ylab="Fraction of positives",
+                             main="Calibration plot", type="s", ...) {
+    if (!add) {
+        plot(0, 0, type="n", xlim=c(0, 1), ylim=c(0, 1), xlab=xlab, ylab=ylab, main=main)
+        abline(a=0, b=1, col="lightgray")
+    }
+    if (length(x$xy)>0) {
+        xx <- x$xy[[cl]]$cpt
+        xx[1] <- xx[1]+1e-12
+        xx[length(xx)] <- xx[length(xx)]-1e-12
+        yy <- x$stepfun[[cl]](xx)
+        lines(xx, yy, type=type, ...)
+    } else {
+        plot(x$stepfun[[cl]], add=TRUE, type=type, ...)
+    }
+}
+
+##' @export
 print.calibration <- function(x, ...) {
     cat("Call: "); print(x$call)
     cat("\nCalibration model:", x$model, "\n")
@@ -240,9 +266,3 @@ predict.calibration <- function(object, newdata, ...) {
     calibrate(object, newdata, ...)
 }
 
-## if (data.table::is.data.table(newdata)) newdata <- as.data.frame(newdata)
-## pr1 <- predict(model, newdata=newdata, ...)
-## response <- with(model, model$response)
-## weight <- with(model, model$filter[[1]])
-## cal1 <- calibration(pr1, newdata[,response], weights=newdata[,weight])
-## calibrate(cal1, pr1, ...)
