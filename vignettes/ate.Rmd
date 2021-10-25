@@ -8,6 +8,8 @@ output:
     fig_width: 5.15
     fig_height: 3.5
     fig_align: center
+    toc: true
+    toc_depth: 2
 vignette: >
   %\VignetteIndexEntry{Average Treatment Effects}
   %\VignetteEngine{knitr::rmarkdown}
@@ -20,7 +22,7 @@ knitr::opts_chunk$set(
  #dev="png",
  comment = "#>"
 )
-library(targeted)
+library("targeted")
 ```
 
 Introduction

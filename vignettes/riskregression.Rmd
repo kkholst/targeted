@@ -7,6 +7,8 @@ output:
     fig_caption: yes
     fig_width: 7.15
     fig_height: 5.5
+    toc: true
+    toc_depth: 2
 vignette: >
   %\VignetteIndexEntry{Estimating a relative risk or risk difference with a binary exposure}
   %\VignetteEngine{knitr::rmarkdown}
@@ -19,7 +21,7 @@ knitr::opts_chunk$set(
  #dev="png",
  comment = "#>"
 )
-library(lava)
+library("lava")
 ```
 
 Introduction

@@ -2,7 +2,7 @@ Package: targeted
 Type: Package
 Title: Targeted Inference
 Version: 0.2.0
-Date: 2021-10-19
+Date: 2021-10-25
 Authors@R: c(person("Klaus K.", "Holst", email="klaus@holst.it", role=c("aut", "cre")))
 Author: Klaus K. Holst [aut, cre]
 Maintainer: Klaus K. Holst <klaus@holst.it>
@@ -24,6 +24,7 @@ Imports:
     Rcpp (>= 1.0.0),
     optimx
 Suggests:
+    grf,
     mgcv,
     testthat (>= 0.11),
     rmarkdown,
