@@ -3,20 +3,18 @@
 # Copyright (c) 2019-2020 Klaus K. Holst.  All rights reserved.
 
 import ssm
-import numpy as np
 
-class kf:
+class Kalman:
     """Documentation for kf
 
     """
-    obj = None
-
-    def __init__(self, h, q, y):
+    kalman = None
+    def __init__(self, Y,T,Z,H,Q,a0,P0, K, L, x, c, d):
         """State space model
 
         Examples
         --------
-
+        %TODO: write docstring
         Parameters
         ----------
         h: numpy.array
@@ -28,15 +26,26 @@ class kf:
 
         Returns
         -------
-        kf
-            kf object
+        LinearGaussian
+            LinearGaussian object
 
         """
-        obj = ssm.kalmanfilter(h,q,y)
+        self.kalman = ssm.CPP_Kalman(Y, T, Z, H, Q, a0, P0, K, L, x, c, d)
 
+    def filter(self):
+        self.kalman.filter()
+        self.filter_estimates_ = self.kalman.filter_estimates
+        self.llh_ = self.kalman.llh
+
+    def smoother(self):
+        self.kalman.smoother()
+        self.smoother_estimates_ = self.kalman.smoother_estimates
+
+    def update_model(self, Y, T, Z, H, Q, a0, P0, K, L, x, c, d):
+        self.kalman.update_model(Y, T, Z, H, Q, a0, P0, K, L, x, c, d)
 
     def __repr__(self):
-        return "Estimate: " + str(self.obj)
+        return "Estimate: " + str(self.kalman)
 
     def __str__(self):
-        return "Estimate: " + str(self.obj)
+        return "Estimate: " + str(self.kalman)

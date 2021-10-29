@@ -28,6 +28,7 @@ doc/xml
 build
 tmp
 __pycache__
+.idea
 
 # Created by https://www.gitignore.io/api/c++
 # Edit at https://www.gitignore.io/?templates=c++

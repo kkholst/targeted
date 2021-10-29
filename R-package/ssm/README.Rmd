@@ -1,0 +1,115 @@
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+
+```{r  include=FALSE }
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "50%"
+)
+```
+
+<!-- badges: start -->
+  [![travis](https://travis-ci.com/kkholst/targeted.svg?branch=master)](https://travis-ci.com/kkholst/targeted)
+  [![coverage](https://codecov.io/github/kkholst/targeted/coverage.svg?branch=master)](https://codecov.io/github/kkholst/targeted?branch=master)
+  [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+  [![cran](https://www.r-pkg.org/badges/version-last-release/targeted)](https://cranlogs.r-pkg.org/downloads/total/last-month/targeted)
+<!-- badges: end -->
+
+
+# Targeted Inference in R: targeted <a href="https://targetlib.org/r/"><img src="man/figures/logo.svg" align="right" height="75" /></a>
+
+Various methods for targeted and semiparametric inference including
+augmented inverse probability weighted estimators for missing data and
+causal inference (Bang and Robins (2005)
+<10.1111/j.1541-0420.2005.00377.x>) and estimators for risk
+differences and relative risks (Richardson et al. (2017)
+<10.1080/01621459.2016.1192546>).
+
+## Installation
+
+You can install the released version of targeted from [CRAN](<https://CRAN.R-project.org>) with:
+
+```{r  install, eval=FALSE }
+install.packages("targeted")
+```
+
+And the development version from [GitHub](<https://github.com/kkholst/targeted>) with:
+
+```{r  eval=FALSE }
+# install.packages("devtools")
+remotes::install_github("kkholst/targeted")
+```
+
+## Examples
+
+
+### Targeted risk regression
+
+```{r  results='hide' }
+library(targeted)
+library(magrittr)
+```
+
+Simulate some data:
+
+```{r   }
+m <- lvm() %>%
+    regression(a ~ x+z) %>%
+    regression(lp.target ~ 1) %>%
+    regression(lp.nuisance ~ x + z) %>%
+    distribution('a', binomial.lvm("logit")) %>%
+    binomial.rr('y', 'a', 'lp.target', 'lp.nuisance')
+
+par <- c('a'=-2, 'lp.target'=1, 'lp.nuisance'=-1, 'lp.nuisance~x'=2)
+d <- lava::sim(m, n=1e4, seed=1, p=par) %>%
+    subset(select=c('y', 'a','x','z'))
+
+head(d)
+```
+
+```{r   }
+fit <- riskreg(y ~ a, nuisance=~x+z, data=d, type="rr")
+fit
+```
+
+Here the same design matrix is used for both the propensity model and
+the nuisance parameter (odds-product) model
+
+```{r   }
+summary(fit)
+```
+
+Double-robustness illustrated by using a wrong propensity
+model but a correct nuisance paramter (odds-product) model:
+
+```{r   }
+riskreg(y ~ a, nuisance=~x+z, propensity=~z, data=d, type="rr")
+```
+
+Or vice-versa
+
+```{r   }
+riskreg(y ~ a, nuisance=~z, propensity=~x+z, data=d, type="rr")
+```
+
+Whereas the MLE yields a biased estimate of the relative risk:
+
+```{r   }
+fit_mle <- with(d, riskreg_mle(y, a, x1=model.matrix(~1,d), x2=model.matrix(~z, d)))
+estimate(fit_mle, 1)
+```
+
+To obtain an estimate of the risk-difference (here wrong model) we simply chance the `type` argument
+
+```{r   }
+riskreg(y ~ a, nuisance=~x+z, data=d, type="rd")
+```
+
+
+Interactions with the exposure can be examined with the `target` argument
+
+```{r   }
+riskreg(y ~ a, target=a~x, nuisance=~x+z, data=d, type="rr")
+```
