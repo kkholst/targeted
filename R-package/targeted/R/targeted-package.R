@@ -14,6 +14,7 @@
 ##'  	glm.fit lm.wfit lm.fit glm lm coef vcov
 ##'     model.frame model.matrix na.pass nlminb predict
 ##'     dnorm quantile terms weighted.mean runif
+##'     .getXlevels delete.response model.response
 ##' @importFrom digest sha1
 ##' @importFrom optimx optimx
 ##' @importFrom data.table data.table is.data.table
