@@ -16,8 +16,8 @@ example(riskreg)
 
 example(ate)
 
-example(calibration
-)
+example(calibration)
+
 }
 \author{
 Klaus K. Holst Maintainer: <klaus@holst.it>

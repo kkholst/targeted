@@ -48,7 +48,9 @@ below)}
 Generic cross-validation function
 }
 \details{
-...
+modelList should be list of objects of class ml_model.
+Alternatively, each element of modelList should be a list with a fitting function
+and a prediction function.
 }
 \examples{
 f0 <- function(data,...) lm(...,data=data)

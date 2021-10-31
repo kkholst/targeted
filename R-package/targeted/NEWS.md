@@ -1,3 +1,7 @@
+# targeted 0.2.1
+
+- Development version
+
 # targeted 0.2.0
 
 - Weighted Naive Bayes classifer with `NB`

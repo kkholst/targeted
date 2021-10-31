@@ -30,8 +30,7 @@
 ##'
 ##' example(ate)
 ##'
-##' example(calibration
-##' )
+##' example(calibration)
+##'
 loadModule("riskregmodel", TRUE)
 NULL
-##loadModule("dcmodel", TRUE)

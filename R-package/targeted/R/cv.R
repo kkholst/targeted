@@ -16,7 +16,9 @@
 ##'   below)
 ##' @param ... Additional arguments parsed to models in modelList
 ##' @author Klaus K. Holst
-##' @details ...
+##' @details modelList should be list of objects of class ml_model.
+##' Alternatively, each element of modelList should be a list with a fitting function
+##' and a prediction function.
 ##' @examples
 ##' f0 <- function(data,...) lm(...,data=data)
 ##' f1 <- function(data,...) lm(Sepal.Length~Species,data=data)
@@ -39,13 +41,14 @@ cv <- function(modelList, data, response = NULL, K = 5, rep = 1,
 
   for (i in seq_along(modelList)) {
     f <- modelList[[i]]
-    if (!is.list(f) || length(f) == 1) {
+    if ((!is.list(f) || length(f) == 1)
+        && !inherits(f, "ml_model")) {
       ## No predict function provided. Assume 'predict' works on fitted object
       if (is.list(f)) f <- f[[1]]
       modelList[[i]] <- list(
         fit = f,
-        predict = function(fit, data, ...) {
-          predict(fit, newdata = data, ...)
+        predict = function(fit, newdata, ...) {
+          predict(fit, newdata = newdata, ...)
         }
       )
     }
@@ -59,21 +62,34 @@ cv <- function(modelList, data, response = NULL, K = 5, rep = 1,
   arglist <- c(list(data = data), args)
   if (!is.null(weights)) arglist <- c(arglist, list(weights = weights))
 
-  f <- modelList[[1]][[1]]
-  if (!is.null(response) && "response" %in% formalArgs(f)) {
-    arglist <- c(arglist, list(response = response))
+  f <- modelList[[1]]
+  if (inherits(f, "ml_model")) {
+    fit0 <- do.call(f$estimate, arglist)
+    response <- f$response(data)
+  } else {
+    if (!is.null(response) && "response" %in% formalArgs(f[[1]])) {
+      arglist <- c(arglist, list(response = response))
+    }
+    fit0 <- do.call(f[[1]], arglist)
   }
-  fit0 <-do.call(f, arglist)
   if (is.null(response)) {
-    response <- tryCatch(data[, lava::endogenous(fit0), drop = TRUE],
-      error = function(...) NULL
-    )
+    if (inherits(f, "ml_model")) {
+      response <- f$response(data)
+    } else {
+      response <- tryCatch(data[, lava::endogenous(fit0), drop = TRUE],
+                           error = function(...) NULL)
+    }
     if (is.null(response)) stop("Provide 'response'")
   }
   ## In-sample predictive performance:
-  pred0 <- do.call(
-    modelList[[1]][[2]],
-       c(list(fit0, data = data), args.pred))
+  if (inherits(f, "ml_model")) {
+    pred0 <- do.call(f$predict,
+                     c(list(newdata = data), args.pred))
+  } else {
+    pred0 <- do.call(
+      f[[2]],
+      c(list(fit0, newdata = data), args.pred))
+  }
   perf0 <- modelscore(prediction=pred0, response=response, weights=weights)
   namPerf <- if (is.vector(perf0))
                names(perf0) else colnames(perf0)
@@ -123,18 +139,27 @@ cv <- function(modelList, data, response = NULL, K = 5, rep = 1,
     if (!is.null(weights)) arglist <- c(arglist, list(weights = wtrain))
     fits <- list()
     for (i in seq_along(modelList)) {
-      f <- modelList[[i]][[1]]
-      if ("response" %in% formalArgs(f)) {
-        arglist <- c(arglist, list(response = ytrain))
+      f <- modelList[[i]]
+      if (inherits(f, "ml_model")) {
+        fits <- c(fits, list(do.call(f$estimate, arglist)))
+      } else {
+        if ("response" %in% formalArgs(f[[1]])) {
+          arglist <- c(arglist, list(response = ytrain))
+        }
+        fits <- c(fits, list(do.call(f[[1]], arglist)))
       }
-      fits <- c(fits, list(do.call(f, arglist)))
     }
     perfs <- list()
     for (i in seq_along(fits)) {
-      pred <- do.call(
-        modelList[[i]][[2]],
-        c(list(fits[[i]], data = dtest), args.pred)
-      )
+      if (inherits(modelList[[i]], "ml_model")) {
+        pred <- do.call(
+          modelList[[i]]$predict,
+          c(list(newdata = dtest), args.pred))
+      } else {
+        pred <- do.call(
+          modelList[[i]][[2]],
+          c(list(fits[[i]], newdata = dtest), args.pred))
+      }
       perfs <- c(perfs, list(
         do.call(
           modelscore,

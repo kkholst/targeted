@@ -1,8 +1,8 @@
 Package: targeted
 Type: Package
 Title: Targeted Inference
-Version: 0.2.0
-Date: 2021-10-19
+Version: 0.2.1
+Date: 2021-10-29
 Authors@R: c(person("Klaus K.", "Holst", email="klaus@holst.it", role=c("aut", "cre")))
 Author: Klaus K. Holst [aut, cre]
 Maintainer: Klaus K. Holst <klaus@holst.it>
@@ -21,6 +21,7 @@ Imports:
     future.apply,
 	progressr,
     methods,
+    R6,
     Rcpp (>= 1.0.0),
     optimx
 Suggests:
