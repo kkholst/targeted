@@ -2,18 +2,24 @@
 % Please edit documentation in R/design.R
 \name{design}
 \alias{design}
-\title{}
+\title{Extract design matrix}
 \usage{
 design(formula, data, intercept = FALSE, ...)
 }
-\value{
+\arguments{
+\item{formula}{formula}
 
+\item{data}{data.frame}
+
+\item{intercept}{If FALSE (default) an intercept is not included}
+
+\item{...}{additional arguments (e.g, specials such weights, offsets, subset)}
+}
+\value{
+An object of class 'design'
 }
 \description{
-.. content for \description{} (no empty lines) ..
-}
-\details{
-.. content for \details{} ..
+Extract design matrix from data.frame and formula
 }
 \author{
 Klaus Kähler Holst

@@ -17,34 +17,14 @@ Klaus Kähler Holst
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{formula}}{Formula specifying response and design matrix}
-
-\item{\code{predfun}}{Prediction method}
-
-\item{\code{fitfun}}{Estimation method}
-
-\item{\code{fitted}}{Fitted model object}
-
-\item{\code{call}}{Information on the initialized model}
-
-\item{\code{formals}}{Formal arguments of estimation and prediction methods}
+\item{\code{info}}{Optional information/name of the model}
 }
 \if{html}{\out{</div>}}
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{formula}}{Formula specifying response and design matrix}
-
-\item{\code{predfun}}{Prediction method}
-
-\item{\code{fitfun}}{Estimation method}
-
-\item{\code{fitted}}{Fitted model object}
-
-\item{\code{call}}{Information on the initialized model}
-
-\item{\code{formals}}{Formal arguments of estimation and prediction methods}
+\item{\code{fit}}{Active binding returning estimated model object}
 }
 \if{html}{\out{</div>}}
 }
@@ -68,11 +48,12 @@ Klaus Kähler Holst
 Create a new prediction model object
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ml_model$new(
-  formula = y ~ .,
+  formula = NULL,
   fit,
   pred = predict,
-  info = NULL,
   pred.args = NULL,
+  info = NULL,
+  specials,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -86,11 +67,14 @@ Create a new prediction model object
 and design matrix, 'x'. Alternatively, a function with a single 'formula' argument)}
 
 \item{\code{pred}}{prediction function (must be a function of model object, 'fit',
-and new design matrix, 'data')}
+and new design matrix, 'newdata')}
+
+\item{\code{pred.args}}{optional arguments to prediction function}
 
 \item{\code{info}}{optional description of the model}
 
-\item{\code{pred.args}}{optional arguments to prediction function}
+\item{\code{specials}}{optional additional terms (weights, offset, id, subset, ...)
+passed to 'fit'}
 
 \item{\code{...}}{optional arguments to fitting function}
 }
@@ -184,6 +168,13 @@ Extract response from data
 \if{html}{\out{<div class="r">}}\preformatted{ml_model$response(data)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{data}}{data.frame}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-design"></a>}}
@@ -194,6 +185,13 @@ Extract design matrix (features) from data
 \if{html}{\out{<div class="r">}}\preformatted{ml_model$design(data)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{data}}{data.frame}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

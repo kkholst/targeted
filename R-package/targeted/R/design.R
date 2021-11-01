@@ -4,7 +4,8 @@
 ##' @author Klaus Kähler Holst
 ##' @export
 ml_model <- R6::R6Class("ml_model",
-   public = list(##' @field info Optional information/name of the model
+    public = list(
+     ##' @field info Optional information/name of the model
      info = NULL,
 
      ##' @description
@@ -16,6 +17,8 @@ ml_model <- R6::R6Class("ml_model",
      ##' and new design matrix, 'newdata')
      ##' @param info optional description of the model
      ##' @param pred.args optional arguments to prediction function
+     ##' @param specials optional additional terms (weights, offset, id, subset, ...)
+     ##'   passed to 'fit'
      ##' @param ... optional arguments to fitting function
      initialize = function(formula=NULL, fit,
                            pred=predict, pred.args=NULL,
@@ -128,12 +131,14 @@ ml_model <- R6::R6Class("ml_model",
 
      ##' @description
      ##' Extract response from data
+     ##' @param data data.frame
      response = function(data) {
        design(update(private$formula, ~ 1), data)$y
      },
 
      ##' @description
      ##' Extract design matrix (features) from data
+     ##' @param data data.frame
      design = function(data) {
        design(private$formula, data)$x
      }
@@ -141,23 +146,22 @@ ml_model <- R6::R6Class("ml_model",
    ),
 
    active = list(
-     ##' @description
-     ##' Active binding returning estimated model object
+     ##' @field fit Active binding returning estimated model object
      fit = function() private$fitted
    ),
 
    private = list(
-     ##' @field formula Formula specifying response and design matrix
+     ## @field formula Formula specifying response and design matrix
      formula = NULL,
-     ##' @field predfun Prediction method
+     ## @field predfun Prediction method
      predfun = NULL,
-     ##' @field fitfun Estimation method
+     ## @field fitfun Estimation method
      fitfun = NULL,
-     ##' @field fitted Fitted model object
+     ## @field fitted Fitted model object
      fitted = NULL,
-     ##' @field call Information on the initialized model
+     ## @field call Information on the initialized model
      call = NULL,
-     ##' @field formals Formal arguments of estimation and prediction methods
+     ## @field formals Formal arguments of estimation and prediction methods
      formals = NULL
    )
 )
@@ -168,20 +172,18 @@ estimate.ml_model <- function(x, ...) {
 }
 
 ##' @export
-predict.ml_model <- function(x, ...) {
-  x$predict(...)
+predict.ml_model <- function(object, ...) {
+  object$predict(...)
 }
 
 
-##' .. content for \description{} (no empty lines) ..
-##'
-##' .. content for \details{} ..
-##' @title
-##' @param formula
-##' @param data
-##' @param intercept
-##' @param ...
-##' @return
+##' Extract design matrix from data.frame and formula
+##' @title Extract design matrix
+##' @param formula formula
+##' @param data data.frame
+##' @param intercept If FALSE (default) an intercept is not included
+##' @param ... additional arguments (e.g, specials such weights, offsets, subset)
+##' @return An object of class 'design'
 ##' @author Klaus Kähler Holst
 ##' @export
 design <- function(formula, data, intercept=FALSE, ...) {
