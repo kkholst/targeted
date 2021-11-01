@@ -17,11 +17,14 @@ expand.list <- function(...) {
       dots[[i]] <- "NULL"
       nulls <- c(nulls, i)
     }
-    if (inherits(dots[[i]], "formula")) {
-      dots[[i]] <- deparse1(dots[[i]])
-      formulas <- c(formulas, i)
+    if (is.list(dots[[i]])) {
+      if (inherits(dots[[i]][[1]], "formula")) {
+        dots[[i]] <- unlist(lapply(dots[[i]], deparse1))
+        formulas <- c(formulas, i)
+      }
     }
   }
+
   names(dots) <- nam
   dat <- do.call(expand.grid, c(dots,
             list(KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)))

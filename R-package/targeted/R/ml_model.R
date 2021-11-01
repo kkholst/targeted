@@ -72,10 +72,10 @@ ml_model <- R6::R6Class("ml_model",
       private$formula <- formula
       self$info <- info
       private$formals <- list(formals(fit), formals(pred))
-      private$call <- list(substitute(fit),
-                           substitute(pred),
-                           substitute(dots),
-                           substitute(pred.args))
+      private$call <- list(fit=substitute(fit),
+                           pred=substitute(pred),
+                           dots=substitute(dots),
+                           pred.args=substitute(pred.args))
      },
 
      ##' @description
@@ -117,15 +117,19 @@ ml_model <- R6::R6Class("ml_model",
        cat("Prediction Model (class ml_model)",
            "\n_________________________________\n\n")
        if (!is.null(self$info))
-         cat(self$info, "\n")
-       cat("\n- Model:\n",
+         cat(self$info, "\n\n")
+       cat("Arguments:\n")
+       print(unlist(private$call$dots))
+       if (!is.null(private$formula))
+         cat("Data:\n",
+             "\t", deparse1(private$formula), "\n", sep="")
+       cat("Model:\n",
            "\tfunction(",paste(names(private$formals[[1]]),
                                collapse=", "), ")\n", sep="")
-       cat("\n- Prediction:\n",
+       cat("Prediction:\n",
            "\tfunction(",paste(names(private$formals[[2]]),
-                             collapse=", "), ")\n", sep="")
-       cat("\n- Data:\n",
-           "\t", deparse1(private$formula), "\n\n", sep="")
+                               collapse=", "), ")\n", sep="")
+       #cat("\n\nMethods: estimate, predict, fit, update, response, design, clone\n")
      },
 
      ##' @description
