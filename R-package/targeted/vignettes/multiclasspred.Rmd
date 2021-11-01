@@ -55,10 +55,10 @@ scoring(dat[[2]]$Species, pr0=pr0, pr1=pr1, pr2=pr2)
 \(A\) ...
 
 ```{r scoring2}
-library(ranger)
-m1 <- ranger(Species ~ ., data=dat[[1]], num.threads=1, probability=TRUE)
-pr3 <- predict(m1, data=dat[[2]], num.threads=1)$predictions
-scoring(dat[[2]]$Species, pr3)
+## library(ranger)
+## m1 <- ranger(Species ~ ., data=dat[[1]], num.threads=1, probability=TRUE)
+## pr3 <- predict(m1, data=dat[[2]], num.threads=1)$predictions
+## scoring(dat[[2]]$Species, pr3)
 ```
 
 ```{r scoring3}
@@ -163,10 +163,8 @@ models <- lapply(args, function(par) do.call(rf, par))
 x <- models[[1]]$clone()
 x$estimate(iris)
 
-x$.__enclos_env__$private$formula
-
-
-rtarget
+#x$.__enclos_env__$private$formula
+#rtarget
 
 x <- ml_model$new(Species ~ ., info="grf::probability_forest",
              fit=function(x,y, ...) grf::probability_forest(X=x, Y=y, ...),
