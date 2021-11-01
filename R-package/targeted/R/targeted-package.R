@@ -19,6 +19,7 @@
 ##' @importFrom optimx optimx
 ##' @importFrom data.table data.table is.data.table
 ##' @importFrom futile.logger flog.warn flog.debug flog.info
+##' @importFrom R6 R6Class
 ##' @importFrom utils tail head
 ##' @useDynLib targeted, .registration=TRUE
 ##' @aliases targeted-package targeted

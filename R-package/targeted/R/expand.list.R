@@ -31,7 +31,7 @@ expand.list <- function(...) {
                   if (length(nulls)>0) res[nulls] <- list(NULL)
                   if (length(formulas)>0) {
                     res[[formulas]] <- as.formula(res[[formulas]])
-                    environment(res[[formulas]]) <- emptyenv()
+                    environment(res[[formulas]]) <- baseenv()
                   }
                   res
                 })
