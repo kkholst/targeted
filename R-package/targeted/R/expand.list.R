@@ -22,6 +22,9 @@ expand.list <- function(...) {
         dots[[i]] <- unlist(lapply(dots[[i]], deparse1))
         formulas <- c(formulas, i)
       }
+    } else if (inherits(dots[[i]], "formula")) {
+        dots[[i]] <- deparse1(dots[[i]])
+        formulas <- c(formulas, i)
     }
   }
 
