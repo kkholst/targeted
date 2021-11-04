@@ -61,13 +61,15 @@ cv <- function(modelList, data, response = NULL, K = 5, rep = 1,
   }
   arglist <- c(list(data = data), args)
   if (!is.null(weights)) arglist <- c(arglist, list(weights = weights))
-
   f <- modelList[[1]]
   if (inherits(f, "ml_model")) {
     fit0 <- do.call(f$estimate, arglist)
-    response <- f$response(data)
+    if (is.null(response)) {
+      response <- f$response(data)
+    } else if (length(response)==1)
+      response <- data[, response, drop=TRUE]
   } else {
-    if (!is.null(response) && "response" %in% formalArgs(f[[1]])) {
+    if (!is.null(response) && "response" %in% formalArgs(f)) {
       arglist <- c(arglist, list(response = response))
     }
     fit0 <- do.call(f[[1]], arglist)

@@ -1,3 +1,7 @@
+Model <- function(fit, pred)
+  function()
+  ml_model$new(formula, fit, pred, ...)
+
 ##' R6 class for prediction models
 ##'
 ##' Provides standardized estimation and prediction methods
@@ -136,6 +140,7 @@ ml_model <- R6::R6Class("ml_model",
      ##' Extract response from data
      ##' @param data data.frame
      response = function(data) {
+       if (is.null(private$formula)) return(NULL)
        design(update(private$formula, ~ 1), data)$y
      },
 

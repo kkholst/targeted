@@ -185,6 +185,24 @@ cbind(coef(a), attr(args, "table")[,1:2])
 ```
 
 
+```{r}
+a <- ml_model$new(fit=function(data,response="Species",...) {
+  y <- data[,response]
+  x <- data[,-which(names(data)%in%response),drop=FALSE]
+  NB2(x=x,y=y)
+}, pred=function(fit, newdata) predict(fit, newdata))
+a$estimate(iris)
+
+b <- ml_model$new(Species ~ ., fit=function(x,y,...) {
+  grf::probability_forest(Y=y,X=x,...)
+}, pred=function(fit,newdata) predict(fit,newdata)$predictions,
+num.trees=50)
+
+cv(list(NB=a, RF=b), iris, response="Species")
+
+```
+
+
 Model calibration
 ========================
 
