@@ -62,7 +62,6 @@ namespace target {
     raggedArray val(p);
     double sw = 0;
     for (unsigned i=0; i < idx.n_elem; i++) sw += weights(i);
-
     for (unsigned j=0; j < p; j++) {
       if (xlev(j) > 0) {  // factor
         arma::vec est(xlev[j]);
@@ -100,61 +99,65 @@ namespace target {
   }
 
 
-  arma::mat prednb(const arma::mat &X,
-                   const raggedArray &condprob,
-                   const raggedArray &xord,
+  arma::mat prednb(arma::mat const &X,
+                   raggedArray const &condprob,
+                   raggedArray const &xord,
                    arma::uvec multinomial,
                    arma::vec prior,
                    double threshold) {
-    return X;
+    unsigned p = X.n_cols;
+    unsigned n = X.n_rows;
+    unsigned nclasses = condprob.size()/p;
+    arma::mat lposterior(n, nclasses);
+    arma::vec px(n); px.fill(0);
+
+    for (unsigned k=0; k < nclasses; k++) {
+      arma::vec lpcond(n); lpcond.fill(0);
+      for (unsigned j=0; j < p; j++) {
+        unsigned pos = k * p + j;
+        arma::vec estx = condprob[pos];
+        if (multinomial[j]) {
+          arma::uvec x = arma::conv_to<arma::uvec>::from(X.col(j));
+          arma::vec est = xord[j];
+          arma::uvec ord(est.n_elem);
+          arma::uvec estna(est.n_elem);  estna.fill(false);
+          for (unsigned i=0; i < est.n_elem; i++) {
+            if (est[i] < 0 || est[i] >= estx.n_elem) {
+              ord[i] = static_cast<unsigned>(est[i]);
+            } else {
+              estna[i] = true;
+            }
+          }
+          for (unsigned i=0; i < est.size(); i++)
+            if (estna[i]) {
+              est[i] = threshold;
+            } else {
+              est[i] = estx[ord[i]];
+              if (est[i] < threshold) est[i] = threshold;
+            }
+          double s = sum(est);
+          arma::vec logest(est.size());
+          for (unsigned i=0; i < est.size(); i++) {
+            logest[i] = log(est[i]/s);
+          }
+          lpcond += logest.elem(x);
+        } else {  // Gaussian
+          arma::vec x = X.col(j);
+          // LogicalVector estna = is_na(estx);
+          // if (estna[0]) estx[0] = 0;
+          // if (estna[1] | (estx[1] < 1E-16)) estx[1] = 1;
+          for (unsigned i=0; i < n; i++) {
+            lpcond[i] += arma::log_normpdf(x[i], estx[0], estx[1]);
+          }
+        }
+      }
+      lposterior.col(k) = lpcond + std::log(prior[k]);  // log P(x,c)
+      px = px + exp(lposterior.col(k));  // P(x)
+    }
+    arma::colvec lpx = -log(px);
+    lposterior.each_col() += lpx;  // log P(c|x)
+    return lposterior;
   }
-
-//   unsigned p = X.n_cols;
-//   unsigned n = X.n_rows;
-//   unsigned nclasses = condprob.size()/p;
-//   arma::mat lposterior(n,nclasses);
-//   arma::vec px(n); px.fill(0);
-
-//   for (unsigned k=0; k<nclasses; k++) {
-//     arma::vec lpcond(n); lpcond.fill(0);
-//     for (unsigned j=0; j<p; j++) {
-//       unsigned pos = k*p + j;
-//       NumericVector estx = condprob[pos];
-//       if (multinomial[j]) {
-// 	arma::uvec x = arma::conv_to<arma::uvec>::from(X.col(j));
-// 	NumericVector xx = xord(j);
-// 	NumericVector est = clone(xx);
-// 	LogicalVector estna = is_na(est);
-// 	for (unsigned i=0; i<est.size(); i++)
-//        	  if (estna[i]) {
-// 	    est[i] = threshold;
-// 	  } else {
-// 	    est[i] = estx[est[i]];
-// 	    if (est[i]<threshold) est[i] = threshold;
-// 	  }
-// 	double s = sum(est);
-// 	arma::vec logest(est.size());
-// 	for (unsigned i=0; i<est.size(); i++) {
-// 	  logest[i] = log(est[i]/s);
-//        	}
-// 	lpcond += logest.elem(x);
-//       } else { // Gaussian
-// 	arma::vec x = X.col(j);
-//       	LogicalVector estna = is_na(estx);
-//       	if (estna[0]) estx[0] = 0;
-//       	if (estna[1] | (estx[1]<1E-16)) estx[1] = 1;
-//       	for (unsigned i=0; i<n; i++) {
-//       	  lpcond[i] += Rf_dnorm4(x[i],estx[0],estx[1],true);
-// 	}
-//       }
-//     }
-//     lposterior.col(k) = lpcond + std::log(prior[k]); // log P(x,c)
-//     px = px + exp(lposterior.col(k)); // P(x)
-//   }
-//   arma::colvec lpx = -log(px);
-//   lposterior.each_col() += lpx; // log P(c|x)
-//   return lposterior;
-// }
 
 
 }  // namespace target

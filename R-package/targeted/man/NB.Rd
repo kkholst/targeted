@@ -6,12 +6,15 @@
 \title{Naive Bayes}
 \usage{
 NB(
-  formula,
+  formula = NULL,
   data,
   weights = NULL,
   kernel = FALSE,
   laplace.smooth = 0,
   prior = NULL,
+  y = NULL,
+  X = NULL,
+  categorical = NULL,
   ...
 )
 }

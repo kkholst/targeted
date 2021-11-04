@@ -15,7 +15,6 @@ namespace target {
 
   using raggedArray = std::vector<arma::vec>;
 
-
   raggedArray pcond(const arma::uvec   &idx,
 		    const arma::mat    &x,
 		    const arma::uvec   &xlev,
@@ -29,11 +28,11 @@ namespace target {
 			      arma::vec  weights = arma::vec(),
 			      double     laplacesmooth = 1.0);
 
-  arma::mat prednb(const arma::mat &X,
-		   const raggedArray &condprob,
-		   raggedArray xord,
-		   arma::uvec multinomial,
-		   arma::vec  prior = arma::vec(),
-		   double     threshold = 1E-3);
+  arma::mat prednb(arma::mat const &X,
+                   raggedArray const &condprob,
+                   raggedArray const &xord,
+                   arma::uvec multinomial,
+                   arma::vec  prior = arma::vec(),
+                   double     threshold = 1E-3);
 
 }  // namespace target
