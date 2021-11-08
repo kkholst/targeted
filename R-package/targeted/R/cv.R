@@ -1,4 +1,4 @@
->##' Generic cross-validation function
+##' Generic cross-validation function
 ##'
 ##' @title Cross-validation
 ##' @param models List of fitting functions

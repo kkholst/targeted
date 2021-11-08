@@ -6,15 +6,12 @@
 \title{Naive Bayes}
 \usage{
 NB(
-  formula = NULL,
+  formula,
   data,
   weights = NULL,
   kernel = FALSE,
   laplace.smooth = 0,
   prior = NULL,
-  y = NULL,
-  X = NULL,
-  categorical = NULL,
   ...
 )
 }
@@ -32,6 +29,11 @@ NB(
 \item{prior}{optional prior probabilities (default estimated from data)}
 
 \item{...}{additional arguments to lower level functions}
+}
+\value{
+An object of class '\code{NB}' is returned. See
+  \code{\link{NB-class}} for more details about this class and
+  its generic functions.
 }
 \description{
 Naive Bayes Classifier

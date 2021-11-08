@@ -18,6 +18,8 @@ Klaus Kähler Holst
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
 \item{\code{info}}{Optional information/name of the model}
+
+\item{\code{formals}}{List with formal arguments of estimation and prediction functions}
 }
 \if{html}{\out{</div>}}
 }
@@ -54,6 +56,8 @@ Create a new prediction model object
   pred.args = NULL,
   info = NULL,
   specials,
+  response.arg = "y",
+  x.arg = "x",
   ...
 )}\if{html}{\out{</div>}}
 }
