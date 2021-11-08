@@ -9,8 +9,10 @@ Model <- function(fit, pred)
 ##' @export
 ml_model <- R6::R6Class("ml_model",
     public = list(
-     ##' @field info Optional information/name of the model
-     info = NULL,
+      ##' @field info Optional information/name of the model
+      info = NULL,
+      ##' @field formals List with formal arguments of estimation and prediction functions
+      formals = NULL,
 
      ##' @description
      ##' Create a new prediction model object
@@ -25,18 +27,27 @@ ml_model <- R6::R6Class("ml_model",
      ##'   passed to 'fit'
      ##' @param ... optional arguments to fitting function
      initialize = function(formula=NULL, fit,
-                           pred=predict, pred.args=NULL,
-                           info=NULL, specials, ...) {
+                           pred=predict,
+                           pred.args=NULL,
+                           info=NULL, specials,
+                           response.arg="y",
+                           x.arg="x",
+                           ...) {
       if (!("..."%in%formalArgs(fit))) {
         formals(fit) <- c(formals(fit), alist(...=))
       }
       des.args <- lapply(substitute(specials), function(x) x)[-1]
 
       fit_formula <- "formula"%in%formalArgs(fit)
+
+      fit_response_arg <- response.arg %in% formalArgs(fit)
+      fit_x_arg <- "x"%in%formalArgs(fit)
+      ## if (!fit_x_arg && !("data"%in%formalArgs(fit)))
+      ##   stop("Estimation method must have an argument 'x' or 'data'")
+
       dots <- list(...)
       no_formula <- is.null(formula)
       if (no_formula) {
-        fit_formula <- "formula"%in%formalArgs(fit)
         private$fitfun <- function(...) {
           args <-  c(list(...), dots)
           do.call(fit, args)
@@ -46,18 +57,22 @@ ml_model <- R6::R6Class("ml_model",
           do.call(pred, args)
         }
       } else {
-        private$fitfun <- function(data, ...) {
-          if (fit_formula || no_formula) {
-            if (no_formula) {
-              args <- c(dots, list(data=data), list(...))
-            } else {
-              args <- c(dots, list(formula=formula, data=data), list(...))
-            }
+        if (fit_formula) {  ## Formula in arguments of estimation procedure
+          private$fitfun <- function(data, ...) {
+            args <- c(dots, list(formula=formula, data=data), list(...))
             return(do.call(fit, args))
-          } else {
+          }
+        } else {  ##  Formula automatically processed into design matrix & response
+          private$fitfun <- function(data, ...) {
             xx <- do.call(design, c(list(formula=formula, data=data), des.args))
-            ##xx <- design(formula, data)
-            args <- c(dots, list(y=xx$y, x=xx$x), list(...))
+            if (fit_x_arg) {
+              args <- c(dots, list(x=xx$x), list(...))
+            } else {
+              args <- c(dots, list(data=xx$x), list(...))
+            }
+            if (fit_response_arg) {
+              args <- c(list(y=xx$y), args)
+            }
             if (length(xx$specials)>0)
               args <- c(args, xx[xx$specials])
             return(structure(do.call(fit, args), design=summary(xx)))
@@ -75,7 +90,7 @@ ml_model <- R6::R6Class("ml_model",
       }
       private$formula <- formula
       self$info <- info
-      private$formals <- list(formals(fit), formals(pred))
+      self$formals <- list(estimate=formals(fit), predict=formals(pred))
       private$call <- list(fit=substitute(fit),
                            pred=substitute(pred),
                            dots=substitute(dots),
@@ -128,10 +143,10 @@ ml_model <- R6::R6Class("ml_model",
          cat("Data:\n",
              "\t", deparse1(private$formula), "\n", sep="")
        cat("Model:\n",
-           "\tfunction(",paste(names(private$formals[[1]]),
+           "\tfunction(",paste(names(self$formals[[1]]),
                                collapse=", "), ")\n", sep="")
        cat("Prediction:\n",
-           "\tfunction(",paste(names(private$formals[[2]]),
+           "\tfunction(",paste(names(self$formals[[2]]),
                                collapse=", "), ")\n", sep="")
        #cat("\n\nMethods: estimate, predict, fit, update, response, design, clone\n")
      },
@@ -168,9 +183,7 @@ ml_model <- R6::R6Class("ml_model",
      ## @field fitted Fitted model object
      fitted = NULL,
      ## @field call Information on the initialized model
-     call = NULL,
-     ## @field formals Formal arguments of estimation and prediction methods
-     formals = NULL
+     call = NULL
    )
 )
 
