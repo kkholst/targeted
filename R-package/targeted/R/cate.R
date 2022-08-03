@@ -22,19 +22,18 @@ cate_fold1 <- function(fold, data, score, treatment_des) {
   lm.fit(y=y, x=x)$coef
 }
 
-##' .. content for \description{} (no empty lines) ..
+##' Conditional Average Treatment Effect estimation via Double Machine Learning
 ##'
-##' .. content for \details{} ..
-##' @title
-##' @param treatment
-##' @param response_model
-##' @param propensity_model
-##' @param contrast
-##' @param data
-##' @param nfolds
-##' @param type
-##' @param ...
-##' @return
+##' @title Conditional Average Treatment Effect estimation
+##' @param treatment formula specifying treatment and variables to condition on
+##' @param response_model SL object
+##' @param propensity_model SL object
+##' @param contrast treatment contrast (default 1 vs 0)
+##' @param data data.frame
+##' @param nfolds Number of folds
+##' @param type 'dml1' or 'dml2'
+##' @param ... additional arguments to SuperLearner
+##' @return cate.targeted object
 ##' @author Klaus Kähler Holst
 ##' @export
 cate <- function(treatment,

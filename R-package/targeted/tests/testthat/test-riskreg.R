@@ -11,7 +11,7 @@ d <- lava::sim(m,1e3)
 
 testthat::test_that("MLE convergence", {
     fit <- targeted::riskreg(y ~ a | 1 | x+z | 1, data=d, type="rr")
-    influ <- lava::iid(fit)
-    val <- sum(colMeans(influ)^2)
-    testthat::expect_true(val<1e-8)
+    influ <- lava::IC(fit)
+    val <- colMeans(influ)^2
+    testthat::expect_true(val<1e-3)
 })
