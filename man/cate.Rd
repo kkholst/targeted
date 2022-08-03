@@ -2,7 +2,7 @@
 % Please edit documentation in R/cate.R
 \name{cate}
 \alias{cate}
-\title{}
+\title{Conditional Average Treatment Effect estimation}
 \usage{
 cate(
   treatment,
@@ -15,14 +15,28 @@ cate(
   ...
 )
 }
-\value{
+\arguments{
+\item{treatment}{formula specifying treatment and variables to condition on}
 
+\item{response_model}{SL object}
+
+\item{propensity_model}{SL object}
+
+\item{contrast}{treatment contrast (default 1 vs 0)}
+
+\item{data}{data.frame}
+
+\item{nfolds}{Number of folds}
+
+\item{type}{'dml1' or 'dml2'}
+
+\item{...}{additional arguments to SuperLearner}
+}
+\value{
+cate.targeted object
 }
 \description{
-.. content for \description{} (no empty lines) ..
-}
-\details{
-.. content for \details{} ..
+Conditional Average Treatment Effect estimation via Double Machine Learning
 }
 \author{
 Klaus Kähler Holst

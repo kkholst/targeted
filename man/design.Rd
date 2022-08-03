@@ -4,7 +4,7 @@
 \alias{design}
 \title{Extract design matrix}
 \usage{
-design(formula, data, intercept = FALSE, ...)
+design(formula, data, intercept = FALSE, rm_envir = FALSE, ...)
 }
 \arguments{
 \item{formula}{formula}
@@ -12,6 +12,8 @@ design(formula, data, intercept = FALSE, ...)
 \item{data}{data.frame}
 
 \item{intercept}{If FALSE (default) an intercept is not included}
+
+\item{rm_envir}{Remove environment}
 
 \item{...}{additional arguments (e.g, specials such weights, offsets, subset)}
 }

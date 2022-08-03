@@ -23,10 +23,10 @@ SL <- function(formula=~., ...,
                  args <- c(list(Y=Y, X=X, SL.library=SL.library), dots)
                  if (binomial)
                    args <- c(args, list(family=binomial()))
-                 res <- do.call(SuperLearner, args)
+                 res <- do.call(SuperLearner::SuperLearner, args)
                  res$call <- quote(SuperLearner(...))
                  if (binomial)
-                   res$call <- quote(SuperLearner(..., family=binomial()))
+                   res$call <- quote(SuperLearner::SuperLearner(..., family=binomial()))
                  res
                },
                pred=function(object,newdata) {

@@ -2,7 +2,7 @@ Package: targeted
 Type: Package
 Title: Targeted Inference
 Version: 0.2.1
-Date: 2021-10-29
+Date: 2022-08-03
 Authors@R: c(person("Klaus K.", "Holst", email="klaus@holst.it", role=c("aut", "cre")))
 Author: Klaus K. Holst [aut, cre]
 Maintainer: Klaus K. Holst <klaus@holst.it>
@@ -13,7 +13,7 @@ Description: Various methods for targeted and semiparametric inference including
 	     <doi:10.1080/01621459.2016.1192546>).
 Depends:
     R (>= 4.0),
-    lava (>= 1.6.10)
+    lava (>= 1.7.0)
 Imports:
     data.table,
     digest,
@@ -29,6 +29,7 @@ Suggests:
     mgcv,
     testthat (>= 0.11),
     rmarkdown,
+    SuperLearner (>= 2.0-28),
     scatterplot3d,
     knitr
 URL: https://targetlib.org/r/

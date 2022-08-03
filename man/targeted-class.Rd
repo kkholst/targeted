@@ -27,7 +27,7 @@ The following S3 generic functions are available for an object of class \code{ta
 \itemize{
   \item{\code{coef}}{Extract target coefficients of the estimated model.}
   \item{\code{vcov}}{Extract the variance-covariance matrix of the target parameters.}
-  \item{\code{iid}}{Extract the estimated influence function.}
+  \item{\code{IC}}{Extract the estimated influence function.}
   \item{\code{print}}{Print estimates of the target parameters.}
   \item{\code{summary}}{Extract information on both target parameters and estimated nuisance model.}'
  }
