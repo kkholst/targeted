@@ -3,11 +3,13 @@
 ##' @param formula formula
 ##' @param data data.frame
 ##' @param intercept If FALSE (default) an intercept is not included
+##' @param rm_envir Remove environment
 ##' @param ... additional arguments (e.g, specials such weights, offsets, subset)
 ##' @return An object of class 'design'
 ##' @author Klaus Kähler Holst
 ##' @export
-design <- function(formula, data, intercept=FALSE, ...) {
+design <- function(formula, data, intercept=FALSE,
+                   rm_envir=FALSE, ...) {
   tt <- terms(formula, data=data)
   if (!intercept)
     attr(tt, "intercept") <- 0
@@ -25,7 +27,8 @@ design <- function(formula, data, intercept=FALSE, ...) {
     names(specials_list) <- specials
   }
   tt <- delete.response(tt)
-  attr(tt, ".Environment") <- NULL
+  if (rm_envir)
+    attr(tt, ".Environment") <- NULL
   res <- c(list(terms=tt, xlevels=x_levels, x=x, y=y,
                 specials=specials),
            specials_list)
