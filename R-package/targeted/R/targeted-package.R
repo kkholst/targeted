@@ -9,7 +9,7 @@
 ##' @import Rcpp methods
 ##' @importFrom graphics plot points abline lines
 ##' @importFrom grDevices nclass.Sturges
-##' @importFrom lava iid getoutcome estimate Inverse na.pass0
+##' @importFrom lava IC getoutcome estimate Inverse na.pass0
 ##' @importFrom stats approxfun as.formula update binomial deriv density
 ##'  	glm.fit lm.wfit lm.fit glm lm coef vcov
 ##'     model.frame model.matrix na.pass nlminb predict
