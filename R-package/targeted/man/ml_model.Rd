@@ -20,6 +20,8 @@ Klaus Kähler Holst
 \item{\code{info}}{Optional information/name of the model}
 
 \item{\code{formals}}{List with formal arguments of estimation and prediction functions}
+
+\item{\code{formula}}{Formula specifying response and design matrix}
 }
 \if{html}{\out{</div>}}
 }
@@ -79,6 +81,10 @@ and new design matrix, 'newdata')}
 
 \item{\code{specials}}{optional additional terms (weights, offset, id, subset, ...)
 passed to 'fit'}
+
+\item{\code{response.arg}}{name of response argument}
+
+\item{\code{x.arg}}{name of design matrix argument}
 
 \item{\code{...}}{optional arguments to fitting function}
 }

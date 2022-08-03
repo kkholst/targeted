@@ -67,6 +67,7 @@ f0 <- function(data,...) lm(...,data=data)
 f1 <- function(data,...) lm(Sepal.Length~Species,data=data)
 f2 <- function(data,...) lm(Sepal.Length~Species+Petal.Length,data=data)
 x <- cv(list(m0=f0,m1=f1,m2=f2),rep=10, data=iris, formula=Sepal.Length~.)
+x
 }
 \author{
 Klaus K. Holst
