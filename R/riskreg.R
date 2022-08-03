@@ -176,9 +176,9 @@ riskreg_mle <- function(y, a, x1, x2=x1, weights=rep(1, length(y)), std.err=TRUE
     }
     loglik  <- -f(op$par)
     est <- lava::estimate(coef=op$par, vcov=V, ...)
-    est$iid  <- ii
+    est$IC  <- ii*NROW(ii)
     structure(list(estimate=est, npar=c(ncol(x1), ncol(x2)), logLik=loglik, nobs=length(y),
-                   opt=op, bread=V, type=type, estimator="mle"),
+                   opt=op, bread=V*NROW(ii), type=type, estimator="mle"),
               class=c("riskreg.targeted", "targeted"))
 }
 
@@ -270,10 +270,10 @@ riskreg_fit <- function(y, a,
                               weights=weights1, type=type)
         DU  <- deriv(U, pp)
         U0 <- u(alphahat, indiv=TRUE)
-        ## iid.gamma <- iid(propmod)
-        iid.gamma <- fast_iid(y, pr, propensity, weights)
+        iid.gamma <- fast_iid(y, pr, propensity, weights)/length(y)
         Vprop <- crossprod(iid.gamma)
-        iid.theta <- lava::iid(mle$estimate)
+        iid.theta <- lava::IC(mle$estimate)
+        iid.theta <- iid.theta/NROW(iid.theta)
         ii <- (U0 + iid.theta %*% t(DU[, theta.index, drop=FALSE]) +
                iid.gamma %*% t(DU[, gamma.index, drop=FALSE])) %*%
           t(-Inverse(DU[, alpha.index, drop=FALSE]))
@@ -282,7 +282,7 @@ riskreg_fit <- function(y, a,
         V <- ii <- NULL
     }
     est <- lava::estimate(coef=opt$par, vcov=V, ...)
-    est$iid  <- ii
+    est$IC  <- ii*NROW(ii)
     propmod <- lava::estimate(coef=coef(propmod), vcov=Vprop)
     structure(list(estimate=est, opt=opt, npar=c(ncol(target), ncol(nuisance), ncol(propensity)), nobs=length(y),
                    mle=mle, prop=propmod, type=type, estimator="dre"),
@@ -330,7 +330,7 @@ summary.riskreg.targeted <- function(object, ...) {
     }
     if (object$estimator=="mle") {
         cc <- object$estimate
-        cc$iid <- NULL
+        cc$IC <- NULL
     } else {
         cc <- rbind(object$mle$estimate$coefmat, object$prop$coefmat)
         cc[seq_len(object$npar[1]), ] <- object$estimate$coefmat

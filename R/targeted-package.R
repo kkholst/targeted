@@ -9,15 +9,17 @@
 ##' @import Rcpp methods
 ##' @importFrom graphics plot points abline lines
 ##' @importFrom grDevices nclass.Sturges
-##' @importFrom lava iid getoutcome estimate Inverse na.pass0
+##' @importFrom lava IC getoutcome estimate Inverse na.pass0
 ##' @importFrom stats approxfun as.formula update binomial deriv density
 ##'  	glm.fit lm.wfit lm.fit glm lm coef vcov
 ##'     model.frame model.matrix na.pass nlminb predict
 ##'     dnorm quantile terms weighted.mean runif
+##'     .getXlevels delete.response model.response
 ##' @importFrom digest sha1
 ##' @importFrom optimx optimx
 ##' @importFrom data.table data.table is.data.table
 ##' @importFrom futile.logger flog.warn flog.debug flog.info
+##' @importFrom R6 R6Class
 ##' @importFrom utils tail head
 ##' @useDynLib targeted, .registration=TRUE
 ##' @aliases targeted-package targeted
@@ -30,8 +32,7 @@
 ##'
 ##' example(ate)
 ##'
-##' example(calibration
-##' )
+##' example(calibration)
+##'
 loadModule("riskregmodel", TRUE)
 NULL
-##loadModule("dcmodel", TRUE)

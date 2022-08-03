@@ -1,7 +1,7 @@
 /*!
   @file odesolver.h
   @author Klaus K. Holst
-  @copyright 2019-2021, Klaus Kähler Holst
+  @copyright 2019-2022, Klaus Kähler Holst
 
   @brief Classes for Ordinary Differential Equation Solvers
 
@@ -16,9 +16,9 @@ namespace target {
   using arma::mat;
   using arma::uvec;
 
-  arma::mat RK4::solve(mat const &input,
-                       mat init,
-                       mat theta) {
+  mat RK4::solve(mat const &input,
+                 mat init,
+                 mat theta) {
     unsigned n = input.n_rows;
     unsigned p = init.n_elem;
     mat res(n, p);

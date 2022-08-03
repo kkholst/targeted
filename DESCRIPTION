@@ -1,8 +1,8 @@
 Package: targeted
 Type: Package
 Title: Targeted Inference
-Version: 0.2.0
-Date: 2021-10-25
+Version: 0.2.1
+Date: 2021-10-29
 Authors@R: c(person("Klaus K.", "Holst", email="klaus@holst.it", role=c("aut", "cre")))
 Author: Klaus K. Holst [aut, cre]
 Maintainer: Klaus K. Holst <klaus@holst.it>
@@ -21,6 +21,7 @@ Imports:
     future.apply,
 	progressr,
     methods,
+    R6,
     Rcpp (>= 1.0.0),
     optimx
 Suggests:
@@ -28,8 +29,9 @@ Suggests:
     mgcv,
     testthat (>= 0.11),
     rmarkdown,
+    scatterplot3d,
     knitr
-URL: https://www.targetlib.org/r/
+URL: https://targetlib.org/r/
 BugReports: https://github.com/kkholst/targeted/issues
 License: Apache License (== 2.0)
 LinkingTo: Rcpp, RcppArmadillo
@@ -39,5 +41,5 @@ SystemRequirements: C++11
 ByteCompile: yes
 RcppModules: riskregmodel
 Encoding: UTF-8
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 VignetteBuilder: knitr
