@@ -32,15 +32,11 @@
 ##' f1 <- function(data,...) lm(Sepal.Length~Species,data=data)
 ##' f2 <- function(data,...) lm(Sepal.Length~Species+Petal.Length,data=data)
 ##' x <- cv(list(m0=f0,m1=f1,m2=f2),rep=10, data=iris, formula=Sepal.Length~.)
+##' x
 ##' @export
 cv <- function(models, data, response = NULL, K = 5, rep = 1,
                weights = NULL, modelscore,
                seed = NULL, shared = NULL, args.pred = NULL, ...) {
-  if (inherits(data, "list")) {
-    data.arg <- names(data)[1]
-    data <- data[[1]]
-  }
-  if (is.vector(data)) data <- cbind(data)
   if (missing(modelscore)) modelscore <- scoring
   if (!is.list(models)) stop("Expected a list of models")
   nam <- names(models)
@@ -53,6 +49,12 @@ cv <- function(models, data, response = NULL, K = 5, rep = 1,
     if (!is.null(names(response))) response.arg <- names(response)[1]
     response <- response[[1]]
   }
+  if (inherits(data, "list")) {
+    data.arg <- names(data)[1]
+    data <- data[[1]]
+  }
+  if (is.vector(data)) data <- cbind(data)
+
   if (is.character(response) && length(response) == 1) {
     response <- data[, response, drop = TRUE]
   }
@@ -78,7 +80,6 @@ cv <- function(models, data, response = NULL, K = 5, rep = 1,
     args <- c(args, sharedres)
   }
   arglist <- c(list(data), args)
-  names(arglist)[1] <- data.arg
   if (!is.null(weights)) arglist <- c(arglist, list(weights = weights))
 
   arg_response <- rep(FALSE, length(models))
@@ -97,6 +98,7 @@ cv <- function(models, data, response = NULL, K = 5, rep = 1,
   if (arg_response[1]) {
     arglist[response.arg] <- list(response)
   }
+
   if (inherits(f, "ml_model")) {
     fit0 <- do.call(f$estimate, arglist)
     if (is.null(response)) {
@@ -160,7 +162,8 @@ cv <- function(models, data, response = NULL, K = 5, rep = 1,
       args <- c(args, sharedres)
     }
     arglist <- c(list(dtrain), args)
-    names(arglist)[1] <- data.arg
+    if (!is.null(data.arg))
+      names(arglist)[1] <- data.arg
     if (!is.null(weights)) arglist <- c(arglist, list(weights = wtrain))
     fits <- list()
     for (j in seq_along(models)) {
