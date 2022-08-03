@@ -1,6 +1,3 @@
-Model <- function(fit, pred)
-  function()
-  ml_model$new(formula, fit, pred, ...)
 
 ##' R6 class for prediction models
 ##'
@@ -13,6 +10,8 @@ ml_model <- R6::R6Class("ml_model",
       info = NULL,
       ##' @field formals List with formal arguments of estimation and prediction functions
       formals = NULL,
+      ##' @field formula Formula specifying response and design matrix
+      formula = NULL,
 
      ##' @description
      ##' Create a new prediction model object
@@ -25,6 +24,8 @@ ml_model <- R6::R6Class("ml_model",
      ##' @param pred.args optional arguments to prediction function
      ##' @param specials optional additional terms (weights, offset, id, subset, ...)
      ##'   passed to 'fit'
+     ##' @param response.arg name of response argument
+     ##' @param x.arg name of design matrix argument
      ##' @param ... optional arguments to fitting function
      initialize = function(formula=NULL, fit,
                            pred=predict,
@@ -41,7 +42,8 @@ ml_model <- R6::R6Class("ml_model",
       fit_formula <- "formula"%in%formalArgs(fit)
 
       fit_response_arg <- response.arg %in% formalArgs(fit)
-      fit_x_arg <- "x"%in%formalArgs(fit)
+      fit_x_arg <- x.arg%in%formalArgs(fit)
+      fit_data_arg <- "data"%in%formalArgs(fit)
       ## if (!fit_x_arg && !("data"%in%formalArgs(fit)))
       ##   stop("Estimation method must have an argument 'x' or 'data'")
 
@@ -65,13 +67,14 @@ ml_model <- R6::R6Class("ml_model",
         } else {  ##  Formula automatically processed into design matrix & response
           private$fitfun <- function(data, ...) {
             xx <- do.call(design, c(list(formula=formula, data=data), des.args))
+            args <- c(list(xx$x), list(...), dots)
             if (fit_x_arg) {
-              args <- c(dots, list(x=xx$x), list(...))
+              names(args)[1] <- x.arg
             } else {
-              args <- c(dots, list(data=xx$x), list(...))
+              if (fit_data_arg) names(args)[1] <- "data"
             }
             if (fit_response_arg) {
-              args <- c(list(y=xx$y), args)
+              args[response.arg] <- list(xx$y)
             }
             if (length(xx$specials)>0)
               args <- c(args, xx[xx$specials])
@@ -88,7 +91,7 @@ ml_model <- R6::R6Class("ml_model",
           return(do.call(pred, args))
         }
       }
-      private$formula <- formula
+      self$formula <- formula
       self$info <- info
       self$formals <- list(estimate=formals(fit), predict=formals(pred))
       private$call <- list(fit=substitute(fit),
@@ -125,7 +128,7 @@ ml_model <- R6::R6Class("ml_model",
      ##' @param ... Additional arguments to lower level functions
      update = function(formula, ...) {
        ## environment(formula) <- baseenv()
-       private$formula <- formula
+       self$formula <- formula
        environment(private$fitfun)$formula <- formula
      },
 
@@ -139,9 +142,9 @@ ml_model <- R6::R6Class("ml_model",
          cat(self$info, "\n\n")
        cat("Arguments:\n")
        print(unlist(private$call$dots))
-       if (!is.null(private$formula))
+       if (!is.null(self$formula))
          cat("Data:\n",
-             "\t", deparse1(private$formula), "\n", sep="")
+             "\t", deparse1(self$formula), "\n", sep="")
        cat("Model:\n",
            "\tfunction(",paste(names(self$formals[[1]]),
                                collapse=", "), ")\n", sep="")
@@ -155,15 +158,15 @@ ml_model <- R6::R6Class("ml_model",
      ##' Extract response from data
      ##' @param data data.frame
      response = function(data) {
-       if (is.null(private$formula)) return(NULL)
-       design(update(private$formula, ~ 1), data)$y
+       if (is.null(self$formula)) return(NULL)
+       design(update(self$formula, ~ 1), data)$y
      },
 
      ##' @description
      ##' Extract design matrix (features) from data
      ##' @param data data.frame
      design = function(data) {
-       design(private$formula, data)$x
+       design(self$formula, data)$x
      }
 
    ),
@@ -174,8 +177,6 @@ ml_model <- R6::R6Class("ml_model",
    ),
 
    private = list(
-     ## @field formula Formula specifying response and design matrix
-     formula = NULL,
      ## @field predfun Prediction method
      predfun = NULL,
      ## @field fitfun Estimation method
