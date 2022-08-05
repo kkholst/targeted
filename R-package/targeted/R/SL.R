@@ -15,7 +15,6 @@ SL <- function(formula=~., ...,
   dots <- list(...)
   if (!requireNamespace("SuperLearner"))
     stop("Package 'SuperLearner' required.")
-  suppressPackageStartupMessages(require(SuperLearner))
   ml_model$new(formula, info="SuperLearner",
                fit=function(x,y) {
                  Y <- as.numeric(y)

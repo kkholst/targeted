@@ -1,6 +1,10 @@
 # targeted 0.2.1
 
 - Development version
+- CATE estimator 'cate'
+- ml_model class
+- design
+- SL superlearner
 
 # targeted 0.2.0
 

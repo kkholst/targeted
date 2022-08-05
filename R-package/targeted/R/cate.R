@@ -53,8 +53,8 @@ cate <- function(treatment,
   if (inherits(response_model, "formula")) {
     response_model <- SL(response_model, ...)
   }
-  if (length(contrast)!=2)
-    stop("Expected contrast vector length 2.")
+  if (length(contrast)>2)
+    stop("Expected contrast vector of length 1 or 2.")
 
   response_var <- lava::getoutcome(response_model$formula, data=data)
   treatment_var <- lava::getoutcome(treatment)
@@ -86,13 +86,16 @@ cate <- function(treatment,
   }
   names(scores) <- contrast
 
-  Y <- scores[[1]]-scores[[2]]
+  Y <- scores[[1]]
+  if (length(contrast)>1)
+    Y <- Y-scores[[2]]
   if (type=="dml1") {
     est1 <- lapply(folds, function(x) cate_fold1(x, data, Y, desA))
     est <- colMeans(Reduce(rbind, est1))
   } else {
     est <- coef(lm(Y ~ -1+desA$x))
   }
+  names(est) <- names(desA$x)
 
   V <- desA$x
   h0 <- V%*%est
