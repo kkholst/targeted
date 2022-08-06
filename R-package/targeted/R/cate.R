@@ -10,7 +10,9 @@ ate_if_fold <- function(fold, data,
   Y <- response_model$response(deval)
   X <- deval
   X[, treatment] <- level
-  pr <- propensity_model$predict(newdata=deval)[,2]
+  pr <- propensity_model$predict(newdata=deval)
+  if (NCOL(pr)>1)
+    pr <- pr[,2]
   eY <- response_model$predict(newdata=X)
   IF <- A/pr*(Y-eY) + eY
   return(IF)
@@ -35,6 +37,28 @@ cate_fold1 <- function(fold, data, score, treatment_des) {
 ##' @param ... additional arguments to SuperLearner
 ##' @return cate.targeted object
 ##' @author Klaus Kähler Holst
+##' @examples
+##' sim1 <- function(n=1e4,
+##'                  seed=NULL,
+##'                  return_model=FALSE, ...) {
+##' suppressPackageStartupMessages(require("lava"))
+##' if (!is.null(seed)) set.seed(seed)
+##' m <- lava::lvm()
+##' regression(m, ~a) <- function(z1,z2,z3,z4,z5)
+##'          cos(z1)+sin(z1*z2)+z3+z4+z5^2
+##' regression(m, ~u) <- function(a,z1,z2,z3,z4,z5)
+##'         (z1+z2+z3)*a + z1+z2+z3 + a
+##' distribution(m, ~a) <- binomial.lvm()
+##' if (return_model) return(m)
+##' lava::sim(m, n, p=par)
+##' }
+##'
+##' d <- sim1(200)
+##' if (require("SuperLearner",quietly=TRUE)) {
+##'   e <- cate(a ~ z1+z2+z3, response=u~., data=d)
+##'   e
+##' }
+##'
 ##' @export
 cate <- function(treatment,
                  response_model,

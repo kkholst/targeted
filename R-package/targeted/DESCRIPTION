@@ -19,18 +19,18 @@ Imports:
     digest,
     futile.logger,
     future.apply,
+    optimx,
 	progressr,
     methods,
     R6,
-    Rcpp (>= 1.0.0),
-    optimx
+    Rcpp (>= 1.0.0)
 Suggests:
     grf,
     mgcv,
     testthat (>= 0.11),
     rmarkdown,
-    SuperLearner (>= 2.0-28),
     scatterplot3d,
+    SuperLearner (>= 2.0-28),
     knitr
 URL: https://targetlib.org/r/
 BugReports: https://github.com/kkholst/targeted/issues

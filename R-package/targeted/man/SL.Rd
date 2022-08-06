@@ -4,7 +4,13 @@
 \alias{SL}
 \title{SuperLearner wrapper for ml_model}
 \usage{
-SL(formula = ~., ..., SL.library = c("SL.mean", "SL.glm"), binomial = FALSE)
+SL(
+  formula = ~.,
+  ...,
+  SL.library = c("SL.mean", "SL.glm"),
+  binomial = FALSE,
+  data = NULL
+)
 }
 \arguments{
 \item{formula}{Model design}
@@ -14,6 +20,8 @@ SL(formula = ~., ..., SL.library = c("SL.mean", "SL.glm"), binomial = FALSE)
 \item{SL.library}{character vector of prediction algorithms}
 
 \item{binomial}{boolean specifying binomial or gaussian family (default FALSE)}
+
+\item{data}{Optional data.frame}
 }
 \value{
 ml_model object
