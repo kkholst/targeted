@@ -1,5 +1,4 @@
 
-
 ##' SuperLearner wrapper for ml_model
 ##'
 ##' @title SuperLearner wrapper for ml_model
@@ -7,16 +6,18 @@
 ##' @param ... Additional arguments for SuperLearner::SuperLearner
 ##' @param SL.library character vector of prediction algorithms
 ##' @param binomial boolean specifying binomial or gaussian family (default FALSE)
+##' @param data Optional data.frame
 ##' @return ml_model object
 ##' @author Klaus Kähler Holst
 ##' @export
 SL <- function(formula=~., ...,
-               SL.library=c("SL.mean","SL.glm"), binomial=FALSE) {
+               SL.library=c("SL.mean", "SL.glm"),
+               binomial=FALSE,
+               data=NULL) {
   dots <- list(...)
   if (!requireNamespace("SuperLearner"))
     stop("Package 'SuperLearner' required.")
-  suppressPackageStartupMessages(require(SuperLearner))
-  ml_model$new(formula, info="SuperLearner",
+  m <- ml_model$new(formula, info="SuperLearner",
                fit=function(x,y) {
                  Y <- as.numeric(y)
                  X <- as.data.frame(x)
@@ -35,4 +36,7 @@ SL <- function(formula=~., ...,
                    pr <- cbind((1-pr), pr)
                  return(pr)
                })
+  if (!is.null(data))
+    m$estimate(data)
+  return(m)
 }

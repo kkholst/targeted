@@ -48,6 +48,7 @@ NB2 <- function(formula, data, weights=NULL,
         if (prop) res <- res/sum(res)
         return(structure(as.numeric(res), names=names(res)))
     }
+    browser()
     prior0 <- xtabs0(weights, y, prop=TRUE)
     res <- list(prior=prior0,
                conditional=pcond,
