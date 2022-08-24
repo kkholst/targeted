@@ -3,11 +3,8 @@ set(pkg "targeted_template")
 set(target "${pkg}_c")
 
 set(RUN_TESTS TRUE)
-set(CMAKE_CXX_STANDARD 11)
+# set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-if(APPLE)
-  set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
-endif()
 project(${target} CXX)
 
 ################################################################################
@@ -36,20 +33,10 @@ endif()
 FIND_PACKAGE(PythonInterp REQUIRED 3)
 FIND_PACKAGE(PythonLibs REQUIRED 3)
 
-# find_package(Armadillo 9.500 QUIET)
-# if (ARMADILLO_FOUND)
-#   message ([Main]  " Armadillo FOUND")
-# else()
-  message ([Main]  " Using Armadillo included in this package")
-  set(DETECT_HDF5 OFF CACHE BOOL "Disable Armadillo HDF5 support")
-  add_subdirectory(lib/armadillo)
-# endif ()
-
-message([Main] " ARMADILLO_LIBRARIES = ${ARMADILLO_LIBRARIES}")
-message([Main] " ARMADILLO_INCLUDE_DIRS = ${ARMADILLO_INCLUDE_DIRS}")
-message([Main] " PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
-message([Main] " PYTHON_EXECUTABLE = ${PYTHON_EXECUTABLE}")
-message([Main] " PYTHON_INCLUDE_DIRS = ${PYTHON_INCLUDE_DIRS}")
+message ([Main]  " Using Armadillo included in this package")
+set(DETECT_HDF5 OFF CACHE BOOL "Disable Armadillo HDF5 support")
+add_subdirectory(lib/armadillo)
+add_subdirectory(lib/eigen)
 
 ################################################################################
 # Tests
@@ -87,9 +74,15 @@ message( [Main] " LIBTARGET_CPP = ${LIBTARGET_CPP}")
 message( [Main] " LIBTARGET_INC = ${LIBTARGET_INC}")
 include_directories(${LIBTARGET_INC} LIBTARGET)
 
+file(GLOB PKG_SRC src/${pkg}/*.cpp)
+
 pybind11_add_module(__${target}__
-  ${LIBTARGET_SRC} ${LIBTARGET_HDR}
-  src/${pkg}/interface.cpp
+  ${LIBTARGET_CPP}/utils.cpp
+  ${LIBTARGET_CPP}/glm.cpp
+  # ${LIBTARGET_SRC}
+  ${LIBTARGET_HDR}
+  ${PKG_SRC}
+  #src/${pkg}/interface.cpp
  )
 
 if(APPLE)
@@ -101,4 +94,4 @@ else()
   #set_target_properties(__${target}__ PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN")
 endif()
 
-target_link_libraries(__${target}__ PRIVATE armadillo)
+target_link_libraries(__${target}__ PRIVATE armadillo eigen)

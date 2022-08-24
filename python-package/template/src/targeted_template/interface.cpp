@@ -2,10 +2,10 @@
 #include <complex>
 #include <memory>     // smart pointers (unique_ptr)
 #include <pybind11/stl.h>
-#include <target/utils.hpp>
 #include <target/glm.hpp>
 #include "armapy.hpp"
 #include "py_test.hpp"
+#include "loop.hpp"
 
 
 pyarray expit(pyarray &x) {
@@ -18,6 +18,9 @@ PYBIND11_MODULE(__targeted_template_c__, m) {
 
   m.def("expit", &expit, "Sigmoid function (inverse logit)");
   //m.#define ("expit", [](arma::mat &x) { return target::expit(x); }, "Sigmoid function (inverse logit)");
+  m.def("myloop", &myloop, "test loop");
+  m.def("scale2", &scale2);
+  m.def("add", &add);
 
   py::class_<Test>(m, "testclass")
     .def(py::init<pyarray &, pyarray &,  // x, y

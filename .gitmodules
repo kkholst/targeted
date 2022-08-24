@@ -6,7 +6,7 @@
 	path = lib/armadillo
 	shallow = true
 	url = https://gitlab.com/conradsnicta/armadillo-code.git
-	branch = 10.4.x
+	branch = unstable 
 [submodule "lib/spdlog"]
 	path = lib/spdlog
 	shallow = true
@@ -15,3 +15,6 @@
 	path = lib/doctest
 	shallow = true
 	url = https://github.com/onqtam/doctest
+[submodule "lib/eigen"]
+	path = lib/eigen
+	url = https://gitlab.com/libeigen/eigen.git
