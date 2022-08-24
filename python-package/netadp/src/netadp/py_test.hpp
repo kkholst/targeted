@@ -1,3 +1,5 @@
+#pragma once
+
 #include <pybind11/stl.h>
 #include <target/utils.hpp>
 #include "armapy.hpp"

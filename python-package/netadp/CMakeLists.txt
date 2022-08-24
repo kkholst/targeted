@@ -90,6 +90,7 @@ include_directories(${LIBTARGET_INC} LIBTARGET)
 pybind11_add_module(__${target}__
   ${LIBTARGET_SRC} ${LIBTARGET_HDR}
   src/${pkg}/interface.cpp
+  src/${pkg}/loop.cpp
  )
 
 if(APPLE)
