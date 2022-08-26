@@ -11,6 +11,7 @@ tg.expit(x)
 
 tg.add1([1,2,3])
 
-#a = x.copy()
-#a.flags.f_contiguous = True
-#tg.scale2(a)
+a = np.array(x.copy(), dtype='float64', order='F')
+tg.scale2(a)
+tg.scale2(a)
+a

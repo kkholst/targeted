@@ -3,7 +3,7 @@ set(pkg "targeted_template")
 set(target "${pkg}_c")
 
 set(RUN_TESTS TRUE)
-# set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(${target} CXX)
 
