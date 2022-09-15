@@ -1,26 +1,31 @@
 #include <pybind11/stl.h>
+#include <vector>
 #include <target/utils.hpp>
-#include "armapy.hpp"
+
 
 
 class Test {
-
-private:
-    arma::mat x;
-    arma::mat y;
+// private:
+//     arma::mat x;
+//     arma::mat y;
 
 public:
-    Test(pyarray &x, pyarray &y, std::string type) {
-      this->x = pymat(x);
-      this->y = pymat(y);
+    std::vector<double> x;
+    std::vector<double> y;
+
+    Test(std::vector<double> &x, std::vector<double> &y, std::string type) {
+      this->x = x;
+      this->y = y;
     }
 
-    void update_x(pyarray &x) {
-      this->x = pymat(x);
+    void update_x(std::vector<double> &x) {
+      this->x = x;
     }
 
-    pyarray calc() {
-      arma::mat res = x+y;
-      return matpy(res);
+    std::vector<double> calc() {
+      std::vector<double> res = this->x;
+      for (unsigned i=0; i<x.size(); i++)
+        res[i] += y[i];
+      return res;
     }
 };
