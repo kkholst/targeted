@@ -35,19 +35,19 @@ Klaus Kähler Holst
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{ml_model$new()}}
-\item \href{#method-estimate}{\code{ml_model$estimate()}}
-\item \href{#method-predict}{\code{ml_model$predict()}}
-\item \href{#method-update}{\code{ml_model$update()}}
-\item \href{#method-print}{\code{ml_model$print()}}
-\item \href{#method-response}{\code{ml_model$response()}}
-\item \href{#method-design}{\code{ml_model$design()}}
-\item \href{#method-clone}{\code{ml_model$clone()}}
+\item \href{#method-ml_model-new}{\code{ml_model$new()}}
+\item \href{#method-ml_model-estimate}{\code{ml_model$estimate()}}
+\item \href{#method-ml_model-predict}{\code{ml_model$predict()}}
+\item \href{#method-ml_model-update}{\code{ml_model$update()}}
+\item \href{#method-ml_model-print}{\code{ml_model$print()}}
+\item \href{#method-ml_model-response}{\code{ml_model$response()}}
+\item \href{#method-ml_model-design}{\code{ml_model$design()}}
+\item \href{#method-ml_model-clone}{\code{ml_model$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-ml_model-new"></a>}}
+\if{latex}{\out{\hypertarget{method-ml_model-new}{}}}
 \subsection{Method \code{new()}}{
 Create a new prediction model object
 \subsection{Usage}{
@@ -92,8 +92,8 @@ passed to 'fit'}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-estimate"></a>}}
-\if{latex}{\out{\hypertarget{method-estimate}{}}}
+\if{html}{\out{<a id="method-ml_model-estimate"></a>}}
+\if{latex}{\out{\hypertarget{method-ml_model-estimate}{}}}
 \subsection{Method \code{estimate()}}{
 Estimation method
 \subsection{Usage}{
@@ -113,8 +113,8 @@ Estimation method
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-predict"></a>}}
-\if{latex}{\out{\hypertarget{method-predict}{}}}
+\if{html}{\out{<a id="method-ml_model-predict"></a>}}
+\if{latex}{\out{\hypertarget{method-ml_model-predict}{}}}
 \subsection{Method \code{predict()}}{
 Prediction method
 \subsection{Usage}{
@@ -134,8 +134,8 @@ Prediction method
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-update"></a>}}
-\if{latex}{\out{\hypertarget{method-update}{}}}
+\if{html}{\out{<a id="method-ml_model-update"></a>}}
+\if{latex}{\out{\hypertarget{method-ml_model-update}{}}}
 \subsection{Method \code{update()}}{
 Update formula
 \subsection{Usage}{
@@ -153,8 +153,8 @@ Update formula
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-print"></a>}}
-\if{latex}{\out{\hypertarget{method-print}{}}}
+\if{html}{\out{<a id="method-ml_model-print"></a>}}
+\if{latex}{\out{\hypertarget{method-ml_model-print}{}}}
 \subsection{Method \code{print()}}{
 Print method
 \subsection{Usage}{
@@ -170,8 +170,8 @@ Print method
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-response"></a>}}
-\if{latex}{\out{\hypertarget{method-response}{}}}
+\if{html}{\out{<a id="method-ml_model-response"></a>}}
+\if{latex}{\out{\hypertarget{method-ml_model-response}{}}}
 \subsection{Method \code{response()}}{
 Extract response from data
 \subsection{Usage}{
@@ -187,8 +187,8 @@ Extract response from data
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-design"></a>}}
-\if{latex}{\out{\hypertarget{method-design}{}}}
+\if{html}{\out{<a id="method-ml_model-design"></a>}}
+\if{latex}{\out{\hypertarget{method-ml_model-design}{}}}
 \subsection{Method \code{design()}}{
 Extract design matrix (features) from data
 \subsection{Usage}{
@@ -204,8 +204,8 @@ Extract design matrix (features) from data
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-ml_model-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-ml_model-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{
