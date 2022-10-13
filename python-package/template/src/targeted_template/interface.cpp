@@ -7,11 +7,22 @@
 #include "armapy.hpp"
 #include "py_test.hpp"
 #include "loop.hpp"
+#include <algorithm>
+#include <string>
+#include <random>
+#include <iterator>
 
 
 pyarray expit(pyarray &x) {
   arma::mat res = target::expit(pymat(x));
   return matpy(res);
+}
+
+std::string samp() {
+  std::string in = "Sangmin", out;
+  std::sample(in.begin(), in.end(), std::back_inserter(out),
+    5, std::mt19937{std::random_device{}()});
+  return out;
 }
 
 PYBIND11_MODULE(__targeted_template_c__, m) {
@@ -21,6 +32,7 @@ PYBIND11_MODULE(__targeted_template_c__, m) {
   m.def("myloop", &myloop, "test loop");
   m.def("scale2", &scale2);
   m.def("add", &add);
+  m.def("samp", &samp);
 
   py::class_<Test>(m, "testclass")
     .def(py::init<std::vector<double> &, std::vector<double> &,  // x, y
