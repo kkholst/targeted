@@ -1,7 +1,7 @@
 /*!
   @file utils.cpp
   @author Klaus K. Holst
-  @copyright 2020-2021, Klaus Kähler Holst
+  @copyright 2020-2022, Klaus Kähler Holst
 
   @brief Various utility functions and constants
 
