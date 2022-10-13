@@ -1,3 +1,4 @@
+.ccls*
 .clangd
 compile_commands.json
 Debug
