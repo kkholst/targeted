@@ -62,19 +62,19 @@ Estimation of the Average Treatment Effect among Responders for Survival Outcome
 \details{
 Estimation of
 \deqn{
-\frac{\mathbb{P}(T \leq \tau|A=1) - \mathbb{P}(T \leq \tau|A=1)}{\mathbb{E}[D|A=1]}
+\frac{P(T \leq \tau|A=1) - P(T \leq \tau|A=1)}{E[D|A=1]}
 }
-under right censoring based on plug-in estimates of \eqn{\mathbb{P}(T \leq \tau|A=a)} and \eqn{\mathbb{E}[D|A=1]}.
+under right censoring based on plug-in estimates of \eqn{P(T \leq \tau|A=a)} and \eqn{E[D|A=1]}.
 
-An efficient one-step estimator of \eqn{\mathbb{P}(T \leq \tau|A=a)} is constructed using
+An efficient one-step estimator of \eqn{P(T \leq \tau|A=a)} is constructed using
 the efficient influence function
 \deqn{
-\frac{I\{A=a\}}{\mathbb{P}(A = a)} \Big(\frac{\Delta}{S^c_{0}(\tilde T|X)} I\{\tilde T \leq \tau\} + \int_0^\tau \frac{S_0(u|X)-S_0(\tau|X)}{S_0(u|X)S^c_0(u|X)} d M^c_0(u|X))\Big)\\
-+ \Big(1 - \frac{I\{A=a\}}{\mathbb{P}(A = a)}\Big)F_0(\tau|A=a, W) - \mathbb{P}(T \leq \tau|A=a).
+\frac{I\{A=a\}}{P(A = a)} \Big(\frac{\Delta}{S^c_{0}(\tilde T|X)} I\{\tilde T \leq \tau\} + \int_0^\tau \frac{S_0(u|X)-S_0(\tau|X)}{S_0(u|X)S^c_0(u|X)} d M^c_0(u|X))\Big)\\
++ \Big(1 - \frac{I\{A=a\}}{P(A = a)}\Big)F_0(\tau|A=a, W) - P(T \leq \tau|A=a).
 }
-An efficient one-step estimator of \eqn{\mathbb{E}[D|A=1]} is constructed using the efficient influence function
+An efficient one-step estimator of \eqn{E[D|A=1]} is constructed using the efficient influence function
 \deqn{
-\frac{A}{\mathbb{P}(A = 1)}\left(D-\mathbb{E}[D|A=1, W]\right) + \mathbb{E}[D|A=1, W] -\mathbb{E}[D|A=1].
+\frac{A}{P(A = 1)}\left(D-E[D|A=1, W]\right) + E[D|A=1, W] -E[D|A=1].
 }
 }
 \author{
