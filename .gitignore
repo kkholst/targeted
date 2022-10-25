@@ -1,3 +1,8 @@
+autom4te.cache
+config.status
+R-package/targeted/configure
+.RDataTmp
+
 .ccls*
 .clangd
 compile_commands.json
