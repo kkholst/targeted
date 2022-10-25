@@ -1,7 +1,7 @@
 /*!
   @file glm.cpp
   @author Klaus K. Holst
-  @copyright 2018-2021, Klaus Kähler Holst
+  @copyright 2018-2022, Klaus Kähler Holst
 
   @brief Utility functions for Generalized Linear Models
 
@@ -76,17 +76,17 @@ namespace target {
 		 const arma::mat &x,
 		 const arma::vec &w) {
     arma::vec r = (y-p);
-    double df = y.n_elem-x.n_cols;
+    // double df = y.n_elem-x.n_cols;
+    // double sigma2 = sum(r%s)/df;
     arma::vec s = r%w;
-    double sigma2 = sum(r%s)/df;
     arma::mat U = x;
     for (unsigned i=0; i < x.n_cols; i++)
-      U.col(i) %= s/sigma2;
+      U.col(i) %= s;
     arma::mat H = arma::zeros(x.n_cols, x.n_cols);
     for (unsigned i=0; i < x.n_rows; i++) {
       H += w[i]*trans(x.row(i))*x.row(i);
     }
-    return IID(U, sigma2*H.i());
+    return IID(U, H.i());
   }
 
 }  // namespace target

@@ -33,19 +33,12 @@ namespace target {
   arma::vec softmax(arma::vec u);
   arma::mat softmax(arma::mat lp, bool ref, bool log);
 
-  // template<typename T>
-  // arma::Mat<T> expit(const arma::Mat<T> &x) {
-  //   return 1.0/(1+exp(-x));
-  // }
-  arma::mat expit(arma::mat x);
-  arma::cx_mat expit(arma::cx_mat x);
-
   class IID {
   public:
     arma::mat iid;
     arma::mat vcov;
     IID(): iid(arma::zeros(1, 1)), vcov(arma::zeros(1, 1)) {}
-    IID(arma::mat score, arma::mat v): iid(score*v), vcov(v) {}
+    IID(arma::mat score, arma::mat v): iid(score*v*score.n_rows), vcov(v) {}
   };
 
   IID logistic_iid(const arma::vec &y,
