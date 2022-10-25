@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019-2020 Klaus K. Holst.  All rights reserved.
+# Copyright (c) 2019-2022 Klaus K. Holst.  All rights reserved.
 
 import targeted as tg
 import numpy as np
