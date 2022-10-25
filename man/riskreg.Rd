@@ -112,6 +112,8 @@ with(d, riskreg_fit(y, a, nuisance=X, type="rr"))
 a <- riskreg(y ~ a, nuisance=~x,  data=d, type="rr")
 a
 
+riskreg(y ~ a, nuisance=~x,  data=d, type="rr", mle=TRUE)
+
 
 }
 \references{
