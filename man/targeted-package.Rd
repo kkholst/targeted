@@ -14,12 +14,12 @@ causal inference.
 
 example(riskreg)
 
-example(ate)
+example(cate)
 
 example(calibration)
 
 }
 \author{
-Klaus K. Holst Maintainer: <klaus@holst.it>
+Klaus K. Holst (Maintainer) \href{mailto:klaus@holst.it}{klaus@holst.it}
 }
 \keyword{package}
