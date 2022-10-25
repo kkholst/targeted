@@ -3,8 +3,7 @@ Type: Package
 Title: Targeted Inference
 Version: 0.3
 Date: 2022-10-25
-Authors@R: c(person(given = "Klaus",
-                    middle = "K.",
+Authors@R: c(person(given = "Klaus K.",
                     family = "Holst",
                     role = c("aut", "cre"),
                     email = "klaus@holst.it",
@@ -44,7 +43,6 @@ Suggests:
     scatterplot3d,
     SuperLearner (>= 2.0-28),
     knitr
-URL: https://targetlib.org/r/
 BugReports: https://github.com/kkholst/targeted/issues
 License: Apache License (== 2.0)
 LinkingTo: Rcpp, RcppArmadillo

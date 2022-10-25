@@ -1,10 +1,10 @@
-# targeted 0.2.1
+# targeted 0.3
 
-- Development version
-- CATE estimator 'cate'
-- ml_model class
+- Conditional average treatment estimator `cate`, `crr`
+- Generic prediction model class `ml_model`
 - design
-- SL superlearner
+- SuperLearner wrapper `SL`
+- Average Treatment among responders `RATE`
 
 # targeted 0.2.0
 
