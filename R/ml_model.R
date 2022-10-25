@@ -10,7 +10,7 @@
 ##'              fit=function(x,y, ...) grf::probability_forest(X=x, Y=y, ...),
 ##'              pred=function(fit, newdata) predict(fit, newdata)$predictions, ...)
 ##'
-##' args <- expand.list(num.trees=c(50,100,200), mtry=1:3,
+##' args <- expand.list(num.trees=c(100,200), mtry=1:3,
 ##'                    formula=c(Species ~ ., Species ~ Sepal.Length + Sepal.Width))
 ##' models <- lapply(args, function(par) do.call(rf, par))
 ##'
@@ -18,8 +18,10 @@
 ##' x$estimate(iris)
 ##' predict(x, newdata=head(iris))
 ##'
+##' \donttest{ # Reduce Ex. timing
 ##' a <- targeted::cv(models, data=iris)
 ##' cbind(coef(a), attr(args, "table"))
+##' }
 ##' @export
 ml_model <- R6::R6Class("ml_model",
     public = list(
