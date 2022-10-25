@@ -11,7 +11,7 @@
 <!-- badges: end -->
 
 
-# Targeted Inference in R: targeted <a href="https://www.targetlib.org/r/"><img src="man/figures/logo.svg" align="right" height="75" /></a>
+# Targeted Inference in R: targeted <a href="https://kkholst.github.io/targeted/"><img src="man/figures/logo.svg" align="right" height="75" /></a>
 
 Various methods for targeted and semiparametric inference including
 augmented inverse probability weighted estimators for missing data and
