@@ -32,7 +32,7 @@ elements additional exogenous input variables,}
 \eqn{y'(t) = f_{p}(x(t), y(t))}
 All variables are treated as Armadillo (http://arma.sourceforge.net/) vectors/matrices.
 
-As an example consider the *Lorenz Equations*
+As an example consider the \emph{Lorenz Equations}
 \eqn{\frac{dx_{t}}{dt} = \sigma(y_{t}-x_{t})}
 \eqn{\frac{dy_{t}}{dt} = x_{t}(\rho-z_{t})-y_{t}}
 \eqn{\frac{dz_{t}}{dt} = x_{t}y_{t}-\beta z_{t}}

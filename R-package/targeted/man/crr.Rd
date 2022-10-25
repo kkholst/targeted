@@ -19,9 +19,11 @@ crr(
 \arguments{
 \item{treatment}{formula specifying treatment and variables to condition on}
 
-\item{response_model}{SL object}
+\item{response_model}{SL object (outcome/response model)}
 
-\item{propensity_model}{SL object}
+\item{propensity_model}{SL object (treatment/propensity model)}
+
+\item{importance_model}{SL object (conditional expectation of outcome model on variables conditioned on in treatment argument)}
 
 \item{contrast}{treatment contrast (default 1 vs 0)}
 
@@ -42,18 +44,18 @@ Conditional Relative Risk estimation via Double Machine Learning
 \examples{
 sim1 <- function(n=1e4,
                  seed=NULL,
-                 return_model=FALSE, ...){
-suppressPackageStartupMessages(require("lava"))
-if (!is.null(seed)) set.seed(seed)
-m <- lava::lvm()
-distribution(m, ~x) <- gaussian.lvm()
-distribution(m, ~v) <- gaussian.lvm(mean = 5)
-distribution(m, ~a) <- binomial.lvm("logit")
-regression(m, "a") <- function(v, x){.2*v + x}
-distribution(m, "y") <- gaussian.lvm()
-regression(m, "y") <- function(a, v, x){v+x+a*x+a*v*v}
-if (return_model) return(m)
-lava::sim(m, n = n)
+                 return_model=FALSE, ...) {
+  suppressPackageStartupMessages(require("lava"))
+  if (!is.null(seed)) set.seed(seed)
+  m <- lava::lvm()
+  distribution(m, ~x) <- gaussian.lvm()
+  distribution(m, ~v) <- gaussian.lvm(mean = 5)
+  distribution(m, ~a) <- binomial.lvm("logit")
+  regression(m, "a") <- function(v, x){.2*v + x}
+  distribution(m, "y") <- gaussian.lvm()
+  regression(m, "y") <- function(a, v, x){v+x+a*x+a*v*v}
+  if (return_model) return(m)
+  lava::sim(m, n = n)
 }
 
 d <- sim1(n = 1e4, seed = 1)

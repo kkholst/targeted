@@ -23,7 +23,7 @@ cv(
 
 \item{data}{data.frame or matrix}
 
-\item{response}{Response variable (vector or name of column in `data`).##'}
+\item{response}{Response variable (vector or name of column in \code{data}).##'}
 
 \item{K}{Number of folds (default 5. K=0 splits in 1:n/2, n/2:n with last part
 used for testing)}
@@ -46,8 +46,8 @@ below)}
 }
 \value{
 An object of class '\code{cross_validated}' is returned. See
-  \code{\link{cross_validated-class}} for more details about this class and
-  its generic functions.
+\code{\link{cross_validated-class}} for more details about this class and
+its generic functions.
 }
 \description{
 Generic cross-validation function
@@ -57,7 +57,7 @@ models should be list of objects of class ml_model.
 Alternatively, each element of models should be a list with a fitting function
 and a prediction function.
 
-The `reponse` argument can optionally be a named list where the name is then
+The \code{reponse} argument can optionally be a named list where the name is then
 used as the name of the response argument in models. Similarly, if data
 is a named list with a single data.frame/matrix then this name will be used
 as the name of the data/design matrix argument in models.

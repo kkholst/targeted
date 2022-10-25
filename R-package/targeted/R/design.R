@@ -65,3 +65,12 @@ summary.design <- function(object, ...) {
   for (i in object$specials) object[[i]] <- NULL
   return(object)
 }
+
+get_response <- function(formula, ...) {
+  if (!is.null(attr(formula, "response"))) {
+    y <- get(attr(formula, "response"), envir=environment(formula))
+  } else {
+    y <- model.response(model.frame(formula, ...))
+  }
+  return(y)
+}
