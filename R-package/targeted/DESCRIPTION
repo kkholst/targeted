@@ -1,9 +1,10 @@
 Package: targeted
 Type: Package
 Title: Targeted Inference
-Version: 0.2.1
-Date: 2022-08-03
+Version: 0.3
+Date: 2022-10-25
 Authors@R: c(person(given = "Klaus",
+                    middle = "K.",
                     family = "Holst",
                     role = c("aut", "cre"),
                     email = "klaus@holst.it",
