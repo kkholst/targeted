@@ -70,3 +70,4 @@ __pycache__
 # End of https://www.gitignore.io/api/c++
 /R-package/targeted/_test.R
 /y.csv
+.Rproj.user
