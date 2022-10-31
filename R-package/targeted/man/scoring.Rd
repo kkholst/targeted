@@ -35,7 +35,7 @@ these can be named arguments)}
 }
 \value{
 Numeric matrix of dimension m x p, where m is the number of
-  different models and p is the number of model metrics
+different models and p is the number of model metrics
 }
 \description{
 Predictive model scoring
