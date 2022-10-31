@@ -78,8 +78,6 @@ multiclass_scoring1 <-
 ##' @param names optional names of models coments (given as ..., alternatively
 ##'   these can be named arguments)
 ##' @param messages controls amount of messages/warnings (0: none)
-##' @return
-##' @export
 ##' @examples
 ##' data(iris)
 ##' set.seed(1)

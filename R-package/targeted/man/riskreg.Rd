@@ -17,7 +17,7 @@ riskreg(
   optimal = TRUE,
   std.err = TRUE,
   start = NULL,
-  semi = TRUE,
+  mle = FALSE,
   ...
 )
 }
@@ -42,7 +42,7 @@ riskreg(
 
 \item{start}{optional starting values}
 
-\item{semi}{Semi-parametric (double-robust) estimate (FALSE gives MLE)}
+\item{mle}{Semi-parametric (double-robust) estimate or MLE (TRUE gives MLE)}
 
 \item{...}{additional arguments to unconstrained optimization routine (nlminb)}
 }
@@ -112,13 +112,15 @@ with(d, riskreg_fit(y, a, nuisance=X, type="rr"))
 a <- riskreg(y ~ a, nuisance=~x,  data=d, type="rr")
 a
 
+riskreg(y ~ a, nuisance=~x,  data=d, type="rr", mle=TRUE)
+
 
 }
 \references{
 Richardson, T. S., Robins, J. M., & Wang, L. (2017). On modeling and
- estimation for the relative risk and risk difference. Journal of the
- American Statistical Association, 112(519),
- 1121–1130. http://dx.doi.org/10.1080/01621459.2016.1192546
+estimation for the relative risk and risk difference. Journal of the
+American Statistical Association, 112(519),
+1121–1130. http://dx.doi.org/10.1080/01621459.2016.1192546
 }
 \author{
 Klaus K. Holst

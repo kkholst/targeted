@@ -1,3 +1,12 @@
+devel
+test.R
+
+autom4te.cache
+config.status
+R-package/targeted/configure
+.RDataTmp
+
+.ccls*
 .clangd
 compile_commands.json
 Debug

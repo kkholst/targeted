@@ -14,23 +14,23 @@ The functions \code{\link{riskreg}} and \code{\link{ate}} returns an object of t
 
 An object of class '\code{targeted}' is a list with at least the following components:
 \describe{
-  \item{estimate}{An \code{estimate} object with the target parameter
-  estimates (see \code{\link[lava]{estimate.default}})}
-  \item{opt}{Object returned from the applied optimization routine}
-  \item{npar}{number of parameters of the model (target and nuisance)}
-  \item{type}{String describing the model}
+\item{estimate}{An \code{estimate} object with the target parameter
+estimates (see \code{\link[lava]{estimate.default}})}
+\item{opt}{Object returned from the applied optimization routine}
+\item{npar}{number of parameters of the model (target and nuisance)}
+\item{type}{String describing the model}
 }
 }
 \section{S3 generics}{
 
 The following S3 generic functions are available for an object of class \code{targeted}:
 \itemize{
-  \item{\code{coef}}{Extract target coefficients of the estimated model.}
-  \item{\code{vcov}}{Extract the variance-covariance matrix of the target parameters.}
-  \item{\code{IC}}{Extract the estimated influence function.}
-  \item{\code{print}}{Print estimates of the target parameters.}
-  \item{\code{summary}}{Extract information on both target parameters and estimated nuisance model.}'
- }
+\item{\code{coef}}{Extract target coefficients of the estimated model.}
+\item{\code{vcov}}{Extract the variance-covariance matrix of the target parameters.}
+\item{\code{IC}}{Extract the estimated influence function.}
+\item{\code{print}}{Print estimates of the target parameters.}
+\item{\code{summary}}{Extract information on both target parameters and estimated nuisance model.}'
+}
 }
 
 \examples{

@@ -14,25 +14,23 @@
 ##'  	glm.fit lm.wfit lm.fit glm lm coef vcov
 ##'     model.frame model.matrix na.pass nlminb predict
 ##'     dnorm quantile terms weighted.mean runif
-##'     .getXlevels delete.response model.response
+##'     .getXlevels delete.response model.response gaussian
 ##' @importFrom digest sha1
 ##' @importFrom optimx optimx
 ##' @importFrom data.table data.table is.data.table
 ##' @importFrom futile.logger flog.warn flog.debug flog.info
 ##' @importFrom R6 R6Class
+##' @importFrom survival survfit
 ##' @importFrom utils tail head
 ##' @useDynLib targeted, .registration=TRUE
 ##' @aliases targeted-package targeted
 ##' @docType package
-##' @author Klaus K. Holst Maintainer: <klaus@@holst.it>
+##' @author Klaus K. Holst (Maintainer) <klaus@@holst.it>
 ##' @keywords package
 ##' @examples
-##'
 ##' example(riskreg)
-##'
+##' example(cate)
 ##' example(ate)
-##'
 ##' example(calibration)
-##'
 loadModule("riskregmodel", TRUE)
 NULL

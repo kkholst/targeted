@@ -1,7 +1,7 @@
 /*!
   @file pava.cpp
   @author Klaus K. Holst
-  @copyright 2020-2021, Klaus Kähler Holst
+  @copyright 2020-2022, Klaus Kähler Holst
 
   @brief Pooled Adjacent Violator Algorithms
 
