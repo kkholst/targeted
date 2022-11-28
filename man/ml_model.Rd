@@ -30,6 +30,11 @@ predict(x, newdata=head(iris))
 a <- targeted::cv(models, data=iris)
 cbind(coef(a), attr(args, "table"))
 }
+
+ff <- ml_model$new(fit=function(y,x) lm.fit(x=x, y=y),
+                   pred=function(fit, newdata) newdata\%*\%aa$coefficients)
+## tmp <- ff$estimate(y, x=x)
+## ff$predict(x)
 }
 \author{
 Klaus Kähler Holst
