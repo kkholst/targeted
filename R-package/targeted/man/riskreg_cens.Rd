@@ -10,6 +10,7 @@ riskreg_cens(
   treatment = NULL,
   prediction = NULL,
   data,
+  newdata,
   tau,
   type = "risk",
   M = 1,
@@ -26,13 +27,18 @@ riskreg_cens(
 \arguments{
 \item{response}{Response formula (e.g., Surv(time, event) ~ D + W).}
 
-\item{censoring}{Censoring formula (e.g., Surv(time, event == 0) ~ D + A + W)).}
+\item{censoring}{Censoring formula (e.g., Surv(time, event == 0) ~ D + A +
+W)).}
 
 \item{treatment}{Optional treatment model (ml_model)}
 
 \item{prediction}{Optional prediction model (ml_model)}
 
 \item{data}{data.frame.}
+
+\item{newdata}{Optional data.frame. In this case the uncentered influence
+function evalued in 'newdata' is returned with nuisance parameters
+obtained from 'data'.}
 
 \item{tau}{Time-point of interest, see Details.}
 
@@ -52,7 +58,8 @@ riskreg_cens(
 
 \item{efficient}{If FALSE an IPCW estimator is returned}
 
-\item{...}{Additional arguments to lower level data pre-processing functions.}
+\item{...}{Additional arguments to lower level data pre-processing
+functions.}
 }
 \value{
 estimate object
