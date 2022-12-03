@@ -26,6 +26,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -38,29 +40,26 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">targeted</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
 <li>
-  <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
-<li>
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="../articles/ate.html">Average Treatment Effects</a>
+    </li>
+    <li>
       <a href="../articles/riskregression.html">Estimating a relative risk or risk difference with a binary exposure</a>
     </li>
   </ul>
@@ -71,8 +70,8 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/kkholst/targeted/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+  <a href="https://github.com/kkholst/targeted/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -90,20 +89,20 @@
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Estimating a relative risk or risk difference with a binary exposure</h1>
-                        <h4 class="author">Klaus Kähler Holst</h4>
+                        <h4 data-toc-skip class="author">Klaus Kähler Holst</h4>
             
-            <h4 class="date">2020-09-09</h4>
+            <h4 data-toc-skip class="date">2022-12-03</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/kkholst/targeted/blob/master/vignettes/riskregression.Rmd"><code>vignettes/riskregression.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/kkholst/targeted/blob/HEAD/vignettes/riskregression.Rmd" class="external-link"><code>vignettes/riskregression.Rmd</code></a></small>
       <div class="hidden name"><code>riskregression.Rmd</code></div>
 
     </div>
 
     
     
-<div id="introduction" class="section level1">
-<h1 class="hasAnchor">
-<a href="#introduction" class="anchor"></a>Introduction</h1>
+<div class="section level2">
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+</h2>
 <p>Let <span class="math inline">\(Y\)</span> be a <em>binary response</em>, <span class="math inline">\(A\)</span> a <em>binary exposure</em>, and <span class="math inline">\(V\)</span> a <em>vector of covariates</em>.</p>
 <div class="figure">
 <img src="dag1.svg" alt="DAG for the statistical model with the dashed edge representing a potential interaction between exposure A and covariates V."><p class="caption">DAG for the statistical model with the dashed edge representing a potential interaction between exposure <span class="math inline">\(A\)</span> and covariates <span class="math inline">\(V\)</span>.</p>
@@ -119,7 +118,7 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 \neq \operatorname{expit}[\mu + \alpha X + \beta E(Z\mid X)],
 \]</span></p>
 <p>When marginalizing we leave the class of logistic regression. This non-collapsibility makes it hard to interpret odds-ratios and to compare results from <em>different studies</em></p>
-<p><strong>Relative risks</strong> (and risk differences) are collapsible and generally considered easier to interpret than odds-ratios. <a href="https://doi.org/10.1080/01621459.2016.1192546">Richardson et al</a> (JASA, 2017) proposed a regression model for a binary exposures which solves the computational problems and need for parameter contraints that are associated with using for example binomial regression with a log-link function (or identify link for the risk difference) to obtain such parameter estimates. In the following we consider the relative risk as the <strong>target parameter</strong></p>
+<p><strong>Relative risks</strong> (and risk differences) are collapsible and generally considered easier to interpret than odds-ratios. <a href="https://doi.org/10.1080/01621459.2016.1192546" class="external-link">Richardson et al</a> (JASA, 2017) proposed a regression model for a binary exposures which solves the computational problems and need for parameter contraints that are associated with using for example binomial regression with a log-link function (or identify link for the risk difference) to obtain such parameter estimates. In the following we consider the relative risk as the <strong>target parameter</strong></p>
 <p><span class="math display">\[
 \mathrm{RR}(v) = \frac{P(Y=1\mid A=1, V=v)}{P(Y=1\mid A=0, V=v)}.
 \]</span></p>
@@ -127,52 +126,47 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 <p>and a <strong>nuisance model</strong> for the <em>odds-product</em> <span class="math display">\[ \phi(v) =
 \log\left(\frac{p_{0}(v)p_{1}(v)}{(1-p_{0}(v))(1-p_{1}(v))}\right) \]</span></p>
 <p>noting that these two parameters are <em>variation independent</em> as illustrated by the below L’Abbé plot.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit">
-  <span class="kw">p0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span>(<span class="fl">0</span>,<span class="fl">1</span>,length.out=<span class="fl">100</span>)
-  <span class="kw">p1</span> <span class="op">&lt;-</span> <span class="fu">function</span>(<span class="kw">p0</span>,<span class="kw">op</span>) <span class="fl">1</span><span class="op">/</span>(<span class="fl">1</span><span class="op">+</span>(<span class="kw">op</span><span class="op">*</span>(<span class="fl">1</span><span class="op">-</span><span class="kw">p0</span>)<span class="op">/</span><span class="kw">p0</span>)<span class="op">^</span><span class="op">-</span><span class="fl">1</span>)
-  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span>(<span class="fl">0</span>, type=<span class="st">"n"</span>, xlim=<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">1</span>), ylim=<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">1</span>),
-     xlab=<span class="st">"P(Y=1|A=0)"</span>, ylab=<span class="st">"P(Y=1|A=1)"</span>, main=<span class="st">"Constant odds product"</span>)
-  <span class="co">for</span> (<span class="kw">op</span> <span class="co">in</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span>(<span class="op">-</span><span class="fl">6</span>,<span class="fl">6</span>,by=<span class="fl">.25</span>))) <span class="fu"><a href="https://rdrr.io/r/graphics/lines.html">lines</a></span>(<span class="kw">p0</span>,<span class="fu">p1</span>(<span class="kw">p0</span>,<span class="kw">op</span>), col=<span class="st">"lightblue"</span>)
-</pre></div>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span>  <span class="va">p0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,length.out<span class="op">=</span><span class="fl">100</span><span class="op">)</span></span>
+<span>  <span class="va">p1</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">p0</span>,<span class="va">op</span><span class="op">)</span> <span class="fl">1</span><span class="op">/</span><span class="op">(</span><span class="fl">1</span><span class="op">+</span><span class="op">(</span><span class="va">op</span><span class="op">*</span><span class="op">(</span><span class="fl">1</span><span class="op">-</span><span class="va">p0</span><span class="op">)</span><span class="op">/</span><span class="va">p0</span><span class="op">)</span><span class="op">^</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fl">0</span>, type<span class="op">=</span><span class="st">"n"</span>, xlim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span>, ylim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span>,</span>
+<span>     xlab<span class="op">=</span><span class="st">"P(Y=1|A=0)"</span>, ylab<span class="op">=</span><span class="st">"P(Y=1|A=1)"</span>, main<span class="op">=</span><span class="st">"Constant odds product"</span><span class="op">)</span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">op</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">6</span>,<span class="fl">6</span>,by<span class="op">=</span><span class="fl">.25</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">p0</span>,<span class="fu">p1</span><span class="op">(</span><span class="va">p0</span>,<span class="va">op</span><span class="op">)</span>, col<span class="op">=</span><span class="st">"lightblue"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="riskregression_files/figure-html/unnamed-chunk-2-1.png" width="480"></p>
-<div class="sourceCode" id="cb2"><pre class="downlit">
-  <span class="kw">p0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span>(<span class="fl">0</span>,<span class="fl">1</span>,length.out=<span class="fl">100</span>)
-  <span class="kw">p1</span> <span class="op">&lt;-</span> <span class="fu">function</span>(<span class="kw">p0</span>,<span class="kw">rr</span>) <span class="kw">rr</span><span class="op">*</span><span class="kw">p0</span>
-  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span>(<span class="fl">0</span>, type=<span class="st">"n"</span>, xlim=<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">1</span>), ylim=<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">1</span>),
-     xlab=<span class="st">"P(Y=1|A=0)"</span>, ylab=<span class="st">"P(Y=1|A=1)"</span>, main=<span class="st">"Constant relative risk"</span>)
-  <span class="co">for</span> (<span class="kw">rr</span> <span class="co">in</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span>(<span class="op">-</span><span class="fl">3</span>,<span class="fl">3</span>,by=<span class="fl">.25</span>))) <span class="fu"><a href="https://rdrr.io/r/graphics/lines.html">lines</a></span>(<span class="kw">p0</span>,<span class="fu">p1</span>(<span class="kw">p0</span>,<span class="kw">rr</span>), col=<span class="st">"lightblue"</span>)
-</pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span>  <span class="va">p0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,length.out<span class="op">=</span><span class="fl">100</span><span class="op">)</span></span>
+<span>  <span class="va">p1</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">p0</span>,<span class="va">rr</span><span class="op">)</span> <span class="va">rr</span><span class="op">*</span><span class="va">p0</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fl">0</span>, type<span class="op">=</span><span class="st">"n"</span>, xlim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span>, ylim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span>,</span>
+<span>     xlab<span class="op">=</span><span class="st">"P(Y=1|A=0)"</span>, ylab<span class="op">=</span><span class="st">"P(Y=1|A=1)"</span>, main<span class="op">=</span><span class="st">"Constant relative risk"</span><span class="op">)</span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">rr</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">3</span>,<span class="fl">3</span>,by<span class="op">=</span><span class="fl">.25</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">p0</span>,<span class="fu">p1</span><span class="op">(</span><span class="va">p0</span>,<span class="va">rr</span><span class="op">)</span>, col<span class="op">=</span><span class="st">"lightblue"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="riskregression_files/figure-html/unnamed-chunk-3-1.png" width="480"></p>
 <p>Similarly, a model can be constructed for the risk-difference on the following scale</p>
 <p><span class="math display">\[\theta(v) = \operatorname{arctanh} \big(RD(v)\big).\]</span></p>
 </div>
-<div id="simulation" class="section level1">
-<h1 class="hasAnchor">
-<a href="#simulation" class="anchor"></a>Simulation</h1>
+<div class="section level2">
+<h2 id="simulation">Simulation<a class="anchor" aria-label="anchor" href="#simulation"></a>
+</h2>
 <p>First the <code>targeted</code> package is loaded</p>
-<div class="sourceCode" id="cb3"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="kw"><a href="https://targetlib.org/r">targeted</a></span>)
-</pre></div>
-<p>This automatically imports <a href="https://arxiv.org/abs/1206.3421">lava</a> <a href="https://CRAN.R-project.org/package=lava">(CRAN)</a> which we can use to simulate from the Relative-Risk Odds-Product (RR-OP) model.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit">
-<span class="kw">m</span> <span class="op">&lt;-</span> <span class="fu">lvm</span>(<span class="kw">a</span> <span class="op">~</span> <span class="kw">x</span>,
-         <span class="kw">lp.target</span> <span class="op">~</span> <span class="fl">1</span>,
-         <span class="kw">lp.nuisance</span> <span class="op">~</span> <span class="kw">x</span><span class="op">+</span><span class="kw">z</span>)
-<span class="kw">m</span> <span class="op">&lt;-</span> <span class="fu">binomial.rr</span>(<span class="kw">m</span>, response=<span class="st">"y"</span>, exposure=<span class="st">"a"</span>, target.model=<span class="st">"lp.target"</span>, nuisance.model=<span class="st">"lp.nuisance"</span>)
-</pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">targeted</span><span class="op">)</span></span></code></pre></div>
+<p>This automatically imports <a href="https://arxiv.org/abs/1206.3421" class="external-link">lava</a> <a href="https://CRAN.R-project.org/package=lava" class="external-link">(CRAN)</a> which we can use to simulate from the Relative-Risk Odds-Product (RR-OP) model.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/lvm.html" class="external-link">lvm</a></span><span class="op">(</span><span class="va">a</span> <span class="op">~</span> <span class="va">x</span>,</span>
+<span>         <span class="va">lp.target</span> <span class="op">~</span> <span class="fl">1</span>,</span>
+<span>         <span class="va">lp.nuisance</span> <span class="op">~</span> <span class="va">x</span><span class="op">+</span><span class="va">z</span><span class="op">)</span></span>
+<span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/binomial.rd.html" class="external-link">binomial.rr</a></span><span class="op">(</span><span class="va">m</span>, response<span class="op">=</span><span class="st">"y"</span>, exposure<span class="op">=</span><span class="st">"a"</span>, target.model<span class="op">=</span><span class="st">"lp.target"</span>, nuisance.model<span class="op">=</span><span class="st">"lp.nuisance"</span><span class="op">)</span></span></code></pre></div>
 <p>The <code>lvm</code> call first defines the linear predictor for the exposure to be of the form</p>
 <p><span class="math display">\[\mathrm{LP}_A := \mu_A + \alpha X\]</span></p>
 <p>and the linear predictors for the /target parameter/ (relative risk) and the /nuisance parameter/ (odds product) to be of the form</p>
 <p><span class="math display">\[\mathrm{LP}_{RR} := \mu_{RR},\]</span></p>
 <p><span class="math display">\[\mathrm{LP}_{OP} := \mu_{OP} + \beta_x X + \beta_z Z.\]</span></p>
-<p>The covariates are by default assumed to be independent and standard normal <span class="math inline">\(X, Z\sim\mathcal{N}(0,1)\)</span>, but their distribution can easily be altered using the <code><a href="https://rdrr.io/pkg/lava/man/sim.html">lava::distribution</a></code> method.</p>
+<p>The covariates are by default assumed to be independent and standard normal <span class="math inline">\(X, Z\sim\mathcal{N}(0,1)\)</span>, but their distribution can easily be altered using the <code><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">lava::distribution</a></code> method.</p>
 <p>The <code>binomial.rr</code> function</p>
-<div class="sourceCode" id="cb5"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/r/base/args.html">args</a></span>(<span class="kw">binomial.rr</span>)
-<span class="co">#&gt; function (x, response, exposure, target.model, nuisance.model, </span>
-<span class="co">#&gt;     exposure.model = binomial.lvm(), ...) </span>
-<span class="co">#&gt; NULL</span>
-</pre></div>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/args.html" class="external-link">args</a></span><span class="op">(</span><span class="va">binomial.rr</span><span class="op">)</span></span>
+<span><span class="co">#&gt; function (x, response, exposure, target.model, nuisance.model, </span></span>
+<span><span class="co">#&gt;     exposure.model = binomial.lvm(), ...) </span></span>
+<span><span class="co">#&gt; NULL</span></span></code></pre></div>
 <p>then defines the link functions, i.e.,</p>
 <p><span class="math display">\[\operatorname{logit}(E[A\mid X,Z]) = \mu_A + \alpha X,\]</span></p>
 <p><span class="math display">\[\operatorname{log}(E[Y\mid X,Z, A=1]/E[Y\mid X, A=0]) = \mu_{RR},\]</span></p>
@@ -180,191 +174,179 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 \mu_{OP}+\beta_x X + \beta_z Z\]</span></p>
 <p>with <span class="math inline">\(p_a(X,Z)=E(Y\mid A=a,X,Z)\)</span>.</p>
 <p>The risk-difference model with the RD parameter modeled on the <span class="math inline">\(\operatorname{arctanh}\)</span> scale can be defined similarly using the <code>binomial.rd</code> method</p>
-<div class="sourceCode" id="cb6"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/r/base/args.html">args</a></span>(<span class="kw">binomial.rd</span>)
-<span class="co">#&gt; function (x, response, exposure, target.model, nuisance.model, </span>
-<span class="co">#&gt;     exposure.model = binomial.lvm(), ...) </span>
-<span class="co">#&gt; NULL</span>
-</pre></div>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/args.html" class="external-link">args</a></span><span class="op">(</span><span class="va">binomial.rd</span><span class="op">)</span></span>
+<span><span class="co">#&gt; function (x, response, exposure, target.model, nuisance.model, </span></span>
+<span><span class="co">#&gt;     exposure.model = binomial.lvm(), ...) </span></span>
+<span><span class="co">#&gt; NULL</span></span></code></pre></div>
 <p>We can inspect the parameter names of the modeled</p>
-<div class="sourceCode" id="cb7"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span>(<span class="kw">m</span>)
-<span class="co">#&gt;              m1              m2              m3              p1              p2 </span>
-<span class="co">#&gt;             "a"     "lp.target"   "lp.nuisance"           "a~x" "lp.nuisance~x" </span>
-<span class="co">#&gt;              p3              p4 </span>
-<span class="co">#&gt; "lp.nuisance~z"          "a~~a"</span>
-</pre></div>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span>
+<span><span class="co">#&gt;              m1              m2              m3              p1              p2 </span></span>
+<span><span class="co">#&gt;             "a"     "lp.target"   "lp.nuisance"           "a~x" "lp.nuisance~x" </span></span>
+<span><span class="co">#&gt;              p3              p4 </span></span>
+<span><span class="co">#&gt; "lp.nuisance~z"          "a~~a"</span></span></code></pre></div>
 <p>Here the intercepts of the model are simply given the same name as the variables, such that <span class="math inline">\(\mu_A\)</span> becomes <code>a</code>, and the other regression coefficients are labeled using the “~”-formula notation, e.g., <span class="math inline">\(\alpha\)</span> becomes <code>a~x</code>.</p>
 <p>Intercepts are by default set to zero and regression parameters set to one in the simulation. Hence to simulate from the model with <span class="math inline">\((mu_A, \mu_{RR}, \mu_{OP}, \alpha, \beta_x, \beta_z)^T = (-1,1,-2,2,1,1)^T\)</span>, we define the parameter vector <code>p</code> given by</p>
-<div class="sourceCode" id="cb8"><pre class="downlit">
-<span class="kw">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'a'</span>=<span class="op">-</span><span class="fl">1</span>, <span class="st">'lp.target'</span>=<span class="fl">1</span>, <span class="st">'lp.nuisance'</span>=<span class="op">-</span><span class="fl">1</span>, <span class="st">'a~x'</span>=<span class="fl">2</span>)
-</pre></div>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'a'</span><span class="op">=</span><span class="op">-</span><span class="fl">1</span>, <span class="st">'lp.target'</span><span class="op">=</span><span class="fl">1</span>, <span class="st">'lp.nuisance'</span><span class="op">=</span><span class="op">-</span><span class="fl">1</span>, <span class="st">'a~x'</span><span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <p>and then simulate from the model using the <code>sim</code> method</p>
-<div class="sourceCode" id="cb9"><pre class="downlit">
-<span class="kw">d</span> <span class="op">&lt;-</span> <span class="fu">sim</span>(<span class="kw">m</span>, <span class="fl">1e4</span>, p=<span class="kw">p</span>, seed=<span class="fl">1</span>)
-
-<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="kw">d</span>)
-<span class="co">#&gt;   a          x lp.target lp.nuisance          z y</span>
-<span class="co">#&gt; 1 0 -0.6264538         1  -2.4307854 -0.8043316 0</span>
-<span class="co">#&gt; 2 0  0.1836433         1  -1.8728823 -1.0565257 0</span>
-<span class="co">#&gt; 3 0 -0.8356286         1  -2.8710244 -1.0353958 0</span>
-<span class="co">#&gt; 4 1  1.5952808         1  -0.5902796 -1.1855604 1</span>
-<span class="co">#&gt; 5 0  0.3295078         1  -1.1709317 -0.5004395 1</span>
-<span class="co">#&gt; 6 0 -0.8204684         1  -2.3454571 -0.5249887 0</span>
-</pre></div>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="va">m</span>, <span class="fl">1e4</span>, p<span class="op">=</span><span class="va">p</span>, seed<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   a          x lp.target lp.nuisance          z y</span></span>
+<span><span class="co">#&gt; 1 0 -0.6264538         1  -2.4307854 -0.8043316 0</span></span>
+<span><span class="co">#&gt; 2 0  0.1836433         1  -1.8728823 -1.0565257 0</span></span>
+<span><span class="co">#&gt; 3 0 -0.8356286         1  -2.8710244 -1.0353958 0</span></span>
+<span><span class="co">#&gt; 4 1  1.5952808         1  -0.5902796 -1.1855604 1</span></span>
+<span><span class="co">#&gt; 5 0  0.3295078         1  -1.1709317 -0.5004395 1</span></span>
+<span><span class="co">#&gt; 6 0 -0.8204684         1  -2.3454571 -0.5249887 0</span></span></code></pre></div>
 <p>Notice, that in this simulated data the <strong>target parameter</strong> <span class="math inline">\(\mu_{RR}\)</span> has been set to <code>lp.target =</code> 1.</p>
 </div>
-<div id="estimation" class="section level1">
-<h1 class="hasAnchor">
-<a href="#estimation" class="anchor"></a>Estimation</h1>
-<div id="mle" class="section level2">
-<h2 class="hasAnchor">
-<a href="#mle" class="anchor"></a>MLE</h2>
+<div class="section level2">
+<h2 id="estimation">Estimation<a class="anchor" aria-label="anchor" href="#estimation"></a>
+</h2>
+<div class="section level3">
+<h3 id="mle">MLE<a class="anchor" aria-label="anchor" href="#mle"></a>
+</h3>
 <p>We start by fitting the model using the maximum likelihood estimator.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/r/base/args.html">args</a></span>(<span class="kw">riskreg_mle</span>)
-<span class="co">#&gt; function (y, a, x1, x2 = x1, weights = rep(1, length(y)), std.err = TRUE, </span>
-<span class="co">#&gt;     type = "rr", start = NULL, control = list(), ...) </span>
-<span class="co">#&gt; NULL</span>
-</pre></div>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/args.html" class="external-link">args</a></span><span class="op">(</span><span class="va">riskreg_mle</span><span class="op">)</span></span>
+<span><span class="co">#&gt; function (y, a, x1, x2 = x1, weights = rep(1, length(y)), std.err = TRUE, </span></span>
+<span><span class="co">#&gt;     type = "rr", start = NULL, control = list(), ...) </span></span>
+<span><span class="co">#&gt; NULL</span></span></code></pre></div>
 <p>The <code>riskreg_mle</code> function takes vectors/matrices as input arguments with the response <code>y</code>, exposure <code>a</code>, target parameter design matrix <code>x1</code> (i.e., the matrix <span class="math inline">\(W\)</span> at the start of this text), and the nuisance model design matrix <code>x2</code> (odds product).</p>
 <p>We first consider the case of a correctly specified model, hence we do not consider any interactions with the exposure for the odds product and simply let <code>x1</code> be a vector of ones, whereas the design matrix for the log-odds-product depends on both <span class="math inline">\(X\)</span> and <span class="math inline">\(Z\)</span></p>
-<div class="sourceCode" id="cb11"><pre class="downlit">
-<span class="kw">x1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html">model.matrix</a></span>(<span class="op">~</span><span class="fl">1</span>, <span class="kw">d</span>)
-<span class="kw">x2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html">model.matrix</a></span>(<span class="op">~</span><span class="kw">x</span><span class="op">+</span><span class="kw">z</span>, <span class="kw">d</span>)
-
-<span class="kw">fit1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html">with</a></span>(<span class="kw">d</span>, <span class="fu"><a href="../reference/riskreg.html">riskreg_mle</a></span>(<span class="kw">y</span>, <span class="kw">a</span>, <span class="kw">x1</span>, <span class="kw">x2</span>, type=<span class="st">"rr"</span>))
-<span class="kw">fit1</span>
-<span class="co">#&gt;    Estimate Std.Err    2.5%   97.5%    P-value</span>
-<span class="co">#&gt; p1   0.9512 0.03319  0.8862  1.0163 1.204e-180</span>
-<span class="co">#&gt; p2  -1.0610 0.05199 -1.1629 -0.9591  1.377e-92</span>
-<span class="co">#&gt; p3   1.0330 0.05944  0.9165  1.1495  1.230e-67</span>
-<span class="co">#&gt; p4   1.0421 0.05285  0.9386  1.1457  1.523e-86</span>
-</pre></div>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">x1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span><span class="fl">1</span>, <span class="va">d</span><span class="op">)</span></span>
+<span><span class="va">x2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span><span class="va">x</span><span class="op">+</span><span class="va">z</span>, <span class="va">d</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">fit1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">d</span>, <span class="fu"><a href="../reference/riskreg.html">riskreg_mle</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">a</span>, <span class="va">x1</span>, <span class="va">x2</span>, type<span class="op">=</span><span class="st">"rr"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">fit1</span></span>
+<span><span class="co">#&gt;                          Estimate Std.Err    2.5%   97.5%    P-value</span></span>
+<span><span class="co">#&gt; (Intercept)                0.9512 0.03319  0.8862  1.0163 1.204e-180</span></span>
+<span><span class="co">#&gt; odds-product:(Intercept)  -1.0610 0.05199 -1.1629 -0.9591  1.377e-92</span></span>
+<span><span class="co">#&gt; odds-product:x             1.0330 0.05944  0.9165  1.1495  1.230e-67</span></span>
+<span><span class="co">#&gt; odds-product:z             1.0421 0.05285  0.9386  1.1457  1.523e-86</span></span></code></pre></div>
 <p>The parameters are presented in the same order as the columns of <code>x1</code>and <code>x2</code>, hence the target parameter estimate is in the first row</p>
-<div class="sourceCode" id="cb12"><pre class="downlit">
-<span class="fu">estimate</span>(<span class="kw">fit1</span>, keep=<span class="fl">1</span>)
-<span class="co">#&gt;    Estimate Std.Err   2.5% 97.5%    P-value</span>
-<span class="co">#&gt; p1   0.9512 0.03336 0.8858 1.017 7.159e-179</span>
-</pre></div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://kkholst.github.io/lava/reference/estimate.default.html" class="external-link">estimate</a></span><span class="op">(</span><span class="va">fit1</span>, keep<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt;             Estimate Std.Err   2.5% 97.5%    P-value</span></span>
+<span><span class="co">#&gt; (Intercept)   0.9512 0.03336 0.8858 1.017 7.159e-179</span></span></code></pre></div>
 </div>
-<div id="dre" class="section level2">
-<h2 class="hasAnchor">
-<a href="#dre" class="anchor"></a>DRE</h2>
+<div class="section level3">
+<h3 id="dre">DRE<a class="anchor" aria-label="anchor" href="#dre"></a>
+</h3>
 <p>We next fit the model using a double robust estimator (DRE) which introduces a model for the exposure <span class="math inline">\(E(A=1\mid V)\)</span> (propensity model). The double-robustness stems from the fact that the this estimator remains consistent in the union model where either the odds-product model or the propensity model is correctly specified. With both models correctly specified the estimator is efficient.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/r/base/with.html">with</a></span>(<span class="kw">d</span>, <span class="fu"><a href="../reference/riskreg.html">riskreg_fit</a></span>(<span class="kw">y</span>, <span class="kw">a</span>, target=<span class="kw">x1</span>, nuisance=<span class="kw">x2</span>, propensity=<span class="kw">x2</span>, type=<span class="st">"rr"</span>))
-<span class="co">#&gt;    Estimate Std.Err   2.5% 97.5%    P-value</span>
-<span class="co">#&gt; p1   0.9372  0.0339 0.8708 1.004 3.004e-168</span>
-</pre></div>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">d</span>, <span class="fu"><a href="../reference/riskreg.html">riskreg_fit</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">a</span>, target<span class="op">=</span><span class="va">x1</span>, nuisance<span class="op">=</span><span class="va">x2</span>, propensity<span class="op">=</span><span class="va">x2</span>, type<span class="op">=</span><span class="st">"rr"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;             Estimate Std.Err   2.5% 97.5%    P-value</span></span>
+<span><span class="co">#&gt; (Intercept)   0.9372  0.0339 0.8708 1.004 3.004e-168</span></span></code></pre></div>
 <p>The usual /formula/-syntax can be applied using the <code>riskreg</code> function. Here we illustrate the double-robustness by using a <em>wrong propensity model</em> but a correct nuisance paramter (odds-product) model:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit">
-  <span class="fu"><a href="../reference/riskreg.html">riskreg</a></span>(<span class="kw">y</span><span class="op">~</span><span class="kw">a</span>, nuisance=<span class="op">~</span><span class="kw">x</span><span class="op">+</span><span class="kw">z</span>, propensity=<span class="op">~</span><span class="kw">z</span>, data=<span class="kw">d</span>, type=<span class="st">"rr"</span>)
-<span class="co">#&gt;             Estimate Std.Err   2.5% 97.5%    P-value</span>
-<span class="co">#&gt; (Intercept)   0.9511 0.03333 0.8857 1.016 4.547e-179</span>
-</pre></div>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span>  <span class="fu"><a href="../reference/riskreg.html">riskreg</a></span><span class="op">(</span><span class="va">y</span><span class="op">~</span><span class="va">a</span>, nuisance<span class="op">=</span><span class="op">~</span><span class="va">x</span><span class="op">+</span><span class="va">z</span>, propensity<span class="op">=</span><span class="op">~</span><span class="va">z</span>, data<span class="op">=</span><span class="va">d</span>, type<span class="op">=</span><span class="st">"rr"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;             Estimate Std.Err   2.5% 97.5%    P-value</span></span>
+<span><span class="co">#&gt; (Intercept)   0.9511 0.03333 0.8857 1.016 4.547e-179</span></span></code></pre></div>
 <p>Or vice-versa</p>
-<div class="sourceCode" id="cb15"><pre class="downlit">
-  <span class="fu"><a href="../reference/riskreg.html">riskreg</a></span>(<span class="kw">y</span><span class="op">~</span><span class="kw">a</span>, nuisance=<span class="op">~</span><span class="kw">z</span>, propensity=<span class="op">~</span><span class="kw">x</span><span class="op">+</span><span class="kw">z</span>, data=<span class="kw">d</span>, type=<span class="st">"rr"</span>)
-<span class="co">#&gt;             Estimate Std.Err   2.5% 97.5%    P-value</span>
-<span class="co">#&gt; (Intercept)   0.9404 0.03727 0.8673 1.013 1.736e-140</span>
-</pre></div>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span>  <span class="fu"><a href="../reference/riskreg.html">riskreg</a></span><span class="op">(</span><span class="va">y</span><span class="op">~</span><span class="va">a</span>, nuisance<span class="op">=</span><span class="op">~</span><span class="va">z</span>, propensity<span class="op">=</span><span class="op">~</span><span class="va">x</span><span class="op">+</span><span class="va">z</span>, data<span class="op">=</span><span class="va">d</span>, type<span class="op">=</span><span class="st">"rr"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;             Estimate Std.Err   2.5% 97.5%    P-value</span></span>
+<span><span class="co">#&gt; (Intercept)   0.9404 0.03727 0.8673 1.013 1.736e-140</span></span></code></pre></div>
 <p>whereas the MLE in this case yields a biased estimate of the relative risk:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit">
-  <span class="kw">fit2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html">with</a></span>(<span class="kw">d</span>, <span class="fu"><a href="../reference/riskreg.html">riskreg_mle</a></span>(<span class="kw">y</span>, <span class="kw">a</span>, x1=<span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html">model.matrix</a></span>(<span class="op">~</span><span class="fl">1</span>,<span class="kw">d</span>), x2=<span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html">model.matrix</a></span>(<span class="op">~</span><span class="kw">z</span>, <span class="kw">d</span>)))
-  <span class="fu">estimate</span>(<span class="kw">fit2</span>, keep=<span class="fl">1</span>)
-<span class="co">#&gt;    Estimate Std.Err  2.5% 97.5% P-value</span>
-<span class="co">#&gt; p1    1.243 0.02778 1.189 1.298       0</span>
-</pre></div>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span>  <span class="va">fit2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">d</span>, <span class="fu"><a href="../reference/riskreg.html">riskreg_mle</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">a</span>, x1<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span><span class="fl">1</span>,<span class="va">d</span><span class="op">)</span>, x2<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span><span class="va">z</span>, <span class="va">d</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://kkholst.github.io/lava/reference/estimate.default.html" class="external-link">estimate</a></span><span class="op">(</span><span class="va">fit2</span>, keep<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt;             Estimate Std.Err  2.5% 97.5% P-value</span></span>
+<span><span class="co">#&gt; (Intercept)    1.243 0.02778 1.189 1.298       0</span></span></code></pre></div>
 </div>
-<div id="interactions" class="section level2">
-<h2 class="hasAnchor">
-<a href="#interactions" class="anchor"></a>Interactions</h2>
+<div class="section level3">
+<h3 id="interactions">Interactions<a class="anchor" aria-label="anchor" href="#interactions"></a>
+</h3>
 <p>The more general model where <span class="math display">\[\log RR(V) = A \alpha^TV\]</span> for a subset <span class="math inline">\(V\)</span> of the covariates can be estimated using the <code>target</code> argument:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit">
-<span class="kw">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/riskreg.html">riskreg</a></span>(<span class="kw">y</span><span class="op">~</span><span class="kw">a</span>, target=<span class="op">~</span><span class="kw">x</span>, nuisance=<span class="op">~</span><span class="kw">x</span><span class="op">+</span><span class="kw">z</span>, data=<span class="kw">d</span>)
-<span class="kw">fit</span>
-<span class="co">#&gt;             Estimate Std.Err    2.5%   97.5%    P-value</span>
-<span class="co">#&gt; (Intercept)  0.93479 0.03528  0.8656 1.00393 9.881e-155</span>
-<span class="co">#&gt; x           -0.02035 0.05259 -0.1234 0.08273  6.988e-01</span>
-</pre></div>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/riskreg.html">riskreg</a></span><span class="op">(</span><span class="va">y</span><span class="op">~</span><span class="va">a</span>, target<span class="op">=</span><span class="op">~</span><span class="va">x</span>, nuisance<span class="op">=</span><span class="op">~</span><span class="va">x</span><span class="op">+</span><span class="va">z</span>, data<span class="op">=</span><span class="va">d</span><span class="op">)</span></span>
+<span><span class="va">fit</span></span>
+<span><span class="co">#&gt;             Estimate Std.Err    2.5%   97.5%    P-value</span></span>
+<span><span class="co">#&gt; (Intercept)  0.93479 0.03528  0.8656 1.00393 9.884e-155</span></span>
+<span><span class="co">#&gt; x           -0.02035 0.05259 -0.1234 0.08273  6.988e-01</span></span></code></pre></div>
 <p>As expected we do not see any evidence of an effect of <span class="math inline">\(X\)</span> on the relative risk with the 95% confidence limits clearly overlapping zero.</p>
 <p>Note, that when the <code>propensity</code> argument is omitted as above, the same design matrix is used for both the odds-product model and the propensity model.</p>
 </div>
-<div id="risk-difference" class="section level2">
-<h2 class="hasAnchor">
-<a href="#risk-difference" class="anchor"></a>Risk-difference</h2>
+<div class="section level3">
+<h3 id="risk-difference">Risk-difference<a class="anchor" aria-label="anchor" href="#risk-difference"></a>
+</h3>
 <p>The syntax for fitting the risk-difference model is similar. To illustrate this we simulate some new data from this model</p>
-<div class="sourceCode" id="cb18"><pre class="downlit">
-<span class="kw">m2</span> <span class="op">&lt;-</span> <span class="fu">binomial.rd</span>(<span class="kw">m</span>, response=<span class="st">"y"</span>, exposure=<span class="st">"a"</span>, target.model=<span class="st">"lp.target"</span>, nuisance.model=<span class="st">"lp.nuisance"</span>)
-<span class="kw">d2</span> <span class="op">&lt;-</span> <span class="fu">sim</span>(<span class="kw">m2</span>, <span class="fl">1e4</span>, p=<span class="kw">p</span>)
-</pre></div>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">m2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/binomial.rd.html" class="external-link">binomial.rd</a></span><span class="op">(</span><span class="va">m</span>, response<span class="op">=</span><span class="st">"y"</span>, exposure<span class="op">=</span><span class="st">"a"</span>, target.model<span class="op">=</span><span class="st">"lp.target"</span>, nuisance.model<span class="op">=</span><span class="st">"lp.nuisance"</span><span class="op">)</span></span>
+<span><span class="va">d2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="va">m2</span>, <span class="fl">1e4</span>, p<span class="op">=</span><span class="va">p</span><span class="op">)</span></span></code></pre></div>
 <p>And we can then fit the DRE with the syntax</p>
-<div class="sourceCode" id="cb19"><pre class="downlit">
-<span class="fu"><a href="../reference/riskreg.html">riskreg</a></span>(<span class="kw">y</span><span class="op">~</span><span class="kw">a</span>, nuisance=<span class="op">~</span><span class="kw">x</span><span class="op">+</span><span class="kw">z</span>, data=<span class="kw">d2</span>, type=<span class="st">"rd"</span>)
-<span class="co">#&gt;             Estimate Std.Err   2.5% 97.5% P-value</span>
-<span class="co">#&gt; (Intercept)    1.027 0.02144 0.9854 1.069       0</span>
-</pre></div>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/riskreg.html">riskreg</a></span><span class="op">(</span><span class="va">y</span><span class="op">~</span><span class="va">a</span>, nuisance<span class="op">=</span><span class="op">~</span><span class="va">x</span><span class="op">+</span><span class="va">z</span>, data<span class="op">=</span><span class="va">d2</span>, type<span class="op">=</span><span class="st">"rd"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;             Estimate Std.Err   2.5% 97.5% P-value</span></span>
+<span><span class="co">#&gt; (Intercept)    1.005 0.02136 0.9627 1.046       0</span></span></code></pre></div>
 </div>
-<div id="influence-function" class="section level2">
-<h2 class="hasAnchor">
-<a href="#influence-function" class="anchor"></a>Influence-function</h2>
+<div class="section level3">
+<h3 id="influence-function">Influence-function<a class="anchor" aria-label="anchor" href="#influence-function"></a>
+</h3>
 <p>The DRE is a <em>regular and asymptotic linear</em> (RAL) estimator, hence <span class="math display">\[\sqrt{n}(\widehat{\alpha}_{\mathrm{DRE}} - \alpha) = \frac{1}{\sqrt{n}}\sum_{i=1}^{n} \phi_{\mathrm{eff}}(Z_{i}) + o_{p}(1)\]</span> where <span class="math inline">\(Z_i = (Y_i, A_i, V_i), i=1,\ldots,n\)</span> are the i.i.d. observations and <span class="math inline">\(\phi_{\mathrm{eff}}\)</span> is the <em>influence function</em>.</p>
-<p>The influence function can be extracted using the <code>iid</code> method</p>
-<div class="sourceCode" id="cb20"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fu">iid</span>(<span class="kw">fit</span>))
-<span class="co">#&gt;        (Intercept)             x</span>
-<span class="co">#&gt; [1,]  6.283230e-05 -9.100844e-05</span>
-<span class="co">#&gt; [2,]  1.454404e-04  2.519557e-06</span>
-<span class="co">#&gt; [3,]  3.801776e-05 -6.489639e-05</span>
-<span class="co">#&gt; [4,]  5.305096e-06  8.331332e-05</span>
-<span class="co">#&gt; [5,] -7.976368e-04 -2.798109e-04</span>
-<span class="co">#&gt; [6,]  5.316760e-05 -8.983380e-05</span>
-</pre></div>
+<p>The influence function can be extracted using the <code>IC</code> method</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/IC.html" class="external-link">IC</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      (Intercept)           x</span></span>
+<span><span class="co">#&gt; [1,]  0.62832222 -0.91008302</span></span>
+<span><span class="co">#&gt; [2,]  1.45440275  0.02519715</span></span>
+<span><span class="co">#&gt; [3,]  0.38017708 -0.64896293</span></span>
+<span><span class="co">#&gt; [4,]  0.05305129  0.83313072</span></span>
+<span><span class="co">#&gt; [5,] -7.97636324 -2.79811779</span></span>
+<span><span class="co">#&gt; [6,]  0.53167527 -0.89833683</span></span></code></pre></div>
 </div>
 </div>
-<div id="sessioninfo" class="section level1">
-<h1 class="hasAnchor">
-<a href="#sessioninfo" class="anchor"></a>SessionInfo</h1>
-<div class="sourceCode" id="cb21"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html">sessionInfo</a></span>()
-<span class="co">#&gt; R Under development (unstable) (2020-09-08 r79165)</span>
-<span class="co">#&gt; Platform: x86_64-pc-linux-gnu (64-bit)</span>
-<span class="co">#&gt; Running under: Ubuntu 16.04.6 LTS</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Matrix products: default</span>
-<span class="co">#&gt; BLAS:   /usr/lib/openblas-base/libblas.so.3</span>
-<span class="co">#&gt; LAPACK: /usr/lib/libopenblasp-r0.2.18.so</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; locale:</span>
-<span class="co">#&gt;  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              </span>
-<span class="co">#&gt;  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    </span>
-<span class="co">#&gt;  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   </span>
-<span class="co">#&gt;  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 </span>
-<span class="co">#&gt;  [9] LC_ADDRESS=C               LC_TELEPHONE=C            </span>
-<span class="co">#&gt; [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       </span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; attached base packages:</span>
-<span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; other attached packages:</span>
-<span class="co">#&gt; [1] targeted_0.1.2 lava_1.6.7    </span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; loaded via a namespace (and not attached):</span>
-<span class="co">#&gt;  [1] Rcpp_1.0.5           cpp11_0.2.1          knitr_1.29          </span>
-<span class="co">#&gt;  [4] magrittr_1.5         splines_4.1.0        lattice_0.20-41     </span>
-<span class="co">#&gt;  [7] R6_2.4.1             ragg_0.3.1           rlang_0.4.7         </span>
-<span class="co">#&gt; [10] optimx_2020-4.2      stringr_1.4.0        tools_4.1.0         </span>
-<span class="co">#&gt; [13] grid_4.1.0           xfun_0.17            lambda.r_1.2.4      </span>
-<span class="co">#&gt; [16] futile.logger_1.4.3  htmltools_0.5.0      systemfonts_0.3.1   </span>
-<span class="co">#&gt; [19] yaml_2.2.1           survival_3.2-3       assertthat_0.2.1    </span>
-<span class="co">#&gt; [22] rprojroot_1.3-2      digest_0.6.25        numDeriv_2016.8-1.1 </span>
-<span class="co">#&gt; [25] pkgdown_1.6.0        crayon_1.3.4         Matrix_1.2-18       </span>
-<span class="co">#&gt; [28] formatR_1.7          codetools_0.2-16     futile.options_1.0.1</span>
-<span class="co">#&gt; [31] fs_1.5.0             memoise_1.1.0        evaluate_0.14       </span>
-<span class="co">#&gt; [34] rmarkdown_2.3        stringi_1.5.3        compiler_4.1.0      </span>
-<span class="co">#&gt; [37] desc_1.2.0           backports_1.1.9</span>
-</pre></div>
+<div class="section level2">
+<h2 id="sessioninfo">SessionInfo<a class="anchor" aria-label="anchor" href="#sessioninfo"></a>
+</h2>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; R version 4.2.2 (2022-10-31)</span></span>
+<span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu (64-bit)</span></span>
+<span><span class="co">#&gt; Running under: Ubuntu 20.04.5 LTS</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Matrix products: default</span></span>
+<span><span class="co">#&gt; BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.9.0</span></span>
+<span><span class="co">#&gt; LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.9.0</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; locale:</span></span>
+<span><span class="co">#&gt;  [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       </span></span>
+<span><span class="co">#&gt;  [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   </span></span>
+<span><span class="co">#&gt;  [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          </span></span>
+<span><span class="co">#&gt; [10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; attached base packages:</span></span>
+<span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; other attached packages:</span></span>
+<span><span class="co">#&gt; [1] targeted_0.3 lava_1.7.0  </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
+<span><span class="co">#&gt;  [1] xfun_0.35            bslib_0.4.1          purrr_0.3.5         </span></span>
+<span><span class="co">#&gt;  [4] listenv_0.8.0        splines_4.2.2        lattice_0.20-45     </span></span>
+<span><span class="co">#&gt;  [7] vctrs_0.5.1          htmltools_0.5.3      yaml_2.3.6          </span></span>
+<span><span class="co">#&gt; [10] survival_3.4-0       rlang_1.0.6          pkgdown_2.0.6       </span></span>
+<span><span class="co">#&gt; [13] jquerylib_0.1.4      glue_1.6.2           optimx_2022-4.30    </span></span>
+<span><span class="co">#&gt; [16] lambda.r_1.2.4       lifecycle_1.0.3      stringr_1.5.0       </span></span>
+<span><span class="co">#&gt; [19] timereg_2.0.4        futile.logger_1.4.3  ragg_1.2.4          </span></span>
+<span><span class="co">#&gt; [22] future_1.29.0        mvtnorm_1.1-3        codetools_0.2-18    </span></span>
+<span><span class="co">#&gt; [25] memoise_2.0.1        evaluate_0.18        knitr_1.41          </span></span>
+<span><span class="co">#&gt; [28] fastmap_1.1.0        parallel_4.2.2       highr_0.9           </span></span>
+<span><span class="co">#&gt; [31] Rcpp_1.0.9           formatR_1.12         cachem_1.0.6        </span></span>
+<span><span class="co">#&gt; [34] desc_1.4.2           jsonlite_1.8.3       parallelly_1.32.1   </span></span>
+<span><span class="co">#&gt; [37] systemfonts_1.0.4    fs_1.5.2             textshaping_0.3.6   </span></span>
+<span><span class="co">#&gt; [40] digest_0.6.30        stringi_1.7.8        numDeriv_2016.8-1.1 </span></span>
+<span><span class="co">#&gt; [43] rprojroot_2.0.3      grid_4.2.2           cli_3.4.1           </span></span>
+<span><span class="co">#&gt; [46] tools_4.2.2          magrittr_2.0.3       sass_0.4.4          </span></span>
+<span><span class="co">#&gt; [49] futile.options_1.0.1 future.apply_1.10.0  Matrix_1.5-1        </span></span>
+<span><span class="co">#&gt; [52] data.table_1.14.6    mets_1.3.1           rmarkdown_2.18      </span></span>
+<span><span class="co">#&gt; [55] R6_2.5.1             globals_0.16.2       compiler_4.2.2</span></span></code></pre></div>
 </div>
   </div>
 
@@ -379,11 +361,13 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 
 
       <footer><div class="copyright">
-  <p>Developed by Klaus K. Holst.</p>
+  <p></p>
+<p>Developed by Klaus K. Holst, Andreas Nordland.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.0.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer>
@@ -391,6 +375,8 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 
   
 
+
+  
 
   </body>
 </html>
