@@ -1,9 +1,13 @@
 ##' @title Binary regression models with right censored outcomes
 ##' @param response Response formula (e.g., Surv(time, event) ~ D + W).
-##' @param censoring Censoring formula (e.g., Surv(time, event == 0) ~ D + A + W)).
+##' @param censoring Censoring formula (e.g., Surv(time, event == 0) ~ D + A +
+##'   W)).
 ##' @param treatment Optional treatment model (ml_model)
 ##' @param prediction Optional prediction model (ml_model)
 ##' @param data data.frame.
+##' @param newdata Optional data.frame. In this case the uncentered influence
+##'   function evalued in 'newdata' is returned with nuisance parameters
+##'   obtained from 'data'.
 ##' @param tau Time-point of interest, see Details.
 ##' @param type "risk", "treatment", "rmst", "brier"
 ##' @param M Number of folds in cross-fitting (M=1 is no cross-fitting).
@@ -13,7 +17,9 @@
 ##' @param args.censoring Similar to args.response.
 ##' @param preprocess (optional) Data pre-processing function.
 ##' @param efficient If FALSE an IPCW estimator is returned
-##' @param ... Additional arguments to lower level data pre-processing functions.
+##' @param control
+##' @param ... Additional arguments to lower level data pre-processing
+##'   functions.
 ##' @return estimate object
 ##' @author Klaus K. Holst, Andreas Nordland
 ##' @export
@@ -21,7 +27,7 @@ riskreg_cens <- function(response,
                         censoring,
                         treatment=NULL,
                         prediction=NULL,
-                        data, tau,
+                        data, newdata, tau,
                         type="risk",
                         M = 1,
                         call.response = "phreg",
@@ -35,7 +41,7 @@ riskreg_cens <- function(response,
   dots <- list(...)
   cl <- match.call()
   control0 <- control
-  control <- list(sample=500)
+  control <- list(sample=500, blocksize=0)
   control[names(control0)] <- control0
 
   surv.response <- targeted:::get_response(formula = response, data)
@@ -64,10 +70,11 @@ riskreg_cens <- function(response,
     }
   } else if (type[1]=="rmst") {
     m <- function(time, data) {
-      min(time, tau)
+      pmin(time, tau)
     }
     h <- function(data, time, S, S.tau, tau) {
-      (time*S + AUS(time, S, tau))/S *(time<=tau)
+      I <- intsurv(time, S, tau)$cint
+      (as.vector(time)*as.vector(S) + I/as.vector(S)) *(time<=tau)
     }
   } else if (type[1]=="brier") {
     if (is.null(prediction)) {
@@ -77,8 +84,9 @@ riskreg_cens <- function(response,
     if (is.null(treatment))
       stop("Specify treatment formula.")
   }
+
+
   if (!is.null(treatment)) { ## Potential outcome
-    type <- "treatment"
     if (inherits(treatment, "formula"))
       treatment <- SL(treatment, family=binomial())
     A <- treatment$response(data)
@@ -86,14 +94,28 @@ riskreg_cens <- function(response,
     A.var <- all.vars(update(formula(treatment),~1))
     A.value <- data[which(A)[1], A.var]
     if (length(A.levels)!=2) stop("Expected binary treatment variable (0,1).")
-    m <- function(time, data) {
-      (time<=tau)*data[,"_weight"] +
-        data[,"_pred"]*(1 - data[,"_weight"])
-    }
-    h <- function(data, time, S, S.tau, tau) {
-      res <- (S-S.tau)/S * as.vector(data[,"_weight"])*(time<=tau) +
-        as.vector(data[,"_pred"])*(1 - as.vector(data[,"_weight"]))
-      res
+    if (type=="rmst") {
+      m <- function(time, data) {
+        pmin(time, tau)*data[,"_weight"] +
+          data[,"_pred"]*(1 - data[,"_weight"])
+      }
+      h <- function(data, time, S, S.tau, tau) {
+        I <- intsurv(time, S, tau)$cint
+        (as.vector(time)*as.vector(S) +
+         I)/as.vector(S) * (time<=tau) * as.vector(data[,"_weight"]) +
+          as.vector(data[,"_pred"])*(1 - as.vector(data[,"_weight"]))
+      }
+    } else {
+      type <- "treatment"
+      m <- function(time, data) {
+        (time<=tau)*data[,"_weight"] +
+          data[,"_pred"]*(1 - data[,"_weight"])
+      }
+      h <- function(data, time, S, S.tau, tau) {
+        res <- (S-S.tau)/S * as.vector(data[,"_weight"])*(time<=tau) +
+          as.vector(data[,"_pred"])*(1 - as.vector(data[,"_weight"]))
+        res
+      }
     }
   }
   if (!is.null(prediction)) { ## Brier score
@@ -146,6 +168,9 @@ riskreg_cens <- function(response,
       )
     }
 
+    valid.time <- targeted:::get_response(formula = response, valid_data)[,1]
+    valid.event <- targeted:::get_response(formula = response, valid_data)[,2]
+
     ## treatment model
     if (!is.null(treatment)) {
       treatment$estimate(train_data)
@@ -153,9 +178,15 @@ riskreg_cens <- function(response,
       pr.A <- treatment$predict(valid_data)
       valid_data.a <- valid_data
       valid_data.a[, A.var] <- A.value
-      Fhat <- 1-as.vector(cumhaz(T.est, newdata = valid_data.a, times = tau)$surv)
+      if (type=="rmst") {
+        rms <- intsurv2(T.est, valid_data.a, time=valid.time,
+                        stop=tau, sample=control$sample, blocksize=control$blocksize)
+        valid_data[, "_pred"] <- rms
+      } else {
+        Fhat <- 1-as.vector(cumhaz(T.est, newdata = valid_data.a, times = tau)$surv)
+        valid_data[, "_pred"] <- Fhat
+      }
       rm(valid_data.a)
-      valid_data[, "_pred"] <- Fhat
       valid_data[, "_weight"] <- A/pr.A
     }
 
@@ -166,8 +197,6 @@ riskreg_cens <- function(response,
         valid_data[, "_pred"] <- prediction$predict(valid_data)
       }
     }
-    valid.time <- targeted:::get_response(formula = response, valid_data)[,1]
-    valid.event <- targeted:::get_response(formula = response, valid_data)[,2]
 
     aug <- 0
     ## augmentation term
@@ -193,6 +222,12 @@ riskreg_cens <- function(response,
     return(phi.0)
   }
 
+
+  if (!missing(newdata)) {
+    ph <- fit.phis(train_data = data, valid_data = newdata)
+    return(cbind(ph))
+  }
+
   folds <- NULL
   n <- nrow(data)
   if (M < 2) {
@@ -210,6 +245,7 @@ riskreg_cens <- function(response,
     }
   }
 
+
   estimates <- apply(phis, 2, mean)
   IC <- apply(phis, 2, function(x) x - mean(x))
   out <- lava::estimate(NULL, coef = estimates, IC = IC)
@@ -218,13 +254,6 @@ riskreg_cens <- function(response,
   return(out)
 }
 
-
-subjumps <- function(jumptimes, tau, size=100L) {
-  jt <- jumptimes[jumptimes<=tau]
-  tt <- seq(min(jt), min(max(jt),tau), length.out=size)
-  tt <- jt[unique(mets::fast.approx(jt, tt))]
-  return(tt)
-}
 
 ## vector of size n with values \int_0^tau E(Q_u|T_i>=u,X_i)S^c(u|X_i)}^{-1} d M_i^c,
 ## h = E(Q|T>u=u,X), function(data, u, S, S.tau, tau)
@@ -262,11 +291,10 @@ binreg_augmentation <- function(T.est, C.est, data, time, event, tau, h, phreg=T
     i <- 0
     for(r in b) { ## Loop over each row in the data
       i <- i+1
-      ##at.risk <- c(rep(1, i), rep(0, n-i))
       at.risk <- tt<=time[i]
       ## E[Q|T>=u, X]
-      Eq = h(data[i,], tt, S[,i], S.tau[,i], tau) / Sc$surv[,i]
-      lc <- sum((Eq * at.risk * Sc$dchf[,i])[tt<=tau])
+      Eq = h(data[r,], tt, S[,i], S.tau[,i], tau) / Sc$surv[,i]
+      lc <- sum((Eq * at.risk * Sc$dchf[,i]) [tt<=tau])
       Lc[r] <- lc
     }
   }
