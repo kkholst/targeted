@@ -8,9 +8,9 @@
 \usage{
 riskreg(
   formula,
-  target = NULL,
-  nuisance = NULL,
-  propensity = nuisance,
+  nuisance = ~1,
+  propensity = ~1,
+  target = ~1,
   data,
   weights,
   type = "rr",
@@ -24,11 +24,11 @@ riskreg(
 \arguments{
 \item{formula}{formula (see details below)}
 
-\item{target}{(optional) target model (formula)}
-
 \item{nuisance}{nuisance model (formula)}
 
 \item{propensity}{propensity model (formula)}
+
+\item{target}{(optional) target model (formula)}
 
 \item{data}{data.frame}
 
@@ -93,8 +93,9 @@ The \code{riskreg_fit} function can be used with matrix inputs rather than formu
 }
 \examples{
 m <- lvm(a[-2] ~ x,
-        lp.target[1] ~ 1,
-        lp.nuisance[-1] ~ 2*x)
+         z ~ 1,
+         lp.target[1] ~ 1,
+         lp.nuisance[-1] ~ 2*x)
 distribution(m,~a) <- binomial.lvm("logit")
 m <- binomial.rr(m, "y","a","lp.target","lp.nuisance")
 d <- sim(m,5e2,seed=1)
@@ -104,12 +105,12 @@ X <- model.matrix(~1+x, d)
 with(d, riskreg_mle(y, a, I, X, type="rr"))
 
 with(d, riskreg_fit(y, a, nuisance=X, propensity=I, type="rr"))
-riskreg(y ~ a | 1 | x ,  data=d, type="rr")
+riskreg(y ~ a | 1, nuisance=~x ,  data=d, type="rr")
 
 ## Model with same design matrix for nuisance and propensity model:
 with(d, riskreg_fit(y, a, nuisance=X, type="rr"))
 
-a <- riskreg(y ~ a, nuisance=~x,  data=d, type="rr")
+a <- riskreg(y ~ a, target=~z, nuisance=~x,  propensity=~x, data=d, type="rr")
 a
 
 riskreg(y ~ a, nuisance=~x,  data=d, type="rr", mle=TRUE)

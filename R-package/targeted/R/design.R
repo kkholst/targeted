@@ -30,6 +30,7 @@ design <- function(formula, data, intercept=FALSE,
   if (rm_envir)
     attr(tt, ".Environment") <- NULL
   res <- c(list(terms=tt, xlevels=x_levels, x=x, y=y,
+                data=data[0, ], ## Empty data.frame to capture structure of data
                 specials=specials),
            specials_list)
   structure(res, class="design")
@@ -37,7 +38,7 @@ design <- function(formula, data, intercept=FALSE,
 
 ##' @export
 update.design <- function(object, data=NULL, ...) {
-  if (is.null(data)) return()
+  if (is.null(data))  data <- object$data
   mf <- with(object, model.frame(terms, data=data, ...,
                                  xlev = xlevels,
                                  drop.unused.levels=FALSE))

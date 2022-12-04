@@ -1,3 +1,7 @@
+# targeted 0.4
+
+- development version
+
 # targeted 0.3
 
 - Conditional average treatment estimator `cate`, `crr`
