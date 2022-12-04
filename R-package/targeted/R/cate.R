@@ -183,6 +183,7 @@ score_fold <- function(fold,
 #' @param treatment formula specifying treatment and variables to condition on
 #' @param response_model SL object
 #' @param propensity_model SL object
+#' @param importance_model  SL object
 #' @param contrast treatment contrast (default 1 vs 0)
 #' @param data data.frame
 #' @param nfolds Number of folds
@@ -322,10 +323,11 @@ crr <- function(treatment,
 #' Conditional average treatment effect estimation via Double Machine Learning
 #'
 #' @title Conditional Relative Risk estimation
-#' @param link Link function
 #' @param treatment formula specifying treatment and variables to condition on
+#' @param link Link function
 #' @param response_model SL object
 #' @param propensity_model SL object
+#' @param importance_model SL object
 #' @param contrast treatment contrast (default 1 vs 0)
 #' @param data data.frame
 #' @param nfolds Number of folds
