@@ -82,8 +82,11 @@
 ##' ## a <- riskreg(y ~ a, target=~z, nuisance=~x,  propensity=~x, data=d, type="rr")
 ##' a <- riskreg(y ~ a | z, nuisance=~x,  propensity=~x, data=d, type="rr")
 ##' a
+##' predict(a, d[1:5,])
 ##'
 ##' riskreg(y ~ a, nuisance=~x,  data=d, type="rr", mle=TRUE)
+##'
+##'
 ##'
 ##'
 riskreg <- function(formula,
@@ -356,6 +359,9 @@ predict.riskreg.targeted <- function(object,
   if (missing(X))
     X <- with(object, update(des.nuisance, newdata)$x)
   p <- coef(object)
+  if (tolower(object$estimator)!="mle") {
+    p <- coef(object$mle)
+  }
   ##nx <- NCOL(object$nuisance$x)
   ##nz <- NCOL(object$target$x)
   pz <- p[seq_len(ncol(Z))]
