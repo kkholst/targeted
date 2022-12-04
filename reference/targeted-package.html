@@ -113,7 +113,8 @@ causal inference.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err   2.5% 97.5%   P-value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.9402  0.1173 0.7104  1.17 1.082e-15</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> riskrg&gt; a &lt;- riskreg(y ~ a, target=~z, nuisance=~x,  propensity=~x, data=d, type="rr")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> riskrg&gt; ## a &lt;- riskreg(y ~ a, target=~z, nuisance=~x,  propensity=~x, data=d, type="rr")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> riskrg&gt; a &lt;- riskreg(y ~ a | z, nuisance=~x,  propensity=~x, data=d, type="rr")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> riskrg&gt; a</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err    2.5%     97.5%   P-value</span>

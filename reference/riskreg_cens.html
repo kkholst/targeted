@@ -152,6 +152,10 @@ obtained from 'data'.</p></dd>
 <dd><p>If FALSE an IPCW estimator is returned</p></dd>
 
 
+<dt>control</dt>
+<dd><p>See details</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Additional arguments to lower level data pre-processing
 functions.</p></dd>
@@ -162,6 +166,17 @@ functions.</p></dd>
     
 
 <p>estimate object</p>
+    </div>
+    <div id="details">
+    <h2>Details</h2>
+    <p>The one-step estimator depends on the calculation of an integral
+wrt. the martingale process corresponding to the counting process N(t) =
+I(C&gt;min(T,tau)). This can be decomposed into an integral wrt the counting
+process, \(dN_c(t)\) and the compensator \(d\Lambda_c(t)\) where the
+latter term can be computational intensive to calculate. Rather than
+calculating this integral in all observed time points, we can make a
+coarser evaluation which can be controlled by setting <code>control=(sample=N)</code>.
+With <code>N=0</code> the (computational intensive) standard evaluation is used.##'</p>
     </div>
     <div id="author">
     <h2>Author</h2>
