@@ -23,6 +23,8 @@ crr(
 
 \item{propensity_model}{SL object}
 
+\item{importance_model}{SL object}
+
 \item{contrast}{treatment contrast (default 1 vs 0)}
 
 \item{data}{data.frame}

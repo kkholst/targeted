@@ -54,7 +54,7 @@ intsurv2 <- function(object, data, time, stop=max(time), sample=0, blocksize=0) 
   }
   blocks <- list(1:n)
   if (blocksize>0)
-    blocks <- lava:::csplit(1:n, k=min(n, blocksize))
+    blocks <- lava::csplit(1:n, k=min(n, blocksize))
 
   res <- numeric(n)
   for (b in blocks) {

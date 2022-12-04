@@ -79,7 +79,8 @@
 ##' ## Model with same design matrix for nuisance and propensity model:
 ##' with(d, riskreg_fit(y, a, nuisance=X, type="rr"))
 ##'
-##' a <- riskreg(y ~ a, target=~z, nuisance=~x,  propensity=~x, data=d, type="rr")
+##' ## a <- riskreg(y ~ a, target=~z, nuisance=~x,  propensity=~x, data=d, type="rr")
+##' a <- riskreg(y ~ a | z, nuisance=~x,  propensity=~x, data=d, type="rr")
 ##' a
 ##'
 ##' riskreg(y ~ a, nuisance=~x,  data=d, type="rr", mle=TRUE)
@@ -124,10 +125,11 @@ riskreg <- function(formula,
     val$prop <- lava::estimate(val$prop, labels=nn[[5]])
   }
   ##val$labels <- nn
-  val$response_exposure <- update(response_exposure)
-  val$target <- update(target)
-  val$nuisance <- update(nuisance)
-  val$propensity <- update(propensity)
+  val$des.response_exposure <- update(response_exposure)
+  val$des.target <- update(target)
+  val$des.nuisance <- update(nuisance)
+  val$des.propensity <- update(propensity)
+  val$labels <- nn
   val$call <- match.call()
   return(val)
 }
@@ -341,16 +343,21 @@ summary.riskreg.targeted <- function(object, ...) {
 
 
 ##' @export
-predict.riskreg.targeted <- function(object, newdata,
-                                     a, X, Z, ...) {
-  if (missing(Z)) {
-    Z <- with(object, update(target, newdata)$x)
-    a <- with(object, update(response_exposure, newdata)$x)
-  }
+predict.riskreg.targeted <- function(object,
+                                     newdata,
+                                     a, ## Binary exposure (optional if newdata is provide)
+                                     X, ## Nuisance design matrix (odds-product) (optional)
+                                     Z, ## Relative risk/Risk difference design matrix (optional)
+                                     ...) {
+  if (missing(Z))
+    Z <- with(object, update(des.target, newdata)$x)
+  if (missing(a))
+    a <- with(object, update(des.response_exposure, newdata)$x)
   if (missing(X))
-    X <- with(object, update(nuisance, newdata)$x)
+    X <- with(object, update(des.nuisance, newdata)$x)
   p <- coef(object)
-  if (length(p)!=ncol(Z)+ncol(X)) stop("wrong design")
+  ##nx <- NCOL(object$nuisance$x)
+  ##nz <- NCOL(object$target$x)
   pz <- p[seq_len(ncol(Z))]
   px <- p[seq_len(ncol(X))+ncol(Z)]
   op <- exp(X%*%px)
@@ -361,6 +368,6 @@ predict.riskreg.targeted <- function(object, newdata,
     r <- tanh(Z%*%pz)
     pr <- targeted:::rd2pr(r, op)
   }
-  res <- pr[cbind(1:nrow(pr),a+1)]
+  res <- pr[cbind(seq_len(NROW(pr)), a+1)]
   return(res)
 }

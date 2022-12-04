@@ -58,6 +58,8 @@ obtained from 'data'.}
 
 \item{efficient}{If FALSE an IPCW estimator is returned}
 
+\item{control}{See details}
+
 \item{...}{Additional arguments to lower level data pre-processing
 functions.}
 }
@@ -66,6 +68,16 @@ estimate object
 }
 \description{
 Binary regression models with right censored outcomes
+}
+\details{
+The one-step estimator depends on the calculation of an integral
+wrt. the martingale process corresponding to the counting process N(t) =
+I(C>min(T,tau)). This can be decomposed into an integral wrt the counting
+process, \eqn{dN_c(t)} and the compensator \eqn{d\Lambda_c(t)} where the
+latter term can be computational intensive to calculate. Rather than
+calculating this integral in all observed time points, we can make a
+coarser evaluation which can be controlled by setting \code{control=(sample=N)}.
+With \code{N=0} the (computational intensive) standard evaluation is used.##'
 }
 \author{
 Klaus K. Holst, Andreas Nordland
