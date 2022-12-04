@@ -19,7 +19,7 @@ causal inference."><meta property="og:image" content="/logo.svg"><!-- mathjax --
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">targeted</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4</span>
       </span>
     </div>
 
@@ -80,8 +80,9 @@ causal inference.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/example.html" class="external-link">example</a></span><span class="op">(</span><span class="va">riskreg</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> riskrg&gt; m &lt;- lvm(a[-2] ~ x,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> riskrg+         lp.target[1] ~ 1,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> riskrg+         lp.nuisance[-1] ~ 2*x)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> riskrg+          z ~ 1,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> riskrg+          lp.target[1] ~ 1,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> riskrg+          lp.nuisance[-1] ~ 2*x)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> riskrg&gt; distribution(m,~a) &lt;- binomial.lvm("logit")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -95,34 +96,35 @@ causal inference.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> riskrg&gt; with(d, riskreg_mle(y, a, I, X, type="rr"))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                          Estimate Std.Err    2.5%   97.5%   P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)                0.9510  0.1176  0.7205  1.1815 6.196e-16</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> odds-product:(Intercept)  -0.8606  0.2973 -1.4433 -0.2779 3.795e-03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> odds-product:x             2.2874  0.3844  1.5339  3.0409 2.679e-09</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)                0.9453  0.1150  0.7198  1.1707 2.092e-16</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> odds-product:(Intercept)  -0.8068  0.3031 -1.4009 -0.2126 7.783e-03</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> odds-product:x             2.3296  0.3914  1.5624  3.0969 2.659e-09</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> riskrg&gt; with(d, riskreg_fit(y, a, nuisance=X, propensity=I, type="rr"))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err   2.5% 97.5%   P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.9528  0.1165 0.7246 1.181 2.791e-16</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.9469   0.113 0.7254 1.168 5.418e-17</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> riskrg&gt; riskreg(y ~ a | 1 | x ,  data=d, type="rr")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err   2.5% 97.5%  P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.9397  0.1193 0.7058 1.174 3.38e-15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> riskrg&gt; riskreg(y ~ a | 1, nuisance=~x ,  data=d, type="rr")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err   2.5% 97.5%   P-value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.9469   0.113 0.7254 1.168 5.418e-17</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> riskrg&gt; ## Model with same design matrix for nuisance and propensity model:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> riskrg&gt; with(d, riskreg_fit(y, a, nuisance=X, type="rr"))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err   2.5% 97.5%  P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.9397  0.1193 0.7058 1.174 3.38e-15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err   2.5% 97.5%   P-value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.9402  0.1173 0.7104  1.17 1.082e-15</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> riskrg&gt; a &lt;- riskreg(y ~ a, nuisance=~x,  data=d, type="rr")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> riskrg&gt; a &lt;- riskreg(y ~ a, target=~z, nuisance=~x,  propensity=~x, data=d, type="rr")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> riskrg&gt; a</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err   2.5% 97.5%  P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.9397  0.1193 0.7058 1.174 3.38e-15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err    2.5%     97.5%   P-value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.9797  0.1212  0.7421  1.217288 6.365e-16</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> z            -0.2218  0.1115 -0.4404 -0.003202 4.674e-02</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> riskrg&gt; riskreg(y ~ a, nuisance=~x,  data=d, type="rr", mle=TRUE)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                          Estimate Std.Err    2.5%   97.5%   P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)                0.9510  0.1176  0.7205  1.1815 6.196e-16</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> odds-product:(Intercept)  -0.8606  0.2973 -1.4433 -0.2779 3.795e-03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> odds-product:x             2.2874  0.3844  1.5339  3.0409 2.679e-09</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)                0.9453  0.1150  0.7198  1.1707 2.092e-16</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> odds-product:(Intercept)  -0.8068  0.3031 -1.4009 -0.2126 7.783e-03</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> odds-product:x             2.3296  0.3914  1.5624  3.0969 2.659e-09</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/example.html" class="external-link">example</a></span><span class="op">(</span><span class="va">cate</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cate&gt; sim1 &lt;- function(n=1e4,</span>

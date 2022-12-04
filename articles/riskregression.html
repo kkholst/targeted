@@ -40,7 +40,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">targeted</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4</span>
       </span>
     </div>
 
@@ -91,7 +91,7 @@
       <h1 data-toc-skip>Estimating a relative risk or risk difference with a binary exposure</h1>
                         <h4 data-toc-skip class="author">Klaus Kähler Holst</h4>
             
-            <h4 data-toc-skip class="date">2022-12-03</h4>
+            <h4 data-toc-skip class="date">2022-12-04</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/kkholst/targeted/blob/HEAD/vignettes/riskregression.Rmd" class="external-link"><code>vignettes/riskregression.Rmd</code></a></small>
       <div class="hidden name"><code>riskregression.Rmd</code></div>
@@ -267,9 +267,9 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/riskreg.html">riskreg</a></span><span class="op">(</span><span class="va">y</span><span class="op">~</span><span class="va">a</span>, target<span class="op">=</span><span class="op">~</span><span class="va">x</span>, nuisance<span class="op">=</span><span class="op">~</span><span class="va">x</span><span class="op">+</span><span class="va">z</span>, data<span class="op">=</span><span class="va">d</span><span class="op">)</span></span>
 <span><span class="va">fit</span></span>
-<span><span class="co">#&gt;             Estimate Std.Err    2.5%   97.5%    P-value</span></span>
-<span><span class="co">#&gt; (Intercept)  0.93479 0.03528  0.8656 1.00393 9.884e-155</span></span>
-<span><span class="co">#&gt; x           -0.02035 0.05259 -0.1234 0.08273  6.988e-01</span></span></code></pre></div>
+<span><span class="co">#&gt;             Estimate Std.Err     2.5%   97.5%    P-value</span></span>
+<span><span class="co">#&gt; (Intercept)  0.95267 0.03365  0.88673 1.01862 2.361e-176</span></span>
+<span><span class="co">#&gt; x           -0.01078 0.03804 -0.08534 0.06378  7.769e-01</span></span></code></pre></div>
 <p>As expected we do not see any evidence of an effect of <span class="math inline">\(X\)</span> on the relative risk with the 95% confidence limits clearly overlapping zero.</p>
 <p>Note, that when the <code>propensity</code> argument is omitted as above, the same design matrix is used for both the odds-product model and the propensity model.</p>
 </div>
@@ -284,7 +284,7 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/riskreg.html">riskreg</a></span><span class="op">(</span><span class="va">y</span><span class="op">~</span><span class="va">a</span>, nuisance<span class="op">=</span><span class="op">~</span><span class="va">x</span><span class="op">+</span><span class="va">z</span>, data<span class="op">=</span><span class="va">d2</span>, type<span class="op">=</span><span class="st">"rd"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;             Estimate Std.Err   2.5% 97.5% P-value</span></span>
-<span><span class="co">#&gt; (Intercept)    1.005 0.02136 0.9627 1.046       0</span></span></code></pre></div>
+<span><span class="co">#&gt; (Intercept)    1.029 0.02094 0.9876  1.07       0</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="influence-function">Influence-function<a class="anchor" aria-label="anchor" href="#influence-function"></a>
@@ -293,13 +293,13 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 <p>The influence function can be extracted using the <code>IC</code> method</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/IC.html" class="external-link">IC</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;      (Intercept)           x</span></span>
-<span><span class="co">#&gt; [1,]  0.62832222 -0.91008302</span></span>
-<span><span class="co">#&gt; [2,]  1.45440275  0.02519715</span></span>
-<span><span class="co">#&gt; [3,]  0.38017708 -0.64896293</span></span>
-<span><span class="co">#&gt; [4,]  0.05305129  0.83313072</span></span>
-<span><span class="co">#&gt; [5,] -7.97636324 -2.79811779</span></span>
-<span><span class="co">#&gt; [6,]  0.53167527 -0.89833683</span></span></code></pre></div>
+<span><span class="co">#&gt;      (Intercept)          x</span></span>
+<span><span class="co">#&gt; [1,]   0.6226459 -0.4585424</span></span>
+<span><span class="co">#&gt; [2,]   1.2319960  0.7925974</span></span>
+<span><span class="co">#&gt; [3,]   0.3941325 -0.5798067</span></span>
+<span><span class="co">#&gt; [4,]  -0.8854890  2.9621436</span></span>
+<span><span class="co">#&gt; [5,]  -6.9949141 -5.2133644</span></span>
+<span><span class="co">#&gt; [6,]   0.5853934 -0.7571452</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -325,7 +325,7 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 <span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] targeted_0.3 lava_1.7.0  </span></span>
+<span><span class="co">#&gt; [1] targeted_0.4 lava_1.7.0  </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
 <span><span class="co">#&gt;  [1] xfun_0.35            bslib_0.4.1          purrr_0.3.5         </span></span>
