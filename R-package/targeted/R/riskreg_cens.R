@@ -52,12 +52,12 @@ riskreg_cens <- function(response,
   control <- list(sample=500, blocksize=0)
   control[names(control0)] <- control0
 
-  surv.response <- targeted:::get_response(formula = response, data)
+  surv.response <- get_response(formula = response, data)
   ord <- order(surv.response[, 1])
   if (missing(tau)) tau <- max(surv.response[, 1])
   data <- data[ord, ]
   surv.response <- surv.response[ord, ]
-  surv.censoring <- targeted:::get_response(formula = censoring, data)
+  surv.censoring <- get_response(formula = censoring, data)
 
   stopifnot(
     attr(surv.response, "type") == "right", # only allows right censoring
@@ -176,8 +176,8 @@ riskreg_cens <- function(response,
       )
     }
 
-    valid.time <- targeted:::get_response(formula = response, valid_data)[,1]
-    valid.event <- targeted:::get_response(formula = response, valid_data)[,2]
+    valid.time <- get_response(formula = response, valid_data)[,1]
+    valid.event <- get_response(formula = response, valid_data)[,2]
 
     ## treatment model
     if (!is.null(treatment)) {
