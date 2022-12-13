@@ -57,7 +57,14 @@ update.design <- function(object, data=NULL, ...) {
 }
 
 ##' @export
-model.matrix.design <- function(object, ...) return(object$x)
+model.matrix.design <- function(object, drop.intercept = FALSE, ...) {
+  if (drop.intercept) {
+    intercept <- which(attr(object$x, "assign") == 0)
+    if (length(intercept)>0)
+      return(object$x[, -intercept, drop=FALSE])
+  }
+  return(object$x)
+}
 
 ##' @export
 summary.design <- function(object, ...) {
