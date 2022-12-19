@@ -13,7 +13,7 @@ expand.list(...)
 list
 }
 \description{
-Similar to \code{expand.grid} function, this function creates all combinations
+Similar to `expand.grid` function, this function creates all combinations
 of the input arguments but returns the result as a list.
 }
 \examples{

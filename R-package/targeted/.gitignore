@@ -1,4 +1,3 @@
-.RDataTmp
 pkgdown
 man/figures/logo.*
 docs
@@ -16,7 +15,6 @@ test
 *.RData
 *.Rhistory
 *.Rcheck
-.Rproj.user/
 *.tar.gz
 *.zip
 *.tgz

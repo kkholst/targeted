@@ -1,12 +1,3 @@
-devel
-test.R
-
-autom4te.cache
-config.status
-R-package/targeted/configure
-.RDataTmp
-
-.ccls*
 .clangd
 compile_commands.json
 Debug
@@ -37,7 +28,6 @@ doc/xml
 build
 tmp
 __pycache__
-.idea
 
 # Created by https://www.gitignore.io/api/c++
 # Edit at https://www.gitignore.io/?templates=c++
@@ -79,4 +69,3 @@ __pycache__
 # End of https://www.gitignore.io/api/c++
 /R-package/targeted/_test.R
 /y.csv
-.Rproj.user

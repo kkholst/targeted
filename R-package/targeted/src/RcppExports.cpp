@@ -16,12 +16,12 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // NB
-Rcpp::List NB(arma::vec y, arma::mat x, arma::uvec xlev, arma::vec ylev, arma::vec weights, double laplacesmooth);
+Rcpp::List NB(arma::vec y, arma::vec x, arma::uvec xlev, arma::vec ylev, arma::vec weights, double laplacesmooth);
 static SEXP _targeted_NB_try(SEXP ySEXP, SEXP xSEXP, SEXP xlevSEXP, SEXP ylevSEXP, SEXP weightsSEXP, SEXP laplacesmoothSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< arma::vec >::type y(ySEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type x(xSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type x(xSEXP);
     Rcpp::traits::input_parameter< arma::uvec >::type xlev(xlevSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type ylev(ylevSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type weights(weightsSEXP);
@@ -35,45 +35,6 @@ RcppExport SEXP _targeted_NB(SEXP ySEXP, SEXP xSEXP, SEXP xlevSEXP, SEXP ylevSEX
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
         rcpp_result_gen = PROTECT(_targeted_NB_try(ySEXP, xSEXP, xlevSEXP, ylevSEXP, weightsSEXP, laplacesmoothSEXP));
-    }
-    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
-    if (rcpp_isInterrupt_gen) {
-        UNPROTECT(1);
-        Rf_onintr();
-    }
-    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
-    if (rcpp_isLongjump_gen) {
-        Rcpp::internal::resumeJump(rcpp_result_gen);
-    }
-    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
-    if (rcpp_isError_gen) {
-        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
-        UNPROTECT(1);
-        Rf_error(CHAR(rcpp_msgSEXP_gen));
-    }
-    UNPROTECT(1);
-    return rcpp_result_gen;
-}
-// predNB
-arma::mat predNB(arma::mat const& X, Rcpp::List const& condprob, Rcpp::List const& xord, arma::uvec multinomial, arma::vec prior, double threshold);
-static SEXP _targeted_predNB_try(SEXP XSEXP, SEXP condprobSEXP, SEXP xordSEXP, SEXP multinomialSEXP, SEXP priorSEXP, SEXP thresholdSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< arma::mat const& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List const& >::type condprob(condprobSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List const& >::type xord(xordSEXP);
-    Rcpp::traits::input_parameter< arma::uvec >::type multinomial(multinomialSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type prior(priorSEXP);
-    Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
-    rcpp_result_gen = Rcpp::wrap(predNB(X, condprob, xord, multinomial, prior, threshold));
-    return rcpp_result_gen;
-END_RCPP_RETURN_ERROR
-}
-RcppExport SEXP _targeted_predNB(SEXP XSEXP, SEXP condprobSEXP, SEXP xordSEXP, SEXP multinomialSEXP, SEXP priorSEXP, SEXP thresholdSEXP) {
-    SEXP rcpp_result_gen;
-    {
-        Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_targeted_predNB_try(XSEXP, condprobSEXP, xordSEXP, multinomialSEXP, priorSEXP, thresholdSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -601,8 +562,7 @@ RcppExport SEXP _targeted_pava(SEXP ySEXP, SEXP xSEXP, SEXP weightsSEXP) {
 static int _targeted_RcppExport_validate(const char* sig) { 
     static std::set<std::string> signatures;
     if (signatures.empty()) {
-        signatures.insert("Rcpp::List(*.NB)(arma::vec,arma::mat,arma::uvec,arma::vec,arma::vec,double)");
-        signatures.insert("arma::mat(*.predNB)(arma::mat const&,Rcpp::List const&,Rcpp::List const&,arma::uvec,arma::vec,double)");
+        signatures.insert("Rcpp::List(*.NB)(arma::vec,arma::vec,arma::uvec,arma::vec,arma::vec,double)");
         signatures.insert("arma::mat(*.ode_solve)(odeptr_t,arma::mat,arma::mat,arma::mat)");
         signatures.insert("arma::vec(*bin_logl)(const arma::vec&,const arma::vec&,const arma::mat&,const arma::mat&,const arma::vec,const arma::vec&,std::string,bool)");
         signatures.insert("arma::mat(*bin_dlogl)(const arma::vec&,const arma::vec&,const arma::mat&,const arma::mat&,const arma::vec,const arma::vec&,std::string,bool)");
@@ -623,7 +583,6 @@ static int _targeted_RcppExport_validate(const char* sig) {
 // registerCCallable (register entry points for exported C++ functions)
 RcppExport SEXP _targeted_RcppExport_registerCCallable() { 
     R_RegisterCCallable("targeted", "_targeted_.NB", (DL_FUNC)_targeted_NB_try);
-    R_RegisterCCallable("targeted", "_targeted_.predNB", (DL_FUNC)_targeted_predNB_try);
     R_RegisterCCallable("targeted", "_targeted_.ode_solve", (DL_FUNC)_targeted_ode_solve_try);
     R_RegisterCCallable("targeted", "_targeted_bin_logl", (DL_FUNC)_targeted_bin_logl_try);
     R_RegisterCCallable("targeted", "_targeted_bin_dlogl", (DL_FUNC)_targeted_bin_dlogl_try);
@@ -645,7 +604,6 @@ RcppExport SEXP _rcpp_module_boot_riskregmodel();
 
 static const R_CallMethodDef CallEntries[] = {
     {"_targeted_NB", (DL_FUNC) &_targeted_NB, 6},
-    {"_targeted_predNB", (DL_FUNC) &_targeted_predNB, 6},
     {"_targeted_ode_solve", (DL_FUNC) &_targeted_ode_solve, 4},
     {"_targeted_bin_logl", (DL_FUNC) &_targeted_bin_logl, 8},
     {"_targeted_bin_dlogl", (DL_FUNC) &_targeted_bin_dlogl, 8},

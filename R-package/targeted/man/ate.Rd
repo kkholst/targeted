@@ -70,7 +70,7 @@ m <- lvm(y ~ a+x, a~x)
 distribution(m,~ y) <- binomial.lvm()
 m <- ordinal(m, K=4, ~a)
 transform(m, ~a) <- factor
-d <- sim(m, 1e4, seed=1)
+d <- sim(m,1e4)
 (a <- ate(y~a|a*x|x, data=d))
 
 # Comparison with randomized experiment

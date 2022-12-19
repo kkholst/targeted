@@ -11,7 +11,7 @@
 
 \item{newdata}{new data on which to make predictions}
 
-\item{expectation}{Variable to calculate conditional expectation wrt
+\item{expectation}{Variable to calcualte conditional expectation wrt
 probabilities from NB classifier}
 
 \item{threshold}{Threshold parameters. First element defines the threshold

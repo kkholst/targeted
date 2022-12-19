@@ -57,7 +57,7 @@ aipw <- function(formula, data, propensity=NULL, ...) {
 ##' distribution(m,~ y) <- binomial.lvm()
 ##' m <- ordinal(m, K=4, ~a)
 ##' transform(m, ~a) <- factor
-##' d <- sim(m, 1e4, seed=1)
+##' d <- sim(m,1e4)
 ##' (a <- ate(y~a|a*x|x, data=d))
 ##'
 ##' # Comparison with randomized experiment
@@ -129,7 +129,7 @@ ate <- function(formula,
         rm(weights2)
     }
     beta <- l1$coef
-    iid.beta <- fast_iid(y, l1$fitted, x1, weights, binary)/length(y)
+    iid.beta <- fast_iid(y, l1$fitted, x1, weights, binary)
     treatments <- if (is.factor(a)) levels(a) else sort(unique(a))
     if (length(treatments)>20) stop("Unexpected large amount of treatments")
     if (base::missing(all)) all <- length(treatments)==2
@@ -161,7 +161,7 @@ ate <- function(formula,
         gamma.index <- seq_along(gamma) + length(alpha.index) + length(beta.index)
         U0 <- val$u
         DU <- t(val$du)
-        iid.gamma <- fast_iid(a0, l2$fitted, x2, weights)/length(a0)
+        iid.gamma <- fast_iid(a, l2$fitted, x2, weights)
         if (count==1) {
             gidx <- seq_along(gamma)
             bprop <- numeric(length(gamma)*(length(treatments)-1))
@@ -190,13 +190,13 @@ ate <- function(formula,
     propmod <- lava::estimate(coef=bprop, vcov=Vprop)
     V <- crossprod(iids)
     est <- lava::estimate(coef=coefs, vcov=V, labels=nlabels)
-    est$IC <- iids*NROW(iids)
+    est$iid <- iids
     structure(list(estimate=est,
                    outcome.reg=outreg, propensity.model=propmod, names=unlist(nn)[1:2],
                    formula=xf,
                    npar=c(length(treatments), ncol(x1), ncol(x2)), nobs=length(y), opt=NULL,
                    all=all,
-                   type=ifelse(binary, "binary", "linear")),
+                   bread=V, type=ifelse(binary, "binary", "linear")),
               class=c("ate.targeted", "targeted"))
 }
 

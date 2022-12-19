@@ -36,7 +36,7 @@
 ##' @param optimal If TRUE optimal weights are calculated
 ##' @param std.err If TRUE standard errors are calculated
 ##' @param start optional starting values
-##' @param mle Semi-parametric (double-robust) estimate or MLE (TRUE gives MLE)
+##' @param semi Semi-parametric (double-robust) estimate (FALSE gives MLE)
 ##' @param ... additional arguments to unconstrained optimization routine (nlminb)
 ##' @return An object of class '\code{riskreg.targeted}' is returned. See \code{\link{targeted-class}}
 ##' for more details about this class and its generic functions.
@@ -62,9 +62,8 @@
 ##' @author Klaus K. Holst
 ##' @examples
 ##' m <- lvm(a[-2] ~ x,
-##'          z ~ 1,
-##'          lp.target[1] ~ 1,
-##'          lp.nuisance[-1] ~ 2*x)
+##'         lp.target[1] ~ 1,
+##'         lp.nuisance[-1] ~ 2*x)
 ##' distribution(m,~a) <- binomial.lvm("logit")
 ##' m <- binomial.rr(m, "y","a","lp.target","lp.nuisance")
 ##' d <- sim(m,5e2,seed=1)
@@ -74,64 +73,78 @@
 ##' with(d, riskreg_mle(y, a, I, X, type="rr"))
 ##'
 ##' with(d, riskreg_fit(y, a, nuisance=X, propensity=I, type="rr"))
-##' riskreg(y ~ a | 1, nuisance=~x ,  data=d, type="rr")
+##' riskreg(y ~ a | 1 | x ,  data=d, type="rr")
 ##'
 ##' ## Model with same design matrix for nuisance and propensity model:
 ##' with(d, riskreg_fit(y, a, nuisance=X, type="rr"))
 ##'
-##' ## a <- riskreg(y ~ a, target=~z, nuisance=~x,  propensity=~x, data=d, type="rr")
-##' a <- riskreg(y ~ a | z, nuisance=~x,  propensity=~x, data=d, type="rr")
+##' a <- riskreg(y ~ a, nuisance=~x,  data=d, type="rr")
 ##' a
-##' predict(a, d[1:5,])
 ##'
-##' riskreg(y ~ a, nuisance=~x,  data=d, type="rr", mle=TRUE)
 ##'
 riskreg <- function(formula,
-             nuisance=~1,
-             propensity=~1,
-             target=~1,
+             target=NULL,
+             nuisance=NULL,
+             propensity=nuisance,
              data, weights, type="rr",
-             optimal=TRUE, std.err=TRUE, start=NULL, mle=FALSE, ...) {
-  if (!inherits(formula, "formula")) stop("Formula needed")
-  yf <- lava::getoutcome(formula, sep="|")
-  xf <- attr(yf, "x")
-  xf[[1]] <- as.formula(paste0(yf, deparse(xf[[1]])))
-  dots <- list(...)
-  if ("semi"%in%names(dots)) ## Backward compatibility
-    mle <- !dots$semi
-  if (length(xf)>1)
-    target <- xf[[2]]
-  response_exposure <- design(xf[[1]], data=data, intercept=FALSE)
-  target <- design(target, data=data, intercept=TRUE)
-  nuisance <- design(nuisance, data=data, intercept=TRUE)
-  propensity <- design(propensity, data=data, intercept=TRUE)
-  a <- response_exposure$x
-  y <- response_exposure$y
-  x1 <- target$x
-  x2 <- nuisance$x
-  x3 <- propensity$x
-  nn <- list(yf[1], colnames(a), colnames(x1), colnames(x2), colnames(x3))
-  if (missing(weights)) weights <- rep(1, length(y))
-  if (inherits(weights, "formula")) weights <- all.vars(weights)
-  if (is.character(weights)) weights <- as.vector(data[, weights])
-  val <- riskreg_mle(y=y, a=a, x1=x1, x2=x2, weights=weights, std.err=std.err,
-                     type=type, start=start, ...)
-  ##val$labels <- nn[1:4]
-  if (!mle) {
-    val <- riskreg_fit(y=y, a=a, target=x1, nuisance=x2, propensity=x3,
-                       weights=weights, std.err=std.err, type=type,
-                       optimal=optimal, start=start,
-                       mle=val, ...)
-    val$prop <- lava::estimate(val$prop, labels=nn[[5]])
-  }
-  ##val$labels <- nn
-  val$des.response_exposure <- update(response_exposure)
-  val$des.target <- update(target)
-  val$des.nuisance <- update(nuisance)
-  val$des.propensity <- update(propensity)
-  val$labels <- nn
-  val$call <- match.call()
-  return(val)
+             optimal=TRUE, std.err=TRUE, start=NULL, semi=TRUE, ...) {
+    if (is.list(formula)) {
+        yf <- lava::getoutcome(formula[[1]], sep="|")
+        xf <- formula
+        xf[[1]] <- update(xf[[1]], .~.-1)
+    } else {
+        if (!inherits(formula, "formula")) stop("Formula needed")
+        yf <- lava::getoutcome(formula, sep="|")
+        xf <- attr(yf, "x")
+        xf[[1]] <- update(as.formula(paste0(yf, deparse(xf[[1]]))), .~.-1)
+    }
+    xx <- lapply(xf, function(x) model.matrix(x, data))
+    y <- model.frame(xf[[1]], data=data)[, yf]
+    a <- xx[[1]]
+    if (length(xx)>1) {
+        if (NCOL(xx[[1]])>1) stop("First part of formula should specify exposure variable only")
+        x1 <- xx[[2]]
+        x2 <- xx[[3]]
+        if (length(xx)>3) {
+            x3 <- xx[[4]]
+        } else x3 <- x2
+    } else {
+        ones <- cbind(rep(1, length(y))); colnames(ones) <- "(Intercept)"
+        if (!is.null(target)) {
+            x1 <- model.matrix(target, data)
+        } else {
+            x1 <- ones
+        }
+        if (!is.null(nuisance)) {
+            x2 <- model.matrix(nuisance, data)
+        } else {
+            x2 <- ones
+        }
+        if (!is.null(propensity)) {
+            x3 <- model.matrix(propensity, data)
+        } else {
+            x3 <- ones
+        }
+    }
+    nn <- list(yf[1], colnames(a), colnames(x1), colnames(x2), colnames(x3))
+    rm(xx)
+    if (missing(weights)) weights <- rep(1, length(y))
+    if (inherits(weights, "formula")) weights <- all.vars(weights)
+    if (is.character(weights)) weights <- as.vector(data[, weights])
+    val <- riskreg_mle(y=y, a=a, x1=x1, x2=x2, weights=weights, std.err=std.err,
+                       type=type, start=start, labels=c(nn[[3]], nn[[4]]), ...)
+    val$labels <- nn[1:4]
+    if (semi) {
+        val <- riskreg_fit(y=y, a=a, target=x1, nuisance=x2, propensity=x3,
+                           weights=weights, std.err=std.err, type=type,
+                           optimal=optimal, start=start, labels=nn[[3]],
+                           mle=val, ...)
+        val$prop <- lava::estimate(val$prop, labels=nn[[5]])
+    }
+
+    val$labels <- nn
+    val$call <- match.call()
+    return(val)
 }
 
 
@@ -159,19 +172,13 @@ riskreg_mle <- function(y, a, x1, x2=x1, weights=rep(1, length(y)), std.err=TRUE
         V <- lava::Inverse(d2f(op$par))
         ii <- U%*%V
     } else {
-        ii  <- NULL
-        V <- matrix(NA, length(op$par), length(op$par))
+        V <- ii  <- NULL
     }
     loglik  <- -f(op$par)
-    if (!("labels"%in%names(list(...)))) {
-      nam <- c(colnames(x1), paste0("odds-product:", colnames(x2)))
-      est <- lava::estimate(coef=op$par, vcov=V, labels=nam)
-    } else {
-      est <- lava::estimate(coef=op$par, vcov=V, ...)
-    }
-    est$IC  <- ii*NROW(ii)
+    est <- lava::estimate(coef=op$par, vcov=V, ...)
+    est$iid  <- ii
     structure(list(estimate=est, npar=c(ncol(x1), ncol(x2)), logLik=loglik, nobs=length(y),
-                   opt=op, bread=V*NROW(ii), type=type, estimator="mle"),
+                   opt=op, bread=V, type=type, estimator="mle"),
               class=c("riskreg.targeted", "targeted"))
 }
 
@@ -189,12 +196,9 @@ riskreg_fit <- function(y, a,
     target <- cbind(target)
     nuisance <- cbind(nuisance)
     propensity <- cbind(propensity)
-    if (missing(mle) || is.logical(mle)) {
-      return.mle <- (!missing(mle) && is.logical(mle) && mle[1])
+    if (missing(mle))
       mle <- riskreg_mle(y, a, target, nuisance, weights=weights,
                          std.err=std.err, type=type)
-      if (return.mle) return(mle)
-    }
     theta0 <- coef(mle$estimate)
     alpha0 <- start
     if (is.null(alpha0)) {
@@ -266,25 +270,20 @@ riskreg_fit <- function(y, a,
                               weights=weights1, type=type)
         DU  <- deriv(U, pp)
         U0 <- u(alphahat, indiv=TRUE)
-        iid.gamma <- fast_iid(y, pr, propensity, weights)/length(y)
+        ## iid.gamma <- iid(propmod)
+        iid.gamma <- fast_iid(y, pr, propensity, weights)
         Vprop <- crossprod(iid.gamma)
-        iid.theta <- lava::IC(mle$estimate)
-        iid.theta <- iid.theta/NROW(iid.theta)
+        iid.theta <- lava::iid(mle$estimate)
         ii <- (U0 + iid.theta %*% t(DU[, theta.index, drop=FALSE]) +
                iid.gamma %*% t(DU[, gamma.index, drop=FALSE])) %*%
           t(-Inverse(DU[, alpha.index, drop=FALSE]))
         V <- crossprod(ii)
     } else {
-      ii <- NULL
-      V <- matrix(NA, length(opt$par), length(opt$par))
+        V <- ii <- NULL
     }
-    if (!("labels"%in%names(list(...)))) {
-      est <- lava::estimate(coef=opt$par, vcov=V, labels=colnames(target))
-    } else {
-      est <- lava::estimate(coef=opt$par, vcov=V, ...)
-    }
-    est$IC  <- ii*NROW(ii)
-    propmod <- lava::estimate(coef=coef(propmod), vcov=Vprop, colnames)
+    est <- lava::estimate(coef=opt$par, vcov=V, ...)
+    est$iid  <- ii
+    propmod <- lava::estimate(coef=coef(propmod), vcov=Vprop)
     structure(list(estimate=est, opt=opt, npar=c(ncol(target), ncol(nuisance), ncol(propensity)), nobs=length(y),
                    mle=mle, prop=propmod, type=type, estimator="dre"),
               class=c("riskreg.targeted", "targeted"))
@@ -331,7 +330,7 @@ summary.riskreg.targeted <- function(object, ...) {
     }
     if (object$estimator=="mle") {
         cc <- object$estimate
-        cc$IC <- NULL
+        cc$iid <- NULL
     } else {
         cc <- rbind(object$mle$estimate$coefmat, object$prop$coefmat)
         cc[seq_len(object$npar[1]), ] <- object$estimate$coefmat
@@ -339,38 +338,4 @@ summary.riskreg.targeted <- function(object, ...) {
     }
     structure(list(estimate=cc, npar=object$npar, estimator=object$estimator, call=object$call,
                    model=model, type=type, names=nam), class="summary.riskreg.targeted")
-}
-
-
-##' @export
-predict.riskreg.targeted <- function(object,
-                                     newdata,
-                                     a, ## Binary exposure (optional if newdata is provide)
-                                     X, ## Nuisance design matrix (odds-product) (optional)
-                                     Z, ## Relative risk/Risk difference design matrix (optional)
-                                     ...) {
-  if (missing(Z))
-    Z <- with(object, update(des.target, newdata)$x)
-  if (missing(a))
-    a <- with(object, update(des.response_exposure, newdata)$x)
-  if (missing(X))
-    X <- with(object, update(des.nuisance, newdata)$x)
-  p <- coef(object)
-  if (tolower(object$estimator)!="mle") {
-    p <- coef(object$mle)
-  }
-  ##nx <- NCOL(object$nuisance$x)
-  ##nz <- NCOL(object$target$x)
-  pz <- p[seq_len(ncol(Z))]
-  px <- p[seq_len(ncol(X))+ncol(Z)]
-  op <- exp(X%*%px)
-  if (object$type=="rr") { # relative-risk
-    r <- exp(Z%*%pz)
-    pr <- rr2pr(r, op)
-  } else { ## risk-difference
-    r <- tanh(Z%*%pz)
-    pr <- rd2pr(r, op)
-  }
-  res <- pr[cbind(seq_len(NROW(pr)), a+1)]
-  return(res)
 }

@@ -78,6 +78,7 @@ multiclass_scoring1 <-
 ##' @param names optional names of models coments (given as ..., alternatively
 ##'   these can be named arguments)
 ##' @param messages controls amount of messages/warnings (0: none)
+##' @export
 ##' @examples
 ##' data(iris)
 ##' set.seed(1)
@@ -91,8 +92,6 @@ multiclass_scoring1 <-
 ##' scoring(dat[[2]]$Species, pr1=pr1, pr2=pr2)
 ##' ## quantitative response:
 ##' scoring(response=1:10, prediction=rnorm(1:10))
-##' @return Numeric matrix of dimension m x p, where m is the number of
-##'   different models and p is the number of model metrics
 ##' @export
 scoring <- function(response, ..., type="quantitative", metrics=NULL,
                     weights=NULL, names=NULL, messages=1) {

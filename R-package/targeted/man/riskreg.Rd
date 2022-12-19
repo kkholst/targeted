@@ -8,27 +8,27 @@
 \usage{
 riskreg(
   formula,
-  nuisance = ~1,
-  propensity = ~1,
-  target = ~1,
+  target = NULL,
+  nuisance = NULL,
+  propensity = nuisance,
   data,
   weights,
   type = "rr",
   optimal = TRUE,
   std.err = TRUE,
   start = NULL,
-  mle = FALSE,
+  semi = TRUE,
   ...
 )
 }
 \arguments{
 \item{formula}{formula (see details below)}
 
+\item{target}{(optional) target model (formula)}
+
 \item{nuisance}{nuisance model (formula)}
 
 \item{propensity}{propensity model (formula)}
-
-\item{target}{(optional) target model (formula)}
 
 \item{data}{data.frame}
 
@@ -42,7 +42,7 @@ riskreg(
 
 \item{start}{optional starting values}
 
-\item{mle}{Semi-parametric (double-robust) estimate or MLE (TRUE gives MLE)}
+\item{semi}{Semi-parametric (double-robust) estimate (FALSE gives MLE)}
 
 \item{...}{additional arguments to unconstrained optimization routine (nlminb)}
 }
@@ -93,9 +93,8 @@ The \code{riskreg_fit} function can be used with matrix inputs rather than formu
 }
 \examples{
 m <- lvm(a[-2] ~ x,
-         z ~ 1,
-         lp.target[1] ~ 1,
-         lp.nuisance[-1] ~ 2*x)
+        lp.target[1] ~ 1,
+        lp.nuisance[-1] ~ 2*x)
 distribution(m,~a) <- binomial.lvm("logit")
 m <- binomial.rr(m, "y","a","lp.target","lp.nuisance")
 d <- sim(m,5e2,seed=1)
@@ -105,24 +104,21 @@ X <- model.matrix(~1+x, d)
 with(d, riskreg_mle(y, a, I, X, type="rr"))
 
 with(d, riskreg_fit(y, a, nuisance=X, propensity=I, type="rr"))
-riskreg(y ~ a | 1, nuisance=~x ,  data=d, type="rr")
+riskreg(y ~ a | 1 | x ,  data=d, type="rr")
 
 ## Model with same design matrix for nuisance and propensity model:
 with(d, riskreg_fit(y, a, nuisance=X, type="rr"))
 
-## a <- riskreg(y ~ a, target=~z, nuisance=~x,  propensity=~x, data=d, type="rr")
-a <- riskreg(y ~ a | z, nuisance=~x,  propensity=~x, data=d, type="rr")
+a <- riskreg(y ~ a, nuisance=~x,  data=d, type="rr")
 a
-predict(a, d[1:5,])
 
-riskreg(y ~ a, nuisance=~x,  data=d, type="rr", mle=TRUE)
 
 }
 \references{
 Richardson, T. S., Robins, J. M., & Wang, L. (2017). On modeling and
-estimation for the relative risk and risk difference. Journal of the
-American Statistical Association, 112(519),
-1121–1130. http://dx.doi.org/10.1080/01621459.2016.1192546
+ estimation for the relative risk and risk difference. Journal of the
+ American Statistical Association, 112(519),
+ 1121–1130. http://dx.doi.org/10.1080/01621459.2016.1192546
 }
 \author{
 Klaus K. Holst

@@ -26,11 +26,11 @@ namespace targeted {
         }
     }
 
-    inline Rcpp::List _NB(arma::vec y, arma::mat x, arma::uvec xlev, arma::vec ylev, arma::vec weights, double laplacesmooth = 1.0) {
+    inline Rcpp::List _NB(arma::vec y, arma::vec x, arma::uvec xlev, arma::vec ylev, arma::vec weights, double laplacesmooth = 1.0) {
         typedef SEXP(*Ptr__NB)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
         static Ptr__NB p__NB = NULL;
         if (p__NB == NULL) {
-            validateSignature("Rcpp::List(*_NB)(arma::vec,arma::mat,arma::uvec,arma::vec,arma::vec,double)");
+            validateSignature("Rcpp::List(*_NB)(arma::vec,arma::vec,arma::uvec,arma::vec,arma::vec,double)");
             p__NB = (Ptr__NB)R_GetCCallable("targeted", "_targeted__NB");
         }
         RObject rcpp_result_gen;
@@ -45,27 +45,6 @@ namespace targeted {
         if (rcpp_result_gen.inherits("try-error"))
             throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
         return Rcpp::as<Rcpp::List >(rcpp_result_gen);
-    }
-
-    inline arma::mat _predNB(arma::mat const& X, Rcpp::List const& condprob, Rcpp::List const& xord, arma::uvec multinomial, arma::vec prior, double threshold = 1E-3) {
-        typedef SEXP(*Ptr__predNB)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
-        static Ptr__predNB p__predNB = NULL;
-        if (p__predNB == NULL) {
-            validateSignature("arma::mat(*_predNB)(arma::mat const&,Rcpp::List const&,Rcpp::List const&,arma::uvec,arma::vec,double)");
-            p__predNB = (Ptr__predNB)R_GetCCallable("targeted", "_targeted__predNB");
-        }
-        RObject rcpp_result_gen;
-        {
-            RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p__predNB(Shield<SEXP>(Rcpp::wrap(X)), Shield<SEXP>(Rcpp::wrap(condprob)), Shield<SEXP>(Rcpp::wrap(xord)), Shield<SEXP>(Rcpp::wrap(multinomial)), Shield<SEXP>(Rcpp::wrap(prior)), Shield<SEXP>(Rcpp::wrap(threshold)));
-        }
-        if (rcpp_result_gen.inherits("interrupted-error"))
-            throw Rcpp::internal::InterruptedException();
-        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
-            throw Rcpp::LongjumpException(rcpp_result_gen);
-        if (rcpp_result_gen.inherits("try-error"))
-            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
-        return Rcpp::as<arma::mat >(rcpp_result_gen);
     }
 
     inline arma::mat _ode_solve(odeptr_t f, arma::mat input, arma::mat init, arma::mat par) {

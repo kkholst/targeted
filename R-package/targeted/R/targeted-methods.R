@@ -16,7 +16,7 @@
 #' \itemize{
 #'   \item{\code{coef}}{Extract target coefficients of the estimated model.}
 #'   \item{\code{vcov}}{Extract the variance-covariance matrix of the target parameters.}
-#'   \item{\code{IC}}{Extract the estimated influence function.}
+#'   \item{\code{iid}}{Extract the estimated influence function.}
 #'   \item{\code{print}}{Print estimates of the target parameters.}
 #'   \item{\code{summary}}{Extract information on both target parameters and estimated nuisance model.}'
 #'  }
@@ -44,21 +44,20 @@ print.summary.targeted <- function(x, ...) {
 
 ##' @export
 summary.targeted <- function(object, ...) {
-  structure(list(estimate=object$estimate, call=object$call),
-            class="summary.targeted")
+    structure(list(estimate=object$estimate, call=object$call), class="summary.targeted")
 }
 
+
 ##' @export
-IC.targeted <- function(x, ...) {
-    lava::IC(x$estimate, ...)
+iid.targeted <- function(x, ...) {
+    lava::iid(x$estimate, ...)
 }
 
 ##' @export
 logLik.targeted <- function(object, ...) {
     val <- object$logLik
     if (is.null(val)) return(NULL)
-    structure(val, nobs=object$nobs, nall=object$nobs, df=length(coef(object)),
-              class="logLik")
+    structure(val, nobs=object$nobs, nall=object$nobs, df=length(coef(object)), class="logLik")
 }
 
 ##' @export

@@ -11,12 +11,15 @@ augmented inverse probability weighted estimators for missing data and
 causal inference.
 }
 \examples{
+
 example(riskreg)
-example(cate)
+
 example(ate)
-example(calibration)
+
+example(calibration
+)
 }
 \author{
-Klaus K. Holst (Maintainer) \href{mailto:klaus@holst.it}{klaus@holst.it}
+Klaus K. Holst Maintainer: <klaus@holst.it>
 }
 \keyword{package}

@@ -5,10 +5,6 @@
     .Call(`_targeted_NB`, y, x, xlev, ylev, weights, laplacesmooth)
 }
 
-.predNB <- function(X, condprob, xord, multinomial, prior, threshold = 1E-3) {
-    .Call(`_targeted_predNB`, X, condprob, xord, multinomial, prior, threshold)
-}
-
 .ode_solve <- function(f, input, init, par) {
     .Call(`_targeted_ode_solve`, f, input, init, par)
 }

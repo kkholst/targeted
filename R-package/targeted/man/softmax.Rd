@@ -15,10 +15,6 @@ softmax(x, log = FALSE, ref = TRUE, ...)
 
 \item{...}{Additional arguments to lower level functions}
 }
-\value{
-Numeric matrix of dimension n x p, where \code{n= nrow(x)} and
-\code{p = ncol(x) + (ref==TRUE)}
-}
 \description{
 Softmax transformation
 }

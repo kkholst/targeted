@@ -3,6 +3,37 @@
 \name{calibration}
 \alias{calibration}
 \alias{calibrate}
+\alias{Returns}
+\alias{a}
+\alias{list}
+\alias{-}
+\alias{stepfun:}
+\alias{estimated}
+\alias{step-functions}
+\alias{('stepfun')}
+\alias{for}
+\alias{each}
+\alias{class}
+\alias{classes:}
+\alias{the}
+\alias{unique}
+\alias{classes}
+\alias{model:}
+\alias{model/method}
+\alias{type}
+\alias{(string)}
+\alias{xy:}
+\alias{of}
+\alias{data.frame's}
+\alias{with}
+\alias{predictions}
+\alias{(pr)}
+\alias{and}
+\alias{probabilities}
+\alias{success}
+\alias{(only}
+\alias{'bin'}
+\alias{method)}
 \title{Calibration (training)}
 \usage{
 calibration(
@@ -32,10 +63,6 @@ calibration(
 \item{df}{degrees of freedom (only for spline methods)}
 
 \item{...}{additional arguments to lower level functions}
-}
-\value{
-An object of class '\code{calibration}' is returned. See \code{\link{calibration-class}}
-for more details about this class and its generic functions.
 }
 \description{
 Calibration for multiclassication methods
