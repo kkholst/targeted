@@ -1,10 +1,17 @@
 Package: targeted
 Type: Package
 Title: Targeted Inference
-Version: 0.2.0
-Date: 2021-10-19
-Authors@R: c(person("Klaus K.", "Holst", email="klaus@holst.it", role=c("aut", "cre")))
-Author: Klaus K. Holst [aut, cre]
+Version: 0.4
+Date: 2022-12-03
+Authors@R: c(person(given = "Klaus K.",
+                    family = "Holst",
+                    role = c("aut", "cre"),
+                    email = "klaus@holst.it"),
+             person(given = "Andreas",
+                    family = "Nordland",
+                    role = c("aut"),
+                    email = "andreasnordland@gmail.com"))
+Author: Klaus K. Holst [aut, cre], Andreas Nordland [aut]
 Maintainer: Klaus K. Holst <klaus@holst.it>
 Description: Various methods for targeted and semiparametric inference including
 	     augmented inverse probability weighted estimators for missing data and
@@ -13,22 +20,27 @@ Description: Various methods for targeted and semiparametric inference including
 	     <doi:10.1080/01621459.2016.1192546>).
 Depends:
     R (>= 4.0),
-    lava (>= 1.6.10)
+    lava (>= 1.7.0)
 Imports:
     data.table,
     digest,
     futile.logger,
     future.apply,
+    optimx,
 	progressr,
     methods,
+    mets,
+    R6,
     Rcpp (>= 1.0.0),
-    optimx
+    survival
 Suggests:
+    grf,
     mgcv,
     testthat (>= 0.11),
     rmarkdown,
+    scatterplot3d,
+    SuperLearner (>= 2.0-28),
     knitr
-URL: https://targetlib.org/r/
 BugReports: https://github.com/kkholst/targeted/issues
 License: Apache License (== 2.0)
 LinkingTo: Rcpp, RcppArmadillo
@@ -38,5 +50,6 @@ SystemRequirements: C++11
 ByteCompile: yes
 RcppModules: riskregmodel
 Encoding: UTF-8
-RoxygenNote: 7.1.1
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.1
 VignetteBuilder: knitr

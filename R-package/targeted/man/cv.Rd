@@ -5,7 +5,7 @@
 \title{Cross-validation}
 \usage{
 cv(
-  modelList,
+  models,
   data,
   response = NULL,
   K = 5,
@@ -19,13 +19,13 @@ cv(
 )
 }
 \arguments{
-\item{modelList}{List of fitting functions}
+\item{models}{List of fitting functions}
 
-\item{data}{data.frame}
+\item{data}{data.frame or matrix}
 
-\item{response}{Response variable (vector or name of column in `data`)}
+\item{response}{Response variable (vector or name of column in \code{data}).##'}
 
-\item{K}{Number of folds (default 5, 0 splits in 1:n/2, n/2:n with last part
+\item{K}{Number of folds (default 5. K=0 splits in 1:n/2, n/2:n with last part
 used for testing)}
 
 \item{rep}{Number of repetitions (default 1)}
@@ -35,26 +35,39 @@ used for testing)}
 \item{modelscore}{Model scoring metric (default: RMSE / Brier score).
 Must be a function with arguments: response, prediction, weights, ...}
 
-\item{seed}{Optional random seed}
+\item{seed}{Random seed (argument parsed to future_Apply::future_lapply)}
 
 \item{shared}{Function applied to each fold with results send to each model}
 
 \item{args.pred}{Optional arguments to prediction function (see details
 below)}
 
-\item{...}{Additional arguments parsed to models in modelList}
+\item{...}{Additional arguments parsed to models in models}
+}
+\value{
+An object of class '\code{cross_validated}' is returned. See
+\code{\link{cross_validated-class}} for more details about this class and
+its generic functions.
 }
 \description{
 Generic cross-validation function
 }
 \details{
-...
+models should be list of objects of class ml_model.
+Alternatively, each element of models should be a list with a fitting function
+and a prediction function.
+
+The \code{reponse} argument can optionally be a named list where the name is then
+used as the name of the response argument in models. Similarly, if data
+is a named list with a single data.frame/matrix then this name will be used
+as the name of the data/design matrix argument in models.
 }
 \examples{
 f0 <- function(data,...) lm(...,data=data)
 f1 <- function(data,...) lm(Sepal.Length~Species,data=data)
 f2 <- function(data,...) lm(Sepal.Length~Species+Petal.Length,data=data)
 x <- cv(list(m0=f0,m1=f1,m2=f2),rep=10, data=iris, formula=Sepal.Length~.)
+x
 }
 \author{
 Klaus K. Holst
