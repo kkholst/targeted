@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(file_loc), '../.
 # -- Project information -----------------------------------------------------
 
 project = 'targeted'
-copyright = u'2019-2020, Klaus Kähler Holst'
+copyright = u'2019-2022, Klaus Kähler Holst'
 author = u'Klaus Kähler Holst'
 # The full version, including alpha/beta/rc tags
 
