@@ -11,7 +11,7 @@ knitr::opts_chunk$set(
 ```
 
 <!-- badges: start -->
-  [![travis](https://travis-ci.com/kkholst/targeted.svg?branch=master)](https://travis-ci.com/kkholst/targeted)
+  [![R-CMD-check](https://github.com/kkholst/targeted/workflows/R-CMD-check/badge.svg?branch=master)](https://github.com/kkholst/targeted/actions)    
   [![coverage](https://codecov.io/github/kkholst/targeted/coverage.svg?branch=master)](https://codecov.io/github/kkholst/targeted?branch=master)
   [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
   [![cran](https://www.r-pkg.org/badges/version-last-release/targeted)](https://cranlogs.r-pkg.org/downloads/total/last-month/targeted)
