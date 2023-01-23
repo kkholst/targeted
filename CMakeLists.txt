@@ -7,7 +7,7 @@
 # Cmake specific settings:
 #   CMAKE_BUILD_TYPE: Debug (non-optimized code with debug symbols), RelWithDebInfo
 ################################################################################
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.16)
 project(target VERSION 0.1 DESCRIPTION "Targeted Inference Library" LANGUAGES CXX)
 
 option(COTIRE  "precompiled headers" OFF)
@@ -18,7 +18,7 @@ option (USE_SANITIZER "Define CXX Sanitizer (Address, Undefined, Leak, Memory)" 
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/config")
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_program(CCACHE_FOUND ccache)
@@ -81,6 +81,9 @@ if (NOT USE_PKG_LIB)
   add_subdirectory("lib/spdlog")
   include_directories("lib/spdlog/include")
 endif()
+
+include_directories("lib/eigen")
+include_directories("lib")
 
 ################################################################################
 # Main library
