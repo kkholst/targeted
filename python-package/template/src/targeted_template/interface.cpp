@@ -11,7 +11,12 @@
 #include <string>
 #include <random>
 #include <iterator>
+#include <torch/torch.h>
 
+void torch_test() {
+  torch::Tensor tensor = torch::rand({2, 3});
+  std::cout << tensor << std::endl;
+}
 
 pyarray expit(pyarray &x) {
   arma::mat res = target::expit(pymat(x));
@@ -33,6 +38,7 @@ PYBIND11_MODULE(__targeted_template_c__, m) {
   m.def("scale2", &scale2);
   m.def("add", &add);
   m.def("samp", &samp);
+  m.def("torch_test", &torch_test);
 
   py::class_<Test>(m, "testclass")
     .def(py::init<std::vector<double> &, std::vector<double> &,  // x, y

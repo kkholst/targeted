@@ -38,6 +38,9 @@ set(DETECT_HDF5 OFF CACHE BOOL "Disable Armadillo HDF5 support")
 add_subdirectory(lib/armadillo)
 add_subdirectory(lib/eigen)
 
+FIND_PACKAGE(Torch REQUIRED)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+
 ################################################################################
 # Tests
 ################################################################################
@@ -94,4 +97,4 @@ else()
   #set_target_properties(__${target}__ PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN")
 endif()
 
-target_link_libraries(__${target}__ PRIVATE armadillo eigen)
+target_link_libraries(__${target}__ PRIVATE armadillo eigen "${TORCH_LIBRARIES}")
