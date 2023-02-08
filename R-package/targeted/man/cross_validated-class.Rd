@@ -10,26 +10,45 @@ objects of the S3 class '\code{cross_validated}'
 }
 \description{
 The functions \code{\link{cv}} returns an object of the type
+<<<<<<< HEAD
   \code{cross_validated}.
+=======
+\code{cross_validated}.
+>>>>>>> develop
 
 An object of class '\code{cross_validated}' is a list with at least the following components:
 
 \describe{
+<<<<<<< HEAD
   \item{cv}{An array with the model score(s) evaluated for each fold, repetition, and model.
   estimates (see \code{\link[lava]{estimate.default}})}
   \item{names}{Names (character vector) of the models}
   \item{rep}{number of repetitions of the CV}
   \item{folds}{Number of folds of the CV}
+=======
+\item{cv}{An array with the model score(s) evaluated for each fold, repetition, and model.
+estimates (see \code{\link[lava]{estimate.default}})}
+\item{names}{Names (character vector) of the models}
+\item{rep}{number of repetitions of the CV}
+\item{folds}{Number of folds of the CV}
+>>>>>>> develop
 }
 }
 \section{S3 generics}{
 
 The following S3 generic functions are available for an object of class \code{cross_validated}:
 \itemize{
+<<<<<<< HEAD
   \item{\code{coef}}{Extract average model scores from the cross-validation procedure.}
   \item{\code{print}}{Basic print method.}
   \item{\code{summary}}{Summary of the cross-validation procedure.}'
  }
+=======
+\item{\code{coef}}{Extract average model scores from the cross-validation procedure.}
+\item{\code{print}}{Basic print method.}
+\item{\code{summary}}{Summary of the cross-validation procedure.}'
+}
+>>>>>>> develop
 }
 
 \examples{

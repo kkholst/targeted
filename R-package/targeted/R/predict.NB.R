@@ -2,7 +2,7 @@
 ##' @title Predictions for Naive Bayes Classifier
 ##' @param object density object
 ##' @param newdata new data on which to make predictions
-##' @param expectation Variable to calcualte conditional expectation wrt
+##' @param expectation Variable to calculate conditional expectation wrt
 ##' probabilities from NB classifier
 ##' @param threshold Threshold parameters. First element defines the threshold
 ##' on the probabilities and the second element the value to set those
@@ -14,7 +14,7 @@ predict.NB <- function(object, newdata, expectation=NULL,
                        threshold=c(1e-3, 1e-3), ...) {
     if (missing(newdata)) stop("Need new data to make predictions")
     if (!is.data.table(newdata)) newdata <- data.table::data.table(newdata)
-    ## Likelihood P(class|x) = P(class)P(x,class)
+    ## Likelihood P(class|x) = P(class)P(x|class)/P(x)
     if (!is.null(expectation)) {
         if (inherits(expectation, "formula")) expectation <- all.vars(expectation)
         z <- newdata[, expectation]

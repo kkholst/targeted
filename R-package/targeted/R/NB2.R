@@ -48,6 +48,7 @@ NB2 <- function(formula, data, weights=NULL,
         if (prop) res <- res/sum(res)
         return(structure(as.numeric(res), names=names(res)))
     }
+    browser()
     prior0 <- xtabs0(weights, y, prop=TRUE)
     res <- list(prior=prior0,
                conditional=pcond,
@@ -61,29 +62,35 @@ NB2 <- function(formula, data, weights=NULL,
 }
 
 
-## ##' @export
-## predict.NB2 <- function(object,newdata, threshold=c(1e-3, 1e-3), ...) {
-##     if (missing(newdata)) stop("Need new data to make predictions")
-##     if (!data.table::is.data.table(newdata)) newdata <- data.table::data.table(newdata)
-##     if (!is.null(object$model)) {
-##         ## Likelihood P(class|x) = P(class)P(x,class)
-##         if (!all(c(object$model$predictor)%in%names(newdata))) stop("Variables missing in data")
-##         xx <- object$model$predictor
-##         X <-  NB_Xprep(newdata[, xx, with=FALSE, drop=FALSE])
-##     } else {
-##         X <-  NB_Xprep(newdata)
-##     }
-##     lev <- attr(X, "levels")
-##     xord <- vector("list", length(lev))
-##     for (i in seq_along(xord)) {
-##         if (!is.null(lev[[i]])) {
-##             xord[[i]] <- match(lev[[i]], object$xlevels[[i]])-1
-##         }
-##     }
-##     ll <- unlist(object$conditional, recursive=FALSE)
-##     ## conditional prob:
-##     lp <- prednb(X, ll,
-##                 xord, object$xmodel=="multinomial", object$prior)
-##     colnames(lp) <- object$classes
-##     exp(lp)
-## }
+##' @export
+predict.NB2 <- function(object,newdata, threshold=1e-3, ...) {
+    if (missing(newdata)) stop("Need new data to make predictions")
+    if (!data.table::is.data.table(newdata)) newdata <- data.table::data.table(newdata)
+    if (!is.null(object$model)) {
+      if (!all(c(object$model$predictor)%in%names(newdata))) stop("Variables missing in data")
+      xx <- object$model$predictor
+      X <-  NB_Xprep(newdata[, xx, with=FALSE, drop=FALSE])
+    } else {
+      if (all(object$xvar%in%names(newdata))) {
+        X <-  NB_Xprep(newdata[,object$xvar,with=FALSE,drop=FALSE])
+      } else {
+        X <-  NB_Xprep(newdata)
+      }
+    }
+    lev <- attr(X, "levels")
+    xord <- vector("list", length(lev))
+    for (i in seq_along(xord)) {
+        if (!is.null(lev[[i]])) {
+            xord[[i]] <- match(lev[[i]], object$xlevels[[i]])-1
+        } else {
+          xord[[i]] <- 0  # to make sure that xord can be interpreted as std::vector<arma::vec>
+        }
+    }
+    ll <- unlist(object$conditional, recursive=FALSE)
+    ## conditional prob:
+    lp <- .predNB(X, ll,
+                  xord, (object$xmodel=="multinomial")*1L,
+                  object$prior, threshold)
+    colnames(lp) <- object$classes
+    exp(lp)
+}

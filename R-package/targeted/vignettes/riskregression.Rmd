@@ -309,9 +309,9 @@ The DRE is a *regular and asymptotic linear* (RAL) estimator, hence
 where \(Z_i = (Y_i, A_i, V_i), i=1,\ldots,n\) are the i.i.d. observations
 and \(\phi_{\mathrm{eff}}\) is the *influence function*.
 
-The influence function can be extracted using the ``iid`` method
+The influence function can be extracted using the ``IC`` method
 ```{r}
-head(iid(fit))
+head(IC(fit))
 ```
 
 SessionInfo

@@ -78,8 +78,11 @@ multiclass_scoring1 <-
 ##' @param names optional names of models coments (given as ..., alternatively
 ##'   these can be named arguments)
 ##' @param messages controls amount of messages/warnings (0: none)
+<<<<<<< HEAD:R-package/targeted/R/scoring.R
 ##' @return
 ##' @export
+=======
+>>>>>>> develop:R-package/targeted/R/Scoring.R
 ##' @examples
 ##' data(iris)
 ##' set.seed(1)

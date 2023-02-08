@@ -1,9 +1,21 @@
+# targeted 0.4
+
+- development version
+
+# targeted 0.3
+
+- Conditional average treatment estimator `cate`, `crr`
+- Generic prediction model class `ml_model`
+- design
+- SuperLearner wrapper `SL`
+- Average Treatment among responders `RATE`
+
 # targeted 0.2.0
 
-- Naive Bayes classifer with `NB`
+- Weighted Naive Bayes classifer with `NB`
 - Pooled adjacent violator algorithm `pava`
-- ODE `ode_solve`
-- Calibration `calibration`
+- ODE solver `ode_solve`
+- Calibration  `calibration`
 - Cross-validation `cv`
 - `ace` method updated and renamed to `ate`
 

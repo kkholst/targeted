@@ -1,7 +1,7 @@
 /*!
   @file cumres.cpp
   @author Klaus K. Holst
-  @copyright 2020-2021, Klaus Kähler Holst
+  @copyright 2020-2022, Klaus Kähler Holst
 
   @brief Generic function for calculating cumulative residuals
 

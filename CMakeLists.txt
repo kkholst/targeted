@@ -53,8 +53,9 @@ endif()
 # Libraries
 ################################################################################
 
-find_package(Armadillo 9.500 QUIET)
-if (ARMADILLO_FOUND AND NOT USE_PKG_LIB)
+# find_package(Armadillo 9.500 QUIET)
+# if (ARMADILLO_FOUND AND NOT USE_PKG_LIB)
+if (NOT USE_PKG_LIB)
   message ([Main]  " Armadillo FOUND")
   find_package(Armadillo CONFIG REQUIRED)
 else()
@@ -68,8 +69,9 @@ message( [Main] " ARMADILLO_INCLUDE_DIRS = ${ARMADILLO_INCLUDE_DIRS}")
 
 include_directories("lib/doctest")
 
-find_package(spdlog QUIET)
-if (spdlog_FOUND AND NOT USE_PKG_LIB)
+# find_package(spdlog QUIET)
+# if (spdlog_FOUND AND NOT USE_PKG_LIB)
+if (NOT USE_PKG_LIB)
   message ([Main]  " spdlog FOUND")
   find_package(spdlog CONFIG REQUIRED)
  else()
