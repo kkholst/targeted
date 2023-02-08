@@ -132,13 +132,8 @@ r_export:
 	mkdir -p $(BUILD_DIR)/R/$(pkg)/inst/include/target; \
 	cp $(pkg_hpp) $(BUILD_DIR)/R/$(pkg)/inst/include/target; \
 	fi
-<<<<<<< HEAD
-	sed -i $(SED_NOBACKUP) '/^SOURCES/d' $(BUILD_DIR)/R/$(pkg)/src/Makevars
-	sed -i $(SED_NOBACKUP) '/^OBJECTS/d' $(BUILD_DIR)/R/$(pkg)/src/Makevars
-=======
 	sed -i $(SED_NOBACKUP) '/^OBJECTS/d' $(BUILD_DIR)/R/$(pkg)/src/Makevars
 	sed -i $(SED_NOBACKUP) '/^SOURCES/d' $(BUILD_DIR)/R/$(pkg)/src/Makevars
->>>>>>> develop
 
 .PHONY: r_crancheck
 r_crancheck: r_export

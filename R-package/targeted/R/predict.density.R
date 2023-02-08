@@ -4,7 +4,6 @@
 ##' @param object density object
 ##' @param xnew New data on which to make predictions for
 ##' @param ... additional arguments to lower level functions
-##' @return Numeric vector with predictions.
 ##' @export
 ##' @author Klaus K. Holst
 predict.density <-

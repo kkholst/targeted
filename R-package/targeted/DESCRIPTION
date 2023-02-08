@@ -1,12 +1,6 @@
 Package: targeted
 Type: Package
 Title: Targeted Inference
-<<<<<<< HEAD
-Version: 0.2.0
-Date: 2021-10-25
-Authors@R: c(person("Klaus K.", "Holst", email="klaus@holst.it", role=c("aut", "cre")))
-Author: Klaus K. Holst [aut, cre]
-=======
 Version: 0.4
 Date: 2022-12-03
 Authors@R: c(person(given = "Klaus K.",
@@ -18,7 +12,6 @@ Authors@R: c(person(given = "Klaus K.",
                     role = c("aut"),
                     email = "andreasnordland@gmail.com"))
 Author: Klaus K. Holst [aut, cre], Andreas Nordland [aut]
->>>>>>> develop
 Maintainer: Klaus K. Holst <klaus@holst.it>
 Description: Various methods for targeted and semiparametric inference including
 	     augmented inverse probability weighted estimators for missing data and
@@ -48,10 +41,6 @@ Suggests:
     scatterplot3d,
     SuperLearner (>= 2.0-28),
     knitr
-<<<<<<< HEAD
-URL: https://www.targetlib.org/r/
-=======
->>>>>>> develop
 BugReports: https://github.com/kkholst/targeted/issues
 License: Apache License (== 2.0)
 LinkingTo: Rcpp, RcppArmadillo

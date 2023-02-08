@@ -2,16 +2,6 @@
 ##'
 ##' @title Cross-validation
 ##' @param models List of fitting functions
-<<<<<<< HEAD
-##' @param data data.frame
-##' @param response Response variable (vector or name of column in `data`)
-##' @param K Number of folds (default 5, 0 splits in 1:n/2, n/2:n with last part
-##'   used for testing)
-##' @param rep Number of repetitions (default 1)
-##' @param weights Optional frequency weights
-##' @param modelscore Model scoring metric (default: RMSE / Brier score). Must
-##'   be a function with arguments: response, prediction, weights, ...
-=======
 ##' @param data data.frame or matrix
 ##' @param response Response variable (vector or name of column in `data`).##'
 ##' @param K Number of folds (default 5. K=0 splits in 1:n/2, n/2:n with last part
@@ -20,19 +10,10 @@
 ##' @param weights Optional frequency weights
 ##' @param modelscore Model scoring metric (default: RMSE / Brier score).
 ##'   Must be a function with arguments: response, prediction, weights, ...
->>>>>>> develop
 ##' @param seed Random seed (argument parsed to future_Apply::future_lapply)
 ##' @param shared Function applied to each fold with results send to each model
 ##' @param args.pred Optional arguments to prediction function (see details
 ##'   below)
-<<<<<<< HEAD
-##' @param ... Additional arguments parsed to models in `models`
-##' @author Klaus K. Holst
-##' @details ...
-##' @return An object of class '\code{cross_validated}' is returned. See
-##'   \code{\link{cross_validated-class}} for more details about this class and
-##'   its generic functions.
-=======
 ##' @param ... Additional arguments parsed to models in models
 ##' @author Klaus K. Holst
 ##' @return An object of class '\code{cross_validated}' is returned. See
@@ -46,7 +27,6 @@
 ##' used as the name of the response argument in models. Similarly, if data
 ##' is a named list with a single data.frame/matrix then this name will be used
 ##' as the name of the data/design matrix argument in models.
->>>>>>> develop
 ##' @examples
 ##' f0 <- function(data,...) lm(...,data=data)
 ##' f1 <- function(data,...) lm(Sepal.Length~Species,data=data)
@@ -55,14 +35,8 @@
 ##' x
 ##' @export
 cv <- function(models, data, response = NULL, K = 5, rep = 1,
-<<<<<<< HEAD
-               weights = NULL, modelscore, seed=TRUE,
-               shared = NULL, args.pred = NULL, ...) {
-  if (is.vector(data)) data <- cbind(data)
-=======
                weights = NULL, modelscore,
                seed = NULL, shared = NULL, args.pred = NULL, ...) {
->>>>>>> develop
   if (missing(modelscore)) modelscore <- scoring
   if (!is.list(models)) stop("Expected a list of models")
   nam <- names(models)
@@ -87,12 +61,8 @@ cv <- function(models, data, response = NULL, K = 5, rep = 1,
 
   for (i in seq_along(models)) {
     f <- models[[i]]
-<<<<<<< HEAD
-    if (!is.list(f) || length(f) == 1) {
-=======
     if ((!is.list(f) || length(f) == 1)
         && !inherits(f, "ml_model")) {
->>>>>>> develop
       ## No predict function provided. Assume 'predict' works on fitted object
       if (is.list(f)) f <- f[[1]]
       models[[i]] <- list(
@@ -112,11 +82,6 @@ cv <- function(models, data, response = NULL, K = 5, rep = 1,
   arglist <- c(list(data), args)
   if (!is.null(weights)) arglist <- c(arglist, list(weights = weights))
 
-<<<<<<< HEAD
-  f <- models[[1]][[1]]
-  if (!is.null(response) && "response" %in% formalArgs(f)) {
-    arglist <- c(arglist, list(response = response))
-=======
   arg_response <- rep(FALSE, length(models))
   for (i in seq_along(models)) {
     if (inherits(models[[i]], "ml_model")) {
@@ -142,7 +107,6 @@ cv <- function(models, data, response = NULL, K = 5, rep = 1,
       response <- data[, response, drop=TRUE]
   } else {
     fit0 <- do.call(f[[1]], arglist)
->>>>>>> develop
   }
   if (is.null(response)) {
     if (inherits(f, "ml_model")) {
@@ -154,11 +118,6 @@ cv <- function(models, data, response = NULL, K = 5, rep = 1,
     if (is.null(response)) stop("Provide 'response'")
   }
   ## In-sample predictive performance:
-<<<<<<< HEAD
-  pred0 <- do.call(
-    models[[1]][[2]],
-       c(list(fit0, data = data), args.pred))
-=======
   if (inherits(f, "ml_model")) {
     pred0 <- do.call(f$predict,
                      c(list(newdata = data), args.pred))
@@ -167,7 +126,6 @@ cv <- function(models, data, response = NULL, K = 5, rep = 1,
       f[[2]],
       c(list(fit0, newdata = data), args.pred))
   }
->>>>>>> develop
   perf0 <- modelscore(prediction=pred0, response=response, weights=weights)
   nam_perf <- if (is.vector(perf0))
                names(perf0) else colnames(perf0)
@@ -187,10 +145,6 @@ cv <- function(models, data, response = NULL, K = 5, rep = 1,
   dim <- c(rep, K, M, P)
   perf_arr <- array(0, dim)
   dimnames(perf_arr) <- list(NULL, NULL, nam, nam_perf)
-<<<<<<< HEAD
-
-=======
->>>>>>> develop
   pb <- progressr::progressor(along = seq(nrow(arg)))
   ff <- function(i) {
     R <- arg[i, 1]
@@ -212,12 +166,6 @@ cv <- function(models, data, response = NULL, K = 5, rep = 1,
       names(arglist)[1] <- data.arg
     if (!is.null(weights)) arglist <- c(arglist, list(weights = wtrain))
     fits <- list()
-<<<<<<< HEAD
-    for (i in seq_along(models)) {
-      f <- models[[i]][[1]]
-      if ("response" %in% formalArgs(f)) {
-        arglist <- c(arglist, list(response = ytrain))
-=======
     for (j in seq_along(models)) {
       if (arg_response[j]) {
         arglist[response.arg] <- list(ytrain)
@@ -229,17 +177,9 @@ cv <- function(models, data, response = NULL, K = 5, rep = 1,
         fits <- c(fits, list(do.call(f$estimate, arglist)))
       } else {
         fits <- c(fits, list(do.call(f[[1]], arglist)))
->>>>>>> develop
       }
     }
     perfs <- list()
-<<<<<<< HEAD
-    for (i in seq_along(fits)) {
-      pred <- do.call(
-        models[[i]][[2]],
-        c(list(fits[[i]], data = dtest), args.pred)
-      )
-=======
     for (j in seq_along(fits)) {
       if (inherits(models[[j]], "ml_model")) {
         pred <- do.call(
@@ -250,7 +190,6 @@ cv <- function(models, data, response = NULL, K = 5, rep = 1,
           models[[j]][[2]],
           c(list(fits[[j]], newdata = dtest), args.pred))
       }
->>>>>>> develop
       perfs <- c(perfs, list(
         do.call(
           modelscore,
@@ -266,12 +205,8 @@ cv <- function(models, data, response = NULL, K = 5, rep = 1,
     do.call(rbind, perfs)
   }
   val <- future.apply::future_mapply(ff, seq(nrow(arg)),
-<<<<<<< HEAD
-                                     SIMPLIFY = FALSE, USE.NAMES = TRUE,
-=======
                                      SIMPLIFY = FALSE,
                                      USE.NAMES = TRUE,
->>>>>>> develop
                                      future.seed = seed)
   for (i in seq(nrow(arg))) {
     R <- arg[i, 1]
@@ -284,6 +219,7 @@ cv <- function(models, data, response = NULL, K = 5, rep = 1,
     call = match.call(),
     names = nam,
     rep = rep, folds = K
+    ##fit = fit0
   ),
   class = "cross_validated"
   )

@@ -34,15 +34,8 @@ these can be named arguments)}
 \item{messages}{controls amount of messages/warnings (0: none)}
 }
 \value{
-<<<<<<< HEAD
-
-
-Numeric matrix of dimension m x p, where m is the number of
-  different models and p is the number of model metrics
-=======
 Numeric matrix of dimension m x p, where m is the number of
 different models and p is the number of model metrics
->>>>>>> develop
 }
 \description{
 Predictive model scoring

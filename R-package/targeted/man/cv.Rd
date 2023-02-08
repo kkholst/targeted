@@ -12,7 +12,7 @@ cv(
   rep = 1,
   weights = NULL,
   modelscore,
-  seed = TRUE,
+  seed = NULL,
   shared = NULL,
   args.pred = NULL,
   ...
@@ -32,8 +32,8 @@ used for testing)}
 
 \item{weights}{Optional frequency weights}
 
-\item{modelscore}{Model scoring metric (default: RMSE / Brier score). Must
-be a function with arguments: response, prediction, weights, ...}
+\item{modelscore}{Model scoring metric (default: RMSE / Brier score).
+Must be a function with arguments: response, prediction, weights, ...}
 
 \item{seed}{Random seed (argument parsed to future_Apply::future_lapply)}
 
@@ -42,21 +42,12 @@ be a function with arguments: response, prediction, weights, ...}
 \item{args.pred}{Optional arguments to prediction function (see details
 below)}
 
-<<<<<<< HEAD
-\item{...}{Additional arguments parsed to models in `models`}
-}
-\value{
-An object of class '\code{cross_validated}' is returned. See
-  \code{\link{cross_validated-class}} for more details about this class and
-  its generic functions.
-=======
 \item{...}{Additional arguments parsed to models in models}
 }
 \value{
 An object of class '\code{cross_validated}' is returned. See
 \code{\link{cross_validated-class}} for more details about this class and
 its generic functions.
->>>>>>> develop
 }
 \description{
 Generic cross-validation function

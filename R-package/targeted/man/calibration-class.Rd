@@ -12,34 +12,20 @@ The functions \code{\link{calibration}} returns an object of the class \code{cal
 
 An object of class '\code{calibration}' is a list with at least the following components:
 \describe{
-<<<<<<< HEAD
-  \item{stepfun}{estimated step-functions (see \code{stepfun}) for each class}
-  \item{classes}{the unique classes}
-  \item{model}{model/method type (string)}
-  \item{xy}{list of data.frame's with predictions (pr) and estimated probabilities of success (only for 'bin' method)}
-=======
 \item{stepfun}{estimated step-functions (see \code{stepfun}) for each class}
 \item{classes}{the unique classes}
 \item{model}{model/method type (string)}
 \item{xy}{list of data.frame's with predictions (pr) and estimated probabilities of success (only for 'bin' method)}
->>>>>>> develop
 }
 }
 \section{S3 generics}{
 
 The following S3 generic functions are available for an object of class \code{targeted}:
 \itemize{
-<<<<<<< HEAD
-  \item{\code{predict}}{Apply calibration to new data.}
-  \item{\code{plot}}{Plot the calibration curves (reliability plot).}
-  \item{\code{print}}{Basic print method.}
- }
-=======
 \item{\code{predict}}{Apply calibration to new data.}
 \item{\code{plot}}{Plot the calibration curves (reliability plot).}
 \item{\code{print}}{Basic print method.}
 }
->>>>>>> develop
 }
 
 \examples{

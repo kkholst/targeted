@@ -32,13 +32,8 @@ NB(
 }
 \value{
 An object of class '\code{NB}' is returned. See
-<<<<<<< HEAD
-  \code{\link{NB-class}} for more details about this class and
-  its generic functions.
-=======
 \code{\link{NB-class}} for more details about this class and
 its generic functions.
->>>>>>> develop
 }
 \description{
 Naive Bayes Classifier
