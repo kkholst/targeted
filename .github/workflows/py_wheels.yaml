@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.8]
+        python-version: [3.10]
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.9.0
@@ -34,7 +34,7 @@ jobs:
         env:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
           CIBW_MANYLINUX_I686_IMAGE: manylinux2014
-          CIBW_SKIP: cp27-* cp35-* pp*
+          CIBW_SKIP: cp27-* cp35-* cp36-* pp*
           CIBW_BEFORE_BUILD: yum install -y make lapack-devel blas-devel python-devel; pip install cmake; cd lib/armadillo; cmake -B build && cd build; make install; cd ../../..
         run: |
           make py_export pkg=targeted
@@ -59,7 +59,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        python-version: [3.8]
+        python-version: [3.10]
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.9.0
@@ -86,7 +86,7 @@ jobs:
           make py_export pkg=targeted
           cd build/python/targeted; python3 -m cibuildwheel --output-dir wheelhouse
       - name: Upload to PyPi
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+        # if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
