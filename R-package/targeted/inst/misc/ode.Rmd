@@ -1,0 +1,164 @@
+---
+title: "targeted::ode_solve: Solving Ordinary Differential Equations"
+author: Klaus Kähler Holst
+date: "`r Sys.Date()`"
+output:
+  knitr:::html_vignette:
+    fig_caption: yes
+    fig_width: 5.15
+    fig_height: 3.5
+    fig_align: center
+vignette: >
+  %\VignetteIndexEntry{targeted::ode_solve: Solving Ordinary Differential Equations}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+ collapse = TRUE,
+ #dev="png",
+ comment = "#>"
+)
+library(targeted)
+```
+
+Introduction
+============
+
+Mathematical and statistical software often relies on sequential computations.  **ordinary differential equations** where
+numerical approximations are based on looping over the evolving time. When using
+high-level languages such as `R` calculations can be very slow
+unless the algorithms can be vectorized
+
+
+There are various excellent (O)DE solvers (R: [deSolve](http://desolve.r-forge.r-project.org/))
+Here I will illustrate the above techniques using the `targeted` `R`-package based on
+[the target C++ library.](https://targetlib.org)
+
+The ODE is specified using the `specify_ode` function
+
+```{r}
+args(targeted::specify_ode)
+```
+
+The differential equations are here specified as a string containing the `C++` code defining the
+differential equation via the `code` argument.
+The variable names are defined through the `pname` argument which defaults to
+
+dy
+: Vector with derivatives, i.e. the rhs of the ODE, \(y'(t)\) (the result).
+
+x
+: Vector,  with the first element being the time, and the following elements additional exogenous input variables,
+    \(x(t) = \{t, x_{1}(t), \ldots, x_{k}(t)\}\)
+
+y
+: Dependent variable, \(y(t) = \{y_{1}(t),\ldots,y_{l}(t)\}\)
+
+p
+: Parameter vector
+    \[y'(t) = f_{p}(x(t), y(t))\]
+
+All variables are treated as [armadillo](http://arma.sourceforge.net/) vectors/matrices, `arma::mat`.
+
+
+As an example, we can specify the simple differential equation
+\[y'(t) = y(t)-1\]
+
+```{r}
+dy <- targeted::specify_ode("dy = y - 1;")
+```
+
+This compiles the function and stores the pointer in the variable `dy`.
+
+To solve the ODE we must then use the function `solve_ode`
+
+```{r}
+args(targeted::solve_ode)
+```
+
+The first argument is the external pointer, the second argument `input` is the
+input matrix (\(x(t)\) above), and the `init` argument is the vector of initial
+boundary conditions \(y(0)\). The argument `par` is the vector of parameters
+defining the ODE (\(p\)).
+
+Examples
+===========
+
+In this example the input variable does not depend on any exogenous variables so
+we only need to supply the time points, and the defined ODE does not depend on
+any parameters. To approximate the solution with initial condition \(y(0)=0\),
+we therefore run the following code
+
+```{r}
+t <- seq(0, 10, length.out=1e4)
+y <- targeted::solve_ode(dy, t, init=0)
+plot(t, y, type='l', lwd=3)
+```
+
+
+As a more interesting example consider the **Lorenz Equations**
+\[\frac{dx_{t}}{dt} = \sigma(y_{t}-x_{t})\]
+\[\frac{dy_{t}}{dt} = x_{t}(\rho-z_{t})-y_{t}\]
+\[\frac{dz_{t}}{dt} = x_{t}y_{t}-\beta z_{t}\]
+
+we may define them as
+
+```{r}
+library(targeted)
+ode <- 'dy(0) = p(0)*(y(1)-y(0));
+        dy(1) = y(0)*(p(1)-y(2));
+        dy(2) = y(0)*y(1)-p(2)*y(2);'
+f <- specify_ode(ode)
+```
+
+With the choice of parameters given by \(\sigma=10, \rho=28, \beta=8/3\)
+and initial conditions \((x_0,y_0,z_0)=(1,1,1)\), we can calculate the solution
+
+```{r}
+tt <- seq(0, 100, length.out=2e4)
+y <- solve_ode(f, input=tt, init=c(1, 1, 1), par=c(10, 28, 8/3))
+head(y)
+```
+
+```{r}
+colnames(y) <- c("x","y","z")
+scatterplot3d::scatterplot3d(y, cex.symbols=0.1, type='b',
+                             color=viridisLite::viridis(nrow(y)))
+```
+
+To illustrate the use of exogenous inputs, consider the following simulated data
+
+```{r}
+n <- 1e4
+tt <- seq(0, 10, length.out=n)  # Time
+xx <- rep(0, n); xx[(n/3):(2*n/3)] <- 1  # Exogenous input, x(t)
+input <- cbind(tt, xx)
+```
+
+and the following ODE
+
+\[y'(t) = \beta_{0} + \beta_{1}y(t) + \beta_{2}y(t)x(t) + \beta_{3}x(t)\cdot t\]
+
+```{r}
+mod <- 'double t = x(0);
+        dy = p(0) + p(1)*y + p(2)*x(1)*y + p(3)*x(1)*t;'
+dy <- specify_ode(mod)
+```
+
+With \(y(0)=100\) and \(\beta_0=0, \beta_{1}=0.4, \beta_{2}=-0.5, \beta_{3}=-5\) we obtain the following solution
+
+```{r}
+yy <- solve_ode(dy, input=input, init=100, c(0, .4, -.5, -5))
+plot(tt, yy, type='l', lwd=3, xlab='time', ylab='y')
+```
+
+
+SessionInfo
+============
+
+
+```{r}
+sessionInfo()
+```
