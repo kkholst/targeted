@@ -3,7 +3,7 @@ set(pkg "targeted_template")
 set(target "${pkg}_c")
 
 set(RUN_TESTS TRUE)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(${target} CXX)
 
@@ -36,6 +36,7 @@ FIND_PACKAGE(PythonLibs REQUIRED 3)
 message ([Main]  " Using Armadillo included in this package")
 set(DETECT_HDF5 OFF CACHE BOOL "Disable Armadillo HDF5 support")
 add_subdirectory(lib/armadillo)
+add_subdirectory(lib/pybind11)
 add_subdirectory(lib/eigen)
 
 FIND_PACKAGE(Torch REQUIRED)
@@ -60,14 +61,13 @@ endif()
 ################################################################################
 # Python bindings
 ################################################################################
-
-find_package(pybind11 QUIET)
-if (pybind11_FOUND)
-  message([Main]  " pybind11 FOUND")
-else()
-  message([Main]  " Using pybind11 included in this package")
-  add_subdirectory(lib/pybind11)
-endif()
+# find_package(pybind11 QUIET)
+# if (pybind11_FOUND)
+#   message([Main]  " pybind11 FOUND")
+# else()
+#   message([Main]  " Using pybind11 included in this package")
+#   add_subdirectory(lib/pybind11)
+# endif()
 
 set(LIBTARGET_CPP "${CMAKE_SOURCE_DIR}/lib/target-cpp")
 set(LIBTARGET_INC "${CMAKE_SOURCE_DIR}/lib/target-inc")
