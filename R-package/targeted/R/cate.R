@@ -1,8 +1,13 @@
 ate_if_fold <- function(fold, data,
                      propensity_model, response_model,
                      treatment, level) {
-  dtrain <- data[-fold,]
-  deval <- data[fold,]
+  if (length(fold)==nrow(data)) {
+    dtrain <- data
+    deval <- data
+  } else {
+    dtrain <- data[-fold,]
+    deval <- data[fold,]
+  }
   tmp <- propensity_model$estimate(dtrain)
   tmp <- response_model$estimate(dtrain)
 
@@ -20,7 +25,7 @@ ate_if_fold <- function(fold, data,
 
 cate_fold1 <- function(fold, data, score, treatment_des) {
   y <- score[fold]
-  x <- update(treatment_des, data[fold,])$x
+  x <- update(treatment_des, data[fold,,drop=FALSE])$x
   lm.fit(y=y, x=x)$coef
 }
 
@@ -66,7 +71,7 @@ cate <- function(treatment,
                  contrast=c(1,0),
                  data,
                  nfolds=5,
-                 type="dml1",
+                 type="dml2",
                  ...) {
 
   cl <- match.call()
@@ -88,19 +93,19 @@ cate <- function(treatment,
     propensity_model <- SL(treatment_f(contrast[1]), ..., binomial=TRUE)
   }
   n <- nrow(data)
+  if (nfolds<1) nfolds <- 1
   folds <- split(sample(1:n, n), rep(1:nfolds, length.out = n))
   folds <- lapply(folds, sort)
   ff <- Reduce(c, folds)
   idx <- order(ff)
-
   scores <- list()
-  pb <- progressr::progressor(steps = length(contrast)*nfolds)
+  ## pb <- progressr::progressor(steps = length(contrast)*nfolds)
   for (i in seq_along(contrast)) {
     a <- contrast[i]
-    propensity_model$update(treatment_f(a))
+    propensity_model$update(update(treatment, treatment_f(a)))
     val <- c()
     for (f in folds) {
-      pb()
+      ## pb()
       val <- c(val, list(ate_if_fold(f, data,
                                      propensity_model, response_model,
                                      treatment=treatment_var, level=a)))
