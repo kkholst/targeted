@@ -15,8 +15,12 @@ SL <- function(formula=~., ...,
                binomial=FALSE,
                data=NULL) {
   dots <- list(...)
-  if (!requireNamespace("SuperLearner"))
-    stop("Package 'SuperLearner' required.")
+  if (!requireNamespace("SuperLearner")) {
+      stop("Package 'SuperLearner' required.")
+  }
+  if (length(attr(getoutcome(formula), "x")) == 0) {
+    SL.library <- "SL.mean"
+  }
   m <- ml_model$new(formula, info="SuperLearner",
                fit=function(x,y) {
                  Y <- as.numeric(y)
@@ -36,6 +40,20 @@ SL <- function(formula=~., ...,
                    pr <- cbind((1-pr), pr)
                  return(pr)
                })
+  if (!is.null(data))
+    m$estimate(data)
+  return(m)
+}
+
+
+##' @export
+GLM <- function(formula, family=gaussian, ..., data=NULL) {
+  m <- ml_model$new(formula, info="GLM",
+                    fit=function(formula, data)
+                      stats::glm(formula, data=data, family=family, ...),
+                    pred = function(object, newdata)
+                      stats::predict(object, newdata=newdata, type="response")
+                    )
   if (!is.null(data))
     m$estimate(data)
   return(m)
