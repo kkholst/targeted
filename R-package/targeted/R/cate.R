@@ -1,16 +1,15 @@
 ate_if_fold <- function(fold, data,
                      propensity_model, response_model,
                      treatment, level) {
-  if (length(fold)==nrow(data)) {
+  if (length(fold) == NROW(data)) { ## No cross-fitting
     dtrain <- data
     deval <- data
   } else {
-    dtrain <- data[-fold,]
-    deval <- data[fold,]
+    dtrain <- data[-fold, ]
+    deval <- data[fold, ]
   }
   tmp <- propensity_model$estimate(dtrain)
   tmp <- response_model$estimate(dtrain)
-
   A <- propensity_model$response(deval)
   Y <- response_model$response(deval)
   X <- deval
@@ -33,13 +32,14 @@ cate_fold1 <- function(fold, data, score, treatment_des) {
 ##'
 ##' @title Conditional Average Treatment Effect estimation
 ##' @param treatment formula specifying treatment and variables to condition on
-##' @param response_model SL object
-##' @param propensity_model SL object
+##' @param response_model formula or ml_model object (formula = GLM)
+##' @param propensity_model formula or ml_model object (formula = GLM)
 ##' @param contrast treatment contrast (default 1 vs 0)
 ##' @param data data.frame
 ##' @param nfolds Number of folds
 ##' @param type 'dml1' or 'dml2'
-##' @param ... additional arguments to SuperLearner
+##' @param silent supress all messages and progressbars
+##' @param ... additional arguments to future.apply::future_mapply
 ##' @return cate.targeted object
 ##' @author Klaus Kähler Holst
 ##' @examples
@@ -59,10 +59,7 @@ cate_fold1 <- function(fold, data, score, treatment_des) {
 ##' }
 ##'
 ##' d <- sim1(200)
-##' if (require("SuperLearner",quietly=TRUE)) {
-##'   e <- cate(a ~ z1+z2+z3, response=u~., data=d)
-##'   e
-##' }
+##' e <- cate(a ~ z1+z2+z3, response=u~., data=d)
 ##'
 ##' @export
 cate <- function(treatment,
@@ -72,6 +69,8 @@ cate <- function(treatment,
                  data,
                  nfolds=5,
                  type="dml2",
+                 silent=FALSE,
+                 mc.cores,
                  ...) {
 
   cl <- match.call()
@@ -80,17 +79,24 @@ cate <- function(treatment,
   }
   desA <- design(treatment, data, intercept=TRUE, rm_envir=FALSE)
   if (inherits(response_model, "formula")) {
-    response_model <- SL(response_model, ...)
+    response_model <- GLM(response_model)
+  }
+  if (inherits(propensity_model, "formula")) {
+    propensity_model <- GLM(propensity_model, family=binomial)
   }
   if (length(contrast)>2)
     stop("Expected contrast vector of length 1 or 2.")
 
+  propensity_formula <- function(treatment_level)
+    as.formula(paste0("I(", treatment_var, "==", treatment_level, ") ~ ."))
   response_var <- lava::getoutcome(response_model$formula, data=data)
   treatment_var <- lava::getoutcome(treatment)
-  treatment_f <- function(treatment_level, x=paste0(".-", response_var))
-    as.formula(paste0("I(", treatment_var, "==", treatment_level, ") ~ ", x))
   if (missing(propensity_model)) {
-    propensity_model <- SL(treatment_f(contrast[1]), ..., binomial=TRUE)
+    newf <- update(
+      propensity_formula(contrast[1]),
+      as.formula(paste0(". ~ . - ", response_var))
+    )
+    propensity_model <- GLM(newf, family=binomial)
   }
   n <- nrow(data)
   if (nfolds<1) nfolds <- 1
@@ -99,19 +105,65 @@ cate <- function(treatment,
   ff <- Reduce(c, folds)
   idx <- order(ff)
   scores <- list()
-  ## pb <- progressr::progressor(steps = length(contrast)*nfolds)
-  for (i in seq_along(contrast)) {
-    a <- contrast[i]
-    propensity_model$update(update(treatment, treatment_f(a)))
-    val <- c()
-    for (f in folds) {
-      ## pb()
-      val <- c(val, list(ate_if_fold(f, data,
-                                     propensity_model, response_model,
-                                     treatment=treatment_var, level=a)))
-    }
-    val <- unlist(val)[idx]
-    scores <- c(scores, list(val))
+  if (!silent) {
+    pb <- progressr::progressor(steps = length(contrast) * nfolds)
+  }
+  fargs <- rbind(expand.grid(seq_len(nfolds), contrast))
+
+  procfold <- function(a, fold,
+                       data,
+                       propensity_model,
+                       response_model,
+                       folds,
+                       ...) {
+    rmod <- response_model$clone(deep=TRUE)
+    pmod <- propensity_model$clone(deep=TRUE)
+    newf <- update(
+      pmod$formula,
+      propensity_formula(a)
+    )
+    pmod$update(newf)
+    if (!silent) pb()
+    val <- list(ate_if_fold(folds[[fold]], data,
+      propensity_model = pmod,
+      response_model = rmod,
+      treatment = treatment_var,
+      level = a
+    ))
+    return(val)
+  }
+
+  if (!missing(mc.cores)) {
+    mymapply <- ifelse(mc.cores > 1, parallel::mcmapply, mapply)
+    val <- mymapply(procfold,
+        a = as.list(fargs[, 2]), fold = as.list(fargs[, 1]),
+        mc.cores = 1,
+        MoreArgs = list(
+          propensity_model = propensity_model,
+          response_model = response_model,
+          treatment_var = treatment_var,
+          data = data, folds = folds
+        ),
+        ...
+      )
+  } else {
+    val <- future.apply::future_mapply(procfold,
+      a = as.list(fargs[, 2]), fold = as.list(fargs[, 1]),
+      future.seed = TRUE,
+      ## future.packages = c("lava", "targeted", "R6"),
+      MoreArgs = list(
+        propensity_model = propensity_model,
+        response_model = response_model,
+        treatment_var = treatment_var,
+        data = data, folds = folds
+      ),
+      ...
+      )
+  }
+  for (i in contrast) {
+    ii <- which(fargs[,2] == i)
+    scores <- c(scores, list(unlist(val[ii])[idx]))
+
   }
   names(scores) <- contrast
 
@@ -143,7 +195,7 @@ cate <- function(treatment,
   return(res)
 }
 
-score_fold <- function(fold, 
+score_fold <- function(fold,
                     data,
                     propensity_model,
                     response_model,
