@@ -8,13 +8,15 @@ cv(
   models,
   data,
   response = NULL,
-  K = 5,
+  nfolds = 5,
   rep = 1,
   weights = NULL,
   modelscore,
   seed = NULL,
   shared = NULL,
   args.pred = NULL,
+  args.future = list(),
+  mc.cores,
   ...
 )
 }
@@ -23,9 +25,9 @@ cv(
 
 \item{data}{data.frame or matrix}
 
-\item{response}{Response variable (vector or name of column in \code{data}).##'}
+\item{response}{Response variable (vector or name of column in \code{data}).}
 
-\item{K}{Number of folds (default 5. K=0 splits in 1:n/2, n/2:n with last part
+\item{nfolds}{Number of folds (default 5. K=0 splits in 1:n/2, n/2:n with last part
 used for testing)}
 
 \item{rep}{Number of repetitions (default 1)}
@@ -41,6 +43,10 @@ Must be a function with arguments: response, prediction, weights, ...}
 
 \item{args.pred}{Optional arguments to prediction function (see details
 below)}
+
+\item{args.future}{Arguments to future.apply::future_mapply}
+
+\item{mc.cores}{Optional number of cores. Will use parallel::mcmapply instead of future}
 
 \item{...}{Additional arguments parsed to models in models}
 }
