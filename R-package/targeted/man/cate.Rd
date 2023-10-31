@@ -11,16 +11,18 @@ cate(
   contrast = c(1, 0),
   data,
   nfolds = 5,
-  type = "dml1",
+  type = "dml2",
+  silent = FALSE,
+  mc.cores,
   ...
 )
 }
 \arguments{
 \item{treatment}{formula specifying treatment and variables to condition on}
 
-\item{response_model}{SL object}
+\item{response_model}{formula or ml_model object (formula = GLM)}
 
-\item{propensity_model}{SL object}
+\item{propensity_model}{formula or ml_model object (formula = GLM)}
 
 \item{contrast}{treatment contrast (default 1 vs 0)}
 
@@ -30,7 +32,9 @@ cate(
 
 \item{type}{'dml1' or 'dml2'}
 
-\item{...}{additional arguments to SuperLearner}
+\item{silent}{supress all messages and progressbars}
+
+\item{...}{additional arguments to future.apply::future_mapply}
 }
 \value{
 cate.targeted object
@@ -55,10 +59,7 @@ lava::sim(m, n, p=par)
 }
 
 d <- sim1(200)
-if (require("SuperLearner",quietly=TRUE)) {
-  e <- cate(a ~ z1+z2+z3, response=u~., data=d)
-  e
-}
+e <- cate(a ~ z1+z2+z3, response=u~., data=d)
 
 }
 \author{

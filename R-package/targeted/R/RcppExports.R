@@ -63,5 +63,5 @@ fast_iid <- function(y, p, x1, weights, logistic = TRUE) {
 
 # Register entry points for exported C++ functions
 methods::setLoadAction(function(ns) {
-    .Call('_targeted_RcppExport_registerCCallable', PACKAGE = 'targeted')
+    .Call(`_targeted_RcppExport_registerCCallable`)
 })
