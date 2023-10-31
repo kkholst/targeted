@@ -230,7 +230,7 @@ print.summary.ate.targeted <- function(x, ...) {
     if (length(x$contrast)>1) {
         cc <- rownames(x$estimate$coefmat)
         with(x, cat("\nAverage Treatment Effect (constrast: '",
-                    cc[contrast[1]], "' vs. '", cc[contrast[2]], "'):\n\n", sep=""))
+                    cc[contrast[1]], "' - '", cc[contrast[2]], "'):\n\n", sep=""))
         if (!is.null(x$asso)) print(x$asso)
     }
     cat("\n")
@@ -238,7 +238,7 @@ print.summary.ate.targeted <- function(x, ...) {
 
 
 ##' @export
-summary.ate.targeted <- function(object, contrast=c(1:2), ...) {
+summary.ate.targeted <- function(object, contrast=c(2:1), ...) {
   nn <- lapply(object[c("estimate", "outcome.reg", "propensity.model")],
                function(x) length(coef(x)))
     if (object$all) {
