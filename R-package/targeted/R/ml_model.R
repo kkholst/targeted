@@ -62,12 +62,12 @@ ml_model <- R6::R6Class("ml_model",
         formals(fit) <- c(formals(fit), alist(...=))
       }
       des.args <- lapply(substitute(specials), function(x) x)[-1]
-
       fit_formula <- "formula"%in%formalArgs(fit)
-
       fit_response_arg <- response.arg %in% formalArgs(fit)
       fit_x_arg <- x.arg%in%formalArgs(fit)
-      fit_data_arg <- "data"%in%formalArgs(fit)
+      fit_data_arg <- "data" %in% formalArgs(fit)
+      private$init.estimate <- fit
+      private$init.predict <- pred
       ## if (!fit_x_arg && !("data"%in%formalArgs(fit)))
       ##   stop("Estimation method must have an argument 'x' or 'data'")
 
@@ -76,17 +76,17 @@ ml_model <- R6::R6Class("ml_model",
       if (no_formula) {
         private$fitfun <- function(...) {
           args <-  c(list(...), dots)
-          do.call(fit, args)
+          do.call(private$init.estimate, args)
         }
         private$predfun <- function(...) {
           args <-  c(list(...), pred.args)
-          do.call(pred, args)
+          do.call(private$init.predict, args)
         }
       } else {
         if (fit_formula) {  ## Formula in arguments of estimation procedure
           private$fitfun <- function(data, ...) {
             args <- c(dots, list(formula=formula, data=data), list(...))
-            return(do.call(fit, args))
+            return(do.call(private$init.estimate, args))
           }
         } else {  ##  Formula automatically processed into design matrix & response
           private$fitfun <- function(data, ...) {
@@ -102,7 +102,7 @@ ml_model <- R6::R6Class("ml_model",
             }
             if (length(xx$specials)>0)
               args <- c(args, xx[xx$specials])
-            return(structure(do.call(fit, args), design=summary(xx)))
+            return(structure(do.call(private$init.estimate, args), design=summary(xx)))
           }
         }
         private$predfun <- function(fit, data, ...) {
@@ -112,7 +112,7 @@ ml_model <- R6::R6Class("ml_model",
             x <- model.matrix(update(attr(fit, "design"), data))
             args <-  c(list(fit, newdata=x), pred.args, list(...))
           }
-          return(do.call(pred, args))
+          return(do.call(private$init.predict, args))
         }
       }
       self$formula <- formula
@@ -201,6 +201,10 @@ ml_model <- R6::R6Class("ml_model",
    ),
 
    private = list(
+     ## @field init.estimate Original estimate method supplied at initialization
+     init.estimate = NULL,
+     ## @field init.predict Original predict method supplied at initialization
+     init.predict = NULL,
      ## @field predfun Prediction method
      predfun = NULL,
      ## @field fitfun Estimation method
