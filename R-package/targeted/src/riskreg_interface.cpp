@@ -152,17 +152,14 @@ arma::cx_mat bin_esteq_c(const arma::cx_vec &y,
 
 
 // [[Rcpp::export]]
-Rcpp::List ace_est(const arma::vec &y,
-		   const arma::mat &a,
-		   const arma::mat &x1,
-		   const arma::mat &x2,
-		   const arma::vec &theta,
-		   const arma::vec &weights,
-		   bool binary = true) {
+Rcpp::List ace_est(const arma::vec &y, const arma::mat &a, const arma::mat &x1,
+                   const arma::mat &x2, const arma::vec &theta,
+                   const arma::vec &weights, const arma::vec &offset,
+                   std::string link = "identity") {
   arma::vec par(theta.n_elem+1);
   par[0] = 0;
   for (unsigned i=0; i < theta.n_elem; i++) par[i+1] = theta[i];
-  target::ACE model(y, a, x1, x2, par, weights, binary);
+  target::ACE model(y, a, x1, x2, par, weights, offset, link);
   double alpha = real(model.est(false)[0])/y.n_elem;
   par[0] = alpha;
   model.update_par(par);

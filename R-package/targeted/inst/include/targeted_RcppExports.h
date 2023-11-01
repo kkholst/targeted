@@ -215,17 +215,17 @@ namespace targeted {
         return Rcpp::as<arma::cx_mat >(rcpp_result_gen);
     }
 
-    inline Rcpp::List ace_est(const arma::vec& y, const arma::mat& a, const arma::mat& x1, const arma::mat& x2, const arma::vec& theta, const arma::vec& weights, bool binary = true) {
-        typedef SEXP(*Ptr_ace_est)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
+    inline Rcpp::List ace_est(const arma::vec& y, const arma::mat& a, const arma::mat& x1, const arma::mat& x2, const arma::vec& theta, const arma::vec& weights, const arma::vec& offset, std::string link = "identity") {
+        typedef SEXP(*Ptr_ace_est)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
         static Ptr_ace_est p_ace_est = NULL;
         if (p_ace_est == NULL) {
-            validateSignature("Rcpp::List(*ace_est)(const arma::vec&,const arma::mat&,const arma::mat&,const arma::mat&,const arma::vec&,const arma::vec&,bool)");
+            validateSignature("Rcpp::List(*ace_est)(const arma::vec&,const arma::mat&,const arma::mat&,const arma::mat&,const arma::vec&,const arma::vec&,const arma::vec&,std::string)");
             p_ace_est = (Ptr_ace_est)R_GetCCallable("targeted", "_targeted_ace_est");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_ace_est(Shield<SEXP>(Rcpp::wrap(y)), Shield<SEXP>(Rcpp::wrap(a)), Shield<SEXP>(Rcpp::wrap(x1)), Shield<SEXP>(Rcpp::wrap(x2)), Shield<SEXP>(Rcpp::wrap(theta)), Shield<SEXP>(Rcpp::wrap(weights)), Shield<SEXP>(Rcpp::wrap(binary)));
+            rcpp_result_gen = p_ace_est(Shield<SEXP>(Rcpp::wrap(y)), Shield<SEXP>(Rcpp::wrap(a)), Shield<SEXP>(Rcpp::wrap(x1)), Shield<SEXP>(Rcpp::wrap(x2)), Shield<SEXP>(Rcpp::wrap(theta)), Shield<SEXP>(Rcpp::wrap(weights)), Shield<SEXP>(Rcpp::wrap(offset)), Shield<SEXP>(Rcpp::wrap(link)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
