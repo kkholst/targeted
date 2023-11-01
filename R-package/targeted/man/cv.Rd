@@ -46,7 +46,7 @@ below)}
 
 \item{args.future}{Arguments to future.apply::future_mapply}
 
-\item{mc.cores}{Optional number of cores. Will use parallel::mcmapply instead of future}
+\item{mc.cores}{Optional number of cores. parallel::mcmapply used instead of future}
 
 \item{...}{Additional arguments parsed to models in models}
 }

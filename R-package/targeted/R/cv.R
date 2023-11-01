@@ -15,7 +15,7 @@
 ##' @param args.pred Optional arguments to prediction function (see details
 ##'   below)
 ##' @param args.future Arguments to future.apply::future_mapply
-##' @param mc.cores Optional number of cores. Will use parallel::mcmapply instead of future
+##' @param mc.cores Optional number of cores. parallel::mcmapply used instead of future
 ##' @param ... Additional arguments parsed to models in models
 ##' @author Klaus K. Holst
 ##' @return An object of class '\code{cross_validated}' is returned. See
@@ -187,21 +187,22 @@ cv <- function(models, data, response = NULL, nfolds = 5, rep = 1,
       f <- models[[j]]
       if (inherits(f, "ml_model")) {
         f <- f$clone(deep = TRUE)
-        fits <- c(fits, list(do.call(f$estimate, arglist)))
+        do.call(f$estimate, arglist)
+        fits <- c(fits, f)
       } else {
         fits <- c(fits, list(do.call(f[[1]], arglist)))
       }
     }
     perfs <- list()
     for (j in seq_along(fits)) {
-      if (inherits(f, "ml_model")) {
+      if (inherits(fits[[j]], "ml_model")) {
         pred <- do.call(
-          f$predict,
+          fits[[j]]$predict,
           c(list(newdata = dtest), args.pred)
         )
       } else {
         pred <- do.call(
-          f[[2]],
+          models[[j]][[2]],
           c(list(fits[[j]], newdata = dtest), args.pred)
         )
       }
@@ -251,33 +252,6 @@ cv <- function(models, data, response = NULL, nfolds = 5, rep = 1,
   class = "cross_validated"
   )
 }
-
-##' @export
-cc <- function(f, data, ...) {
-  print(f$estimate(data))
-
-  myfit <- function(..., fit) {
-    Sys.sleep(0.1)
-      ##val <- fit(data)
-      ff <- f$clone(deep=TRUE)
-      val <- ff$estimate(data)
-      coef(val)
-  }
-  parallel::mcmapply(myfit, ...
-   # MoreArgs = list(fit = f$estimate)
-  )
-}
-
-##' @export
-ccc <- function(f, data, ...) {
-  val <- parallel::mcmapply(function(..., fit, data) {
-    val <- fit(data)
-    coef(val)
-  }, ..., x = as.list(1:4), MoreArgs = list(fit = f$estimate, data = data))
-  val
-}
-
-
 
 ##' @export
 summary.cross_validated <- function(object, ...) {
