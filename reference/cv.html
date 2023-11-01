@@ -70,13 +70,15 @@
 <span>  <span class="va">models</span>,</span>
 <span>  <span class="va">data</span>,</span>
 <span>  response <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  K <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  nfolds <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  rep <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">modelscore</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  shared <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  args.pred <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  args.future <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  <span class="va">mc.cores</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -92,10 +94,10 @@
 
 
 <dt>response</dt>
-<dd><p>Response variable (vector or name of column in <code>data</code>).##'</p></dd>
+<dd><p>Response variable (vector or name of column in <code>data</code>).</p></dd>
 
 
-<dt>K</dt>
+<dt>nfolds</dt>
 <dd><p>Number of folds (default 5. K=0 splits in 1:n/2, n/2:n with last part
 used for testing)</p></dd>
 
@@ -124,6 +126,14 @@ Must be a function with arguments: response, prediction, weights, ...</p></dd>
 <dt>args.pred</dt>
 <dd><p>Optional arguments to prediction function (see details
 below)</p></dd>
+
+
+<dt>args.future</dt>
+<dd><p>Arguments to future.apply::future_mapply</p></dd>
+
+
+<dt>mc.cores</dt>
+<dd><p>Optional number of cores. parallel::mcmapply used instead of future</p></dd>
 
 
 <dt>...</dt>

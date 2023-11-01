@@ -73,7 +73,10 @@
 <span>  contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span>,</span>
 <span>  <span class="va">data</span>,</span>
 <span>  nfolds <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>  type <span class="op">=</span> <span class="st">"dml1"</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"dml2"</span>,</span>
+<span>  silent <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  stratify <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">mc.cores</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -85,11 +88,11 @@
 
 
 <dt>response_model</dt>
-<dd><p>SL object</p></dd>
+<dd><p>formula or ml_model object (formula =&gt; glm)</p></dd>
 
 
 <dt>propensity_model</dt>
-<dd><p>SL object</p></dd>
+<dd><p>formula or ml_model object (formula =&gt; glm)</p></dd>
 
 
 <dt>contrast</dt>
@@ -108,8 +111,20 @@
 <dd><p>'dml1' or 'dml2'</p></dd>
 
 
+<dt>silent</dt>
+<dd><p>supress all messages and progressbars</p></dd>
+
+
+<dt>stratify</dt>
+<dd><p>If TRUE the response_model will be stratified by treatment</p></dd>
+
+
+<dt>mc.cores</dt>
+<dd><p>mc.cores Optional number of cores. parallel::mcmapply used instead of future</p></dd>
+
+
 <dt>...</dt>
-<dd><p>additional arguments to SuperLearner</p></dd>
+<dd><p>additional arguments to future.apply::future_mapply</p></dd>
 
 </dl></div>
     <div id="value">
@@ -141,19 +156,7 @@
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">sim1</span><span class="op">(</span><span class="fl">200</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://github.com/ecpolley/SuperLearner" class="external-link">"SuperLearner"</a></span>,quietly<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="va">e</span> <span class="op">&lt;-</span> <span class="fu">cate</span><span class="op">(</span><span class="va">a</span> <span class="op">~</span> <span class="va">z1</span><span class="op">+</span><span class="va">z2</span><span class="op">+</span><span class="va">z3</span>, response<span class="op">=</span><span class="va">u</span><span class="op">~</span><span class="va">.</span>, data<span class="op">=</span><span class="va">d</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="va">e</span></span></span>
-<span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Loaded gam 1.22</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Super Learner</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Version: 2.0-28</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Package created on 2021-05-04</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err    2.5%  97.5%   P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.9236  0.2107 0.51066 1.3366 1.167e-05</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> z1            1.0195  0.2603 0.50943 1.5296 8.952e-05</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> z2            0.4243  0.1905 0.05089 0.7977 2.594e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> z3            0.7302  0.1979 0.34233 1.1181 2.245e-04</span>
+<span class="r-in"><span><span class="va">e</span> <span class="op">&lt;-</span> <span class="fu">cate</span><span class="op">(</span><span class="va">a</span> <span class="op">~</span> <span class="va">z1</span><span class="op">+</span><span class="va">z2</span><span class="op">+</span><span class="va">z3</span>, response<span class="op">=</span><span class="va">u</span><span class="op">~</span><span class="va">.</span>, data<span class="op">=</span><span class="va">d</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

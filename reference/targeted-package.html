@@ -118,8 +118,11 @@ causal inference.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> riskrg&gt; a</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err    2.5%     97.5%   P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.9797  0.1212  0.7421  1.217281 6.366e-16</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> z            -0.2218  0.1115 -0.4404 -0.003198 4.674e-02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.9797  0.1212  0.7421  1.217291 6.365e-16</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> z            -0.2218  0.1115 -0.4404 -0.003204 4.674e-02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> riskrg&gt; predict(a, d[1:5,])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.1491919 0.6897799 0.1040211 0.3736667 0.3304784</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> riskrg&gt; riskreg(y ~ a, nuisance=~x,  data=d, type="rr", mle=TRUE)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                          Estimate Std.Err    2.5%   97.5%   P-value</span>
@@ -145,51 +148,43 @@ causal inference.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cate&gt; d &lt;- sim1(200)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> cate&gt; if (require("SuperLearner",quietly=TRUE)) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> cate+   e &lt;- cate(a ~ z1+z2+z3, response=u~., data=d)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> cate+   e</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> cate+ }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err    2.5% 97.5%   P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.9841  0.2682 0.45842 1.510 2.433e-04</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> z1            1.3639  0.3206 0.73544 1.992 2.103e-05</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> z2            0.8310  0.1769 0.48425 1.178 2.635e-06</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> z3            0.5569  0.2747 0.01853 1.095 4.262e-02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> cate&gt; e &lt;- cate(a ~ z1+z2+z3, response=u~., data=d)</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/example.html" class="external-link">example</a></span><span class="op">(</span><span class="va">ate</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ate&gt; m &lt;- lvm(y ~ a+x, a~x)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ate&gt; distribution(m,~ a+y) &lt;- binomial.lvm()</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ate&gt; d &lt;- sim(m,1e3,seed=1)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ate&gt; d &lt;- sim(m,1e4,seed=1)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ate&gt; a &lt;- ate(y ~ a, nuisance=~x, data=d)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ate&gt; summary(a)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Augmented Inverse Probability Weighting estimator</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Response y (Outcome model: logistic regression):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Response y (Outcome model: gaussian):</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	 y ~ x + a </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Exposure a (Propensity model: logistic regression):</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	 a ~ x </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                   Estimate Std.Err     2.5%   97.5%    P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  a=0               0.48496 0.02311  0.43967  0.5302  8.607e-98</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  a=1               0.67788 0.02240  0.63397  0.7218 4.249e-201</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Outcome model:                                                </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  (Intercept)      -0.02229 0.10163 -0.22149  0.1769  8.264e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  x                 0.90226 0.08857  0.72866  1.0759  2.276e-24</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  a                 1.01052 0.15195  0.71270  1.3083  2.926e-11</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Propensity model:                                             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  (Intercept)       0.06214 0.06914 -0.07337  0.1977  3.688e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  x                -0.92905 0.08035 -1.08653 -0.7716  6.408e-31</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                    Estimate  Std.Err     2.5%    97.5%    P-value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  a=0               0.496843 0.007478  0.48219  0.51150  0.000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  a=1               0.706396 0.007364  0.69196  0.72083  0.000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Outcome model:                                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  (Intercept)       0.485158 0.006898  0.47164  0.49868  0.000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  x                 0.175278 0.004231  0.16699  0.18357  0.000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  a                 0.224335 0.010050  0.20464  0.24403 2.287e-110</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Propensity model:                                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  (Intercept)      -0.001888 0.022109 -0.04522  0.04144  9.320e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  x                -1.019511 0.026347 -1.07115 -0.96787  0.000e+00</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Average Treatment Effect (constrast: 'a=0' vs. 'a=1'):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Average Treatment Effect (constrast: 'a=1' - 'a=0'):</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Estimate Std.Err    2.5%   97.5%   P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> RR   0.7154 0.04004  0.6369  0.7939 2.114e-71</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> OR   0.4474 0.05952  0.3308  0.5641 5.611e-14</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> RD  -0.1929 0.03099 -0.2537 -0.1322 4.785e-10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Estimate Std.Err   2.5%  97.5%   P-value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ATE   0.2096 0.01013 0.1897 0.2294 4.494e-95</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ate&gt; b &lt;- cate(a ~ 1, y ~ a*x, a ~ x, data=d)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ate&gt; # Multiple treatments</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ate&gt; m &lt;- lvm(y ~ a+x, a~x)</span>
@@ -203,11 +198,11 @@ causal inference.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ate&gt; d &lt;- sim(m, 1e4, seed=1)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ate&gt; (a &lt;- ate(y~a|a*x|x, data=d))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Estimate  Std.Err   2.5%  97.5%    P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> a=0   0.2406 0.018291 0.2047 0.2764  1.638e-39</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> a=1   0.3638 0.017241 0.3300 0.3976  7.816e-99</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> a=2   0.4003 0.015525 0.3699 0.4307 1.286e-146</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> a=3   0.6054 0.007469 0.5908 0.6201  0.000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Estimate Std.Err   2.5%  97.5%    P-value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> a=0   0.2121 0.01695 0.1788 0.2453  6.738e-36</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> a=1   0.3422 0.01831 0.3063 0.3781  6.005e-78</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> a=2   0.3922 0.01617 0.3605 0.4239 6.820e-130</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> a=3   0.6052 0.00771 0.5901 0.6203  0.000e+00</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ate&gt; # Comparison with randomized experiment</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ate&gt; m0 &lt;- cancel(m, a~x)</span>
@@ -221,30 +216,28 @@ causal inference.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Coefficients:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     a0      a1      a2      a3  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.2232  0.3393  0.4093  0.6208  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.2245  0.3405  0.4111  0.6206  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ate&gt; # Choosing a different contrast for the association measures</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ate&gt; summary(a, contrast=c(2,4))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Augmented Inverse Probability Weighting estimator</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Response y (Outcome model: logistic regression):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Response y (Outcome model: gaussian):</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	 y ~ a * x </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Exposure a (Propensity model: logistic regression):</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	 a ~ x </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Estimate  Std.Err   2.5%  97.5%    P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> a=0   0.2406 0.018291 0.2047 0.2764  1.638e-39</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> a=1   0.3638 0.017241 0.3300 0.3976  7.816e-99</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> a=2   0.4003 0.015525 0.3699 0.4307 1.286e-146</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> a=3   0.6054 0.007469 0.5908 0.6201  0.000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Estimate Std.Err   2.5%  97.5%    P-value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> a=0   0.2121 0.01695 0.1788 0.2453  6.738e-36</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> a=1   0.3422 0.01831 0.3063 0.3781  6.005e-78</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> a=2   0.3922 0.01617 0.3605 0.4239 6.820e-130</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> a=3   0.6052 0.00771 0.5901 0.6203  0.000e+00</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Average Treatment Effect (constrast: 'a=1' vs. 'a=3'):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Average Treatment Effect (constrast: 'a=1' - 'a=3'):</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Estimate Std.Err    2.5%   97.5%   P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> RR   0.6009 0.02911  0.5438  0.6579 1.240e-94</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> OR   0.3726 0.02964  0.3146  0.4307 2.964e-36</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> RD  -0.2416 0.01849 -0.2779 -0.2054 4.999e-39</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Estimate Std.Err    2.5%   97.5%   P-value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ATE   -0.263 0.01955 -0.3013 -0.2247 3.016e-41</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/example.html" class="external-link">example</a></span><span class="op">(</span><span class="va">calibration</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>

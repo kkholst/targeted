@@ -91,7 +91,7 @@
       <h1 data-toc-skip>Average Treatment Effects</h1>
                         <h4 data-toc-skip class="author">Klaus Kähler Holst</h4>
             
-            <h4 data-toc-skip class="date">2023-01-04</h4>
+            <h4 data-toc-skip class="date">2023-11-01</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/kkholst/targeted/blob/HEAD/vignettes/ate.Rmd" class="external-link"><code>vignettes/ate.Rmd</code></a></small>
       <div class="hidden name"><code>ate.Rmd</code></div>
@@ -149,9 +149,9 @@
 <p>The target parameter, <span class="math inline">\(E[Y(a)]\)</span> can be estimated with the <code><a href="../reference/ate.html">targeted::ate</a></code> function:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/args.html" class="external-link">args</a></span><span class="op">(</span><span class="va">ate</span><span class="op">)</span></span>
-<span><span class="co">#&gt; function (formula, data = parent.frame(), weights, binary = TRUE, </span></span>
-<span><span class="co">#&gt;     nuisance = NULL, propensity = nuisance, all, missing = FALSE, </span></span>
-<span><span class="co">#&gt;     labels = NULL, ...) </span></span>
+<span><span class="co">#&gt; function (formula, data = parent.frame(), weights, offset, family = stats::gaussian(identity), </span></span>
+<span><span class="co">#&gt;     nuisance = NULL, propensity = nuisance, all, labels = NULL, </span></span>
+<span><span class="co">#&gt;     ...) </span></span>
 <span><span class="co">#&gt; NULL</span></span></code></pre></div>
 <p>The formula should be specified as <code>formula = response ~ treatment</code>, and the outcome regression specified as <code>nuisance = ~ covariates</code>, and propensity model <code>propensity = ~ covariates</code>. Alternatively, the formula can be specified with the notation <code>formula = response ~ treatment | OR-covariates | propensity-covariates</code>. <em>Parametric models</em> are assumed for both the outcome regression and the propensity model which defaults to be logistic regression models (as in the simulation). A linear model can be used for the outcome regression part by setting <code>binary=FALSE</code>.</p>
 <p>To illustrate this, we can estimate the (non-causal) marginal mean of each treatment value</p>
@@ -169,9 +169,9 @@
 <p>In this simulation we can compare the estimates to the actual expected potential outcomes which can be approximated by Monte Carlo integration by simulating from the model where we intervene on <span class="math inline">\(A\)</span> (i.e., break the dependence on <span class="math inline">\(X, Z\)</span>):</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/intervention.lvm.html" class="external-link">intervention</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">"A"</span>, <span class="fl">0</span><span class="op">)</span>, <span class="fl">2e5</span><span class="op">)</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.499995</span></span>
+<span><span class="co">#&gt; [1] 0.49966</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/intervention.lvm.html" class="external-link">intervention</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">"A"</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fl">2e5</span><span class="op">)</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.63757</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.638085</span></span></code></pre></div>
 <p>The IPW estimator can then be estimated</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ate.html">ate</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">A</span> <span class="op">|</span> <span class="fl">1</span> <span class="op">|</span> <span class="va">X</span><span class="op">+</span><span class="va">Z</span>, data<span class="op">=</span><span class="va">d</span><span class="op">)</span></span>
@@ -182,8 +182,8 @@
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ate.html">ate</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">A</span> <span class="op">|</span> <span class="va">A</span><span class="op">*</span><span class="op">(</span><span class="va">X</span><span class="op">+</span><span class="va">Z</span><span class="op">)</span> <span class="op">|</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">d</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     Estimate Std.Err   2.5%  97.5%    P-value</span></span>
-<span><span class="co">#&gt; A=0   0.5115 0.02106 0.4703 0.5528 2.367e-130</span></span>
-<span><span class="co">#&gt; A=1   0.6585 0.02518 0.6092 0.7079 1.008e-150</span></span></code></pre></div>
+<span><span class="co">#&gt; A=0   0.4858 0.02796 0.4310 0.5406  1.243e-67</span></span>
+<span><span class="co">#&gt; A=1   0.7213 0.02600 0.6703 0.7723 2.248e-169</span></span></code></pre></div>
 <p>Both estimates are in this case consistent though we can see that the OR estimate is much more efficient compared to the IPW estimator. However, both of these models rely on correct model specifications.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ate.html">ate</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">A</span> <span class="op">|</span> <span class="fl">1</span> <span class="op">|</span> <span class="va">X</span>, data<span class="op">=</span><span class="va">d</span><span class="op">)</span></span>
@@ -192,57 +192,55 @@
 <span><span class="co">#&gt; A=1   0.7072 0.03366 0.6412 0.7731 5.204e-98</span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ate.html">ate</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">A</span> <span class="op">|</span> <span class="va">A</span><span class="op">*</span><span class="va">X</span> <span class="op">|</span> <span class="fl">1</span>, data<span class="op">=</span><span class="va">d</span><span class="op">)</span></span>
-<span><span class="co">#&gt;     Estimate Std.Err   2.5%  97.5%   P-value</span></span>
-<span><span class="co">#&gt; A=0   0.4413 0.02395 0.3944 0.4882  7.88e-76</span></span>
-<span><span class="co">#&gt; A=1   0.7084 0.02491 0.6596 0.7572 5.84e-178</span></span></code></pre></div>
+<span><span class="co">#&gt;     Estimate Std.Err   2.5%  97.5%    P-value</span></span>
+<span><span class="co">#&gt; A=0   0.4240 0.02617 0.3727 0.4752  4.794e-59</span></span>
+<span><span class="co">#&gt; A=1   0.7474 0.02411 0.7001 0.7946 5.297e-211</span></span></code></pre></div>
 <p>In contrast, the doubly-robust AIPW estimator is consistent in the <em>intersection model</em> where either the propensity model or the outcome regression model is correctly specified</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ate.html">ate</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">A</span> <span class="op">|</span> <span class="va">A</span><span class="op">*</span><span class="va">X</span> <span class="op">|</span> <span class="va">X</span><span class="op">+</span><span class="va">Z</span>, data<span class="op">=</span><span class="va">d</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">a</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Augmented Inverse Probability Weighting estimator</span></span>
-<span><span class="co">#&gt;   Response Y (Outcome model: logistic regression):</span></span>
+<span><span class="co">#&gt;   Response Y (Outcome model: gaussian):</span></span>
 <span><span class="co">#&gt;   Y ~ A * X </span></span>
 <span><span class="co">#&gt;   Exposure A (Propensity model: logistic regression):</span></span>
 <span><span class="co">#&gt;   A ~ X + Z </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                    Estimate Std.Err    2.5%    97.5%    P-value</span></span>
-<span><span class="co">#&gt;  A=0               0.493714 0.02451  0.4457  0.54175  3.039e-90</span></span>
-<span><span class="co">#&gt;  A=1               0.654050 0.02839  0.5984  0.70970 1.995e-117</span></span>
+<span><span class="co">#&gt;  A=0               0.492322 0.02609  0.4412  0.54346  2.028e-79</span></span>
+<span><span class="co">#&gt;  A=1               0.663735 0.03068  0.6036  0.72386 8.429e-104</span></span>
 <span><span class="co">#&gt; Outcome model:                                                 </span></span>
-<span><span class="co">#&gt;  (Intercept)      -0.320268 0.12263 -0.5606 -0.07991  9.012e-03</span></span>
-<span><span class="co">#&gt;  A                 1.578135 0.18083  1.2237  1.93255  2.609e-18</span></span>
-<span><span class="co">#&gt;  X                 1.464900 0.15842  1.1544  1.77539  2.305e-20</span></span>
-<span><span class="co">#&gt;  A:X              -0.010495 0.25101 -0.5025  0.48147  9.666e-01</span></span>
+<span><span class="co">#&gt;  (Intercept)       0.426675 0.02498  0.3777  0.47563  2.048e-65</span></span>
+<span><span class="co">#&gt;  A                 0.322545 0.03399  0.2559  0.38916  2.303e-21</span></span>
+<span><span class="co">#&gt;  X                 0.232605 0.01825  0.1968  0.26837  3.266e-37</span></span>
+<span><span class="co">#&gt;  A:X              -0.075738 0.02609 -0.1269 -0.02461  3.693e-03</span></span>
 <span><span class="co">#&gt; Propensity model:                                              </span></span>
 <span><span class="co">#&gt;  (Intercept)      -0.006421 0.08337 -0.1698  0.15699  9.386e-01</span></span>
 <span><span class="co">#&gt;  X                -0.863004 0.12123 -1.1006 -0.62539  1.091e-12</span></span>
 <span><span class="co">#&gt;  Z                -1.005211 0.09080 -1.1832 -0.82725  1.742e-28</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Average Treatment Effect (constrast: 'A=0' vs. 'A=1'):</span></span>
+<span><span class="co">#&gt; Average Treatment Effect (constrast: 'A=1' - 'A=0'):</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;    Estimate Std.Err    2.5%    97.5%   P-value</span></span>
-<span><span class="co">#&gt; RR   0.7549 0.04536  0.6659  0.84377 3.578e-62</span></span>
-<span><span class="co">#&gt; OR   0.5158 0.07501  0.3688  0.66282 6.150e-12</span></span>
-<span><span class="co">#&gt; RD  -0.1603 0.03419 -0.2273 -0.09333 2.732e-06</span></span></code></pre></div>
+<span><span class="co">#&gt;     Estimate Std.Err    2.5%  97.5%   P-value</span></span>
+<span><span class="co">#&gt; ATE   0.1714 0.03661 0.09967 0.2432 2.831e-06</span></span></code></pre></div>
 <p>From the <code>summary</code> output we also get the estimates of the Average Treatment Effects expressed as a causal relative risk (RR), causal odds ratio (OR), or causal risk difference (RD) including the confidence limits.</p>
 <p>From the model object <code>a</code> we can extract the estimated coefficients (expected potential outcomes) and corresponding asympotic variance matrix with the <code>coef</code> and <code>vcov</code> methods. The estimated <em>influence function</em> can extracted with the <code>iid</code> method:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">a</span><span class="op">)</span></span>
 <span><span class="co">#&gt;       A=0       A=1 </span></span>
-<span><span class="co">#&gt; 0.4937138 0.6540498</span></span>
+<span><span class="co">#&gt; 0.4923220 0.6637346</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">a</span><span class="op">)</span></span>
 <span><span class="co">#&gt;              A=0          A=1</span></span>
-<span><span class="co">#&gt; A=0 0.0006007034 0.0001190188</span></span>
-<span><span class="co">#&gt; A=1 0.0001190188 0.0008060789</span></span>
+<span><span class="co">#&gt; A=0 0.0006807275 0.0001409887</span></span>
+<span><span class="co">#&gt; A=1 0.0001409887 0.0009411920</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/iid.html" class="external-link">iid</a></span><span class="op">(</span><span class="va">a</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                A=0           A=1</span></span>
-<span><span class="co">#&gt; [1,] -0.0011525278 -6.835682e-05</span></span>
-<span><span class="co">#&gt; [2,]  0.0002149985  2.750537e-04</span></span>
-<span><span class="co">#&gt; [3,] -0.0004591691 -2.792536e-04</span></span>
-<span><span class="co">#&gt; [4,]  0.0004331270  2.878354e-04</span></span>
-<span><span class="co">#&gt; [5,]  0.0011762997  1.537040e-04</span></span>
-<span><span class="co">#&gt; [6,] -0.0004537058 -2.268427e-04</span></span></code></pre></div>
+<span><span class="co">#&gt; [1,] -0.0012182867 -0.0002821609</span></span>
+<span><span class="co">#&gt; [2,]  0.0002438822  0.0002898771</span></span>
+<span><span class="co">#&gt; [3,] -0.0004583641 -0.0002555994</span></span>
+<span><span class="co">#&gt; [4,]  0.0003753253  0.0002567340</span></span>
+<span><span class="co">#&gt; [5,]  0.0011971267  0.0001267515</span></span>
+<span><span class="co">#&gt; [6,] -0.0004585485 -0.0001710518</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="multiple-treatments">Multiple treatments<a class="anchor" aria-label="anchor" href="#multiple-treatments"></a>
@@ -257,66 +255,66 @@
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">a2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ate.html">ate</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">a</span> <span class="op">|</span> <span class="va">a</span><span class="op">*</span><span class="va">x</span> <span class="op">|</span> <span class="va">x</span>, data<span class="op">=</span><span class="va">d</span>, binary<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Augmented Inverse Probability Weighting estimator</span></span>
-<span><span class="co">#&gt;   Response y (Outcome model: linear regression):</span></span>
+<span><span class="co">#&gt;   Response y (Outcome model: gaussian):</span></span>
 <span><span class="co">#&gt;   y ~ a * x </span></span>
 <span><span class="co">#&gt;   Exposure a (Propensity model: logistic regression):</span></span>
 <span><span class="co">#&gt;   a ~ x </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     Estimate Std.Err    2.5%   97.5%    P-value</span></span>
-<span><span class="co">#&gt; a=0  -1.6161 0.04079 -1.6960 -1.5361  0.000e+00</span></span>
-<span><span class="co">#&gt; a=1  -0.7665 0.04009 -0.8451 -0.6880  1.755e-81</span></span>
-<span><span class="co">#&gt; a=2  -0.4574 0.03337 -0.5228 -0.3920  9.351e-43</span></span>
-<span><span class="co">#&gt; a=3   0.7570 0.02584  0.7063  0.8076 1.234e-188</span></span>
+<span><span class="co">#&gt; a=0  -1.5756 0.04148 -1.6569 -1.4943  0.000e+00</span></span>
+<span><span class="co">#&gt; a=1  -0.7945 0.04324 -0.8792 -0.7097  2.190e-75</span></span>
+<span><span class="co">#&gt; a=2  -0.3973 0.03439 -0.4647 -0.3299  7.189e-31</span></span>
+<span><span class="co">#&gt; a=3   0.7663 0.02494  0.7174  0.8151 2.932e-207</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Average Treatment Effect (constrast: 'a=0' vs. 'a=1'):</span></span>
+<span><span class="co">#&gt; Average Treatment Effect (constrast: 'a=1' - 'a=0'):</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     Estimate Std.Err    2.5%   97.5%  P-value</span></span>
-<span><span class="co">#&gt; ATE  -0.8496 0.05494 -0.9572 -0.7419 6.16e-54</span></span></code></pre></div>
+<span><span class="co">#&gt;     Estimate Std.Err   2.5%  97.5%   P-value</span></span>
+<span><span class="co">#&gt; ATE   0.7812 0.05782 0.6679 0.8945 1.331e-41</span></span></code></pre></div>
 <p>Choosing a different contrast for the association measures:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">a2</span>, contrast<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">4</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Augmented Inverse Probability Weighting estimator</span></span>
-<span><span class="co">#&gt;   Response y (Outcome model: linear regression):</span></span>
+<span><span class="co">#&gt;   Response y (Outcome model: gaussian):</span></span>
 <span><span class="co">#&gt;   y ~ a * x </span></span>
 <span><span class="co">#&gt;   Exposure a (Propensity model: logistic regression):</span></span>
 <span><span class="co">#&gt;   a ~ x </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     Estimate Std.Err    2.5%   97.5%    P-value</span></span>
-<span><span class="co">#&gt; a=0  -1.6161 0.04079 -1.6960 -1.5361  0.000e+00</span></span>
-<span><span class="co">#&gt; a=1  -0.7665 0.04009 -0.8451 -0.6880  1.755e-81</span></span>
-<span><span class="co">#&gt; a=2  -0.4574 0.03337 -0.5228 -0.3920  9.351e-43</span></span>
-<span><span class="co">#&gt; a=3   0.7570 0.02584  0.7063  0.8076 1.234e-188</span></span>
+<span><span class="co">#&gt; a=0  -1.5756 0.04148 -1.6569 -1.4943  0.000e+00</span></span>
+<span><span class="co">#&gt; a=1  -0.7945 0.04324 -0.8792 -0.7097  2.190e-75</span></span>
+<span><span class="co">#&gt; a=2  -0.3973 0.03439 -0.4647 -0.3299  7.189e-31</span></span>
+<span><span class="co">#&gt; a=3   0.7663 0.02494  0.7174  0.8151 2.932e-207</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Average Treatment Effect (constrast: 'a=1' vs. 'a=3'):</span></span>
+<span><span class="co">#&gt; Average Treatment Effect (constrast: 'a=1' - 'a=3'):</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     Estimate Std.Err   2.5%  97.5%    P-value</span></span>
-<span><span class="co">#&gt; ATE   -1.524  0.0445 -1.611 -1.436 7.837e-257</span></span></code></pre></div>
+<span><span class="co">#&gt; ATE   -1.561 0.04685 -1.653 -1.469 2.428e-243</span></span></code></pre></div>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/iid.html" class="external-link">iid</a></span><span class="op">(</span><span class="va">a2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                a=0           a=1           a=2           a=3</span></span>
-<span><span class="co">#&gt; [1,]  1.811492e-04  1.351556e-04  1.332927e-04  1.401916e-04</span></span>
-<span><span class="co">#&gt; [2,] -1.099388e-04 -8.534005e-05 -8.417548e-05  1.994063e-05</span></span>
-<span><span class="co">#&gt; [3,] -5.574835e-04 -6.362948e-05 -6.269639e-05 -6.811459e-05</span></span>
-<span><span class="co">#&gt; [4,] -3.626775e-05 -1.773685e-05 -1.581719e-03 -8.595930e-06</span></span>
-<span><span class="co">#&gt; [5,] -4.962439e-05 -2.783677e-05 -2.732798e-05 -4.338660e-04</span></span>
-<span><span class="co">#&gt; [6,]  3.508889e-05  3.259422e-05 -3.411864e-04  2.944555e-05</span></span>
+<span><span class="co">#&gt; [1,] -7.032447e-05 -1.378416e-04 -4.730011e-05 -5.039736e-05</span></span>
+<span><span class="co">#&gt; [2,]  8.466811e-06  1.329358e-05  1.432039e-05 -2.420318e-05</span></span>
+<span><span class="co">#&gt; [3,]  4.158192e-05  3.555431e-05  3.807546e-05 -2.918448e-04</span></span>
+<span><span class="co">#&gt; [4,] -1.792276e-06  6.288010e-06  6.841984e-06  4.012050e-06</span></span>
+<span><span class="co">#&gt; [5,]  1.427956e-04  1.032023e-04  1.102017e-04  3.584262e-05</span></span>
+<span><span class="co">#&gt; [6,] -9.765353e-05 -6.944653e-05 -7.410042e-05  2.652941e-05</span></span>
 <span><span class="fu"><a href="https://kkholst.github.io/lava/reference/estimate.default.html" class="external-link">estimate</a></span><span class="op">(</span><span class="va">a2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">-</span><span class="va">x</span><span class="op">[</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     Estimate Std.Err   2.5%  97.5%    P-value</span></span>
-<span><span class="co">#&gt; a=1   -1.524  0.0445 -1.611 -1.436 7.837e-257</span></span></code></pre></div>
+<span><span class="co">#&gt; a=1   -1.561 0.04685 -1.653 -1.469 2.428e-243</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="sessioninfo">SessionInfo<a class="anchor" aria-label="anchor" href="#sessioninfo"></a>
 </h2>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; R version 4.2.2 (2022-10-31)</span></span>
+<span><span class="co">#&gt; R version 4.3.2 (2023-10-31)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu (64-bit)</span></span>
-<span><span class="co">#&gt; Running under: Ubuntu 22.04.1 LTS</span></span>
+<span><span class="co">#&gt; Running under: Ubuntu 22.04.3 LTS</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Matrix products: default</span></span>
-<span><span class="co">#&gt; BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3</span></span>
-<span><span class="co">#&gt; LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.20.so</span></span>
+<span><span class="co">#&gt; BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 </span></span>
+<span><span class="co">#&gt; LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.20.so;  LAPACK version 3.10.0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; locale:</span></span>
 <span><span class="co">#&gt;  [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       </span></span>
@@ -324,32 +322,36 @@
 <span><span class="co">#&gt;  [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          </span></span>
 <span><span class="co">#&gt; [10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   </span></span>
 <span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; time zone: UTC</span></span>
+<span><span class="co">#&gt; tzcode source: system (glibc)</span></span>
+<span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; attached base packages:</span></span>
 <span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] targeted_0.4 lava_1.7.0  </span></span>
+<span><span class="co">#&gt; [1] targeted_0.4 lava_1.7.2.1</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span><span class="co">#&gt;  [1] Rcpp_1.0.9           formatR_1.13         futile.logger_1.4.3 </span></span>
-<span><span class="co">#&gt;  [4] bslib_0.4.2          compiler_4.2.2       jquerylib_0.1.4     </span></span>
-<span><span class="co">#&gt;  [7] mets_1.3.1           futile.options_1.0.1 tools_4.2.2         </span></span>
-<span><span class="co">#&gt; [10] digest_0.6.31        lattice_0.20-45      jsonlite_1.8.4      </span></span>
-<span><span class="co">#&gt; [13] evaluate_0.19        memoise_2.0.1        lifecycle_1.0.3     </span></span>
-<span><span class="co">#&gt; [16] rlang_1.0.6          Matrix_1.5-1         cli_3.5.0           </span></span>
-<span><span class="co">#&gt; [19] yaml_2.3.6           parallel_4.2.2       mvtnorm_1.1-3       </span></span>
-<span><span class="co">#&gt; [22] pkgdown_2.0.7        xfun_0.36            fastmap_1.1.0       </span></span>
-<span><span class="co">#&gt; [25] stringr_1.5.0        knitr_1.41           desc_1.4.2          </span></span>
-<span><span class="co">#&gt; [28] fs_1.5.2             vctrs_0.5.1          sass_0.4.4          </span></span>
-<span><span class="co">#&gt; [31] systemfonts_1.0.4    globals_0.16.2       grid_4.2.2          </span></span>
-<span><span class="co">#&gt; [34] rprojroot_2.0.3      data.table_1.14.6    glue_1.6.2          </span></span>
-<span><span class="co">#&gt; [37] listenv_0.9.0        R6_2.5.1             timereg_2.0.4       </span></span>
-<span><span class="co">#&gt; [40] textshaping_0.3.6    future.apply_1.10.0  parallelly_1.33.0   </span></span>
-<span><span class="co">#&gt; [43] survival_3.4-0       rmarkdown_2.19       lambda.r_1.2.4      </span></span>
-<span><span class="co">#&gt; [46] purrr_1.0.0          magrittr_2.0.3       codetools_0.2-18    </span></span>
-<span><span class="co">#&gt; [49] htmltools_0.5.4      splines_4.2.2        future_1.30.0       </span></span>
-<span><span class="co">#&gt; [52] numDeriv_2016.8-1.1  ragg_1.2.4           optimx_2022-4.30    </span></span>
-<span><span class="co">#&gt; [55] stringi_1.7.8        cachem_1.0.6</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1] sass_0.4.7           future_1.33.0        futile.options_1.0.1</span></span>
+<span><span class="co">#&gt;  [4] stringi_1.7.12       lattice_0.21-9       pracma_2.4.2        </span></span>
+<span><span class="co">#&gt;  [7] listenv_0.9.0        digest_0.6.33        magrittr_2.0.3      </span></span>
+<span><span class="co">#&gt; [10] evaluate_0.23        grid_4.3.2           mvtnorm_1.2-3       </span></span>
+<span><span class="co">#&gt; [13] fastmap_1.1.1        rprojroot_2.0.3      jsonlite_1.8.7      </span></span>
+<span><span class="co">#&gt; [16] Matrix_1.6-1.1       survival_3.5-7       formatR_1.14        </span></span>
+<span><span class="co">#&gt; [19] purrr_1.0.2          codetools_0.2-19     numDeriv_2016.8-1.1 </span></span>
+<span><span class="co">#&gt; [22] textshaping_0.3.7    jquerylib_0.1.4      cli_3.6.1           </span></span>
+<span><span class="co">#&gt; [25] rlang_1.1.1          futile.logger_1.4.3  mets_1.3.2          </span></span>
+<span><span class="co">#&gt; [28] parallelly_1.36.0    future.apply_1.11.0  splines_4.3.2       </span></span>
+<span><span class="co">#&gt; [31] cachem_1.0.8         yaml_2.3.7           tools_4.3.2         </span></span>
+<span><span class="co">#&gt; [34] parallel_4.3.2       nloptr_2.0.3         memoise_2.0.1       </span></span>
+<span><span class="co">#&gt; [37] optimx_2023-10.21    lambda.r_1.2.4       globals_0.16.2      </span></span>
+<span><span class="co">#&gt; [40] vctrs_0.6.4          R6_2.5.1             lifecycle_1.0.3     </span></span>
+<span><span class="co">#&gt; [43] stringr_1.5.0        fs_1.6.3             ragg_1.2.6          </span></span>
+<span><span class="co">#&gt; [46] desc_1.4.2           timereg_2.0.5        pkgdown_2.0.7       </span></span>
+<span><span class="co">#&gt; [49] bslib_0.5.1          glue_1.6.2           data.table_1.14.8   </span></span>
+<span><span class="co">#&gt; [52] Rcpp_1.0.11          systemfonts_1.0.5    xfun_0.41           </span></span>
+<span><span class="co">#&gt; [55] knitr_1.45           htmltools_0.5.6.1    rmarkdown_2.25      </span></span>
+<span><span class="co">#&gt; [58] compiler_4.3.2</span></span></code></pre></div>
 </div>
   </div>
 

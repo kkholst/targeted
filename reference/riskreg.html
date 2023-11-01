@@ -238,15 +238,16 @@ American Statistical Association, 112(519),
 <span class="r-in"><span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu">riskreg</span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">a</span> <span class="op">|</span> <span class="va">z</span>, nuisance<span class="op">=</span><span class="op">~</span><span class="va">x</span>,  propensity<span class="op">=</span><span class="op">~</span><span class="va">x</span>, data<span class="op">=</span><span class="va">d</span>, type<span class="op">=</span><span class="st">"rr"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">a</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err    2.5%     97.5%   P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.9797  0.1212  0.7421  1.217281 6.366e-16</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> z            -0.2218  0.1115 -0.4404 -0.003198 4.674e-02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.9797  0.1212  0.7421  1.217291 6.365e-16</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> z            -0.2218  0.1115 -0.4404 -0.003204 4.674e-02</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">d</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>,<span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.1491919 0.6897799 0.1040211 0.3736667 0.3304784</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">riskreg</span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">a</span>, nuisance<span class="op">=</span><span class="op">~</span><span class="va">x</span>,  data<span class="op">=</span><span class="va">d</span>, type<span class="op">=</span><span class="st">"rr"</span>, mle<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                          Estimate Std.Err    2.5%   97.5%   P-value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)                0.9453  0.1150  0.7198  1.1707 2.092e-16</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> odds-product:(Intercept)  -0.8068  0.3031 -1.4009 -0.2126 7.783e-03</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> odds-product:x             2.3296  0.3914  1.5624  3.0969 2.659e-09</span>
-<span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

@@ -152,8 +152,8 @@
 <span class="r-in"><span><span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="va">m</span>, n <span class="op">=</span> <span class="va">n</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">sim1</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">1e3</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://github.com/ecpolley/SuperLearner" class="external-link">"SuperLearner"</a></span>,quietly<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">sim1</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">1e3</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">e</span> <span class="op">&lt;-</span> <span class="fu">cate_link</span><span class="op">(</span>data<span class="op">=</span><span class="va">d</span>,</span></span>
 <span class="r-in"><span>           type <span class="op">=</span> <span class="st">"dml2"</span>,</span></span>
 <span class="r-in"><span>           treatment <span class="op">=</span> <span class="va">a</span> <span class="op">~</span> <span class="va">v</span>,</span></span>
@@ -162,6 +162,10 @@
 <span class="r-in"><span>           nfolds <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="co"># the true parameters are c(1,1)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Loaded gam 1.22-2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Super Learner</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Version: 2.0-28.1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Package created on 2021-05-04</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cate_link(treatment = a ~ v, response_model = y ~ a * (x + v + </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     I(v^2)), importance_model = SL(D_ ~ v + I(v^2)), data = d, </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     nfolds = 10, type = "dml2")</span>
