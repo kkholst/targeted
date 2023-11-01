@@ -18,11 +18,13 @@ SL <- function(formula=~., ...,
   if (!requireNamespace("SuperLearner")) {
       stop("Package 'SuperLearner' required.")
   }
-  if (length(attr(getoutcome(formula), "x")) == 0) {
+  pred <- as.character(formula)
+  pred <- ifelse (length(pred)==2, pred[2], pred[3])
+  if (pred=="1") {
     SL.library <- "SL.mean"
   }
   m <- ml_model$new(formula, info="SuperLearner",
-               fit=function(x,y) {
+               estimate=function(x,y) {
                  Y <- as.numeric(y)
                  X <- as.data.frame(x)
                  args <- c(list(Y=Y, X=X, SL.library=SL.library), dots)
@@ -34,26 +36,12 @@ SL <- function(formula=~., ...,
                    res$call <- quote(SuperLearner::SuperLearner(..., family=binomial()))
                  res
                },
-               pred=function(object,newdata) {
+               predict=function(object,newdata) {
                  pr <- predict(object,newdata=newdata)$pred
                  if (binomial)
                    pr <- cbind((1-pr), pr)
                  return(pr)
                })
-  if (!is.null(data))
-    m$estimate(data)
-  return(m)
-}
-
-
-##' @export
-GLM <- function(formula, family=gaussian, ..., data=NULL) {
-  m <- ml_model$new(formula, info="GLM",
-                    fit=function(formula, data)
-                      stats::glm(formula, data=data, family=family, ...),
-                    pred = function(object, newdata)
-                      stats::predict(object, newdata=newdata, type="response")
-                    )
   if (!is.null(data))
     m$estimate(data)
   return(m)
