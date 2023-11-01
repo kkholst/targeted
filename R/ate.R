@@ -1,33 +1,21 @@
-##' @export
-aipw <- function(formula, data, propensity=NULL, ...) {
-    yf <- lava::getoutcome(formula, sep="|")
-    if (length(attr(yf, "x"))==1) {
-        yf <- lava::getoutcome(formula, sep="")
-        xx <- list(as.formula(paste("~", as.character(formula)[3])))
-        if (!is.null(propensity))
-            attr(yf, "x") <- c(xx, list(propensity))
-        else
-            attr(yf, "x") <- c(xx, xx)
-    }
-    r <- !is.na(model.frame(as.formula(paste0(yf, "~1")), data=data, na.action=na.pass))*1
-    data[, "_R"] <- r[, 1]
-    formula <- c(list(as.formula(paste(yf[1], "~ `_R`"))), attr(yf, "x"))
-    res <- ate(formula, data=data, ..., missing=TRUE, labels=yf[1])
-    res
-}
-
-##' Augmented Inverse Probability Weighting estimator for the Average (Causal) Treatment Effect.
+##' Augmented Inverse Probability Weighting estimator for the Average (Causal)
+##' Treatment Effect. All nuisance models are here parametric (glm). For a more
+##' general approach see the \code{cate} implementation. In this implementation
+##' the standard errors are correct even when the nuisance models are
+##' misspecified (the influence curve is calculated including the term coming
+##' from the parametric nuisance models). The estimate is consistent if either
+##' the propensity model or the outcome model / Q-model is correctly specified.
 ##'
-##' @title AIPW estimator for Average Treatement Effect
+##' @title AIPW (doubly-robust) estimator for Average Treatement Effect
 ##' @param formula Formula (see details below)
 ##' @param data data.frame
 ##' @param weights optional frequency weights
-##' @param binary Binary response (default TRUE)
-##' @param nuisance outcome regression formula
+##' @param offset optional offset (character or vector). can also be specified in the formula.
+##' @param family Exponential family argument for outcome model
+##' @param nuisance outcome regression formula (Q-model)
 ##' @param propensity propensity model formula
 ##' @param all If TRUE all standard errors are calculated (default TRUE when exposure
 ##' only has two levels)
-##' @param missing If TRUE a missing data (AIPW) estimator is returned
 ##' @param labels Optional treatment labels
 ##' @param ... Additional arguments to lower level functions
 ##' @return An object of class '\code{ate.targeted}' is returned. See \code{\link{targeted-class}}
@@ -43,14 +31,15 @@ aipw <- function(formula, data, propensity=NULL, ...) {
 ##' Or using the nuisance (and propensity argument): \code{ate(y~a, nuisance=~x+z, ...)}
 ##' @export
 ##' @author Klaus K. Holst
-##' @aliases ate aipw
+##' @aliases ate
 ##' @examples
 ##' m <- lvm(y ~ a+x, a~x)
 ##' distribution(m,~ a+y) <- binomial.lvm()
-##' d <- sim(m,1e3,seed=1)
+##' d <- sim(m,1e4,seed=1)
 ##'
 ##' a <- ate(y ~ a, nuisance=~x, data=d)
 ##' summary(a)
+##' b <- cate(a ~ 1, y ~ a*x, a ~ x, data=d)
 ##'
 ##' # Multiple treatments
 ##' m <- lvm(y ~ a+x, a~x)
@@ -68,10 +57,11 @@ aipw <- function(formula, data, propensity=NULL, ...) {
 ##' # Choosing a different contrast for the association measures
 ##' summary(a, contrast=c(2,4))
 ate <- function(formula,
-         data=parent.frame(), weights, binary=TRUE,
-         nuisance=NULL,
-         propensity=nuisance,
-         all, missing=FALSE, labels=NULL, ...) {
+                data=parent.frame(), weights, offset,
+                family=stats::gaussian(identity),
+                nuisance=NULL,
+                propensity=nuisance,
+                all, labels=NULL, ...) {
     cl <- match.call()
     if (!is.null(nuisance) && inherits(nuisance, "formula")) {
         exposure <- attr(lava::getoutcome(formula), "x")
@@ -80,6 +70,14 @@ ate <- function(formula,
             nuisance <- update(nuisance, as.formula(paste0("~ . +", exposure)))
             formula[[2]] <- nuisance
         }
+    }
+    if (is.character(family))
+        family <- get(family, mode = "function", envir = parent.frame())
+    if (is.function(family))
+        family <- family()
+    if (is.null(family$family)) {
+        print(family)
+        stop("'family' not recognized")
     }
     if (is.list(formula)) {
         yf <- lava::getoutcome(formula[[1]])
@@ -92,44 +90,37 @@ ate <- function(formula,
             xf <- attr(yf, "x")
             exposure <- attr(lava::getoutcome(xf[[1]]), "x")
             xf[[1]] <- update(as.formula(paste0(yf, deparse(xf[[1]]))), .~.-1)
-            ## if (!missing) ## Add exposure indicator to outcome regression model unless we are doing a missing data analysis
-            ## xf[[2]] <- update(xf[[2]], as.formula(paste0("~ ",exposure," + .")))
         }
     }
     if (is.list(formula) || inherits(formula, "formula")) {
         ## xf <- lapply(xf, function(x) { environment(x) <- baseenv(); return(x) })
         xx <- lapply(xf, function(x) model.matrix(x, data=data))
-        if (missing) {
-            yx <- model.frame(xf[[1]], data=data, na.action=lava::na.pass0)
-        } else {
-            yx <- model.frame(xf[[1]], data=data)
-        }
+        yx <- model.frame(xf[[1]], data=data)
+        ## }
         a <- yx[, exposure]
         y <- yx[, yf[1]]
         x1 <- xx[[2]]
         x2 <- xx[[3]]
+        if (base::missing(offset))
+          offset <- model.offset(model.frame(xf[[2]], data=data))
         nn <- list(yf[1], exposure, colnames(x1), colnames(x2))
         rm(yx, xx, yf)
     } else {
         stop("Expected a formula") # or a matrix (response,exposure)")
     }
-    if (base::missing(weights)) weights <- rep(1, length(y))
+    if (base::missing(weights) || length(weights)==0) weights <- rep(1, length(y))
     if (inherits(weights, "formula")) weights <- all.vars(weights)
     if (is.character(weights)) weights <- as.vector(data[, weights])
-    weights2 <- weights
-    if (missing) {
-        binary <- FALSE
-        a0 <- (a!=1)
-        weights2[a0] <- 0
-    }
-    if (binary) {
-        l1 <- glm.fit(y=y, x=x1, weights=weights, family=binomial())
-    } else {
-        l1 <- lm.wfit(y=y, x=x1, w=weights2)
-        rm(weights2)
-    }
-    beta <- l1$coef
-    iid.beta <- fast_iid(y, l1$fitted, x1, weights, binary)/length(y)
+
+    if (base::missing(offset) || length(offset)==0) offset <- rep(0, length(y))
+    if (inherits(offset, "formula")) offset <- all.vars(offset)
+    if (is.character(offset)) offset <- as.vector(data[, offset])
+    ##l1 <- glm.fit(y=y, x=x1, weights=weights, family=family)
+    l1 <- glm(y ~ -1+x1, weights=weights, offset=offset, family=family)
+    beta <- coef(l1)
+    names(beta) <- gsub("^x1", "" ,names(beta))
+    ## iid.beta <- fast_iid(y, l1$fitted, x1, weights, logistic=family$family=="binomial")/length(y)
+    iid.beta <- IC(l1)/length(y)
     treatments <- if (is.factor(a)) levels(a) else sort(unique(a))
     if (length(treatments)>20) stop("Unexpected large amount of treatments")
     if (base::missing(all)) all <- length(treatments)==2
@@ -137,7 +128,6 @@ ate <- function(formula,
         if (!is.factor(a)) warning("`", exposure, "` should probably be converted into a factor. An additive model is now assumed in the outcome regression model.")
     }
     est <- c()
-    if (missing) treatments <- 1
     iids <- matrix(nrow=length(y), ncol=length(treatments))
     coefs <- numeric(length(treatments))
     count <- 0
@@ -155,7 +145,7 @@ ate <- function(formula,
         data0[, exposure] <- factor(trt, levels=treatments)
         x1 <- model.matrix(xf[[2]], data=data0)
         val <- ace_est(y=cbind(y), a=cbind(a0), x1=cbind(x1), x2=cbind(x2),
-                       theta=c(beta, gamma), weights=weights, binary=binary)
+                       theta=c(beta, gamma), weights=weights, offset=offset, link=family$link)
         alpha.index <- 1
         beta.index <- seq_along(beta) + length(alpha.index)
         gamma.index <- seq_along(gamma) + length(alpha.index) + length(beta.index)
@@ -182,11 +172,7 @@ ate <- function(formula,
     }
     Vout  <- NULL
     if (all) Vout <- crossprod(iid.beta)
-    outreg <- lava::estimate(coef=coef(l1), vcov=Vout)
-    if (missing) {
-        bprop <- gamma
-        Vprop <- crossprod(iid.gamma)
-    }
+    outreg <- lava::estimate(coef=beta, vcov=Vout)
     propmod <- lava::estimate(coef=bprop, vcov=Vprop)
     V <- crossprod(iids)
     est <- lava::estimate(coef=coefs, vcov=V, labels=nlabels)
@@ -196,7 +182,7 @@ ate <- function(formula,
                    formula=xf,
                    npar=c(length(treatments), ncol(x1), ncol(x2)), nobs=length(y), opt=NULL,
                    all=all,
-                   type=ifelse(binary, "binary", "linear")),
+                   family=family),
               class=c("ate.targeted", "targeted"))
 }
 
@@ -205,7 +191,7 @@ ate <- function(formula,
 print.summary.ate.targeted <- function(x, ...) {
     nam <- x$names
     cat("\nAugmented Inverse Probability Weighting estimator\n")
-    outreg <- ifelse(x$type=="binary", "logistic regression", "linear regression")
+    outreg <- x$family$family
     cat("  Response ", nam[[1]], " (Outcome model: ", outreg, "):\n", sep="")
     cat("\t", paste(nam[[1]], x$formula[[2]]), "\n")
     cat("  Exposure ", nam[[2]], " (Propensity model: logistic regression):\n", sep="")
@@ -230,7 +216,7 @@ print.summary.ate.targeted <- function(x, ...) {
     if (length(x$contrast)>1) {
         cc <- rownames(x$estimate$coefmat)
         with(x, cat("\nAverage Treatment Effect (constrast: '",
-                    cc[contrast[1]], "' vs. '", cc[contrast[2]], "'):\n\n", sep=""))
+                    cc[contrast[1]], "' - '", cc[contrast[2]], "'):\n\n", sep=""))
         if (!is.null(x$asso)) print(x$asso)
     }
     cat("\n")
@@ -238,7 +224,7 @@ print.summary.ate.targeted <- function(x, ...) {
 
 
 ##' @export
-summary.ate.targeted <- function(object, contrast=c(1:2), ...) {
+summary.ate.targeted <- function(object, contrast=c(2:1), ...) {
   nn <- lapply(object[c("estimate", "outcome.reg", "propensity.model")],
                function(x) length(coef(x)))
     if (object$all) {
@@ -254,7 +240,7 @@ summary.ate.targeted <- function(object, contrast=c(1:2), ...) {
     if (object$npar[1]<2) contrast <- 1
     asso <- NULL
     if (length(contrast)>=2)
-        if (object$type=="binary") {
+        if (object$family$family=="binomial") {
           asso <- estimate(object$estimate, function(x) c(x[contrast[1]]/x[contrast[2]],
                                                           lava::OR(x[contrast]),
                                                           x[contrast[1]]-x[contrast[2]]),
@@ -264,6 +250,7 @@ summary.ate.targeted <- function(object, contrast=c(1:2), ...) {
                            labels=c("ATE"))
         }
   structure(list(estimate=cc, npar=nn, type=object$type, asso=asso,
+                 family=object$family,
                  names=c(object$names, "", "Outcome model:", "Propensity model:"),
                  all=object$all, formula=gsub("~", "~ ", unlist(lapply(object$formula, deparse))),
                  contrast=contrast),

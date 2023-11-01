@@ -113,9 +113,9 @@ with(d, riskreg_fit(y, a, nuisance=X, type="rr"))
 ## a <- riskreg(y ~ a, target=~z, nuisance=~x,  propensity=~x, data=d, type="rr")
 a <- riskreg(y ~ a | z, nuisance=~x,  propensity=~x, data=d, type="rr")
 a
+predict(a, d[1:5,])
 
 riskreg(y ~ a, nuisance=~x,  data=d, type="rr", mle=TRUE)
-
 
 }
 \references{

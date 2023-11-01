@@ -86,9 +86,6 @@
 ##'
 ##' riskreg(y ~ a, nuisance=~x,  data=d, type="rr", mle=TRUE)
 ##'
-##'
-##'
-##'
 riskreg <- function(formula,
              nuisance=~1,
              propensity=~1,
@@ -369,10 +366,10 @@ predict.riskreg.targeted <- function(object,
   op <- exp(X%*%px)
   if (object$type=="rr") { # relative-risk
     r <- exp(Z%*%pz)
-    pr <- targeted:::rr2pr(r, op)
+    pr <- rr2pr(r, op)
   } else { ## risk-difference
     r <- tanh(Z%*%pz)
-    pr <- targeted:::rd2pr(r, op)
+    pr <- rd2pr(r, op)
   }
   res <- pr[cbind(seq_len(NROW(pr)), a+1)]
   return(res)
