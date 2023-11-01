@@ -7,8 +7,8 @@
 ##' data(iris)
 ##' rf <- function(formula, ...)
 ##' ml_model$new(formula, info="grf::probability_forest",
-##'              fit=function(x,y, ...) grf::probability_forest(X=x, Y=y, ...),
-##'              pred=function(fit, newdata) predict(fit, newdata)$predictions, ...)
+##'              estimate=function(x,y, ...) grf::probability_forest(X=x, Y=y, ...),
+##'              predict=function(object, newdata) predict(object, newdata)$predictions, ...)
 ##'
 ##' args <- expand.list(num.trees=c(100,200), mtry=1:3,
 ##'                    formula=c(Species ~ ., Species ~ Sepal.Length + Sepal.Width))
@@ -23,8 +23,8 @@
 ##' cbind(coef(a), attr(args, "table"))
 ##' }
 ##'
-##' ff <- ml_model$new(fit=function(y,x) lm.fit(x=x, y=y),
-##'                    pred=function(fit, newdata) newdata%*%aa$coefficients)
+##' ff <- ml_model$new(estimate=function(y,x) lm.fit(x=x, y=y),
+##'                    predict=function(object, newdata) newdata%*%object$coefficients)
 ##' ## tmp <- ff$estimate(y, x=x)
 ##' ## ff$predict(x)
 ##' @export
@@ -40,35 +40,36 @@ ml_model <- R6::R6Class("ml_model",
      ##' @description
      ##' Create a new prediction model object
      ##' @param formula formula specifying outcome and design matrix
-     ##' @param fit function for fitting the model (must be a function response, 'y',
+     ##' @param estimate function for fitting the model (must be a function response, 'y',
      ##'   and design matrix, 'x'. Alternatively, a function with a single 'formula' argument)
-     ##' @param pred prediction function (must be a function of model object, 'fit',
+     ##' @param predict prediction function (must be a function of model object, 'object',
      ##' and new design matrix, 'newdata')
      ##' @param info optional description of the model
-     ##' @param pred.args optional arguments to prediction function
+     ##' @param predict.args optional arguments to prediction function
      ##' @param specials optional additional terms (weights, offset, id, subset, ...)
-     ##'   passed to 'fit'
+     ##'   passed to 'estimate'
      ##' @param response.arg name of response argument
      ##' @param x.arg name of design matrix argument
      ##' @param ... optional arguments to fitting function
-     initialize = function(formula=NULL, fit,
-                           pred=predict,
-                           pred.args=NULL,
+      initialize = function(formula=NULL,
+                           estimate,
+                           predict=predict,
+                           predict.args=NULL,
                            info=NULL, specials,
                            response.arg="y",
                            x.arg="x",
                            ...) {
-      if (!("..."%in%formalArgs(fit))) {
-        formals(fit) <- c(formals(fit), alist(...=))
+      if (!("..."%in%formalArgs(estimate))) {
+        formals(estimate) <- c(formals(estimate), alist(...=))
       }
       des.args <- lapply(substitute(specials), function(x) x)[-1]
-      fit_formula <- "formula"%in%formalArgs(fit)
-      fit_response_arg <- response.arg %in% formalArgs(fit)
-      fit_x_arg <- x.arg%in%formalArgs(fit)
-      fit_data_arg <- "data" %in% formalArgs(fit)
-      private$init.estimate <- fit
-      private$init.predict <- pred
-      ## if (!fit_x_arg && !("data"%in%formalArgs(fit)))
+      fit_formula <- "formula"%in%formalArgs(estimate)
+      fit_response_arg <- response.arg %in% formalArgs(estimate)
+      fit_x_arg <- x.arg%in%formalArgs(estimate)
+      fit_data_arg <- "data" %in% formalArgs(estimate)
+      private$init.estimate <- estimate
+      private$init.predict <- predict
+      ## if (!fit_x_arg && !("data"%in%formalArgs(estimate)))
       ##   stop("Estimation method must have an argument 'x' or 'data'")
 
       dots <- list(...)
@@ -79,7 +80,7 @@ ml_model <- R6::R6Class("ml_model",
           do.call(private$init.estimate, args)
         }
         private$predfun <- function(...) {
-          args <-  c(list(...), pred.args)
+          args <-  c(list(...), predict.args)
           do.call(private$init.predict, args)
         }
       } else {
@@ -105,23 +106,23 @@ ml_model <- R6::R6Class("ml_model",
             return(structure(do.call(private$init.estimate, args), design=summary(xx)))
           }
         }
-        private$predfun <- function(fit, data, ...) {
+        private$predfun <- function(object, data, ...) {
           if (fit_formula || no_formula) {
-            args <-  c(list(fit, newdata=data), pred.args, list(...))
+            args <-  c(list(object, newdata=data), predict.args, list(...))
           } else {
-            x <- model.matrix(update(attr(fit, "design"), data))
-            args <-  c(list(fit, newdata=x), pred.args, list(...))
+            x <- model.matrix(update(attr(object, "design"), data))
+            args <-  c(list(object, newdata=x), predict.args, list(...))
           }
           return(do.call(private$init.predict, args))
         }
       }
       self$formula <- formula
       self$info <- info
-      self$formals <- list(estimate=formals(fit), predict=formals(pred))
-      private$call <- list(fit=substitute(fit),
-                           pred=substitute(pred),
-                           dots=substitute(dots),
-                           pred.args=substitute(pred.args))
+      self$formals <- list(estimate=formals(estimate), predict=formals(predict))
+      private$call <- list(estimate=substitute(estimate),
+                           predict=substitute(predict),
+                           dots=substitute(list(...)),
+                           predict.args=substitute(predict.args))
      },
 
      ##' @description
@@ -139,11 +140,11 @@ ml_model <- R6::R6Class("ml_model",
      ##' Prediction method
      ##' @param newdata data.frame
      ##' @param ... Additional arguments to prediction method
-     ##' @param fit Optional model fit object
-     predict = function(newdata, ..., fit=NULL) {
-       if (is.null(fit)) fit <- private$fitted
-       if (is.null(fit)) stop("Provide estimated model object")
-       private$predfun(fit, newdata, ...)
+     ##' @param object Optional model fit object
+     predict = function(newdata, ..., object=NULL) {
+       if (is.null(object)) object <- private$fitted
+       if (is.null(object)) stop("Provide estimated model object")
+       private$predfun(object, newdata, ...)
      },
 
      ##' @description
@@ -167,9 +168,9 @@ ml_model <- R6::R6Class("ml_model",
        cat("Arguments:\n")
        print(unlist(private$call$dots))
        if (!is.null(self$formula))
-         cat("Data:\n",
+         cat("Model:\n",
              "\t", deparse1(self$formula), "\n", sep="")
-       cat("Model:\n",
+       cat("Estimate function:\n",
            "\tfunction(",paste(names(self$formals[[1]]),
                                collapse=", "), ")\n", sep="")
        cat("Prediction:\n",
@@ -181,16 +182,18 @@ ml_model <- R6::R6Class("ml_model",
      ##' @description
      ##' Extract response from data
      ##' @param data data.frame
-     response = function(data) {
+     ##' @param ... additional arguments to 'design'
+     response = function(data, ...) {
        if (is.null(self$formula)) return(NULL)
-       design(update(self$formula, ~ 1), data)$y
+       design(update(self$formula, ~ 1), data=data, ...)$y
      },
 
      ##' @description
      ##' Extract design matrix (features) from data
      ##' @param data data.frame
-     design = function(data) {
-       design(self$formula, data)$x
+     ##' @param ... additional arguments to 'design'
+     design = function(data, ...) {
+       design(self$formula, data=data, ...)$x
      }
 
    ),
@@ -218,10 +221,63 @@ ml_model <- R6::R6Class("ml_model",
 
 ##' @export
 estimate.ml_model <- function(x, ...) {
-  x$estimate(...)
+  val <- x$estimate(...)
+  val
 }
 
 ##' @export
 predict.ml_model <- function(object, ...) {
   object$predict(...)
+}
+
+##' ML model
+##'
+##' Wrapper for ml_model
+##' @export
+##' @param formula formula
+##' @param ... additional arguments to model object
+##' @param model model (sl, rf, pf, glm, ...)
+##' @details
+##' model 'sl' (SuperLearner::SuperLearner)
+##' args: SL.library, cvControl, f<aamily, method
+##' example:
+##'
+##' model 'rf' (grf::regression_forest)
+##' args: num.trees, mtry, sample.weights, sample.fraction, min.node.size, ...
+##' example:
+##'
+##' model 'pf' (grf::probability_forest)
+##' args: num.trees, mtry, sample.weights, ...
+##' example:
+##' ##'
+##' model 'glm'
+##' args: family, weights, offset, ...
+##'
+##'
+ML <- function(formula, ..., model="glm") {
+  model <- tolower(model)
+  if (model=="sl") {
+    return(SL(formula, ...))
+  }
+  if (model%in%c("grf", "rf", "regression_forest")) {
+    m <- ml_model$new(formula, info="grf::regression_forest", ...,
+           estimate=function(x,y, ...) grf::regression_forest(X=x, Y=y, ...),
+           predict=function(object, newdata) predict(object, newdata)$predictions, ...)
+    return(m)
+  }
+  if (model%in%c("pf", "probability_forest")) {
+    m <- ml_model$new(formula, info = "grf::probability_forest",
+           estimate=function(x,y, ...) grf::probability_forest(X=x, Y=y, ...),
+           predict=function(object, newdata) predict(object, newdata)$predictions, ...)
+    return(m)
+  }
+  ## GLM
+  m <- ml_model$new(formula, info = "GLM", ...,
+        estimate = function(formula, data, ...)
+          stats::glm(formula, data=data, ...),
+        predict = function(object, newdata)
+          stats::predict(object, newdata=newdata, type="response")
+      )
+  return(m)
+
 }
