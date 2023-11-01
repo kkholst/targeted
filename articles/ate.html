@@ -169,9 +169,9 @@
 <p>In this simulation we can compare the estimates to the actual expected potential outcomes which can be approximated by Monte Carlo integration by simulating from the model where we intervene on <span class="math inline">\(A\)</span> (i.e., break the dependence on <span class="math inline">\(X, Z\)</span>):</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/intervention.lvm.html" class="external-link">intervention</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">"A"</span>, <span class="fl">0</span><span class="op">)</span>, <span class="fl">2e5</span><span class="op">)</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.49966</span></span>
+<span><span class="co">#&gt; [1] 0.50001</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/intervention.lvm.html" class="external-link">intervention</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">"A"</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fl">2e5</span><span class="op">)</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.638085</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.637015</span></span></code></pre></div>
 <p>The IPW estimator can then be estimated</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ate.html">ate</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">A</span> <span class="op">|</span> <span class="fl">1</span> <span class="op">|</span> <span class="va">X</span><span class="op">+</span><span class="va">Z</span>, data<span class="op">=</span><span class="va">d</span><span class="op">)</span></span>
@@ -261,15 +261,15 @@
 <span><span class="co">#&gt;   a ~ x </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     Estimate Std.Err    2.5%   97.5%    P-value</span></span>
-<span><span class="co">#&gt; a=0  -1.5756 0.04148 -1.6569 -1.4943  0.000e+00</span></span>
-<span><span class="co">#&gt; a=1  -0.7945 0.04324 -0.8792 -0.7097  2.190e-75</span></span>
-<span><span class="co">#&gt; a=2  -0.3973 0.03439 -0.4647 -0.3299  7.189e-31</span></span>
-<span><span class="co">#&gt; a=3   0.7663 0.02494  0.7174  0.8151 2.932e-207</span></span>
+<span><span class="co">#&gt; a=0  -1.6168 0.06119 -1.7367 -1.4968 7.932e-154</span></span>
+<span><span class="co">#&gt; a=1  -0.8389 0.03844 -0.9142 -0.7635 1.421e-105</span></span>
+<span><span class="co">#&gt; a=2  -0.4255 0.03523 -0.4946 -0.3565  1.391e-33</span></span>
+<span><span class="co">#&gt; a=3   0.7409 0.02688  0.6882  0.7935 3.528e-167</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Average Treatment Effect (constrast: 'a=1' - 'a=0'):</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     Estimate Std.Err   2.5%  97.5%   P-value</span></span>
-<span><span class="co">#&gt; ATE   0.7812 0.05782 0.6679 0.8945 1.331e-41</span></span></code></pre></div>
+<span><span class="co">#&gt; ATE   0.7779 0.07062 0.6395 0.9163 3.258e-28</span></span></code></pre></div>
 <p>Choosing a different contrast for the association measures:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">a2</span>, contrast<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">4</span><span class="op">)</span><span class="op">)</span></span>
@@ -281,27 +281,27 @@
 <span><span class="co">#&gt;   a ~ x </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     Estimate Std.Err    2.5%   97.5%    P-value</span></span>
-<span><span class="co">#&gt; a=0  -1.5756 0.04148 -1.6569 -1.4943  0.000e+00</span></span>
-<span><span class="co">#&gt; a=1  -0.7945 0.04324 -0.8792 -0.7097  2.190e-75</span></span>
-<span><span class="co">#&gt; a=2  -0.3973 0.03439 -0.4647 -0.3299  7.189e-31</span></span>
-<span><span class="co">#&gt; a=3   0.7663 0.02494  0.7174  0.8151 2.932e-207</span></span>
+<span><span class="co">#&gt; a=0  -1.6168 0.06119 -1.7367 -1.4968 7.932e-154</span></span>
+<span><span class="co">#&gt; a=1  -0.8389 0.03844 -0.9142 -0.7635 1.421e-105</span></span>
+<span><span class="co">#&gt; a=2  -0.4255 0.03523 -0.4946 -0.3565  1.391e-33</span></span>
+<span><span class="co">#&gt; a=3   0.7409 0.02688  0.6882  0.7935 3.528e-167</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Average Treatment Effect (constrast: 'a=1' - 'a=3'):</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     Estimate Std.Err   2.5%  97.5%    P-value</span></span>
-<span><span class="co">#&gt; ATE   -1.561 0.04685 -1.653 -1.469 2.428e-243</span></span></code></pre></div>
+<span><span class="co">#&gt; ATE    -1.58 0.04382 -1.666 -1.494 1.343e-284</span></span></code></pre></div>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/iid.html" class="external-link">iid</a></span><span class="op">(</span><span class="va">a2</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                a=0           a=1           a=2           a=3</span></span>
-<span><span class="co">#&gt; [1,] -7.032447e-05 -1.378416e-04 -4.730011e-05 -5.039736e-05</span></span>
-<span><span class="co">#&gt; [2,]  8.466811e-06  1.329358e-05  1.432039e-05 -2.420318e-05</span></span>
-<span><span class="co">#&gt; [3,]  4.158192e-05  3.555431e-05  3.807546e-05 -2.918448e-04</span></span>
-<span><span class="co">#&gt; [4,] -1.792276e-06  6.288010e-06  6.841984e-06  4.012050e-06</span></span>
-<span><span class="co">#&gt; [5,]  1.427956e-04  1.032023e-04  1.102017e-04  3.584262e-05</span></span>
-<span><span class="co">#&gt; [6,] -9.765353e-05 -6.944653e-05 -7.410042e-05  2.652941e-05</span></span>
+<span><span class="co">#&gt;               a=0           a=1           a=2           a=3</span></span>
+<span><span class="co">#&gt; [1,] 4.194327e-05  4.261845e-05  4.537288e-05 -8.433906e-05</span></span>
+<span><span class="co">#&gt; [2,] 1.646434e-04 -7.114783e-05 -7.669557e-05 -7.869931e-05</span></span>
+<span><span class="co">#&gt; [3,] 9.436199e-05  7.450827e-05  7.985561e-05  3.469342e-04</span></span>
+<span><span class="co">#&gt; [4,] 1.106684e-04  8.451855e-05  1.095887e-03  2.163169e-05</span></span>
+<span><span class="co">#&gt; [5,] 3.663764e-04  1.589130e-05  1.654902e-05  1.865371e-05</span></span>
+<span><span class="co">#&gt; [6,] 3.911816e-05  4.089782e-05  4.351503e-05 -2.152065e-04</span></span>
 <span><span class="fu"><a href="https://kkholst.github.io/lava/reference/estimate.default.html" class="external-link">estimate</a></span><span class="op">(</span><span class="va">a2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">-</span><span class="va">x</span><span class="op">[</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     Estimate Std.Err   2.5%  97.5%    P-value</span></span>
-<span><span class="co">#&gt; a=1   -1.561 0.04685 -1.653 -1.469 2.428e-243</span></span></code></pre></div>
+<span><span class="co">#&gt; a=1    -1.58 0.04382 -1.666 -1.494 1.343e-284</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="sessioninfo">SessionInfo<a class="anchor" aria-label="anchor" href="#sessioninfo"></a>
