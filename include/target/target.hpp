@@ -28,6 +28,7 @@ namespace target {
     arma::Mat<T> _x2;
     arma::Mat<T> _x3;
     arma::Col<T> _weights;
+    arma::Col<T> _offset;
 
   public:
     arma::Col<T> alpha;  // Target parameter
@@ -151,35 +152,32 @@ namespace target {
 
   class ACE : public Target<cx_dbl> {
   protected:
-    bool binary;
+    std::string link;
 
   public:
-    ACE(const arma::cx_vec &y,
-  	const arma::cx_mat &a,
-  	const arma::cx_mat &x2,
-  	const arma::cx_mat &x3,
-  	const arma::cx_vec &parameter,
-  	const arma::cx_vec &weights,
-	bool binary = true);
+    ACE(const arma::cx_vec &y, const arma::cx_mat &a, const arma::cx_mat &x2,
+        const arma::cx_mat &x3, const arma::cx_vec &parameter,
+        const arma::cx_vec &weights, const arma::cx_vec &offset,
+        std::string link = "identity");
     ACE(const arma::vec &y,
-    	const arma::vec &a,
-    	const arma::mat &x2,
-    	const arma::mat &x3,
-    	const arma::vec &parameter,
-    	const arma::vec &weights,
-    	bool binary = true);
+        const arma::vec &a,
+        const arma::mat &x2,
+        const arma::mat &x3,
+        const arma::vec &parameter,
+        const arma::vec &weights, const arma::vec &offset,
+        std::string link = "identity");
 
     void calculate(bool target = true,
-		   bool nuisance = true,
-		   bool propensity = true) override;
+                   bool nuisance = true,
+                   bool propensity = true) override;
     void update_par(arma::cx_vec par);
     void update_par(arma::vec par);
 
     arma::cx_mat est(arma::cx_vec par,
-		     bool indiv = false,
-		     const cx_dbl &value = 1);
+                     bool indiv = false,
+                     const cx_dbl &value = 1);
     arma::cx_mat est(bool indiv = false,
-		     const cx_dbl &value = 1);
+                     const cx_dbl &value = 1);
     arma::mat deriv(const cx_dbl &value = 1);
   };
 
