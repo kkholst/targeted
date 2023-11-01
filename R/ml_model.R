@@ -260,14 +260,14 @@ ML <- function(formula, ..., model="glm") {
     return(SL(formula, ...))
   }
   if (model%in%c("grf", "rf", "regression_forest")) {
-    m <- ml_model$new(formula, info="grf::regression_forest", ...,
-           estimate=function(x,y, ...) grf::regression_forest(X=x, Y=y, ...),
+    m <- ml_model$new(formula, info="grf::regression_forest",
+           estimate=function(x,y) grf::regression_forest(X=x, Y=y, ...),
            predict=function(object, newdata) predict(object, newdata)$predictions, ...)
     return(m)
   }
   if (model%in%c("pf", "probability_forest")) {
     m <- ml_model$new(formula, info = "grf::probability_forest",
-           estimate=function(x,y, ...) grf::probability_forest(X=x, Y=y, ...),
+           estimate=function(x,y) grf::probability_forest(X=x, Y=y, ...),
            predict=function(object, newdata) predict(object, newdata)$predictions, ...)
     return(m)
   }
