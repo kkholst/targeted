@@ -13,6 +13,7 @@ cate(
   nfolds = 5,
   type = "dml2",
   silent = FALSE,
+  stratify = FALSE,
   mc.cores,
   ...
 )
@@ -20,9 +21,9 @@ cate(
 \arguments{
 \item{treatment}{formula specifying treatment and variables to condition on}
 
-\item{response_model}{formula or ml_model object (formula = GLM)}
+\item{response_model}{formula or ml_model object (formula => glm)}
 
-\item{propensity_model}{formula or ml_model object (formula = GLM)}
+\item{propensity_model}{formula or ml_model object (formula => glm)}
 
 \item{contrast}{treatment contrast (default 1 vs 0)}
 
@@ -33,6 +34,10 @@ cate(
 \item{type}{'dml1' or 'dml2'}
 
 \item{silent}{supress all messages and progressbars}
+
+\item{stratify}{If TRUE the response_model will be stratified by treatment}
+
+\item{mc.cores}{mc.cores Optional number of cores. parallel::mcmapply used instead of future}
 
 \item{...}{additional arguments to future.apply::future_mapply}
 }

@@ -15,6 +15,7 @@
 ##'     model.frame model.matrix na.pass nlminb predict
 ##'     dnorm quantile terms weighted.mean runif
 ##'     .getXlevels delete.response model.response gaussian formula
+##'     model.offset reformulate
 ##' @importFrom digest sha1
 ##' @importFrom optimx optimx
 ##' @importFrom data.table data.table is.data.table
