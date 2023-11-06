@@ -47,6 +47,8 @@ Klaus Kähler Holst
 \item{\code{formals}}{List with formal arguments of estimation and prediction functions}
 
 \item{\code{formula}}{Formula specifying response and design matrix}
+
+\item{\code{args}}{additional arguments specified during initialization}
 }
 \if{html}{\out{</div>}}
 }
@@ -67,6 +69,7 @@ Klaus Kähler Holst
 \item \href{#method-ml_model-print}{\code{ml_model$print()}}
 \item \href{#method-ml_model-response}{\code{ml_model$response()}}
 \item \href{#method-ml_model-design}{\code{ml_model$design()}}
+\item \href{#method-ml_model-opt}{\code{ml_model$opt()}}
 \item \href{#method-ml_model-clone}{\code{ml_model$clone()}}
 }
 }
@@ -228,6 +231,25 @@ Extract design matrix (features) from data
 \item{\code{data}}{data.frame}
 
 \item{\code{...}}{additional arguments to 'design'}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ml_model-opt"></a>}}
+\if{latex}{\out{\hypertarget{method-ml_model-opt}{}}}
+\subsection{Method \code{opt()}}{
+Get options
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ml_model$opt(arg, ...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{arg}}{name of option to get value of}
+
+\item{\code{...}}{additional arguments to lower level functions}
 }
 \if{html}{\out{</div>}}
 }
