@@ -1,9 +1,7 @@
 
 ##' Targeted inference
 ##'
-##' Methods for targeted and semiparametric inference including
-##' augmented inverse probability weighted estimators for missing data and
-##' causal inference.
+##' Methods for targeted and semiparametric inference.
 ##'
 ##' @name targeted-package
 ##' @import Rcpp methods
@@ -15,7 +13,7 @@
 ##'     model.frame model.matrix na.pass nlminb predict
 ##'     dnorm quantile terms weighted.mean runif
 ##'     .getXlevels delete.response model.response gaussian formula
-##'     model.offset reformulate
+##'     model.offset reformulate drop.terms
 ##' @importFrom digest sha1
 ##' @importFrom optimx optimx
 ##' @importFrom data.table data.table is.data.table

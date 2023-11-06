@@ -6,9 +6,7 @@
 \alias{targeted}
 \title{Targeted inference}
 \description{
-Methods for targeted and semiparametric inference including
-augmented inverse probability weighted estimators for missing data and
-causal inference.
+Methods for targeted and semiparametric inference.
 }
 \examples{
 example(riskreg)
