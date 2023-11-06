@@ -69,7 +69,7 @@ cate_fold1 <- function(fold, data, score, treatment_des) {
 ##'
 ##' d <- sim1(200)
 ##' e <- cate(a ~ z1+z2+z3, response=u~., data=d)
-##'
+##' e
 ##' @export
 cate <- function(treatment,
                  response_model,

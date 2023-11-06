@@ -65,7 +65,7 @@ lava::sim(m, n, p=par)
 
 d <- sim1(200)
 e <- cate(a ~ z1+z2+z3, response=u~., data=d)
-
+e
 }
 \author{
 Klaus Kähler Holst

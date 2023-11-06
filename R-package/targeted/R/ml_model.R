@@ -157,7 +157,6 @@ ml_model <- R6::R6Class("ml_model",
      ##' @param formula formula
      ##' @param ... Additional arguments to lower level functions
      update = function(formula, ...) {
-       ## environment(formula) <- baseenv()
        self$formula <- formula
        environment(private$fitfun)$formula <- formula
      },
@@ -237,7 +236,7 @@ ml_model <- R6::R6Class("ml_model",
              as.list.environment(environment(value),
                  all.names = TRUE
              ),
-             parent = baseenv()
+             parent = globalenv()
          )
          environment(value) <- env
          return(value)
