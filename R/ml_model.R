@@ -36,6 +36,8 @@ ml_model <- R6::R6Class("ml_model",
       formals = NULL,
       ##' @field formula Formula specifying response and design matrix
       formula = NULL,
+      ##' @field args additional arguments specified during initialization
+      args = NULL,
 
      ##' @description
      ##' Create a new prediction model object
@@ -73,6 +75,7 @@ ml_model <- R6::R6Class("ml_model",
       ##   stop("Estimation method must have an argument 'x' or 'data'")
 
       dots <- list(...)
+      self$args <- dots
       no_formula <- is.null(formula)
       if (no_formula) {
         private$fitfun <- function(...) {
@@ -91,7 +94,7 @@ ml_model <- R6::R6Class("ml_model",
           }
         } else {  ##  Formula automatically processed into design matrix & response
           private$fitfun <- function(data, ...) {
-            xx <- do.call(design, c(list(formula=formula, data=data), des.args))
+            xx <- do.call(design, c(list(formula=self$formula, data=data), des.args))
             args <- c(list(xx$x), list(...), dots)
             if (fit_x_arg) {
               names(args)[1] <- x.arg
@@ -194,6 +197,14 @@ ml_model <- R6::R6Class("ml_model",
      ##' @param ... additional arguments to 'design'
      design = function(data, ...) {
        design(self$formula, data=data, ...)$x
+     },
+
+     ##' @description
+     ##' Get options
+     ##' @param arg name of option to get value of
+     ##' @param ... additional arguments to lower level functions
+     opt = function(arg, ...) {
+       return(self$args[[arg]])
      }
 
    ),
@@ -215,10 +226,28 @@ ml_model <- R6::R6Class("ml_model",
      ## @field fitted Fitted model object
      fitted = NULL,
      ## @field call Information on the initialized model
-     call = NULL
+     call = NULL,
+     # When x$clone(deep=TRUE) is called, the deep_clone gets invoked once for
+                                        # each field, with the name and value.
+     deep_clone = function(name, value) {
+       if (name == "fitfun") {
+         env <- list2env(
+             as.list.environment(environment(value),
+                 all.names = TRUE
+             ),
+             parent = baseenv()
+         )
+         environment(value) <- env
+         return(value)
+       } else {
+         ## For everything else, just return it. This results in a shallow
+         ## copy of s3.
+         return(value)
+       }
+     }
    )
 )
-
+##
 ##' @export
 estimate.ml_model <- function(x, ...) {
   val <- x$estimate(...)
