@@ -1,4 +1,3 @@
-
 ##' R6 class for prediction models
 ##'
 ##' Provides standardized estimation and prediction methods
@@ -89,13 +88,16 @@ ml_model <- R6::R6Class("ml_model",
       } else {
         if (fit_formula) {  ## Formula in arguments of estimation procedure
           private$fitfun <- function(data, ...) {
-            args <- c(dots, list(formula=formula, data=data), list(...))
+            args <- c(self$args, list(formula=self$formula, data=data), list(...))
             return(do.call(private$init.estimate, args))
           }
         } else {  ##  Formula automatically processed into design matrix & response
           private$fitfun <- function(data, ...) {
-            xx <- do.call(design, c(list(formula=self$formula, data=data), des.args))
-            args <- c(list(xx$x), list(...), dots)
+            xx <- do.call(
+              targeted::design,
+              c(list(formula = self$formula, data = data), des.args)
+            )
+            args <- c(list(xx$x), list(...), self$args)
             if (fit_x_arg) {
               names(args)[1] <- x.arg
             } else {
