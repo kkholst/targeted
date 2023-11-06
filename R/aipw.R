@@ -30,7 +30,7 @@ aipw <- function(response_model, data,
   r <- !is.na(model.frame(as.formula(paste0(resp, "~1")), data = data, na.action = na.pass)) * 1
   data[, "R_"] <- r[, 1]
   if (base::missing(missing_model)) {
-      missing_model <- update(response_model$formula, as.formula("`_R` ~ ."))
+      missing_model <- update(response_model$formula, as.formula("R_ ~ ."))
   }
   if (inherits(missing_model, "formula")) {
     missing_model <- ML(missing_model, family=binomial)
