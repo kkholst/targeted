@@ -1,7 +1,7 @@
 import targeted as tg
 import numpy as np
 import patsy
-from scipy import optimize
+import scipy.optimize as opt
 import statsmodels.api as sm
 import targeted.formula as tgf
 import logging
@@ -50,7 +50,7 @@ def jac(theta):
     return -m.score().flatten()
 
 
-op = optimize.minimize(obj, theta, method="BFGS", jac=jac)
+op = opt.minimize(obj, np.array(theta).flatten(), method="BFGS", jac=jac)
 cc = op['x']
 logger.info("MLE:\n\t%s", cc)
 

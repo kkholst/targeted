@@ -20,7 +20,7 @@ matrices ace_est(pyarray &y,
 		 pyarray &x2,
 		 pyarray &par,
 		 pyarray &weights,
-		 bool binary = true) {
+		 std::string link= "identity") {
   arma::vec Y = pymat(y).as_col();
   arma::vec A = pymat(a).as_col();
   arma::mat X1 = pymat(x1);
@@ -30,7 +30,7 @@ matrices ace_est(pyarray &y,
   arma::vec par0(theta.n_elem+1);
   par0[0] = 0;
   for (unsigned i=0; i < theta.n_elem; i++) par0[i+1] = theta[i];
-  target::ACE model(Y, A, X1, X2, par0, W, binary);
+  target::ACE model(Y, A, X1, X2, par0, W, link);
   double alpha = real(model.est(false)[0])/Y.n_elem;
   par0[0] = alpha;
   model.update_par(par0);

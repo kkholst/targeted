@@ -96,7 +96,7 @@ class riskreg:
 
         def obj(alpha):
             return sum(sum(self.model.esteq(alpha, pr))**2)
-
+        alpha0 = np.array(alpha0).flatten()
         op = optimize.minimize(obj, alpha0, method='Nelder-Mead')
         self.estimate = op['x']
 
@@ -160,6 +160,7 @@ def riskreg_mle(y, a, x2, *args, **kwargs):
 
     p = x1.shape[1]+x2.shape[1]
     init = kwargs.get('init', np.repeat(0, p))
+    init = np.array(init).flatten()
     op = optimize.minimize(obj, init, method='BFGS', jac=jac)
     if not op['success']:
         op = optimize.minimize(obj, init, method='CG', jac=jac)
