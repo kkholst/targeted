@@ -62,8 +62,8 @@ if (return_model) return(m)
 lava::sim(m, n = n)
 }
 
-d <- sim1(n = 1e3, seed = 1)
 if (require("SuperLearner",quietly=TRUE)) {
+  d <- sim1(n = 1e3, seed = 1)
   e <- cate_link(data=d,
            type = "dml2",
            treatment = a ~ v,

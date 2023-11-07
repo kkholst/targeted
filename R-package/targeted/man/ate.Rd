@@ -2,18 +2,17 @@
 % Please edit documentation in R/ate.R
 \name{ate}
 \alias{ate}
-\alias{aipw}
-\title{AIPW estimator for Average Treatement Effect}
+\title{AIPW (doubly-robust) estimator for Average Treatement Effect}
 \usage{
 ate(
   formula,
   data = parent.frame(),
   weights,
-  binary = TRUE,
+  offset,
+  family = stats::gaussian(identity),
   nuisance = NULL,
   propensity = nuisance,
   all,
-  missing = FALSE,
   labels = NULL,
   ...
 )
@@ -25,16 +24,16 @@ ate(
 
 \item{weights}{optional frequency weights}
 
-\item{binary}{Binary response (default TRUE)}
+\item{offset}{optional offset (character or vector). can also be specified in the formula.}
 
-\item{nuisance}{outcome regression formula}
+\item{family}{Exponential family argument for outcome model}
+
+\item{nuisance}{outcome regression formula (Q-model)}
 
 \item{propensity}{propensity model formula}
 
 \item{all}{If TRUE all standard errors are calculated (default TRUE when exposure
 only has two levels)}
-
-\item{missing}{If TRUE a missing data (AIPW) estimator is returned}
 
 \item{labels}{Optional treatment labels}
 
@@ -45,7 +44,13 @@ An object of class '\code{ate.targeted}' is returned. See \code{\link{targeted-c
 for more details about this class and its generic functions.
 }
 \description{
-Augmented Inverse Probability Weighting estimator for the Average (Causal) Treatment Effect.
+Augmented Inverse Probability Weighting estimator for the Average (Causal)
+Treatment Effect. All nuisance models are here parametric (glm). For a more
+general approach see the \code{cate} implementation. In this implementation
+the standard errors are correct even when the nuisance models are
+misspecified (the influence curve is calculated including the term coming
+from the parametric nuisance models). The estimate is consistent if either
+the propensity model or the outcome model / Q-model is correctly specified.
 }
 \details{
 The formula may either be specified as:
@@ -60,10 +65,11 @@ Or using the nuisance (and propensity argument): \code{ate(y~a, nuisance=~x+z, .
 \examples{
 m <- lvm(y ~ a+x, a~x)
 distribution(m,~ a+y) <- binomial.lvm()
-d <- sim(m,1e3,seed=1)
+d <- sim(m,1e4,seed=1)
 
 a <- ate(y ~ a, nuisance=~x, data=d)
 summary(a)
+b <- cate(a ~ 1, y ~ a*x, a ~ x, data=d)
 
 # Multiple treatments
 m <- lvm(y ~ a+x, a~x)

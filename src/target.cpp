@@ -39,6 +39,8 @@ namespace target {
                     const arma::Col<T> &parameter,
                     const arma::Col<T> &weights) : Target(y, a, x1, x2, x3, parameter) {
     this->weights(weights);
+    arma::Col<T> offset(y.n_elem, arma::fill::zeros);
+    this->_offset = offset;
   }
 
 
@@ -105,7 +107,7 @@ namespace target {
     if (target)  // Target, linear predictor
       this->target = Target<T>::X1()*Target<T>::alpha;
     if (nuisance)  // Nuisance, linear predictor
-      this->nuisance = Target<T>::X2()*Target<T>::beta;
+      this->nuisance = Target<T>::X2()*Target<T>::beta + this->_offset;
     if (propensity && Target<T>::gamma.n_elem > 0) {  // Propensity
       this->propensity = Target<T>::X3()*Target<T>::gamma;
       this->propensity = target::expit(this->propensity);
@@ -351,40 +353,39 @@ namespace target {
     @param x3 Design matrix for propensity model
     @param parameter Parameters from outcome regression and propensity model
     @param weights Weight vector
-    @param binary If TRUE outcome regression is assumed to be a logistic regression model.
+    @param link Link function for the outcome model (Q-model)
     @return ACE
   */
-  ACE::ACE(const arma::cx_vec &y,
-           const arma::cx_mat &a,
-           const arma::cx_mat &x2,
-           const arma::cx_mat &x3,
-           const arma::cx_vec &parameter,
-           const arma::cx_vec &weights,
-           bool bin) :
-    Target<cx_dbl>(y, a, arma::cx_mat(1, 1), x2, x3, parameter, weights) {
-    this->binary = bin;
+  ACE::ACE(const arma::cx_vec &y, const arma::cx_mat &a, const arma::cx_mat &x2,
+           const arma::cx_mat &x3, const arma::cx_vec &parameter,
+           const arma::cx_vec &weights, const arma::cx_vec &offset,
+           std::string link)
+      : Target<cx_dbl>(y, a, arma::cx_mat(1, 1), x2, x3, parameter, weights) {
+    this->_offset = offset;
+    this->link = link;
     ACE::calculate(true, true);
   }
 
-  ACE::ACE(const arma::vec &y,
-           const arma::vec &a,
-           const arma::mat &x2,
-           const arma::mat &x3,
-           const arma::vec &parameter,
-           const arma::vec &weights,
-           bool bin) :
-    ACE(arma::conv_to<arma::cx_vec>::from(y),
-        arma::conv_to<arma::cx_vec>::from(a),
-        arma::conv_to<arma::cx_mat>::from(x2),
-        arma::conv_to<arma::cx_mat>::from(x3),
-        arma::conv_to<arma::cx_vec>::from(parameter),
-        arma::conv_to<arma::cx_vec>::from(weights),
-        bin) { }
+  ACE::ACE(const arma::vec &y, const arma::vec &a, const arma::mat &x2,
+           const arma::mat &x3, const arma::vec &parameter,
+           const arma::vec &weights, const arma::vec &offset, std::string link)
+      : ACE(arma::conv_to<arma::cx_vec>::from(y),
+            arma::conv_to<arma::cx_vec>::from(a),
+            arma::conv_to<arma::cx_mat>::from(x2),
+            arma::conv_to<arma::cx_mat>::from(x3),
+            arma::conv_to<arma::cx_vec>::from(parameter),
+            arma::conv_to<arma::cx_vec>::from(weights),
+            arma::conv_to<arma::cx_vec>::from(offset),
+            link) { }
 
   void ACE::calculate(bool target, bool nuisance, bool propensity) {
     Target<cx_dbl>::calculate(false, nuisance, propensity);
-    if (nuisance && this->binary) {
-      this->nuisance = target::expit(this->nuisance);  // outcome regression
+    if (nuisance) { // outcome regression / Q-model
+      if (this->link == "logit") {
+        this->nuisance = target::expit(this->nuisance);
+      } else if (this->link == "log") {
+        this->nuisance = arma::exp(this->nuisance);
+      }
     }
   }
 

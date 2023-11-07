@@ -68,9 +68,9 @@ rf_model <- function(...) {
   dots <- list(...)
   fit <- function(data)
     do.call(ranger, c(dots, list(data=data, num.threads=1)))
-  pred <- function(fit, data)
-    predict(fit, data=data, num.threads=1)$predictions
-  list(fit=fit, predict=pred)
+  pred <- function(object, newdata)
+    predict(object, data=newdata, num.threads=1)$predictions
+  list(fit=fit, pred=pred)
 }
 
 lm_model <- function(...) {

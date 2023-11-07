@@ -11,9 +11,9 @@ knitr::opts_chunk$set(
 ```
 
 <!-- badges: start -->
-  [![travis](https://travis-ci.com/kkholst/targeted.svg?branch=master)](https://travis-ci.com/kkholst/targeted)
-  [![coverage](https://codecov.io/github/kkholst/targeted/coverage.svg?branch=master)](https://codecov.io/github/kkholst/targeted?branch=master)
-  [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+  [![travis](https://travis-ci.com/kkholst/targeted.svg?branch=main)](https://travis-ci.com/kkholst/targeted)
+  [![coverage](https://codecov.io/github/kkholst/targeted/coverage.svg?branch=main)](https://app.codecov.io/github/kkholst/targeted?branch=main)
+  [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/apache-2.0)
   [![cran](https://www.r-pkg.org/badges/version-last-release/targeted)](https://cranlogs.r-pkg.org/downloads/total/last-month/targeted)
 <!-- badges: end -->
 
@@ -21,12 +21,15 @@ knitr::opts_chunk$set(
 # Targeted Inference in R: targeted <a href="https://kkholst.github.io/targeted"><img src="man/figures/logo.svg" align="right" height="75" /></a>
 <!-- # Targeted Inference in R: targeted <a href="https://targetlib.org/r/"><img src="man/figures/logo.svg" align="right" height="75" /></a> -->
 
-Various methods for targeted and semiparametric inference including
-augmented inverse probability weighted estimators for missing data and
-causal inference (Bang and Robins (2005)
-<10.1111/j.1541-0420.2005.00377.x>) and estimators for risk
-differences and relative risks (Richardson et al. (2017)
-<10.1080/01621459.2016.1192546>).
+Various methods for targeted and semiparametric inference including augmented
+inverse probability weighted (AIPW) estimators for missing data and causal
+inference (Bang and Robins (2005) <doi:10.1111/j.1541-0420.2005.00377.x>),
+variable importance and conditional average treatment effects (CATE) (van der
+Laan (2006) <doi:10.2202/1557-4679.1008>), estimators for risk differences and
+relative risks (Richardson et al. (2017) <doi:10.1080/01621459.2016.1192546>),
+assumption lean inference for generalized linear model parameters (Vansteelandt
+et al. (2022) <doi:10.1111/rssb.12504>).
+
 
 ## Installation
 
@@ -39,7 +42,6 @@ install.packages("targeted")
 And the development version from [GitHub](<https://github.com/kkholst/targeted>) with:
 
 ```{r  eval=FALSE }
-# install.packages("devtools")
 remotes::install_github("kkholst/targeted")
 ```
 
@@ -50,21 +52,20 @@ remotes::install_github("kkholst/targeted")
 
 ```{r  results='hide' }
 library(targeted)
-library(magrittr)
 ```
 
 Simulate some data:
 
 ```{r   }
-m <- lvm() %>%
-    regression(a ~ x+z) %>%
-    regression(lp.target ~ 1) %>%
-    regression(lp.nuisance ~ x + z) %>%
-    distribution('a', binomial.lvm("logit")) %>%
+m <- lvm() |>
+    regression(a ~ x+z) |>
+    regression(lp.target ~ 1) |>
+    regression(lp.nuisance ~ x + z) |>
+    distribution('a', binomial.lvm("logit")) |>
     binomial.rr('y', 'a', 'lp.target', 'lp.nuisance')
 
 par <- c('a'=-2, 'lp.target'=1, 'lp.nuisance'=-1, 'lp.nuisance~x'=2)
-d <- lava::sim(m, n=1e4, seed=1, p=par) %>%
+d <- lava::sim(m, n=1e4, seed=1, p=par) |>
     subset(select=c('y', 'a','x','z'))
 
 head(d)

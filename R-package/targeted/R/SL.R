@@ -15,10 +15,16 @@ SL <- function(formula=~., ...,
                binomial=FALSE,
                data=NULL) {
   dots <- list(...)
-  if (!requireNamespace("SuperLearner"))
-    stop("Package 'SuperLearner' required.")
+  if (!requireNamespace("SuperLearner")) {
+      stop("Package 'SuperLearner' required.")
+  }
+  pred <- as.character(formula)
+  pred <- ifelse (length(pred)==2, pred[2], pred[3])
+  if (pred=="1") {
+    SL.library <- "SL.mean"
+  }
   m <- ml_model$new(formula, info="SuperLearner",
-               fit=function(x,y) {
+               estimate=function(x,y) {
                  Y <- as.numeric(y)
                  X <- as.data.frame(x)
                  args <- c(list(Y=Y, X=X, SL.library=SL.library), dots)
@@ -30,7 +36,7 @@ SL <- function(formula=~., ...,
                    res$call <- quote(SuperLearner::SuperLearner(..., family=binomial()))
                  res
                },
-               pred=function(object,newdata) {
+               predict=function(object,newdata) {
                  pr <- predict(object,newdata=newdata)$pred
                  if (binomial)
                    pr <- cbind((1-pr), pr)

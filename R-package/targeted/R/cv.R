@@ -3,8 +3,8 @@
 ##' @title Cross-validation
 ##' @param models List of fitting functions
 ##' @param data data.frame or matrix
-##' @param response Response variable (vector or name of column in `data`).##'
-##' @param K Number of folds (default 5. K=0 splits in 1:n/2, n/2:n with last part
+##' @param response Response variable (vector or name of column in `data`).
+##' @param nfolds Number of folds (default 5. K=0 splits in 1:n/2, n/2:n with last part
 ##'   used for testing)
 ##' @param rep Number of repetitions (default 1)
 ##' @param weights Optional frequency weights
@@ -14,6 +14,8 @@
 ##' @param shared Function applied to each fold with results send to each model
 ##' @param args.pred Optional arguments to prediction function (see details
 ##'   below)
+##' @param args.future Arguments to future.apply::future_mapply
+##' @param mc.cores Optional number of cores. parallel::mcmapply used instead of future
 ##' @param ... Additional arguments parsed to models in models
 ##' @author Klaus K. Holst
 ##' @return An object of class '\code{cross_validated}' is returned. See
@@ -34,9 +36,10 @@
 ##' x <- cv(list(m0=f0,m1=f1,m2=f2),rep=10, data=iris, formula=Sepal.Length~.)
 ##' x
 ##' @export
-cv <- function(models, data, response = NULL, K = 5, rep = 1,
+cv <- function(models, data, response = NULL, nfolds = 5, rep = 1,
                weights = NULL, modelscore,
-               seed = NULL, shared = NULL, args.pred = NULL, ...) {
+               seed = NULL, shared = NULL, args.pred = NULL,
+               args.future = list(), mc.cores, ...) {
   if (missing(modelscore)) modelscore <- scoring
   if (!is.list(models)) stop("Expected a list of models")
   nam <- names(models)
@@ -61,8 +64,8 @@ cv <- function(models, data, response = NULL, K = 5, rep = 1,
 
   for (i in seq_along(models)) {
     f <- models[[i]]
-    if ((!is.list(f) || length(f) == 1)
-        && !inherits(f, "ml_model")) {
+    if ((!is.list(f) || length(f) == 1) &&
+      !inherits(f, "ml_model")) {
       ## No predict function provided. Assume 'predict' works on fitted object
       if (is.list(f)) f <- f[[1]]
       models[[i]] <- list(
@@ -103,8 +106,9 @@ cv <- function(models, data, response = NULL, K = 5, rep = 1,
     fit0 <- do.call(f$estimate, arglist)
     if (is.null(response)) {
       response <- f$response(data)
-    } else if (length(response)==1)
-      response <- data[, response, drop=TRUE]
+    } else if (length(response) == 1) {
+      response <- data[, response, drop = TRUE]
+    }
   } else {
     fit0 <- do.call(f[[1]], arglist)
   }
@@ -113,36 +117,43 @@ cv <- function(models, data, response = NULL, K = 5, rep = 1,
       response <- f$response(data)
     } else {
       response <- tryCatch(data[, lava::endogenous(fit0), drop = TRUE],
-                           error = function(...) NULL)
+        error = function(...) NULL
+      )
     }
     if (is.null(response)) stop("Provide 'response'")
   }
   ## In-sample predictive performance:
   if (inherits(f, "ml_model")) {
-    pred0 <- do.call(f$predict,
-                     c(list(newdata = data), args.pred))
+    pred0 <- do.call(
+      f$predict,
+      c(list(newdata = data), args.pred)
+    )
   } else {
     pred0 <- do.call(
       f[[2]],
-      c(list(fit0, newdata = data), args.pred))
+      c(list(fit0, newdata = data), args.pred)
+    )
   }
-  perf0 <- modelscore(prediction=pred0, response=response, weights=weights)
-  nam_perf <- if (is.vector(perf0))
-               names(perf0) else colnames(perf0)
+  perf0 <- modelscore(prediction = pred0, response = response, weights = weights)
+  nam_perf <- if (is.vector(perf0)) {
+    names(perf0)
+  } else {
+    colnames(perf0)
+  }
   n <- NROW(data)
   M <- length(models) # Number of models
   P <- length(perf0) # Number of performance measures
   rm(fit0, pred0, perf0)
 
-  if (K == 0) {
+  if (nfolds == 0) {
     rep <- 1
-    K <- 1
+    nfolds <- 1
     folds <- list(lava::csplit(seq(n)))
   } else {
-    folds <- lava::foldr(n, K, rep)
+    folds <- lava::foldr(n, nfolds, rep)
   }
-  arg <- expand.grid(R = seq(rep), K = seq(K)) # ,M=seq_along(models))
-  dim <- c(rep, K, M, P)
+  arg <- expand.grid(R = seq(rep), K = seq(nfolds)) # ,M=seq_along(models))
+  dim <- c(rep, nfolds, M, P)
   perf_arr <- array(0, dim)
   dimnames(perf_arr) <- list(NULL, NULL, nam, nam_perf)
   pb <- progressr::progressor(along = seq(nrow(arg)))
@@ -162,8 +173,9 @@ cv <- function(models, data, response = NULL, K = 5, rep = 1,
       args <- c(args, sharedres)
     }
     arglist <- c(list(dtrain), args)
-    if (!is.null(data.arg))
+    if (!is.null(data.arg)) {
       names(arglist)[1] <- data.arg
+    }
     if (!is.null(weights)) arglist <- c(arglist, list(weights = wtrain))
     fits <- list()
     for (j in seq_along(models)) {
@@ -174,21 +186,25 @@ cv <- function(models, data, response = NULL, K = 5, rep = 1,
       }
       f <- models[[j]]
       if (inherits(f, "ml_model")) {
-        fits <- c(fits, list(do.call(f$estimate, arglist)))
+        f <- f$clone(deep = TRUE)
+        do.call(f$estimate, arglist)
+        fits <- c(fits, f)
       } else {
         fits <- c(fits, list(do.call(f[[1]], arglist)))
       }
     }
     perfs <- list()
     for (j in seq_along(fits)) {
-      if (inherits(models[[j]], "ml_model")) {
+      if (inherits(fits[[j]], "ml_model")) {
         pred <- do.call(
-          models[[j]]$predict,
-          c(list(newdata = dtest), args.pred))
+          fits[[j]]$predict,
+          c(list(newdata = dtest), args.pred)
+        )
       } else {
         pred <- do.call(
           models[[j]][[2]],
-          c(list(fits[[j]], newdata = dtest), args.pred))
+          c(list(fits[[j]], newdata = dtest), args.pred)
+        )
       }
       perfs <- c(perfs, list(
         do.call(
@@ -204,10 +220,22 @@ cv <- function(models, data, response = NULL, K = 5, rep = 1,
     pb()
     do.call(rbind, perfs)
   }
-  val <- future.apply::future_mapply(ff, seq(nrow(arg)),
-                                     SIMPLIFY = FALSE,
-                                     USE.NAMES = TRUE,
-                                     future.seed = seed)
+
+  if (missing(mc.cores)) {
+    fargs <- list(ff, seq(nrow(arg)),
+      SIMPLIFY = FALSE,
+      USE.NAMES = TRUE,
+      future.seed = seed
+      )
+    if (length(args.future) > 0) {
+      fargs[names(args.future)] <- args.future
+    }
+    val <- do.call(future.apply::future_mapply, fargs)
+  } else {
+    val <- parallel::mcmapply(ff, as.list(seq(nrow(arg))),
+      SIMPLIFY = FALSE, USE.NAMES = TRUE, mc.cores=mc.cores
+    )
+  }
   for (i in seq(nrow(arg))) {
     R <- arg[i, 1]
     k <- arg[i, 2]
@@ -218,7 +246,7 @@ cv <- function(models, data, response = NULL, K = 5, rep = 1,
     cv = perf_arr,
     call = match.call(),
     names = nam,
-    rep = rep, folds = K
+    rep = rep, folds = nfolds
     ##fit = fit0
   ),
   class = "cross_validated"

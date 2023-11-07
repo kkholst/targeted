@@ -377,8 +377,8 @@ RcppExport SEXP _targeted_bin_esteq_c(SEXP ySEXP, SEXP aSEXP, SEXP x1SEXP, SEXP 
     return rcpp_result_gen;
 }
 // ace_est
-Rcpp::List ace_est(const arma::vec& y, const arma::mat& a, const arma::mat& x1, const arma::mat& x2, const arma::vec& theta, const arma::vec& weights, bool binary);
-static SEXP _targeted_ace_est_try(SEXP ySEXP, SEXP aSEXP, SEXP x1SEXP, SEXP x2SEXP, SEXP thetaSEXP, SEXP weightsSEXP, SEXP binarySEXP) {
+Rcpp::List ace_est(const arma::vec& y, const arma::mat& a, const arma::mat& x1, const arma::mat& x2, const arma::vec& theta, const arma::vec& weights, const arma::vec& offset, std::string link);
+static SEXP _targeted_ace_est_try(SEXP ySEXP, SEXP aSEXP, SEXP x1SEXP, SEXP x2SEXP, SEXP thetaSEXP, SEXP weightsSEXP, SEXP offsetSEXP, SEXP linkSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const arma::vec& >::type y(ySEXP);
@@ -387,16 +387,17 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type x2(x2SEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type theta(thetaSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type weights(weightsSEXP);
-    Rcpp::traits::input_parameter< bool >::type binary(binarySEXP);
-    rcpp_result_gen = Rcpp::wrap(ace_est(y, a, x1, x2, theta, weights, binary));
+    Rcpp::traits::input_parameter< const arma::vec& >::type offset(offsetSEXP);
+    Rcpp::traits::input_parameter< std::string >::type link(linkSEXP);
+    rcpp_result_gen = Rcpp::wrap(ace_est(y, a, x1, x2, theta, weights, offset, link));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP _targeted_ace_est(SEXP ySEXP, SEXP aSEXP, SEXP x1SEXP, SEXP x2SEXP, SEXP thetaSEXP, SEXP weightsSEXP, SEXP binarySEXP) {
+RcppExport SEXP _targeted_ace_est(SEXP ySEXP, SEXP aSEXP, SEXP x1SEXP, SEXP x2SEXP, SEXP thetaSEXP, SEXP weightsSEXP, SEXP offsetSEXP, SEXP linkSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_targeted_ace_est_try(ySEXP, aSEXP, x1SEXP, x2SEXP, thetaSEXP, weightsSEXP, binarySEXP));
+        rcpp_result_gen = PROTECT(_targeted_ace_est_try(ySEXP, aSEXP, x1SEXP, x2SEXP, thetaSEXP, weightsSEXP, offsetSEXP, linkSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -610,7 +611,7 @@ static int _targeted_RcppExport_validate(const char* sig) {
         signatures.insert("arma::cx_mat(*bin_dlogl_c)(const arma::cx_vec&,const arma::cx_vec&,const arma::cx_mat&,const arma::cx_mat&,const arma::cx_vec,const arma::cx_vec&,std::string,bool)");
         signatures.insert("arma::mat(*bin_esteq)(const arma::vec&,const arma::vec&,const arma::mat&,const arma::mat&,const arma::vec&,arma::vec,arma::vec,const arma::vec&,std::string)");
         signatures.insert("arma::cx_mat(*bin_esteq_c)(const arma::cx_vec&,const arma::cx_vec&,const arma::cx_mat&,const arma::cx_mat&,const arma::cx_mat&,arma::cx_vec,arma::cx_vec,const arma::cx_vec&,std::string)");
-        signatures.insert("Rcpp::List(*ace_est)(const arma::vec&,const arma::mat&,const arma::mat&,const arma::mat&,const arma::vec&,const arma::vec&,bool)");
+        signatures.insert("Rcpp::List(*ace_est)(const arma::vec&,const arma::mat&,const arma::mat&,const arma::mat&,const arma::vec&,const arma::vec&,const arma::vec&,std::string)");
         signatures.insert("arma::mat(*fast_iid)(const arma::vec&,const arma::vec&,const arma::mat&,const arma::vec&,bool)");
         signatures.insert("List(*.clusterid)(const arma::uvec&)");
         signatures.insert("arma::mat(*.groupsum)(const arma::mat&,const arma::uvec&,bool)");
@@ -653,7 +654,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_targeted_bin_dlogl_c", (DL_FUNC) &_targeted_bin_dlogl_c, 8},
     {"_targeted_bin_esteq", (DL_FUNC) &_targeted_bin_esteq, 9},
     {"_targeted_bin_esteq_c", (DL_FUNC) &_targeted_bin_esteq_c, 9},
-    {"_targeted_ace_est", (DL_FUNC) &_targeted_ace_est, 7},
+    {"_targeted_ace_est", (DL_FUNC) &_targeted_ace_est, 8},
     {"_targeted_fast_iid", (DL_FUNC) &_targeted_fast_iid, 5},
     {"_targeted_clusterid", (DL_FUNC) &_targeted_clusterid, 1},
     {"_targeted_groupsum", (DL_FUNC) &_targeted_groupsum, 3},
