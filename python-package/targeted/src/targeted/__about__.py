@@ -1,7 +1,7 @@
 # coding: utf-8
 
 __name__        = "targeted"
-__version__     = "0.0.34"
+__version__     = "0.0.35"
 __license__     = "Apache Software License"
 __description__ = "Python package for targeted inference."
 __author__      = u"Klaus Kähler Holst"
