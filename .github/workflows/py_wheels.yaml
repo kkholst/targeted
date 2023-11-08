@@ -83,7 +83,6 @@ jobs:
           CIBW_SKIP: cp27-* cp35-* cp36-* pp*
           CIBW_ARCHS: arm64 x86_64
           CIBW_ARCHS_MACOS: x86_64 arm64 universal2
-          CIBW_ARCHS_MACOS: x86_64 arm64 universal2
           CMAKE_OSX_ARCHITECTURES: arm64;x86_64
         run: |
           make py_export pkg=targeted
