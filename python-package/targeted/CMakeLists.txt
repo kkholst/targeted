@@ -1,10 +1,14 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.18)
 set(target "targeted_c")
 
 set(RUN_TESTS TRUE)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if(APPLE)
+  if (CMAKE_TOOLCHAIN_FILE)
+    # This is in cross compiling condition.
+    set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
+  endif()
   set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
 endif()
 project(${target} CXX)
