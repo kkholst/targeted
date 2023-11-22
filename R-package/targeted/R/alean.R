@@ -160,7 +160,8 @@ alean <- function(response_model,
   mu <- scores[, 1]
   est <- coef(lm(mu ~ -1 + A.))
   names(est) <- A_var
-  IF <- A.*(mu - est * A.) / mean(A.^2)
+  IF <- cbind(A. * (mu - est * A.) / mean(A.^2))
+  rownames(IF) <- rownames(data)
   estimate <- estimate(coef=est, IC=IF)
   res <- list(folds=folds, scores=scores,
               IF=IF, est=est,
