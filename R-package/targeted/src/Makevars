@@ -1,6 +1,6 @@
 ## -*- Makefile -*-
 
-CXX_STD = CXX11
+#CXX_STD = CXX11
 
 PKGROOT=../../..
 PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) -DARMA_R -I. -I$(PKGROOT)/include -I../inst/include
