@@ -34,7 +34,7 @@ unless the algorithms can be vectorized
 
 There are various excellent (O)DE solvers (R: [deSolve](http://desolve.r-forge.r-project.org/))
 Here I will illustrate the above techniques using the `targeted` `R`-package based on
-[the target C++ library.](https://targetlib.org)
+[the target C++ library.](https://target.readthedocs.io/en/latest/)
 
 The ODE is specified using the `specify_ode` function
 
@@ -60,7 +60,7 @@ p
 : Parameter vector
     \[y'(t) = f_{p}(x(t), y(t))\]
 
-All variables are treated as [armadillo](http://arma.sourceforge.net/) vectors/matrices, `arma::mat`.
+All variables are treated as [armadillo](https://arma.sourceforge.net/) vectors/matrices, `arma::mat`.
 
 
 As an example, we can specify the simple differential equation

@@ -4,14 +4,14 @@
 \alias{ML}
 \title{ML model}
 \usage{
-ML(formula, ..., model = "glm")
+ML(formula, model = "glm", ...)
 }
 \arguments{
 \item{formula}{formula}
 
-\item{...}{additional arguments to model object}
-
 \item{model}{model (sl, rf, pf, glm, ...)}
+
+\item{...}{additional arguments to model object}
 }
 \description{
 Wrapper for ml_model
@@ -21,14 +21,14 @@ model 'sl' (SuperLearner::SuperLearner)
 args: SL.library, cvControl, f<aamily, method
 example:
 
-model 'rf' (grf::regression_forest)
+model 'grf' (grf::regression_forest)
 args: num.trees, mtry, sample.weights, sample.fraction, min.node.size, ...
 example:
 
-model 'pf' (grf::probability_forest)
+model 'grf.binary' (grf::probability_forest)
 args: num.trees, mtry, sample.weights, ...
 example:
-##'
+
 model 'glm'
 args: family, weights, offset, ...
 }

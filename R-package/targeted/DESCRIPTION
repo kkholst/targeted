@@ -43,7 +43,9 @@ Suggests:
     rmarkdown,
     scatterplot3d,
     SuperLearner (>= 2.0-28),
-    knitr
+    knitr,
+    xgboost,
+    viridisLite
 BugReports: https://github.com/kkholst/targeted/issues
 License: Apache License (== 2.0)
 LinkingTo: Rcpp, RcppArmadillo
