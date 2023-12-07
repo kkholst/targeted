@@ -29,7 +29,7 @@ function(x, ...) {
 #'
 #' @section S3 generics:
 #' The following S3 generic functions are available for an object of class \code{NB}:
-#' \itemize{
+#' \describe{
 #'   \item{\code{predict}}{Predict class probabilities for new features data.}
 #'   \item{\code{print}}{Basic print method.}
 #'  }
