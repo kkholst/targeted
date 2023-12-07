@@ -35,6 +35,9 @@
       <a href="../articles/ate.html">Average Treatment Effects</a>
     </li>
     <li>
+      <a href="../articles/ode.html">targeted::ode_solve: Solving Ordinary Differential Equations</a>
+    </li>
+    <li>
       <a href="../articles/riskregression.html">Estimating a relative risk or risk difference with a binary exposure</a>
     </li>
   </ul></li>
@@ -66,7 +69,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">ML</span><span class="op">(</span><span class="va">formula</span>, <span class="va">...</span>, model <span class="op">=</span> <span class="st">"glm"</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">ML</span><span class="op">(</span><span class="va">formula</span>, model <span class="op">=</span> <span class="st">"glm"</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -75,12 +78,12 @@
 <dd><p>formula</p></dd>
 
 
-<dt>...</dt>
-<dd><p>additional arguments to model object</p></dd>
-
-
 <dt>model</dt>
 <dd><p>model (sl, rf, pf, glm, ...)</p></dd>
+
+
+<dt>...</dt>
+<dd><p>additional arguments to model object</p></dd>
 
 </dl></div>
     <div id="details">
@@ -88,14 +91,13 @@
     <p>model 'sl' (SuperLearner::SuperLearner)
 args: SL.library, cvControl, f&lt;aamily, method
 example:</p>
-<p>model 'rf' (grf::regression_forest)
+<p>model 'grf' (grf::regression_forest)
 args: num.trees, mtry, sample.weights, sample.fraction, min.node.size, ...
 example:</p>
-<p>model 'pf' (grf::probability_forest)
+<p>model 'grf.binary' (grf::probability_forest)
 args: num.trees, mtry, sample.weights, ...
-example:
-##'
-model 'glm'
+example:</p>
+<p>model 'glm'
 args: family, weights, offset, ...</p>
     </div>
 

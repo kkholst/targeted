@@ -60,6 +60,9 @@
       <a href="../articles/ate.html">Average Treatment Effects</a>
     </li>
     <li>
+      <a href="../articles/ode.html">targeted::ode_solve: Solving Ordinary Differential Equations</a>
+    </li>
+    <li>
       <a href="../articles/riskregression.html">Estimating a relative risk or risk difference with a binary exposure</a>
     </li>
   </ul>
@@ -91,7 +94,7 @@
       <h1 data-toc-skip>Average Treatment Effects</h1>
                         <h4 data-toc-skip class="author">Klaus Kähler Holst</h4>
             
-            <h4 data-toc-skip class="date">2023-11-06</h4>
+            <h4 data-toc-skip class="date">2023-12-07</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/kkholst/targeted/blob/HEAD/vignettes/ate.Rmd" class="external-link"><code>vignettes/ate.Rmd</code></a></small>
       <div class="hidden name"><code>ate.Rmd</code></div>
@@ -169,9 +172,9 @@
 <p>In this simulation we can compare the estimates to the actual expected potential outcomes which can be approximated by Monte Carlo integration by simulating from the model where we intervene on <span class="math inline">\(A\)</span> (i.e., break the dependence on <span class="math inline">\(X, Z\)</span>):</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/intervention.lvm.html" class="external-link">intervention</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">"A"</span>, <span class="fl">0</span><span class="op">)</span>, <span class="fl">2e5</span><span class="op">)</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.49978</span></span>
+<span><span class="co">#&gt; [1] 0.5015</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/intervention.lvm.html" class="external-link">intervention</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">"A"</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fl">2e5</span><span class="op">)</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.63782</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.639775</span></span></code></pre></div>
 <p>The IPW estimator can then be estimated</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ate.html">ate</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">A</span> <span class="op">|</span> <span class="fl">1</span> <span class="op">|</span> <span class="va">X</span><span class="op">+</span><span class="va">Z</span>, data<span class="op">=</span><span class="va">d</span><span class="op">)</span></span>
@@ -234,13 +237,13 @@
 <span><span class="co">#&gt; A=0 0.0006807275 0.0001409887</span></span>
 <span><span class="co">#&gt; A=1 0.0001409887 0.0009411920</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/iid.html" class="external-link">iid</a></span><span class="op">(</span><span class="va">a</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                A=0           A=1</span></span>
-<span><span class="co">#&gt; [1,] -0.0012182867 -0.0002821609</span></span>
-<span><span class="co">#&gt; [2,]  0.0002438822  0.0002898771</span></span>
-<span><span class="co">#&gt; [3,] -0.0004583641 -0.0002555994</span></span>
-<span><span class="co">#&gt; [4,]  0.0003753253  0.0002567340</span></span>
-<span><span class="co">#&gt; [5,]  0.0011971267  0.0001267515</span></span>
-<span><span class="co">#&gt; [6,] -0.0004585485 -0.0001710518</span></span></code></pre></div>
+<span><span class="co">#&gt;             A=0           A=1</span></span>
+<span><span class="co">#&gt; 1 -0.0012182867 -0.0002821609</span></span>
+<span><span class="co">#&gt; 2  0.0002438822  0.0002898771</span></span>
+<span><span class="co">#&gt; 3 -0.0004583641 -0.0002555994</span></span>
+<span><span class="co">#&gt; 4  0.0003753253  0.0002567340</span></span>
+<span><span class="co">#&gt; 5  0.0011971267  0.0001267515</span></span>
+<span><span class="co">#&gt; 6 -0.0004585485 -0.0001710518</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="multiple-treatments">Multiple treatments<a class="anchor" aria-label="anchor" href="#multiple-treatments"></a>
@@ -261,15 +264,15 @@
 <span><span class="co">#&gt;   a ~ x </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     Estimate Std.Err    2.5%   97.5%    P-value</span></span>
-<span><span class="co">#&gt; a=0  -1.5515 0.03958 -1.6291 -1.4740  0.000e+00</span></span>
-<span><span class="co">#&gt; a=1  -0.8592 0.03823 -0.9342 -0.7843 7.549e-112</span></span>
-<span><span class="co">#&gt; a=2  -0.4607 0.03367 -0.5267 -0.3947  1.317e-42</span></span>
-<span><span class="co">#&gt; a=3   0.7198 0.02585  0.6692  0.7705 1.177e-170</span></span>
+<span><span class="co">#&gt; a=0  -1.5201 0.04824 -1.6146 -1.4256 5.560e-218</span></span>
+<span><span class="co">#&gt; a=1  -0.7853 0.03996 -0.8637 -0.7070  5.678e-86</span></span>
+<span><span class="co">#&gt; a=2  -0.4154 0.03517 -0.4843 -0.3465  3.370e-32</span></span>
+<span><span class="co">#&gt; a=3   0.7972 0.02461  0.7489  0.8454 3.506e-230</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Average Treatment Effect (constrast: 'a=1' - 'a=0'):</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     Estimate Std.Err   2.5%  97.5%   P-value</span></span>
-<span><span class="co">#&gt; ATE   0.6923 0.05266 0.5891 0.7955 1.753e-39</span></span></code></pre></div>
+<span><span class="co">#&gt; ATE   0.7348 0.06054 0.6161 0.8534 6.805e-34</span></span></code></pre></div>
 <p>Choosing a different contrast for the association measures:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">a2</span>, contrast<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">4</span><span class="op">)</span><span class="op">)</span></span>
@@ -281,27 +284,27 @@
 <span><span class="co">#&gt;   a ~ x </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     Estimate Std.Err    2.5%   97.5%    P-value</span></span>
-<span><span class="co">#&gt; a=0  -1.5515 0.03958 -1.6291 -1.4740  0.000e+00</span></span>
-<span><span class="co">#&gt; a=1  -0.8592 0.03823 -0.9342 -0.7843 7.549e-112</span></span>
-<span><span class="co">#&gt; a=2  -0.4607 0.03367 -0.5267 -0.3947  1.317e-42</span></span>
-<span><span class="co">#&gt; a=3   0.7198 0.02585  0.6692  0.7705 1.177e-170</span></span>
+<span><span class="co">#&gt; a=0  -1.5201 0.04824 -1.6146 -1.4256 5.560e-218</span></span>
+<span><span class="co">#&gt; a=1  -0.7853 0.03996 -0.8637 -0.7070  5.678e-86</span></span>
+<span><span class="co">#&gt; a=2  -0.4154 0.03517 -0.4843 -0.3465  3.370e-32</span></span>
+<span><span class="co">#&gt; a=3   0.7972 0.02461  0.7489  0.8454 3.506e-230</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Average Treatment Effect (constrast: 'a=1' - 'a=3'):</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     Estimate Std.Err   2.5%  97.5%    P-value</span></span>
-<span><span class="co">#&gt; ATE   -1.579 0.04285 -1.663 -1.495 3.048e-297</span></span></code></pre></div>
+<span><span class="co">#&gt; ATE   -1.582  0.0436 -1.668 -1.497 1.789e-288</span></span></code></pre></div>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/iid.html" class="external-link">iid</a></span><span class="op">(</span><span class="va">a2</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                a=0           a=1           a=2           a=3</span></span>
-<span><span class="co">#&gt; [1,]  3.481772e-05  3.019098e-05  2.923941e-05 -1.831245e-04</span></span>
-<span><span class="co">#&gt; [2,] -3.456708e-04 -1.074928e-04 -1.033261e-04 -1.516128e-04</span></span>
-<span><span class="co">#&gt; [3,] -3.102928e-04 -2.090136e-04 -2.022850e-04 -3.337057e-04</span></span>
-<span><span class="co">#&gt; [4,] -1.938674e-04 -1.618698e-04 -1.561628e-04 -2.496649e-04</span></span>
-<span><span class="co">#&gt; [5,] -4.192013e-04 -5.618894e-05 -5.375914e-05 -6.540146e-05</span></span>
-<span><span class="co">#&gt; [6,] -3.856214e-05 -4.331428e-04 -1.986504e-05 -1.646454e-05</span></span>
+<span><span class="co">#&gt;             a=0           a=1           a=2           a=3</span></span>
+<span><span class="co">#&gt; 1 -1.115672e-04  4.188610e-04 -1.015575e-04 -1.391155e-04</span></span>
+<span><span class="co">#&gt; 2 -9.491443e-05 -6.433929e-05 -6.308236e-05 -5.950010e-04</span></span>
+<span><span class="co">#&gt; 3 -2.054253e-03 -3.859992e-05 -3.789061e-05 -4.083870e-05</span></span>
+<span><span class="co">#&gt; 4 -3.209166e-04 -1.521252e-04 -1.488196e-04 -2.197583e-04</span></span>
+<span><span class="co">#&gt; 5 -9.436868e-05 -5.390230e-04 -1.475960e-04 -2.176559e-04</span></span>
+<span><span class="co">#&gt; 6  3.664509e-05  3.719971e-05  3.637473e-05  9.622979e-05</span></span>
 <span><span class="fu"><a href="https://kkholst.github.io/lava/reference/estimate.default.html" class="external-link">estimate</a></span><span class="op">(</span><span class="va">a2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">-</span><span class="va">x</span><span class="op">[</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     Estimate Std.Err   2.5%  97.5%    P-value</span></span>
-<span><span class="co">#&gt; a=1   -1.579 0.04285 -1.663 -1.495 3.048e-297</span></span></code></pre></div>
+<span><span class="co">#&gt; a=1   -1.582  0.0436 -1.668 -1.497 1.789e-288</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="sessioninfo">SessionInfo<a class="anchor" aria-label="anchor" href="#sessioninfo"></a>
@@ -332,23 +335,23 @@
 <span><span class="co">#&gt; [1] targeted_0.4 lava_1.7.3  </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span><span class="co">#&gt;  [1] sass_0.4.7           future_1.33.0        futile.options_1.0.1</span></span>
-<span><span class="co">#&gt;  [4] stringi_1.7.12       lattice_0.21-9       pracma_2.4.2        </span></span>
+<span><span class="co">#&gt;  [1] sass_0.4.8           future_1.33.0        futile.options_1.0.1</span></span>
+<span><span class="co">#&gt;  [4] stringi_1.8.2        lattice_0.21-9       pracma_2.4.4        </span></span>
 <span><span class="co">#&gt;  [7] listenv_0.9.0        digest_0.6.33        magrittr_2.0.3      </span></span>
-<span><span class="co">#&gt; [10] evaluate_0.23        grid_4.3.2           mvtnorm_1.2-3       </span></span>
-<span><span class="co">#&gt; [13] fastmap_1.1.1        rprojroot_2.0.4      jsonlite_1.8.7      </span></span>
+<span><span class="co">#&gt; [10] evaluate_0.23        grid_4.3.2           mvtnorm_1.2-4       </span></span>
+<span><span class="co">#&gt; [13] fastmap_1.1.1        rprojroot_2.0.4      jsonlite_1.8.8      </span></span>
 <span><span class="co">#&gt; [16] Matrix_1.6-1.1       survival_3.5-7       formatR_1.14        </span></span>
 <span><span class="co">#&gt; [19] purrr_1.0.2          codetools_0.2-19     numDeriv_2016.8-1.1 </span></span>
 <span><span class="co">#&gt; [22] textshaping_0.3.7    jquerylib_0.1.4      cli_3.6.1           </span></span>
-<span><span class="co">#&gt; [25] rlang_1.1.2          futile.logger_1.4.3  mets_1.3.2          </span></span>
+<span><span class="co">#&gt; [25] rlang_1.1.2          futile.logger_1.4.3  mets_1.3.3          </span></span>
 <span><span class="co">#&gt; [28] parallelly_1.36.0    future.apply_1.11.0  splines_4.3.2       </span></span>
 <span><span class="co">#&gt; [31] cachem_1.0.8         yaml_2.3.7           tools_4.3.2         </span></span>
 <span><span class="co">#&gt; [34] parallel_4.3.2       nloptr_2.0.3         memoise_2.0.1       </span></span>
 <span><span class="co">#&gt; [37] optimx_2023-10.21    lambda.r_1.2.4       globals_0.16.2      </span></span>
-<span><span class="co">#&gt; [40] vctrs_0.6.4          R6_2.5.1             lifecycle_1.0.3     </span></span>
-<span><span class="co">#&gt; [43] stringr_1.5.0        fs_1.6.3             ragg_1.2.6          </span></span>
+<span><span class="co">#&gt; [40] vctrs_0.6.5          R6_2.5.1             lifecycle_1.0.4     </span></span>
+<span><span class="co">#&gt; [43] stringr_1.5.1        fs_1.6.3             ragg_1.2.6          </span></span>
 <span><span class="co">#&gt; [46] desc_1.4.2           timereg_2.0.5        pkgdown_2.0.7       </span></span>
-<span><span class="co">#&gt; [49] bslib_0.5.1          glue_1.6.2           data.table_1.14.8   </span></span>
+<span><span class="co">#&gt; [49] bslib_0.6.1          glue_1.6.2           data.table_1.14.8   </span></span>
 <span><span class="co">#&gt; [52] Rcpp_1.0.11          systemfonts_1.0.5    xfun_0.41           </span></span>
 <span><span class="co">#&gt; [55] knitr_1.45           htmltools_0.5.7      rmarkdown_2.25      </span></span>
 <span><span class="co">#&gt; [58] compiler_4.3.2</span></span></code></pre></div>
