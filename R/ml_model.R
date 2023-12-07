@@ -154,9 +154,15 @@ ml_model <- R6::R6Class("ml_model",
 
      ##' @description
      ##' Update formula
-     ##' @param formula formula
+     ##' @param formula formula or character which defines the new response
      ##' @param ... Additional arguments to lower level functions
      update = function(formula, ...) {
+       if (is.character(formula)) {
+         if (grepl("~", formula))
+           formula <- as.formula(formula)
+         else
+           formula <- reformulate(as.character(self$formula)[3], formula)
+       }
        self$formula <- formula
        environment(private$fitfun)$formula <- formula
      },
@@ -260,6 +266,7 @@ predict.ml_model <- function(object, ...) {
   object$predict(...)
 }
 
+
 ##' ML model
 ##'
 ##' Wrapper for ml_model
@@ -272,42 +279,138 @@ predict.ml_model <- function(object, ...) {
 ##' args: SL.library, cvControl, f<aamily, method
 ##' example:
 ##'
-##' model 'rf' (grf::regression_forest)
+##' model 'grf' (grf::regression_forest)
 ##' args: num.trees, mtry, sample.weights, sample.fraction, min.node.size, ...
 ##' example:
 ##'
-##' model 'pf' (grf::probability_forest)
+##' model 'grf.binary' (grf::probability_forest)
 ##' args: num.trees, mtry, sample.weights, ...
 ##' example:
-##' ##'
+##'
 ##' model 'glm'
 ##' args: family, weights, offset, ...
 ##'
 ##'
-ML <- function(formula, ..., model="glm") {
+ML <- function(formula, model="glm", ...) {
   model <- tolower(model)
-  if (model=="sl") {
-    return(SL(formula, ...))
+  dots <- list(...)
+  addargs <- function(..., dots, args = list()) {
+      for (p in names(args)) {
+          if (!(p %in% names(dots))) dots[p] <- args[[p]]
+      }
+      c(list(...), dots)
   }
-  if (model%in%c("grf", "rf", "regression_forest")) {
-    m <- ml_model$new(formula, info="grf::regression_forest",
-           estimate=function(x,y) grf::regression_forest(X=x, Y=y, ...),
-           predict=function(object, newdata) predict(object, newdata)$predictions, ...)
-    return(m)
+
+  ## SL / SuperLearner
+  if (model == "sl") {
+      return(SL(formula, ...))
   }
-  if (model%in%c("pf", "probability_forest")) {
-    m <- ml_model$new(formula, info = "grf::probability_forest",
-           estimate=function(x,y) grf::probability_forest(X=x, Y=y, ...),
-           predict=function(object, newdata) predict(object, newdata)$predictions, ...)
-    return(m)
+
+  ## grf
+  grf.bin <- c("grf.binary", "pf", "probability_forest")
+  if (model%in%c("grf", "rf", "regression_forest",
+                 grf.bin)) {
+    args <- list(
+      num.trees = 2000,
+      min.node.size = 5,
+      alpha = 0.05,
+      sample.fraction = 0.5,
+      num.threads=1
+    )
+    obj <- "grf::regression_forest"
+    est <- function(x, y)
+        grf::regression_forest(X = x, Y = y, ...)
+    if (model %in% grf.bin) {
+        obj <- "grf::probability_forest"
+        est <- function(x, y)
+            grf::probability_forest(X = x, Y = y, ...)
+    }
+    ml_args <- addargs(formula,
+        info = obj,
+        estimate = est,
+        predict = function(object, newdata, ...) {
+          predict(object, newdata, ...)$predictions
+        },
+        dots = dots,
+        args = args
+        )
+    return(do.call(ml_model$new, ml_args))
   }
-  ## GLM
-  m <- ml_model$new(formula, info = "GLM", ...,
+
+  ## xgboost
+  if (model %in% c("xgboost", "xgb", "xgboost.multiclass",
+                   "xgboost.binary", "xgboost.count", "xgboost.survival")) {
+    obj <- switch(model,
+        xgboost.multiclass = "multi:softprob",
+        xgboost.binary = "reg:logistic",
+        xgboost.survival = "survival:cox",
+        xgboost.count = "count:poisson",
+        "reg:squarederror"
+        )
+    if (!requireNamespace("xgboost"))
+      stop("xgboost library required")
+
+    args <- list(
+      max_depth = 2,
+      eta = 1,
+      nrounds = 2,
+      subsample = 1,
+      lambda = 1,
+      objective = obj,
+      verbose = 0
+    )
+    pred <- function(object, newdata, ...) {
+        d <- xgboost::xgb.DMatrix(newdata)
+        predict(object, d, ...)
+    }
+    if (obj == "multi:softprob") {
+        pred <- function(object, newdata, ...) {
+            d <- xgboost::xgb.DMatrix(newdata)
+            val <- predict(object, d, ...)
+            matrix(val, nrow = NROW(d), byrow=TRUE)
+        }
+    }
+    ml_args <- addargs(formula,
+                       info = paste0("xgboost (", obj, ")"),
+                       estimate = function(x, y) {
+                         d <- xgboost::xgb.DMatrix(x, label = y)
+                         xgboost::xgboost(d, ...)
+                       },
+                       predict = pred,
+                       dots = dots,
+                       args = args
+                       )
+    return(do.call(ml_model$new, ml_args))
+  }
+
+  ## GAM
+  if (model %in% c("mgcv", "gam")) {
+    args <- list(
+        family = gaussian(),
+        select = FALSE,
+        gamma = 1
+    )
+    ml_args <- addargs(formula,
+        info = paste0("mgcv::gam"),
+        estimate = function(formula, data, ...) {
+            mgcv::gam(formula, data = data, ...)
+        },
+        predict = function(object, newdata) {
+            stats::predict(object, newdata = newdata, type = "response")
+        },
+        dots = dots,
+        args = args
+        )
+    return(do.call(ml_model$new, ml_args))
+  }
+
+  ## glm, default
+  m <- ml_model$new(formula, info = "glm", ...,
         estimate = function(formula, data, ...)
           stats::glm(formula, data=data, ...),
         predict = function(object, newdata)
           stats::predict(object, newdata=newdata, type="response")
-      )
+        )
   return(m)
 
 }

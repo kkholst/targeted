@@ -145,16 +145,16 @@ cate <- function(treatment,
 
   if (!missing(mc.cores)) {
     val <- parallel::mcmapply(procfold,
-        a = as.list(fargs[, 2]), fold = as.list(fargs[, 1]),
-        mc.cores = 1,
-        MoreArgs = list(
-          propensity_model = propensity_model,
-          response_model = response_model,
-          treatment_var = treatment_var,
-          data = data, folds = folds, stratify=stratify
-        ),
-        ...
-      )
+      a = as.list(fargs[, 2]), fold = as.list(fargs[, 1]),
+      mc.cores = 1,
+      MoreArgs = list(
+        propensity_model = propensity_model,
+        response_model = response_model,
+        treatment_var = treatment_var,
+        data = data, folds = folds, stratify = stratify
+      ),
+      ...
+    )
   } else {
     val <- future.apply::future_mapply(procfold,
       a = as.list(fargs[, 2]), fold = as.list(fargs[, 1]),
@@ -164,15 +164,15 @@ cate <- function(treatment,
         propensity_model = propensity_model,
         response_model = response_model,
         treatment_var = treatment_var,
-        data = data, folds = folds, stratify=stratify
+        data = data, folds = folds, stratify = stratify
       ),
       ...
-      )
+    )
   }
+
   for (i in contrast) {
     ii <- which(fargs[,2] == i)
     scores <- c(scores, list(unlist(val[ii])[idx]))
-
   }
   names(scores) <- contrast
 
@@ -193,7 +193,8 @@ cate <- function(treatment,
   r <- (Y-h0)
   IF <- apply(h1, 2, function(x) x*r)
   A <- solve(crossprod(V))*n
-  IF <- IF%*%A
+  IF <- IF %*% A
+  rownames(IF) <- rownames(data)
   estimate <- estimate(coef=est, IC=IF)
 
   res <- list(folds=folds, scores=scores, treatment_des=desA,
@@ -227,7 +228,7 @@ score_fold <- function(fold,
   D <- A/pr*(Y-eY) + eY
   X[["D_"]] <- D
   tmp <- importance_model$estimate(data = X)
-  
+
   # evaluation 
   A <- propensity_model$response(deval)
   Y <- response_model$response(deval)

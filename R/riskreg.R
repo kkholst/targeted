@@ -169,7 +169,8 @@ riskreg_mle <- function(y, a, x1, x2=x1, weights=rep(1, length(y)), std.err=TRUE
     } else {
       est <- lava::estimate(coef=op$par, vcov=V, ...)
     }
-    est$IC  <- ii*NROW(ii)
+    est$IC <- ii * NROW(ii)
+    rownames(est$IC) <- rownames(cbind(y))
     structure(list(estimate=est, npar=c(ncol(x1), ncol(x2)), logLik=loglik, nobs=length(y),
                    opt=op, bread=V*NROW(ii), type=type, estimator="mle"),
               class=c("riskreg.targeted", "targeted"))
@@ -283,7 +284,8 @@ riskreg_fit <- function(y, a,
     } else {
       est <- lava::estimate(coef=opt$par, vcov=V, ...)
     }
-    est$IC  <- ii*NROW(ii)
+    est$IC <- ii * NROW(ii)
+    rownames(est$IC) <- rownames(cbind(y))
     propmod <- lava::estimate(coef=coef(propmod), vcov=Vprop, colnames)
     structure(list(estimate=est, opt=opt, npar=c(ncol(target), ncol(nuisance), ncol(propensity)), nobs=length(y),
                    mle=mle, prop=propmod, type=type, estimator="dre"),

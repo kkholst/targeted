@@ -176,7 +176,8 @@ ate <- function(formula,
     propmod <- lava::estimate(coef=bprop, vcov=Vprop)
     V <- crossprod(iids)
     est <- lava::estimate(coef=coefs, vcov=V, labels=nlabels)
-    est$IC <- iids*NROW(iids)
+    est$IC <- iids * NROW(iids)
+    rownames(est$IC) <- rownames(data)
     structure(list(estimate=est,
                    outcome.reg=outreg, propensity.model=propmod, names=unlist(nn)[1:2],
                    formula=xf,

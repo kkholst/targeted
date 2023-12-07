@@ -13,6 +13,10 @@
     .Call(`_targeted_ode_solve`, f, input, init, par)
 }
 
+.ode_solve2 <- function(f, input, init, par) {
+    .Call(`_targeted_ode_solve2`, f, input, init, par)
+}
+
 bin_logl <- function(y, a, x1, x2, par, weights, type = "rd", indiv = FALSE) {
     .Call(`_targeted_bin_logl`, y, a, x1, x2, par, weights, type, indiv)
 }
