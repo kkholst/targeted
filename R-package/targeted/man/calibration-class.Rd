@@ -21,7 +21,7 @@ An object of class '\code{calibration}' is a list with at least the following co
 \section{S3 generics}{
 
 The following S3 generic functions are available for an object of class \code{targeted}:
-\itemize{
+\describe{
 \item{\code{predict}}{Apply calibration to new data.}
 \item{\code{plot}}{Plot the calibration curves (reliability plot).}
 \item{\code{print}}{Basic print method.}

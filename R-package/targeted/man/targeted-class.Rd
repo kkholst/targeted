@@ -24,7 +24,7 @@ estimates (see \code{\link[lava]{estimate.default}})}
 \section{S3 generics}{
 
 The following S3 generic functions are available for an object of class \code{targeted}:
-\itemize{
+\describe{
 \item{\code{coef}}{Extract target coefficients of the estimated model.}
 \item{\code{vcov}}{Extract the variance-covariance matrix of the target parameters.}
 \item{\code{IC}}{Extract the estimated influence function.}

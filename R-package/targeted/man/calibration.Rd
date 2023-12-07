@@ -60,7 +60,7 @@ a1 <- NB(y ~ ., data=d)
 a2 <- glm(y ~ ., data=d, family=binomial)
 ## a3 <- randomForest(factor(y) ~ ., data=d, family=binomial)
 
-d0 <- sim1(1e5, beta=beta)
+d0 <- sim1(1e4, beta=beta)
 p1 <- predict(a1, newdata=d0)
 p2 <- predict(a2, newdata=d0, type="response")
 ## p3 <- predict(a3, newdata=d0, type="prob")
@@ -76,7 +76,7 @@ if (interactive()) {
 
 set.seed(1)
 beta <- c(-2,rep(1,10))
-dd <- lava::csplit(sim1(6e4, beta=beta), k=3)
+dd <- lava::csplit(sim1(1e4, beta=beta), k=3)
 mod <- NB(y ~ ., data=dd[[1]])
 p1 <- predict(mod, newdata=dd[[2]])
 cal <- calibration(p1, dd[[2]]$y)

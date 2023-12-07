@@ -22,7 +22,7 @@ Define compiled code for ordinary differential equation.
 \details{
 The model (\code{code}) should be specified as the body of of C++ function.
 The following variables are defined bye default (see the argument \code{pname})
-\itemize{
+\describe{
 \item{dy}{Vector with derivatives, i.e. the rhs of the ODE (the result).}
 \item{x}{Vector with the first element being the time, and the following
 elements additional exogenous input variables,}
