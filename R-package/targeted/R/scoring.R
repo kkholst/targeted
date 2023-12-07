@@ -96,7 +96,8 @@ multiclass_scoring1 <-
 ##' @export
 scoring <- function(response, ..., type="quantitative", metrics=NULL,
                     weights=NULL, names=NULL, messages=1) {
-  if (is.factor(response) || is.character(response))
+  nlev <- length(unique(response))
+  if (is.factor(response) || is.character(response) || nlev==2)
     type <- "multiclass"
   if (tolower(type)%in%c("quantitative","cont","continuous")) {
     S <- suppressWarnings(lapply(list(...),

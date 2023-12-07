@@ -2,7 +2,7 @@ Package: targeted
 Type: Package
 Title: Targeted Inference
 Version: 0.4
-Date: 2022-12-03
+Date: 2023-12-08
 Authors@R: c(person(given = "Klaus K.",
                     family = "Holst",
                     role = c("aut", "cre"),
@@ -49,7 +49,6 @@ License: Apache License (== 2.0)
 LinkingTo: Rcpp, RcppArmadillo
 LazyLoad: yes
 NeedsCompilation: yes
-SystemRequirements: C++11
 ByteCompile: yes
 RcppModules: riskregmodel
 Encoding: UTF-8

@@ -20,13 +20,18 @@ vec dy(const vec &input,  // time (first element) and input variables
 int main(int argc, char **argv) {
     cout << target::BLUE << "RK4 test\n\n";
 
-    target::RK4 MyODE(dy);
+    target::RungeKutta MyODE(dy);
     vec t = arma::linspace(0, 2, 20);
     vec y0 = arma::zeros(1);
     vec par = { 1.0, 1.0 };
     vec y = MyODE.solve(t, y0, par);
     cout << y << endl;
     std::cout << target::COL_RESET;
+
+    target::RK4 ODE2(dy);
+    vec y2 = ODE2.solve(t, y0, par);
+    cout << arma::join_rows(y, y2) << endl;
+
 
     mat ty = arma::join_horiz(t, y);
     ty.save("y.csv", arma::csv_ascii);
