@@ -25,7 +25,7 @@ estimates (see \code{\link[lava]{estimate.default}})}
 \section{S3 generics}{
 
 The following S3 generic functions are available for an object of class \code{cross_validated}:
-\itemize{
+\describe{
 \item{\code{coef}}{Extract average model scores from the cross-validation procedure.}
 \item{\code{print}}{Basic print method.}
 \item{\code{summary}}{Summary of the cross-validation procedure.}'

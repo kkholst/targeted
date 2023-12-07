@@ -65,7 +65,7 @@ Or using the nuisance (and propensity argument): \code{ate(y~a, nuisance=~x+z, .
 \examples{
 m <- lvm(y ~ a+x, a~x)
 distribution(m,~ a+y) <- binomial.lvm()
-d <- sim(m,1e4,seed=1)
+d <- sim(m,1e3,seed=1)
 
 a <- ate(y ~ a, nuisance=~x, data=d)
 summary(a)
@@ -76,13 +76,12 @@ m <- lvm(y ~ a+x, a~x)
 distribution(m,~ y) <- binomial.lvm()
 m <- ordinal(m, K=4, ~a)
 transform(m, ~a) <- factor
-d <- sim(m, 1e4, seed=1)
+d <- sim(m, 1e3, seed=1)
 (a <- ate(y~a|a*x|x, data=d))
 
 # Comparison with randomized experiment
 m0 <- cancel(m, a~x)
-d0 <- sim(m0,2e5)
-lm(y~a-1,d0)
+lm(y~a-1, sim(m0,1e5))
 
 # Choosing a different contrast for the association measures
 summary(a, contrast=c(2,4))
