@@ -338,7 +338,8 @@ ML <- function(formula, model="glm", ...) {
   }
 
   ## xgboost
-  if (model %in% c("xgboost", "xgb", "xgboost.multiclass", "xgboost.binary", "xgboost.count", "xgboost.survival")) {
+  if (model %in% c("xgboost", "xgb", "xgboost.multiclass",
+                   "xgboost.binary", "xgboost.count", "xgboost.survival")) {
     obj <- switch(model,
         xgboost.multiclass = "multi:softprob",
         xgboost.binary = "reg:logistic",
@@ -346,14 +347,17 @@ ML <- function(formula, model="glm", ...) {
         xgboost.count = "count:poisson",
         "reg:squarederror"
         )
+    if (!requireNamespace("xgboost"))
+      stop("xgboost library required")
+
     args <- list(
-        max_depth = 2,
-        eta = 1,
-        nrounds = 2,
-        subsample = 1,
-        lambda = 1,
-        objective = obj,
-        verbose = 0
+      max_depth = 2,
+      eta = 1,
+      nrounds = 2,
+      subsample = 1,
+      lambda = 1,
+      objective = obj,
+      verbose = 0
     )
     pred <- function(object, newdata, ...) {
         d <- xgboost::xgb.DMatrix(newdata)
