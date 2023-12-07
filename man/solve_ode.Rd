@@ -7,7 +7,7 @@
 solve_ode(ode_ptr, input, init, par = 0)
 }
 \arguments{
-\item{ode_ptr}{pointer (externalptr) to C++ function}
+\item{ode_ptr}{pointer (externalptr) to C++ function or an R function}
 
 \item{input}{Input matrix. 1st column specifies the time points}
 

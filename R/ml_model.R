@@ -272,8 +272,8 @@ predict.ml_model <- function(object, ...) {
 ##' Wrapper for ml_model
 ##' @export
 ##' @param formula formula
-##' @param ... additional arguments to model object
 ##' @param model model (sl, rf, pf, glm, ...)
+##' @param ... additional arguments to model object
 ##' @details
 ##' model 'sl' (SuperLearner::SuperLearner)
 ##' args: SL.library, cvControl, f<aamily, method

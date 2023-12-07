@@ -173,7 +173,7 @@ Update formula
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{formula}}{formula}
+\item{\code{formula}}{formula or character which defines the new response}
 
 \item{\code{...}}{Additional arguments to lower level functions}
 }
