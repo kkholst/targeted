@@ -27,9 +27,11 @@
 ##' @author Klaus K. Holst (Maintainer) <klaus@@holst.it>
 ##' @keywords package
 ##' @examples
+##' \dontrun{
 ##' example(riskreg)
 ##' example(cate)
 ##' example(ate)
 ##' example(calibration)
+##' }
 loadModule("riskregmodel", TRUE)
 NULL

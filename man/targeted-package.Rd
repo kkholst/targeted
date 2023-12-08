@@ -9,10 +9,12 @@
 Methods for targeted and semiparametric inference.
 }
 \examples{
+\dontrun{
 example(riskreg)
 example(cate)
 example(ate)
 example(calibration)
+}
 }
 \author{
 Klaus K. Holst (Maintainer) \href{mailto:klaus@holst.it}{klaus@holst.it}
