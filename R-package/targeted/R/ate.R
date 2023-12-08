@@ -30,6 +30,7 @@
 ##'
 ##' Or using the nuisance (and propensity argument): \code{ate(y~a, nuisance=~x+z, ...)}
 ##' @export
+##' @seealso cate
 ##' @author Klaus K. Holst
 ##' @aliases ate
 ##' @examples
@@ -39,7 +40,6 @@
 ##'
 ##' a <- ate(y ~ a, nuisance=~x, data=d)
 ##' summary(a)
-##' b <- cate(a ~ 1, y ~ a*x, a ~ x, data=d)
 ##'
 ##' # Multiple treatments
 ##' m <- lvm(y ~ a+x, a~x)
