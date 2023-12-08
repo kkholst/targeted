@@ -64,27 +64,22 @@ Or using the nuisance (and propensity argument): \code{ate(y~a, nuisance=~x+z, .
 }
 \examples{
 m <- lvm(y ~ a+x, a~x)
-distribution(m,~ a+y) <- binomial.lvm()
-d <- sim(m,1e3,seed=1)
-
-a <- ate(y ~ a, nuisance=~x, data=d)
-summary(a)
-b <- cate(a ~ 1, y ~ a*x, a ~ x, data=d)
-
-# Multiple treatments
-m <- lvm(y ~ a+x, a~x)
-distribution(m,~ y) <- binomial.lvm()
+distribution(m, ~y) <- binomial.lvm()
 m <- ordinal(m, K=4, ~a)
 transform(m, ~a) <- factor
 d <- sim(m, 1e3, seed=1)
 (a <- ate(y~a|a*x|x, data=d))
+## ate(y~a, nuisance=~a*x, propensity=~x, ...)
 
 # Comparison with randomized experiment
 m0 <- cancel(m, a~x)
-lm(y~a-1, sim(m0,1e5))
+lm(y~a-1, sim(m0,2e4))
 
 # Choosing a different contrast for the association measures
 summary(a, contrast=c(2,4))
+}
+\seealso{
+cate
 }
 \author{
 Klaus K. Holst
