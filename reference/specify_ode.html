@@ -95,12 +95,21 @@
     <div id="details">
     <h2>Details</h2>
     <p>The model (<code>code</code>) should be specified as the body of of C++ function.
-The following variables are defined bye default (see the argument <code>pname</code>)</p><ul><li><p>dyVector with derivatives, i.e. the rhs of the ODE (the result).</p></li>
-<li><p>xVector with the first element being the time, and the following
-elements additional exogenous input variables,</p></li>
-<li><p>yVector with the dependent variable</p></li>
-<li><p>pParameter vector</p></li>
-</ul><p>\(y'(t) = f_{p}(x(t), y(t))\)
+The following variables are defined bye default (see the argument <code>pname</code>)</p><dl><dt>dy</dt>
+<dd><p>Vector with derivatives, i.e. the rhs of the ODE (the result).</p></dd>
+
+<dt>x</dt>
+<dd><p>Vector with the first element being the time, and the following
+elements additional exogenous input variables,</p></dd>
+
+<dt>y</dt>
+<dd><p>Vector with the dependent variable</p></dd>
+
+<dt>p</dt>
+<dd><p>Parameter vector</p></dd>
+
+
+</dl><p>\(y'(t) = f_{p}(x(t), y(t))\)
 All variables are treated as Armadillo (http://arma.sourceforge.net/) vectors/matrices.</p>
 <p>As an example consider the <em>Lorenz Equations</em>
 \(\frac{dx_{t}}{dt} = \sigma(y_{t}-x_{t})\)

@@ -155,6 +155,10 @@ response ~ treatment | nuisance-formula | propensity-formula</p>
 <p>Alternatively, as a list: <code>ate(list(y~a, ~x+z, ~x*z), data=...)</code></p>
 <p>Or using the nuisance (and propensity argument): <code>ate(y~a, nuisance=~x+z, ...)</code></p>
     </div>
+    <div id="see-also">
+    <h2>See also</h2>
+    <div class="dont-index"><p>cate</p></div>
+    </div>
     <div id="author">
     <h2>Author</h2>
     <p>Klaus K. Holst</p>
@@ -163,60 +167,28 @@ response ~ treatment | nuisance-formula | propensity-formula</p>
     <div id="ref-examples">
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/lvm.html" class="external-link">lvm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">a</span><span class="op">+</span><span class="va">x</span>, <span class="va">a</span><span class="op">~</span><span class="va">x</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">distribution</a></span><span class="op">(</span><span class="va">m</span>,<span class="op">~</span> <span class="va">a</span><span class="op">+</span><span class="va">y</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">binomial.lvm</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="va">m</span>,<span class="fl">1e4</span>,seed<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu">ate</span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">a</span>, nuisance<span class="op">=</span><span class="op">~</span><span class="va">x</span>, data<span class="op">=</span><span class="va">d</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">a</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Augmented Inverse Probability Weighting estimator</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Response y (Outcome model: gaussian):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	 y ~ x + a </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Exposure a (Propensity model: logistic regression):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	 a ~ x </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                    Estimate  Std.Err     2.5%    97.5%    P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  a=0               0.496843 0.007478  0.48219  0.51150  0.000e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  a=1               0.706396 0.007364  0.69196  0.72083  0.000e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Outcome model:                                                   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  (Intercept)       0.485158 0.006898  0.47164  0.49868  0.000e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  x                 0.175278 0.004231  0.16699  0.18357  0.000e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  a                 0.224335 0.010050  0.20464  0.24403 2.287e-110</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Propensity model:                                                </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  (Intercept)      -0.001888 0.022109 -0.04522  0.04144  9.320e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  x                -1.019511 0.026347 -1.07115 -0.96787  0.000e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Average Treatment Effect (constrast: 'a=1' - 'a=0'):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Estimate Std.Err   2.5%  97.5%   P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ATE   0.2096 0.01013 0.1897 0.2294 4.494e-95</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="cate.html">cate</a></span><span class="op">(</span><span class="va">a</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">y</span> <span class="op">~</span> <span class="va">a</span><span class="op">*</span><span class="va">x</span>, <span class="va">a</span> <span class="op">~</span> <span class="va">x</span>, data<span class="op">=</span><span class="va">d</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Multiple treatments</span></span></span>
-<span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/lvm.html" class="external-link">lvm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">a</span><span class="op">+</span><span class="va">x</span>, <span class="va">a</span><span class="op">~</span><span class="va">x</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">distribution</a></span><span class="op">(</span><span class="va">m</span>,<span class="op">~</span> <span class="va">y</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">binomial.lvm</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">distribution</a></span><span class="op">(</span><span class="va">m</span>, <span class="op">~</span><span class="va">y</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">binomial.lvm</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/ordinal-set.html" class="external-link">ordinal</a></span><span class="op">(</span><span class="va">m</span>, K<span class="op">=</span><span class="fl">4</span>, <span class="op">~</span><span class="va">a</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span><span class="va">m</span>, <span class="op">~</span><span class="va">a</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">factor</span></span></span>
-<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="va">m</span>, <span class="fl">1e4</span>, seed<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="va">m</span>, <span class="fl">1e3</span>, seed<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">(</span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu">ate</span><span class="op">(</span><span class="va">y</span><span class="op">~</span><span class="va">a</span><span class="op">|</span><span class="va">a</span><span class="op">*</span><span class="va">x</span><span class="op">|</span><span class="va">x</span>, data<span class="op">=</span><span class="va">d</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Estimate Std.Err   2.5%  97.5%    P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> a=0   0.2121 0.01695 0.1788 0.2453  6.738e-36</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> a=1   0.3422 0.01831 0.3063 0.3781  6.005e-78</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> a=2   0.3922 0.01617 0.3605 0.4239 6.820e-130</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> a=3   0.6052 0.00771 0.5901 0.6203  0.000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> a=0   0.2302 0.05278 0.1268 0.3337  1.288e-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> a=1   0.3148 0.05466 0.2077 0.4219  8.413e-09</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> a=2   0.4961 0.04732 0.4034 0.5889  1.019e-25</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> a=3   0.6348 0.02492 0.5860 0.6836 3.667e-143</span>
+<span class="r-in"><span><span class="co">## ate(y~a, nuisance=~a*x, propensity=~x, ...)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Comparison with randomized experiment</span></span></span>
 <span class="r-in"><span><span class="va">m0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/cancel.html" class="external-link">cancel</a></span><span class="op">(</span><span class="va">m</span>, <span class="va">a</span><span class="op">~</span><span class="va">x</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">d0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="va">m0</span>,<span class="fl">2e5</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">y</span><span class="op">~</span><span class="va">a</span><span class="op">-</span><span class="fl">1</span>,<span class="va">d0</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">y</span><span class="op">~</span><span class="va">a</span><span class="op">-</span><span class="fl">1</span>, <span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="va">m0</span>,<span class="fl">2e4</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> lm(formula = y ~ a - 1, data = d0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> lm(formula = y ~ a - 1, data = sim(m0, 20000))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Coefficients:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     a0      a1      a2      a3  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.2222  0.3408  0.4071  0.6228  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.2176  0.3346  0.4103  0.6162  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Choosing a different contrast for the association measures</span></span></span>
@@ -229,15 +201,15 @@ response ~ treatment | nuisance-formula | propensity-formula</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	 a ~ x </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Estimate Std.Err   2.5%  97.5%    P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> a=0   0.2121 0.01695 0.1788 0.2453  6.738e-36</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> a=1   0.3422 0.01831 0.3063 0.3781  6.005e-78</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> a=2   0.3922 0.01617 0.3605 0.4239 6.820e-130</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> a=3   0.6052 0.00771 0.5901 0.6203  0.000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> a=0   0.2302 0.05278 0.1268 0.3337  1.288e-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> a=1   0.3148 0.05466 0.2077 0.4219  8.413e-09</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> a=2   0.4961 0.04732 0.4034 0.5889  1.019e-25</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> a=3   0.6348 0.02492 0.5860 0.6836 3.667e-143</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Average Treatment Effect (constrast: 'a=1' - 'a=3'):</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Estimate Std.Err    2.5%   97.5%   P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ATE   -0.263 0.01955 -0.3013 -0.2247 3.016e-41</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ATE    -0.32 0.05923 -0.4361 -0.2039 6.577e-08</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>
