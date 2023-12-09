@@ -94,7 +94,7 @@
       <h1 data-toc-skip>Average Treatment Effects</h1>
                         <h4 data-toc-skip class="author">Klaus Kähler Holst</h4>
             
-            <h4 data-toc-skip class="date">2023-12-08</h4>
+            <h4 data-toc-skip class="date">2023-12-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/kkholst/targeted/blob/HEAD/vignettes/ate.Rmd" class="external-link"><code>vignettes/ate.Rmd</code></a></small>
       <div class="hidden name"><code>ate.Rmd</code></div>
@@ -172,9 +172,9 @@
 <p>In this simulation we can compare the estimates to the actual expected potential outcomes which can be approximated by Monte Carlo integration by simulating from the model where we intervene on <span class="math inline">\(A\)</span> (i.e., break the dependence on <span class="math inline">\(X, Z\)</span>):</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/intervention.lvm.html" class="external-link">intervention</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">"A"</span>, <span class="fl">0</span><span class="op">)</span>, <span class="fl">2e5</span><span class="op">)</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.500175</span></span>
+<span><span class="co">#&gt; [1] 0.498735</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/intervention.lvm.html" class="external-link">intervention</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">"A"</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fl">2e5</span><span class="op">)</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.64071</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.637855</span></span></code></pre></div>
 <p>The IPW estimator can then be estimated</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ate.html">ate</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">A</span> <span class="op">|</span> <span class="fl">1</span> <span class="op">|</span> <span class="va">X</span><span class="op">+</span><span class="va">Z</span>, data<span class="op">=</span><span class="va">d</span><span class="op">)</span></span>
@@ -264,15 +264,15 @@
 <span><span class="co">#&gt;   a ~ x </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     Estimate Std.Err    2.5%   97.5%    P-value</span></span>
-<span><span class="co">#&gt; a=0  -1.5663 0.03944 -1.6436 -1.4890  0.000e+00</span></span>
-<span><span class="co">#&gt; a=1  -0.8024 0.04250 -0.8857 -0.7191  1.660e-79</span></span>
-<span><span class="co">#&gt; a=2  -0.4113 0.03576 -0.4814 -0.3412  1.287e-30</span></span>
-<span><span class="co">#&gt; a=3   0.7257 0.02680  0.6732  0.7782 1.742e-161</span></span>
+<span><span class="co">#&gt; a=0  -1.5377 0.03649 -1.6092 -1.4662  0.000e+00</span></span>
+<span><span class="co">#&gt; a=1  -0.8069 0.04034 -0.8860 -0.7278  5.207e-89</span></span>
+<span><span class="co">#&gt; a=2  -0.4862 0.03454 -0.5539 -0.4185  5.289e-45</span></span>
+<span><span class="co">#&gt; a=3   0.7568 0.02623  0.7054  0.8082 4.294e-183</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Average Treatment Effect (constrast: 'a=1' - 'a=0'):</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     Estimate Std.Err   2.5% 97.5%   P-value</span></span>
-<span><span class="co">#&gt; ATE   0.7639 0.05565 0.6549 0.873 6.925e-43</span></span></code></pre></div>
+<span><span class="co">#&gt;     Estimate Std.Err   2.5%  97.5%   P-value</span></span>
+<span><span class="co">#&gt; ATE   0.7308 0.05187 0.6291 0.8325 4.527e-45</span></span></code></pre></div>
 <p>Choosing a different contrast for the association measures:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">a2</span>, contrast<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">4</span><span class="op">)</span><span class="op">)</span></span>
@@ -284,27 +284,27 @@
 <span><span class="co">#&gt;   a ~ x </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     Estimate Std.Err    2.5%   97.5%    P-value</span></span>
-<span><span class="co">#&gt; a=0  -1.5663 0.03944 -1.6436 -1.4890  0.000e+00</span></span>
-<span><span class="co">#&gt; a=1  -0.8024 0.04250 -0.8857 -0.7191  1.660e-79</span></span>
-<span><span class="co">#&gt; a=2  -0.4113 0.03576 -0.4814 -0.3412  1.287e-30</span></span>
-<span><span class="co">#&gt; a=3   0.7257 0.02680  0.6732  0.7782 1.742e-161</span></span>
+<span><span class="co">#&gt; a=0  -1.5377 0.03649 -1.6092 -1.4662  0.000e+00</span></span>
+<span><span class="co">#&gt; a=1  -0.8069 0.04034 -0.8860 -0.7278  5.207e-89</span></span>
+<span><span class="co">#&gt; a=2  -0.4862 0.03454 -0.5539 -0.4185  5.289e-45</span></span>
+<span><span class="co">#&gt; a=3   0.7568 0.02623  0.7054  0.8082 4.294e-183</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Average Treatment Effect (constrast: 'a=1' - 'a=3'):</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     Estimate Std.Err  2.5%  97.5%    P-value</span></span>
-<span><span class="co">#&gt; ATE   -1.528 0.04714 -1.62 -1.436 1.553e-230</span></span></code></pre></div>
+<span><span class="co">#&gt;     Estimate Std.Err   2.5%  97.5%    P-value</span></span>
+<span><span class="co">#&gt; ATE   -1.564 0.04485 -1.652 -1.476 2.543e-266</span></span></code></pre></div>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/iid.html" class="external-link">iid</a></span><span class="op">(</span><span class="va">a2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;             a=0           a=1           a=2           a=3</span></span>
-<span><span class="co">#&gt; 1 -2.414314e-05 -4.741830e-06 -4.353538e-06 -2.771441e-04</span></span>
-<span><span class="co">#&gt; 2  8.825724e-05  7.149501e-05  6.758418e-05  2.982946e-04</span></span>
-<span><span class="co">#&gt; 3 -2.495344e-04 -1.106549e-04 -1.045369e-04 -1.385481e-04</span></span>
-<span><span class="co">#&gt; 4  3.175629e-05  3.376066e-05  3.199177e-05 -2.555702e-05</span></span>
-<span><span class="co">#&gt; 5 -8.652620e-05 -5.642322e-05 -5.319583e-05 -3.812672e-04</span></span>
-<span><span class="co">#&gt; 6  7.929876e-05  6.550606e-05  6.193679e-05  4.649490e-05</span></span>
+<span><span class="co">#&gt; 1 -5.227212e-05 -3.264240e-05 -3.245003e-05 -1.802241e-04</span></span>
+<span><span class="co">#&gt; 2  2.314662e-05  8.710235e-04  2.395071e-05  2.082329e-05</span></span>
+<span><span class="co">#&gt; 3 -3.739645e-04 -6.107279e-05 -6.105597e-05 -5.448558e-05</span></span>
+<span><span class="co">#&gt; 4  6.833656e-04  2.459737e-05  2.497977e-05  2.123117e-05</span></span>
+<span><span class="co">#&gt; 5  4.693644e-04 -8.474883e-05 -8.492744e-05 -8.948365e-05</span></span>
+<span><span class="co">#&gt; 6 -7.779785e-04 -2.938377e-05 -2.917504e-05 -1.633950e-05</span></span>
 <span><span class="fu"><a href="https://kkholst.github.io/lava/reference/estimate.default.html" class="external-link">estimate</a></span><span class="op">(</span><span class="va">a2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">-</span><span class="va">x</span><span class="op">[</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#&gt;     Estimate Std.Err  2.5%  97.5%    P-value</span></span>
-<span><span class="co">#&gt; a=1   -1.528 0.04714 -1.62 -1.436 1.553e-230</span></span></code></pre></div>
+<span><span class="co">#&gt;     Estimate Std.Err   2.5%  97.5%    P-value</span></span>
+<span><span class="co">#&gt; a=1   -1.564 0.04485 -1.652 -1.476 2.543e-266</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="sessioninfo">SessionInfo<a class="anchor" aria-label="anchor" href="#sessioninfo"></a>
