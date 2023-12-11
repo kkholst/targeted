@@ -127,7 +127,6 @@ solve_ode_adaptive <- function(f, y0, t0, t1,  h0=0.1,
 
   intstep <- function(t, h, y) {
     k <- matrix(0, nrow = q + 1, ncol = length(y0))
-    ##browser()
     for (i in seq(nrow(k))) {
       yval <- y
       for (j in seq_along(i-1))
