@@ -54,14 +54,21 @@ ml_model <- R6::R6Class("ml_model",
      ##' @param ... optional arguments to fitting function
       initialize = function(formula=NULL,
                            estimate,
-                           predict=predict,
+                           predict=stats::predict,
                            predict.args=NULL,
                            info=NULL, specials,
                            response.arg="y",
                            x.arg="x",
                            ...) {
-      if (!("..."%in%formalArgs(estimate))) {
-        formals(estimate) <- c(formals(estimate), alist(...=))
+      dots <- list(...)
+      if (!is.null(dots$fit)) { ## Backward compatibility
+        if (missing(estimate)) {
+          estimate <- dots$fit
+        }
+        dots$fit <- NULL
+      }
+      if (!("..." %in% formalArgs(estimate))) {
+        formals(estimate) <- c(formals(estimate), alist(... = ))
       }
       des.args <- lapply(substitute(specials), function(x) x)[-1]
       fit_formula <- "formula"%in%formalArgs(estimate)
@@ -73,7 +80,7 @@ ml_model <- R6::R6Class("ml_model",
       ## if (!fit_x_arg && !("data"%in%formalArgs(estimate)))
       ##   stop("Estimation method must have an argument 'x' or 'data'")
 
-      dots <- list(...)
+
       self$args <- dots
       no_formula <- is.null(formula)
       if (no_formula) {
@@ -181,11 +188,11 @@ ml_model <- R6::R6Class("ml_model",
          cat("Model:\n",
              "\t", deparse1(self$formula), "\n", sep="")
        cat("Estimate function:\n",
-           "\tfunction(",paste(names(self$formals[[1]]),
-                               collapse=", "), ")\n", sep="")
+           "\tfunction(", paste(names(self$formals[[1]]),
+                                collapse=", "), ")\n", sep="")
        cat("Prediction:\n",
-           "\tfunction(",paste(names(self$formals[[2]]),
-                               collapse=", "), ")\n", sep="")
+           "\tfunction(", paste(names(self$formals[[2]]),
+                                collapse=", "), ")\n", sep="")
        #cat("\n\nMethods: estimate, predict, fit, update, response, design, clone\n")
      },
 
@@ -318,12 +325,14 @@ ML <- function(formula, model="glm", ...) {
       num.threads=1
     )
     obj <- "grf::regression_forest"
-    est <- function(x, y)
-        grf::regression_forest(X = x, Y = y, ...)
+    est <- function(x, y) {
+      grf::regression_forest(X = x, Y = y, ...)
+    }
     if (model %in% grf.bin) {
         obj <- "grf::probability_forest"
-        est <- function(x, y)
-            grf::probability_forest(X = x, Y = y, ...)
+        est <- function(x, y) {
+          grf::probability_forest(X = x, Y = y, ...)
+        }
     }
     ml_args <- addargs(formula,
         info = obj,
@@ -406,10 +415,12 @@ ML <- function(formula, model="glm", ...) {
 
   ## glm, default
   m <- ml_model$new(formula, info = "glm", ...,
-        estimate = function(formula, data, ...)
-          stats::glm(formula, data=data, ...),
-        predict = function(object, newdata)
-          stats::predict(object, newdata=newdata, type="response")
+        estimate = function(formula, data, ...) {
+          stats::glm(formula, data=data, ...)
+        },
+        predict = function(object, newdata) {
+          stats::predict(object, newdata = newdata, type = "response")
+        }
         )
   return(m)
 
