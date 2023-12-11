@@ -32,17 +32,20 @@ multiclass_scoring1 <-
     if (is.factor(response) && is.null(levels)) {
       levels <- levels(response)
     }
-    if (is.null(levels)) stop("missing definition of levels")
+    if (is.null(levels)) {
+      warning("missing definition of levels, using observed")
+      levels <- sort(unique(response))
+    }
     cl <- levels
     if (is.factor(response)) {
       cl.response <- levels(response)
     } else {
       cl.response <- unique(response)
     }
-    newcl <- which(!cl.response%in%cl) # responseerved classes for which no predictions are available
-    ## assigning pred 0 probabilities to unresponseerved classes
+    newcl <- which(!cl.response%in%cl) # response classes for which no predictions are available
+    ## assigning pred 0 probabilities to unresponse classes
     if (length(newcl)) {
-        if (messages>0) warning("new classes among responseervations")
+      if (messages > 0) warning("new response classes detected")
         temp <- array(0, dim = c(nrow(prob), length(newcl)))
         colnames(temp) <- cl.response[newcl]
         prob <- cbind(prob, temp)
