@@ -101,7 +101,6 @@ cv <- function(models, data, response = NULL, nfolds = 5, rep = 1,
   if (arg_response[1]) {
     arglist[response.arg] <- list(response)
   }
-
   if (inherits(f, "ml_model")) {
     fit0 <- do.call(f$estimate, arglist)
     if (is.null(response)) {
