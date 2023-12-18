@@ -18,6 +18,7 @@
 #include <target/utils.hpp>
 #include <target/glm.hpp>
 #include <target/pava.hpp>
+#include <target/nondom.hpp>
 
 using namespace Rcpp;
 
@@ -51,4 +52,9 @@ List pava(const arma::vec &y, const NumericVector &x, const NumericVector &weigh
   return Rcpp::List::create(Rcpp::Named("index")=idx,
 			    Rcpp::Named("value")=res.col(0));
 
+}
+
+// [[Rcpp::export(name = ".nondom")]]
+arma::mat nondom(const arma::mat &x) {
+  return target::nondominated(x);
 }

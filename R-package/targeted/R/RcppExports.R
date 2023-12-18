@@ -65,6 +65,10 @@ fast_iid <- function(y, p, x1, weights, logistic = TRUE) {
     .Call(`_targeted_pava`, y, x, weights)
 }
 
+.nondom <- function(x) {
+    .Call(`_targeted_nondom`, x)
+}
+
 # Register entry points for exported C++ functions
 methods::setLoadAction(function(ns) {
     .Call(`_targeted_RcppExport_registerCCallable`)
