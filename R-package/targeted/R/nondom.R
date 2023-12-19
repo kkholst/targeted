@@ -11,11 +11,19 @@
 ##' @return matrix
 ##' @author Klaus Kähler Holst
 ##' @export
+##' @examples
+##' rbind(
+##'   c(1.0, 0.5),
+##'   c(0.0, 1.0),
+##'   c(1.0, 0.0),
+##'   c(0.5, 1.0),
+##'   c(1.0, 1.0),
+##'   c(0.8, 0.8)) |> nondom()
 nondom <- function(x, ...) {
   if (is.vector(x)) {
     return(min(x))
   }
-  if (!is.matrix(x)) stop("expecting matrix")
+  if (!is.matrix(x)) stop("expecting a matrix")
   val <- .nondom(x)
   return(val)
 }
