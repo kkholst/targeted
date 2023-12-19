@@ -82,7 +82,7 @@ Create a new prediction model object
 \if{html}{\out{<div class="r">}}\preformatted{ml_model$new(
   formula = NULL,
   estimate,
-  predict = predict,
+  predict = stats::predict,
   predict.args = NULL,
   info = NULL,
   specials,

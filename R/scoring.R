@@ -21,14 +21,15 @@ mae <- function(response, prediction, weights=NULL, ...) {
 }
 
 quantitative_scoring1 <- function(response, prediction, weights=NULL, ...) {
-  c(rmse(response, prediction, weights, ...),
-    mae(response, prediction, weights, ...))
+  c(rmse(response, prediction, weights=weights, ...),
+    mae(response, prediction, weights=weights, ...))
 }
 
 multiclass_scoring1 <-
-  function(prob, response, levels=NULL, weights = NULL, messages=1) {
-    if (is.null(levels) && length(colnames(prob))==length(levels))
-      levels <- colnames(prob)
+  function(response, prediction, levels = NULL, weights = NULL, messages = 1) {
+    if (is.null(levels) && NCOL(prediction)>1) {
+      levels <- colnames(prediction)
+    }
     if (is.factor(response) && is.null(levels)) {
       levels <- levels(response)
     }
@@ -40,32 +41,38 @@ multiclass_scoring1 <-
     if (is.factor(response)) {
       cl.response <- levels(response)
     } else {
-      cl.response <- unique(response)
+      cl.response <- sort(unique(response))
     }
-    newcl <- which(!cl.response%in%cl) # response classes for which no predictions are available
+    if ((length(cl.response)==2) && (NCOL(prediction)==1)) {
+      prediction <- cbind(1 - prediction, prediction)
+      colnames(prediction) <- cl.response
+    }
+    newcl <- which(!cl.response %in% cl) # response classes for which no predictions are available
     ## assigning pred 0 probabilities to unresponse classes
     if (length(newcl)) {
       if (messages > 0) warning("new response classes detected")
-        temp <- array(0, dim = c(nrow(prob), length(newcl)))
-        colnames(temp) <- cl.response[newcl]
-        prob <- cbind(prob, temp)
+      temp <- array(0, dim = c(nrow(prediction), length(newcl)))
+      colnames(temp) <- cl.response[newcl]
+      prediction <- cbind(prediction, temp)
     }
-    y <- outer(response, colnames(prob), "==")
+    y <- outer(response, colnames(prediction), "==")
     ## Brier score
-    Bi <- apply((prob - y)^2, 1, sum)
+    Bi <- apply((prediction - y)^2, 1, sum)
+    if (ncol(prediction) == 2) {
+      Bi <- Bi / 2
+    }
     ## logscore
-    Li <- apply(log(prob) * y, 1, function(x) sum(x[is.finite(x)], na.rm=TRUE))
-
+    Li <- apply(log(prediction) * y, 1, function(x) sum(x[is.finite(x)], na.rm = TRUE))
     ##
     if (!is.null(weights)) {
-        B <- stats::weighted.mean(Bi, w = weights, na.rm = TRUE)
-        L <- stats::weighted.mean(Li, w = weights, na.rm = TRUE)
+      B <- stats::weighted.mean(Bi, w = weights, na.rm = TRUE)
+      L <- stats::weighted.mean(Li, w = weights, na.rm = TRUE)
     } else {
-        B <- mean(Bi, na.rm = TRUE)
-        L <- mean(Li, na.rm = TRUE)
+      B <- mean(Bi, na.rm = TRUE)
+      L <- mean(Li, na.rm = TRUE)
     }
     return(list("brier" = B, "-logscore" = -L))
-}
+  }
 
 ##' Predictive model scoring
 ##'
@@ -80,6 +87,7 @@ multiclass_scoring1 <-
 ##' @param weights optional frequency weights
 ##' @param names optional names of models coments (given as ..., alternatively
 ##'   these can be named arguments)
+##' @param levels (optional) unique levels in response variable
 ##' @param messages controls amount of messages/warnings (0: none)
 ##' @examples
 ##' data(iris)
@@ -97,11 +105,13 @@ multiclass_scoring1 <-
 ##' @return Numeric matrix of dimension m x p, where m is the number of
 ##'   different models and p is the number of model metrics
 ##' @export
-scoring <- function(response, ..., type="quantitative", metrics=NULL,
+scoring <- function(response, ..., type="quantitative",
+                    levels=NULL, metrics=NULL,
                     weights=NULL, names=NULL, messages=1) {
-  nlev <- length(unique(response))
-  if (is.factor(response) || is.character(response) || nlev==2)
+  nlev <- sort(length(unique(response)))
+  if (is.factor(response) || is.character(response) || nlev == 2) {
     type <- "multiclass"
+  }
   if (tolower(type)%in%c("quantitative","cont","continuous")) {
     S <- suppressWarnings(lapply(list(...),
                                  quantitative_scoring1, response=response,
@@ -109,7 +119,7 @@ scoring <- function(response, ..., type="quantitative", metrics=NULL,
   } else {
     S <- suppressWarnings(lapply(list(...),
                                  multiclass_scoring1, response=response,
-                                 weights=weights, messages=messages))
+                                 levels=levels, weights=weights, messages=messages))
   }
   if (is.null(names)) {
     names <- base::names(list(...))

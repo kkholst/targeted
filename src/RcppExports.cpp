@@ -634,6 +634,40 @@ RcppExport SEXP _targeted_pava(SEXP ySEXP, SEXP xSEXP, SEXP weightsSEXP) {
     UNPROTECT(1);
     return rcpp_result_gen;
 }
+// nondom
+arma::mat nondom(const arma::mat& x);
+static SEXP _targeted_nondom_try(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(nondom(x));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _targeted_nondom(SEXP xSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_targeted_nondom_try(xSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error("%s", CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
 
 // validate (ensure exported C++ functions exist before calling them)
 static int _targeted_RcppExport_validate(const char* sig) { 
@@ -655,6 +689,7 @@ static int _targeted_RcppExport_validate(const char* sig) {
         signatures.insert("arma::mat(*.groupsum)(const arma::mat&,const arma::uvec&,bool)");
         signatures.insert("arma::mat(*.softmax)(arma::mat&,bool,bool)");
         signatures.insert("List(*.pava)(const arma::vec&,const NumericVector&,const NumericVector&)");
+        signatures.insert("arma::mat(*.nondom)(const arma::mat&)");
     }
     return signatures.find(sig) != signatures.end();
 }
@@ -677,6 +712,7 @@ RcppExport SEXP _targeted_RcppExport_registerCCallable() {
     R_RegisterCCallable("targeted", "_targeted_.groupsum", (DL_FUNC)_targeted_groupsum_try);
     R_RegisterCCallable("targeted", "_targeted_.softmax", (DL_FUNC)_targeted_softmax_try);
     R_RegisterCCallable("targeted", "_targeted_.pava", (DL_FUNC)_targeted_pava_try);
+    R_RegisterCCallable("targeted", "_targeted_.nondom", (DL_FUNC)_targeted_nondom_try);
     R_RegisterCCallable("targeted", "_targeted_RcppExport_validate", (DL_FUNC)_targeted_RcppExport_validate);
     return R_NilValue;
 }
@@ -700,6 +736,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_targeted_groupsum", (DL_FUNC) &_targeted_groupsum, 3},
     {"_targeted_softmax", (DL_FUNC) &_targeted_softmax, 3},
     {"_targeted_pava", (DL_FUNC) &_targeted_pava, 3},
+    {"_targeted_nondom", (DL_FUNC) &_targeted_nondom, 1},
     {"_rcpp_module_boot_riskregmodel", (DL_FUNC) &_rcpp_module_boot_riskregmodel, 0},
     {"_targeted_RcppExport_registerCCallable", (DL_FUNC) &_targeted_RcppExport_registerCCallable, 0},
     {NULL, NULL, 0}
