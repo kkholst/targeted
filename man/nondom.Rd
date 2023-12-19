@@ -24,6 +24,15 @@ then for all i: f_i(x)<=f_i(y) and there exists j: f_j(x)<f_j(y).
 
 Based on the algorithm of Kung et al. 1975.
 }
+\examples{
+rbind(
+  c(1.0, 0.5),
+  c(0.0, 1.0),
+  c(1.0, 0.0),
+  c(0.5, 1.0),
+  c(1.0, 1.0),
+  c(0.8, 0.8)) |> nondom()
+}
 \author{
 Klaus Kähler Holst
 }
