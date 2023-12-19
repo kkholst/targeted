@@ -8,6 +8,7 @@ scoring(
   response,
   ...,
   type = "quantitative",
+  levels = NULL,
   metrics = NULL,
   weights = NULL,
   names = NULL,
@@ -23,6 +24,8 @@ scoring(
 \item{type}{continuous or categorical response (the latter is automatically
 chosen if response is a factor, otherwise a continuous response is
 assumed)}
+
+\item{levels}{(optional) unique levels in response variable}
 
 \item{metrics}{which metrics to report}
 
