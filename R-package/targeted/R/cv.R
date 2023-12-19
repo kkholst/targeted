@@ -45,6 +45,10 @@ cv <- function(models, data, response = NULL, nfolds = 5, rep = 1,
   nam <- names(models)
   if (is.null(nam)) nam <- paste0("model", seq_along(models))
   args0 <- list(...)
+  if ("K" %in% names(args0)) { ## Backward compatibility
+    nfolds <- args0$K
+    args0$K <- NULL
+  }
   args <- args0
   data.arg <- NULL
   response.arg <- "response"
