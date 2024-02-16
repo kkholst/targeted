@@ -4,11 +4,6 @@
 \alias{ml_model}
 \title{R6 class for prediction models}
 \description{
-R6 class for prediction models
-
-R6 class for prediction models
-}
-\details{
 Provides standardized estimation and prediction methods
 }
 \examples{

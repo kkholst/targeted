@@ -1,6 +1,5 @@
-##' R6 class for prediction models
-##'
-##' Provides standardized estimation and prediction methods
+##' @title R6 class for prediction models
+##' @description Provides standardized estimation and prediction methods
 ##' @author Klaus Kähler Holst
 ##' @examples
 ##' data(iris)
