@@ -4,29 +4,30 @@
 ##' @param models List of fitting functions
 ##' @param data data.frame or matrix
 ##' @param response Response variable (vector or name of column in `data`).
-##' @param nfolds Number of folds (default 5. K=0 splits in 1:n/2, n/2:n with last part
-##'   used for testing)
+##' @param nfolds Number of folds (default 5. K=0 splits in 1:n/2, n/2:n with
+##'   last part used for testing)
 ##' @param rep Number of repetitions (default 1)
 ##' @param weights Optional frequency weights
-##' @param modelscore Model scoring metric (default: RMSE / Brier score).
-##'   Must be a function with arguments: response, prediction, weights, ...
+##' @param modelscore Model scoring metric (default: MSE / Brier score). Must be
+##'   a function with arguments: response, prediction, weights, ...
 ##' @param seed Random seed (argument parsed to future_Apply::future_lapply)
 ##' @param shared Function applied to each fold with results send to each model
 ##' @param args.pred Optional arguments to prediction function (see details
 ##'   below)
 ##' @param args.future Arguments to future.apply::future_mapply
-##' @param mc.cores Optional number of cores. parallel::mcmapply used instead of future
+##' @param mc.cores Optional number of cores. parallel::mcmapply used instead of
+##'   future
 ##' @param ... Additional arguments parsed to models in models
 ##' @author Klaus K. Holst
 ##' @return An object of class '\code{cross_validated}' is returned. See
 ##'   \code{\link{cross_validated-class}} for more details about this class and
 ##'   its generic functions.
-##' @details models should be list of objects of class ml_model.
-##' Alternatively, each element of models should be a list with a fitting function
-##' and a prediction function.
+##' @details models should be list of objects of class ml_model. Alternatively,
+##'   each element of models should be a list with a fitting function and a
+##'   prediction function.
 ##'
-##' The `reponse` argument can optionally be a named list where the name is then
-##' used as the name of the response argument in models. Similarly, if data
+##' The `response` argument can optionally be a named list where the name is
+##' then used as the name of the response argument in models. Similarly, if data
 ##' is a named list with a single data.frame/matrix then this name will be used
 ##' as the name of the data/design matrix argument in models.
 ##' @examples
@@ -41,6 +42,9 @@ cv <- function(models, data, response = NULL, nfolds = 5, rep = 1,
                seed = NULL, shared = NULL, args.pred = NULL,
                args.future = list(), mc.cores, ...) {
   if (missing(modelscore)) modelscore <- scoring
+  if (!("weights" %in% formalArgs(modelscore))) {
+    formals(modelscore) <- c(formals(modelscore), alist(weights=NULL))
+  }
   if (!is.list(models)) stop("Expected a list of models")
   nam <- names(models)
   if (is.null(nam)) nam <- paste0("model", seq_along(models))
@@ -92,11 +96,13 @@ cv <- function(models, data, response = NULL, nfolds = 5, rep = 1,
   arg_response <- rep(FALSE, length(models))
   for (i in seq_along(models)) {
     if (inherits(models[[i]], "ml_model")) {
-      if (!is.null(response) && response.arg %in% names(models[[i]]$formals$estimate)) {
+      if (!is.null(response) && response.arg %in%
+          names(models[[i]]$formals$estimate)) {
         arg_response[i] <- TRUE
       }
     } else {
-      if (!is.null(response) && response.arg %in% formalArgs(models[[i]][[1]])) {
+      if (!is.null(response) && response.arg %in%
+          formalArgs(models[[i]][[1]])) {
         arg_response[i] <- TRUE
       }
     }
@@ -137,7 +143,11 @@ cv <- function(models, data, response = NULL, nfolds = 5, rep = 1,
       c(list(fit0, newdata = data), args.pred)
     )
   }
-  perf0 <- modelscore(prediction = pred0, response = response, weights = weights)
+  perf0 <- modelscore(
+    prediction = pred0,
+    response = response,
+    weights = weights
+  )
   nam_perf <- if (is.vector(perf0)) {
     names(perf0)
   } else {
@@ -159,7 +169,7 @@ cv <- function(models, data, response = NULL, nfolds = 5, rep = 1,
   dim <- c(rep, nfolds, M, P)
   perf_arr <- array(0, dim)
   dimnames(perf_arr) <- list(NULL, NULL, nam, nam_perf)
-  pb <- progressr::progressor(along = seq(nrow(arg)))
+  pb <- progressr::progressor(along = seq_len(nrow(arg)))
   ff <- function(i) {
     R <- arg[i, 1]
     k <- arg[i, 2]
@@ -225,7 +235,7 @@ cv <- function(models, data, response = NULL, nfolds = 5, rep = 1,
   }
 
   if (missing(mc.cores)) {
-    fargs <- list(ff, seq(nrow(arg)),
+    fargs <- list(ff, seq_len(nrow(arg)),
       SIMPLIFY = FALSE,
       USE.NAMES = TRUE,
       future.seed = seed
@@ -235,11 +245,11 @@ cv <- function(models, data, response = NULL, nfolds = 5, rep = 1,
     }
     val <- do.call(future.apply::future_mapply, fargs)
   } else {
-    val <- parallel::mcmapply(ff, as.list(seq(nrow(arg))),
+    val <- parallel::mcmapply(ff, as.list(seq_len(nrow(arg))),
       SIMPLIFY = FALSE, USE.NAMES = TRUE, mc.cores=mc.cores
     )
   }
-  for (i in seq(nrow(arg))) {
+  for (i in seq_len(nrow(arg))) {
     R <- arg[i, 1]
     k <- arg[i, 2]
     perf_arr[R, k, , ] <- val[[i]]
@@ -287,20 +297,25 @@ coef.cross_validated <- function(object, min=FALSE, ...) {
 #' @description The functions \code{\link{cv}} returns an object of the type
 #'   \code{cross_validated}.
 #'
-#' An object of class '\code{cross_validated}' is a list with at least the following components:
+#' An object of class '\code{cross_validated}' is a list with at least the
+#' following components:
 #'
 #' \describe{
-#'   \item{cv}{An array with the model score(s) evaluated for each fold, repetition, and model.
-#'   estimates (see \code{\link[lava]{estimate.default}})}
+#'   \item{cv}{An array with the model score(s) evaluated for each fold,
+#' repetition, and model estimates
+#' (see \code{\link[lava]{estimate.default}})}
 #'   \item{names}{Names (character vector) of the models}
 #'   \item{rep}{number of repetitions of the CV}
 #'   \item{folds}{Number of folds of the CV}
 #' }
 #'
 #' @section S3 generics:
-#' The following S3 generic functions are available for an object of class \code{cross_validated}:
+#' The following S3 generic functions are available for an object of
+#' class \code{cross_validated}:
+#'
 #' \describe{
-#'   \item{\code{coef}}{Extract average model scores from the cross-validation procedure.}
+#'   \item{\code{coef}}{Extract average model scores from the
+#' cross-validation procedure.}
 #'   \item{\code{print}}{Basic print method.}
 #'   \item{\code{summary}}{Summary of the cross-validation procedure.}'
 #'  }
