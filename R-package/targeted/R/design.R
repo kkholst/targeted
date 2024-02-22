@@ -4,7 +4,8 @@
 ##' @param data data.frame
 ##' @param intercept If FALSE (default) an intercept is not included
 ##' @param rm_envir Remove environment
-##' @param ... additional arguments (e.g, specials such weights, offsets, subset)
+##' @param ... additional arguments (e.g, specials such weights, offsets,
+##'   subset)
 ##' @return An object of class 'design'
 ##' @author Klaus Kähler Holst
 ##' @export
