@@ -6,7 +6,7 @@
 <!-- badges: start -->
   [![R-CMD-check](https://github.com/kkholst/targeted/workflows/R-CMD-check/badge.svg?branch=master)](https://github.com/kkholst/targeted/actions)    
   [![coverage](https://app.codecov.io/github/kkholst/targeted/coverage.svg?branch=master)](https://app.codecov.io/github/kkholst/targeted?branch=master)
-  [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/license/apache-2-0/)
+  [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/blog/license/apache-2-0)
   [![cran](https://www.r-pkg.org/badges/version-last-release/targeted)](https://cranlogs.r-pkg.org/downloads/total/last-month/targeted)
 <!-- badges: end -->
 
