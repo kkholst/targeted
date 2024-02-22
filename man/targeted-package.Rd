@@ -2,6 +2,7 @@
 % Please edit documentation in R/targeted-package.R
 \docType{package}
 \name{targeted-package}
+\alias{-package}
 \alias{targeted-package}
 \alias{targeted}
 \title{Targeted inference}

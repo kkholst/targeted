@@ -1,12 +1,12 @@
-rmse <- function(response, prediction, weights=NULL, ...) {
+mse <- function(response, prediction, weights=NULL, ...) {
   res <- (response - prediction)^2
   if (!is.null(weights)) {
     res <- stats::weighted.mean(res, w = weights, na.rm = TRUE)
   } else {
     res <- mean(res, na.rm = TRUE)
   }
-  names(res) <- "rmse"
-  return(res^.5)
+  names(res) <- "mse"
+  return(res)
 }
 
 mae <- function(response, prediction, weights=NULL, ...) {
@@ -21,7 +21,7 @@ mae <- function(response, prediction, weights=NULL, ...) {
 }
 
 quantitative_scoring1 <- function(response, prediction, weights=NULL, ...) {
-  c(rmse(response, prediction, weights=weights, ...),
+  c(mse(response, prediction, weights=weights, ...),
     mae(response, prediction, weights=weights, ...))
 }
 
@@ -47,8 +47,9 @@ multiclass_scoring1 <-
       prediction <- cbind(1 - prediction, prediction)
       colnames(prediction) <- cl.response
     }
-    newcl <- which(!cl.response %in% cl) # response classes for which no predictions are available
-    ## assigning pred 0 probabilities to unresponse classes
+    newcl <- which(!cl.response %in% cl) # response classes for which no
+    ## predictions are available assigning pred 0 probabilities to unresponse
+    ## classes
     if (length(newcl)) {
       if (messages > 0) warning("new response classes detected")
       temp <- array(0, dim = c(nrow(prediction), length(newcl)))
@@ -62,7 +63,10 @@ multiclass_scoring1 <-
       Bi <- Bi / 2
     }
     ## logscore
-    Li <- apply(log(prediction) * y, 1, function(x) sum(x[is.finite(x)], na.rm = TRUE))
+    Li <- apply(
+      log(prediction) * y, 1,
+      function(x) sum(x[is.finite(x)], na.rm = TRUE)
+    )
     ##
     if (!is.null(weights)) {
       B <- stats::weighted.mean(Bi, w = weights, na.rm = TRUE)
@@ -108,18 +112,21 @@ multiclass_scoring1 <-
 scoring <- function(response, ..., type="quantitative",
                     levels=NULL, metrics=NULL,
                     weights=NULL, names=NULL, messages=1) {
-  nlev <- sort(length(unique(response)))
-  if (is.factor(response) || is.character(response) || nlev == 2) {
+  if (is.factor(response) || is.character(response)) {
     type <- "multiclass"
   }
-  if (tolower(type)%in%c("quantitative","cont","continuous")) {
+  if (tolower(type) %in% c("quantitative", "cont", "continuous")) {
     S <- suppressWarnings(lapply(list(...),
-                                 quantitative_scoring1, response=response,
-                                 weights=weights, messages=messages))
+      quantitative_scoring1,
+      response = response,
+      weights = weights, messages = messages
+    ))
   } else {
     S <- suppressWarnings(lapply(list(...),
-                                 multiclass_scoring1, response=response,
-                                 levels=levels, weights=weights, messages=messages))
+      multiclass_scoring1,
+      response = response,
+      levels = levels, weights = weights, messages = messages
+    ))
   }
   if (is.null(names)) {
     names <- base::names(list(...))

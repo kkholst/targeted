@@ -4,22 +4,18 @@
 \alias{ml_model}
 \title{R6 class for prediction models}
 \description{
-R6 class for prediction models
-
-R6 class for prediction models
-}
-\details{
 Provides standardized estimation and prediction methods
 }
 \examples{
 data(iris)
 rf <- function(formula, ...)
 ml_model$new(formula, info="grf::probability_forest",
-             estimate=function(x,y, ...) grf::probability_forest(X=x, Y=y, ...),
-             predict=function(object, newdata) predict(object, newdata)$predictions, ...)
+  estimate=function(x,y, ...) grf::probability_forest(X=x, Y=y, ...),
+  predict=function(object, newdata)
+             predict(object, newdata)$predictions, ...)
 
 args <- expand.list(num.trees=c(100,200), mtry=1:3,
-                   formula=c(Species ~ ., Species ~ Sepal.Length + Sepal.Width))
+          formula=c(Species ~ ., Species ~ Sepal.Length + Sepal.Width))
 models <- lapply(args, function(par) do.call(rf, par))
 
 x <- models[[1]]$clone()
@@ -32,7 +28,7 @@ cbind(coef(a), attr(args, "table"))
 }
 
 ff <- ml_model$new(estimate=function(y,x) lm.fit(x=x, y=y),
-                   predict=function(object, newdata) newdata\%*\%object$coefficients)
+        predict=function(object, newdata) newdata\%*\%object$coefficients)
 ## tmp <- ff$estimate(y, x=x)
 ## ff$predict(x)
 }
@@ -44,7 +40,8 @@ Klaus Kähler Holst
 \describe{
 \item{\code{info}}{Optional information/name of the model}
 
-\item{\code{formals}}{List with formal arguments of estimation and prediction functions}
+\item{\code{formals}}{List with formal arguments of estimation and
+prediction functions}
 
 \item{\code{formula}}{Formula specifying response and design matrix}
 
@@ -97,18 +94,19 @@ Create a new prediction model object
 \describe{
 \item{\code{formula}}{formula specifying outcome and design matrix}
 
-\item{\code{estimate}}{function for fitting the model (must be a function response, 'y',
-and design matrix, 'x'. Alternatively, a function with a single 'formula' argument)}
+\item{\code{estimate}}{function for fitting the model (must be a function
+response, 'y', and design matrix, 'x'. Alternatively, a function
+with a single 'formula' argument)}
 
-\item{\code{predict}}{prediction function (must be a function of model object, 'object',
-and new design matrix, 'newdata')}
+\item{\code{predict}}{prediction function (must be a function of model
+object, 'object', and new design matrix, 'newdata')}
 
 \item{\code{predict.args}}{optional arguments to prediction function}
 
 \item{\code{info}}{optional description of the model}
 
-\item{\code{specials}}{optional additional terms (weights, offset, id, subset, ...)
-passed to 'estimate'}
+\item{\code{specials}}{optional additional terms (weights, offset,
+id, subset, ...) passed to 'estimate'}
 
 \item{\code{response.arg}}{name of response argument}
 
@@ -135,7 +133,8 @@ Estimation method
 
 \item{\code{...}}{Additional arguments to estimation method}
 
-\item{\code{store}}{Logical determining if estimated model should be stored inside the class.}
+\item{\code{store}}{Logical determining if estimated model should be
+stored inside the class.}
 }
 \if{html}{\out{</div>}}
 }

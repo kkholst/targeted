@@ -27,15 +27,15 @@ cv(
 
 \item{response}{Response variable (vector or name of column in \code{data}).}
 
-\item{nfolds}{Number of folds (default 5. K=0 splits in 1:n/2, n/2:n with last part
-used for testing)}
+\item{nfolds}{Number of folds (default 5. K=0 splits in 1:n/2, n/2:n with
+last part used for testing)}
 
 \item{rep}{Number of repetitions (default 1)}
 
 \item{weights}{Optional frequency weights}
 
-\item{modelscore}{Model scoring metric (default: RMSE / Brier score).
-Must be a function with arguments: response, prediction, weights, ...}
+\item{modelscore}{Model scoring metric (default: MSE / Brier score). Must be
+a function with arguments: response, prediction, weights, ...}
 
 \item{seed}{Random seed (argument parsed to future_Apply::future_lapply)}
 
@@ -46,7 +46,8 @@ below)}
 
 \item{args.future}{Arguments to future.apply::future_mapply}
 
-\item{mc.cores}{Optional number of cores. parallel::mcmapply used instead of future}
+\item{mc.cores}{Optional number of cores. parallel::mcmapply used instead of
+future}
 
 \item{...}{Additional arguments parsed to models in models}
 }
@@ -59,12 +60,12 @@ its generic functions.
 Generic cross-validation function
 }
 \details{
-models should be list of objects of class ml_model.
-Alternatively, each element of models should be a list with a fitting function
-and a prediction function.
+models should be list of objects of class ml_model. Alternatively,
+each element of models should be a list with a fitting function and a
+prediction function.
 
-The \code{reponse} argument can optionally be a named list where the name is then
-used as the name of the response argument in models. Similarly, if data
+The \code{response} argument can optionally be a named list where the name is
+then used as the name of the response argument in models. Similarly, if data
 is a named list with a single data.frame/matrix then this name will be used
 as the name of the data/design matrix argument in models.
 }

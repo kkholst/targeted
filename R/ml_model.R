@@ -1,16 +1,16 @@
-##' R6 class for prediction models
-##'
-##' Provides standardized estimation and prediction methods
+##' @title R6 class for prediction models
+##' @description Provides standardized estimation and prediction methods
 ##' @author Klaus Kähler Holst
 ##' @examples
 ##' data(iris)
 ##' rf <- function(formula, ...)
 ##' ml_model$new(formula, info="grf::probability_forest",
-##'              estimate=function(x,y, ...) grf::probability_forest(X=x, Y=y, ...),
-##'              predict=function(object, newdata) predict(object, newdata)$predictions, ...)
+##'   estimate=function(x,y, ...) grf::probability_forest(X=x, Y=y, ...),
+##'   predict=function(object, newdata)
+##'              predict(object, newdata)$predictions, ...)
 ##'
 ##' args <- expand.list(num.trees=c(100,200), mtry=1:3,
-##'                    formula=c(Species ~ ., Species ~ Sepal.Length + Sepal.Width))
+##'           formula=c(Species ~ ., Species ~ Sepal.Length + Sepal.Width))
 ##' models <- lapply(args, function(par) do.call(rf, par))
 ##'
 ##' x <- models[[1]]$clone()
@@ -23,7 +23,7 @@
 ##' }
 ##'
 ##' ff <- ml_model$new(estimate=function(y,x) lm.fit(x=x, y=y),
-##'                    predict=function(object, newdata) newdata%*%object$coefficients)
+##'         predict=function(object, newdata) newdata%*%object$coefficients)
 ##' ## tmp <- ff$estimate(y, x=x)
 ##' ## ff$predict(x)
 ##' @export
@@ -31,7 +31,8 @@ ml_model <- R6::R6Class("ml_model",
     public = list(
       ##' @field info Optional information/name of the model
       info = NULL,
-      ##' @field formals List with formal arguments of estimation and prediction functions
+      ##' @field formals List with formal arguments of estimation and
+      ##'  prediction functions
       formals = NULL,
       ##' @field formula Formula specifying response and design matrix
       formula = NULL,
@@ -41,14 +42,15 @@ ml_model <- R6::R6Class("ml_model",
      ##' @description
      ##' Create a new prediction model object
      ##' @param formula formula specifying outcome and design matrix
-     ##' @param estimate function for fitting the model (must be a function response, 'y',
-     ##'   and design matrix, 'x'. Alternatively, a function with a single 'formula' argument)
-     ##' @param predict prediction function (must be a function of model object, 'object',
-     ##' and new design matrix, 'newdata')
+     ##' @param estimate function for fitting the model (must be a function
+     ##'   response, 'y', and design matrix, 'x'. Alternatively, a function
+     ##'  with a single 'formula' argument)
+     ##' @param predict prediction function (must be a function of model
+     ##' object, 'object', and new design matrix, 'newdata')
      ##' @param info optional description of the model
      ##' @param predict.args optional arguments to prediction function
-     ##' @param specials optional additional terms (weights, offset, id, subset, ...)
-     ##'   passed to 'estimate'
+     ##' @param specials optional additional terms (weights, offset,
+     ##'  id, subset, ...) passed to 'estimate'
      ##' @param response.arg name of response argument
      ##' @param x.arg name of design matrix argument
      ##' @param ... optional arguments to fitting function
@@ -95,10 +97,14 @@ ml_model <- R6::R6Class("ml_model",
       } else {
         if (fit_formula) {  ## Formula in arguments of estimation procedure
           private$fitfun <- function(data, ...) {
-            args <- c(self$args, list(formula=self$formula, data=data), list(...))
+            args <- c(
+              self$args, list(formula = self$formula, data = data),
+              list(...)
+            )
             return(do.call(private$init.estimate, args))
           }
-        } else {  ##  Formula automatically processed into design matrix & response
+        } else {
+          ##  Formula automatically processed into design matrix & response
           private$fitfun <- function(data, ...) {
             xx <- do.call(
               targeted::design,
@@ -115,7 +121,9 @@ ml_model <- R6::R6Class("ml_model",
             }
             if (length(xx$specials)>0)
               args <- c(args, xx[xx$specials])
-            return(structure(do.call(private$init.estimate, args), design=summary(xx)))
+            return(structure(do.call(private$init.estimate, args),
+              design = summary(xx)
+              ))
           }
         }
         private$predfun <- function(object, data, ...) {
@@ -141,7 +149,8 @@ ml_model <- R6::R6Class("ml_model",
      ##' Estimation method
      ##' @param data data.frame
      ##' @param ... Additional arguments to estimation method
-     ##' @param store Logical determining if estimated model should be stored inside the class.
+     ##' @param store Logical determining if estimated model should be
+     ##'   stored inside the class.
      estimate = function(data, ..., store=TRUE) {
        res <- private$fitfun(data, ...)
        if (store) private$fitted <- res
@@ -172,6 +181,7 @@ ml_model <- R6::R6Class("ml_model",
        }
        self$formula <- formula
        environment(private$fitfun)$formula <- formula
+       environment(private$fitfun)$self <- self
      },
 
      ##' @description
@@ -193,7 +203,6 @@ ml_model <- R6::R6Class("ml_model",
        cat("Prediction:\n",
            "\tfunction(", paste(names(self$formals[[2]]),
                                 collapse=", "), ")\n", sep="")
-       #cat("\n\nMethods: estimate, predict, fit, update, response, design, clone\n")
      },
 
      ##' @description
