@@ -15,7 +15,8 @@ design(formula, data, intercept = FALSE, rm_envir = FALSE, ...)
 
 \item{rm_envir}{Remove environment}
 
-\item{...}{additional arguments (e.g, specials such weights, offsets, subset)}
+\item{...}{additional arguments (e.g, specials such weights, offsets,
+subset)}
 }
 \value{
 An object of class 'design'

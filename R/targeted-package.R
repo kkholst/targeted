@@ -1,3 +1,5 @@
+#' @keywords internal
+"_PACKAGE"
 
 ##' Targeted inference
 ##'
@@ -23,7 +25,6 @@
 ##' @importFrom utils tail head
 ##' @useDynLib targeted, .registration=TRUE
 ##' @aliases targeted-package targeted
-##' @docType package
 ##' @author Klaus K. Holst (Maintainer) <klaus@@holst.it>
 ##' @keywords package
 ##' @examples
