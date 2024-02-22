@@ -1,3 +1,10 @@
+# targeted 0.5
+- `cate` now also returns the expected potential outcomes and influence functions
+- Bug-fix in the `ml_model$update()` method
+- The default scoring method for `cv` now only switches to log-score+brier score
+  when the response is a factor. Custom model-scoring function (cv argument
+  modelscore) automatically gets 'weights' appended to the formal-arguments.
+
 # targeted 0.4
 
 - `alean`: Assumption Lean inference for generalized linear model parameters
