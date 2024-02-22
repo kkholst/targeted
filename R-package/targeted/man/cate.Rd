@@ -37,7 +37,8 @@ cate(
 
 \item{stratify}{If TRUE the response_model will be stratified by treatment}
 
-\item{mc.cores}{mc.cores Optional number of cores. parallel::mcmapply used instead of future}
+\item{mc.cores}{mc.cores Optional number of cores. parallel::mcmapply used
+instead of future}
 
 \item{...}{additional arguments to future.apply::future_mapply}
 }
