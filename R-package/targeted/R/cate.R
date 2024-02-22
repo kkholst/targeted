@@ -12,8 +12,8 @@ ate_if_fold <- function(fold, data,
   tmp <- propensity_model$estimate(dtrain)
   X <- deval
   if (stratify) {
-    idx <- which(dtrain[,treatment]==level)
-    tmp <- response_model$estimate(dtrain[idx,,drop=FALSE])
+    idx <- which(dtrain[, treatment]==level)
+    tmp <- response_model$estimate(dtrain[idx, , drop=FALSE])
   } else {
     tmp <- response_model$estimate(dtrain)
     X[, treatment] <- level
@@ -23,15 +23,15 @@ ate_if_fold <- function(fold, data,
   Y <- response_model$response(deval, na.action=lava::na.pass0)
   pr <- propensity_model$predict(newdata=deval)
   if (NCOL(pr)>1)
-    pr <- pr[,2]
-  eY <- response_model$predict(newdata=X)
-  IF <- A/pr*(Y-eY) + eY
+    pr <- pr[, 2]
+  eY <- response_model$predict(newdata = X)
+  IF <- A / pr * (Y - eY) + eY
   return(IF)
 }
 
 cate_fold1 <- function(fold, data, score, treatment_des) {
   y <- score[fold]
-  x <- update(treatment_des, data[fold,,drop=FALSE])$x
+  x <- update(treatment_des, data[fold, , drop=FALSE])$x
   lm.fit(y=y, x=x)$coef
 }
 
@@ -46,7 +46,8 @@ cate_fold1 <- function(fold, data, score, treatment_des) {
 ##' @param nfolds Number of folds
 ##' @param type 'dml1' or 'dml2'
 ##' @param silent supress all messages and progressbars
-##' @param mc.cores mc.cores Optional number of cores. parallel::mcmapply used instead of future
+##' @param mc.cores mc.cores Optional number of cores. parallel::mcmapply used
+##'   instead of future
 ##' @param stratify If TRUE the response_model will be stratified by treatment
 ##' @param ... additional arguments to future.apply::future_mapply
 ##' @return cate.targeted object
@@ -74,12 +75,12 @@ cate_fold1 <- function(fold, data, score, treatment_des) {
 cate <- function(treatment,
                  response_model,
                  propensity_model,
-                 contrast=c(1,0),
+                 contrast = c(1, 0),
                  data,
-                 nfolds=5,
-                 type="dml2",
-                 silent=FALSE,
-                 stratify=FALSE,
+                 nfolds = 5,
+                 type = "dml2",
+                 silent = FALSE,
+                 stratify = FALSE,
                  mc.cores,
                  ...) {
 
@@ -185,7 +186,7 @@ cate <- function(treatment,
   } else {
     est <- coef(lm(Y ~ -1+desA$x))
   }
-  names(est) <- names(desA$x)
+  names(est) <- colnames(desA$x)
 
   V <- desA$x
   h0 <- V%*%est
@@ -195,10 +196,28 @@ cate <- function(treatment,
   A <- solve(crossprod(V))*n
   IF <- IF %*% A
   rownames(IF) <- rownames(data)
-  estimate <- estimate(coef=est, IC=IF)
+
+  resp <- lava::getoutcome(response_model$formula, data = data)
+  nam <- paste0("E[", resp, "(", names(scores), ")]")
+  est0 <- unlist(lapply(scores, mean))
+  IF0 <- c()
+  for (i in seq_along(est0)) {
+    IF0 <- cbind(IF0, scores[[i]]-est0[i])
+  }
+  names(est0) <- nam
+  est <- c(est0, est)
+  IF <- cbind(IF0, IF)
+  estimate <- lava::estimate(coef=est, IC=IF)
+  estimate$model.index <- list(
+    seq_along(est0),
+    seq_along(est) + length(est0)
+  )
+  potential.outcomes <- as.list(nam)
+  names(potential.outcomes) <- names(scores)
 
   res <- list(folds=folds, scores=scores, treatment_des=desA,
-              IF=IF, est=est,
+              est=est,
+              potential.outcomes=potential.outcomes,
               call=cl,
               estimate=estimate)
   class(res) <- c("cate.targeted", "targeted")
