@@ -123,7 +123,8 @@
 
 
 <dt>mc.cores</dt>
-<dd><p>mc.cores Optional number of cores. parallel::mcmapply used instead of future</p></dd>
+<dd><p>mc.cores Optional number of cores. parallel::mcmapply used
+instead of future</p></dd>
 
 
 <dt>...</dt>
@@ -161,11 +162,14 @@
 <span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">sim1</span><span class="op">(</span><span class="fl">200</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">e</span> <span class="op">&lt;-</span> <span class="fu">cate</span><span class="op">(</span><span class="va">a</span> <span class="op">~</span> <span class="va">z1</span><span class="op">+</span><span class="va">z2</span><span class="op">+</span><span class="va">z3</span>, response<span class="op">=</span><span class="va">u</span><span class="op">~</span><span class="va">.</span>, data<span class="op">=</span><span class="va">d</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">e</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err   2.5%  97.5%   P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.8777  0.1304 0.6221 1.1333 1.697e-11</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> z1            0.7621  0.1462 0.4755 1.0487 1.869e-07</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> z2            0.5707  0.1696 0.2383 0.9031 7.647e-04</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> z3            0.7539  0.1506 0.4587 1.0491 5.557e-07</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err    2.5%  97.5%   P-value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> E[u(1)]       1.1020  0.2505  0.6110 1.5929 1.086e-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> E[u(0)]      -0.0897  0.2345 -0.5493 0.3699 7.021e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ___________                                          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   1.1865  0.1977  0.7989 1.5740 1.965e-09</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> z1            1.3537  0.3760  0.6166 2.0907 3.185e-04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> z2            0.7588  0.2521  0.2647 1.2529 2.612e-03</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> z3            0.8032  0.1486  0.5120 1.0944 6.441e-08</span>
 </code></pre></div>
     </div>
   </div>

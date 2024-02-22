@@ -108,8 +108,10 @@ default will use the same design as the response_model.</p></dd>
 <span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="va">m</span>,<span class="fl">1e3</span>,seed<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">aipw</span><span class="op">(</span><span class="va">y0</span> <span class="op">~</span> <span class="va">x</span>, data<span class="op">=</span><span class="va">d</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Estimate Std.Err    2.5%  97.5% P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.05351 0.08466 -0.1124 0.2194  0.5274</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err    2.5%  97.5% P-value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> E[y0(1)]     0.05351 0.08466 -0.1124 0.2194  0.5274</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ___________                                        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)  0.05351 0.08466 -0.1124 0.2194  0.5274</span>
 </code></pre></div>
     </div>
   </div>
