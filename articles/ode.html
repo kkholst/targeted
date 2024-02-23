@@ -94,7 +94,7 @@
       <h1 data-toc-skip>targeted::ode_solve: Solving Ordinary Differential Equations</h1>
                         <h4 data-toc-skip class="author">Klaus Kähler Holst</h4>
             
-            <h4 data-toc-skip class="date">2024-02-22</h4>
+            <h4 data-toc-skip class="date">2024-02-23</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/kkholst/targeted/blob/HEAD/vignettes/ode.Rmd" class="external-link"><code>vignettes/ode.Rmd</code></a></small>
       <div class="hidden name"><code>ode.Rmd</code></div>
@@ -152,7 +152,7 @@
 <p>As a more interesting example consider the <strong>Lorenz Equations</strong> <span class="math display">\[\frac{dx_{t}}{dt} = \sigma(y_{t}-x_{t})\]</span> <span class="math display">\[\frac{dy_{t}}{dt} = x_{t}(\rho-z_{t})-y_{t}\]</span> <span class="math display">\[\frac{dz_{t}}{dt} = x_{t}y_{t}-\beta z_{t}\]</span></p>
 <p>we may define them as</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">targeted</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://kkholst.github.io/targeted/" class="external-link">targeted</a></span><span class="op">)</span></span>
 <span><span class="va">ode</span> <span class="op">&lt;-</span> <span class="st">'dy(0) = p(0)*(y(1)-y(0));</span></span>
 <span><span class="st">        dy(1) = y(0)*(p(1)-y(2));</span></span>
 <span><span class="st">        dy(2) = y(0)*y(1)-p(2)*y(2);'</span></span>

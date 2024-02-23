@@ -94,7 +94,7 @@
       <h1 data-toc-skip>Estimating a relative risk or risk difference with a binary exposure</h1>
                         <h4 data-toc-skip class="author">Klaus Kähler Holst</h4>
             
-            <h4 data-toc-skip class="date">2024-02-22</h4>
+            <h4 data-toc-skip class="date">2024-02-23</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/kkholst/targeted/blob/HEAD/vignettes/riskregression.Rmd" class="external-link"><code>vignettes/riskregression.Rmd</code></a></small>
       <div class="hidden name"><code>riskregression.Rmd</code></div>
@@ -151,7 +151,7 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 </h2>
 <p>First the <code>targeted</code> package is loaded</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">targeted</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://kkholst.github.io/targeted/" class="external-link">targeted</a></span><span class="op">)</span></span></code></pre></div>
 <p>This automatically imports <a href="https://arxiv.org/abs/1206.3421" class="external-link">lava</a> <a href="https://CRAN.R-project.org/package=lava" class="external-link">(CRAN)</a> which we can use to simulate from the Relative-Risk Odds-Product (RR-OP) model.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/lvm.html" class="external-link">lvm</a></span><span class="op">(</span><span class="va">a</span> <span class="op">~</span> <span class="va">x</span>,</span>
@@ -287,7 +287,7 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/riskreg.html">riskreg</a></span><span class="op">(</span><span class="va">y</span><span class="op">~</span><span class="va">a</span>, nuisance<span class="op">=</span><span class="op">~</span><span class="va">x</span><span class="op">+</span><span class="va">z</span>, data<span class="op">=</span><span class="va">d2</span>, type<span class="op">=</span><span class="st">"rd"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;             Estimate Std.Err   2.5% 97.5% P-value</span></span>
-<span><span class="co">#&gt; (Intercept)    1.011 0.02104 0.9701 1.053       0</span></span></code></pre></div>
+<span><span class="co">#&gt; (Intercept)    1.025 0.02078 0.9839 1.065       0</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="influence-function">Influence-function<a class="anchor" aria-label="anchor" href="#influence-function"></a>
