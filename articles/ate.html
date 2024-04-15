@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png">
 <link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/spacelab/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/spacelab/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
@@ -40,7 +40,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">targeted</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6</span>
       </span>
     </div>
 
@@ -94,7 +94,7 @@
       <h1 data-toc-skip>Average Treatment Effects</h1>
                         <h4 data-toc-skip class="author">Klaus Kähler Holst</h4>
             
-            <h4 data-toc-skip class="date">2024-02-23</h4>
+            <h4 data-toc-skip class="date">2024-04-15</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/kkholst/targeted/blob/HEAD/vignettes/ate.Rmd" class="external-link"><code>vignettes/ate.Rmd</code></a></small>
       <div class="hidden name"><code>ate.Rmd</code></div>
@@ -172,9 +172,9 @@
 <p>In this simulation we can compare the estimates to the actual expected potential outcomes which can be approximated by Monte Carlo integration by simulating from the model where we intervene on <span class="math inline">\(A\)</span> (i.e., break the dependence on <span class="math inline">\(X, Z\)</span>):</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/intervention.lvm.html" class="external-link">intervention</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">"A"</span>, <span class="fl">0</span><span class="op">)</span>, <span class="fl">2e5</span><span class="op">)</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.50102</span></span>
+<span><span class="co">#&gt; [1] 0.50034</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/intervention.lvm.html" class="external-link">intervention</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">"A"</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fl">2e5</span><span class="op">)</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.639415</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.63689</span></span></code></pre></div>
 <p>The IPW estimator can then be estimated</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ate.html">ate</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">A</span> <span class="op">|</span> <span class="fl">1</span> <span class="op">|</span> <span class="va">X</span><span class="op">+</span><span class="va">Z</span>, data<span class="op">=</span><span class="va">d</span><span class="op">)</span></span>
@@ -264,15 +264,15 @@
 <span><span class="co">#&gt;   a ~ x </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     Estimate Std.Err    2.5%   97.5%    P-value</span></span>
-<span><span class="co">#&gt; a=0  -1.5759 0.04515 -1.6644 -1.4874 6.236e-267</span></span>
-<span><span class="co">#&gt; a=1  -0.7983 0.04009 -0.8769 -0.7197  3.038e-88</span></span>
-<span><span class="co">#&gt; a=2  -0.4766 0.03434 -0.5439 -0.4093  8.477e-44</span></span>
-<span><span class="co">#&gt; a=3   0.7130 0.02528  0.6635  0.7625 5.110e-175</span></span>
+<span><span class="co">#&gt; a=0  -1.5792 0.03928 -1.6562 -1.5022  0.000e+00</span></span>
+<span><span class="co">#&gt; a=1  -0.7682 0.04115 -0.8489 -0.6876  8.723e-78</span></span>
+<span><span class="co">#&gt; a=2  -0.4171 0.03548 -0.4866 -0.3475  6.582e-32</span></span>
+<span><span class="co">#&gt; a=3   0.7470 0.02424  0.6995  0.7945 1.340e-208</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Average Treatment Effect (constrast: 'a=1' - 'a=0'):</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     Estimate Std.Err   2.5%  97.5%   P-value</span></span>
-<span><span class="co">#&gt; ATE   0.7775 0.05819 0.6635 0.8916 1.015e-40</span></span></code></pre></div>
+<span><span class="co">#&gt;     Estimate Std.Err   2.5% 97.5%   P-value</span></span>
+<span><span class="co">#&gt; ATE    0.811 0.05461 0.7039 0.918 7.044e-50</span></span></code></pre></div>
 <p>Choosing a different contrast for the association measures:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">a2</span>, contrast<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">4</span><span class="op">)</span><span class="op">)</span></span>
@@ -284,34 +284,34 @@
 <span><span class="co">#&gt;   a ~ x </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     Estimate Std.Err    2.5%   97.5%    P-value</span></span>
-<span><span class="co">#&gt; a=0  -1.5759 0.04515 -1.6644 -1.4874 6.236e-267</span></span>
-<span><span class="co">#&gt; a=1  -0.7983 0.04009 -0.8769 -0.7197  3.038e-88</span></span>
-<span><span class="co">#&gt; a=2  -0.4766 0.03434 -0.5439 -0.4093  8.477e-44</span></span>
-<span><span class="co">#&gt; a=3   0.7130 0.02528  0.6635  0.7625 5.110e-175</span></span>
+<span><span class="co">#&gt; a=0  -1.5792 0.03928 -1.6562 -1.5022  0.000e+00</span></span>
+<span><span class="co">#&gt; a=1  -0.7682 0.04115 -0.8489 -0.6876  8.723e-78</span></span>
+<span><span class="co">#&gt; a=2  -0.4171 0.03548 -0.4866 -0.3475  6.582e-32</span></span>
+<span><span class="co">#&gt; a=3   0.7470 0.02424  0.6995  0.7945 1.340e-208</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Average Treatment Effect (constrast: 'a=1' - 'a=3'):</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     Estimate Std.Err   2.5%  97.5%    P-value</span></span>
-<span><span class="co">#&gt; ATE   -1.511 0.04397 -1.597 -1.425 6.379e-259</span></span></code></pre></div>
+<span><span class="co">#&gt; ATE   -1.515 0.04424 -1.602 -1.429 3.985e-257</span></span></code></pre></div>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/iid.html" class="external-link">iid</a></span><span class="op">(</span><span class="va">a2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;             a=0           a=1           a=2           a=3</span></span>
-<span><span class="co">#&gt; 1  1.357178e-04  9.998739e-05  9.330374e-05  1.077818e-04</span></span>
-<span><span class="co">#&gt; 2  1.545104e-04  1.123059e-04  1.049215e-04  4.466851e-06</span></span>
-<span><span class="co">#&gt; 3  1.448942e-04  1.059891e-04  9.896282e-05 -7.341852e-05</span></span>
-<span><span class="co">#&gt; 4 -1.864814e-06  1.140371e-05  1.009997e-05  9.922705e-06</span></span>
-<span><span class="co">#&gt; 5  3.868800e-06  1.517953e-05  1.363176e-05 -3.435807e-04</span></span>
-<span><span class="co">#&gt; 6 -8.272741e-05 -6.127659e-04 -4.771777e-05 -6.483081e-05</span></span>
+<span><span class="co">#&gt; 1 -6.051178e-04  3.348572e-05  3.188711e-05  4.116160e-05</span></span>
+<span><span class="co">#&gt; 2 -9.227453e-05  2.809195e-04 -6.091591e-05 -7.910553e-05</span></span>
+<span><span class="co">#&gt; 3  1.554332e-04  1.229831e-04  1.160951e-04  2.360075e-04</span></span>
+<span><span class="co">#&gt; 4  4.581986e-05  4.615912e-05 -3.669610e-04  5.317770e-05</span></span>
+<span><span class="co">#&gt; 5 -3.005632e-04 -2.050601e-04 -1.952828e-04 -3.077626e-04</span></span>
+<span><span class="co">#&gt; 6  1.699202e-04  1.334874e-04  1.259713e-04  1.760130e-04</span></span>
 <span><span class="fu"><a href="https://kkholst.github.io/lava/reference/estimate.default.html" class="external-link">estimate</a></span><span class="op">(</span><span class="va">a2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">-</span><span class="va">x</span><span class="op">[</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     Estimate Std.Err   2.5%  97.5%    P-value</span></span>
-<span><span class="co">#&gt; a=1   -1.511 0.04397 -1.597 -1.425 6.379e-259</span></span></code></pre></div>
+<span><span class="co">#&gt; a=1   -1.515 0.04424 -1.602 -1.429 3.985e-257</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="sessioninfo">SessionInfo<a class="anchor" aria-label="anchor" href="#sessioninfo"></a>
 </h2>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; R version 4.3.2 (2023-10-31)</span></span>
+<span><span class="co">#&gt; R version 4.3.3 (2024-02-29)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu (64-bit)</span></span>
 <span><span class="co">#&gt; Running under: Ubuntu 22.04.4 LTS</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -332,28 +332,27 @@
 <span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] targeted_0.5 lava_1.7.3  </span></span>
+<span><span class="co">#&gt; [1] targeted_0.6 lava_1.8.0  </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span><span class="co">#&gt;  [1] sass_0.4.8           future_1.33.1        futile.options_1.0.1</span></span>
-<span><span class="co">#&gt;  [4] stringi_1.8.3        lattice_0.21-9       pracma_2.4.4        </span></span>
-<span><span class="co">#&gt;  [7] listenv_0.9.1        digest_0.6.34        magrittr_2.0.3      </span></span>
-<span><span class="co">#&gt; [10] evaluate_0.23        grid_4.3.2           mvtnorm_1.2-4       </span></span>
-<span><span class="co">#&gt; [13] fastmap_1.1.1        jsonlite_1.8.8       Matrix_1.6-1.1      </span></span>
-<span><span class="co">#&gt; [16] survival_3.5-7       formatR_1.14         purrr_1.0.2         </span></span>
-<span><span class="co">#&gt; [19] codetools_0.2-19     numDeriv_2016.8-1.1  textshaping_0.3.7   </span></span>
-<span><span class="co">#&gt; [22] jquerylib_0.1.4      cli_3.6.2            rlang_1.1.3         </span></span>
-<span><span class="co">#&gt; [25] futile.logger_1.4.3  mets_1.3.4           parallelly_1.37.0   </span></span>
-<span><span class="co">#&gt; [28] future.apply_1.11.1  splines_4.3.2        cachem_1.0.8        </span></span>
-<span><span class="co">#&gt; [31] yaml_2.3.8           tools_4.3.2          parallel_4.3.2      </span></span>
-<span><span class="co">#&gt; [34] memoise_2.0.1        nloptr_2.0.3         optimx_2023-10.21   </span></span>
-<span><span class="co">#&gt; [37] lambda.r_1.2.4       globals_0.16.2       vctrs_0.6.5         </span></span>
-<span><span class="co">#&gt; [40] R6_2.5.1             lifecycle_1.0.4      stringr_1.5.1       </span></span>
-<span><span class="co">#&gt; [43] fs_1.6.3             ragg_1.2.7           desc_1.4.3          </span></span>
-<span><span class="co">#&gt; [46] timereg_2.0.5        pkgdown_2.0.7        bslib_0.6.1         </span></span>
-<span><span class="co">#&gt; [49] glue_1.7.0           data.table_1.15.0    Rcpp_1.0.12         </span></span>
-<span><span class="co">#&gt; [52] systemfonts_1.0.5    xfun_0.42            knitr_1.45          </span></span>
-<span><span class="co">#&gt; [55] htmltools_0.5.7      rmarkdown_2.25       compiler_4.3.2</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1] sass_0.4.9           future_1.33.2        futile.options_1.0.1</span></span>
+<span><span class="co">#&gt;  [4] lattice_0.22-5       listenv_0.9.1        pracma_2.4.4        </span></span>
+<span><span class="co">#&gt;  [7] digest_0.6.35        magrittr_2.0.3       evaluate_0.23       </span></span>
+<span><span class="co">#&gt; [10] grid_4.3.3           mvtnorm_1.2-4        fastmap_1.1.1       </span></span>
+<span><span class="co">#&gt; [13] jsonlite_1.8.8       Matrix_1.6-5         survival_3.5-8      </span></span>
+<span><span class="co">#&gt; [16] formatR_1.14         purrr_1.0.2          codetools_0.2-19    </span></span>
+<span><span class="co">#&gt; [19] numDeriv_2016.8-1.1  textshaping_0.3.7    jquerylib_0.1.4     </span></span>
+<span><span class="co">#&gt; [22] cli_3.6.2            rlang_1.1.3          futile.logger_1.4.3 </span></span>
+<span><span class="co">#&gt; [25] mets_1.3.4           parallelly_1.37.1    future.apply_1.11.2 </span></span>
+<span><span class="co">#&gt; [28] splines_4.3.3        cachem_1.0.8         yaml_2.3.8          </span></span>
+<span><span class="co">#&gt; [31] tools_4.3.3          parallel_4.3.3       memoise_2.0.1       </span></span>
+<span><span class="co">#&gt; [34] nloptr_2.0.3         optimx_2023-10.21    lambda.r_1.2.4      </span></span>
+<span><span class="co">#&gt; [37] globals_0.16.3       vctrs_0.6.5          R6_2.5.1            </span></span>
+<span><span class="co">#&gt; [40] lifecycle_1.0.4      fs_1.6.3             ragg_1.3.0          </span></span>
+<span><span class="co">#&gt; [43] desc_1.4.3           timereg_2.0.5        pkgdown_2.0.8       </span></span>
+<span><span class="co">#&gt; [46] bslib_0.7.0          data.table_1.15.4    Rcpp_1.0.12         </span></span>
+<span><span class="co">#&gt; [49] systemfonts_1.0.6    xfun_0.43            knitr_1.46          </span></span>
+<span><span class="co">#&gt; [52] htmltools_0.5.8.1    rmarkdown_2.26       compiler_4.3.3</span></span></code></pre></div>
 </div>
   </div>
 
@@ -374,7 +373,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.8.</p>
 </div>
 
       </footer>
