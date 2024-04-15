@@ -82,7 +82,7 @@ Create a new prediction model object
   predict = stats::predict,
   predict.args = NULL,
   info = NULL,
-  specials,
+  specials = c(),
   response.arg = "y",
   x.arg = "x",
   ...
