@@ -10,15 +10,18 @@
 ##' @author Klaus Kähler Holst
 ##' @export
 design <- function(formula, data, intercept=FALSE,
-                   rm_envir=FALSE, ...) {
-  tt <- terms(formula, data=data)
+                   rm_envir=FALSE, ..., specials = c("weights", "offset")) {
+  tt <- terms(formula, data = data)
   if (!intercept)
     attr(tt, "intercept") <- 0
   mf <- model.frame(tt, data=data, ...)
   x_levels <- .getXlevels(tt, mf)
   x <- model.matrix(mf, data=data)
   y <- model.response(mf, type="any")
-  specials <- names(substitute(list(...)))[-1]
+  specials <- union(
+    specials,
+    names(substitute(list(...)))[-1]
+  )
   specials_list <- c()
   if (length(specials)>0) {
     for (s in specials) {
@@ -38,19 +41,23 @@ design <- function(formula, data, intercept=FALSE,
 }
 
 ##' @export
-update.design <- function(object, data=NULL, ...) {
+update.design <- function(object, data = NULL, ...,
+                          specials = c("weights", "offset")) {
   if (is.null(data))  data <- object$data
-  mf <- with(object, model.frame(terms, data=data, ...,
-                                 xlev = xlevels,
-                                 drop.unused.levels=FALSE))
+  mf <- model.frame(object$terms, data=data, ...,
+                    xlev = object$xlevels,
+                    drop.unused.levels=FALSE)
   x <- model.matrix(mf, data=data, ..., xlev = object$xlevels)
   object[["y"]] <- NULL
   for (s in object$specials) {
     object[[s]] <- NULL
   }
-  specials <- names(substitute(list(...)))[-1]
+  specials2 <- names(substitute(list(...)))[-1]
+  for (s in specials2) {
+    object[[s]] <- eval(substitute(model.extract(mf, s), list(s = s)))
+  }
   for (s in specials) {
-    object[[s]] <- eval(substitute(model.extract(mf, s), list(s=s)))
+    object[[s]] <- do.call(model.extract, list(mf, s))
   }
   object$specials <- specials
   object$x <- x
@@ -61,10 +68,32 @@ update.design <- function(object, data=NULL, ...) {
 model.matrix.design <- function(object, drop.intercept = FALSE, ...) {
   if (drop.intercept) {
     intercept <- which(attr(object$x, "assign") == 0)
-    if (length(intercept)>0)
-      return(object$x[, -intercept, drop=FALSE])
+    if (length(intercept) > 0) {
+      return(object$x[, -intercept, drop = FALSE])
+    }
   }
   return(object$x)
+}
+
+##' @export
+weights.design <- function(object, ...) {
+  specials(object, "weights")
+}
+
+##' @export
+offsets <- function(object, ...) UseMethod("offsets")
+
+##' @export
+offsets.design <- function(object, ...) {
+  specials(object, "offset")
+}
+
+##' @export
+specials <- function(object, ...) UseMethod("specials")
+
+##' @export
+specials.design <- function(object, which, ...) {
+  return(object[[which]])
 }
 
 ##' @export
