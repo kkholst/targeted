@@ -129,11 +129,11 @@ scatterplot3d::scatterplot3d(y, cex.symbols=0.1, type='b',
 ```
 
 To illustrate the use of exogenous inputs, consider the following simulated data
-
 ```{r}
 n <- 1e4
 tt <- seq(0, 10, length.out=n)  # Time
-xx <- rep(0, n); xx[(n/3):(2*n/3)] <- 1  # Exogenous input, x(t)
+xx <- rep(0, n)
+xx[(n / 3):(2 * n / 3)] <- 1 # Exogenous input, x(t)
 input <- cbind(tt, xx)
 ```
 

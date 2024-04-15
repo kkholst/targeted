@@ -4,7 +4,14 @@
 \alias{design}
 \title{Extract design matrix}
 \usage{
-design(formula, data, intercept = FALSE, rm_envir = FALSE, ...)
+design(
+  formula,
+  data,
+  intercept = FALSE,
+  rm_envir = FALSE,
+  ...,
+  specials = c("weights", "offset")
+)
 }
 \arguments{
 \item{formula}{formula}

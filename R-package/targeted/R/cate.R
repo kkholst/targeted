@@ -31,8 +31,8 @@ ate_if_fold <- function(fold, data,
 
 cate_fold1 <- function(fold, data, score, treatment_des) {
   y <- score[fold]
-  x <- update(treatment_des, data[fold, , drop=FALSE])$x
-  lm.fit(y=y, x=x)$coef
+  x <- update(treatment_des, data[fold, , drop = FALSE])$x
+  lm.fit(y = y, x = x)$coef
 }
 
 ##' Conditional Average Treatment Effect estimation via Double Machine Learning
@@ -225,14 +225,14 @@ cate <- function(treatment,
 }
 
 score_fold <- function(fold,
-                    data,
-                    propensity_model,
-                    response_model,
-                    importance_model,
-                    treatment, level) {
-  dtrain <- data[-fold,]
-  deval <- data[fold,]
-  
+                       data,
+                       propensity_model,
+                       response_model,
+                       importance_model,
+                       treatment, level) {
+  dtrain <- data[-fold, ]
+  deval <- data[fold, ]
+
   # training
   tmp <- propensity_model$estimate(dtrain)
   tmp <- response_model$estimate(dtrain)
@@ -240,25 +240,27 @@ score_fold <- function(fold,
   Y <- response_model$response(dtrain)
   X <- dtrain
   X[, treatment] <- level
-  pr <- propensity_model$predict(newdata=dtrain)
-  if (NCOL(pr)>1)
-    pr <- pr[,2]
-  eY <- response_model$predict(newdata=X)
-  D <- A/pr*(Y-eY) + eY
+  pr <- propensity_model$predict(newdata = dtrain)
+  if (NCOL(pr) > 1) {
+    pr <- pr[, 2]
+  }
+  eY <- response_model$predict(newdata = X)
+  D <- A / pr * (Y - eY) + eY
   X[["D_"]] <- D
   tmp <- importance_model$estimate(data = X)
 
-  # evaluation 
+  # evaluation
   A <- propensity_model$response(deval)
   Y <- response_model$response(deval)
   X <- deval
   X[, treatment] <- level
-  pr <- propensity_model$predict(newdata=deval)
-  if (NCOL(pr)>1)
-    pr <- pr[,2]
-  eY <- response_model$predict(newdata=X)
-  D <- A/pr*(Y-eY) + eY
-  II <- importance_model$predict(newdata=X)
+  pr <- propensity_model$predict(newdata = deval)
+  if (NCOL(pr) > 1) {
+    pr <- pr[, 2]
+  }
+  eY <- response_model$predict(newdata = X)
+  D <- A / pr * (Y - eY) + eY
+  II <- importance_model$predict(newdata = X)
 
   return(list(II = II, D = D))
 }
@@ -315,7 +317,7 @@ crr <- function(treatment,
                 data,
                 nfolds=5,
                 type="dml1",
-                ...){
+                ...) {
   cl <- match.call()
   if (is.character(treatment)) {
     treatment <- as.formula(paste0(treatment, "~", 1))
@@ -326,7 +328,7 @@ crr <- function(treatment,
   }
   if (length(contrast)!=2)
     stop("Expected contrast vector of length 2.")
-  
+
   response_var <- lava::getoutcome(response_model$formula, data=data)
   treatment_var <- lava::getoutcome(treatment)
   treatment_f <- function(treatment_level, x=paste0(".-", response_var))
@@ -338,18 +340,18 @@ crr <- function(treatment,
     importance_formula <- update(treatment, D_~.)
     importance_model <- SL(importance_formula, ...)
   }
-  
+
   n <- nrow(data)
   folds <- split(sample(1:n, n), rep(1:nfolds, length.out = n))
   folds <- lapply(folds, sort)
-  
+
   ff <- Reduce(c, folds)
   idx <- order(ff)
-  
+
   # D_a = I(A=a)/P(A=a|W)[Y - E[Y|A=a, W]] + E[Y|A=a, W], a = {1,0}
   D <- list()
   # II = E[E[Y|A=a, W]|V] = E[D_a|V], a = {1,0}
-  II <- list() 
+  II <- list()
   pb <- progressr::progressor(steps = length(contrast)*nfolds)
   for (i in seq_along(contrast)) {
     a <- contrast[i]
@@ -373,11 +375,11 @@ crr <- function(treatment,
   }
   names(D) <- contrast
   names(II) <- contrast
-  
+
   score <- D[[1]]*II[[2]] - D[[2]]*II[[1]]
   score <- score + II[[1]] * II[[2]]
   score <- score * II[[2]]^(-2)
-  
+
   if (type=="dml1") {
     est1 <- lapply(folds, function(x) cate_fold1(x,
                                                  data = data,
@@ -388,14 +390,13 @@ crr <- function(treatment,
     est <- coef(lm(score ~ -1+desA$x))
   }
   names(est) <- names(desA$x)
-  
+
   M1 <- desA$x
   C <-  -n^(-1) * crossprod(M1)
   IF <- -solve(C) %*% t(M1 * as.vector(score - M1 %*% est))
   IF <- t(IF)
-  
+
   estimate <- estimate(coef=est, IC=IF)
-  
   res <- list(folds=folds,
               score=score,
               treatment_des=desA,

@@ -190,7 +190,7 @@ RATE.surv <- function(response, post.treatment, treatment, censoring,
     attr(surv.response, "type") == "right", # only allows right censoring
     attr(surv.censoring, "type") == "right", # only allows right censoring
     all(surv.response[,1] == surv.censoring[ ,1]), # time must be equal
-    all(order(surv.response[,1]) == (1:nrow(data))) # data must be ordered by time and have no missing values
+    all(order(surv.response[,1]) == (seq_len(nrow(data)))) # data must be ordered by time and have no missing values
   )
   rm(surv.response, surv.censoring)
 

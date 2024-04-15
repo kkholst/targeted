@@ -21,6 +21,7 @@ example(calibration)
 \seealso{
 Useful links:
 \itemize{
+  \item \url{https://kkholst.github.io/targeted/}
   \item Report bugs at \url{https://github.com/kkholst/targeted/issues}
 }
 
