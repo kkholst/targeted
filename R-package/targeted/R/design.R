@@ -92,6 +92,11 @@ offsets.design <- function(object, ...) {
 specials <- function(object, ...) UseMethod("specials")
 
 ##' @export
+##' @title Extract model component from [design] object
+##' @param object [design] object
+##' @param which model component (e.g., "offset", "weights", ...)
+##' @aliases specials specials.design offsets offsets.design weights.design
+##' @param ...  Additional arguments to lower level functions
 specials.design <- function(object, which, ...) {
   return(object[[which]])
 }
