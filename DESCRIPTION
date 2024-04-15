@@ -1,8 +1,8 @@
 Package: targeted
 Type: Package
 Title: Targeted Inference
-Version: 0.5
-Date: 2024-02-22
+Version: 0.6
+Date: 2024-04-15
 Authors@R: c(person(given = "Klaus K.",
                     family = "Holst",
                     role = c("aut", "cre"),
@@ -23,7 +23,7 @@ Description: Various methods for targeted and semiparametric inference including
          linear model parameters (Vansteelandt et al. (2022) <doi:10.1111/rssb.12504>).
 Depends:
     R (>= 4.0),
-    lava (>= 1.7.0)
+    lava (>= 1.8.0)
 Imports:
     data.table,
     digest,

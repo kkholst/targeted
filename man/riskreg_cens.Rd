@@ -76,8 +76,9 @@ I(C>min(T,tau)). This can be decomposed into an integral wrt the counting
 process, \eqn{dN_c(t)} and the compensator \eqn{d\Lambda_c(t)} where the
 latter term can be computational intensive to calculate. Rather than
 calculating this integral in all observed time points, we can make a
-coarser evaluation which can be controlled by setting \code{control=(sample=N)}.
-With \code{N=0} the (computational intensive) standard evaluation is used.##'
+coarser evaluation which can be controlled by setting
+\code{control=(sample=N)}. With \code{N=0} the (computational intensive)
+standard evaluation is used.##'
 }
 \author{
 Klaus K. Holst, Andreas Nordland

@@ -27,15 +27,18 @@
 ##'   process, \eqn{dN_c(t)} and the compensator \eqn{d\Lambda_c(t)} where the
 ##'   latter term can be computational intensive to calculate. Rather than
 ##'   calculating this integral in all observed time points, we can make a
-##'   coarser evaluation which can be controlled by setting \code{control=(sample=N)}.
-##'   With \code{N=0} the (computational intensive) standard evaluation is used.##'
+##'   coarser evaluation which can be controlled by setting
+##'   \code{control=(sample=N)}. With \code{N=0} the (computational intensive)
+##'   standard evaluation is used.##'
 ##' @author Klaus K. Holst, Andreas Nordland
 ##' @export
 riskreg_cens <- function(response,
                         censoring,
-                        treatment=NULL,
-                        prediction=NULL,
-                        data, newdata, tau,
+                        treatment = NULL,
+                        prediction = NULL,
+                        data,
+                        newdata,
+                        tau,
                         type="risk",
                         M = 1,
                         call.response = "phreg",
@@ -43,8 +46,8 @@ riskreg_cens <- function(response,
                         call.censoring = "phreg",
                         args.censoring = list(),
                         preprocess = NULL,
-                        efficient=TRUE,
-                        control=list(),
+                        efficient = TRUE,
+                        control = list(),
                         ...) {
   dots <- list(...)
   cl <- match.call()
@@ -63,7 +66,8 @@ riskreg_cens <- function(response,
     attr(surv.response, "type") == "right", # only allows right censoring
     attr(surv.censoring, "type") == "right", # only allows right censoring
     all(surv.response[, 1] == surv.censoring[, 1]), # time must be equal
-    all(order(surv.response[, 1]) == (1:nrow(data))) # data must be ordered by time and have no missing values
+    # data must be ordered by time and have no missing values:
+    all(order(surv.response[, 1]) == (seq_len(nrow(data))))
   )
   rm(surv.response, surv.censoring)
 
@@ -93,35 +97,34 @@ riskreg_cens <- function(response,
       stop("Specify treatment formula.")
   }
 
-
   if (!is.null(treatment)) { ## Potential outcome
     if (inherits(treatment, "formula"))
       treatment <- SL(treatment, family=binomial())
     A <- treatment$response(data)
     A.levels <- sort(unique(A))
-    A.var <- all.vars(update(formula(treatment),~1))
+    A.var <- all.vars(update(formula(treatment), ~1))
     A.value <- data[which(A)[1], A.var]
     if (length(A.levels)!=2) stop("Expected binary treatment variable (0,1).")
-    if (type=="rmst") {
+    if (type == "rmst") {
       m <- function(time, data) {
-        pmin(time, tau)*data[,"_weight"] +
-          data[,"_pred"]*(1 - data[,"_weight"])
+        pmin(time, tau)*data[, "_weight"] +
+          data[, "_pred"]*(1 - data[, "_weight"])
       }
       h <- function(data, time, S, S.tau, tau) {
         I <- intsurv(time, S, tau)$cint
         (as.vector(time)*as.vector(S) +
-         I)/as.vector(S) * (time<=tau) * as.vector(data[,"_weight"]) +
-          as.vector(data[,"_pred"])*(1 - as.vector(data[,"_weight"]))
+         I)/as.vector(S) * (time<=tau) * as.vector(data[, "_weight"]) +
+          as.vector(data[, "_pred"])*(1 - as.vector(data[, "_weight"]))
       }
     } else {
       type <- "treatment"
       m <- function(time, data) {
-        (time<=tau)*data[,"_weight"] +
-          data[,"_pred"]*(1 - data[,"_weight"])
+        (time<=tau)*data[, "_weight"] +
+          data[, "_pred"]*(1 - data[, "_weight"])
       }
       h <- function(data, time, S, S.tau, tau) {
-        res <- (S-S.tau)/S * as.vector(data[,"_weight"])*(time<=tau) +
-          as.vector(data[,"_pred"])*(1 - as.vector(data[,"_weight"]))
+        res <- (S-S.tau)/S * as.vector(data[, "_weight"])*(time<=tau) +
+          as.vector(data[, "_pred"])*(1 - as.vector(data[, "_weight"]))
         res
       }
     }
@@ -135,11 +138,11 @@ riskreg_cens <- function(response,
       data[, "_pred"] <- prediction
     }
     m <- function(time, data) {
-      ((time<=tau) - as.vector(data[,"_pred"]))^2
+      ((time<=tau) - as.vector(data[, "_pred"]))^2
     }
     h <- function(data, time, S, S.tau, tau) {
-      (S-S.tau)/S*(1-2*as.vector(data[,"_pred"]))*(time<=tau) +
-        as.vector(data[,"_pred"])^2
+      (S - S.tau) / S * (1 - 2 * as.vector(data[, "_pred"])) * (time <= tau) +
+        as.vector(data[, "_pred"])^2
     }
   }
 
@@ -176,8 +179,8 @@ riskreg_cens <- function(response,
       )
     }
 
-    valid.time <- get_response(formula = response, valid_data)[,1]
-    valid.event <- get_response(formula = response, valid_data)[,2]
+    valid.time <- get_response(formula = response, valid_data)[, 1]
+    valid.event <- get_response(formula = response, valid_data)[, 2]
 
     ## treatment model
     if (!is.null(treatment)) {
@@ -187,11 +190,18 @@ riskreg_cens <- function(response,
       valid_data.a <- valid_data
       valid_data.a[, A.var] <- A.value
       if (type=="rmst") {
-        rms <- intsurv2(T.est, valid_data.a, time=valid.time,
-                        stop=tau, sample=control$sample, blocksize=control$blocksize)
+        rms <- intsurv2(T.est, valid_data.a,
+          time = valid.time,
+          stop = tau,
+          sample = control$sample,
+          blocksize = control$blocksize
+          )
         valid_data[, "_pred"] <- rms
       } else {
-        Fhat <- 1-as.vector(cumhaz(T.est, newdata = valid_data.a, times = tau)$surv)
+        Fhat <- 1 - as.vector(cumhaz(T.est,
+          newdata = valid_data.a,
+          times = tau
+          )$surv)
         valid_data[, "_pred"] <- Fhat
       }
       rm(valid_data.a)
@@ -248,7 +258,7 @@ riskreg_cens <- function(response,
       train_data <- data[-f, ]
       valid_data <- data[f, ]
       ph <- fit.phis(train_data = train_data, valid_data = valid_data)
-      phis[f,] <- ph
+      phis[f, ] <- ph
       colnames(phis) <- colnames(ph)
     }
   }
@@ -263,18 +273,39 @@ riskreg_cens <- function(response,
 }
 
 
-## vector of size n with values \int_0^tau E(Q_u|T_i>=u,X_i)S^c(u|X_i)}^{-1} d M_i^c,
-## h = E(Q|T>u=u,X), function(data, u, S, S.tau, tau)
-binreg_augmentation <- function(T.est, C.est, data, time, event, tau, h, phreg=TRUE,
-                                sample=0, blocksize=0, ...) {
+## vector of size n with values \int_0^tau E(Q_u|T_i>=u,X_i)S^c(u|X_i)}^{-1} d
+## M_i^c, h = E(Q|T>u=u,X), function(data, u, S, S.tau, tau)
+binreg_augmentation <- function(T.est,
+                                C.est,
+                                data,
+                                time,
+                                event,
+                                tau,
+                                h,
+                                phreg=TRUE,
+                                sample=0,
+                                blocksize=0,
+                                ...) {
   n <- nrow(data)
-  data.C <- data[event == 0,]
+  data.C <- data[event == 0, , drop = FALSE]
   time.C <- time[event == 0]
-  delta <- event; delta[time>tau] <-1
+  delta <- event
+  delta[time > tau] <- 1
 
-  S <- cumhaz(T.est, newdata = data.C, times = time.C, individual.time=TRUE)$surv
-  S.tau <- cumhaz(T.est, newdata = data.C, times = tau)$surv[1,]
-  Sc <- cumhaz(C.est, newdata = data.C, times = time.C, individual.time=TRUE)$surv
+  S <- cumhaz(T.est,
+    newdata = data.C,
+    times = time.C,
+    individual.time = TRUE
+    )$surv
+  S.tau <- cumhaz(T.est,
+    newdata = data.C,
+    times = tau
+    )$surv[1, ]
+  Sc <- cumhaz(C.est,
+    newdata = data.C,
+    times = time.C,
+    individual.time = TRUE
+    )$surv
   stopifnot(all(S * Sc> 0))
   ## Counting process term
   Nc <- vector(mode = "numeric", length = n)
@@ -301,8 +332,8 @@ binreg_augmentation <- function(T.est, C.est, data, time, event, tau, h, phreg=T
       i <- i+1
       at.risk <- tt<=time[i]
       ## E[Q|T>=u, X]
-      Eq = h(data[r,], tt, S[,i], S.tau[,i], tau) / Sc$surv[,i]
-      lc <- sum((Eq * at.risk * Sc$dchf[,i]) [tt<=tau])
+      Eq <- h(data[r, ], tt, S[, i], S.tau[, i], tau) / Sc$surv[, i]
+      lc <- sum((Eq * at.risk * Sc$dchf[, i]) [tt<=tau])
       Lc[r] <- lc
     }
   }

@@ -58,7 +58,8 @@ ml_model <- R6::R6Class("ml_model",
                            estimate,
                            predict=stats::predict,
                            predict.args=NULL,
-                           info=NULL, specials,
+                           info=NULL,
+                           specials = c(),
                            response.arg="y",
                            x.arg="x",
                            ...) {
@@ -72,7 +73,8 @@ ml_model <- R6::R6Class("ml_model",
       if (!("..." %in% formalArgs(estimate))) {
         formals(estimate) <- c(formals(estimate), alist(... = ))
       }
-      des.args <- lapply(substitute(specials), function(x) x)[-1]
+      ## des.args <- lapply(substitute(specials), function(x) x)[-1]
+      des.args <- list(specials = specials)
       fit_formula <- "formula"%in%formalArgs(estimate)
       fit_response_arg <- response.arg %in% formalArgs(estimate)
       fit_x_arg <- x.arg%in%formalArgs(estimate)
@@ -81,7 +83,6 @@ ml_model <- R6::R6Class("ml_model",
       private$init.predict <- predict
       ## if (!fit_x_arg && !("data"%in%formalArgs(estimate)))
       ##   stop("Estimation method must have an argument 'x' or 'data'")
-
 
       self$args <- dots
       no_formula <- is.null(formula)
@@ -128,10 +129,16 @@ ml_model <- R6::R6Class("ml_model",
         }
         private$predfun <- function(object, data, ...) {
           if (fit_formula || no_formula) {
-            args <-  c(list(object, newdata=data), predict.args, list(...))
+            args <- c(list(object, newdata = data), predict.args, list(...))
           } else {
-            x <- model.matrix(update(attr(object, "design"), data))
-            args <-  c(list(object, newdata=x), predict.args, list(...))
+            args <- list(...)
+            des <- update(attr(object, "design"), data)
+            for (s in des$specials) {
+              if (is.null(args[[s]])) args[[s]] <- des[[s]]
+            }
+            args <- c(list(object,
+              newdata = model.matrix(des)
+            ), predict.args, args)
           }
           return(do.call(private$init.predict, args))
         }
@@ -154,7 +161,7 @@ ml_model <- R6::R6Class("ml_model",
      estimate = function(data, ..., store=TRUE) {
        res <- private$fitfun(data, ...)
        if (store) private$fitted <- res
-       invisible(res)
+       return(invisible(res))
      },
 
      ##' @description
@@ -292,7 +299,7 @@ predict.ml_model <- function(object, ...) {
 ##' @param ... additional arguments to model object
 ##' @details
 ##' model 'sl' (SuperLearner::SuperLearner)
-##' args: SL.library, cvControl, f<aamily, method
+##' args: SL.library, cvControl, family, method
 ##' example:
 ##'
 ##' model 'grf' (grf::regression_forest)
@@ -305,7 +312,6 @@ predict.ml_model <- function(object, ...) {
 ##'
 ##' model 'glm'
 ##' args: family, weights, offset, ...
-##'
 ##'
 ML <- function(formula, model="glm", ...) {
   model <- tolower(model)
@@ -425,10 +431,16 @@ ML <- function(formula, model="glm", ...) {
   ## glm, default
   m <- ml_model$new(formula, info = "glm", ...,
         estimate = function(formula, data, ...) {
-          stats::glm(formula, data=data, ...)
+          stats::glm(formula,
+            data = data,
+            ...
+            )
         },
-        predict = function(object, newdata) {
-          stats::predict(object, newdata = newdata, type = "response")
+        predict = function(object, newdata, ...) {
+          stats::predict(object,
+                         newdata = newdata,
+                         type = "response"
+          )
         }
         )
   return(m)

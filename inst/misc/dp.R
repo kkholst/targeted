@@ -62,7 +62,7 @@ dormand_prince <- function(f, y0, t1, t0=0, h0=0.1,
   }
 
   step <- function(t, h, y, fac_max) {
-    accept <- FALSE;
+    accept <- FALSE
     teval <- t+h
     while (!accept) {
       teval <- t+h

@@ -18,7 +18,7 @@ Wrapper for ml_model
 }
 \details{
 model 'sl' (SuperLearner::SuperLearner)
-args: SL.library, cvControl, f<aamily, method
+args: SL.library, cvControl, family, method
 example:
 
 model 'grf' (grf::regression_forest)
