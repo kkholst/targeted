@@ -88,11 +88,12 @@ fit_treatment_model <- function(data,
 }
 
 
-survival_risk_treatment_level_estimating_functions <- function(data,
-                                                                      tau,
-                                                                      survival_models,
-                                                                      treatment_model,
-                                                               control) {
+survival_treatment_level_estimating_functions <- function(type = "risk",
+                                                          data,
+                                                          tau,
+                                                          survival_models,
+                                                          treatment_model,
+                                                          control) {
   ## getting dimensions:
   n <- nrow(data)
 
@@ -104,6 +105,11 @@ survival_risk_treatment_level_estimating_functions <- function(data,
   ## getting the time for the response T and the event indicator:
   time <- get_response(formula = response, data)[, 1]
   event <- get_response(formula = response, data)[, 2]
+
+  ## checking if tau is missing
+  if (missing(tau)) {
+    tau <- max(time)
+  }
 
   ## calculating \Delta(\tau) = I \{C > \min(T, \tau)\}:
   delta <- event
@@ -117,8 +123,6 @@ survival_risk_treatment_level_estimating_functions <- function(data,
     individual.time = TRUE
   )$surv |> as.vector()
 
-
-
   ## getting the treatment_model elements:
   A_model <- treatment_model$A_model
   A_levels <- treatment_model$A_levels
@@ -131,16 +135,28 @@ survival_risk_treatment_level_estimating_functions <- function(data,
   ## getting the treatment propensity g(1|X):
   g1 <- A_model$predict(data) |> as.vector()
 
+  if (type == "risk") {
+    ## h: I\{\tilde T_i \leq tau\}
+    ## vector of dimension n
+    h <- (time <= tau)
 
+    ## Hu: H(u|X_i, A_i) = E[I\{T_i \leq \tau\} | T_i > u, X_i, A_i] = I\{u \leq \tau \} \frac{S(u|X_i, A_i) - S(\tau|X_i, A_i)}{S(u|X_i, A_i)}
+    ## vector of dimension n
+    Hu <- function(data, time, S, S_tau, tau) {
+      (S - S_tau) / S * (time <= tau) |> as.vector()
+    }
+  } else if (type == "prob") {
+    ## h: I\{\tilde T_i \leq tau\}
+    ## vector of dimension n
+    h <- (time > tau)
 
-  ## h: I\{\tilde T_i \leq tau\}
-  ## vector of dimension n
-  h <- (time <= tau)
-
-  ## Hu: H(u|X_i, A_i) = E[I\{T_i \leq \tau\} | T_i > u, X_i, A_i] = I\{u \leq \tau \} \frac{S(u|X_i, A_i) - S(\tau|X_i, A_i)}{S(u|X_i, A_i)}
-  ## vector of dimension n
-  Hu <- function(data, time, S, S_tau, tau) {
-    (S - S_tau) / S * (time <= tau) |> as.vector()
+    ## Hu: H(u|X_i, A_i) = E[I\{T_i > \tau\} | T_i \geq u, X_i, A_i] = I\{u \leq \tau \} \frac{S(u|X_i, A_i) - S(\tau|X_i, A_i)}{S(u|X_i, A_i)}
+    ## vector of dimension n
+    Hu <- function(data, time, S, S_tau, tau) {
+      S_tau / S * (time <= tau) + (time > tau) |> as.vector()
+    }
+  } else {
+    stop("unknown type. Must be either risk or prob.")
   }
 
   ## calculating the right censoring augmentation integral \int_0^tau H(u|X_i, A_i) S^c(u|X_i)}^{-1} dM_i^c
@@ -157,6 +173,8 @@ survival_risk_treatment_level_estimating_functions <- function(data,
   )
 
   estimating_functions <- matrix(nrow = n, ncol = 2)
+  or <- matrix(nrow = n, ncol = 2)
+  ipw <- matrix(nrow = n, ncol =2)
   for (a in 0:1) {
     data_a <- data
     data_a[, A_var] <- factor(A_levels[(a + 1)], levels = A_levels)
@@ -164,19 +182,36 @@ survival_risk_treatment_level_estimating_functions <- function(data,
     ## calculating the weight \frac{I\{A_i = a\}}{g(a|X_i)}
     weight <- (A == a) / (a * g1 + (1 - a) * (1 - g1))
 
-    ## calculating H0: E[I\{T_i \leq \tau\} | X_i, A_i = a] = 1-S(\tau|X_i, A_i = a)
-    H0 <- 1 - cumhaz(
-      object = T_model,
-      newdata = data_a,
-      times = tau
-    )$surv |> as.vector()
+    if (type == "risk") {
+      ## calculating H0: E[I\{T_i \leq \tau\} | X_i, A_i = a] = 1-S(\tau|X_i, A_i = a)
+      H0 <- 1 - cumhaz(
+        object = T_model,
+        newdata = data_a,
+        times = tau
+      )$surv |> as.vector()
+    } else if (type == "prob") {
+      ## calculating H0: E[I\{T_i \leq \tau\} | X_i, A_i = a] = 1-S(\tau|X_i, A_i = a)
+      H0 <- cumhaz(
+        object = T_model,
+        newdata = data_a,
+        times = tau
+      )$surv |> as.vector()
+    }
 
-    estimating_functions[,(a+1)] <- (1-weight) * H0 + weight * (delta / Sc * h + rcai)
+    or[, (a + 1)] <- H0
+    ipw[, (a + 1)] <- weight * delta / Sc * h
+    estimating_functions[, (a + 1)] <- (1 - weight) * H0 + weight * (delta / Sc * h + rcai)
   }
 
   colnames(estimating_functions) <- A_levels
 
-  return(estimating_functions)
+  out <- list(
+    estimating_functions = estimating_functions,
+    or = or,
+    ipw = ipw
+  )
+
+  return(out)
 }
 
 ## vector of size n with values \int_0^tau H(u|X_i, A_i) S^c(u|X_i)}^{-1} dM_i^c
