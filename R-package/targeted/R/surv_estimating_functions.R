@@ -18,12 +18,12 @@
 ##' @return List with elements T_model and C_model
 ##' @author Andreas Nordland, Klaus K. Holst
 fit_survival_models <- function(data,
-                                     response,
-                                     censoring,
-                                     response_call = "phreg",
-                                     response_args = list(),
-                                     censoring_call = "phreg",
-                                     censoring_args = list()) {
+                                response,
+                                censoring,
+                                response_call = "phreg",
+                                response_args = list(),
+                                censoring_call = "phreg",
+                                censoring_args = list()) {
   ## response time-to-event (T) model:
   T_args <- c(
     list(
@@ -105,6 +105,11 @@ survival_treatment_level_estimating_functions <- function(type = "risk",
   ## getting the time for the response T and the event indicator:
   time <- get_response(formula = response, data)[, 1]
   event <- get_response(formula = response, data)[, 2]
+
+  ## checking if (right) censoring occur:
+  if (all(event == 1)) {
+    stop("censoring does not occur in the data (fold).")
+  }
 
   ## checking if tau is missing
   if (missing(tau)) {
