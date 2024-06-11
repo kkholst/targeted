@@ -70,7 +70,7 @@ test_that("cumhaz works for model objects of inherited class coxph.null", {
 
 
   test_predict_1 <- predict(test_coxph, type = "survival") |> unname()
-  test_predict_2 <- diag(test_cumhaz$surv) |> unnname()
+  test_predict_2 <- diag(test_cumhaz$surv) |> unname()
 
   ## survival predictions for each observation at the individual time points:
   expect_equal(test_predict_1, test_predict_2, tolerance = 10e-15)
@@ -87,4 +87,23 @@ test_that("cumhaz works for model objects of inherited class coxph.null", {
   expect_no_error({
     test_cumhaz <- cumhaz(test_coxph, newdata = test_data, times = max_time_epsilon, extend = TRUE)
   })
-})
+
+  expect_no_error({
+    test_cumhaz <- cumhaz(test_coxph, newdata = test_data, times = test_data$time, individual.time = TRUE)
+  })
+
+  expect_equal(
+    test_predict_1,
+    test_cumhaz$surv,
+    tolerance = 10e-15
+  )
+
+  expect_no_error({
+    test_cumhaz <- cumhaz(test_coxph, newdata = test_data, times = rep(1, nrow(test_data)), individual.time = TRUE)
+  })
+
+  expect_no_error({
+    test_cumhaz <- cumhaz(test_coxph, newdata = test_data, times = c(rep(1, nrow(test_data) - 5), rep(2, 5)), individual.time = TRUE)
+  })
+
+  })
