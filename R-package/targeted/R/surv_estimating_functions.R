@@ -182,7 +182,7 @@ survival_treatment_level_estimating_functions <- function(type = "risk",
   ipw <- matrix(nrow = n, ncol =2)
   for (a in 0:1) {
     data_a <- data
-    data_a[, A_var] <- factor(A_levels[(a + 1)], levels = A_levels)
+    data_a[, A_var] <- A_levels[(a + 1)]
 
     ## calculating the weight \frac{I\{A_i = a\}}{g(a|X_i)}
     weight <- (A == a) / (a * g1 + (1 - a) * (1 - g1))
