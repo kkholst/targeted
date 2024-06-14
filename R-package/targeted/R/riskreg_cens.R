@@ -33,22 +33,22 @@
 ##' @author Klaus K. Holst, Andreas Nordland
 ##' @export
 riskreg_cens <- function(response,
-                        censoring,
-                        treatment = NULL,
-                        prediction = NULL,
-                        data,
-                        newdata,
-                        tau,
-                        type="risk",
-                        M = 1,
-                        call.response = "phreg",
-                        args.response = list(),
-                        call.censoring = "phreg",
-                        args.censoring = list(),
-                        preprocess = NULL,
-                        efficient = TRUE,
-                        control = list(),
-                        ...) {
+                         censoring,
+                         treatment = NULL,
+                         prediction = NULL,
+                         data,
+                         newdata,
+                         tau,
+                         type="risk",
+                         M = 1,
+                         call.response = "phreg",
+                         args.response = list(),
+                         call.censoring = "phreg",
+                         args.censoring = list(),
+                         preprocess = NULL,
+                         efficient = TRUE,
+                         control = list(),
+                         ...) {
   dots <- list(...)
   cl <- match.call()
   control0 <- control
@@ -199,9 +199,8 @@ riskreg_cens <- function(response,
         valid_data[, "_pred"] <- rms
       } else {
         Fhat <- 1 - as.vector(cumhaz(T.est,
-          newdata = valid_data.a,
-          times = tau
-          )$surv)
+                                     newdata = valid_data.a,
+                                     times = tau)$surv)
         valid_data[, "_pred"] <- Fhat
       }
       rm(valid_data.a)
@@ -231,7 +230,9 @@ riskreg_cens <- function(response,
         sample=control$sample)
     }
     t. <- pmin(valid.time, tau)
-    sc <- cumhaz(C.est, newdata = valid_data, times = t.,
+    sc <- cumhaz(C.est,
+                 newdata = valid_data,
+                 times = t.,
                  individual.time=TRUE)$surv
     mf <- m(valid.time, valid_data)
     delta <- valid.event
@@ -293,19 +294,16 @@ binreg_augmentation <- function(T.est,
   delta[time > tau] <- 1
 
   S <- cumhaz(T.est,
-    newdata = data.C,
-    times = time.C,
-    individual.time = TRUE
-    )$surv
+              newdata = data.C,
+              times = time.C,
+              individual.time = TRUE)$surv
   S.tau <- cumhaz(T.est,
-    newdata = data.C,
-    times = tau
-    )$surv[1, ]
+                  newdata = data.C,
+                  times = tau)$surv[ , 1]
   Sc <- cumhaz(C.est,
-    newdata = data.C,
-    times = time.C,
-    individual.time = TRUE
-    )$surv
+               newdata = data.C,
+               times = time.C,
+               individual.time = TRUE)$surv
   stopifnot(all(S * Sc> 0))
   ## Counting process term
   Nc <- vector(mode = "numeric", length = n)
@@ -332,8 +330,8 @@ binreg_augmentation <- function(T.est,
       i <- i+1
       at.risk <- tt<=time[i]
       ## E[Q|T>=u, X]
-      Eq <- h(data[r, ], tt, S[, i], S.tau[, i], tau) / Sc$surv[, i]
-      lc <- sum((Eq * at.risk * Sc$dchf[, i]) [tt<=tau])
+      Eq <- h(data[r, ], tt, S[i, ], S.tau[i, ], tau) / Sc$surv[i, ]
+      lc <- sum((Eq * at.risk * Sc$dchf[i, ]) [tt<=tau])
       Lc[r] <- lc
     }
   }

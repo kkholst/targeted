@@ -11,7 +11,7 @@
 ##'   \item time: numeric vector
 ##'   \item chf: cummulative hazard function. If individual.time = FALSE, matrix with dimension (nrow(newdata), length(times)). If individual.time = TRUE, vector of length length(times).
 ##'   \item surv: survival function, exp(-chf).
-##'   \item dchf: diff(rbind(0, chf))
+##'   \item dchf: t(diff(rbind(0, t(chf))))
 ##' }
 ##' @author Klaus K. Holst, Andreas Nordland
 cumhaz <- function(object, newdata, times=NULL, individual.time=FALSE, extend = FALSE,...) {
@@ -36,29 +36,36 @@ cumhaz <- function(object, newdata, times=NULL, individual.time=FALSE, extend = 
       times = times, se = FALSE,
       individual.time = individual.time, ...
     )
-    chf <- t(pp$cumhaz)
+    chf <- pp$cumhaz
+    if (individual.time == TRUE) {
+      chf <- as.vector(chf)
+    }
     tt <- pp$times
   } else if (inherits(object, "rfsrc")) {
     pp <- predict(object, newdata = newdata, oob = TRUE, ...)
-    chf <- t(rbind(pp$chf))
+    chf <- rbind(pp$chf)
     tt <- pp$time.interest
     if (!is.null(times)) {
       idx <- mets::fast.approx(tt, times)
-      chf <- chf[idx, , drop = FALSE]
+      chf <- chf[, idx, drop = FALSE]
       tt <- times
     }
-    if (individual.time) chf <- diag(chf) ## rfsrc unfortunately does not have the immediate possibility to extract individual survival times
+    if (individual.time) {
+      chf <- diag(chf)
+    } ## rfsrc unfortunately does not have the immediate possibility to extract individual survival times
   } else if (inherits(object, "ranger")) {
     num.threads <- object$call$num.threads
     pp <- predict(object, type = "response", data = newdata, num.threads = num.threads, ...)
-    chf <- t(rbind(pp$chf))
+    chf <- rbind(pp$chf)
     tt <- pp$unique.death.times
     if (!is.null(times)) {
       idx <- mets::fast.approx(tt, times)
-      chf <- chf[idx, , drop = FALSE]
+      chf <- chf[ , idx, drop = FALSE]
       tt <- times
     }
-    if (individual.time) chf <- diag(chf)
+    if (individual.time) {
+      chf <- diag(chf)
+    }
   } else if (inherits(object, "coxph")) {
     if (inherits(object, "coxph.null")) { # completely stratified model, i.e., no parameters
       xlevels <- object$xlevels
@@ -92,9 +99,14 @@ cumhaz <- function(object, newdata, times=NULL, individual.time=FALSE, extend = 
     } else {
       pp <- survfit(object, newdata = newdata)
       pp <- summary(pp, time = times)
-      chf <- rbind(pp$cumhaz)
+      if (!is.null(pp$strata)) {
+        stop("cumhaz is not implemented for a coxph model with strata.")
+      }
+      chf <- t(rbind(pp$cumhaz))
       tt <- pp$time
-      if (individual.time) chf <- diag(chf)
+      if (individual.time == TRUE) {
+        chf <- diag(chf)
+      }
     }
   } else if (inherits(object, "survfit")) {
     stop("cumhaz is not implemented for survfit objects.")
@@ -111,18 +123,31 @@ cumhaz <- function(object, newdata, times=NULL, individual.time=FALSE, extend = 
     !anyNA(tt),
     !is.unsorted(tt)
   )
+  if (individual.time == TRUE) {
+    stopifnot(
+      is.vector(chf)
+    )
+  } else {
+    stopifnot(
+      is.matrix(chf)
+    )
+  }
+
   if (is.matrix(chf)) {
     stopifnot(
       length(tt) == dim(chf)[2],
       nrow(newdata) == dim(chf)[1]
     )
-  } else if (is.vector(chf)) {
+  } else {
     stopifnot(
       length(tt) == length(chf)
     )
-  } else {
-    stop("Internal error: chf is not a vector or a matrix.")
   }
 
-  list(time=tt, chf=chf, surv=exp(-chf), dchf=diff(rbind(0,chf)))
+  list(
+    time = tt,
+    chf = chf,
+    surv = exp(-chf),
+    dchf = t(diff(rbind(0, t(chf))))
+  )
 }

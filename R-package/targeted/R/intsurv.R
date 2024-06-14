@@ -62,7 +62,7 @@ intsurv2 <- function(object, data, time, stop=max(time), sample=0, blocksize=0) 
     i <- 0
     for(r in b) { ## Loop over each row in the data
       i <- i+1
-      int <- intsurv(tt, S[,i], tau)
+      int <- intsurv(tt, S[i,], tau)
       res[r] <- 0
     }
   }

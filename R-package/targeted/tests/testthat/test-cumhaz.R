@@ -45,15 +45,79 @@ par0 <- list(
 set.seed(1)
 test_data <- sim_surv(n = 1e3, beta = par0$beta, zeta = par0$zeta)
 
+test_cumhaz_function <- function(object) {
 
-test_that("cumhaz works for model objects of inherited class coxph.null", {
+  expect_no_error({
+    test_cumhaz <- cumhaz(object, times = c(0.4, 0.5), newdata = test_data[c(23, 655, 800), ])
+  })
+
+  expect_equal(
+    dim(test_cumhaz$chf),
+    c(3, 2)
+  )
+
+  expect_equal(
+    test_cumhaz$time,
+    c(0.4, 0.5)
+  )
+
+  expect_no_error({
+    test_cumhaz <- cumhaz(object, times = c(0.4, 0.5), newdata = test_data[c(23, 655), ], individual.time = TRUE)
+  })
+}
+
+
+test_that("cumhaz works for model objects of class class phreg", {
+
+  library(survival)
+  library(mets)
+
+  test_phreg <- phreg(Surv(time, event) ~ W, data = test_data)
+
+  test_cumhaz_function(test_phreg)
+
+  test_cumhaz <- cumhaz(test_phreg, newdata = test_data, times= c(0.4, 0.5))
+  ref_cumhaz <- as.matrix(predict(test_phreg, times = c(0.4, 0.5))$cumhaz)
+
+  expect_equal(
+    ref_cumhaz,
+    as.matrix(test_cumhaz$chf)
+  )
+
+  test_cumhaz <- cumhaz(test_phreg, newdata = test_data[c(100,800),], times= c(0.4, 0.5))
+
+})
+
+
+test_that("cumhaz works for model objects of class coxph", {
 
   library(survival)
 
-  ## must be sorted
-  expect_true(!is.unsorted(test_data$time))
+  test_coxph <- coxph(Surv(time, event) ~ W, data = test_data)
+
+  test_cumhaz_function(test_coxph)
+
+  test_cumhaz <- cumhaz(test_coxph, newdata = test_data, times = c(0.4, 0.5))
+
+  ref_cumhaz <- survfit(test_coxph, newdata = test_data)
+  ref_cumhaz <- summary(ref_cumhaz, times = c(0.4, 0.5))
+  ref_cumhaz <- ref_cumhaz$cumhaz |> t()
+
+  expect_equal(
+    ref_cumhaz,
+    as.matrix(test_cumhaz$chf)
+  )
+
+})
+
+
+test_that("cumhaz works for model objects of class coxph.null", {
+
+  library(survival)
 
   test_coxph <- coxph(Surv(time, event) ~ strata(A, D), data = test_data)
+
+  test_cumhaz_function(test_coxph)
 
   ## must be a coxph.null object:
   expect_true({
@@ -106,4 +170,34 @@ test_that("cumhaz works for model objects of inherited class coxph.null", {
     test_cumhaz <- cumhaz(test_coxph, newdata = test_data, times = c(rep(1, nrow(test_data) - 5), rep(2, 5)), individual.time = TRUE)
   })
 
+})
+
+test_that("cumhaz works for model objects of class class rfsrc.", {
+
+  library(survival)
+  library(randomForestSRC)
+
+  test_rfsrc <- rfsrc(Surv(time, event) ~ W, data = test_data, ntree = 10, block.size = 1)
+
+  test_cumhaz_function(test_rfsrc)
+
+  expect_no_error({
+    test_cumhaz <- cumhaz(test_rfsrc, newdata = test_data, times = c(0.4, 0.5))
   })
+
+})
+
+test_that("cumhaz works for model objects of class ranger.", {
+
+  library(survival)
+  library(ranger)
+
+  test_ranger <- ranger(Surv(time, event) ~ W, data = test_data, num.trees = 10)
+
+  test_cumhaz_function(test_ranger)
+
+  expect_no_error({
+    test_cumhaz <- cumhaz(test_ranger, newdata = test_data, times = c(0.4, 0.5))
+  })
+
+})
