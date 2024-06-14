@@ -291,11 +291,11 @@ right_censoring_augmentation_integral <- function(T_model,
       hu <- Hu(
         data = data[r, ],
         time = tt,
-        S = S[i,],
-        S_tau = S_tau[i,],
+        S = S[i, ],
+        S_tau = S_tau[i, ],
         tau = tau
-      ) / Sc$surv[i,i]
-      lc <- sum((hu * at_risk * Sc$dchf[i,])[tt <= tau])
+      ) / Sc$surv[i, ]
+      lc <- sum((hu * at_risk * Sc$dchf[i, ])[tt <= tau])
       Lc[r] <- lc
     }
   }
