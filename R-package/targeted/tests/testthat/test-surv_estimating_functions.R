@@ -1,6 +1,7 @@
 library(data.table)
 library(survival)
 library(SuperLearner)
+library(mets)
 
 sim_surv_unif <- function(n) {
   id <- 1:n
@@ -28,8 +29,55 @@ sim_surv_unif <- function(n) {
 set.seed(1)
 test_data_unif <- sim_surv_unif(n = 1e3)
 
-test_that("surv_estimating_functions have similar results for type risk or prob."{
+sim_surv <- function(n, beta, zeta) {
+  ## id
+  id <- 1:n
 
+  ## covariate W
+  W <- runif(n, min = 1, max = 3)
+
+  ## treatment
+  A <- rbinom(n = n, size = 1, prob = 0.5)
+
+  ## simulate T
+  TT1 <- c(unlist(rexp(n, 1) / exp(matrix(c(rep(1, n), W, rep(1, n), rep(1, n) * W), ncol = 4) %*% beta)))
+  TT0 <- c(unlist(rexp(n, 1) / exp(matrix(c(rep(1, n), W), ncol = 2) %*% beta[1:2])))
+  TT <- TT1 * A + TT0 * (1 - A)
+
+  ## simulate C
+  C <- c(unlist(rexp(n, 1) / exp(matrix(c(rep(1, n), A), ncol = 2) %*% zeta)))
+
+  time <- apply(cbind(TT, C), 1, min)
+  event <- TT < C
+
+  d <- data.frame(
+    id = id,
+    W = W,
+    A = A,
+    TT1 = TT1,
+    TT0 = TT0,
+    TT = TT,
+    C = C,
+    time = time,
+    event = event
+  )
+  d <- d[order(time), ]
+
+  return(d)
+}
+
+par0 <- list(
+  beta = c(-2, 2, -0.2, -0.4),
+  zeta = c(-1, 0.5),
+  tau = 1
+)
+
+set.seed(1)
+test_data <- sim_surv(n = 1e3, beta = par0$beta, zeta = par0$zeta)
+test_data$D <- rbinom(n = nrow(test_data), size = 1, prob = 0.5)
+
+
+test_that("surv_estimating_functions have similar results for type risk or prob.", {
   test_survival_models <- fit_survival_models(
     data = test_data_unif,
     response = Surv(time, event) ~ strata(A),
@@ -62,5 +110,40 @@ test_that("surv_estimating_functions have similar results for type risk or prob.
     control = list(sample = 0, blocksize = 0)
   )
 
+  expect_equal(
+    apply(test_risk_treat_ef$estimating_functions, 2, mean),
+    apply(1 - test_prob_treat_ef$estimating_functions, 2, mean),
+    tolerance = 1e-2
+  )
+})
+
+test_that("surv_estimating_functions is consistent.", {
+
+  test_survival_models <- fit_survival_models(
+    data = test_data,
+    response = Surv(time, event) ~ A + A * W,
+    response_call = "phreg",
+    censoring = Surv(time, event == 0) ~ A,
+    censoring_call = "phreg"
+  )
+
+  test_treatment_model <- fit_treatment_model(data = test_data, treatment = A ~ 1)
+
+  test_risk_ef <- survival_treatment_level_estimating_functions(
+    type = "risk",
+    data = test_data,
+    tau = par0$tau,
+    survival_models = test_survival_models,
+    treatment_model = test_treatment_model,
+    control = list(sample = 0, blocksize = 0)
+  )
+
+  test_coef <- test_risk_ef$estimating_functions |> apply(2, mean)
+
+  expect_equal(
+    unname(test_coef),
+    c(0.9399351, 0.8822896),
+    tolerance = 1e-7
+  )
 
 })
