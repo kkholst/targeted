@@ -236,20 +236,23 @@ right_censoring_augmentation_integral <- function(T_model,
   time_C <- time[event == 0]
 
   ## Counting process term:
-  S <- cumhaz(T_model,
-              newdata = data_C,
-              times = time_C,
-              individual.time = TRUE
-              )$surv
-  S_tau <- cumhaz(T_model,
-                  newdata = data_C,
-                  times = tau
-                  )$surv[1, ]
-  Sc <- cumhaz(C_model,
+  S <- cumhaz(
+    T_model,
     newdata = data_C,
     times = time_C,
     individual.time = TRUE
-    )$surv
+  )$surv
+  S_tau <- cumhaz(
+    T_model,
+    newdata = data_C,
+    times = tau
+  )$surv[, 1]
+  Sc <- cumhaz(
+    C_model,
+    newdata = data_C,
+    times = time_C,
+    individual.time = TRUE
+  )$surv
   stopifnot(all(S * Sc > 0))
   Nc <- vector(mode = "numeric", length = n)
   Nc[(event == 0)] <- Hu(
@@ -288,11 +291,11 @@ right_censoring_augmentation_integral <- function(T_model,
       hu <- Hu(
         data = data[r, ],
         time = tt,
-        S = S[, i],
-        S_tau = S_tau[, i],
+        S = S[i,],
+        S_tau = S_tau[i,],
         tau = tau
-      ) / Sc$surv[, i]
-      lc <- sum((hu * at_risk * Sc$dchf[, i])[tt <= tau])
+      ) / Sc$surv[i,i]
+      lc <- sum((hu * at_risk * Sc$dchf[i,])[tt <= tau])
       Lc[r] <- lc
     }
   }
