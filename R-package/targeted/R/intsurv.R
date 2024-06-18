@@ -44,25 +44,74 @@ intsurv <- function(time, surv, stop = max(time), jumps.only=FALSE) {
 }
 
 
-intsurv2 <- function(object, data, time, stop=max(time), sample=0, blocksize=0) {
+intsurv2 <- function(object, data, time, stop = max(time), sample = 0, blocksize = 0) {
   tau <- min(max(as.vector(time)), stop)
   n <- NROW(data)
   Lc <- vector(mode = "numeric", length = n)
   tt <- time
-  if (sample>0) {
-    tt <- subjumps(time, size=sample, tau=tau)
+  if (sample > 0) {
+    tt <- subjumps(time, size = sample, tau = tau)
   }
   blocks <- list(1:n)
-  if (blocksize>0)
-    blocks <- lava::csplit(1:n, k=min(n, blocksize))
+  if (blocksize > 0) {
+    blocks <- lava::csplit(1:n, k = min(n, blocksize))
+  }
 
   res <- numeric(n)
   for (b in blocks) {
     S <- cumhaz(object, newdata = data[b, ], times = tt)$surv
     i <- 0
-    for(r in b) { ## Loop over each row in the data
-      i <- i+1
-      int <- intsurv(tt, S[,i], tau)
+    for (r in b) { ## Loop over each row in the data
+      i <- i + 1
+      int <- intsurv(tt, S[i, ], tau)
+      res[r] <- 0
+    }
+  }
+  return(res)
+}
+
+
+##' Computes $\int_0^stop S(t|X) dt$
+##'
+##' @title
+##' @param object Survival model object
+##' @param data data.frame containing the covariates X
+##' @param times Numeric vector, time points that the survival function is evalauted in
+##' @param start Numeric, start of the integral
+##' @param stop Numeric, end of the integral
+##' @param sample
+##' @param blocksize
+##' @return Numeric vector of length nrow(data).
+##' @author Andreas Nordland
+intsurv3 <- function(object, data, times, tau = max(times), sample = 0, blocksize = 0) {
+
+  times <- as.vector(times)
+
+  stopifnot(
+    all(times > 0)
+  )
+
+  tau <- min(max(times), tau)
+  n <- nrow(data)
+
+  tt <- times
+  if (sample > 0) {
+    tt <- subjumps(times, size = sample, tau = tau)
+  }
+
+  blocks <- list(1:n)
+  if (blocksize > 0) {
+    blocks <- lava::csplit(1:n, k = min(n, blocksize))
+  }
+
+  res <- numeric(n)
+  for (b in blocks) {
+    browser()
+    S  <- cumhaz(object, newdata = data[b, ], times = tt)$surv
+    i <- 0
+    for (r in b) { ## Loop over each row in the data
+      i <- i + 1
+      int <- intsurv(tt, S[i, ], tau)
       res[r] <- 0
     }
   }
