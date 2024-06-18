@@ -87,6 +87,11 @@ fit_treatment_model <- function(data,
   return(out)
 }
 
+Hu_rmst <- function(data, time, S, S_tau, tau) {
+  I <- intsurv(time = time, surv = S, stop = tau)$cint
+  (tau > time) * (time + I / S) + tau * (tau <= time)
+}
+
 ##' @title Treatment level estimating functions for survival outcomes under right censoring
 ##' @param type Character string, outcome of interest: "risk": P(T <= tau|A=a), "surv": P(T > tau|A=a)
 ##' @param data data.frame
@@ -159,15 +164,20 @@ survival_treatment_level_estimating_functions <- function(type = "risk",
       (S - S_tau) / S * (time <= tau) |> as.vector()
     }
   } else if (type == "prob") {
-    ## h: I\{\tilde T_i \leq tau\}
-    ## vector of dimension n
+    ## h: I\{\tilde T_i > tau\}
     h <- (time > tau)
 
     ## Hu: H(u|X_i, A_i) = E[I\{T_i > \tau\} | T_i \geq u, X_i, A_i] = I\{u \leq \tau \} \frac{S(u|X_i, A_i) - S(\tau|X_i, A_i)}{S(u|X_i, A_i)}
-    ## vector of dimension n
     Hu <- function(data, time, S, S_tau, tau) {
       S_tau / S * (time <= tau) + (time > tau) |> as.vector()
     }
+  } else if (type == "rmst") {
+    ## h: \min(\tilde{T}, \tau)
+    h <- pmin(time, tau)
+
+    ## Hu:
+    Hu <- Hu_rmst
+
   } else {
     stop("unknown type. Must be either risk or prob.")
   }
