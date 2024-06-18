@@ -170,6 +170,16 @@ test_that("cumhaz works for model objects of class coxph.null", {
     test_cumhaz <- cumhaz(test_coxph, newdata = test_data, times = c(rep(1, nrow(test_data) - 5), rep(2, 5)), individual.time = TRUE)
   })
 
+  ## test that cumhaz works with nwedata not containing all strata
+  test_coxph <- coxph(Surv(time, event) ~ strata(A), data = test_data)
+
+  test_data_0 <- test_data
+  test_data_0[, "A"] <- 0
+
+  expect_true({
+    !any(is.na(cumhaz(test_coxph, newdata = test_data_0, times = 1)$chf))
+  })
+
 })
 
 test_that("cumhaz works for model objects of class class rfsrc.", {

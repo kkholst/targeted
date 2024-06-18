@@ -68,7 +68,6 @@ cumhaz <- function(object, newdata, times=NULL, individual.time=FALSE, extend = 
     }
   } else if (inherits(object, "coxph")) {
     if (inherits(object, "coxph.null")) { # completely stratified model, i.e., no parameters
-      xlevels <- object$xlevels
       formula <- object$formula
 
       mf <- model.frame(formula, data = newdata)
