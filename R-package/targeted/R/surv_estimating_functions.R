@@ -70,7 +70,7 @@ fit_treatment_model <- function(data,
     stop("Expected binary treatment variable.")
   }
   A_var <- all.vars(update(formula(treatment), ~1)) # name of the treatment variable
-  A_value <- (A == A_levels[2]) * 1                 # binary representation of the treatment variable
+  A_value <- (A == A_levels[2]) * 1 # binary representation of the treatment variable
 
   ## overwriting the treatment variable with the binary representation:
   data[, A_var] <- A_value
@@ -87,7 +87,15 @@ fit_treatment_model <- function(data,
   return(out)
 }
 
-
+##' @title Treatment level estimating functions for survival outcomes under right censoring
+##' @param type Character string, outcome of interest: "risk": P(T <= tau|A=a), "surv": P(T > tau|A=a)
+##' @param data data.frame
+##' @param tau Numeric, time-point of interest
+##' @param survival_models List of survival models, see fit_survival_models()
+##' @param treatment_model Treatment model, see fit_treatment_model()
+##' @param control List of control parameters, list(sample, blocksize)
+##' @return List with matrix elements estimating_functions, or, and ipw.
+##' @author Andreas Nordland
 survival_treatment_level_estimating_functions <- function(type = "risk",
                                                           data,
                                                           tau,
