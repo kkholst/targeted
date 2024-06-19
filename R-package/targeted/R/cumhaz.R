@@ -100,11 +100,12 @@ cumhaz <- function(object, newdata, times=NULL, individual.time=FALSE, extend = 
         chf <- unlist(chf) |> unname()
       }
     } else {
-      pp <- survfit(object, newdata = newdata)
-      pp <- summary(pp, time = times)
-      if (!is.null(pp$strata)) {
+      if (!is.null(object$xlevels)) {
         stop("cumhaz is not implemented for a coxph model with strata.")
       }
+      pp <- survfit(object, newdata = newdata)
+      pp <- summary(pp, time = times)
+
       chf <- t(rbind(pp$cumhaz))
       tt <- pp$time
       if (individual.time == TRUE) {
@@ -112,6 +113,10 @@ cumhaz <- function(object, newdata, times=NULL, individual.time=FALSE, extend = 
       }
     }
   } else if (inherits(object, "survfit")) {
+
+    if (inherits(object, "survfitcox")) {
+      stop("Use cumhaz on the coxph model object directly instead.")
+    }
 
     call <- object$call
     formula <- call$formula
