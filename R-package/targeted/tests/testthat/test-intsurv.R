@@ -26,28 +26,60 @@ sim_surv_unif <- function(n) {
 }
 
 set.seed(1)
-test_data_unif <- sim_surv_unif(n = 1e3)
+n <- 2e3
+test_data_unif <- sim_surv_unif(n = n)
+test_survfit_unif <- survfit(Surv(TT, event = rep(1, n)) ~ 1, data = test_data_unif)
+test_times_unif <- sort(test_data_unif$TT)
+tau0 <- 1.75
+u0 <- 0.5
 
-test_that("intsurv3", {
+test_that("int_surv() integrates given functions", {
+
+  n <- 1e3
+  set.seed(1)
+  times <- sort(runif(n = n, min = 0, max = 1))
+
+  fun <- function(x) 1 - x^2
+  fun_values <- fun(times)
+
+  true_value <- integrate(fun, lower = 0.2, upper = 0.7)$value
+
+  expect_no_error({
+    value <- int_surv(times = times, surv = fun_values, start = 0.2, stop = 0.7)
+  })
+
+  expect_true(!is.na(value))
+
+  expect_equal(
+    true_value,
+    value,
+    tolerance = 1e-3
+  )
+
 })
 
+test_that("int_surv() matches the true value for a uniform event time distribution", {
 
-u <- c(0.5, 1, 1.5)
-tau0 <- 1.75
+  surv <- cumhaz(
+    test_survfit_unif,
+    newdata = test_data_unif,
+    times = test_times_unif,
+    individual.time = TRUE
+  )$surv
 
-empir_Hu <- function(u) {
-  pmin(test_data_unif$TT, tau0)[test_data_unif$TT > u] |> mean()
-}
+  is <- int_surv(
+    times = test_times_unif,
+    surv = surv,
+    start = u0,
+    stop = tau0
+  )
 
-empir_Hu <- Vectorize(empir_Hu)
+  true_value <- integrate(function(x) 1-x/2, lower = u0, upper = tau0)$value
 
-empir_Hu0 <- empir_Hu(u)
+  expect_equal(
+    is,
+    true_value,
+    tolerance = 2e-2
+  )
 
-sf <- survfit(Surv(test_data_unif$TT, event = rep(1, nrow(test_data_unif)))~1)
-S0 <- summary(sf, times = test_data_unif$TT)$surv
-
-true_int_u_tau_S <- tau0 - u - 1/4*tau0^2 + 1/4 * u^2
-
-intsurv(time = , surv = S0, stop = tau0)
-
-Hu_rmst(time = u, S = S0, tau = tau0)
+})
