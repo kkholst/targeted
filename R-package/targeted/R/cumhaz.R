@@ -2,7 +2,7 @@
 ##' @title Predict the cumulative hazard/survival function for a survival model
 ##' @param object Survival model object: phreg, coxph, rfsrc, ranger
 ##' @param newdata data.frame
-##' @param times numeric vector: Time points at which the survival model is evalauted. If NULL, the time points associated with the survival model is used.
+##' @param times numeric vector: Time points at which the survival model is evalauted. Must be a sorted vector with unique elements. If NULL, the time points associated with the survival model is used.
 ##' @param individual.time logical: If TRUE the survival object is evaluated at different time points for each row in newdata.
 ##' The number of rows in newdata and the length of times must be the same.
 ##' @param ... Additional arguments.
@@ -15,16 +15,20 @@
 ##' }
 ##' @author Klaus K. Holst, Andreas Nordland
 cumhaz <- function(object, newdata, times=NULL, individual.time=FALSE, extend = FALSE,...) {
+  n <- nrow(newdata)
+
   ## input check: times
   if (!is.null(times)) {
     stopifnot(
       is.numeric(times),
       length(times) > 0,
-      !anyNA(times)
+      !anyNA(times),
+      !is.unsorted(times)
     )
     if (individual.time == TRUE) {
       stopifnot(
-        nrow(newdata) == length(times)
+        !is.null(times),
+        n == length(times)
       )
     }
   }
@@ -68,7 +72,6 @@ cumhaz <- function(object, newdata, times=NULL, individual.time=FALSE, extend = 
     }
   } else if (inherits(object, "coxph")) {
     if (inherits(object, "coxph.null")) { # completely stratified model, i.e., no parameters
-      xlevels <- object$xlevels
       formula <- object$formula
 
       mf <- model.frame(formula, data = newdata)
@@ -87,7 +90,6 @@ cumhaz <- function(object, newdata, times=NULL, individual.time=FALSE, extend = 
         chf[, ("strata") := NULL]
         chf <- as.matrix(chf)
       } else {
-        stopifnot(!is.null(times))
         tt <- times
         strata[, ("time") := times]
         ssf_df <- unique(ssf_df)
@@ -97,11 +99,12 @@ cumhaz <- function(object, newdata, times=NULL, individual.time=FALSE, extend = 
         chf <- unlist(chf) |> unname()
       }
     } else {
-      pp <- survfit(object, newdata = newdata)
-      pp <- summary(pp, time = times)
-      if (!is.null(pp$strata)) {
+      if (!is.null(object$xlevels)) {
         stop("cumhaz is not implemented for a coxph model with strata.")
       }
+      pp <- survfit(object, newdata = newdata)
+      pp <- summary(pp, time = times)
+
       chf <- t(rbind(pp$cumhaz))
       tt <- pp$time
       if (individual.time == TRUE) {
@@ -109,8 +112,49 @@ cumhaz <- function(object, newdata, times=NULL, individual.time=FALSE, extend = 
       }
     }
   } else if (inherits(object, "survfit")) {
-    stop("cumhaz is not implemented for survfit objects.")
-    pp <- summary(object, time = times)
+
+    if (inherits(object, "survfitcox")) {
+      stop("Use cumhaz on the coxph model object directly instead.")
+    }
+
+    call <- object$call
+    formula <- call$formula
+    strata_indicator <- !is.null(object$strata)
+    ssf <- summary(object, time = times, extend = extend)
+    ssf_df <- data.table::data.table(strata = ssf$strata, time = ssf$time, chf = ssf$cumhaz)
+
+    if (strata_indicator == FALSE) {
+      tt <- ssf$time
+      chf <- ssf$cumhaz
+
+      if (individual.time == FALSE) {
+        chf <- matrix(rep(chf, times = n), ncol = length(tt), byrow = TRUE)
+        colnames(chf) <- tt
+      }
+    } else {
+      if (is.null(formula)) {
+        stop("formula not available for the survfit object.")
+      }
+      mf <- model.frame(formula, data = newdata)[, -1, drop = FALSE]
+      strata <- data.table(strata = strata(mf))
+
+      if (individual.time == FALSE) {
+
+        ssf_df_wide <- data.table::dcast(ssf_df, strata ~ time, value.var = "chf")
+        tt <- colnames(ssf_df_wide)[-1] |> as.numeric()
+
+        chf <- merge(strata, ssf_df_wide, by = "strata", all.x = TRUE, sort = FALSE)
+        chf[, ("strata") := NULL]
+        chf <- as.matrix(chf)
+      } else {
+        tt <- times
+        strata[, ("time") := tt]
+        chf <- merge(strata, ssf_df, by = c("strata", "time"), all.x = TRUE, sort = FALSE)
+        chf[, ("strata") := NULL]
+        chf[, ("time") := NULL]
+        chf <- unlist(chf) |> unname()
+      }
+    }
   } else {
     stop("unknown survival model object. Must be either phreg, rfsrc, ranger, or coxph.")
   }

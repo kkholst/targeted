@@ -1,10 +1,14 @@
+library(survival)
+library(mets)
+library(data.table)
+
 sim_surv <- function(n, beta, zeta){
   ## id
   id <- 1:n
 
   ## covariate W and D
   W <- runif(n, min = 1, max = 3)
-  D <- rbinom(n = n, size = 1, prob = 0.5)
+  D <- as.factor(rbinom(n = n, size = 1, prob = 0.5))
 
   ## treatment
   A <- rbinom(n = n, size = 1, prob = 0.5)
@@ -45,32 +49,114 @@ par0 <- list(
 set.seed(1)
 test_data <- sim_surv(n = 1e3, beta = par0$beta, zeta = par0$zeta)
 
+test_times <- c(0.4, 0.5)
+idx <- c(23, 658)
+idx_add <- c(idx, c(1, 802))
+
 test_cumhaz_function <- function(object) {
 
   expect_no_error({
-    test_cumhaz <- cumhaz(object, times = c(0.4, 0.5), newdata = test_data[c(23, 655, 800), ])
+    test_cumhaz <- cumhaz(object, times = test_times, newdata = test_data[idx_add, ])
   })
+
+  expect_true(any(!is.na(test_cumhaz$chf)))
 
   expect_equal(
     dim(test_cumhaz$chf),
-    c(3, 2)
+    c(length(idx_add), length(test_times))
   )
 
   expect_equal(
     test_cumhaz$time,
-    c(0.4, 0.5)
-  )
+    test_times)
 
   expect_no_error({
-    test_cumhaz <- cumhaz(object, times = c(0.4, 0.5), newdata = test_data[c(23, 655), ], individual.time = TRUE)
+    test_cumhaz <- cumhaz(object, times = test_times, newdata = test_data[idx, ], individual.time = TRUE)
   })
+
+  expect_true(any(!is.na(test_cumhaz$chf)))
+
+  test_cumhaz_diag <- cumhaz(object, times = test_times, newdata = test_data[idx,], individual.time = FALSE)
+
+  expect_equal(
+    test_cumhaz$chf,
+    diag(test_cumhaz_diag$chf)
+  )
+
 }
+
+test_that("cumhaz works for model objects of survfit", {
+
+  ## no strata:
+
+  test_survfit <- survfit(Surv(time, event) ~ 1, data = test_data)
+
+  test_cumhaz_function(test_survfit)
+
+  ref_cumhaz <- summary(test_survfit, times = test_times)
+  ref_cumhaz <- matrix(rep(ref_cumhaz$cumhaz, nrow(test_data)), ncol = length(test_times), byrow = TRUE)
+  colnames(ref_cumhaz) <- test_times
+
+  expect_no_error({
+    test_cumhaz <- cumhaz(object = test_survfit, newdata = test_data, times = test_times)
+  })
+
+  expect_equal(
+    ref_cumhaz,
+    test_cumhaz$chf
+  )
+
+  ## with strata:
+
+  test_survfit <- survfit(Surv(time, event) ~ A + D, data = test_data)
+
+  test_cumhaz_function(test_survfit)
+
+  ref_cumhaz <- summary(test_survfit, times = test_times)
+  ref_cumhaz <- data.table(
+    chf = ref_cumhaz$cumhaz,
+    strata = ref_cumhaz$strata,
+    time = ref_cumhaz$time
+  )
+  ref_cumhaz <- dcast(ref_cumhaz, strata ~ time, value.var = "chf")
+  ref_cumhaz <- merge(
+    data.table(strata = strata(test_data[, c("A", "D")])),
+    ref_cumhaz,
+    by = "strata",
+    sort = FALSE,
+    all.x = TRUE
+  )
+  ref_cumhaz <- as.matrix(ref_cumhaz[, -1, drop = FALSE])
+
+  expect_no_error({
+    test_cumhaz <- cumhaz(object = test_survfit, newdata = test_data, times = test_times)
+  })
+
+  expect_equal(
+    ref_cumhaz,
+    test_cumhaz$chf
+  )
+
+  ## with factor strata:
+
+  test_survfit <- survfit(Surv(time, event) ~ D, data = test_data)
+
+  test_cumhaz_function(test_survfit)
+
+  ## with strata in formula
+
+  test_survfit <- survfit(Surv(time, event) ~ strata(A, D), data = test_data)
+
+  test_cumhaz_function(test_survfit)
+
+  expect_no_error({
+    test_cumhaz <- cumhaz(object = test_survfit, newdata = test_data, times = test_times)
+  })
+
+})
 
 
 test_that("cumhaz works for model objects of class class phreg", {
-
-  library(survival)
-  library(mets)
 
   test_phreg <- phreg(Surv(time, event) ~ W, data = test_data)
 
@@ -91,9 +177,16 @@ test_that("cumhaz works for model objects of class class phreg", {
 
 test_that("cumhaz works for model objects of class coxph", {
 
-  library(survival)
-
   test_coxph <- coxph(Surv(time, event) ~ W, data = test_data)
+
+  test_sf <- survfit(test_coxph)
+  expect_error(
+    {
+      cumhaz(test_sf, newdata = test_data)
+    },
+    "Use cumhaz on the coxph model object directly instead."
+  )
+
 
   test_cumhaz_function(test_coxph)
 
@@ -112,8 +205,6 @@ test_that("cumhaz works for model objects of class coxph", {
 
 
 test_that("cumhaz works for model objects of class coxph.null", {
-
-  library(survival)
 
   test_coxph <- coxph(Surv(time, event) ~ strata(A, D), data = test_data)
 
@@ -162,13 +253,22 @@ test_that("cumhaz works for model objects of class coxph.null", {
     tolerance = 10e-15
   )
 
-  expect_no_error({
-    test_cumhaz <- cumhaz(test_coxph, newdata = test_data, times = rep(1, nrow(test_data)), individual.time = TRUE)
+  ## test that cumhaz works with newdata not containing all strata
+  test_coxph <- coxph(Surv(time, event) ~ strata(A), data = test_data)
+
+  test_data_0 <- test_data
+  test_data_0[, "A"] <- 0
+
+  expect_true({
+    !any(is.na(cumhaz(test_coxph, newdata = test_data_0, times = 1)$chf))
   })
 
-  expect_no_error({
-    test_cumhaz <- cumhaz(test_coxph, newdata = test_data, times = c(rep(1, nrow(test_data) - 5), rep(2, 5)), individual.time = TRUE)
-  })
+  test_coxph <- coxph(Surv(time, event) ~ strata(A) + W, data = test_data)
+
+  expect_error(
+    cumhaz(test_coxph, newdata = test_data),
+    "cumhaz is not implemented for a coxph model with strata."
+  )
 
 })
 
