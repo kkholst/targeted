@@ -23,8 +23,7 @@ cumhaz <- function(object, newdata, times=NULL, individual.time=FALSE, extend = 
       is.numeric(times),
       length(times) > 0,
       !anyNA(times),
-      !is.unsorted(times),
-      !any(duplicated(times))
+      !is.unsorted(times)
     )
     if (individual.time == TRUE) {
       stopifnot(
