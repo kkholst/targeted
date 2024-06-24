@@ -9,7 +9,7 @@ ate_if_fold <- function(fold, data,
     deval <- data[fold, ]
   }
 
-  tmp <- propensity_model$estimate(dtrain)
+  pmod <- propensity_model$estimate(dtrain)
   X <- deval
   if (stratify) {
     idx <- which(dtrain[, treatment]==level)
@@ -21,12 +21,23 @@ ate_if_fold <- function(fold, data,
 
   A <- propensity_model$response(deval)
   Y <- response_model$response(deval, na.action=lava::na.pass0)
-  pr <- propensity_model$predict(newdata=deval)
+  pr <- propensity_model$predict(newdata = deval)
   if (NCOL(pr)>1)
     pr <- pr[, 2]
   eY <- response_model$predict(newdata = X)
-  IF <- A / pr * (Y - eY) + eY
-  return(IF)
+  part1 <- A / pr * (Y - eY)
+  IC <- part1 + eY
+  adj <- NULL
+  if (inherits(pmod, "glm")) {
+    pX <- propensity_model$design(deval, intercept = TRUE)
+    dlinkinv <- pmod$family$mu.eta
+    adj <- -part1 / pr * dlinkinv(pmod$family$linkfun(pr))
+    for (i in seq_len(ncol(pX))) {
+      pX[, i] <- pX[, i] * adj
+    }
+    adj <- pX
+  }
+  return(list(IC = IC, pmod = pr, qmod = eY, adj = adj))
 }
 
 cate_fold1 <- function(fold, data, score, treatment_des) {
@@ -51,7 +62,7 @@ cate_fold1 <- function(fold, data, score, treatment_des) {
 ##' @param stratify If TRUE the response_model will be stratified by treatment
 ##' @param ... additional arguments to future.apply::future_mapply
 ##' @return cate.targeted object
-##' @author Klaus Kähler Holst
+##' @author Klaus Kähler Holst, Andreas Nordland
 ##' @examples
 ##' sim1 <- function(n=1e4,
 ##'                  seed=NULL,
@@ -116,7 +127,7 @@ cate <- function(treatment,
   folds <- lapply(folds, sort)
   ff <- Reduce(c, folds)
   idx <- order(ff)
-  scores <- list()
+  scores <- adj <- list()
   if (!silent) {
     pb <- progressr::progressor(steps = length(contrast) * nfolds)
   }
@@ -130,7 +141,7 @@ cate <- function(treatment,
                        stratify,
                        folds,
                        ...) {
-    rmod <- response_model$clone(deep=TRUE)
+    rmod <- response_model$clone(deep = TRUE)
     pmod <- propensity_model$clone(deep = TRUE)
     newf <- reformulate(as.character(pmod$formula)[[3]], propensity_outcome(a))
     pmod$update(newf)
@@ -139,8 +150,8 @@ cate <- function(treatment,
       propensity_model = pmod,
       response_model = rmod,
       treatment = treatment_var,
-      level = a, stratify=stratify
-    ))
+      level = a, stratify = stratify
+      ))
     return(val)
   }
 
@@ -155,7 +166,7 @@ cate <- function(treatment,
         data = data, folds = folds, stratify = stratify
       ),
       ...
-    )
+     )
   } else {
     val <- future.apply::future_mapply(procfold,
       a = as.list(fargs[, 2]), fold = as.list(fargs[, 1]),
@@ -172,10 +183,20 @@ cate <- function(treatment,
   }
 
   for (i in contrast) {
-    ii <- which(fargs[,2] == i)
-    scores <- c(scores, list(unlist(val[ii])[idx]))
+    ii <- which(fargs[, 2] == i)
+    scores <- c(
+      scores,
+      list(unlist(lapply(ii, function(x) val[[x]]$IC))[idx])
+    )
+    if (!is.null(val[[1]]$adj)) {
+      A <- lapply(ii, function(x) {
+        val[[x]]$adj
+      })
+      adj <- c(adj, list(Reduce(rbind, A)[idx, , drop = FALSE]))
+    }
   }
   names(scores) <- contrast
+  if (length(adj)>0) names(adj) <- contrast
 
   Y <- scores[[1]]
   if (length(contrast)>1)
@@ -197,13 +218,26 @@ cate <- function(treatment,
   IF <- IF %*% A
   rownames(IF) <- rownames(data)
 
+  ## Expectation of potential outcomes
   resp <- lava::getoutcome(response_model$formula, data = data)
   nam <- paste0("E[", resp, "(", names(scores), ")]")
   est0 <- unlist(lapply(scores, mean))
   IF0 <- c()
   for (i in seq_along(est0)) {
-    IF0 <- cbind(IF0, scores[[i]]-est0[i])
+    newIF <- scores[[i]] - est0[i]
+    if (length(adj) > 0) {
+      pmod <- propensity_model$clone(deep = TRUE)
+      newf <- reformulate(
+        as.character(pmod$formula)[[3]],
+        propensity_outcome(contrast[i])
+      )
+      pmod$update(newf)
+      icprop <- IC(pmod$estimate(data))
+      newIF <- newIF + icprop %*% colMeans(adj[[i]])
+    }
+    IF0 <- cbind(IF0,  newIF)
   }
+
   names(est0) <- nam
   est <- c(est0, est)
   IF <- cbind(IF0, IF)
@@ -229,7 +263,7 @@ score_fold <- function(fold,
                        propensity_model,
                        response_model,
                        importance_model,
-                       treatment, level) {
+                        treatment, level) {
   dtrain <- data[-fold, ]
   deval <- data[fold, ]
 
@@ -313,7 +347,7 @@ crr <- function(treatment,
                 response_model,
                 propensity_model,
                 importance_model,
-                contrast=c(1,0),
+                contrast=c(1, 0),
                 data,
                 nfolds=5,
                 type="dml1",
@@ -336,7 +370,7 @@ crr <- function(treatment,
   if (missing(propensity_model)) {
     propensity_model <- SL(treatment_f(contrast[1]), ..., binomial=TRUE)
   }
-  if (missing(importance_model)){
+  if (missing(importance_model)) {
     importance_formula <- update(treatment, D_~.)
     importance_model <- SL(importance_formula, ...)
   }
@@ -457,11 +491,11 @@ cate_link <- function(treatment,
                 response_model,
                 propensity_model,
                 importance_model,
-                contrast=c(1,0),
+                contrast=c(1, 0),
                 data,
                 nfolds=5,
                 type="dml1",
-                ...){
+                ...) {
   cl <- match.call()
   if (is.character(treatment)) {
     treatment <- as.formula(paste0(treatment, "~", 1))
@@ -477,34 +511,32 @@ cate_link <- function(treatment,
   treatment_var <- lava::getoutcome(treatment)
   treatment_f <- function(treatment_level, x=paste0(".-", response_var))
     as.formula(paste0("I(", treatment_var, "==", treatment_level, ") ~ ", x))
-  
+
   if (missing(propensity_model)) {
     propensity_model <- SL(treatment_f(contrast[1]), ..., binomial=TRUE)
   }
-  
-  if (missing(importance_model)){
+
+  if (missing(importance_model)) {
     importance_formula <- update(treatment, D_~.)
     importance_model <- SL(importance_formula, ...)
   }
-  
-  if (link == "identity"){
+
+  if (link == "identity") {
     g <- identity
     gd <- function(x) rep(1, length(x))
-  } else if (link == "log"){
+  } else if (link == "log") {
     g <- log
     gd <- function(x) 1/x
-  } else if (link == "logit"){
+  } else if (link == "logit") {
     g <- lava::logit
     gd <- function(x) 1/x + 1/(1-x)
   }
-  
 
   n <- nrow(data)
   folds <- split(sample(1:n, n), rep(1:nfolds, length.out = n))
   folds <- lapply(folds, sort)
   ff <- Reduce(c, folds)
   idx <- order(ff)
-  
   # D_a = I(A=a)/P(A=a|W)[Y - E[Y|A=a, W]] + E[Y|A=a, W], a = {1,0}
   D <- list()
   # II = E[E[Y|A=a, W]|V] = E[D_a|V], a = {1,0}
@@ -534,10 +566,10 @@ cate_link <- function(treatment,
   names(II) <- contrast
 
   score <- gd(II[[1]])*(D[[1]] - II[[1]]) + g(II[[1]])
-  if (length(contrast)>1){
+  if (length(contrast)>1) {
     score <- score - (gd(II[[2]])*(D[[2]] - II[[2]]) + g(II[[2]]))
   }
-  
+
   if (type=="dml1") {
     est1 <- lapply(folds, function(x) cate_fold1(x,
                                                  data = data,
@@ -548,14 +580,14 @@ cate_link <- function(treatment,
     est <- coef(lm(score ~ -1+desA$x))
   }
   names(est) <- colnames(desA$x)
-  
+
   M1 <- desA$x
   C <-  -n^(-1) * crossprod(M1)
   IF <- -solve(C) %*% t(M1 * as.vector(score - M1 %*% est))
   IF <- t(IF)
-  
+
   estimate <- estimate(coef=est, IC=IF)
-  
+
   res <- list(folds=folds,
               score=score,
               treatment_des=desA,
@@ -563,7 +595,6 @@ cate_link <- function(treatment,
               est=est,
               call=cl,
               estimate=estimate)
-  
   class(res) <- c("cate.targeted", "targeted")
   return(res)
 }
