@@ -29,7 +29,7 @@ sim_surv_unif <- function(n) {
 set.seed(1)
 test_data_unif <- sim_surv_unif(n = 1e3)
 
-test_that("surv_estimating_functions have similar results for type risk or surv.", {
+test_that("rcai has mean zero for type = 'risk' and type = 'surv'.", {
   test_survival_models <- fit_survival_models(
     data = test_data_unif,
     response = Surv(time, event) ~ 1,
@@ -37,34 +37,48 @@ test_that("surv_estimating_functions have similar results for type risk or surv.
     censoring = Surv(time, event == 0) ~ 1,
     censoring_call = "survfit"
   )
-  test_treatment_model <- fit_treatment_model(data = test_data_unif, treatment = A ~ 1)
+  tau0 <- 1
 
-  ## cumhaz(test_survival_models$T_model, newdata = test_data_unif, times = tau0)
-
-  test_risk_treat_ef <- survival_treatment_level_estimating_functions(
-    type = "risk",
+  risk_rcai <- rcai(
+    T_model = test_survival_models$T_model,
+    C_model = test_survival_models$C_model,
     data = test_data_unif,
-    tau = 1,
-    survival_models = test_survival_models,
-    treatment_model = test_treatment_model,
-    control = list(sample = 0, blocksize = 0)
-  )
-
-  test_surv_treat_ef <- survival_treatment_level_estimating_functions(
-    type = "surv",
-    data = test_data_unif,
-    tau = 1,
-    survival_models = test_survival_models,
-    treatment_model = test_treatment_model,
-    control = list(sample = 0, blocksize = 0)
+    time = test_data_unif$time,
+    event = test_data_unif$event,
+    tau = tau0,
+    H_constructor = H_constructor_risk,
+    sample = 0,
+    blocksize = 0,
+    return_all = TRUE
   )
 
   expect_equal(
-    apply(test_risk_treat_ef$estimating_functions, 2, mean),
-    apply(1 - test_surv_treat_ef$estimating_functions, 2, mean),
-    tolerance = 1e-3
+    mean(risk_rcai$Nc - risk_rcai$Lc),
+    0,
+    tolerance = 1e-10
   )
+
+  surv_rcai <- rcai(
+    T_model = test_survival_models$T_model,
+    C_model = test_survival_models$C_model,
+    data = test_data_unif,
+    time = test_data_unif$time,
+    event = test_data_unif$event,
+    tau = tau0,
+    H_constructor = H_constructor_surv,
+    sample = 0,
+    blocksize = 0,
+    return_all = TRUE
+  )
+
+  expect_equal(
+    mean(surv_rcai$Nc - surv_rcai$Lc),
+    0,
+    tolerance = 1e-10
+  )
+
 })
+
 
 sim_surv <- function(n, beta, zeta) {
   ## id
@@ -112,33 +126,3 @@ par0 <- list(
 set.seed(1)
 test_data <- sim_surv(n = 1e3, beta = par0$beta, zeta = par0$zeta)
 test_data$D <- rbinom(n = nrow(test_data), size = 1, prob = 0.5)
-
-
-test_that("surv_estimating_functions is consistent.", {
-  test_survival_models <- fit_survival_models(
-    data = test_data,
-    response = Surv(time, event) ~ A + A * W,
-    response_call = "phreg",
-    censoring = Surv(time, event == 0) ~ A,
-    censoring_call = "phreg"
-  )
-
-  test_treatment_model <- fit_treatment_model(data = test_data, treatment = A ~ 1)
-
-  test_risk_ef <- survival_treatment_level_estimating_functions(
-    type = "risk",
-    data = test_data,
-    tau = par0$tau,
-    survival_models = test_survival_models,
-    treatment_model = test_treatment_model,
-    control = list(sample = 0, blocksize = 0)
-  )
-
-  test_coef <- test_risk_ef$estimating_functions |> apply(2, mean)
-
-  expect_equal(
-    unname(test_coef),
-    c(0.9399351, 0.8822896),
-    tolerance = 1e-7
-  )
-})
