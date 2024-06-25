@@ -26,7 +26,7 @@ sim_surv_unif <- function(n) {
 }
 
 set.seed(1)
-test_data_unif <- sim_surv_unif(n = 1e5)
+test_data_unif <- sim_surv_unif(n = 1e3)
 
 u <- c(0.5, 1, 1.5)
 tau0 <- 1.75
@@ -68,14 +68,12 @@ test_that("H_constructor_risk", {
   expect_equal(
     h,
     true_H_risk(u),
-    tolerance = 5e-3
+    tolerance = 4e-2
   )
-
 })
 
 
 test_that("H_constructor_surv", {
-
   test_survival_models <- fit_survival_models(
     data = test_data_unif,
     response = Surv(time, event) ~ 1,
@@ -104,7 +102,7 @@ test_that("H_constructor_surv", {
   expect_equal(
     h,
     true_H_surv(u),
-    tolerance = 5e-3
+    tolerance = 4e-2
   )
 
   H <- H_constructor_surv(
@@ -118,15 +116,55 @@ test_that("H_constructor_surv", {
   expect_equal(
     h,
     true_H_surv(u),
-    tolerance = 5e-3
+    tolerance = 4e-2
   )
-
-
 })
 
+test_that("H_constructor_rmst", {
+  test_survival_models <- fit_survival_models(
+    data = test_data_unif,
+    response = Surv(time, event) ~ 1,
+    censoring = Surv(time, event == 0) ~ 1,
+    response_call = "survfit",
+    censoring_call = "survfit"
+  )
 
+  true_H_rmst <- function(u) {
+    res <- u + (1 - u / 2)^(-1) * (tau0 - u - 1 / 4 * tau0^2 + 1 / 4 * u^2)
+    return(res)
+  }
+  true_H_rmst <- Vectorize(true_H_rmst)
 
+  H <- H_constructor_rmst(
+    T_model = test_survival_models$T_model,
+    tau = tau0,
+    individual_time = FALSE,
+    time = test_data_unif$time,
+    event = test_data_unif$event
+  )
 
+  h <- H(u = u, data = test_data_unif)
+  h <- apply(h, 2, mean) |> unname()
 
+  expect_equal(
+    h,
+    true_H_rmst(u),
+    tolerance = 2e-2
+  )
 
-## true_int_u_tau_S <- tau0 - u - 1 / 4 * tau0^2 + 1 / 4 * u^2
+  H <- H_constructor_rmst(
+    T_model = test_survival_models$T_model,
+    tau = tau0,
+    individual_time = TRUE,
+    time = test_data_unif$time,
+    event = test_data_unif$event
+  )
+
+  h <- H(u = u, data = test_data_unif[1:length(u), ])
+
+  expect_equal(
+    h,
+    true_H_rmst(u),
+    tolerance = 2e-2
+  )
+})

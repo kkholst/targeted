@@ -1,6 +1,5 @@
-## Constructor for H(u):
 ## H(u|X_i, A_i) = E[I\{T_i \leq \tau\} | T_i > u, X_i, A_i] = I\{u \leq \tau \} \frac{S(u|X_i, A_i) - S(\tau|X_i, A_i)}{S(u|X_i, A_i)}
-H_constructor_risk <- function(T_model, tau, individual_time) {
+H_constructor_risk <- function(T_model, tau, individual_time, ...) {
   force(T_model)
   force(tau)
   force(individual_time)
@@ -37,10 +36,8 @@ H_constructor_risk <- function(T_model, tau, individual_time) {
   return(H)
 }
 
-
-## Constructor for H(u):
 ## Hu: H(u|X_i, A_i) = E[I\{T_i > \tau\} | T_i \geq u, X_i, A_i] = I\{u \leq \tau \} \frac{S(\tau|X_i, A_i)}{S(u|X_i, A_i)} +  I\{u > \tau \}
-H_constructor_surv <- function(T_model, tau, individual_time) {
+H_constructor_surv <- function(T_model, tau, individual_time, ...) {
   force(T_model)
   force(tau)
   force(individual_time)
@@ -73,6 +70,52 @@ H_constructor_surv <- function(T_model, tau, individual_time) {
       res <- as.vector(res)
     }
 
+    return(res)
+  }
+  return(H)
+}
+
+## Hu: H_\tau(u|X_i, A_i) = E[\min(T, \tau) | T_i \geq u, X_i, A_i] = u + \frac{1}{S(u|X,A)} \int_u^\tau S(t|X,A) dt
+H_constructor_rmst <- function(T_model, time, event, tau, individual_time) {
+  force(T_model)
+  force(tau)
+  force(individual_time)
+  force(time)
+  force(event)
+  H <- function(u, data) {
+    S <- cumhaz(
+      T_model,
+      newdata = data,
+      times = u,
+      individual.time = individual_time
+    )$surv
+    times_T <- time[event == 1]
+    S_T <- cumhaz(
+      T_model,
+      newdata = data,
+      times = times_T,
+      individual.time = FALSE
+    )$surv
+    if (individual_time == FALSE) {
+      int_S <- apply(
+        S_T,
+        1,
+        function(x) {
+          int_surv(times = times_T, surv = x, start = u, stop = tau, extend = FALSE)
+        }
+      )
+      int_S <- t(int_S)
+      res <- 1 / S
+      res <- res * int_S
+      res <- apply(res, 1, function(x) x + u)
+      res <- t(res)
+    } else {
+      int_S <- numeric(length = length(u))
+      for (k in seq_along(u)) {
+        int_S[k] <- int_surv(times = times_T, surv = S_T[k, ], start = u[k], stop = tau, extend = FALSE)
+      }
+      res <- u + 1 / S * int_S
+    }
     return(res)
   }
   return(H)

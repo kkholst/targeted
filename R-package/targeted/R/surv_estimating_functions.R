@@ -13,7 +13,7 @@ survival_treatment_level_estimating_functions <- function(type = "risk",
                                                           survival_models,
                                                           treatment_model,
                                                           control) {
-  ## getting dimensions:
+  ## getting dimensions of the data:
   n <- nrow(data)
 
   ## getting survival model elements:
@@ -59,6 +59,8 @@ survival_treatment_level_estimating_functions <- function(type = "risk",
   ## getting the treatment propensity g(1|X):
   g1 <- A_model$predict(data) |> as.vector()
 
+  ## setting h_\tau(\tilde T)
+  ##  setting H_\tau(u|X,A) = E[h_\tau(T)| T \geq u, X, A]
   if (type == "risk") {
     h <- (time <= tau)
     H_constructor <- H_constructor_risk
@@ -89,7 +91,7 @@ survival_treatment_level_estimating_functions <- function(type = "risk",
     blocksize = control$blocksize
   )
 
-  estimating_functions <- matrix(nrow = n, ncol = 2)
+  ef <- matrix(nrow = n, ncol = 2)
   or <- matrix(nrow = n, ncol = 2)
   ipw <- matrix(nrow = n, ncol = 2)
   for (a in 0:1) {
@@ -99,24 +101,26 @@ survival_treatment_level_estimating_functions <- function(type = "risk",
     ## calculating the weight \frac{I\{A_i = a\}}{g(a|X_i)}
     weight <- (A == a) / (a * g1 + (1 - a) * (1 - g1))
 
-    ## calculating E[h_\tau(T)|X, A = a]
-    H0 <- H_constructor(
+    ## calculating H_\tau(0|X, A = a) = E[h_\tau(T)| T \geq 0, X, A = a]
+    H <- H_constructor(
       T_model = T_model,
       tau = tau,
-      individual_time = FALSE
+      individual_time = FALSE,
+      time = time,
+      event = event
     )
-    H0 <- H0(u = 0, data = data_a)
-    H0 <- as.vector(H0)
+    H <- H(u = 0, data = data_a)
+    H <- as.vector(H)
 
-    or[, (a + 1)] <- H0
+    or[, (a + 1)] <- H
     ipw[, (a + 1)] <- weight * delta / Sc * h
-    estimating_functions[, (a + 1)] <- (1 - weight) * H0 + weight * (delta / Sc * h + rcai)
+    ef[, (a + 1)] <- (1 - weight) * H + weight * (delta / Sc * h + rcai)
   }
 
-  colnames(estimating_functions) <- A_levels
+  colnames(ef) <- A_levels
 
   out <- list(
-    estimating_functions = estimating_functions,
+    ef = ef,
     or = or,
     ipw = ipw
   )
@@ -164,7 +168,9 @@ rcai <- function(T_model,
   H_Nc <- H_constructor(
     T_model = T_model,
     tau = tau,
-    individual_time = TRUE
+    individual_time = TRUE,
+    time = time,
+    event = event
   )
   Sc <- cumhaz(
     C_model,
@@ -181,7 +187,9 @@ rcai <- function(T_model,
   H_Lc <- H_constructor(
     T_model = T_model,
     tau = tau,
-    individual_time = FALSE
+    individual_time = FALSE,
+    time = time,
+    event = event
   )
 
   Lc <- vector(mode = "numeric", length = n)
@@ -223,89 +231,3 @@ rcai <- function(T_model,
 
   return(out)
 }
-
-## right_censoring_augmentation_integral <- function(T_model,
-##                                                   C_model,
-##                                                   data,
-##                                                   time,
-##                                                   event,
-##                                                   tau,
-##                                                   Hu,
-##                                                   sample = 0,
-##                                                   blocksize = 0,
-##                                                   ...) {
-##   n <- nrow(data)
-##   data_C <- data[event == 0, , drop = FALSE]
-##   time_C <- time[event == 0]
-
-##   ## Counting process term:
-##   S <- cumhaz(
-##     T_model,
-##     newdata = data_C,
-##     times = time_C,
-##     individual.time = TRUE
-##   )$surv
-##   S_tau <- cumhaz(
-##     T_model,
-##     newdata = data_C,
-##     times = tau
-##   )$surv[, 1]
-##   Sc <- cumhaz(
-##     C_model,
-##     newdata = data_C,
-##     times = time_C,
-##     individual.time = TRUE
-##   )$surv
-##   stopifnot(all(S * Sc > 0))
-##   Nc <- vector(mode = "numeric", length = n)
-##   Nc[(event == 0)] <- Hu(
-##     data = data_C,
-##     u = time_C,
-##     S = S,
-##     S_tau = S_tau,
-##     tau = tau
-##   ) / Sc
-##   Nc[time > tau] <- 0
-##   rm(S, S_tau, Sc)
-
-##   ## Compensator term:
-##   Lc <- vector(mode = "numeric", length = n)
-##   tt <- time
-##   if (sample > 0) {
-##     tt <- subjumps(time_C, size = sample, tau = tau)
-##   }
-
-##   blocks <- list(1:n)
-##   if (blocksize > 0) {
-##     blocks <- lava::csplit(1:n, k = min(n, blocksize))
-##   }
-
-##   ii <- 0
-##   for (b in blocks) {
-##     S <- cumhaz(T_model, newdata = data[b, ], times = tt)$surv
-##     S_tau <- cumhaz(T_model, newdata = data[b, ], times = tau)$surv
-##     Sc <- cumhaz(C_model, newdata = data[b, ], times = tt)
-
-##     i <- 0
-##     for (r in b) { ## Loop over each row in the data
-##       i <- i + 1
-##       ii <- ii + 1
-##       at_risk <- tt <= time[ii]
-##       hu <- Hu(
-##         data = data[r, ],
-##         u = tt,
-##         S = S[i, ],
-##         S_tau = S_tau[i, ],
-##         tau = tau
-##       ) / Sc$surv[i, ]
-##       lc <- sum((hu * at_risk * Sc$dchf[i, ])[tt <= tau])
-##       Lc[r] <- lc
-##     }
-##   }
-##   hmc <- Nc - Lc
-
-##   return(hmc)
-## }
-
-
-

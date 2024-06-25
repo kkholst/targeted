@@ -60,8 +60,8 @@ test_that("surv_estimating_functions have similar results for type risk or surv.
   )
 
   expect_equal(
-    apply(test_risk_treat_ef$estimating_functions, 2, mean),
-    apply(1 - test_surv_treat_ef$estimating_functions, 2, mean),
+    apply(test_risk_treat_ef$ef, 2, mean),
+    apply(1 - test_surv_treat_ef$ef, 2, mean),
     tolerance = 1e-3
   )
 })
@@ -134,7 +134,7 @@ test_that("surv_estimating_functions is consistent.", {
     control = list(sample = 0, blocksize = 0)
   )
 
-  test_coef <- test_risk_ef$estimating_functions |> apply(2, mean)
+  test_coef <- test_risk_ef$ef |> apply(2, mean)
 
   expect_equal(
     unname(test_coef),
