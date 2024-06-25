@@ -103,7 +103,8 @@ survival_treatment_level_estimating_functions <- function(type = "risk",
       tau = tau,
       individual_time = FALSE,
       time = time,
-      event = event
+      event = event,
+      sample = control$sample
     )
     H <- H(u = 0, data = data_a)
     H <- as.vector(H)
@@ -166,7 +167,8 @@ rcai <- function(T_model,
     tau = tau,
     individual_time = TRUE,
     time = time,
-    event = event
+    event = event,
+    sample = sample
   )
   Sc <- cumhaz(
     C_model,
@@ -185,7 +187,8 @@ rcai <- function(T_model,
     tau = tau,
     individual_time = FALSE,
     time = time,
-    event = event
+    event = event,
+    sample = sample
   )
 
   Lc <- vector(mode = "numeric", length = n)

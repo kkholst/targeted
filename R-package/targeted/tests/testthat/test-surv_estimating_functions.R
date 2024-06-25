@@ -97,6 +97,23 @@ test_that("surv_estimating_functions returns a consistent estimate for type rmst
     tolerance = 0.02
   )
 
+   test_rmst_treat_ef_sample <- survival_treatment_level_estimating_functions(
+    type = "rmst",
+    data = test_data_unif,
+    tau = tau0,
+    survival_models = test_survival_models,
+    treatment_model = test_treatment_model,
+    control = list(sample = 100, blocksize = 0)
+  )
+
+  est_sample <- apply(test_rmst_treat_ef_sample$ef, 2, mean) |> unname()
+
+  expect_equal(
+    est_sample - true_E_min_T_tau,
+    c(0, 0),
+    tolerance = 0.02
+  )
+
 })
 
 sim_surv <- function(n, beta, zeta) {
