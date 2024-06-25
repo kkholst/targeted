@@ -152,6 +152,15 @@ test_that("H_constructor_rmst", {
     tolerance = 2e-2
   )
 
+  h <- H(u = u[1], data = test_data_unif) |> mean()
+
+  expect_equal(
+    h,
+    true_H_rmst(u[1]),
+    tolerance = 2e-2
+  )
+
+
   H <- H_constructor_rmst(
     T_model = test_survival_models$T_model,
     tau = tau0,

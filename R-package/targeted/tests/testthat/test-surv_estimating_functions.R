@@ -66,6 +66,20 @@ test_that("surv_estimating_functions have similar results for type risk or surv.
   )
 })
 
+test_that("surv_estimating_functions returns a consistent estimate for type rmst.", {
+  test_survival_models <- fit_survival_models(
+    data = test_data_unif,
+    response = Surv(time, event) ~ 1,
+    response_call = "survfit",
+    censoring = Surv(time, event == 0) ~ 1,
+    censoring_call = "survfit"
+  )
+  test_treatment_model <- fit_treatment_model(data = test_data_unif, treatment = A ~ 1)
+
+
+
+})
+
 sim_surv <- function(n, beta, zeta) {
   ## id
   id <- 1:n

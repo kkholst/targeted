@@ -82,6 +82,7 @@ H_constructor_rmst <- function(T_model, time, event, tau, individual_time) {
   force(individual_time)
   force(time)
   force(event)
+
   H <- function(u, data) {
     S <- cumhaz(
       T_model,
@@ -102,21 +103,23 @@ H_constructor_rmst <- function(T_model, time, event, tau, individual_time) {
         1,
         function(x) {
           int_surv(times = times_T, surv = x, start = u, stop = tau, extend = FALSE)
-        }
+        },
+        simplify = FALSE
       )
-      int_S <- t(int_S)
+      int_S <- do.call(what = "rbind", int_S)
       res <- 1 / S
       res <- res * int_S
-      res <- apply(res, 1, function(x) x + u)
+      res <- apply(res, 1, function(x) x + pmin(u, tau))
       res <- t(res)
     } else {
       int_S <- numeric(length = length(u))
       for (k in seq_along(u)) {
         int_S[k] <- int_surv(times = times_T, surv = S_T[k, ], start = u[k], stop = tau, extend = FALSE)
       }
-      res <- u + 1 / S * int_S
+      res <- pmin(u, tau) + 1 / S * int_S
     }
     return(res)
   }
+
   return(H)
 }

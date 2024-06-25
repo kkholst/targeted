@@ -2,9 +2,10 @@
 getjumps <- function(time, dy) {
   jumps <- which(dy < 0)
   stop <- NULL
-  if (jumps[length(jumps)] < length(dy))
+  if (jumps[length(jumps)] < length(dy)) {
     stop <- time[stop]
-  dt <- c(0,time[jumps], stop)
+  }
+  dt <- c(0, time[jumps], stop)
   surv <- surv[jumps]
 }
 
@@ -128,87 +129,15 @@ int_surv <- function(times, surv, start = 0, stop = max(times), extend = FALSE) 
     start_k <- start[k]
     stop_k <- stop[k]
 
-    idx <- which(times <= stop_k & times >= start_k)
-
-    diff_times_k <- diff(c(start_k, times[idx], stop_k))
-    surv_k <- c(surv[idx[1] - 1], surv[idx])
-
-    res[k] <- sum(surv_k * diff_times_k)
+    if (start_k >= stop_k) {
+      res[k] <- 0
+    } else {
+      idx <- which(times <= stop_k & times >= start_k)
+      diff_times_k <- diff(c(start_k, times[idx], stop_k))
+      surv_k <- c(surv[idx[1] - 1], surv[idx])
+      res[k] <- sum(surv_k * diff_times_k)
+    }
   }
 
   return(res)
 }
-
-
-## ##' Computes $\int_{u_i}^{\tau_i} S(t|X_i) dt$
-## ##'
-## ##' @title Integration of an estimated survival function.
-## ##' @param object Survival model object.
-## ##' @param data data.frame containing the covariates X.
-## ##' @param times Numeric vector, time points that the survival function is evalauted in.
-## ##' @param u Numeric or numeric vector, start of the integral.
-## ##' @param tau  Numeric or numeric vector, end of the integral.
-## ##' @param sample
-## ##' @param blocksize
-## ##' @param extend
-## ##' @return Numeric vector of length \code{nrow(data)}
-## ##' @author Andreas Nordland
-## integrate_survival <- function(object, data, times, u = 0, tau = max(times), sample = 0, blocksize = 0, extend = FALSE) {
-##   times <- as.vector(times)
-
-##   ## input checks
-##   stopifnot(
-##     all(times > 0),
-##     !is.unsorted(times)
-##   )
-##   dim_u_tau <- max(length(u), length(tau))
-##   stopifnot(
-##     length(u) == 1 | length(u) == dim_u_tau,
-##     length(tau) == 1 | length(tau) == dim_u_tau
-##   )
-
-##   if (extend == FALSE) {
-##     tau <- pmin(max(times), tau)
-##   }
-
-##   n <- nrow(data)
-##   tt <- times
-
-##   ## set subjumps in the interval
-##   if (sample > 0) {
-##     stop("TODO") # jumps within the interval? or just max(tau)
-##     tt <- subjumps(times, size = sample, tau = tau)
-##   }
-
-##   browser()
-
-##   blocks <- list(1:n)
-##   if (blocksize > 0) {
-##     blocks <- lava::csplit(1:n, k = min(n, blocksize))
-##   }
-
-##   res <- matrix(nrow = n, ncol = dim_u_tau)
-##   for (b in blocks) {
-##     S <- cumhaz(object, newdata = data[b, ], times = tt)$surv
-##     i <- 0
-##     for (r in b) { ## Loop over each row in the data
-##       i <- i + 1
-
-##       if (u_singleton) {
-##         start <- u
-##       } else {
-##         start <- u[r]
-##       }
-
-##       browser()
-##       ## set start value
-
-
-##       int <- int_fun_time_points(times = tt, fun_values = S[i, ], start = u, stop = tau)
-##       res[r] <- 0
-##     }
-##   }
-
-
-##   return(res)
-## }

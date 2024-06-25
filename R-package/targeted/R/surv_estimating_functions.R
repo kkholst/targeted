@@ -68,12 +68,8 @@ survival_treatment_level_estimating_functions <- function(type = "risk",
     h <- (time > tau)
     H_constructor <- H_constructor_surv
   } else if (type == "rmst") {
-    stop("implement")
-    ## h: \min(\tilde{T}, \tau)
     h <- pmin(time, tau)
-
-    ## Hu:
-    Hu <- Hu_rmst
+    H_constructor <- H_constructor_rmst
   } else {
     stop("unknown type. Must be either risk or prob.")
   }
