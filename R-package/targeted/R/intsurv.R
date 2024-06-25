@@ -132,9 +132,16 @@ int_surv <- function(times, surv, start = 0, stop = max(times), extend = FALSE) 
     if (start_k >= stop_k) {
       res[k] <- 0
     } else {
-      idx <- which(times <= stop_k & times >= start_k)
-      diff_times_k <- diff(c(start_k, times[idx], stop_k))
-      surv_k <- c(surv[idx[1] - 1], surv[idx])
+      idx <- which(times <= stop_k & times > start_k)
+
+      if (length(idx) > 0) {
+        diff_times_k <- diff(c(start_k, times[idx], stop_k))
+        surv_k <- c(surv[idx[1] - 1], surv[idx])
+      } else {
+        idx_last <- last(which(times <= stop_k))
+        diff_times_k <- diff(c(start_k, stop_k))
+        surv_k <- surv[idx_last]
+      }
       res[k] <- sum(surv_k * diff_times_k)
     }
   }

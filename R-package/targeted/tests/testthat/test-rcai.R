@@ -76,9 +76,39 @@ test_that("rcai has mean zero for type = 'risk' and type = 'surv'.", {
     0,
     tolerance = 1e-10
   )
-
 })
 
+test_that("rcai has mean zero for type = 'rmst'", {
+
+  test_survival_models <- fit_survival_models(
+    data = test_data_unif,
+    response = Surv(time, event) ~ 1,
+    response_call = "survfit",
+    censoring = Surv(time, event == 0) ~ 1,
+    censoring_call = "survfit"
+  )
+  tau0 <- 1
+
+  rmst_rcai <- rcai(
+    T_model = test_survival_models$T_model,
+    C_model = test_survival_models$C_model,
+    data = test_data_unif,
+    time = test_data_unif$time,
+    event = test_data_unif$event,
+    tau = tau0,
+    H_constructor = H_constructor_rmst,
+    sample = 0,
+    blocksize = 0,
+    return_all = TRUE
+  )
+
+  expect_equal(
+    mean(rmst_rcai$Nc - rmst_rcai$Lc),
+    0,
+    tolerance = 1e-10
+  )
+
+})
 
 sim_surv <- function(n, beta, zeta) {
   ## id

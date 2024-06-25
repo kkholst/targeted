@@ -67,6 +67,7 @@ test_that("surv_estimating_functions have similar results for type risk or surv.
 })
 
 test_that("surv_estimating_functions returns a consistent estimate for type rmst.", {
+
   test_survival_models <- fit_survival_models(
     data = test_data_unif,
     response = Surv(time, event) ~ 1,
@@ -76,7 +77,25 @@ test_that("surv_estimating_functions returns a consistent estimate for type rmst
   )
   test_treatment_model <- fit_treatment_model(data = test_data_unif, treatment = A ~ 1)
 
+  tau0 <- 1
+  true_E_min_T_tau <- (tau0 - 1 / 4 * tau0^2)
 
+  test_rmst_treat_ef <- survival_treatment_level_estimating_functions(
+    type = "rmst",
+    data = test_data_unif,
+    tau = tau0,
+    survival_models = test_survival_models,
+    treatment_model = test_treatment_model,
+    control = list(sample = 0, blocksize = 0)
+  )
+
+  est <- apply(test_rmst_treat_ef$ef, 2, mean) |> unname()
+
+  expect_equal(
+    est - true_E_min_T_tau,
+    c(0, 0),
+    tolerance = 0.02
+  )
 
 })
 
