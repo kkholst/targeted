@@ -1,3 +1,6 @@
+# targeted 0.6
+- repeated cross-fitting in `cate` function via the new 'rep' argument
+
 # targeted 0.5
 - `cate` now also returns the expected potential outcomes and influence functions
 - Bug-fix in the `ml_model$update()` method

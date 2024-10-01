@@ -5,13 +5,13 @@
 \title{Conditional Average Treatment Effect estimation}
 \usage{
 cate(
-  treatment,
   response_model,
   propensity_model,
+  cate_model = ~1,
   contrast = c(1, 0),
   data,
-  nfolds = 5,
-  type = "dml2",
+  nfolds = 1,
+  rep = 1,
   silent = FALSE,
   stratify = FALSE,
   mc.cores,
@@ -19,11 +19,12 @@ cate(
 )
 }
 \arguments{
-\item{treatment}{formula specifying treatment and variables to condition on}
-
 \item{response_model}{formula or ml_model object (formula => glm)}
 
 \item{propensity_model}{formula or ml_model object (formula => glm)}
+
+\item{cate_model}{formula specifying regression design for conditional
+average treatment effects}
 
 \item{contrast}{treatment contrast (default 1 vs 0)}
 
@@ -31,7 +32,7 @@ cate(
 
 \item{nfolds}{Number of folds}
 
-\item{type}{'dml1' or 'dml2'}
+\item{rep}{Number of replications of cross-fitting procedure}
 
 \item{silent}{supress all messages and progressbars}
 
@@ -52,14 +53,14 @@ Conditional Average Treatment Effect estimation via Double Machine Learning
 sim1 <- function(n=1e4,
                  seed=NULL,
                  return_model=FALSE, ...) {
-suppressPackageStartupMessages(require("lava"))
-if (!is.null(seed)) set.seed(seed)
-m <- lava::lvm()
-regression(m, ~a) <- function(z1,z2,z3,z4,z5)
+  suppressPackageStartupMessages(require("lava"))
+  if (!is.null(seed)) set.seed(seed)
+  m <- lava::lvm()
+lava::regression(m, ~a) <- function(z1,z2,z3,z4,z5)
          cos(z1)+sin(z1*z2)+z3+z4+z5^2
-regression(m, ~u) <- function(a,z1,z2,z3,z4,z5)
+lava::regression(m, ~u) <- function(a,z1,z2,z3,z4,z5)
         (z1+z2+z3)*a + z1+z2+z3 + a
-distribution(m, ~a) <- binomial.lvm()
+lava::distribution(m, ~a) <- lava::binomial.lvm()
 if (return_model) return(m)
 lava::sim(m, n, p=par)
 }
@@ -69,5 +70,5 @@ e <- cate(a ~ z1+z2+z3, response=u~., data=d)
 e
 }
 \author{
-Klaus Kähler Holst
+Klaus Kähler Holst, Andreas Nordland
 }

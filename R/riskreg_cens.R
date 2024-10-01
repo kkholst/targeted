@@ -86,7 +86,7 @@ riskreg_cens <- function(response,
     }
     h <- function(data, time, S, S.tau, tau) {
       I <- intsurv(time, S, tau)$cint
-      (as.vector(time)*as.vector(S) + I/as.vector(S)) *(time<=tau)
+      (as.vector(time)*as.vector(S) + I) / as.vector(S) *(time<=tau)
     }
   } else if (type[1]=="brier") {
     if (is.null(prediction)) {

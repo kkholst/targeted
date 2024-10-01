@@ -10,25 +10,27 @@
 ##' @param formula Formula (see details below)
 ##' @param data data.frame
 ##' @param weights optional frequency weights
-##' @param offset optional offset (character or vector). can also be specified in the formula.
+##' @param offset optional offset (character or vector). can also be specified
+##'   in the formula.
 ##' @param family Exponential family argument for outcome model
 ##' @param nuisance outcome regression formula (Q-model)
 ##' @param propensity propensity model formula
-##' @param all If TRUE all standard errors are calculated (default TRUE when exposure
-##' only has two levels)
+##' @param all If TRUE all standard errors are calculated (default TRUE when
+##'   exposure only has two levels)
 ##' @param labels Optional treatment labels
 ##' @param ... Additional arguments to lower level functions
-##' @return An object of class '\code{ate.targeted}' is returned. See \code{\link{targeted-class}}
-##' for more details about this class and its generic functions.
-##' @details
-##' The formula may either be specified as:
-##' response ~ treatment | nuisance-formula | propensity-formula
+##' @return An object of class '\code{ate.targeted}' is returned. See
+##'   \code{\link{targeted-class}} for more details about this class and its
+##'   generic functions.
+##' @details The formula may either be specified as: response ~ treatment |
+##'   nuisance-formula | propensity-formula
 ##'
 ##' For example: \code{ate(y~a | x+z+a | x*z, data=...)}
 ##'
 ##' Alternatively, as a list: \code{ate(list(y~a, ~x+z, ~x*z), data=...)}
 ##'
-##' Or using the nuisance (and propensity argument): \code{ate(y~a, nuisance=~x+z, ...)}
+##' Or using the nuisance (and propensity argument):
+##' \code{ate(y~a, nuisance=~x+z, ...)}
 ##' @export
 ##' @seealso cate
 ##' @author Klaus K. Holst
@@ -85,10 +87,8 @@ ate <- function(formula,
         }
     }
     if (is.list(formula) || inherits(formula, "formula")) {
-        ## xf <- lapply(xf, function(x) { environment(x) <- baseenv(); return(x) })
         xx <- lapply(xf, function(x) model.matrix(x, data=data))
         yx <- model.frame(xf[[1]], data=data)
-        ## }
         a <- yx[, exposure]
         y <- yx[, yf[1]]
         x1 <- xx[[2]]
@@ -100,24 +100,30 @@ ate <- function(formula,
     } else {
         stop("Expected a formula") # or a matrix (response,exposure)")
     }
-    if (base::missing(weights) || length(weights)==0) weights <- rep(1, length(y))
+    if (base::missing(weights) || length(weights) == 0) {
+      weights <- rep(1, length(y))
+    }
     if (inherits(weights, "formula")) weights <- all.vars(weights)
     if (is.character(weights)) weights <- as.vector(data[, weights])
 
     if (base::missing(offset) || length(offset)==0) offset <- rep(0, length(y))
     if (inherits(offset, "formula")) offset <- all.vars(offset)
     if (is.character(offset)) offset <- as.vector(data[, offset])
-    ##l1 <- glm.fit(y=y, x=x1, weights=weights, family=family)
     l1 <- glm(y ~ -1+x1, weights=weights, offset=offset, family=family)
     beta <- coef(l1)
-    names(beta) <- gsub("^x1", "" ,names(beta))
-    ## iid.beta <- fast_iid(y, l1$fitted, x1, weights, logistic=family$family=="binomial")/length(y)
+    names(beta) <- gsub("^x1", "", names(beta))
     iid.beta <- IC(l1)/length(y)
     treatments <- if (is.factor(a)) levels(a) else sort(unique(a))
     if (length(treatments)>20) stop("Unexpected large amount of treatments")
     if (base::missing(all)) all <- length(treatments)==2
     if (length(treatments)>2) {
-        if (!is.factor(a)) warning("`", exposure, "` should probably be converted into a factor. An additive model is now assumed in the outcome regression model.")
+        if (!is.factor(a)) {
+          warning(
+            "`", exposure,
+            "` should probably be converted into a factor. ",
+            "An additive model is now assumed in the outcome regression model."
+          )
+        }
     }
     est <- c()
     iids <- matrix(nrow=length(y), ncol=length(treatments))
@@ -131,16 +137,21 @@ ate <- function(formula,
         count <- count+1
         a0 <- (a==trt)
         ## For simplicity we here fit a logistic regression for each treatment.
-        ## TODO: we do not need to recalculate logistic regression for the last treatment.
+        ## TODO: we do not need to recalculate logistic regression for the last
+        ## treatment.
         l2 <- glm.fit(y=a0, x=x2, weights=weights, family=binomial("logit"))
         gamma <- l2$coef
         data0[, exposure] <- factor(trt, levels=treatments)
         x1 <- model.matrix(xf[[2]], data=data0)
-        val <- ace_est(y=cbind(y), a=cbind(a0), x1=cbind(x1), x2=cbind(x2),
-                       theta=c(beta, gamma), weights=weights, offset=offset, link=family$link)
+        val <- ace_est(
+          y = cbind(y), a = cbind(a0), x1 = cbind(x1), x2 = cbind(x2),
+          theta = c(beta, gamma), weights = weights,
+          offset = offset, link = family$link
+        )
         alpha.index <- 1
         beta.index <- seq_along(beta) + length(alpha.index)
-        gamma.index <- seq_along(gamma) + length(alpha.index) + length(beta.index)
+        gamma.index <- seq_along(gamma) +
+          length(alpha.index) + length(beta.index)
         U0 <- val$u
         DU <- t(val$du)
         iid.gamma <- fast_iid(a0, l2$fitted, x2, weights)/length(a0)
@@ -171,9 +182,14 @@ ate <- function(formula,
     est$IC <- iids * NROW(iids)
     rownames(est$IC) <- rownames(data)
     structure(list(estimate=est,
-                   outcome.reg=outreg, propensity.model=propmod, names=unlist(nn)[1:2],
+                   outcome.reg=outreg,
+                   propensity.model=propmod,
+                   names=unlist(nn)[1:2],
                    formula=xf,
-                   npar=c(length(treatments), ncol(x1), ncol(x2)), nobs=length(y), opt=NULL,
+                   call = cl,
+                   npar=c(length(treatments), ncol(x1), ncol(x2)),
+                   nobs=length(y),
+                   opt=NULL,
                    all=all,
                    family=family),
               class=c("ate.targeted", "targeted"))
@@ -187,7 +203,10 @@ print.summary.ate.targeted <- function(x, ...) {
     outreg <- x$family$family
     cat("  Response ", nam[[1]], " (Outcome model: ", outreg, "):\n", sep="")
     cat("\t", paste(nam[[1]], x$formula[[2]]), "\n")
-    cat("  Exposure ", nam[[2]], " (Propensity model: logistic regression):\n", sep="")
+    cat("  Exposure ", nam[[2]],
+        " (Propensity model: logistic regression):\n",
+      sep = ""
+    )
     cat("\t", paste(nam[[2]], x$formula[[3]]), "\n")
     cat("\n")
     if (x$all) {
@@ -209,7 +228,10 @@ print.summary.ate.targeted <- function(x, ...) {
     if (length(x$contrast)>1) {
         cc <- rownames(x$estimate$coefmat)
         with(x, cat("\nAverage Treatment Effect (constrast: '",
-                    cc[contrast[1]], "' - '", cc[contrast[2]], "'):\n\n", sep=""))
+                    cc[contrast[1]], "' - '",
+                    cc[contrast[2]], "'):\n\n",
+          sep = ""
+        ))
         if (!is.null(x$asso)) print(x$asso)
     }
     cat("\n")
@@ -227,25 +249,40 @@ summary.ate.targeted <- function(object, contrast=c(2:1), ...) {
     } else {
         cc <- object$estimate$coefmat
     }
-    cc <- lava::estimate(coef=cc[, 1], vcov=diag(cc[, 2]^2, ncol=nrow(cc)), labels=rownames(cc))
+    cc <- lava::estimate(
+                  coef = cc[, 1],
+                  vcov = diag(cc[, 2]^2, ncol = nrow(cc)), labels = rownames(cc)
+    )
     if (length(contrast)>2)
         warning("Only the first two elements of 'contrast' are used")
     if (object$npar[1]<2) contrast <- 1
     asso <- NULL
-    if (length(contrast)>=2)
-        if (object$family$family=="binomial") {
-          asso <- estimate(object$estimate, function(x) c(x[contrast[1]]/x[contrast[2]],
-                                                          lava::OR(x[contrast]),
-                                                          x[contrast[1]]-x[contrast[2]]),
-                           labels=c("RR", "OR", "RD"))
-        } else {
-          asso <- estimate(object$estimate, function(x) x[contrast[1]]-x[contrast[2]],
-                           labels=c("ATE"))
-        }
+    if (length(contrast) >= 2) {
+      if (object$family$family == "binomial") {
+        asso <- estimate(object$estimate,
+          function(x) {
+            c(
+              x[contrast[1]] / x[contrast[2]],
+              lava::OR(x[contrast]),
+              x[contrast[1]] - x[contrast[2]]
+            )
+          },
+          labels = c("RR", "OR", "RD")
+        )
+      } else {
+        asso <- estimate(object$estimate,
+          function(x) x[contrast[1]] - x[contrast[2]],
+          labels = c("ATE")
+        )
+      }
+    }
   structure(list(estimate=cc, npar=nn, type=object$type, asso=asso,
                  family=object$family,
-                 names=c(object$names, "", "Outcome model:", "Propensity model:"),
-                 all=object$all, formula=gsub("~", "~ ", unlist(lapply(object$formula, deparse))),
+                 names=c(object$names, "",
+                         "Outcome model:", "Propensity model:"),
+                 all=object$all,
+                 formula=gsub("~", "~ ",
+                              unlist(lapply(object$formula, deparse))),
                  contrast=contrast),
             class="summary.ate.targeted")
 }
