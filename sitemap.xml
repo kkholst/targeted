@@ -1,129 +1,45 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>/404.html</loc>
-  </url>
-  <url>
-    <loc>/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>/articles/ate.html</loc>
-  </url>
-  <url>
-    <loc>/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>/articles/ode.html</loc>
-  </url>
-  <url>
-    <loc>/articles/riskregression.html</loc>
-  </url>
-  <url>
-    <loc>/authors.html</loc>
-  </url>
-  <url>
-    <loc>/index.html</loc>
-  </url>
-  <url>
-    <loc>/news/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ML.html</loc>
-  </url>
-  <url>
-    <loc>/reference/NB-class.html</loc>
-  </url>
-  <url>
-    <loc>/reference/NB.html</loc>
-  </url>
-  <url>
-    <loc>/reference/RATE.html</loc>
-  </url>
-  <url>
-    <loc>/reference/RATE.surv.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SL.html</loc>
-  </url>
-  <url>
-    <loc>/reference/Scoring.html</loc>
-  </url>
-  <url>
-    <loc>/reference/aipw.html</loc>
-  </url>
-  <url>
-    <loc>/reference/alean.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ate.html</loc>
-  </url>
-  <url>
-    <loc>/reference/calibration-class.html</loc>
-  </url>
-  <url>
-    <loc>/reference/calibration.html</loc>
-  </url>
-  <url>
-    <loc>/reference/cate.html</loc>
-  </url>
-  <url>
-    <loc>/reference/cate_link.html</loc>
-  </url>
-  <url>
-    <loc>/reference/cross_validated-class.html</loc>
-  </url>
-  <url>
-    <loc>/reference/crr.html</loc>
-  </url>
-  <url>
-    <loc>/reference/cv.html</loc>
-  </url>
-  <url>
-    <loc>/reference/design.html</loc>
-  </url>
-  <url>
-    <loc>/reference/expand.list.html</loc>
-  </url>
-  <url>
-    <loc>/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ml_model.html</loc>
-  </url>
-  <url>
-    <loc>/reference/nondom.html</loc>
-  </url>
-  <url>
-    <loc>/reference/pava.html</loc>
-  </url>
-  <url>
-    <loc>/reference/predict.NB.html</loc>
-  </url>
-  <url>
-    <loc>/reference/predict.density.html</loc>
-  </url>
-  <url>
-    <loc>/reference/riskreg.html</loc>
-  </url>
-  <url>
-    <loc>/reference/riskreg_cens.html</loc>
-  </url>
-  <url>
-    <loc>/reference/softmax.html</loc>
-  </url>
-  <url>
-    <loc>/reference/solve_ode.html</loc>
-  </url>
-  <url>
-    <loc>/reference/specials.design.html</loc>
-  </url>
-  <url>
-    <loc>/reference/specify_ode.html</loc>
-  </url>
-  <url>
-    <loc>/reference/targeted-class.html</loc>
-  </url>
-  <url>
-    <loc>/reference/targeted-package.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>/404.html</loc></url>
+<url><loc>/LICENSE-text.html</loc></url>
+<url><loc>/articles/ate.html</loc></url>
+<url><loc>/articles/index.html</loc></url>
+<url><loc>/articles/ode.html</loc></url>
+<url><loc>/articles/riskregression.html</loc></url>
+<url><loc>/authors.html</loc></url>
+<url><loc>/index.html</loc></url>
+<url><loc>/news/index.html</loc></url>
+<url><loc>/reference/ML.html</loc></url>
+<url><loc>/reference/NB-class.html</loc></url>
+<url><loc>/reference/NB.html</loc></url>
+<url><loc>/reference/RATE.html</loc></url>
+<url><loc>/reference/RATE.surv.html</loc></url>
+<url><loc>/reference/SL.html</loc></url>
+<url><loc>/reference/Scoring.html</loc></url>
+<url><loc>/reference/aipw.html</loc></url>
+<url><loc>/reference/alean.html</loc></url>
+<url><loc>/reference/ate.html</loc></url>
+<url><loc>/reference/calibration-class.html</loc></url>
+<url><loc>/reference/calibration.html</loc></url>
+<url><loc>/reference/cate.html</loc></url>
+<url><loc>/reference/cate_link.html</loc></url>
+<url><loc>/reference/cross_validated-class.html</loc></url>
+<url><loc>/reference/crr.html</loc></url>
+<url><loc>/reference/cv.html</loc></url>
+<url><loc>/reference/design.html</loc></url>
+<url><loc>/reference/expand.list.html</loc></url>
+<url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/ml_model.html</loc></url>
+<url><loc>/reference/nondom.html</loc></url>
+<url><loc>/reference/pava.html</loc></url>
+<url><loc>/reference/predict.NB.html</loc></url>
+<url><loc>/reference/predict.density.html</loc></url>
+<url><loc>/reference/riskreg.html</loc></url>
+<url><loc>/reference/riskreg_cens.html</loc></url>
+<url><loc>/reference/softmax.html</loc></url>
+<url><loc>/reference/solve_ode.html</loc></url>
+<url><loc>/reference/specials.design.html</loc></url>
+<url><loc>/reference/specify_ode.html</loc></url>
+<url><loc>/reference/targeted-class.html</loc></url>
+<url><loc>/reference/targeted-package.html</loc></url>
 </urlset>
+

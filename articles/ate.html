@@ -6,27 +6,19 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Average Treatment Effects • targeted</title>
-<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
-<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
-<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png">
-<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
-<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/spacelab/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
 <script src="../pkgdown.js"></script><meta property="og:title" content="Average Treatment Effects">
-<meta property="og:description" content="targeted">
-<meta property="og:image" content="/logo.svg">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -52,7 +44,7 @@
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
@@ -75,7 +67,7 @@
 <li>
   <a href="https://github.com/kkholst/targeted/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul>
@@ -86,7 +78,7 @@
 </div>
 <!--/.navbar -->
 
-      
+
 
       </header><script src="ate_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
@@ -94,9 +86,9 @@
       <h1 data-toc-skip>Average Treatment Effects</h1>
                         <h4 data-toc-skip class="author">Klaus Kähler Holst</h4>
             
-            <h4 data-toc-skip class="date">2024-04-15</h4>
+            <h4 data-toc-skip class="date">2024-10-01</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/kkholst/targeted/blob/HEAD/vignettes/ate.Rmd" class="external-link"><code>vignettes/ate.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/kkholst/targeted/blob/main/vignettes/ate.Rmd" class="external-link"><code>vignettes/ate.Rmd</code></a></small>
       <div class="hidden name"><code>ate.Rmd</code></div>
 
     </div>
@@ -106,7 +98,7 @@
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>Let <span class="math inline">\(Y\)</span> be a <em>binary response</em>, <span class="math inline">\(A\)</span> a <em>categorical treatment</em>, and <span class="math inline">\(W\)</span> a <em>vector of confounders</em>. Assume that we have observed <span class="math inline">\(n\)</span> i.i.d. observations <span class="math inline">\((Y_i, W_i, A_i) \sim P, i=1,\ldots,n\)</span>. In the following we are interested in estimating the target parameter <span class="math inline">\(\psi(P) = (E[Y(a)]\)</span>, where <span class="math inline">\(Y(a)\)</span> is the <em>potential outcome</em> we would have observed if treatment <span class="math inline">\(a\)</span> had been administered, possibly contrary to the actual treatment that was observed, i.e., <span class="math inline">\(Y = Y(A)\)</span>.</p>
+<p>Let <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Y</mi><annotation encoding="application/x-tex">Y</annotation></semantics></math> be a <em>binary response</em>, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>A</mi><annotation encoding="application/x-tex">A</annotation></semantics></math> a <em>categorical treatment</em>, and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>W</mi><annotation encoding="application/x-tex">W</annotation></semantics></math> a <em>vector of confounders</em>. Assume that we have observed <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math> i.i.d. observations <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>Y</mi><mi>i</mi></msub><mo>,</mo><msub><mi>W</mi><mi>i</mi></msub><mo>,</mo><msub><mi>A</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>∼</mo><mi>P</mi><mo>,</mo><mi>i</mi><mo>=</mo><mn>1</mn><mo>,</mo><mi>…</mi><mo>,</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">(Y_i, W_i, A_i) \sim P, i=1,\ldots,n</annotation></semantics></math>. In the following we are interested in estimating the target parameter <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ψ</mi><mo stretchy="false" form="prefix">(</mo><mi>P</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo stretchy="false" form="prefix">(</mo><mi>E</mi><mo stretchy="false" form="prefix">[</mo><mi>Y</mi><mo stretchy="false" form="prefix">(</mo><mi>a</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">\psi(P) = (E[Y(a)]</annotation></semantics></math>, where <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mo stretchy="false" form="prefix">(</mo><mi>a</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">Y(a)</annotation></semantics></math> is the <em>potential outcome</em> we would have observed if treatment <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math> had been administered, possibly contrary to the actual treatment that was observed, i.e., <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mo>=</mo><mi>Y</mi><mo stretchy="false" form="prefix">(</mo><mi>A</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">Y = Y(A)</annotation></semantics></math>.</p>
 <!-- ```{r plotdag, echo=FALSE, fig.cap="DAG for the statistical model"} -->
 <!-- par(mfrow=c(1, 2)) -->
 <!-- m <- lvm(Y ~ A + W, A ~ W) -->
@@ -118,18 +110,18 @@
 <p>Under the following assumptions</p>
 <ol style="list-style-type: decimal">
 <li>Stable Unit Treatment Values Assumption (the treatment of a specific subject is not affecting the potential outcome of other subjects)</li>
-<li>Positivity, <span class="math inline">\(P(A\mid W)&gt;\epsilon\)</span> for some <span class="math inline">\(\epsilon&gt;0.\)</span>
+<li>Positivity, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>A</mi><mo>∣</mo><mi>W</mi><mo stretchy="false" form="postfix">)</mo><mo>&gt;</mo><mi>ϵ</mi></mrow><annotation encoding="application/x-tex">P(A\mid W)&gt;\epsilon</annotation></semantics></math> for some <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϵ</mi><mo>&gt;</mo><mn>0</mn><mi>.</mi></mrow><annotation encoding="application/x-tex">\epsilon&gt;0.</annotation></semantics></math>
 </li>
-<li>No unmeasured confounders, <span class="math inline">\(Y(a)\perp \!\!\! \perp A|W\)</span>
+<li>No unmeasured confounders, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mo stretchy="false" form="prefix">(</mo><mi>a</mi><mo stretchy="false" form="postfix">)</mo><mo>⊥</mo><mspace width="-0.167em"></mspace><mspace width="-0.167em"></mspace><mspace width="-0.167em"></mspace><mo>⊥</mo><mi>A</mi><mo stretchy="false" form="prefix">|</mo><mi>W</mi></mrow><annotation encoding="application/x-tex">Y(a)\perp \!\!\! \perp A|W</annotation></semantics></math>
 </li>
 </ol>
-<p>the target parameter can be identified from the observed data distribution as <span class="math display">\[E(E[Y|W,A=a]) = E(E[Y(a)|W]) = E[Y(a)]\]</span> or <span class="math display">\[E[Y I(A=a)/P(A=a|W)] = E[Y(a)].\]</span></p>
+<p>the target parameter can be identified from the observed data distribution as <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mo stretchy="false" form="prefix">(</mo><mi>E</mi><mo stretchy="false" form="prefix">[</mo><mi>Y</mi><mo stretchy="false" form="prefix">|</mo><mi>W</mi><mo>,</mo><mi>A</mi><mo>=</mo><mi>a</mi><mo stretchy="false" form="postfix">]</mo><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>E</mi><mo stretchy="false" form="prefix">(</mo><mi>E</mi><mo stretchy="false" form="prefix">[</mo><mi>Y</mi><mo stretchy="false" form="prefix">(</mo><mi>a</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="prefix">|</mo><mi>W</mi><mo stretchy="false" form="postfix">]</mo><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>E</mi><mo stretchy="false" form="prefix">[</mo><mi>Y</mi><mo stretchy="false" form="prefix">(</mo><mi>a</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">E(E[Y|W,A=a]) = E(E[Y(a)|W]) = E[Y(a)]</annotation></semantics></math> or <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mo stretchy="false" form="prefix">[</mo><mi>Y</mi><mi>I</mi><mo stretchy="false" form="prefix">(</mo><mi>A</mi><mo>=</mo><mi>a</mi><mo stretchy="false" form="postfix">)</mo><mi>/</mi><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>A</mi><mo>=</mo><mi>a</mi><mo stretchy="false" form="prefix">|</mo><mi>W</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">]</mo><mo>=</mo><mi>E</mi><mo stretchy="false" form="prefix">[</mo><mi>Y</mi><mo stretchy="false" form="prefix">(</mo><mi>a</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">]</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">E[Y I(A=a)/P(A=a|W)] = E[Y(a)].</annotation></semantics></math></p>
 <p>This suggests estimation via either <em>outcome regression</em> (OR, g-computation) or <em>inverse probability weighting</em> (IPW). These can eventually also be combined to a doubly-robust augmented inverse probability weighted (AIPW) estimator.</p>
 </div>
 <div class="section level2">
 <h2 id="simulation">Simulation<a class="anchor" aria-label="anchor" href="#simulation"></a>
 </h2>
-<p>As an illustration we simulate from the following model <span class="math display">\[Y \sim Bernoulli(\operatorname{expit}\{A+X+Z\})\]</span> <span class="math display">\[A \sim Bernoulli(\operatorname{expit}\{X+Z\})\]</span> <span class="math display">\[Z \sim \mathcal{N}(X,1)\]</span></p>
+<p>As an illustration we simulate from the following model <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mo>∼</mo><mi>B</mi><mi>e</mi><mi>r</mi><mi>n</mi><mi>o</mi><mi>u</mi><mi>l</mi><mi>l</mi><mi>i</mi><mo stretchy="false" form="prefix">(</mo><mo>expit</mo><mo stretchy="false" form="prefix">{</mo><mi>A</mi><mo>+</mo><mi>X</mi><mo>+</mo><mi>Z</mi><mo stretchy="false" form="postfix">}</mo><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">Y \sim Bernoulli(\operatorname{expit}\{A+X+Z\})</annotation></semantics></math><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mo>∼</mo><mi>B</mi><mi>e</mi><mi>r</mi><mi>n</mi><mi>o</mi><mi>u</mi><mi>l</mi><mi>l</mi><mi>i</mi><mo stretchy="false" form="prefix">(</mo><mo>expit</mo><mo stretchy="false" form="prefix">{</mo><mi>X</mi><mo>+</mo><mi>Z</mi><mo stretchy="false" form="postfix">}</mo><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">A \sim Bernoulli(\operatorname{expit}\{X+Z\})</annotation></semantics></math><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Z</mi><mo>∼</mo><mstyle mathvariant="script"><mi>𝒩</mi></mstyle><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">Z \sim \mathcal{N}(X,1)</annotation></semantics></math></p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/lvm.html" class="external-link">lvm</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">A</span><span class="op">+</span><span class="va">X</span><span class="op">+</span><span class="va">Z</span>, <span class="va">A</span><span class="op">~</span><span class="va">X</span><span class="op">+</span><span class="va">Z</span>, <span class="va">Z</span><span class="op">~</span><span class="va">X</span><span class="op">)</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">distribution</a></span><span class="op">(</span><span class="va">m</span>, <span class="op">~</span><span class="va">A</span><span class="op">+</span><span class="va">Y</span>, <span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">binomial.lvm</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
@@ -149,7 +141,7 @@
 <div class="section level2">
 <h2 id="estimation">Estimation<a class="anchor" aria-label="anchor" href="#estimation"></a>
 </h2>
-<p>The target parameter, <span class="math inline">\(E[Y(a)]\)</span> can be estimated with the <code><a href="../reference/ate.html">targeted::ate</a></code> function:</p>
+<p>The target parameter, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mo stretchy="false" form="prefix">[</mo><mi>Y</mi><mo stretchy="false" form="prefix">(</mo><mi>a</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">E[Y(a)]</annotation></semantics></math> can be estimated with the <code><a href="../reference/ate.html">targeted::ate</a></code> function:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/args.html" class="external-link">args</a></span><span class="op">(</span><span class="va">ate</span><span class="op">)</span></span>
 <span><span class="co">#&gt; function (formula, data = parent.frame(), weights, offset, family = stats::gaussian(identity), </span></span>
@@ -169,7 +161,7 @@
 <span><span class="co">#&gt;     Estimate Std.Err   2.5%  97.5%   P-value</span></span>
 <span><span class="co">#&gt; A=0   0.2937 0.02029 0.2539 0.3334 1.741e-47</span></span>
 <span><span class="co">#&gt; A=1   0.8367 0.01660 0.8042 0.8692 0.000e+00</span></span></code></pre></div>
-<p>In this simulation we can compare the estimates to the actual expected potential outcomes which can be approximated by Monte Carlo integration by simulating from the model where we intervene on <span class="math inline">\(A\)</span> (i.e., break the dependence on <span class="math inline">\(X, Z\)</span>):</p>
+<p>In this simulation we can compare the estimates to the actual expected potential outcomes which can be approximated by Monte Carlo integration by simulating from the model where we intervene on <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>A</mi><annotation encoding="application/x-tex">A</annotation></semantics></math> (i.e., break the dependence on <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo>,</mo><mi>Z</mi></mrow><annotation encoding="application/x-tex">X, Z</annotation></semantics></math>):</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/intervention.lvm.html" class="external-link">intervention</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">"A"</span>, <span class="fl">0</span><span class="op">)</span>, <span class="fl">2e5</span><span class="op">)</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 0.50034</span></span>
@@ -311,9 +303,9 @@
 </h2>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; R version 4.3.3 (2024-02-29)</span></span>
-<span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu (64-bit)</span></span>
-<span><span class="co">#&gt; Running under: Ubuntu 22.04.4 LTS</span></span>
+<span><span class="co">#&gt; R version 4.4.1 (2024-06-14)</span></span>
+<span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu</span></span>
+<span><span class="co">#&gt; Running under: Ubuntu 22.04.5 LTS</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Matrix products: default</span></span>
 <span><span class="co">#&gt; BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 </span></span>
@@ -335,32 +327,29 @@
 <span><span class="co">#&gt; [1] targeted_0.6 lava_1.8.0  </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span><span class="co">#&gt;  [1] sass_0.4.9           future_1.33.2        futile.options_1.0.1</span></span>
-<span><span class="co">#&gt;  [4] lattice_0.22-5       listenv_0.9.1        pracma_2.4.4        </span></span>
-<span><span class="co">#&gt;  [7] digest_0.6.35        magrittr_2.0.3       evaluate_0.23       </span></span>
-<span><span class="co">#&gt; [10] grid_4.3.3           mvtnorm_1.2-4        fastmap_1.1.1       </span></span>
-<span><span class="co">#&gt; [13] jsonlite_1.8.8       Matrix_1.6-5         survival_3.5-8      </span></span>
-<span><span class="co">#&gt; [16] formatR_1.14         purrr_1.0.2          codetools_0.2-19    </span></span>
-<span><span class="co">#&gt; [19] numDeriv_2016.8-1.1  textshaping_0.3.7    jquerylib_0.1.4     </span></span>
-<span><span class="co">#&gt; [22] cli_3.6.2            rlang_1.1.3          futile.logger_1.4.3 </span></span>
-<span><span class="co">#&gt; [25] mets_1.3.4           parallelly_1.37.1    future.apply_1.11.2 </span></span>
-<span><span class="co">#&gt; [28] splines_4.3.3        cachem_1.0.8         yaml_2.3.8          </span></span>
-<span><span class="co">#&gt; [31] tools_4.3.3          parallel_4.3.3       memoise_2.0.1       </span></span>
-<span><span class="co">#&gt; [34] nloptr_2.0.3         optimx_2023-10.21    lambda.r_1.2.4      </span></span>
-<span><span class="co">#&gt; [37] globals_0.16.3       vctrs_0.6.5          R6_2.5.1            </span></span>
-<span><span class="co">#&gt; [40] lifecycle_1.0.4      fs_1.6.3             ragg_1.3.0          </span></span>
-<span><span class="co">#&gt; [43] desc_1.4.3           timereg_2.0.5        pkgdown_2.0.8       </span></span>
-<span><span class="co">#&gt; [46] bslib_0.7.0          data.table_1.15.4    Rcpp_1.0.12         </span></span>
-<span><span class="co">#&gt; [49] systemfonts_1.0.6    xfun_0.43            knitr_1.46          </span></span>
-<span><span class="co">#&gt; [52] htmltools_0.5.8.1    rmarkdown_2.26       compiler_4.3.3</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1] Matrix_1.7-0         future.apply_1.11.2  jsonlite_1.8.9      </span></span>
+<span><span class="co">#&gt;  [4] futile.logger_1.4.3  compiler_4.4.1       Rcpp_1.0.13         </span></span>
+<span><span class="co">#&gt;  [7] parallel_4.4.1       jquerylib_0.1.4      globals_0.16.3      </span></span>
+<span><span class="co">#&gt; [10] splines_4.4.1        systemfonts_1.1.0    textshaping_0.4.0   </span></span>
+<span><span class="co">#&gt; [13] yaml_2.3.10          fastmap_1.2.0        lattice_0.22-6      </span></span>
+<span><span class="co">#&gt; [16] R6_2.5.1             knitr_1.48           future_1.34.0       </span></span>
+<span><span class="co">#&gt; [19] nloptr_2.1.1         desc_1.4.3           bslib_0.8.0         </span></span>
+<span><span class="co">#&gt; [22] rlang_1.1.4          cachem_1.1.0         xfun_0.47           </span></span>
+<span><span class="co">#&gt; [25] fs_1.6.4             sass_0.4.9           cli_3.6.3           </span></span>
+<span><span class="co">#&gt; [28] pkgdown_2.1.1        formatR_1.14         futile.options_1.0.1</span></span>
+<span><span class="co">#&gt; [31] digest_0.6.37        grid_4.4.1           mvtnorm_1.3-1       </span></span>
+<span><span class="co">#&gt; [34] lifecycle_1.0.4      timereg_2.0.6        pracma_2.4.4        </span></span>
+<span><span class="co">#&gt; [37] evaluate_1.0.0       data.table_1.16.0    numDeriv_2016.8-1.1 </span></span>
+<span><span class="co">#&gt; [40] lambda.r_1.2.4       listenv_0.9.1        codetools_0.2-20    </span></span>
+<span><span class="co">#&gt; [43] ragg_1.3.3           optimx_2023-10.21    survival_3.6-4      </span></span>
+<span><span class="co">#&gt; [46] parallelly_1.38.0    rmarkdown_2.28       mets_1.3.4          </span></span>
+<span><span class="co">#&gt; [49] tools_4.4.1          htmltools_0.5.8.1</span></span></code></pre></div>
 </div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
 
-        <nav id="toc" data-toggle="toc"><h2 data-toc-skip>Contents</h2>
-    </nav>
-</div>
+      </div>
 
 </div>
 
@@ -373,16 +362,16 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.8.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
       </footer>
 </div>
 
-  
 
 
-  
+
+
 
   </body>
 </html>
