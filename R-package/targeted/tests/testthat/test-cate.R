@@ -24,7 +24,7 @@ simcate <- function(qmod) {
   ic <- ic0 + ic1
   e1 <- estimate(coef = est, IC = ic)
 
-  aa <- cate(a ~ 1,
+  aa <- cate(
     ML(qmod),
     ML(a ~ x, family = binomial),
     data = d, nfolds = 1
