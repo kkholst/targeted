@@ -71,7 +71,7 @@ observations</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">aipw</span><span class="op">(</span><span class="va">response_model</span>, <span class="va">missing_model</span>, formula <span class="op">=</span> <span class="op">~</span><span class="fl">1</span>, <span class="va">data</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">aipw</span><span class="op">(</span><span class="va">response_model</span>, <span class="va">propensity_model</span>, formula <span class="op">=</span> <span class="op">~</span><span class="fl">1</span>, <span class="va">data</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -83,9 +83,9 @@ observations</p>
 formula)</p></dd>
 
 
-<dt id="arg-missing-model">missing_model<a class="anchor" aria-label="anchor" href="#arg-missing-model"></a></dt>
-<dd><p>Optional missing_model (ml_model or formula). By
-default will use the same design as the response_model.</p></dd>
+<dt id="arg-propensity-model">propensity_model<a class="anchor" aria-label="anchor" href="#arg-propensity-model"></a></dt>
+<dd><p>Optional missing data mechanism model (propensity
+model) (ml_model or formula)</p></dd>
 
 
 <dt id="arg-formula">formula<a class="anchor" aria-label="anchor" href="#arg-formula"></a></dt>
