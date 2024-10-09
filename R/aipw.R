@@ -6,14 +6,12 @@
 ##' @export
 ##' @param response_model Model for the response given covariates (ml_model or
 ##'   formula)
-##' @param missing_model Missing data mechanism model (propensity model)
-##'   (ml_model or formula)
+##' @param propensity_model Optional missing data mechanism model (propensity
+##'   model) (ml_model or formula)
 ##' @param data data.frame
 ##' @param ... additional arguments (see [cate()])
 ##' @param formula design specifying the OLS estimator with outcome given by the
 ##'   EIF
-##' @param missing_model Optional missing_model (ml_model or formula). By
-##'   default will use the same design as the response_model.
 ##' @examples
 ##' m <- lvm(y ~ x+z, r ~ x)
 ##' distribution(m,~ r) <- binomial.lvm()
@@ -22,7 +20,7 @@
 ##'
 ##' aipw(y0 ~ x, data=d)
 aipw <- function(response_model,
-                 missing_model,
+                 propensity_model,
                  formula = ~1,
                  data,
                  ...) {
@@ -35,14 +33,14 @@ aipw <- function(response_model,
     data = data, na.action = na.pass
   )) * 1
   data[, "R_"] <- r[, 1]
-  if (base::missing(missing_model)) {
-      missing_model <- update(response_model$formula, as.formula("R_ ~ ."))
+  if (base::missing(propensity_model)) {
+      propensity_model <- update(response_model$formula, as.formula("R_ ~ ."))
   }
-  if (inherits(missing_model, "formula")) {
-    missing_model <- ML(missing_model, family=binomial)
+  if (inherits(propensity_model, "formula")) {
+    propensity_model <- ML(propensity_model, family=binomial)
   }
   cate(response_model=response_model,
-       propensity_model=missing_model,
+       propensity_model=propensity_model,
        cate_model = formula,
       data = data, contrast = 1, stratify = TRUE,
       ...

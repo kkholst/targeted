@@ -4,14 +4,14 @@
 \alias{aipw}
 \title{AIPW estimator}
 \usage{
-aipw(response_model, missing_model, formula = ~1, data, ...)
+aipw(response_model, propensity_model, formula = ~1, data, ...)
 }
 \arguments{
 \item{response_model}{Model for the response given covariates (ml_model or
 formula)}
 
-\item{missing_model}{Optional missing_model (ml_model or formula). By
-default will use the same design as the response_model.}
+\item{propensity_model}{Optional missing data mechanism model (propensity
+model) (ml_model or formula)}
 
 \item{formula}{design specifying the OLS estimator with outcome given by the
 EIF}

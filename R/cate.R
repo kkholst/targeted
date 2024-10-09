@@ -29,8 +29,8 @@ ate_if_fold <- function(fold, data,
   IC <- part1 + eY
   adj <- NULL
   if (inherits(pmod, "glm")) {
-    ## Term from estimating propensity model / treatment probabilities that does not go to
-    ## zero in probability unless Q-model is correct
+    ## Term from estimating propensity model / treatment probabilities that does
+    ## not go to zero in probability unless Q-model is correct
     pX <- propensity_model$design(deval, intercept = TRUE)
     dlinkinv <- pmod$family$mu.eta
     adj <- -part1 / pr * dlinkinv(pmod$family$linkfun(pr))
