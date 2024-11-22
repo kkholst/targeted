@@ -1,6 +1,14 @@
 ##' @title R6 class for prediction models
 ##' @description Provides standardized estimation and prediction methods
 ##' @author Klaus Kähler Holst
+##' @aliases ml_model predictor
+##' predictor_glm predictor_gam predictor_glmnet
+##' predictor_grf predictor_grf_binary
+##' predictor_xgboost predictor_xgboost_multiclass
+##' predictor_xgboost_count predictor_xgboost_cox
+##' predictor_xgboost_binary
+##' predictor_hal predictor_isoreg
+##' predictor_sl
 ##' @examples
 ##' data(iris)
 ##' rf <- function(formula, ...)
@@ -86,6 +94,10 @@ ml_model <- R6::R6Class("ml_model",
 
       self$args <- dots
       no_formula <- is.null(formula)
+      if (!no_formula && is.character(formula) || is.function(formula)) {
+        no_formula <- TRUE
+
+      }
       if (no_formula) {
         private$fitfun <- function(...) {
           args <-  c(list(...), dots)
@@ -145,10 +157,11 @@ ml_model <- R6::R6Class("ml_model",
       }
       self$formula <- formula
       self$info <- info
+
       self$formals <- list(estimate=formals(estimate), predict=formals(predict))
       private$call <- list(estimate=substitute(estimate),
                            predict=substitute(predict),
-                           dots=substitute(list(...)),
+                           dots=list2str(list(...)),
                            predict.args=substitute(predict.args))
      },
 
@@ -200,16 +213,27 @@ ml_model <- R6::R6Class("ml_model",
        if (!is.null(self$info))
          cat(self$info, "\n\n")
        cat("Arguments:\n")
-       print(unlist(private$call$dots))
-       if (!is.null(self$formula))
+       
+       cat("\t", private$call$dots, "\n", sep="")
+       if (!is.null(self$formula)) {
          cat("Model:\n",
-             "\t", deparse1(self$formula), "\n", sep="")
-       cat("Estimate function:\n",
+           "\t", deparse1(self$formula), "\n",
+           sep = ""
+         )
+       }
+       cat("\`estimate` method:`\n",
            "\tfunction(", paste(names(self$formals[[1]]),
                                 collapse=", "), ")\n", sep="")
-       cat("Prediction:\n",
-           "\tfunction(", paste(names(self$formals[[2]]),
-                                collapse=", "), ")\n", sep="")
+       cat("`predict` method:\n",
+         "\tfunction(", paste(names(self$formals[[2]]),
+           collapse = ", "
+         ), ")\n",
+         sep = ""
+         )
+       if (!is.null(self$fit)) {
+         cat("\n_________________________________\n\n")
+         print(self$fit)
+       }
      },
 
      ##' @description
@@ -217,7 +241,12 @@ ml_model <- R6::R6Class("ml_model",
      ##' @param data data.frame
      ##' @param ... additional arguments to 'design'
      response = function(data, ...) {
-       if (is.null(self$formula)) return(NULL)
+       if (is.null(self$formula)) {
+         if (!is.null(self$responsevar)) {
+           return(data[,self$responsevar,drop=TRUE])
+         }
+         return(NULL)
+       }
        design(update(self$formula, ~ 1), data=data, ...)$y
      },
 
@@ -257,8 +286,10 @@ ml_model <- R6::R6Class("ml_model",
      fitted = NULL,
      ## @field call Information on the initialized model
      call = NULL,
-     # When x$clone(deep=TRUE) is called, the deep_clone gets invoked once for
-                                        # each field, with the name and value.
+     ## @field optional field containing name of response variable
+     responsevar = NULL,
+     ## When x$clone(deep=TRUE) is called, the deep_clone gets invoked once for
+     ## each field, with the name and value.
      deep_clone = function(name, value) {
        if (name == "fitfun") {
          env <- list2env(
@@ -289,160 +320,3 @@ predict.ml_model <- function(object, ...) {
   object$predict(...)
 }
 
-
-##' ML model
-##'
-##' Wrapper for ml_model
-##' @export
-##' @param formula formula
-##' @param model model (sl, rf, pf, glm, ...)
-##' @param ... additional arguments to model object
-##' @details
-##' model 'sl' (SuperLearner::SuperLearner)
-##' args: SL.library, cvControl, family, method
-##' example:
-##'
-##' model 'grf' (grf::regression_forest)
-##' args: num.trees, mtry, sample.weights, sample.fraction, min.node.size, ...
-##' example:
-##'
-##' model 'grf.binary' (grf::probability_forest)
-##' args: num.trees, mtry, sample.weights, ...
-##' example:
-##'
-##' model 'glm'
-##' args: family, weights, offset, ...
-##'
-ML <- function(formula, model="glm", ...) {
-  model <- tolower(model)
-  dots <- list(...)
-  addargs <- function(..., dots, args = list()) {
-      for (p in names(args)) {
-          if (!(p %in% names(dots))) dots[p] <- args[[p]]
-      }
-      c(list(...), dots)
-  }
-
-  ## SL / SuperLearner
-  if (model == "sl") {
-      return(SL(formula, ...))
-  }
-
-  ## grf
-  grf.bin <- c("grf.binary", "pf", "probability_forest")
-  if (model%in%c("grf", "rf", "regression_forest",
-                 grf.bin)) {
-    args <- list(
-      num.trees = 2000,
-      min.node.size = 5,
-      alpha = 0.05,
-      sample.fraction = 0.5,
-      num.threads=1
-    )
-    obj <- "grf::regression_forest"
-    est <- function(x, y) {
-      grf::regression_forest(X = x, Y = y, ...)
-    }
-    if (model %in% grf.bin) {
-        obj <- "grf::probability_forest"
-        est <- function(x, y) {
-          grf::probability_forest(X = x, Y = y, ...)
-        }
-    }
-    ml_args <- addargs(formula,
-        info = obj,
-        estimate = est,
-        predict = function(object, newdata, ...) {
-          predict(object, newdata, ...)$predictions
-        },
-        dots = dots,
-        args = args
-        )
-    return(do.call(ml_model$new, ml_args))
-  }
-
-  ## xgboost
-  if (model %in% c("xgboost", "xgb", "xgboost.multiclass",
-                   "xgboost.binary", "xgboost.count", "xgboost.survival")) {
-    obj <- switch(model,
-        xgboost.multiclass = "multi:softprob",
-        xgboost.binary = "reg:logistic",
-        xgboost.survival = "survival:cox",
-        xgboost.count = "count:poisson",
-        "reg:squarederror"
-        )
-    if (!requireNamespace("xgboost"))
-      stop("xgboost library required")
-
-    args <- list(
-      max_depth = 2,
-      eta = 1,
-      nrounds = 2,
-      subsample = 1,
-      lambda = 1,
-      objective = obj,
-      verbose = 0
-    )
-    pred <- function(object, newdata, ...) {
-        d <- xgboost::xgb.DMatrix(newdata)
-        predict(object, d, ...)
-    }
-    if (obj == "multi:softprob") {
-        pred <- function(object, newdata, ...) {
-            d <- xgboost::xgb.DMatrix(newdata)
-            val <- predict(object, d, ...)
-            matrix(val, nrow = NROW(d), byrow=TRUE)
-        }
-    }
-    ml_args <- addargs(formula,
-                       info = paste0("xgboost (", obj, ")"),
-                       estimate = function(x, y) {
-                         d <- xgboost::xgb.DMatrix(x, label = y)
-                         xgboost::xgboost(d, ...)
-                       },
-                       predict = pred,
-                       dots = dots,
-                       args = args
-                       )
-    return(do.call(ml_model$new, ml_args))
-  }
-
-  ## GAM
-  if (model %in% c("mgcv", "gam")) {
-    args <- list(
-        family = gaussian(),
-        select = FALSE,
-        gamma = 1
-    )
-    ml_args <- addargs(formula,
-        info = paste0("mgcv::gam"),
-        estimate = function(formula, data, ...) {
-            mgcv::gam(formula, data = data, ...)
-        },
-        predict = function(object, newdata) {
-            stats::predict(object, newdata = newdata, type = "response")
-        },
-        dots = dots,
-        args = args
-        )
-    return(do.call(ml_model$new, ml_args))
-  }
-
-  ## glm, default
-  m <- ml_model$new(formula, info = "glm", ...,
-        estimate = function(formula, data, ...) {
-          stats::glm(formula,
-            data = data,
-            ...
-            )
-        },
-        predict = function(object, newdata, ...) {
-          stats::predict(object,
-                         newdata = newdata,
-                         type = "response"
-          )
-        }
-        )
-  return(m)
-
-}
