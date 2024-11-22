@@ -8,8 +8,8 @@
 ##'   last part used for testing)
 ##' @param rep Number of repetitions (default 1)
 ##' @param weights Optional frequency weights
-##' @param modelscore Model scoring metric (default: MSE / Brier score). Must be
-##'   a function with arguments: response, prediction, weights, ...
+##' @param model.score Model scoring metric (default: MSE / Brier score). Must be
+##'   a function with arguments: response, prediction, weights, object, ...
 ##' @param seed Random seed (argument parsed to future_Apply::future_lapply)
 ##' @param shared Function applied to each fold with results send to each model
 ##' @param args.pred Optional arguments to prediction function (see details
@@ -37,21 +37,30 @@
 ##' x <- cv(list(m0=f0,m1=f1,m2=f2),rep=10, data=iris, formula=Sepal.Length~.)
 ##' x
 ##' @export
-cv <- function(models, data, response = NULL, nfolds = 5, rep = 1,
-               weights = NULL, modelscore,
+cv <- function(models, data, response = NULL,
+               nfolds = 5, rep = 1,
+               weights = NULL,
+               model.score = NULL,
                seed = NULL, shared = NULL, args.pred = NULL,
                args.future = list(), mc.cores, ...) {
-  if (missing(modelscore)) modelscore <- scoring
-  if (!("weights" %in% formalArgs(modelscore))) {
-    formals(modelscore) <- c(formals(modelscore), alist(weights=NULL))
-  }
+
   if (!is.list(models)) stop("Expected a list of models")
   nam <- names(models)
   if (is.null(nam)) nam <- paste0("model", seq_along(models))
   args0 <- list(...)
   if ("K" %in% names(args0)) { ## Backward compatibility
+    .Deprecated("argument 'K' replaced by 'nfolds'")
     nfolds <- args0$K
     args0$K <- NULL
+  }
+  if ("modelscore" %in% names(args0)) {
+    .Deprecated("argument `modelscore` replaced by `model.score`")
+    model.score <- args0$modelscore
+    args0$modelscore <- NULL
+  }
+  if (is.null(model.score)) model.score <- scoring
+  if (!("weights" %in% formalArgs(model.score))) {
+    formals(model.score) <- c(formals(model.score), alist(weights=NULL))
   }
   args <- args0
   data.arg <- NULL
@@ -137,17 +146,22 @@ cv <- function(models, data, response = NULL, nfolds = 5, rep = 1,
       f$predict,
       c(list(newdata = data), args.pred)
     )
+    fit0 <- f
   } else {
     pred0 <- do.call(
       f[[2]],
       c(list(fit0, newdata = data), args.pred)
     )
   }
-  perf0 <- modelscore(
+
+  perf0 <- model.score(
     prediction = pred0,
     response = response,
-    weights = weights
+    weights = weights,
+    object = fit0,
+    newdata = data
   )
+
   nam_perf <- if (is.vector(perf0)) {
     names(perf0)
   } else {
@@ -219,16 +233,17 @@ cv <- function(models, data, response = NULL, nfolds = 5, rep = 1,
           c(list(fits[[j]], newdata = dtest), args.pred)
         )
       }
-      perfs <- c(perfs, list(
-        do.call(
-          modelscore,
-          c(list(
-            prediction = pred,
-            response = ytest,
-            weights = wtest
-          ))
-        )
-      ))
+      newperf <- do.call(
+        model.score,
+        c(list(
+          prediction = pred,
+          response = ytest,
+          weights = wtest,
+          object = fits[[j]],
+          newdata = dtest
+        ))
+      )
+      perfs <- c(perfs, list(newperf))
     }
     pb()
     do.call(rbind, perfs)
@@ -238,7 +253,7 @@ cv <- function(models, data, response = NULL, nfolds = 5, rep = 1,
     fargs <- list(ff, seq_len(nrow(arg)),
       SIMPLIFY = FALSE,
       USE.NAMES = TRUE,
-      future.seed = seed
+     future.seed = seed
       )
     if (length(args.future) > 0) {
       fargs[names(args.future)] <- args.future
@@ -290,6 +305,11 @@ coef.cross_validated <- function(object, min=FALSE, ...) {
     res <- apply(res, 2, which.min)
   }
   res
+}
+
+##' @export
+score.cross_validated <- function(x, ...) {
+  return(x$cv)
 }
 
 #' @title cross_validated class object
