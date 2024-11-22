@@ -9,7 +9,8 @@ SL(
   ...,
   SL.library = c("SL.mean", "SL.glm"),
   binomial = FALSE,
-  data = NULL
+  data = NULL,
+  info = "SuperLearner"
 )
 }
 \arguments{
@@ -19,9 +20,12 @@ SL(
 
 \item{SL.library}{character vector of prediction algorithms}
 
-\item{binomial}{boolean specifying binomial or gaussian family (default FALSE)}
+\item{binomial}{boolean specifying binomial or gaussian family (default
+FALSE)}
 
 \item{data}{Optional data.frame}
+
+\item{info}{model information (optional)}
 }
 \value{
 ml_model object
