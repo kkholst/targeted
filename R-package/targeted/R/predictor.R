@@ -190,6 +190,40 @@ predictor_isoreg <- function(formula,
 ##' @references Luedtke & van der Laan (2016) Super-Learning of an Optimal
 ##'   Dynamic Treatment Rule, The International Journal of Biostatistics.
 ##' @seealso ml_model predictor_glm predictor_xgboost
+##' @examples
+##' sim1 <- function(n = 5e2) {
+##'    n <- 5e2
+##'    x1 <- rnorm(n, sd = 2)
+##'    x2 <- rnorm(n)
+##'    y <- x1 + cos(x1) + rnorm(n, sd = 0.5**.5)
+##'    d <- data.frame(y, x1, x2)
+##'    d
+##' }
+##' d <- sim1() |> mets::dsort(~x1)
+##'
+##' m <- list(
+##'   "mean" = predictor_glm(y ~ 1),
+##'   "glm" = predictor_glm(y ~ x1 + x2),
+##'   "iso" = predictor_isoreg(y ~ x1)
+##' )
+##'
+##' s <- predictor_sl(m, nfolds=10)
+##' s$estimate(d)
+##' pr <- s$predict(d)
+##' if (interactive()) {
+##'     plot(y ~ x1, data = d)
+##'     points(d$x1, pr, col = 2, cex = 0.5)
+##'     lines(cos(x1) + x1 ~ x1, data = d,
+##'           lwd = 4, col = lava::Col("darkblue", 0.3))
+##' }
+##' print(s)
+##' ## weights(s)
+##' ## score(s)
+##'
+##' cvres <- summary(s, data=d, nfolds=3, rep=2)
+##' cvres
+##' ## coef(cvres)
+##' ## score(cvres)
 predictor_sl <- function(model.list,
                          info = NULL,
                          nfolds = 5L,
