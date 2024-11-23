@@ -2,7 +2,7 @@ Package: targeted
 Type: Package
 Title: Targeted Inference
 Version: 0.6
-Date: 2024-04-15
+Date: 2024-10-30
 Authors@R: c(person(given = "Klaus K.",
                     family = "Holst",
                     role = c("aut", "cre"),
@@ -26,19 +26,22 @@ Depends:
     lava (>= 1.8.0)
 Imports:
     data.table,
-    digest,
-    futile.logger,
     future.apply,
+    glmnet,
     optimx,
 	progressr,
     methods,
     mets,
     R6,
     Rcpp (>= 1.0.0),
+    rlang,
     survival
 Suggests:
+    e1071,
     grf,
+    hal9001,
     mgcv,
+    nnls,
     testthat (>= 0.11),
     rmarkdown,
     scatterplot3d,

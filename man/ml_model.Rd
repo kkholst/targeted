@@ -2,6 +2,19 @@
 % Please edit documentation in R/ml_model.R
 \name{ml_model}
 \alias{ml_model}
+\alias{predictor}
+\alias{predictor_glm}
+\alias{predictor_gam}
+\alias{predictor_glmnet}
+\alias{predictor_grf}
+\alias{predictor_grf_binary}
+\alias{predictor_xgboost}
+\alias{predictor_xgboost_multiclass}
+\alias{predictor_xgboost_count}
+\alias{predictor_xgboost_cox}
+\alias{predictor_xgboost_binary}
+\alias{predictor_hal}
+\alias{predictor_isoreg}
 \title{R6 class for prediction models}
 \description{
 Provides standardized estimation and prediction methods
@@ -31,6 +44,9 @@ ff <- ml_model$new(estimate=function(y,x) lm.fit(x=x, y=y),
         predict=function(object, newdata) newdata\%*\%object$coefficients)
 ## tmp <- ff$estimate(y, x=x)
 ## ff$predict(x)
+}
+\seealso{
+predictor_sl
 }
 \author{
 Klaus Kähler Holst

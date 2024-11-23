@@ -252,7 +252,7 @@ riskreg_fit <- function(y, a,
                     par=unlist(op1[, seq_along(alpha0), drop=TRUE]))
     }
     if (opt$objective>1e-3) {
-        futile.logger::flog.warn("riskreg optimization: convergence issues")
+        warning("riskreg optimization: convergence issues")
     }
     Vprop <- NULL
     if (std.err) {

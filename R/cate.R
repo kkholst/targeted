@@ -7,7 +7,7 @@ ate_if_fold <- function(fold, data,
   } else {
     dtrain <- data[-fold, ]
     deval <- data[fold, ]
-  }
+ }
 
   pmod <- propensity_model$estimate(dtrain)
   X <- deval
@@ -18,7 +18,6 @@ ate_if_fold <- function(fold, data,
     tmp <- response_model$estimate(dtrain)
     X[, treatment] <- level
   }
-
   A <- propensity_model$response(deval)
   Y <- response_model$response(deval, na.action=lava::na.pass0)
   pr <- propensity_model$predict(newdata = deval)
@@ -48,8 +47,15 @@ cate_fold1 <- function(fold, data, score, cate_des) {
   lm.fit(y = y, x = x)$coef
 }
 
-##' Conditional Average Treatment Effect estimation via Double Machine Learning
+##' Conditional Average Treatment Effect estimation with cross-fitting.
 ##'
+##' We have observed data \eqn{(Y,A,W)} where \eqn{Y} is the response variable,
+##' \eqn{A} the binary treatment, and \eqn{W} covariates. We further let \eqn{V}
+##' be a subset of the covariates. Define the conditional potential mean outcome
+##' \deqn{\psi_{a}(P)(V) = E_{P}[E_{P}(Y\mid A=a, W)|V]} and let \eqn{m(V;
+##' \beta)} denote a parametric working model, then the target parameter is the
+##' mean-squared error \deqn{\beta(P) = \operatorname{argmin}_{\beta}
+##' E_{P}[\{\Psi_{1}(P)(V)-\Psi_{0}(P)(V)\} - m(V; \beta)]^{2}}
 ##' @title Conditional Average Treatment Effect estimation
 ##' @param response_model formula or ml_model object (formula => glm)
 ##' @param propensity_model formula or ml_model object (formula => glm)
@@ -66,25 +72,42 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 ##' @param ... additional arguments to future.apply::future_mapply
 ##' @return cate.targeted object
 ##' @author Klaus Kähler Holst, Andreas Nordland
+##' @references Mark J. van der Laan (2006) Statistical Inference for Variable
+##'   Importance, The International Journal of Biostatistics.
 ##' @examples
-##' sim1 <- function(n=1e4,
-##'                  seed=NULL,
-##'                  return_model=FALSE, ...) {
-##'   suppressPackageStartupMessages(require("lava"))
-##'   if (!is.null(seed)) set.seed(seed)
-##'   m <- lava::lvm()
-##' lava::regression(m, ~a) <- function(z1,z2,z3,z4,z5)
-##'          cos(z1)+sin(z1*z2)+z3+z4+z5^2
-##' lava::regression(m, ~u) <- function(a,z1,z2,z3,z4,z5)
-##'         (z1+z2+z3)*a + z1+z2+z3 + a
-##' lava::distribution(m, ~a) <- lava::binomial.lvm()
-##' if (return_model) return(m)
-##' lava::sim(m, n, p=par)
+##' sim1 <- function(n=1000, ...) {
+##'   w1 <- rnorm(n)
+##'   w2 <- rnorm(n)
+##'   a <- rbinom(n, 1, expit(-1 + w1))
+##'   y <- cos(w1) + w2*a + 0.2*w2^2 + a + rnorm(n)
+##'   data.frame(y, a, w1, w2)
 ##' }
 ##'
-##' d <- sim1(200)
-##' e <- cate(a ~ z1+z2+z3, response=u~., data=d)
-##' e
+##' d <- sim1(5000)
+##' ## ATE
+##' cate(cate_model=~1,
+##'      response_model=y~a*(w1+w2),
+##'      propensity_model=a~w1+w2,
+##'      data=d)
+##' ## CATE
+##' cate(cate_model=~1+w2,
+##'      response_model=y~a*(w1+w2),
+##'      propensity_model=a~w1+w2,
+##'      data=d)
+##'
+##' \dontrun{ ## superlearner example
+##' mod1 <- list(
+##'    glm=predictor_glm(y~w1+w2),
+##'    gam=predictor_gam(y~s(w1) + s(w2))
+##' )
+##' s1 <- predictor_sl(mod1, nfolds=5)
+##' cate(cate_model=~1,
+##'      response_model=s1,
+##'      propensity_model=predictor_glm(a~w1+w2, family=binomial),
+##'      data=d,
+##'      stratify=TRUE)
+##' }
+##'
 ##' @export
 cate <- function(response_model,
                  propensity_model,
@@ -125,7 +148,6 @@ cate <- function(response_model,
   if (inherits(response_model, "formula")) {
     response_model <- ML(response_model)
   }
-  response_var <- lava::getoutcome(response_model$formula, data=data)
 
   if (length(contrast) > 2) {
     stop("Expected contrast vector of length 1 or 2.")
@@ -133,6 +155,7 @@ cate <- function(response_model,
   propensity_outcome <- function(treatment_level)
     paste0("I(", treatment_var, "==", treatment_level, ")")
   if (missing(propensity_model)) {
+    response_var <- lava::getoutcome(response_model$formula, data=data)
     newf <- reformulate(
       paste0(" . - ", response_var),
       response=propensity_outcome(contrast[1])
@@ -213,12 +236,20 @@ cate <- function(response_model,
       )
     }
 
-    scores <- adj <- list()
+    qval <- pval <- scores <- adj <- list()
     for (i in contrast) {
       ii <- which(fargs[, 2] == i)
       scores <- c(
         scores,
         list(unlist(lapply(ii, function(x) val[[x]]$IC))[idx])
+      )
+      qval <- c(
+        qval,
+        list(unlist(lapply(ii, function(x) val[[x]]$qmod))[idx])
+      )
+      pval <- c(
+        pval,
+        list(unlist(lapply(ii, function(x) val[[x]]$pmod))[idx])
       )
       if (!is.null(val[[1]]$adj)) {
         A <- lapply(ii, function(x) {
@@ -228,8 +259,10 @@ cate <- function(response_model,
       }
     }
     names(scores) <- contrast
+    names(qval) <- contrast
+    names(pval) <- contrast
     if (length(adj) > 0) names(adj) <- contrast
-    list(scores = scores, adj = adj)
+    list(scores = scores, adj = adj, qval = qval, pval = pval)
   }
 
   mc <- !missing(mc.cores)
@@ -241,20 +274,28 @@ cate <- function(response_model,
     }
     if (mc) {
       val <- parallel::mclapply(1:rep, f,
-        mc.cores = mc.cores, pb=pb, ...)
+        mc.cores = mc.cores, pb = pb, ...
+      )
     } else {
       val <- future.apply::future_lapply(
-        1:rep, f, pb=pb, future.seed = TRUE, ...)
+        1:rep, f,
+        pb = pb, future.seed = TRUE, ...
+      )
     }
   } else {
-      val <- list(calculate_scores())
+    val <- list(calculate_scores())
   }
+
+  pval <- val[[1]]$pval
+  qval <- val[[1]]$qval
   scores <- val[[1]]$scores
   adj <- val[[1]]$adj
   if (rep > 1) {
     for (i in 2:rep) {
       for (j in seq_len(length(scores))) {
         scores[[j]] <- scores[[j]] + val[[i]]$scores[[j]]
+        qval[[j]] <- qval[[j]] + val[[i]]$qval[[j]]
+        pval[[j]] <- pval[[j]] + val[[i]]$pval[[j]]
         if (length(adj) > 0) {
           adj[[j]] <- adj[[j]] + val[[j]]$adj[[j]]
         }
@@ -262,6 +303,8 @@ cate <- function(response_model,
     }
     for (j in seq_len(length(scores))) {
       scores[[j]] <- scores[[j]] / rep
+      qval[[j]] <- qval[[j]] / rep
+      pval[[j]] <- pval[[j]] / rep
       if (length(adj) > 0) {
         adj[[j]] <- adj[[j]] / rep
       }
@@ -321,6 +364,9 @@ cate <- function(response_model,
 
   res <- list(scores=scores, cate_des=desA,
               coef=est,
+              response_model = response_model,
+              propensity_model = propensity_model,
+              pval = pval, qval = qval,
               potential.outcomes=potential.outcomes,
               call=cl,
               estimate=estimate)
