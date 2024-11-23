@@ -15,7 +15,6 @@
 \alias{predictor_xgboost_binary}
 \alias{predictor_hal}
 \alias{predictor_isoreg}
-\alias{predictor_sl}
 \title{R6 class for prediction models}
 \description{
 Provides standardized estimation and prediction methods
@@ -45,6 +44,9 @@ ff <- ml_model$new(estimate=function(y,x) lm.fit(x=x, y=y),
         predict=function(object, newdata) newdata\%*\%object$coefficients)
 ## tmp <- ff$estimate(y, x=x)
 ## ff$predict(x)
+}
+\seealso{
+predictor_sl
 }
 \author{
 Klaus Kähler Holst

@@ -8,7 +8,7 @@
 ##' predictor_xgboost_count predictor_xgboost_cox
 ##' predictor_xgboost_binary
 ##' predictor_hal predictor_isoreg
-##' predictor_sl
+##' @seealso predictor_sl
 ##' @examples
 ##' data(iris)
 ##' rf <- function(formula, ...)
