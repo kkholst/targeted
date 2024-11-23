@@ -60,7 +60,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>SuperLearner wrapper for ml_model</h1>
-    <small class="dont-index">Source: <a href="https://github.com/kkholst/targeted/blob/main/R/SL.R" class="external-link"><code>R/SL.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/kkholst/targeted/blob/main/R/superlearner.R" class="external-link"><code>R/superlearner.R</code></a></small>
     <div class="hidden name"><code>SL.Rd</code></div>
     </div>
 
@@ -74,7 +74,8 @@
 <span>  <span class="va">...</span>,</span>
 <span>  SL.library <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SL.mean"</span>, <span class="st">"SL.glm"</span><span class="op">)</span>,</span>
 <span>  binomial <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  data <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  data <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  info <span class="op">=</span> <span class="st">"SuperLearner"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -95,11 +96,16 @@
 
 
 <dt id="arg-binomial">binomial<a class="anchor" aria-label="anchor" href="#arg-binomial"></a></dt>
-<dd><p>boolean specifying binomial or gaussian family (default FALSE)</p></dd>
+<dd><p>boolean specifying binomial or gaussian family (default
+FALSE)</p></dd>
 
 
 <dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
 <dd><p>Optional data.frame</p></dd>
+
+
+<dt id="arg-info">info<a class="anchor" aria-label="anchor" href="#arg-info"></a></dt>
+<dd><p>model information (optional)</p></dd>
 
 </dl></div>
     <div id="value">

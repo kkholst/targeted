@@ -86,7 +86,7 @@
       <h1 data-toc-skip>Estimating a relative risk or risk difference with a binary exposure</h1>
                         <h4 data-toc-skip class="author">Klaus Kähler Holst</h4>
             
-            <h4 data-toc-skip class="date">2024-10-09</h4>
+            <h4 data-toc-skip class="date">2024-11-23</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/kkholst/targeted/blob/main/vignettes/riskregression.Rmd" class="external-link"><code>vignettes/riskregression.Rmd</code></a></small>
       <div class="hidden name"><code>riskregression.Rmd</code></div>
@@ -302,7 +302,7 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 </h2>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; R version 4.4.1 (2024-06-14)</span></span>
+<span><span class="co">#&gt; R version 4.4.2 (2024-10-31)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu</span></span>
 <span><span class="co">#&gt; Running under: Ubuntu 22.04.5 LTS</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -326,23 +326,22 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 <span><span class="co">#&gt; [1] targeted_0.6 lava_1.8.0  </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span><span class="co">#&gt;  [1] Matrix_1.7-0         future.apply_1.11.2  jsonlite_1.8.9      </span></span>
-<span><span class="co">#&gt;  [4] futile.logger_1.4.3  compiler_4.4.1       highr_0.11          </span></span>
-<span><span class="co">#&gt;  [7] Rcpp_1.0.13          parallel_4.4.1       jquerylib_0.1.4     </span></span>
-<span><span class="co">#&gt; [10] globals_0.16.3       splines_4.4.1        systemfonts_1.1.0   </span></span>
-<span><span class="co">#&gt; [13] textshaping_0.4.0    yaml_2.3.10          fastmap_1.2.0       </span></span>
-<span><span class="co">#&gt; [16] lattice_0.22-6       R6_2.5.1             knitr_1.48          </span></span>
-<span><span class="co">#&gt; [19] future_1.34.0        nloptr_2.1.1         desc_1.4.3          </span></span>
-<span><span class="co">#&gt; [22] bslib_0.8.0          rlang_1.1.4          cachem_1.1.0        </span></span>
-<span><span class="co">#&gt; [25] xfun_0.48            fs_1.6.4             sass_0.4.9          </span></span>
-<span><span class="co">#&gt; [28] cli_3.6.3            formatR_1.14         pkgdown_2.1.1       </span></span>
-<span><span class="co">#&gt; [31] futile.options_1.0.1 digest_0.6.37        grid_4.4.1          </span></span>
-<span><span class="co">#&gt; [34] mvtnorm_1.3-1        lifecycle_1.0.4      timereg_2.0.6       </span></span>
-<span><span class="co">#&gt; [37] pracma_2.4.4         evaluate_1.0.0       data.table_1.16.0   </span></span>
-<span><span class="co">#&gt; [40] numDeriv_2016.8-1.1  lambda.r_1.2.4       listenv_0.9.1       </span></span>
-<span><span class="co">#&gt; [43] codetools_0.2-20     ragg_1.3.3           optimx_2023-10.21   </span></span>
-<span><span class="co">#&gt; [46] survival_3.6-4       parallelly_1.38.0    rmarkdown_2.28      </span></span>
-<span><span class="co">#&gt; [49] mets_1.3.4           tools_4.4.1          htmltools_0.5.8.1</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1] Matrix_1.7-1        future.apply_1.11.3 jsonlite_1.8.9     </span></span>
+<span><span class="co">#&gt;  [4] compiler_4.4.2      Rcpp_1.0.13-1       parallel_4.4.2     </span></span>
+<span><span class="co">#&gt;  [7] jquerylib_0.1.4     globals_0.16.3      splines_4.4.2      </span></span>
+<span><span class="co">#&gt; [10] systemfonts_1.1.0   textshaping_0.4.0   yaml_2.3.10        </span></span>
+<span><span class="co">#&gt; [13] fastmap_1.2.0       lattice_0.22-6      R6_2.5.1           </span></span>
+<span><span class="co">#&gt; [16] knitr_1.49          future_1.34.0       nloptr_2.1.1       </span></span>
+<span><span class="co">#&gt; [19] desc_1.4.3          bslib_0.8.0         rlang_1.1.4        </span></span>
+<span><span class="co">#&gt; [22] cachem_1.1.0        xfun_0.49           fs_1.6.5           </span></span>
+<span><span class="co">#&gt; [25] sass_0.4.9          cli_3.6.3           pkgdown_2.1.1      </span></span>
+<span><span class="co">#&gt; [28] digest_0.6.37       grid_4.4.2          mvtnorm_1.3-2      </span></span>
+<span><span class="co">#&gt; [31] lifecycle_1.0.4     timereg_2.0.6       evaluate_1.0.1     </span></span>
+<span><span class="co">#&gt; [34] pracma_2.4.4        data.table_1.16.2   numDeriv_2016.8-1.1</span></span>
+<span><span class="co">#&gt; [37] listenv_0.9.1       codetools_0.2-20    ragg_1.3.3         </span></span>
+<span><span class="co">#&gt; [40] survival_3.7-0      optimx_2023-10.21   parallelly_1.39.0  </span></span>
+<span><span class="co">#&gt; [43] rmarkdown_2.29      mets_1.3.4          tools_4.4.2        </span></span>
+<span><span class="co">#&gt; [46] htmltools_0.5.8.1</span></span></code></pre></div>
 </div>
   </div>
 

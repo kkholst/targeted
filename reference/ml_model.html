@@ -69,6 +69,10 @@
     </div>
 
 
+    <div id="see-also">
+    <h2>See also</h2>
+    <div class="dont-index"><p>predictor_sl</p></div>
+    </div>
     <div id="author">
     <h2>Author</h2>
     <p>Klaus Kähler Holst</p>
@@ -361,29 +365,29 @@ stored inside the class.</p></dd>
 <span class="r-in"><span><span class="va">x</span><span class="op">$</span><span class="fu">estimate</span><span class="op">(</span><span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">x</span>, newdata<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         setosa  versicolor   virginica</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.9869394 0.007651515 0.005409091</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.9643561 0.033068182 0.002575758</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 0.9870833 0.011250000 0.001666667</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 0.9804167 0.017916667 0.001666667</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 0.9927727 0.001818182 0.005409091</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 0.9184302 0.059244006 0.022325758</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.9913974 0.007491453 0.001111111</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.9454808 0.054519231 0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 0.9921474 0.007852564 0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 0.9721474 0.027852564 0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 0.9968697 0.002019231 0.001111111</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 0.9612937 0.032595238 0.006111111</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span> <span class="co"># Reduce Ex. timing</span></span></span>
 <span class="r-in"><span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu">targeted</span><span class="fu">::</span><span class="fu"><a href="cv.html">cv</a></span><span class="op">(</span><span class="va">models</span>, data<span class="op">=</span><span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">a</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">args</span>, <span class="st">"table"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              brier -logscore num.trees mtry</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model1  0.09876431 0.2162048       100    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model2  0.09676479 0.2133566       200    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model3  0.08640535 0.1858628       100    2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model4  0.08757708 0.1854903       200    2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model5  0.08523466 0.1714144       100    3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model6  0.08144620 0.1673086       200    3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model7  0.33669049 0.5520703       100    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model8  0.34025907 0.5600141       200    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model9  0.33974766 0.5507261       100    2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model10 0.33571456 0.5493773       200    2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model11 0.33823288 0.5501077       100    3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model12 0.33389234 0.5471020       200    3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model1  0.09615551 0.2097763       100    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model2  0.09675938 0.2184058       200    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model3  0.08210013 0.1772280       100    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model4  0.08439038 0.1828726       200    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model5  0.08112753 0.1647543       100    3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model6  0.08003185 0.1666948       200    3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model7  0.34752831 0.5697157       100    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model8  0.34206584 0.5609870       200    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model9  0.34192105 0.5549436       100    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model10 0.33810713 0.5501649       200    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model11 0.32801397 0.5328124       100    3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model12 0.33355260 0.5465439       200    3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                      formula</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> model1                           Species ~ .</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> model2                           Species ~ .</span>
