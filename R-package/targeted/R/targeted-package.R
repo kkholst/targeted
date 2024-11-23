@@ -16,10 +16,9 @@
 ##'     dnorm quantile terms weighted.mean runif
 ##'     .getXlevels delete.response model.response gaussian formula
 ##'     model.offset reformulate drop.terms weights model.extract
-##' @importFrom digest sha1
+##' @importFrom rlang hash call_match
 ##' @importFrom optimx optimx
 ##' @importFrom data.table data.table is.data.table
-##' @importFrom futile.logger flog.warn flog.debug flog.info
 ##' @importFrom R6 R6Class
 ##' @importFrom survival survfit
 ##' @importFrom utils tail head

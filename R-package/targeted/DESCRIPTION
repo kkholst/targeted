@@ -26,23 +26,22 @@ Depends:
     lava (>= 1.8.0)
 Imports:
     data.table,
-    digest,
-    futile.logger,
     future.apply,
     glmnet,
-    nnls,
     optimx,
 	progressr,
     methods,
     mets,
     R6,
     Rcpp (>= 1.0.0),
+    rlang,
     survival
 Suggests:
     e1071,
     grf,
     hal9001,
     mgcv,
+    nnls,
     testthat (>= 0.11),
     rmarkdown,
     scatterplot3d,
