@@ -1,5 +1,8 @@
 # targeted 0.6
+- Development version
 - repeated cross-fitting in `cate` function via the new 'rep' argument
+- First argument to `ml_model` can be a character defining the response-variable (optional)
+- `predictor` wrapper, and `predictor_sl`, `predictor_glm`, ...
 
 # targeted 0.5
 - `cate` now also returns the expected potential outcomes and influence functions
