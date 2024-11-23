@@ -127,6 +127,76 @@ Dynamic Treatment Rule, The International Journal of Biostatistics.</p>
     <div class="dont-index"><p>ml_model predictor_glm predictor_xgboost</p></div>
     </div>
 
+    <div id="ref-examples">
+    <h2>Examples</h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">sim1</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span> <span class="op">=</span> <span class="fl">5e2</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>   <span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">5e2</span></span></span>
+<span class="r-in"><span>   <span class="va">x1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, sd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span>   <span class="va">x2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span></span>
+<span class="r-in"><span>   <span class="va">y</span> <span class="op">&lt;-</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="va">x1</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, sd <span class="op">=</span> <span class="fl">0.5</span><span class="op">**</span><span class="fl">.5</span><span class="op">)</span></span></span>
+<span class="r-in"><span>   <span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">x1</span>, <span class="va">x2</span><span class="op">)</span></span></span>
+<span class="r-in"><span>   <span class="va">d</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">sim1</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">mets</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/mets/reference/dsort.html" class="external-link">dsort</a></span><span class="op">(</span><span class="op">~</span><span class="va">x1</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="st">"mean"</span> <span class="op">=</span> <span class="fu"><a href="ml_model.html">predictor_glm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="st">"glm"</span> <span class="op">=</span> <span class="fu"><a href="ml_model.html">predictor_glm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="st">"iso"</span> <span class="op">=</span> <span class="fu"><a href="ml_model.html">predictor_isoreg</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">s</span> <span class="op">&lt;-</span> <span class="fu">predictor_sl</span><span class="op">(</span><span class="va">m</span>, nfolds<span class="op">=</span><span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(cl):</span> object 'm' not found</span>
+<span class="r-in"><span><span class="va">s</span><span class="op">$</span><span class="fu">estimate</span><span class="op">(</span><span class="va">d</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in s$estimate:</span> object of type 'closure' is not subsettable</span>
+<span class="r-in"><span><span class="va">pr</span> <span class="op">&lt;-</span> <span class="va">s</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">d</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in s$predict:</span> object of type 'closure' is not subsettable</span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span>, data <span class="op">=</span> <span class="va">d</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">x1</span>, <span class="va">pr</span>, col <span class="op">=</span> <span class="fl">2</span>, cex <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="va">x1</span><span class="op">)</span> <span class="op">+</span> <span class="va">x1</span> <span class="op">~</span> <span class="va">x1</span>, data <span class="op">=</span> <span class="va">d</span>,</span></span>
+<span class="r-in"><span>          lwd <span class="op">=</span> <span class="fl">4</span>, col <span class="op">=</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/Col.html" class="external-link">Col</a></span><span class="op">(</span><span class="st">"darkblue"</span>, <span class="fl">0.3</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">s</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> function (x, df = 4, spar = 1) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     scall &lt;- deparse(sys.call())</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     if (missing(df)) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         if (!missing(spar)) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             df &lt;- 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     if (ncol(as.matrix(x)) &gt; 1) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         stop(paste("The default smoother is bivariate; you gave a matrix as an argument in ", </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             scall, "\n"))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     if (!is.null(levels(x))) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         if (inherits(x, "ordered")) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             x &lt;- as.numeric(x)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         else stop("unordered factors cannot be used as smoothing variables")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     attr(x, "spar") &lt;- spar</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     attr(x, "df") &lt;- df</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     real.call &lt;- substitute(gam.s(data[[scall]], z, w, spar = spar, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         df = df))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     attr(x, "call") &lt;- real.call</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     attr(x, "class") &lt;- "smooth"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     a &lt;- is.na(x)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     if (any(a)) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         attr(x, "NAs") &lt;- seq(along = x)[a]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     x</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;bytecode: 0x5591c27f8be0&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: namespace:gam&gt;</span>
+<span class="r-in"><span><span class="co">## weights(s)</span></span></span>
+<span class="r-in"><span><span class="co">## score(s)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">cvres</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">s</span>, data<span class="op">=</span><span class="va">d</span>, nfolds<span class="op">=</span><span class="fl">3</span>, rep<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in object[[i]]:</span> object of type 'closure' is not subsettable</span>
+<span class="r-in"><span><span class="va">cvres</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'cvres' not found</span>
+<span class="r-in"><span><span class="co">## coef(cvres)</span></span></span>
+<span class="r-in"><span><span class="co">## score(cvres)</span></span></span>
+</code></pre></div>
+    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>
