@@ -342,7 +342,7 @@ predictor_grf <- function(formula,
                           model = "grf::regression_forest",
                           info = model,
                           ...) {
-  est <- getFromNamespace(gsub("^grf::", "", model), "grf")
+  est <- utils::getFromNamespace(gsub("^grf::", "", model), "grf")
   pred <- function(object, newdata, ...) {
     predict(object, newdata, ...)$predictions
   }
