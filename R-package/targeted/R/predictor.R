@@ -3,6 +3,20 @@ predictor <- function(...) {
   ml_model$new(...)
 }
 
+
+update_call_predictor <- function(call.object, call.remove=NULL, ...) {
+  call.object[[1]] <- quote(ml_model$new)
+  dots <- list(...)
+  nn <- names(dots)
+  for (i in seq_along(dots)) {
+    call.object[[nn[i]]] <- dots[[i]]
+  }
+  if (!is.null(call.remove)) {
+    call.object[call.remove] <- NULL
+  }
+  return(call.object)
+}
+
 ##' @export
 predictor_glm <- function(formula,
                           info = "glm",
@@ -35,21 +49,19 @@ predictor_svm <- function(formula,
   # TODO
   }
 
+
 ##' @export
 predictor_glmnet <- function(formula,
                              info = "glmnet",
-                             family = "gaussian",
+                             family = gaussian(),
                              alpha = 1, ## Elastic net (1 is lasso, 0 is L2)
                              lambda = NULL, ## penalty
                              nfolds = 10,
                              ...) {
-  est <- function(y, x) {
+  est <- function(y, x, ..., nfolds) {
     if (nfolds > 1L) {
       res <- glmnet::cv.glmnet(
         x = x, y = y,
-        family = family,
-        alpha = alpha,
-        lambda = lambda,
         nfolds = nfolds,
         ...
       )
@@ -57,30 +69,32 @@ predictor_glmnet <- function(formula,
     }
     glmnet::glmnet(
       x = x, y = y,
-      family = family,
-      alpha = alpha,
-      lambda = lambda,
       ...
     )
   }
-  ml_model$new(formula,
-    info = info, estimate = est,
+  cl <- update_call_predictor(
+    rlang::call_match(
+      fn = predictor_glmnet,
+      defaults = TRUE
+      ),
+    estimate = est,
     predict = function(object, newdata, ...) {
       predict(object,
         newx = newdata,
         type = "response",
         s = "lambda.min",
         ...
-        )
+      )
     }
-    )
+  )
+  eval(cl)
 }
+
 
 
 ##' @export
 predictor_hal <- function(formula,
-                          info = "hal9001",
-                          offset = NULL,
+                          info = "hal9001::fit_hal",
                           smoothness_orders = 0,
                           reduce_basis = NULL,
                           family = gaussian(),
@@ -89,13 +103,10 @@ predictor_hal <- function(formula,
     hal9001::fit_hal(
       X = x,
       Y = y,
-      smoothness_orders = smoothness_orders,
-      reduce_basis = reduce_basis,
-      family = family,
       ...
     )
   }
-  pred <- function(fit, newdata, offset = NULL) {
+  pred <- function(fit, newdata, offset = NULL, ...) {
     res <- predict(fit,
       new_data = newdata,
       offset = offset,
@@ -103,14 +114,16 @@ predictor_hal <- function(formula,
       )
     return(res)
   }
-
-  ml_model$new(add_offset(formula, offset),
-    info = "hal9001::fit_hal",
-    specials = c("weights", "offset"),
+  cl <- update_call_predictor(
+    rlang::call_match(
+      fn = predictor_hal,
+      defaults = TRUE
+    ),
     estimate = est,
     predict = pred,
-    ...
-    )
+    specials = c("weights", "offset")
+  )
+  eval(cl)
 }
 
 ##' @export
@@ -120,22 +133,24 @@ predictor_gam <- function(formula,
                           select = FALSE,
                           gamma = 1,
                           ...) {
-  ml_model$new(
-             formula,
-             info = info,
-        estimate = function(formula, data, ...) {
-          mgcv::gam(formula,
-                    data = data,
-                    family = family,
-                    select = select,
-                    gamma = gamma,
-                    ...
-            )
-        },
-        predict = function(object, newdata) {
-            stats::predict(object, newdata = newdata, type = "response")
-        }
-  )
+
+   cl <- update_call_predictor(
+     rlang::call_match(
+       fn = predictor_gam,
+       defaults = TRUE
+     ),
+     estimate = function(formula, data, ...) {
+       mgcv::gam(
+         formula = formula,
+         data = data,
+         ...
+         )
+     },
+     predict = function(object, newdata) {
+       stats::predict(object, newdata = newdata, type = "response")
+     }
+   )
+  eval(cl)
 }
 
 ##' @export
@@ -146,6 +161,7 @@ predictor_isoreg <- function(formula,
     stop("predictor_isoreg: expected one outcome and one predictor variable")
   }
   ml_model$new(formula,
+    info = info,
     estimate = function(y, x, ...) {
       isoregw(y = y, x = x)
     },
@@ -160,7 +176,7 @@ predictor_sl <- function(model.list,
                          info = NULL,
                          nfolds = 5L,
                          meta.learner = NULL,
-                         model.score = "mse",
+                         model.score = mse,
                          ...) {
   if (is.null(info)) {
     info <- "superlearner\n"
@@ -170,16 +186,28 @@ predictor_sl <- function(model.list,
       if (i < length(nn)) info <- paste0(info, "\n")
     }
   }
-  sl <- ml_model$new(
-    info = info,
+  cl <- update_call_predictor(
+    rlang::call_match(
+      fn = predictor_glmnet,
+      defaults = TRUE
+    ),
+    info = info
+  )
+
+  cl <- update_call_predictor(
+    rlang::call_match(
+      fn = predictor_sl,
+      defaults = TRUE
+      ),
+    ## call.remove = "model.list",
     estimate = function(data, ...) {
-      superlearner(model.list, data, ...)
+      superlearner(data = data, ...)
     },
-    predict = function(object, newdata, all.learners=FALSE, ...) {
+    predict = function(object, newdata, all.learners = FALSE, ...) {
       pr <- lapply(object$fit, \(x) x$predict(newdata))
       res <- Reduce(cbind, pr)
       if (!is.null(names(model.list)) &&
-        length(model.list) == ncol(res)) {
+          length(model.list) == ncol(res)) {
         colnames(res) <- names(model.list)
       }
       if (!all.learners) {
@@ -187,11 +215,9 @@ predictor_sl <- function(model.list,
       }
       return(res)
     },
-    nfolds = nfolds,
-    meta.learner = NULL,
-    model.score = mse,
-    ...
+    info = info
   )
+  sl <- eval(cl)
   sl$update(model.list[[1]]$formula)
   class(sl) <- c("predictor_sl", class(sl))
   return(sl)
@@ -258,7 +284,7 @@ predictor_xgboost <-
         matrix(val, nrow = NROW(d), byrow = TRUE)
       }
     }
-    est = function(x, y, ..., nfolds, nrounds) {
+    est <- function(x, y, ..., nfolds, nrounds) {
       d <- xgboost::xgb.DMatrix(x, label = y)
       if (nfolds > 1L) {
         val <- xgboost::xgb.cv(
@@ -275,20 +301,15 @@ predictor_xgboost <-
         ...
       )
     }
-    ml_model$new(
-      formula,
-      info = info,
+    cl <- update_call_predictor(
+      rlang::call_match(
+        fn = predictor_xgboost,
+        defaults = TRUE
+      ),
       estimate = est,
-      predict = pred,
-      max_depth = max_depth,
-      eta = eta,
-      nrounds = nrounds,
-      subsample = subsample,
-      lambda = lambda,
-      verbose = verbose,
-      objective = objective,
-      nfolds = nfolds, ...
+      predict = pred
     )
+    eval(cl)
   }
 
 ##' @export
@@ -321,27 +342,24 @@ predictor_grf <- function(formula,
                           model = "grf::regression_forest",
                           info = model,
                           ...) {
-  est <- get(model)
-  ml_model$new(
-    formula = formula,
-    info = info,
+  est <- getFromNamespace(gsub("^grf::", "", model), "grf")
+  pred <- function(object, newdata, ...) {
+    predict(object, newdata, ...)$predictions
+  }
+  cl <- update_call_predictor(
+    rlang::call_match(
+      fn = predictor_grf,
+      defaults = TRUE
+      ),
+    call.remove = "model",
     estimate = function(x, y, ...) {
-      est(
-        X = x,
-        Y = y,
-        ...
-      )
+      est(X = x, Y = y, ...)
     },
-    predict = function(object, newdata, ...) {
-      predict(object, newdata, ...)$predictions
-    },
-    num.trees = num.trees,
-    min.node.size = min.node.size,
-    alpha = alpha,
-    sample.fraction = sample.fraction,
-    num.threads = num.threads, ...
+    predict = pred
   )
+  eval(cl)
 }
+
 
 ##' @export
 predictor_grf_binary <- function(formula,

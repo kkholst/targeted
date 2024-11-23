@@ -92,11 +92,11 @@ ml_model <- R6::R6Class("ml_model",
       ## if (!fit_x_arg && !("data"%in%formalArgs(estimate)))
       ##   stop("Estimation method must have an argument 'x' or 'data'")
 
-      self$args <- dots
+
+      self$args <- rlang::call_args(substitute(list(...)))
       no_formula <- is.null(formula)
       if (!no_formula && is.character(formula) || is.function(formula)) {
         no_formula <- TRUE
-
       }
       if (no_formula) {
         private$fitfun <- function(...) {
@@ -158,10 +158,22 @@ ml_model <- R6::R6Class("ml_model",
       self$formula <- formula
       self$info <- info
 
+      args <- deparse(substitute(list(...))) #
+      args <- gsub("^list\\(", "", args, perl = TRUE)
+      args <- gsub("\\)$", "", args)
+      argslist <- strsplit(
+        paste(args, collapse = ""),
+        ","
+      ) |>
+        _[[1]] |>
+        lapply(lava::trim) |>
+        unlist()
+
       self$formals <- list(estimate=formals(estimate), predict=formals(predict))
       private$call <- list(estimate=substitute(estimate),
                            predict=substitute(predict),
-                           dots=list2str(list(...)),
+                           args=argslist,
+                           dots=dots,
                            predict.args=substitute(predict.args))
      },
 
@@ -213,8 +225,14 @@ ml_model <- R6::R6Class("ml_model",
        if (!is.null(self$info))
          cat(self$info, "\n\n")
        cat("Arguments:\n")
-       
-       cat("\t", private$call$dots, "\n", sep="")
+
+       args <- private$call$args
+       cat(
+         paste0("\t", paste(args, collapse = "\n\t")),
+         "\n",
+         sep = ""
+       )
+
        if (!is.null(self$formula)) {
          cat("Model:\n",
            "\t", deparse1(self$formula), "\n",
