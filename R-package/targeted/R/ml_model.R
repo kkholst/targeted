@@ -73,6 +73,7 @@ ml_model <- R6::R6Class("ml_model",
                            ...) {
       dots <- list(...)
       if (!is.null(dots$fit)) { ## Backward compatibility
+        .Deprecated("Use argument 'estimate' instead of 'fit'")
         if (missing(estimate)) {
           estimate <- dots$fit
         }
@@ -81,7 +82,6 @@ ml_model <- R6::R6Class("ml_model",
       if (!("..." %in% formalArgs(estimate))) {
         formals(estimate) <- c(formals(estimate), alist(... = ))
       }
-      ## des.args <- lapply(substitute(specials), function(x) x)[-1]
       des.args <- list(specials = specials)
       fit_formula <- "formula"%in%formalArgs(estimate)
       fit_response_arg <- response.arg %in% formalArgs(estimate)
@@ -89,11 +89,8 @@ ml_model <- R6::R6Class("ml_model",
       fit_data_arg <- "data" %in% formalArgs(estimate)
       private$init.estimate <- estimate
       private$init.predict <- predict
-      ## if (!fit_x_arg && !("data"%in%formalArgs(estimate)))
-      ##   stop("Estimation method must have an argument 'x' or 'data'")
 
-
-      self$args <- rlang::call_args(substitute(list(...)))
+      self$args <- list(...)
       no_formula <- is.null(formula)
       if (!no_formula && is.character(formula) || is.function(formula)) {
         no_formula <- TRUE
@@ -158,22 +155,25 @@ ml_model <- R6::R6Class("ml_model",
       self$formula <- formula
       self$info <- info
 
-      args <- deparse(substitute(list(...))) #
-      args <- gsub("^list\\(", "", args, perl = TRUE)
-      args <- gsub("\\)$", "", args)
+      argslist <- deparse(substitute(list(...))) #
+      argslist <- gsub("^list\\(", "", argslist, perl = TRUE)
+      argslist <- gsub("\\)$", "", argslist)
       argslist <- strsplit(
-        paste(args, collapse = ""),
+        paste(argslist, collapse = ""),
         ","
       ) |>
         _[[1]] |>
         lapply(lava::trim) |>
         unlist()
+      ## args <- rlang::call_args(substitute(list(...)))
 
-      self$formals <- list(estimate=formals(estimate), predict=formals(predict))
+      self$formals <- list(
+        estimate = formals(estimate),
+        predict = formals(predict)
+      )
       private$call <- list(estimate=substitute(estimate),
                            predict=substitute(predict),
-                           args=argslist,
-                           dots=dots,
+                           argslist=argslist,
                            predict.args=substitute(predict.args))
      },
 
@@ -226,7 +226,7 @@ ml_model <- R6::R6Class("ml_model",
          cat(self$info, "\n\n")
        cat("Arguments:\n")
 
-       args <- private$call$args
+       args <- private$call$argslist
        cat(
          paste0("\t", paste(args, collapse = "\n\t")),
          "\n",
