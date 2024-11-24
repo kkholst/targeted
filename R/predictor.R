@@ -240,27 +240,23 @@ predictor_sl <- function(model.list,
   }
   cl <- update_call_predictor(
     rlang::call_match(
-      fn = predictor_glmnet,
-      defaults = TRUE
-    ),
-    info = info
-  )
-
-  cl <- update_call_predictor(
-    rlang::call_match(
       fn = predictor_sl,
       defaults = TRUE
       ),
-    ## call.remove = "model.list",
     estimate = function(data, ...) {
-      superlearner(data = data, ...)
+      superlearner(
+        data = data,
+        ...
+      )
     },
     predict = function(object, newdata, all.learners = FALSE, ...) {
       pr <- lapply(object$fit, \(x) x$predict(newdata))
       res <- Reduce(cbind, pr)
       if (!is.null(names(model.list)) &&
-          length(model.list) == ncol(res)) {
+        length(model.list) == ncol(res)) {
         colnames(res) <- names(model.list)
+      } else {
+        colnames(res) <- paste0("model", 1:length(model.list))
       }
       if (!all.learners) {
         res <- as.vector(res %*% object$weights)
@@ -293,15 +289,16 @@ score_sl <- function(response, prediction, weights, object, newdata, ...) {
     risk <- mse(response, pr)
     res <- c(risk, risk.all)
     names(res)[1] <- "sl"
-    names(res) <- paste0("score.", names(res))
+    nn <- names(res)
+    names(res) <- paste0("score.", nn)
     w <- weights(object)
-    names(w) <- paste0("weight.", names(w))
+    names(w) <- paste0("weight.", nn[-1])
     c(res, w)
 }
 
 ##' @export
 summary.predictor_sl <- function(object, data, nfolds = 5, rep = 1, ...) {
-  res <- cv(list(object),
+  res <- cv(list("performance"=object),
       data = data,
       nfolds = nfolds, rep = rep,
       model.score = score_sl
