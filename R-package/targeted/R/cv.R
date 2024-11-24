@@ -8,8 +8,8 @@
 ##'   last part used for testing)
 ##' @param rep Number of repetitions (default 1)
 ##' @param weights Optional frequency weights
-##' @param model.score Model scoring metric (default: MSE / Brier score). Must be
-##'   a function with arguments: response, prediction, weights, object, ...
+##' @param model.score Model scoring metric (default: MSE / Brier score). Must
+##'   be a function with arguments: response, prediction, weights, object, ...
 ##' @param seed Random seed (argument parsed to future_Apply::future_lapply)
 ##' @param shared Function applied to each fold with results send to each model
 ##' @param args.pred Optional arguments to prediction function (see details
