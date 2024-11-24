@@ -20,7 +20,9 @@ superlearner <- function(model.list,
                          data,
                          nfolds = 10,
                          meta.learner = NULL,
-                         model.score = mse) {
+                         model.score = mse,
+                         mc.cores = NULL,
+                         ...) {
   pred_mod <- function(models, data) {
     res <- lapply(models, \(x) x$predict(data))
     Reduce(cbind, res)
@@ -35,25 +37,61 @@ superlearner <- function(model.list,
   n <- nrow(data)
   folds <- lava::csplit(n, nfolds)
   pred <- matrix(NA, n, length(model.list))
-  for (i in 1:nfolds) {
-    test <- data[folds[[i]], , drop = FALSE]
-    train <- data[setdiff(1:n, folds[[i]]), , drop = FALSE]
-    lapply(model.list, \(x) x$estimate(train))
-    pri <- pred_mod(model.list, test)
-    pred[folds[[i]], ] <- pri
+  pb <- progressr::progressor(along = seq_len(nfolds))
+
+  onefold <- function(fold, data, model.list, pb) {
+    n <- nrow(data)
+    test <- data[fold, , drop = FALSE]
+    train <- data[setdiff(1:n, fold), , drop = FALSE]
+    mod <- lapply(model.list, \(x) x$clone())
+    lapply(mod, \(x) x$estimate(train))
+    pred.test <- pred_mod(mod, test)
+    pb()
+    list(pred = pred.test, fold = fold)
   }
+  if (!is.null(mc.cores)) {
+    if (mc.cores == 1L) {
+      ## disable parallelization
+      pred.folds <- lapply(folds, function(fold) {
+        onefold(fold, data, model.list, pb)
+      })
+    } else {
+      ## mclapply
+      pred.folds <- parallel::mclapply(
+        folds,
+        function(fold) {
+          onefold(fold, data, model.list, pb)
+        },
+        mc.cores = mc.cores, ...
+        )
+    }
+  } else {
+    ## future
+    pred.folds <- future.apply::future_lapply(
+      folds,
+      function(fold) {
+        onefold(fold, data, model.list, pb)
+      },
+      ...
+    )
+  }
+  for (i in seq_along(pred.folds)) {
+    pred[pred.folds[[i]]$fold, ] <- pred.folds[[i]]$pred
+  }
+  mod <- lapply(model.list, \(x) x$clone())
+  ## Meta-learner
   y <- model.list[[1]]$response(data)
   risk <- apply(pred, 2, \(x) model.score(y, x))
   names(risk) <- model.names
   w <- metalearner(y = y, pred = pred)
   names(w) <- model.names
   ## Full predictions
-  lapply(model.list, \(x) x$estimate(data))
+  lapply(mod, \(x) x$estimate(data))
   res <- list(
     model.score = risk,
     weights = w,
     names = model.names,
-    fit = model.list,
+    fit = mod,
     folds = folds
   )
   structure(res, class = "superlearner")
