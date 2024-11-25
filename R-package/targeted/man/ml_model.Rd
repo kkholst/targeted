@@ -62,12 +62,16 @@ prediction functions}
 \item{\code{formula}}{Formula specifying response and design matrix}
 
 \item{\code{args}}{additional arguments specified during initialization}
+
+\item{\code{optional}}{description field}
 }
 \if{html}{\out{</div>}}
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
+\item{\code{optional}}{description field}
+
 \item{\code{fit}}{Active binding returning estimated model object}
 }
 \if{html}{\out{</div>}}

@@ -9,7 +9,7 @@ predictor_sl(
   model.list,
   info = NULL,
   nfolds = 5L,
-  meta.learner = NULL,
+  meta.learner = metalearner_nnls,
   model.score = mse,
   ...
 )

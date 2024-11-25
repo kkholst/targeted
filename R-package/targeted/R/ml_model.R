@@ -46,6 +46,8 @@ ml_model <- R6::R6Class("ml_model",
       formula = NULL,
       ##' @field args additional arguments specified during initialization
       args = NULL,
+      ##' @field optional description field
+      description = NULL,
 
      ##' @description
      ##' Create a new prediction model object
@@ -90,7 +92,7 @@ ml_model <- R6::R6Class("ml_model",
       private$init.estimate <- estimate
       private$init.predict <- predict
 
-      self$args <- list(...)
+      self$args <- dots
       no_formula <- is.null(formula)
       if (!no_formula && is.character(formula) || is.function(formula)) {
         no_formula <- TRUE
@@ -154,26 +156,14 @@ ml_model <- R6::R6Class("ml_model",
       }
       self$formula <- formula
       self$info <- info
-
-      argslist <- deparse(substitute(list(...))) #
-      argslist <- gsub("^list\\(", "", argslist, perl = TRUE)
-      argslist <- gsub("\\)$", "", argslist)
-      argslist <- strsplit(
-        paste(argslist, collapse = ""),
-        ","
-      ) |>
-        _[[1]] |>
-        lapply(lava::trim) |>
-        unlist()
-      ## args <- rlang::call_args(substitute(list(...)))
-
       self$formals <- list(
         estimate = formals(estimate),
         predict = formals(predict)
       )
+
       private$call <- list(estimate=substitute(estimate),
                            predict=substitute(predict),
-                           argslist=argslist,
+                           argslist=substitute(dots),
                            predict.args=substitute(predict.args))
      },
 
@@ -224,30 +214,45 @@ ml_model <- R6::R6Class("ml_model",
            "\n_________________________________\n\n")
        if (!is.null(self$info))
          cat(self$info, "\n\n")
-       cat("Arguments:\n")
 
-       args <- private$call$argslist
-       cat(
-         paste0("\t", paste(args, collapse = "\n\t")),
-         "\n",
-         sep = ""
-       )
-
-       if (!is.null(self$formula)) {
-         cat("Model:\n",
-           "\t", deparse1(self$formula), "\n",
+       if (!is.null(self$description)) {
+         cat(self$description)
+       } else {
+         cat("Arguments:\n")
+         argslist <- gsub("^list\\(", "",
+           deparse(private$call$argslist),
+           perl = TRUE
+           )
+         argslist <- gsub("\\)$", "", argslist)
+         argslist <- strsplit(
+           paste(argslist, collapse = ""),
+           ","
+         ) |>
+           _[[1]] |>
+           lapply(lava::trim) |>
+           unlist()
+         cat(
+           paste0("\t", paste(argslist, collapse = "\n\t")),
+           "\n",
            sep = ""
          )
        }
-       cat("\`estimate` method:`\n",
-           "\tfunction(", paste(names(self$formals[[1]]),
-                                collapse=", "), ")\n", sep="")
-       cat("`predict` method:\n",
-         "\tfunction(", paste(names(self$formals[[2]]),
-           collapse = ", "
-         ), ")\n",
-         sep = ""
-         )
+
+       ## if (!is.null(self$formula)) {
+       ##   cat("Model:\n",
+       ##     "\t", deparse1(self$formula), "\n",
+       ##     sep = ""
+       ##   )
+       ## }
+       ## cat("\`estimate` method:`\n",
+       ##     "\tfunction(", paste(names(self$formals[[1]]),
+       ##                          collapse=", "), ")\n", sep="")
+       ## cat("`predict` method:\n",
+       ##   "\tfunction(", paste(names(self$formals[[2]]),
+       ##     collapse = ", "
+       ##   ), ")\n",
+       ## sep = ""
+       ## )
        if (!is.null(self$fit)) {
          cat("\n_________________________________\n\n")
          print(self$fit)
