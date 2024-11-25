@@ -34,8 +34,8 @@ last part used for testing)}
 
 \item{weights}{Optional frequency weights}
 
-\item{model.score}{Model scoring metric (default: MSE / Brier score). Must be
-a function with arguments: response, prediction, weights, object, ...}
+\item{model.score}{Model scoring metric (default: MSE / Brier score). Must
+be a function with arguments: response, prediction, weights, object, ...}
 
 \item{seed}{Random seed (argument parsed to future_Apply::future_lapply)}
 
