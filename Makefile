@@ -105,6 +105,10 @@ r_build: r_clean
 r_test:
 	@$(R) -e 'testthat::test_package("./R-package/${pkg}/")'
 
+.PHONY: r_lint
+r_lint:
+	@echo 'devtools::lint("./R-package/$(pkg)")' | $(R)
+
 .PHONY: r_run
 r_run:
 	@cd misc; $(R) --silent -f $(TESTR).R
