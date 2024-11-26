@@ -1,11 +1,10 @@
-context("CATE")
+library("tinytest")
 
 n <- 1000
 x <- rnorm(n)
 a <- rbinom(n, 1, expit(1 + x))
-y <- 1 + a + x -a*x + rnorm(n)
+y <- 1 + a + x - a * x + rnorm(n)
 d <- data.frame(y = y, a = a, x = x)
-
 
 simcate <- function(qmod) {
   q1 <- predict(lm(qmod, data = d),
@@ -19,7 +18,7 @@ simcate <- function(qmod) {
   dlinkinv <- g$family$mu.eta
   b <- a / pi^2 * (q1 - y)
   D <- dlinkinv(logit(pi)) * b
-  E1 <- colMeans(cbind(D, D*x))
+  E1 <- colMeans(cbind(D, D * x))
   ic1 <- IC(g) %*% E1
   ic <- ic0 + ic1
   e1 <- estimate(coef = est, IC = ic)
@@ -34,13 +33,6 @@ simcate <- function(qmod) {
     parameter(e1)[1:2],
     parameter(aa)["E[y(1)]", 1:2]
   )
-
 }
-
-testthat::test_that("cate: correct q-model", {
-  simcate(y ~ a*x)
-})
-
-testthat::test_that("cate: misspecified q-model", {
-  simcate(y ~ a + x)
-})
+simcate(y ~ a * x) # cate: correct q-model
+simcate(y ~ a + x) # cate: mis-specified q-model

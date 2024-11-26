@@ -103,7 +103,7 @@ r_build: r_clean
 
 .PHONY: r_test
 r_test:
-	@$(R) -e 'testthat::test_package("./R-package/${pkg}/")'
+	@echo 'devtools::load_all("R-package/${pkg}"); tinytest::test_all("R-package/${pkg}/")' | $(R)
 
 .PHONY: r_run
 r_run:
