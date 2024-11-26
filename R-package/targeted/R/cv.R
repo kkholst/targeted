@@ -1,46 +1,47 @@
-##' Generic cross-validation function
-##'
-##' @title Cross-validation
-##' @param models List of fitting functions
-##' @param data data.frame or matrix
-##' @param response Response variable (vector or name of column in `data`).
-##' @param nfolds Number of folds (default 5. K=0 splits in 1:n/2, n/2:n with
-##'   last part used for testing)
-##' @param rep Number of repetitions (default 1)
-##' @param weights Optional frequency weights
-##' @param model.score Model scoring metric (default: MSE / Brier score). Must
-##'   be a function with arguments: response, prediction, weights, object, ...
-##' @param seed Random seed (argument parsed to future_Apply::future_lapply)
-##' @param shared Function applied to each fold with results send to each model
-##' @param args.pred Optional arguments to prediction function (see details
-##'   below)
-##' @param args.future Arguments to future.apply::future_mapply
-##' @param mc.cores Optional number of cores. parallel::mcmapply used instead of
-##'   future
-##' @param ... Additional arguments parsed to models in models
-##' @author Klaus K. Holst
-##' @return An object of class '\code{cross_validated}' is returned. See
-##'   \code{\link{cross_validated-class}} for more details about this class and
-##'   its generic functions.
-##' @details models should be list of objects of class ml_model. Alternatively,
-##'   each element of models should be a list with a fitting function and a
-##'   prediction function.
-##'
-##' The `response` argument can optionally be a named list where the name is
-##' then used as the name of the response argument in models. Similarly, if data
-##' is a named list with a single data.frame/matrix then this name will be used
-##' as the name of the data/design matrix argument in models.
-##' @examples
-##' f0 <- function(data,...) lm(...,data=data)
-##' f1 <- function(data,...) lm(Sepal.Length~Species,data=data)
-##' f2 <- function(data,...) lm(Sepal.Length~Species+Petal.Length,data=data)
-##' x <- cv(list(m0=f0,m1=f1,m2=f2),rep=10, data=iris, formula=Sepal.Length~.)
-##' x
-##' @export
+#' Generic cross-validation function
+#'
+#' @title Cross-validation
+#' @param models List of fitting functions
+#' @param data data.frame or matrix
+#' @param response Response variable (vector or name of column in `data`).
+#' @param nfolds Number of folds (default 5. K=0 splits in 1:n/2, n/2:n with
+#'   last part used for testing)
+#' @param rep Number of repetitions (default 1)
+#' @param weights Optional frequency weights
+#' @param model.score Model scoring metric (default: MSE / Brier score). Must
+#'   be a function with arguments response and prediction, and may optionally
+#' include weights, object and newdata arguments
+#' @param seed Random seed (argument parsed to future_Apply::future_lapply)
+#' @param shared Function applied to each fold with results send to each model
+#' @param args.pred Optional arguments to prediction function (see details
+#'   below)
+#' @param args.future Arguments to future.apply::future_mapply
+#' @param mc.cores Optional number of cores. [parallel::mcmapply] used instead
+#'   of future
+#' @param ... Additional arguments parsed to models in models
+#' @author Klaus K. Holst
+#' @return An object of class '\code{cross_validated}' is returned. See
+#'   \code{\link{cross_validated-class}} for more details about this class and
+#'   its generic functions.
+#' @details models should be list of objects of class ml_model. Alternatively,
+#'   each element of models should be a list with a fitting function and a
+#'   prediction function.
+#'
+#' The `response` argument can optionally be a named list where the name is
+#' then used as the name of the response argument in models. Similarly, if data
+#' is a named list with a single data.frame/matrix then this name will be used
+#' as the name of the data/design matrix argument in models.
+#' @examples
+#' f0 <- function(data,...) lm(...,data=data)
+#' f1 <- function(data,...) lm(Sepal.Length~Species,data=data)
+#' f2 <- function(data,...) lm(Sepal.Length~Species+Petal.Length,data=data)
+#' x <- cv(list(m0=f0,m1=f1,m2=f2),rep=10, data=iris, formula=Sepal.Length~.)
+#' x
+#' @export
 cv <- function(models, data, response = NULL,
                nfolds = 5, rep = 1,
                weights = NULL,
-               model.score = NULL,
+               model.score = scoring,
                seed = NULL, shared = NULL, args.pred = NULL,
                args.future = list(), mc.cores, ...) {
 
@@ -48,7 +49,7 @@ cv <- function(models, data, response = NULL,
   nam <- names(models)
   if (is.null(nam)) nam <- paste0("model", seq_along(models))
   args0 <- list(...)
-  if ("K" %in% names(args0)) { ## Backward compatibility
+  if ("K" %in% names(args0)) { # Backward compatibility
     .Deprecated("argument 'K' replaced by 'nfolds'")
     nfolds <- args0$K
     args0$K <- NULL
@@ -56,12 +57,10 @@ cv <- function(models, data, response = NULL,
   if ("modelscore" %in% names(args0)) {
     .Deprecated("argument `modelscore` replaced by `model.score`")
     model.score <- args0$modelscore
-    args0$modelscore <- NULL
+    args0$modelscore <- model.score
   }
-  if (is.null(model.score)) model.score <- scoring
-  if (!("weights" %in% formalArgs(model.score))) {
-    formals(model.score) <- c(formals(model.score), alist(weights=NULL))
-  }
+  model.score <- add_dots(model.score)
+
   args <- args0
   data.arg <- NULL
   response.arg <- "response"
@@ -83,7 +82,7 @@ cv <- function(models, data, response = NULL,
     f <- models[[i]]
     if ((!is.list(f) || length(f) == 1) &&
       !inherits(f, "ml_model")) {
-      ## No predict function provided. Assume 'predict' works on fitted object
+      # No predict function provided. Assume 'predict' works on fitted object
       if (is.list(f)) f <- f[[1]]
       models[[i]] <- list(
         fit = f,
@@ -94,7 +93,7 @@ cv <- function(models, data, response = NULL,
     }
   }
 
-  ## Model (1) run on full data:
+  # Model (1) run on full data:
   if (!is.null(shared)) {
     sharedres <- shared(data, ...)
     args <- c(args, sharedres)
@@ -140,7 +139,7 @@ cv <- function(models, data, response = NULL,
     }
     if (is.null(response)) stop("Provide 'response'")
   }
-  ## In-sample predictive performance:
+  # In-sample predictive performance:
   if (inherits(f, "ml_model")) {
     pred0 <- do.call(
       f$predict,
@@ -275,18 +274,18 @@ cv <- function(models, data, response = NULL,
     call = match.call(),
     names = nam,
     rep = rep, folds = nfolds
-    ##fit = fit0
+    #fit = fit0
   ),
   class = "cross_validated"
   )
 }
 
-##' @export
+#' @export
 summary.cross_validated <- function(object, ...) {
   return(coef(object))
 }
 
-##' @export
+#' @export
 print.cross_validated <- function(x, ...) {
   cat("Call: ")
   print(x$call)
@@ -296,7 +295,7 @@ print.cross_validated <- function(x, ...) {
   print(res, quote=FALSE)
 }
 
-##' @export
+#' @export
 coef.cross_validated <- function(object, min=FALSE, ...) {
   res <- apply(object$cv, 3:4, function(x) mean(x))
   if (length(object$names)==nrow(res))
@@ -307,7 +306,7 @@ coef.cross_validated <- function(object, min=FALSE, ...) {
   res
 }
 
-##' @export
+#' @export
 score.cross_validated <- function(x, ...) {
   return(x$cv)
 }
@@ -343,7 +342,7 @@ score.cross_validated <- function(x, ...) {
 #' @aliases cross_validated-class cross_validated
 #' @seealso \code{\link{cv}}
 #' @return objects of the S3 class '\code{cross_validated}'
-#' @examples ## See example(cv) for examples
+#' @examples # See example(cv) for examples
 #' @docType class
 #' @name cross_validated-class
 NULL

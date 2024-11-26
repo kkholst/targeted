@@ -81,9 +81,8 @@ ml_model <- R6::R6Class("ml_model",
         }
         dots$fit <- NULL
       }
-      if (!("..." %in% formalArgs(estimate))) {
-        formals(estimate) <- c(formals(estimate), alist(... = ))
-      }
+      estimate <- add_dots(estimate)
+      
       des.args <- list(specials = specials)
       fit_formula <- "formula"%in%formalArgs(estimate)
       fit_response_arg <- response.arg %in% formalArgs(estimate)

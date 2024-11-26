@@ -42,6 +42,17 @@ add_offset <- function(formula, offset) {
   return(formula)
 }
 
+# Add optional arguments to function
+add_dots <- function(f) {
+  if (!is.function(f)) {
+    stop("f is not a function.")
+  }
+  if (!("..." %in% formalArgs(f))) {
+    formals(f) <- c(formals(f), alist(... = ))
+  }
+  return(f)
+}
+
 list2str <- function(x) {
   nn <- names(x)
   val <- paste(x)

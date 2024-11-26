@@ -261,7 +261,8 @@ coverage:
 .PHONY: check
 check:
 	-@cclint src/*.cpp include/target/*.h* # misc/*demo.cpp misc/*run.cpp misc/*test.cpp
-	-@cppcheck --enable=warning,style,performance,portability,information,missingInclude --language=c++ --std=c11 -Isrc -Iinclude src/
+	-@cppcheck --enable=all --suppress=missingIncludeSystem \
+		--enable=warning,style,performance,portability,information,missingInclude --language=c++ --std=c11 -Isrc -Iinclude src/
 
 .PHONY: valgrind
 valgrind:

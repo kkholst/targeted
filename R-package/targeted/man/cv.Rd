@@ -11,7 +11,7 @@ cv(
   nfolds = 5,
   rep = 1,
   weights = NULL,
-  model.score = NULL,
+  model.score = scoring,
   seed = NULL,
   shared = NULL,
   args.pred = NULL,
@@ -35,7 +35,8 @@ last part used for testing)}
 \item{weights}{Optional frequency weights}
 
 \item{model.score}{Model scoring metric (default: MSE / Brier score). Must
-be a function with arguments: response, prediction, weights, object, ...}
+be a function with arguments response and prediction, and may optionally
+include weights, object and newdata arguments}
 
 \item{seed}{Random seed (argument parsed to future_Apply::future_lapply)}
 
