@@ -43,7 +43,6 @@ par0 <- list(
   tau = 1
 )
 
-set.seed(1)
 test_data <- sim_surv(n = 1e3, beta = par0$beta, zeta = par0$zeta)
 
 test_times <- c(0.4, 0.5)
