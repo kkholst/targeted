@@ -63,10 +63,7 @@ test_cumhaz_function <- function(object) {
     c(length(idx_add), length(test_times))
   )
 
-  expect_equal(
-    test_cumhaz$time,
-    test_times
-  )
+  expect_equal(test_cumhaz$time, test_times)
 
   test_cumhaz <- cumhaz(object, times = test_times, newdata = test_data[idx, ],
     individual.time = TRUE
@@ -78,11 +75,7 @@ test_cumhaz_function <- function(object) {
     newdata = test_data[idx, ], individual.time = FALSE
   )
 
-  expect_equal(
-    test_cumhaz$chf,
-    diag(test_cumhaz_diag$chf)
-  )
-
+  expect_equal(test_cumhaz$chf, diag(test_cumhaz_diag$chf))
 }
 
 # test that cumhaz works for model objects of survfit
@@ -99,7 +92,7 @@ colnames(ref_cumhaz) <- test_times
 test_cumhaz <- cumhaz(object = test_survfit, newdata = test_data,
   times = test_times
 )
-expect_equal(ref_cumhaz,test_cumhaz$chf)
+expect_equal(ref_cumhaz, test_cumhaz$chf)
 
 # with strata:
 test_survfit <- survfit(Surv(time, event) ~ A + D, data = test_data)
