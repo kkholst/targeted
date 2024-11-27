@@ -52,7 +52,9 @@ Suggests:
     SuperLearner (>= 2.0-28),
     knitr,
     xgboost,
-    viridisLite
+    viridisLite,
+    ranger,
+    randomForestSRC
 BugReports: https://github.com/kkholst/targeted/issues
 URL: https://kkholst.github.io/targeted/
 License: Apache License (== 2.0)
