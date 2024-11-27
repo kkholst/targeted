@@ -89,7 +89,7 @@ r_build: r_clean
 	@$(R) CMD INSTALL R-package/${pkg}
 
 r_test:
-	@$(R) -e 'testthat::test_package("./R-package/${pkg}/")'
+	@echo 'devtools::load_all("R-package/${pkg}"); tinytest::test_all("R-package/${pkg}/")' | $(R)
 
 r_lint:
 	@echo 'devtools::lint("./R-package/$(pkg)")' | $(R)

@@ -46,7 +46,7 @@ Suggests:
     hal9001,
     mgcv,
     nnls,
-    testthat (>= 0.11),
+    tinytest,
     rmarkdown,
     scatterplot3d,
     SuperLearner (>= 2.0-28),
