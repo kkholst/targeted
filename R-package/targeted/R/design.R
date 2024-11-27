@@ -6,6 +6,8 @@
 ##' @param rm_envir Remove environment
 ##' @param ... additional arguments (e.g, specials such weights, offsets,
 ##'   subset)
+##' @param specials character vector specifying functions in the formula that
+##'   should be marked as special in the [terms] object
 ##' @return An object of class 'design'
 ##' @author Klaus Kähler Holst
 ##' @export

@@ -38,7 +38,7 @@ cross-validation procedure.}
 }
 
 \examples{
-## See example(cv) for examples
+# See example(cv) for examples
 }
 \seealso{
 \code{\link{cv}}

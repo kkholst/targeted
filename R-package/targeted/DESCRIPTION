@@ -2,16 +2,20 @@ Package: targeted
 Type: Package
 Title: Targeted Inference
 Version: 0.6
-Date: 2024-04-15
+Date: 2024-10-30
 Authors@R: c(person(given = "Klaus K.",
                     family = "Holst",
                     role = c("aut", "cre"),
                     email = "klaus@holst.it"),
+             person(given = "Benedikt",
+                    family = "Sommer",
+                    role = c("aut"),
+                    email = "benediktsommer92@gmail.com"),
              person(given = "Andreas",
                     family = "Nordland",
                     role = c("aut"),
                     email = "andreasnordland@gmail.com"))
-Author: Klaus K. Holst [aut, cre], Andreas Nordland [aut]
+Author: Klaus K. Holst [aut, cre], Benedikt Sommer [aut], Andreas Nordland [aut]
 Maintainer: Klaus K. Holst <klaus@holst.it>
 Description: Various methods for targeted and semiparametric inference including
 	     augmented inverse probability weighted (AIPW) estimators for missing data and
@@ -26,20 +30,23 @@ Depends:
     lava (>= 1.8.0)
 Imports:
     data.table,
-    digest,
-    futile.logger,
     future.apply,
+    glmnet,
     optimx,
 	progressr,
     methods,
     mets,
     R6,
     Rcpp (>= 1.0.0),
+    rlang,
     survival
 Suggests:
+    e1071,
     grf,
+    hal9001,
     mgcv,
-    testthat (>= 0.11),
+    nnls,
+    tinytest,
     rmarkdown,
     scatterplot3d,
     SuperLearner (>= 2.0-28),
@@ -56,5 +63,5 @@ ByteCompile: yes
 RcppModules: riskregmodel
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 VignetteBuilder: knitr

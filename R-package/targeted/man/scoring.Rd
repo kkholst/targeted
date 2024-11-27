@@ -12,6 +12,8 @@ scoring(
   metrics = NULL,
   weights = NULL,
   names = NULL,
+  object = NULL,
+  newdata = NULL,
   messages = 1
 )
 }
@@ -33,6 +35,10 @@ assumed)}
 
 \item{names}{optional names of models coments (given as ..., alternatively
 these can be named arguments)}
+
+\item{object}{optional model object}
+
+\item{newdata}{optional new data.frame}
 
 \item{messages}{controls amount of messages/warnings (0: none)}
 }

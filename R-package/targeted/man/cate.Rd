@@ -5,13 +5,13 @@
 \title{Conditional Average Treatment Effect estimation}
 \usage{
 cate(
-  treatment,
   response_model,
   propensity_model,
+  cate_model = ~1,
   contrast = c(1, 0),
   data,
-  nfolds = 5,
-  type = "dml2",
+  nfolds = 1,
+  rep = 1,
   silent = FALSE,
   stratify = FALSE,
   mc.cores,
@@ -19,11 +19,12 @@ cate(
 )
 }
 \arguments{
-\item{treatment}{formula specifying treatment and variables to condition on}
-
 \item{response_model}{formula or ml_model object (formula => glm)}
 
 \item{propensity_model}{formula or ml_model object (formula => glm)}
+
+\item{cate_model}{formula specifying regression design for conditional
+average treatment effects}
 
 \item{contrast}{treatment contrast (default 1 vs 0)}
 
@@ -31,7 +32,7 @@ cate(
 
 \item{nfolds}{Number of folds}
 
-\item{type}{'dml1' or 'dml2'}
+\item{rep}{Number of replications of cross-fitting procedure}
 
 \item{silent}{supress all messages and progressbars}
 
@@ -46,28 +47,56 @@ instead of future}
 cate.targeted object
 }
 \description{
-Conditional Average Treatment Effect estimation via Double Machine Learning
+Conditional Average Treatment Effect estimation with cross-fitting.
+}
+\details{
+We have observed data \eqn{(Y,A,W)} where \eqn{Y} is the response variable,
+\eqn{A} the binary treatment, and \eqn{W} covariates. We further let \eqn{V}
+be a subset of the covariates. Define the conditional potential mean outcome
+\deqn{\psi_{a}(P)(V) = E_{P}[E_{P}(Y\mid A=a, W)|V]} and let \eqn{m(V;
+\beta)} denote a parametric working model, then the target parameter is the
+mean-squared error \deqn{\beta(P) = \operatorname{argmin}_{\beta}
+E_{P}[\{\Psi_{1}(P)(V)-\Psi_{0}(P)(V)\} - m(V; \beta)]^{2}}
 }
 \examples{
-sim1 <- function(n=1e4,
-                 seed=NULL,
-                 return_model=FALSE, ...) {
-suppressPackageStartupMessages(require("lava"))
-if (!is.null(seed)) set.seed(seed)
-m <- lava::lvm()
-regression(m, ~a) <- function(z1,z2,z3,z4,z5)
-         cos(z1)+sin(z1*z2)+z3+z4+z5^2
-regression(m, ~u) <- function(a,z1,z2,z3,z4,z5)
-        (z1+z2+z3)*a + z1+z2+z3 + a
-distribution(m, ~a) <- binomial.lvm()
-if (return_model) return(m)
-lava::sim(m, n, p=par)
+sim1 <- function(n=1000, ...) {
+  w1 <- rnorm(n)
+  w2 <- rnorm(n)
+  a <- rbinom(n, 1, expit(-1 + w1))
+  y <- cos(w1) + w2*a + 0.2*w2^2 + a + rnorm(n)
+  data.frame(y, a, w1, w2)
 }
 
-d <- sim1(200)
-e <- cate(a ~ z1+z2+z3, response=u~., data=d)
-e
+d <- sim1(5000)
+## ATE
+cate(cate_model=~1,
+     response_model=y~a*(w1+w2),
+     propensity_model=a~w1+w2,
+     data=d)
+## CATE
+cate(cate_model=~1+w2,
+     response_model=y~a*(w1+w2),
+     propensity_model=a~w1+w2,
+     data=d)
+
+\dontrun{ ## superlearner example
+mod1 <- list(
+   glm=predictor_glm(y~w1+w2),
+   gam=predictor_gam(y~s(w1) + s(w2))
+)
+s1 <- predictor_sl(mod1, nfolds=5)
+cate(cate_model=~1,
+     response_model=s1,
+     propensity_model=predictor_glm(a~w1+w2, family=binomial),
+     data=d,
+     stratify=TRUE)
+}
+
+}
+\references{
+Mark J. van der Laan (2006) Statistical Inference for Variable
+Importance, The International Journal of Biostatistics.
 }
 \author{
-Klaus Kähler Holst
+Klaus Kähler Holst, Andreas Nordland
 }

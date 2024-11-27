@@ -48,7 +48,7 @@
 ##' @export
 specify_ode <- function(code, fname=NULL, pname=c("dy", "x", "y", "p")) {
   if (is.null(fname))
-    fname <- paste0("dy_", digest::sha1(code))
+    fname <- paste0("dy_", rlang::hash(code))
   hd <- "// [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::depends(targeted)]]

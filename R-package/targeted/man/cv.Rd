@@ -11,7 +11,7 @@ cv(
   nfolds = 5,
   rep = 1,
   weights = NULL,
-  modelscore,
+  model.score = scoring,
   seed = NULL,
   shared = NULL,
   args.pred = NULL,
@@ -34,8 +34,9 @@ last part used for testing)}
 
 \item{weights}{Optional frequency weights}
 
-\item{modelscore}{Model scoring metric (default: MSE / Brier score). Must be
-a function with arguments: response, prediction, weights, ...}
+\item{model.score}{Model scoring metric (default: MSE / Brier score). Must
+be a function with arguments response and prediction, and may optionally
+include weights, object and newdata arguments}
 
 \item{seed}{Random seed (argument parsed to future_Apply::future_lapply)}
 
@@ -46,8 +47,8 @@ below)}
 
 \item{args.future}{Arguments to future.apply::future_mapply}
 
-\item{mc.cores}{Optional number of cores. parallel::mcmapply used instead of
-future}
+\item{mc.cores}{Optional number of cores. \link[parallel:mclapply]{parallel::mcmapply} used instead
+of future}
 
 \item{...}{Additional arguments parsed to models in models}
 }

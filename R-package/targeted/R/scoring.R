@@ -91,6 +91,8 @@ multiclass_scoring1 <-
 ##' @param weights optional frequency weights
 ##' @param names optional names of models coments (given as ..., alternatively
 ##'   these can be named arguments)
+##' @param object optional model object
+##' @param newdata optional new data.frame
 ##' @param levels (optional) unique levels in response variable
 ##' @param messages controls amount of messages/warnings (0: none)
 ##' @examples
@@ -111,7 +113,8 @@ multiclass_scoring1 <-
 ##' @export
 scoring <- function(response, ..., type="quantitative",
                     levels=NULL, metrics=NULL,
-                    weights=NULL, names=NULL, messages=1) {
+                    weights=NULL, names=NULL, object=NULL, newdata=NULL,
+                    messages=1) {
   if (is.factor(response) || is.character(response)) {
     type <- "multiclass"
   }
