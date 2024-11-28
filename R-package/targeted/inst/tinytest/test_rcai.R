@@ -2,7 +2,7 @@ library("data.table")
 library("survival")
 library("SuperLearner")
 library("mets")
-set.seed(4242)
+set.seed(42422)
 
 sim_surv_unif <- function(n) {
   id <- 1:n
