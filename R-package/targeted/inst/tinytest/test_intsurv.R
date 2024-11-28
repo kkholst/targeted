@@ -14,18 +14,9 @@ sim_surv_unif <- function(n) {
   time <- apply(cbind(TT, C), 1, min)
   event <- TT < C
 
-  d <- data.frame(
-    id = id,
-    W = W,
-    A = A,
-    TT = TT,
-    C = C,
-    time = time,
-    event = event
-  )
-  d <- d[order(time), ]
+  d <- data.frame(id, W, A, TT, C, time, event)[order(time), ]
+  return(d)
 }
-
 
 n <- 2e3
 test_data_unif <- sim_surv_unif(n = n)
