@@ -4,14 +4,21 @@
 \alias{cumhaz}
 \title{Predict the cumulative hazard/survival function for a survival model}
 \usage{
-cumhaz(object, newdata, times = NULL, individual.time = FALSE, ...)
+cumhaz(
+  object,
+  newdata,
+  times = NULL,
+  individual.time = FALSE,
+  extend = FALSE,
+  ...
+)
 }
 \arguments{
 \item{object}{Survival model object: phreg, coxph, rfsrc, ranger}
 
 \item{newdata}{data.frame}
 
-\item{times}{numeric vector: Time points at which the survival model is evalauted. If NULL, the time points associated with the survival model is used.}
+\item{times}{numeric vector: Time points at which the survival model is evalauted. Must be a sorted vector with unique elements. If NULL, the time points associated with the survival model is used.}
 
 \item{individual.time}{logical: If TRUE the survival object is evaluated at different time points for each row in newdata.
 The number of rows in newdata and the length of times must be the same.}
@@ -24,7 +31,7 @@ List with elements:
 \item time: numeric vector
 \item chf: cummulative hazard function. If individual.time = FALSE, matrix with dimension (nrow(newdata), length(times)). If individual.time = TRUE, vector of length length(times).
 \item surv: survival function, exp(-chf).
-\item dchf: diff(rbind(0, chf))
+\item dchf: t(diff(rbind(0, t(chf))))
 }
 }
 \description{
