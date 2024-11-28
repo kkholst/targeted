@@ -107,13 +107,11 @@ sim_surv <- function(n, beta, zeta) {
   A <- rbinom(n = n, size = 1, prob = 0.5)
 
   # simulate T
-  # TT1 <- c(unlist(rexp(n, 1) / exp(matrix(c(rep(1, n), W, rep(1, n), rep(1, n) * W), ncol = 4) %*% beta)))
   TT1 <- c(
     rexp(n, 1) /
     exp(matrix(c(rep(1, n), W, rep(1, n), rep(1, n) * W), ncol = 4) %*% beta
     )
   )
-  # TT0 <- c(unlist(rexp(n, 1) / exp(matrix(c(rep(1, n), W), ncol = 2) %*% beta[1:2])))
   TT0 <- c(
     rexp(n, 1) / exp(matrix(c(rep(1, n), W), ncol = 2) %*% beta[1:2])
   )
