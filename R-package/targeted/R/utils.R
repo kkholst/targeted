@@ -29,3 +29,38 @@ rr2pr <- function(rr, op) {
   p1 <- p0 * rr
   cbind(p0, p1)
 }
+
+add_offset <- function(formula, offset) {
+  tryCatch(offset, error = function(e) {
+      stop("Non-standard evaluations are not supported by the offset argument.")
+  })
+
+  if (!is.null(offset)) {
+    newf <- paste0(".~.+offset(", offset, ")")
+    formula <- update(formula, as.formula(newf))
+  }
+  return(formula)
+}
+
+# Add optional arguments to function
+add_dots <- function(f) {
+  if (!is.function(f)) {
+    stop("f is not a function.")
+  }
+  if (!("..." %in% formalArgs(f))) {
+    formals(f) <- c(formals(f), alist(... = ))
+  }
+  return(f)
+}
+
+list2str <- function(x) {
+  nn <- names(x)
+  val <- paste(x)
+  n <- length(val)
+  res <- ""
+  for (i in seq_along(val)) {
+    res <- paste0(res, nn[i], "=", val[i])
+    if (i<n) res <- paste0(res, ", ")
+  }
+  return(res)
+}

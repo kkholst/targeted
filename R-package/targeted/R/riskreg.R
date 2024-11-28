@@ -1,29 +1,30 @@
-##' @description Risk regression with binary exposure and nuisance model for the odds-product.
+##' @description Risk regression with binary exposure and nuisance model for the
+##'   odds-product.
 ##'
 ##' Let \eqn{A} be the binary exposure, \eqn{V} the set of covariates, and
-##' \eqn{Y} the binary response variable, and define
-##' \eqn{p_a(v) = P(Y=1 \mid A=a, V=v), a\in\{0,1\}}{pa(v) = P(Y=1|A=a,V=v), a=0,1}.
+##' \eqn{Y} the binary response variable, and define \eqn{p_a(v) = P(Y=1 \mid
+##' A=a, V=v), a\in\{0,1\}}{pa(v) = P(Y=1|A=a,V=v), a=0,1}.
 ##'
 ##' The \bold{target parameter} is either the \emph{relative risk}
 ##' \deqn{\mathrm{RR}(v) = \frac{p_1(v)}{p_0(v)}}{RR(v) = p1(v)/p0(v)}
 ##' or the \emph{risk difference}
 ##' \deqn{\mathrm{RD}(v) = p_1(v)-p_0(v)}{RD(v)=p1(v)-p0(v)}
 ##'
-##' We assume a target parameter model given by either
-##' \deqn{\log\{RR(v)\} = \alpha^t v}{log[RR(v)] = a'v}
-##' or
-##' \deqn{\mathrm{arctanh}\{RD(v)\} = \alpha^t v}{arctanh[RD(v)] = a'v}
-##' and similarly a working linear \bold{nuisance model} for the \emph{odds-product}
-##' \deqn{\phi(v) = \log\left(\frac{p_{0}(v)p_{1}(v)}{(1-p_{0}(v))(1-p_{1}(v))}\right)
-##' = \beta^t v}{log[p0(v)p1(v)/{(1-p0(v))(1-p1(v))}] = b'v}.
+##' We assume a target parameter model given by either \deqn{\log\{RR(v)\} =
+##' \alpha^t v}{log[RR(v)] = a'v} or \deqn{\mathrm{arctanh}\{RD(v)\} = \alpha^t
+##' v}{arctanh[RD(v)] = a'v} and similarly a working linear \bold{nuisance
+##' model} for the \emph{odds-product} \deqn{\phi(v) =
+##' \log\left(\frac{p_{0}(v)p_{1}(v)}{(1-p_{0}(v))(1-p_{1}(v))}\right) = \beta^t
+##' v}{log[p0(v)p1(v)/{(1-p0(v))(1-p1(v))}] = b'v}.
 ##'
-##' A \bold{propensity model} for \eqn{E(A=1|V)} is also fitted using a logistic regression working model
-##' \deqn{\mathrm{logit}\{E(A=1\mid V=v)\} = \gamma^t v.}{logit[E(A=1|V=v)] = c'v.}
+##' A \bold{propensity model} for \eqn{E(A=1|V)} is also fitted using a logistic
+##' regression working model \deqn{\mathrm{logit}\{E(A=1\mid V=v)\} = \gamma^t
+##' v.}{logit[E(A=1|V=v)] = c'v.}
 ##'
-##' If both the odds-product model and the propensity model are correct the estimator is efficient.
-##' Further, the estimator is consistent in the union model, i.e., the estimator is
-##' double-robust in the sense that only one of the two models needs to be correctly specified
-##' to get a consistent estimate.
+##' If both the odds-product model and the propensity model are correct the
+##' estimator is efficient. Further, the estimator is consistent in the union
+##' model, i.e., the estimator is double-robust in the sense that only one of
+##' the two models needs to be correctly specified to get a consistent estimate.
 ##'
 ##' @title Risk regression
 ##' @param formula formula (see details below)
@@ -37,25 +38,26 @@
 ##' @param std.err If TRUE standard errors are calculated
 ##' @param start optional starting values
 ##' @param mle Semi-parametric (double-robust) estimate or MLE (TRUE gives MLE)
-##' @param ... additional arguments to unconstrained optimization routine (nlminb)
-##' @return An object of class '\code{riskreg.targeted}' is returned. See \code{\link{targeted-class}}
-##' for more details about this class and its generic functions.
-##' @references  Richardson, T. S., Robins, J. M., & Wang, L. (2017). On modeling and
-##'  estimation for the relative risk and risk difference. Journal of the
-##'  American Statistical Association, 112(519),
-##'  1121–1130. http://dx.doi.org/10.1080/01621459.2016.1192546
-##' @details
-##' The 'formula' argument should be given as
-##' \code{response ~ exposure | target-formula | nuisance-formula}
-##' or
-##' \code{response ~ exposure | target | nuisance | propensity}
+##' @param ... additional arguments to unconstrained optimization routine
+##'   (nlminb)
+##' @return An object of class '\code{riskreg.targeted}' is returned. See
+##'   \code{\link{targeted-class}} for more details about this class and its
+##'   generic functions.
+##' @references Richardson, T. S., Robins, J. M., & Wang, L. (2017). On modeling
+##'   and estimation for the relative risk and risk difference. Journal of the
+##'   American Statistical Association, 112(519), 1121–1130.
+##'   http://dx.doi.org/10.1080/01621459.2016.1192546
+##' @details The 'formula' argument should be given as \code{response ~ exposure
+##'   | target-formula | nuisance-formula} or \code{response ~ exposure | target
+##'   | nuisance | propensity}
 ##'
 ##' E.g., \code{riskreg(y ~ a | 1 | x+z | x+z, data=...)}
 ##'
-##' Alternatively, the model can specifed using the target, nuisance and propensity arguments:
-##' \code{riskreg(y ~ a, target=~1, nuisance=~x+z, ...)}
+##' Alternatively, the model can specifed using the target, nuisance and
+##' propensity arguments: \code{riskreg(y ~ a, target=~1, nuisance=~x+z, ...)}
 ##'
-##' The \code{riskreg_fit} function can be used with matrix inputs rather than formulas.
+##' The \code{riskreg_fit} function can be used with matrix inputs rather than
+##' formulas.
 ##'
 ##' @export
 ##' @aliases riskreg riskreg_fit riskreg_mle
@@ -250,7 +252,7 @@ riskreg_fit <- function(y, a,
                     par=unlist(op1[, seq_along(alpha0), drop=TRUE]))
     }
     if (opt$objective>1e-3) {
-        futile.logger::flog.warn("riskreg optimization: convergence issues")
+        warning("riskreg optimization: convergence issues")
     }
     Vprop <- NULL
     if (std.err) {

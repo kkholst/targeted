@@ -24,6 +24,9 @@ design(
 
 \item{...}{additional arguments (e.g, specials such weights, offsets,
 subset)}
+
+\item{specials}{character vector specifying functions in the formula that
+should be marked as special in the \link{terms} object}
 }
 \value{
 An object of class 'design'

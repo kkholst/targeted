@@ -24,7 +24,8 @@ ate(
 
 \item{weights}{optional frequency weights}
 
-\item{offset}{optional offset (character or vector). can also be specified in the formula.}
+\item{offset}{optional offset (character or vector). can also be specified
+in the formula.}
 
 \item{family}{Exponential family argument for outcome model}
 
@@ -32,16 +33,17 @@ ate(
 
 \item{propensity}{propensity model formula}
 
-\item{all}{If TRUE all standard errors are calculated (default TRUE when exposure
-only has two levels)}
+\item{all}{If TRUE all standard errors are calculated (default TRUE when
+exposure only has two levels)}
 
 \item{labels}{Optional treatment labels}
 
 \item{...}{Additional arguments to lower level functions}
 }
 \value{
-An object of class '\code{ate.targeted}' is returned. See \code{\link{targeted-class}}
-for more details about this class and its generic functions.
+An object of class '\code{ate.targeted}' is returned. See
+\code{\link{targeted-class}} for more details about this class and its
+generic functions.
 }
 \description{
 Augmented Inverse Probability Weighting estimator for the Average (Causal)
@@ -53,14 +55,15 @@ from the parametric nuisance models). The estimate is consistent if either
 the propensity model or the outcome model / Q-model is correctly specified.
 }
 \details{
-The formula may either be specified as:
-response ~ treatment | nuisance-formula | propensity-formula
+The formula may either be specified as: response ~ treatment |
+nuisance-formula | propensity-formula
 
 For example: \code{ate(y~a | x+z+a | x*z, data=...)}
 
 Alternatively, as a list: \code{ate(list(y~a, ~x+z, ~x*z), data=...)}
 
-Or using the nuisance (and propensity argument): \code{ate(y~a, nuisance=~x+z, ...)}
+Or using the nuisance (and propensity argument):
+\code{ate(y~a, nuisance=~x+z, ...)}
 }
 \examples{
 m <- lvm(y ~ a+x, a~x)
