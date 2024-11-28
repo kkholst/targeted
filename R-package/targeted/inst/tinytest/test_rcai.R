@@ -1,7 +1,9 @@
 library("data.table")
 library("survival")
-library("SuperLearner")
-library("mets")
+suppressPackageStartupMessages({
+  library("SuperLearner")
+  library("mets")
+})
 set.seed(42422)
 
 sim_surv_unif <- function(n) {

@@ -1,9 +1,11 @@
 library("tinytest")
 library("survival")
-library("mets")
 library("data.table")
-library("randomForestSRC")
 library("ranger")
+suppressPackageStartupMessages({
+  library("mets")
+  library("randomForestSRC")
+})
 set.seed(42)
 
 sim_surv <- function(n, beta, zeta) {
