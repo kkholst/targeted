@@ -2,6 +2,7 @@ library("data.table")
 library("survival")
 library("SuperLearner")
 library("mets")
+fit_survival_models <- targeted:::fit_survival_models
 
 sim_surv_unif <- function(n) {
   id <- 1:n

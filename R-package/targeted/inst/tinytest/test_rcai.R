@@ -4,6 +4,7 @@ suppressPackageStartupMessages({
   library("SuperLearner")
   library("mets")
 })
+fit_survival_models <- targeted:::fit_survival_models
 set.seed(42422)
 
 sim_surv_unif <- function(n) {

@@ -6,6 +6,8 @@ suppressPackageStartupMessages({
   library("mets")
   library("randomForestSRC")
 })
+cumhaz <- targeted:::cumhaz
+fit_survival_models <- targeted:::fit_survival_models
 set.seed(42)
 
 sim_surv <- function(n, beta, zeta) {

@@ -3,6 +3,7 @@ library("data.table")
 library("survival")
 library("mets")
 set.seed(24)
+fit_survival_models <- targeted:::fit_survival_models
 
 sim_surv_unif <- function(n) {
   id <- 1:n
@@ -45,7 +46,7 @@ test_survival_models <- fit_survival_models(
   censoring_call = "survfit"
 )
 
-H <- H_constructor_risk(
+H <- targeted:::H_constructor_risk(
   T_model = test_survival_models$T_model,
   tau = tau0,
   individual_time = FALSE
@@ -71,7 +72,7 @@ true_H_surv <- function(u) {
 }
 true_H_surv <- Vectorize(true_H_surv)
 
-H <- H_constructor_surv(
+H <- targeted:::H_constructor_surv(
   T_model = test_survival_models$T_model,
   tau = tau0,
   individual_time = FALSE
@@ -80,7 +81,7 @@ h <- H(u = u, data = test_data_unif)
 h <- apply(h, 2, mean) |> unname()
 expect_equal(h, true_H_surv(u), tolerance = 4e-2)
 
-H <- H_constructor_surv(
+H <- targeted:::H_constructor_surv(
   T_model = test_survival_models$T_model,
   tau = tau0,
   individual_time = TRUE
@@ -104,7 +105,7 @@ true_H_rmst <- function(u) {
 }
 true_H_rmst <- Vectorize(true_H_rmst)
 
-H <- H_constructor_rmst(
+H <- targeted:::H_constructor_rmst(
   T_model = test_survival_models$T_model,
   tau = tau0,
   individual_time = FALSE,
@@ -119,7 +120,7 @@ h <- H(u = u[1], data = test_data_unif) |> mean()
 expect_equal(h, true_H_rmst(u[1]), tolerance = 2e-2)
 
 
-H <- H_constructor_rmst(
+H <- targeted:::H_constructor_rmst(
   T_model = test_survival_models$T_model,
   tau = tau0,
   individual_time = TRUE,
@@ -129,7 +130,7 @@ H <- H_constructor_rmst(
 h <- H(u = u, data = test_data_unif[seq_along(u), ])
 expect_equal(h, true_H_rmst(u), tolerance = 2e-2)
 
-H <- H_constructor_rmst(
+H <- targeted:::H_constructor_rmst(
   T_model = test_survival_models$T_model,
   tau = tau0,
   individual_time = FALSE,

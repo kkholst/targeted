@@ -1,6 +1,7 @@
 library("data.table")
 library("survival")
 library("mets")
+int_surv <- targeted:::int_surv
 set.seed(42)
 
 sim_surv_unif <- function(n) {
