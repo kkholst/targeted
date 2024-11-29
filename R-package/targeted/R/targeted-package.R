@@ -18,7 +18,7 @@
 ##'     model.offset reformulate drop.terms weights model.extract
 ##' @importFrom rlang hash call_match
 ##' @importFrom optimx optimx
-##' @importFrom data.table data.table is.data.table
+##' @importFrom data.table data.table is.data.table dcast
 ##' @importFrom R6 R6Class
 ##' @importFrom survival survfit
 ##' @importFrom utils tail head
