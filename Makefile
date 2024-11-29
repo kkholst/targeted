@@ -88,8 +88,11 @@ r_build: r_clean
 	@$(R) --slave -e "Rcpp::compileAttributes('R-package/${pkg}')"
 	@$(R) CMD INSTALL R-package/${pkg}
 
-r_test:
-	@echo 'devtools::load_all("R-package/${pkg}"); tinytest::test_all("R-package/${pkg}/")' | $(R)
+
+# use tinytest::test_package to achieve identical unit testing behave for this
+# rule and the r_check rule
+r_test: r_build
+	@echo 'tinytest::test_package("targeted")' | $(R)
 
 r_lint:
 	@echo 'devtools::lint("./R-package/$(pkg)")' | $(R)
