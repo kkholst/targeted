@@ -3,6 +3,10 @@ library("survival")
 library("SuperLearner")
 library("mets")
 fit_survival_models <- targeted:::fit_survival_models
+fit_treatment_model <- targeted:::fit_treatment_model
+survival_treatment_level_estimating_functions <- (
+  targeted:::survival_treatment_level_estimating_functions
+)
 
 sim_surv_unif <- function(n) {
   id <- 1:n

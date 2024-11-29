@@ -5,6 +5,7 @@ suppressPackageStartupMessages({
   library("mets")
 })
 fit_survival_models <- targeted:::fit_survival_models
+rcai <- targeted:::rcai
 set.seed(42422)
 
 sim_surv_unif <- function(n) {
@@ -51,7 +52,7 @@ risk_rcai <- rcai(
   time = test_data_unif$time,
   event = test_data_unif$event,
   tau = tau0,
-  H_constructor = H_constructor_risk,
+  H_constructor = targeted:::H_constructor_risk,
   sample = 0,
   blocksize = 0,
   return_all = TRUE
@@ -65,7 +66,7 @@ surv_rcai <- rcai(
   time = test_data_unif$time,
   event = test_data_unif$event,
   tau = tau0,
-  H_constructor = H_constructor_surv,
+  H_constructor = targeted:::H_constructor_surv,
   sample = 0,
   blocksize = 0,
   return_all = TRUE
@@ -89,7 +90,7 @@ rmst_rcai <- rcai(
   time = test_data_unif$time,
   event = test_data_unif$event,
   tau = tau0,
-  H_constructor = H_constructor_rmst,
+  H_constructor = targeted:::H_constructor_rmst,
   sample = 0,
   blocksize = 0,
   return_all = TRUE
