@@ -39,9 +39,9 @@ aipw <- function(response_model,
   if (inherits(propensity_model, "formula")) {
     propensity_model <- ML(propensity_model, family=binomial)
   }
-  cate(response_model=response_model,
-       propensity_model=propensity_model,
-       cate_model = formula,
+  cate(response.model = response_model,
+       propensity.model = propensity_model,
+       cate.model = formula,
       data = data, contrast = 1, stratify = TRUE,
       ...
   )
