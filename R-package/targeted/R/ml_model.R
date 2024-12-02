@@ -46,7 +46,7 @@ ml_model <- R6::R6Class("ml_model",
       formula = NULL,
       ##' @field args additional arguments specified during initialization
       args = NULL,
-      ##' @field optional description field
+      ##' @field description optional description field
       description = NULL,
 
      ##' @description
@@ -261,15 +261,21 @@ ml_model <- R6::R6Class("ml_model",
      ##' @description
      ##' Extract response from data
      ##' @param data data.frame
+     ##' @param eval when FALSE return the untransformed outcome
+     ##' (i.e., return 'a' if formula defined as I(a==1) ~ ...)
      ##' @param ... additional arguments to 'design'
-     response = function(data, ...) {
+     response = function(data, eval=TRUE, ...) {
        if (is.null(self$formula)) {
          if (!is.null(self$responsevar)) {
-           return(data[,self$responsevar,drop=TRUE])
+           return(data[, self$responsevar, drop = TRUE])
          }
          return(NULL)
        }
-       design(update(self$formula, ~ 1), data=data, ...)$y
+       newf <- update(self$formula, ~1)
+       if (!eval) {
+         return(data[, all.vars(newf), drop = TRUE])
+       }
+       design(newf, data=data, ...)$y
      },
 
      ##' @description

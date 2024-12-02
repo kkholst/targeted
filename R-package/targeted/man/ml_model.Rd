@@ -63,15 +63,13 @@ prediction functions}
 
 \item{\code{args}}{additional arguments specified during initialization}
 
-\item{\code{optional}}{description field}
+\item{\code{description}}{optional description field}
 }
 \if{html}{\out{</div>}}
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{optional}}{description field}
-
 \item{\code{fit}}{Active binding returning estimated model object}
 }
 \if{html}{\out{</div>}}
@@ -222,13 +220,16 @@ Print method
 \subsection{Method \code{response()}}{
 Extract response from data
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ml_model$response(data, ...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{ml_model$response(data, eval = TRUE, ...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{data}}{data.frame}
+
+\item{\code{eval}}{when FALSE return the untransformed outcome
+(i.e., return 'a' if formula defined as I(a==1) ~ ...)}
 
 \item{\code{...}}{additional arguments to 'design'}
 }
