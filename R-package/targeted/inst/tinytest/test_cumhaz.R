@@ -9,14 +9,14 @@ suppressPackageStartupMessages({
 set.seed(42)
 
 sim_surv <- function(n, beta, zeta) {
-  ## covariate W and D
+  # covariate W and D
   W <- runif(n, min = 1, max = 3)
   D <- as.factor(rbinom(n = n, size = 1, prob = 0.5))
 
-  ## treatment
+  # treatment
   A <- rbinom(n = n, size = 1, prob = 0.5)
 
-  ## simulate T
+  # simulate T
   TT1 <- c(
     rexp(n, 1) /
     exp(matrix(c(rep(1, n), W, rep(1, n), rep(1, n) * W), ncol = 4) %*% beta
@@ -28,7 +28,7 @@ sim_surv <- function(n, beta, zeta) {
   )
   TT <- TT1 * A + TT0 * (1 - A)
 
-  ## simulate C
+  # simulate C
   C <- c(rexp(n, 1) / exp(matrix(c(rep(1, n), A), ncol = 2) %*% zeta))
 
   time <- apply(cbind(TT, C), 1, min)
