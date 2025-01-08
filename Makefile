@@ -133,9 +133,9 @@ r_crancheck: r_export
 	@$(R) -e "pkgbuild::build('$(BUILD_DIR)/R/$(pkg)', args='--compact-vignettes=qpdf --resave-data=best')"
 	cd $(BUILD_DIR)/R; $(R) CMD check `$(GETVER) $(pkg)` --timings --as-cran --no-multiarch --run-donttest
 
-r_check:
+r_check: r_export
 	@$(R) --slave -e "Rcpp::compileAttributes('R-package/${pkg}')"
-	@cd R-package; $(R) CMD check $(pkg) --no-multiarch
+	@echo 'rcmdcheck::rcmdcheck("build/R/targeted", build_args=c("--no-build-vignettes"), args=c("--ignore-vignettes", "--no-multiarch"))' | $(R)
 
 r: r_build r_run
 
