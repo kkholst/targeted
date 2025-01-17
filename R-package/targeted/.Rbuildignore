@@ -6,7 +6,9 @@
 ^tmp$
 ^\.travis\.yml$
 ^\.git$
-^.gitignore$
+^\.lintr$
+^\.github$
+^\.gitignore$
 ^README\.Rmd$
 ^examples$
 ^TODO$
