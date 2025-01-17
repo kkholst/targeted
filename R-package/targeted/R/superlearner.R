@@ -1,4 +1,4 @@
-metalearner_nnls <- function(y, pred, method = "glmnet") {
+metalearner_nnls <- function(y, pred, method = "nnls") {
   if (NCOL(pred)==1) return(1.0)
   if (method == "nnls") {
     res <- nnls::nnls(A = pred, b = y)

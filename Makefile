@@ -88,7 +88,6 @@ r_build: r_clean
 	@$(R) --slave -e "Rcpp::compileAttributes('R-package/${pkg}')"
 	@$(R) CMD INSTALL R-package/${pkg}
 
-
 # use tinytest::test_package to achieve identical unit testing behave for this
 # rule and the r_check rule
 r_test: r_build
@@ -145,6 +144,15 @@ r_clean:
 r_sync: r_export
 	@if [ -d "../$(pkg)" ]; then \
 	cp -rfv $(BUILD_DIR)/R/$(pkg)/.	 ../$(pkg)/; fi
+
+r_export_clean:
+	@rm -Rf $(BUILD_DIR)/R/
+
+r_drat: r_export_clean r_export
+	@if [ ! -d "www" ]; then git clone -b gh-pages git@github.com:kkholst/target www; fi;
+	@cd build/R; $(R) CMD build $(pkg)
+	@echo 'drat::insertPackage(action="archive", repodir="www/pkg", file=paste0("build/R/", list.files("build/R/", "gz$$")))' | $(R)
+	@cd www; git commit -a -m "pkg update"; git push
 
 ##################################################
 ## Python package

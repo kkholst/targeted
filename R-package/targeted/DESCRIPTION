@@ -27,25 +27,27 @@ Description: Various methods for targeted and semiparametric inference including
          linear model parameters (Vansteelandt et al. (2022) <doi:10.1111/rssb.12504>).
 Depends:
     R (>= 4.0),
-    lava (>= 1.8.0)
+    lava (>= 1.8.0),
+    survival
 Imports:
+    cli,
     data.table,
     future.apply,
-    glmnet,
+    nnls,
     optimx,
 	progressr,
     methods,
     mets,
     R6,
     Rcpp (>= 1.0.0),
-    rlang,
-    survival
+    rlang
 Suggests:
+    cmprsk,
     e1071,
+    glmnet,
     grf,
     hal9001,
     mgcv,
-    nnls,
     tinytest,
     rmarkdown,
     scatterplot3d,
