@@ -50,7 +50,15 @@ jobs:
           # args: 'c("--ignore-vignettes")'
           # build_args: 'c("--no-build-vignettes")'
 
-      - name: Upload Coverage to Codecov
+      - name: Webpage deployment
+        if: success() && contains('refs/heads/main', github.ref)
         run: |
-          covr::codecov(path=".", type="all")
+          Rscript -e 'remotes::install_github("kkholst/targeted")'
+          git config --local user.name "$GITHUB_ACTOR"
+          git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          Rscript -e 'pkgdown::deploy_to_branch(new_process = FALSE)'
+
+      - name: Code Coverage
+        if: success() && contains('refs/heads/main', github.ref)
+        run: covr::codecov(type=c("tests", "examples"))
         shell: Rscript {0}
