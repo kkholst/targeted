@@ -7,6 +7,7 @@
 ^\.travis\.yml$
 ^\.git$
 ^.gitignore$
+^src/target/lib$
 ^README\.Rmd$
 ^examples$
 ^TODO$
