@@ -1,4 +1,6 @@
 ^.github$
+^.lintr$
+^.gitignore$
 ^Dockerfile$
 ^Makefile$
 ^LICENSE$
@@ -6,17 +8,10 @@
 ^tmp$
 ^\.travis\.yml$
 ^\.git$
-<<<<<<< HEAD:.Rbuildignore
-^.gitignore$
+^Makefile$
 ^src/target/lib$
-||||||| a02c5ca:R-package/targeted/.Rbuildignore
-^.gitignore$
-=======
-^\.lintr$
-^\.github$
-^\.gitignore$
->>>>>>> develop:R-package/targeted/.Rbuildignore
 ^README\.Rmd$
+^LICENSE$
 ^examples$
 ^TODO$
 ^doc$
