@@ -47,68 +47,68 @@ cate_fold1 <- function(fold, data, score, cate_des) {
   lm.fit(y = y, x = x)$coef
 }
 
-##' Conditional Average Treatment Effect estimation with cross-fitting.
-##'
-##' We have observed data \eqn{(Y,A,W)} where \eqn{Y} is the response variable,
-##' \eqn{A} the binary treatment, and \eqn{W} covariates. We further let \eqn{V}
-##' be a subset of the covariates. Define the conditional potential mean outcome
-##' \deqn{\psi_{a}(P)(V) = E_{P}[E_{P}(Y\mid A=a, W)|V]} and let \eqn{m(V;
-##' \beta)} denote a parametric working model, then the target parameter is the
-##' mean-squared error \deqn{\beta(P) = \operatorname{argmin}_{\beta}
-##' E_{P}[\{\Psi_{1}(P)(V)-\Psi_{0}(P)(V)\} - m(V; \beta)]^{2}}
-##' @title Conditional Average Treatment Effect estimation
-##' @param response.model formula or ml_model object (formula => glm)
-##' @param propensity.model formula or ml_model object (formula => glm)
-##' @param cate.model formula specifying regression design for conditional
-##'   average treatment effects
-##' @param contrast treatment contrast (default 1 vs 0)
-##' @param data data.frame
-##' @param nfolds Number of folds
-##' @param rep Number of replications of cross-fitting procedure
-##' @param silent supress all messages and progressbars
-##' @param stratify If TRUE the response.model will be stratified by treatment
-##' @param mc.cores mc.cores Optional number of cores. parallel::mcmapply used
-##'   instead of future
-##' @param ... additional arguments to future.apply::future_mapply
-##' @return cate.targeted object
-##' @author Klaus Kähler Holst, Andreas Nordland
-##' @references Mark J. van der Laan (2006) Statistical Inference for Variable
-##'   Importance, The International Journal of Biostatistics.
-##' @examples
-##' sim1 <- function(n=1000, ...) {
-##'   w1 <- rnorm(n)
-##'   w2 <- rnorm(n)
-##'   a <- rbinom(n, 1, expit(-1 + w1))
-##'   y <- cos(w1) + w2*a + 0.2*w2^2 + a + rnorm(n)
-##'   data.frame(y, a, w1, w2)
-##' }
-##'
-##' d <- sim1(5000)
-##' ## ATE
-##' cate(cate.model=~1,
-##'      response.model=y~a*(w1+w2),
-##'      propensity.model=a~w1+w2,
-##'      data=d)
-##' ## CATE
-##' cate(cate.model=~1+w2,
-##'      response.model=y~a*(w1+w2),
-##'      propensity.model=a~w1+w2,
-##'      data=d)
-##'
-##' \dontrun{ ## superlearner example
-##' mod1 <- list(
-##'    glm=predictor_glm(y~w1+w2),
-##'    gam=predictor_gam(y~s(w1) + s(w2))
-##' )
-##' s1 <- predictor_sl(mod1, nfolds=5)
-##' cate(cate.model=~1,
-##'      response.model=s1,
-##'      propensity.model=predictor_glm(a~w1+w2, family=binomial),
-##'      data=d,
-##'      stratify=TRUE)
-##' }
-##'
-##' @export
+#' Conditional Average Treatment Effect estimation with cross-fitting.
+#'
+#' We have observed data \eqn{(Y,A,W)} where \eqn{Y} is the response variable,
+#' \eqn{A} the binary treatment, and \eqn{W} covariates. We further let \eqn{V}
+#' be a subset of the covariates. Define the conditional potential mean outcome
+#' \deqn{\psi_{a}(P)(V) = E_{P}[E_{P}(Y\mid A=a, W)|V]} and let \eqn{m(V;
+#' \beta)} denote a parametric working model, then the target parameter is the
+#' mean-squared error \deqn{\beta(P) = \operatorname{argmin}_{\beta}
+#' E_{P}[\{\Psi_{1}(P)(V)-\Psi_{0}(P)(V)\} - m(V; \beta)]^{2}}
+#' @title Conditional Average Treatment Effect estimation
+#' @param response.model formula or ml_model object (formula => glm)
+#' @param propensity.model formula or ml_model object (formula => glm)
+#' @param cate.model formula specifying regression design for conditional
+#'   average treatment effects
+#' @param contrast treatment contrast (default 1 vs 0)
+#' @param data data.frame
+#' @param nfolds Number of folds
+#' @param rep Number of replications of cross-fitting procedure
+#' @param silent supress all messages and progressbars
+#' @param stratify If TRUE the response.model will be stratified by treatment
+#' @param mc.cores mc.cores Optional number of cores. parallel::mcmapply used
+#'   instead of future
+#' @param ... additional arguments to future.apply::future_mapply
+#' @return cate.targeted object
+#' @author Klaus Kähler Holst, Andreas Nordland
+#' @references Mark J. van der Laan (2006) Statistical Inference for Variable
+#'   Importance, The International Journal of Biostatistics.
+#' @examples
+#' sim1 <- function(n=1000, ...) {
+#'   w1 <- rnorm(n)
+#'   w2 <- rnorm(n)
+#'   a <- rbinom(n, 1, expit(-1 + w1))
+#'   y <- cos(w1) + w2*a + 0.2*w2^2 + a + rnorm(n)
+#'   data.frame(y, a, w1, w2)
+#' }
+#'
+#' d <- sim1(5000)
+#' ## ATE
+#' cate(cate.model=~1,
+#'      response.model=y~a*(w1+w2),
+#'      propensity.model=a~w1+w2,
+#'      data=d)
+#' ## CATE
+#' cate(cate.model=~1+w2,
+#'      response.model=y~a*(w1+w2),
+#'      propensity.model=a~w1+w2,
+#'      data=d)
+#'
+#' \dontrun{ ## superlearner example
+#' mod1 <- list(
+#'    glm=predictor_glm(y~w1+w2),
+#'    gam=predictor_gam(y~s(w1) + s(w2))
+#' )
+#' s1 <- predictor_sl(mod1, nfolds=5)
+#' cate(cate.model=~1,
+#'      response.model=s1,
+#'      propensity.model=predictor_glm(a~w1+w2, family=binomial),
+#'      data=d,
+#'      stratify=TRUE)
+#' }
+#'
+#' @export
 cate <- function(response.model,
                  propensity.model,
                  cate.model = ~1,
@@ -118,7 +118,7 @@ cate <- function(response.model,
                  rep = 1,
                  silent = FALSE,
                  stratify = FALSE,
-                 mc.cores,
+                 mc.cores = NULL,
                  ...) {
 
   cl <- match.call()
@@ -150,8 +150,9 @@ cate <- function(response.model,
   if (length(contrast) > 2) {
     stop("Expected contrast vector of length 1 or 2.")
   }
-  propensity_outcome <- function(treatment_level)
+  propensity_outcome <- function(treatment_level) {
     paste0("I(", treatment_var, "==", treatment_level, ")")
+  }
   if (missing(propensity.model)) {
     response_var <- lava::getoutcome(response.model$formula, data=data)
     newf <- reformulate(
@@ -166,19 +167,17 @@ cate <- function(response.model,
   treatment_var <- lava::getoutcome(propensity.model$formula)
 
   procfold <- function(a, fold,
-                       data,
-                       propensity.model,
-                       response.model,
-                       treatment_var,
-                       stratify,
-                       folds,
-                       pb,
-                       ...) {
+                        data,
+                        propensity.model,
+                        response.model,
+                        treatment_var,
+                        stratify,
+                        folds,
+                        ...) {
     rmod <- response.model$clone(deep = TRUE)
     pmod <- propensity.model$clone(deep = TRUE)
     newf <- reformulate(as.character(pmod$formula)[[3]], propensity_outcome(a))
     pmod$update(newf)
-    if (!silent) pb()
     val <- list(ate_if_fold(folds[[fold]], data,
       propensity.model = pmod,
       response.model = rmod,
@@ -190,47 +189,48 @@ cate <- function(response.model,
 
 
   calculate_scores <- function(args) {
-    if (!silent & (rep == 1)) {
-      pb <- progressr::progressor(steps = length(contrast) * nfolds)
-    } else {
-      pb <- function(...) NULL
-    }
     ## Create random folds
     if (nfolds<1) nfolds <- 1
     folds <- split(sample(1:n, n), rep(1:nfolds, length.out = n))
     folds <- lapply(folds, sort)
     ff <- Reduce(c, folds)
     idx <- order(ff)
+    fargs <- rbind(expand.grid(fold = seq_len(nfolds), a = contrast))
 
-    fargs <- rbind(expand.grid(seq_len(nfolds), contrast))
-    if (mc) {
-      val <- parallel::mcmapply(procfold,
-        a = as.list(fargs[, 2]), fold = as.list(fargs[, 1]),
-        mc.cores = mc.cores,
-        MoreArgs = list(
-          propensity.model = propensity.model,
-          response.model = response.model,
-          treatment_var = treatment_var,
-          data = data, folds = folds,
-          stratify = stratify,
-          pb=pb
-        ),
-        ...
-      )
+    if (!silent && (rep == 1) && (nfolds>1)) {
+      pb <- progressr::progressor(message="cross-fitting",
+                                    steps = nrow(fargs))
     } else {
-      val <- future.apply::future_mapply(procfold,
-        a = as.list(fargs[, 2]), fold = as.list(fargs[, 1]),
-        future.seed = TRUE,
-        ## future.packages = c("lava", "targeted", "R6"),
-        MoreArgs = list(
-          propensity.model = propensity.model,
-          response.model = response.model,
-          treatment_var = treatment_var,
-          data = data, folds = folds,
-          stratify = stratify,
-          pb=pb
-        ),
-        ...
+      pb <- function(...) invisible(NULL)
+    }
+
+    myargs <- list(procfold,
+      a = as.list(fargs[, "a"]),
+      fold = as.list(fargs[, "fold"]),
+      MoreArgs = list(
+        propensity.model = propensity.model,
+        response.model = response.model,
+        treatment_var = treatment_var,
+        data = data, folds = folds,
+        stratify = stratify
+      ),
+      ...
+    )
+    if (!is.null(mc.cores)) {
+      myargs$mc.cores <- ifelse(rep == 1, mc.cores, 1)
+      val <- do.call(parallel::mcmapply, myargs)
+    } else {
+      myargs[[1]] <- function(a, fold, ...) {
+        res <- procfold(a = a, fold = fold, ...)
+        pb()
+        return(res)
+      }
+      if (!"future.seed" %in% names(myargs)) {
+        myargs["future.seed"] <- list(NULL)
+      }
+      val <- do.call(
+        future.apply::future_mapply,
+        myargs
       )
     }
 
@@ -263,22 +263,23 @@ cate <- function(response.model,
     list(scores = scores, adj = adj, qval = qval, pval = pval)
   }
 
-  mc <- !missing(mc.cores)
   if (rep > 1) {
-    pb <- progressr::progressor(steps = rep)
+    pb <- progressr::progressor(steps = rep, message="repetition")
     f <- function(...) {
+      res <- calculate_scores()
       pb()
-      return(calculate_scores())
+      return(res)
     }
-    if (mc) {
+    if (!is.null(mc.cores)) {
       val <- parallel::mclapply(1:rep, f,
-        mc.cores = mc.cores, pb = pb, ...
+        mc.cores = mc.cores, ...
       )
     } else {
-      val <- future.apply::future_lapply(
-        1:rep, f,
-        pb = pb, future.seed = TRUE, ...
-      )
+      myargs <- list(X=1:rep, FUN=f, ...)
+      if (!"future.seed" %in% names(myargs)) {
+        myargs["future.seed"] <- list(NULL)
+      }
+      val <- do.call(future.apply::future_lapply, myargs)
     }
   } else {
     val <- list(calculate_scores())
