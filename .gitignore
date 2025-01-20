@@ -44,6 +44,8 @@ _region*
 symbols.rds
 doc
 Meta
+www
+*.obs
 devel
 test.R
 autom4te.cache

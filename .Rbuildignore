@@ -6,8 +6,16 @@
 ^tmp$
 ^\.travis\.yml$
 ^\.git$
+<<<<<<< HEAD:.Rbuildignore
 ^.gitignore$
 ^src/target/lib$
+||||||| a02c5ca:R-package/targeted/.Rbuildignore
+^.gitignore$
+=======
+^\.lintr$
+^\.github$
+^\.gitignore$
+>>>>>>> develop:R-package/targeted/.Rbuildignore
 ^README\.Rmd$
 ^examples$
 ^TODO$

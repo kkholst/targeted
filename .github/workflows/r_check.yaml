@@ -1,7 +1,7 @@
 # runs r cmd check + unit tests in inst/tinytest
 on:
   pull_request:
-    branches: [main, dev]
+    branches: [main, develop]
 
 name: r-cmd-check
 
@@ -52,5 +52,5 @@ jobs:
 
       - name: Upload Coverage to Codecov
         run: |
-          covr::codecov(path="R-package/targeted", type="all")
+          covr::codecov(path=".", type="all")
         shell: Rscript {0}

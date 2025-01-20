@@ -206,7 +206,7 @@ cate <- function(response.model,
     if (mc) {
       val <- parallel::mcmapply(procfold,
         a = as.list(fargs[, 2]), fold = as.list(fargs[, 1]),
-        mc.cores = 1,
+        mc.cores = mc.cores,
         MoreArgs = list(
           propensity.model = propensity.model,
           response.model = response.model,
