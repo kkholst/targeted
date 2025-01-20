@@ -1,19 +1,19 @@
 [submodule "lib/pybind11"]
-	path = R-package/targeted/src/target/lib/pybind11
+	path = src/target/lib/pybind11
 	shallow = true
 	url = https://github.com/pybind/pybind11.git
 [submodule "lib/armadillo"]
-	path = R-package/targeted/src/target/lib/armadillo
+	path = src/target/lib/armadillo
 	shallow = true
 	url = https://gitlab.com/conradsnicta/armadillo-code.git
 [submodule "lib/spdlog"]
-	path = R-package/targeted/src/target/lib/spdlog
+	path = src/target/lib/spdlog
 	shallow = true
 	url = https://github.com/gabime/spdlog.git
 [submodule "lib/doctest"]
-	path = R-package/targeted/src/target/lib/doctest
+	path = src/target/lib/doctest
 	shallow = true
 	url = https://github.com/onqtam/doctest
 [submodule "lib/eigen"]
-	path = R-package/targeted/src/target/lib/eigen
+	path = src/target/lib/eigen
 	url = https://gitlab.com/libeigen/eigen.git
