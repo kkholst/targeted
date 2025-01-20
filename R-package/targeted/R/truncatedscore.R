@@ -21,14 +21,14 @@ q_fct <- function(alpha, corr) {
 # Calculating p-values
 ###############################################################
 #' @title Signed intersection Wald test
-#' @param thetahat1 parameter estimate 1
-#' @param se1 standard error of parameter estimate 1
-#' @param thetahat2 parameter estimate 2
-#' @param se2 standard error of parameter estimate 2
-#' @param noninf1 non-inferiority margin for parameter 1
-#' @param noninf2 non-inferiority margin for parameter 2
-#' @param corr correlation between parameter 1 and 2
-#' @param alpha nominal level
+#' @param thetahat1 (numeric) parameter estimate 1
+#' @param se1 (numeric) standard error of parameter estimate 1
+#' @param thetahat2 (numeric) parameter estimate 2
+#' @param se2 (numeric) standard error of parameter estimate 2
+#' @param noninf1 (numeric) non-inferiority margin for parameter 1
+#' @param noninf2 (numeric) non-inferiority margin for parameter 2
+#' @param corr (numeric) correlation between parameter 1 and 2
+#' @param alpha (numeric) nominal level
 #' @author
 #' Christian Bressen Pipper,
 #' Klaus Kähler Holst
@@ -104,6 +104,7 @@ test_intersectsignedwald <- function(thetahat1,
 }
 
 
+#' Estimation of mean clinical outcome truncated by event process
 #' @description
 #' Let \eqn{Y} denote the clinical outcome, \eqn{A} the binary treatment
 #' variable, \eqn{X} baseline covariates, \eqn{T} the failure time,
@@ -111,20 +112,24 @@ test_intersectsignedwald <- function(thetahat1,
 #' The following are our two target parameters
 #' \deqn{E(Y|T>t, A=1)- E(Y|T>t, A=0)}
 #' \deqn{P(T<t,\epsilon=1|A=1)- P(T<t,\epsilon=1|A=0)}
-#' @title Estimation of mean clinical outcome truncated by event process
-#' @param data data.frame
-#' @param mod.y model for clinical outcome given T>time
-#' @param mod.r model for missing data mechanism for clinical outcome at T=time
-#' @param mod.a treatment model (in RCT should just be 'a ~ 1')
-#' @param mod.event Model for time-to-event process ('Event(time,status) ~ x')
-#' @param time landmark time
-#' @param cause primary event (in the 'status' variable of the 'Event'
-#'   statement)
-#' @param cens.code censoring code (0 default)
-#' @param naive if TRUE the unadjusted estimates ignoring baseline covariates
-#'   is returned as the attribute 'naive'
-#' @param ... additional arguments passed to [mets::binregATE]
-#' @return estimate object
+#' @param data (data.frame)
+#' @param mod.y (formula or ml_model) Model for clinical outcome given T>time.
+#' Using a formula specifies a glm with an identity link (see example).
+#' @param mod.r (formula or ml_model) Model for missing data mechanism for
+#' clinical outcome at T=time. Using a formula specifies a glm with a log
+#' link.
+#' @param mod.a (formula or ml_model) Treatment model (in RCT should just be 'a
+#' ~ 1'). Using a formula specifies a glm with a log link.
+#' @param mod.event (formula) Model for time-to-event process
+#' ('Event(time,status) ~ x').
+#' @param time (numeric) Landmark time.
+#' @param cause (integer) Primary event (in the 'status' variable of the 'Event'
+#'   statement).
+#' @param cens.code (integer) Censoring code.
+#' @param naive (logical) If TRUE, the unadjusted estimates ignoring baseline
+#'   covariates is returned as the attribute 'naive'.
+#' @param ... Additional arguments passed to [mets::binregATE].
+#' @return [lava::estimate.default] object
 #' @author Klaus Kähler Holst
 #' @examples
 #' \dontrun{
@@ -138,10 +143,19 @@ test_intersectsignedwald <- function(thetahat1,
 #'   mod.event = mets::Event(time, status) ~ a * (x1+x2),
 #'   time = 2
 #' )
-#'
 #' s <- summary(a, noninf.t = -0.1)
 #' print(s)
 #' parameter(s)
+#'
+#' # the above is equivalent to
+#' a <- estimate_truncatedscore(
+#'   data = dat,
+#'   mod.y = y ~ a * (x1 + x2),
+#'   mod.r = r ~ a * (x1 + x2),
+#'   mod.a = a ~ 1,
+#'   mod.event = mets::Event(time, status) ~ a * (x1+x2),
+#'   time = 2
+#' )
 #' }
 #' @export
 estimate_truncatedscore <- function(
@@ -180,9 +194,7 @@ estimate_truncatedscore <- function(
   alev <- c(a0[which(a==0)[1]], a0[which(a==1)[1]])
   y <- mod.y$response(data, na.action=lava::na.pass0)
   tmpdata <- data
-  est <- ic <-
-    lab0 <- est.naive <-
-      ic.naive <- c()
+  est <- ic <- lab0 <- est.naive <- ic.naive <- c()
   for (aval in c(0, 1)) {
     Ia <- (a == aval)
     tmpdata[, treatment] <- alev[aval + 1]

@@ -16,21 +16,21 @@ test_intersectsignedwald(
 )
 }
 \arguments{
-\item{thetahat1}{parameter estimate 1}
+\item{thetahat1}{(numeric) parameter estimate 1}
 
-\item{se1}{standard error of parameter estimate 1}
+\item{se1}{(numeric) standard error of parameter estimate 1}
 
-\item{thetahat2}{parameter estimate 2}
+\item{thetahat2}{(numeric) parameter estimate 2}
 
-\item{se2}{standard error of parameter estimate 2}
+\item{se2}{(numeric) standard error of parameter estimate 2}
 
-\item{noninf1}{non-inferiority margin for parameter 1}
+\item{noninf1}{(numeric) non-inferiority margin for parameter 1}
 
-\item{noninf2}{non-inferiority margin for parameter 2}
+\item{noninf2}{(numeric) non-inferiority margin for parameter 2}
 
-\item{corr}{correlation between parameter 1 and 2}
+\item{corr}{(numeric) correlation between parameter 1 and 2}
 
-\item{alpha}{nominal level}
+\item{alpha}{(numeric) nominal level}
 }
 \value{
 list with Wald
