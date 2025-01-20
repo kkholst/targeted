@@ -18,30 +18,35 @@ estimate_truncatedscore(
 )
 }
 \arguments{
-\item{data}{data.frame}
+\item{data}{(data.frame)}
 
-\item{mod.y}{model for clinical outcome given T>time}
+\item{mod.y}{(formula or ml_model) Model for clinical outcome given T>time.
+Using a formula specifies a glm with an identity link (see example).}
 
-\item{mod.r}{model for missing data mechanism for clinical outcome at T=time}
+\item{mod.r}{(formula or ml_model) Model for missing data mechanism for
+clinical outcome at T=time. Using a formula specifies a glm with a log
+link.}
 
-\item{mod.a}{treatment model (in RCT should just be 'a ~ 1')}
+\item{mod.a}{(formula or ml_model) Treatment model (in RCT should just be 'a
+~ 1'). Using a formula specifies a glm with a log link.}
 
-\item{mod.event}{Model for time-to-event process ('Event(time,status) ~ x')}
+\item{mod.event}{(formula) Model for time-to-event process
+('Event(time,status) ~ x').}
 
-\item{time}{landmark time}
+\item{time}{(numeric) Landmark time.}
 
-\item{cause}{primary event (in the 'status' variable of the 'Event'
-statement)}
+\item{cause}{(integer) Primary event (in the 'status' variable of the 'Event'
+statement).}
 
-\item{cens.code}{censoring code (0 default)}
+\item{cens.code}{(integer) Censoring code.}
 
-\item{naive}{if TRUE the unadjusted estimates ignoring baseline covariates
-is returned as the attribute 'naive'}
+\item{naive}{(logical) If TRUE, the unadjusted estimates ignoring baseline
+covariates is returned as the attribute 'naive'.}
 
-\item{...}{additional arguments passed to \link[mets:binregATE]{mets::binregATE}}
+\item{...}{Additional arguments passed to \link[mets:binregATE]{mets::binregATE}.}
 }
 \value{
-estimate object
+\link[lava:estimate.default]{lava::estimate.default} object
 }
 \description{
 Let \eqn{Y} denote the clinical outcome, \eqn{A} the binary treatment
@@ -63,10 +68,19 @@ a <- estimate_truncatedscore(
   mod.event = mets::Event(time, status) ~ a * (x1+x2),
   time = 2
 )
-
 s <- summary(a, noninf.t = -0.1)
 print(s)
 parameter(s)
+
+# the above is equivalent to
+a <- estimate_truncatedscore(
+  data = dat,
+  mod.y = y ~ a * (x1 + x2),
+  mod.r = r ~ a * (x1 + x2),
+  mod.a = a ~ 1,
+  mod.event = mets::Event(time, status) ~ a * (x1+x2),
+  time = 2
+)
 }
 }
 \author{
