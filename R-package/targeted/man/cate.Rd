@@ -5,9 +5,9 @@
 \title{Conditional Average Treatment Effect estimation}
 \usage{
 cate(
-  response_model,
-  propensity_model,
-  cate_model = ~1,
+  response.model,
+  propensity.model,
+  cate.model = ~1,
   contrast = c(1, 0),
   data,
   nfolds = 1,
@@ -19,11 +19,11 @@ cate(
 )
 }
 \arguments{
-\item{response_model}{formula or ml_model object (formula => glm)}
+\item{response.model}{formula or ml_model object (formula => glm)}
 
-\item{propensity_model}{formula or ml_model object (formula => glm)}
+\item{propensity.model}{formula or ml_model object (formula => glm)}
 
-\item{cate_model}{formula specifying regression design for conditional
+\item{cate.model}{formula specifying regression design for conditional
 average treatment effects}
 
 \item{contrast}{treatment contrast (default 1 vs 0)}
@@ -36,7 +36,7 @@ average treatment effects}
 
 \item{silent}{supress all messages and progressbars}
 
-\item{stratify}{If TRUE the response_model will be stratified by treatment}
+\item{stratify}{If TRUE the response.model will be stratified by treatment}
 
 \item{mc.cores}{mc.cores Optional number of cores. parallel::mcmapply used
 instead of future}
@@ -69,14 +69,14 @@ sim1 <- function(n=1000, ...) {
 
 d <- sim1(5000)
 ## ATE
-cate(cate_model=~1,
-     response_model=y~a*(w1+w2),
-     propensity_model=a~w1+w2,
+cate(cate.model=~1,
+     response.model=y~a*(w1+w2),
+     propensity.model=a~w1+w2,
      data=d)
 ## CATE
-cate(cate_model=~1+w2,
-     response_model=y~a*(w1+w2),
-     propensity_model=a~w1+w2,
+cate(cate.model=~1+w2,
+     response.model=y~a*(w1+w2),
+     propensity.model=a~w1+w2,
      data=d)
 
 \dontrun{ ## superlearner example
@@ -85,9 +85,9 @@ mod1 <- list(
    gam=predictor_gam(y~s(w1) + s(w2))
 )
 s1 <- predictor_sl(mod1, nfolds=5)
-cate(cate_model=~1,
-     response_model=s1,
-     propensity_model=predictor_glm(a~w1+w2, family=binomial),
+cate(cate.model=~1,
+     response.model=s1,
+     propensity.model=predictor_glm(a~w1+w2, family=binomial),
      data=d,
      stratify=TRUE)
 }

@@ -88,7 +88,12 @@ r_build: r_clean
 	@$(R) --slave -e "Rcpp::compileAttributes('R-package/${pkg}')"
 	@$(R) CMD INSTALL R-package/${pkg}
 
-r_test:
+# use tinytest::test_package to achieve identical unit testing behave for this
+# rule and the r_check rule
+r_test: r_build
+	@echo 'tinytest::test_package("targeted")' | $(R)
+
+r_test_loadall:
 	@echo 'devtools::load_all("R-package/${pkg}"); tinytest::test_all("R-package/${pkg}/")' | $(R)
 
 r_lint:
@@ -127,9 +132,9 @@ r_crancheck: r_export
 	@$(R) -e "pkgbuild::build('$(BUILD_DIR)/R/$(pkg)', args='--compact-vignettes=qpdf --resave-data=best')"
 	cd $(BUILD_DIR)/R; $(R) CMD check `$(GETVER) $(pkg)` --timings --as-cran --no-multiarch --run-donttest
 
-r_check:
+r_check: r_export
 	@$(R) --slave -e "Rcpp::compileAttributes('R-package/${pkg}')"
-	@cd R-package; $(R) CMD check $(pkg) --no-multiarch
+	@echo 'rcmdcheck::rcmdcheck("build/R/targeted", build_args=c("--no-build-vignettes"), args=c("--ignore-vignettes", "--no-multiarch"))' | $(R)
 
 r: r_build r_run
 
@@ -139,6 +144,15 @@ r_clean:
 r_sync: r_export
 	@if [ -d "../$(pkg)" ]; then \
 	cp -rfv $(BUILD_DIR)/R/$(pkg)/.	 ../$(pkg)/; fi
+
+r_export_clean:
+	@rm -Rf $(BUILD_DIR)/R/
+
+r_drat: r_export_clean r_export
+	@if [ ! -d "www" ]; then git clone -b gh-pages git@github.com:kkholst/target www; fi;
+	@cd build/R; $(R) CMD build $(pkg)
+	@echo 'drat::insertPackage(action="archive", repodir="www/pkg", file=paste0("build/R/", list.files("build/R/", "gz$$")))' | $(R)
+	@cd www; git commit -a -m "pkg update"; git push
 
 ##################################################
 ## Python package

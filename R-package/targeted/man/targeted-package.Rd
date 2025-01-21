@@ -11,7 +11,7 @@ Various methods for targeted and semiparametric inference including augmented in
 Methods for targeted and semiparametric inference.
 }
 \examples{
-\dontrun{
+\dontrun{x
 example(riskreg)
 example(cate)
 example(ate)

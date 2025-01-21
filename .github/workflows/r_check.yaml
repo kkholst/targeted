@@ -24,8 +24,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get install -y pandoc libcurl4-openssl-dev libharfbuzz-dev libfribidi-dev
-
+          sudo apt-get install -y pandoc libcurl4-openssl-dev libharfbuzz-dev libfribidi-dev libfontconfig1-dev libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev
       - name: Cache R packages
         uses: actions/cache@v2
         with:
@@ -37,7 +36,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          install.packages(c("remotes","covr","pkgdown"), repos="https://cloud.r-project.org")
+          install.packages(c("remotes","covr","pkgdown","rcmdcheck"), repos="https://cloud.r-project.org")
           remotes::install_deps("R-package/targeted", dep=T, upgrade=T)
         shell: Rscript {0}
       - name: Check
