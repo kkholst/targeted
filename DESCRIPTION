@@ -54,7 +54,9 @@ Suggests:
     SuperLearner (>= 2.0-28),
     knitr,
     xgboost,
-    viridisLite
+    viridisLite,
+    ranger,
+    randomForestSRC
 BugReports: https://github.com/kkholst/targeted/issues
 SystemRequirements: C++14, GNU make
 URL: https://kkholst.github.io/targeted/
