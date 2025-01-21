@@ -1,7 +1,7 @@
 name: publish R package
 
 on:
-  push:
+  pull_request:
     branches:
       branches: [main]
 
