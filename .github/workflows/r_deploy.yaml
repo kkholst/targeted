@@ -1,0 +1,65 @@
+name: publish R package
+
+on:
+  push:
+    branches:
+      branches: [main]
+
+jobs:
+  r_drat:
+    if: github.event.pull_request.draft == false
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {os: ubuntu-latest,   r: 'release'}
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+
+    runs-on: ${{ matrix.config.os }}
+    steps:
+      - name: Checkout repository incl. submodules
+        uses: actions/checkout@v4
+        # with:
+        #   submodules: recursive
+      - name: Clone gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: www
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.config.r }}
+      - uses: r-lib/actions/setup-tinytex@v2
+      - run: tlmgr --version
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get install -y pandoc libcurl4-openssl-dev libharfbuzz-dev libfribidi-dev
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          cache: always
+          working-directory: .
+          extra-packages: any::drat
+
+      - name: Build R package
+        run: |
+          rm -Rf tmp; mkdir -p tmp/targeted
+          git archive HEAD | (cd tmp/targeted; tar x )
+          cd tmp; R CMD build targeted
+
+      - name: Setting up R repository
+        run: |
+          echo 'drat::insertPackage(action="archive", repodir="www/pkg", file=paste0(tmp/", list.files(tmp/", "gz$")))' | R --no-save --no-restore --silent
+
+      - name: Deploy
+        run: |
+          cd www
+          git config --global user.email "$actions@github.com"
+          git config --global user.name "${REPO} github actions workflow"
+          git commit -a -m "workflow gh-pages"
+          git push

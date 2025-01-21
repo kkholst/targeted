@@ -1,0 +1,121 @@
+.RDataTmp
+pkgdown
+man/figures/logo.*
+docs
+inst/doc
+vignettes/*.html
+vignettes/figure/*chunk*
+vignettes/*.R
+src/dependencies
+*.gcno
+TAGS
+*.o
+*.so
+*~
+test
+*.RData
+*.Rhistory
+*.Rcheck
+.Rproj.user/
+*.tar.gz
+*.zip
+*.tgz
+*.obsolete
+x.log
+nohup.out
+tmp
+valgrind*
+test
+*.tmp
+*.bbl
+*.blg
+*.bak
+*.snm
+*.aux
+*.log
+*~
+*.out
+*.swp
+*.nav
+*.toc
+*.vrb
+*.dvi
+_region*
+symbols.rds
+doc
+Meta
+www
+*.obs
+devel
+test.R
+autom4te.cache
+config.status
+
+.ccls*
+.clangd
+compile_commands.json
+Debug
+.DS_Store
+.cache
+citest
+notes.org
+*.tmp
+src/target/misc/*.csv
+src/target/misc/sgd/*.csv
+src/target/misc/functional
+src/target/misc/sgd/.ipynb_checkpoints/sgd_test-checkpoint.ipynb
+src/target/misc/sgd/sgd/.ropeproject/
+src/target/config/wheel.sh
+Rplots*
+.#*
+examples/*.csv
+doc/*guide*pdf
+doc/latex
+doc/html
+doc/xml
+build
+tmp
+__pycache__
+.idea
+
+# Created by https://www.gitignore.io/api/c++
+# Edit at https://www.gitignore.io/?templates=c++
+
+### C++ ###
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# End of https://www.gitignore.io/api/c++
+/R-package/targeted/_test.R
+/y.csv
+.Rproj.user

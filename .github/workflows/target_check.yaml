@@ -1,0 +1,27 @@
+name: target library tests
+
+on: [push]
+
+jobs:
+
+  cpp_library:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository incl. submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install dependencies
+        run: |
+          sudo apt-get install -y lcov libblas-dev liblapack-dev
+      - name: Unit tests
+        run: |
+          cd src/target
+          make test
+      - name: Coverage
+        run: |
+          cd src/target
+          make coverage
+          cd build/coverage; make coverage
+          ./target_test -s
+          bash <(curl -s https://codecov.io/bash)

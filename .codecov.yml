@@ -1,0 +1,11 @@
+ignore:
+  - "tests"
+  - "misc"
+  - "inst"
+
+notify:
+  slack:
+    url: "secret:ktXIEem/dLaqrGV8h56qz9EbyZXu1/b3ChbDlBLPd0Cf21/S4CgHiF3SHg9eQUoywcdYLTwXkgY7f3gM22EtQ6VG6ZmRl7ytTTDZoWXZ1a8TD3A395AECGy2HtIsTLIDPdrcJoys6Tr+sY+ShGDqCYQJr21fnnw/lPV3VQ2lvGo="
+    branches:
+      - "main"
+      - "develop"
