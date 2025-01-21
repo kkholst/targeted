@@ -1,5 +1,0 @@
-destination: docs
-
-template:
-  params:
-    bootswatch: spacelab

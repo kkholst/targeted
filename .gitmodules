@@ -1,19 +1,19 @@
 [submodule "lib/pybind11"]
-	path = lib/pybind11
+	path = src/target/lib/pybind11
 	shallow = true
 	url = https://github.com/pybind/pybind11.git
 [submodule "lib/armadillo"]
-	path = lib/armadillo
+	path = src/target/lib/armadillo
 	shallow = true
 	url = https://gitlab.com/conradsnicta/armadillo-code.git
 [submodule "lib/spdlog"]
-	path = lib/spdlog
+	path = src/target/lib/spdlog
 	shallow = true
 	url = https://github.com/gabime/spdlog.git
 [submodule "lib/doctest"]
-	path = lib/doctest
+	path = src/target/lib/doctest
 	shallow = true
 	url = https://github.com/onqtam/doctest
 [submodule "lib/eigen"]
-	path = lib/eigen
+	path = src/target/lib/eigen
 	url = https://gitlab.com/libeigen/eigen.git

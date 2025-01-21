@@ -1,46 +1,14 @@
-name: target tests
+name: target library tests
 
 on: [push]
 
 jobs:
-  python_package:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.10']
-
-    steps:
-      - name: Checkout repository incl. submodules
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest-runner pytest-cov scipy patsy numpy pandas statsmodels codecov
-      - name: Check
-        run: |
-          cd python-package/targeted
-          python setup.py install
-          python setup.py test
-          python3 -m targeted
-          pytest --cov=targeted tests/
-          bin/test_targeted
-      - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          verbose: false
 
   cpp_library:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository incl. submodules
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Install dependencies
@@ -48,9 +16,11 @@ jobs:
           sudo apt-get install -y lcov libblas-dev liblapack-dev
       - name: Unit tests
         run: |
+          cd src/target
           make test
       - name: Coverage
         run: |
+          cd src/target
           make coverage
           cd build/coverage; make coverage
           ./target_test -s

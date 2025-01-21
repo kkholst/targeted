@@ -3,10 +3,10 @@ name: publish R package
 on:
   push:
     branches:
-      - develop
+      branches: [main]
 
 jobs:
-  r_targeted:
+  r_drat:
     if: github.event.pull_request.draft == false
     strategy:
       fail-fast: false
@@ -43,18 +43,18 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           cache: always
-          working-directory: R-package/targeted
+          working-directory: .
           extra-packages: any::drat
 
       - name: Build R package
         run: |
-          make r_export
-          cd build/R
-          R CMD build targeted
+          rm -Rf tmp; mkdir -p tmp/targeted
+          git archive HEAD | (cd tmp/targeted; tar x )
+          cd tmp; R CMD build targeted
 
       - name: Setting up R repository
         run: |
-          echo 'drat::insertPackage(action="archive", repodir="www/pkg", file=paste0("build/R/", list.files("build/R/", "gz$")))' | R --no-save --no-restore --silent
+          echo 'drat::insertPackage(action="archive", repodir="www/pkg", file=paste0(tmp/", list.files(tmp/", "gz$")))' | R --no-save --no-restore --silent
 
       - name: Deploy
         run: |

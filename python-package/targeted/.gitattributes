@@ -1,5 +1,0 @@
-lib/armadillo export-ignore
-lib/catch2 export-ignore
-lib/pybind11 export-ignore
-lib/target-cpp export-ignore
-lib/target-inc export-ignore

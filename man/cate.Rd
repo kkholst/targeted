@@ -14,7 +14,7 @@ cate(
   rep = 1,
   silent = FALSE,
   stratify = FALSE,
-  mc.cores,
+  mc.cores = NULL,
   ...
 )
 }

@@ -1,10 +1,8 @@
-FROM kkholst/stat:base
+FROM rocker/r-devel-ubsan-clang
 
-RUN install_packages tmux mg git && \
-    pip3 install cmake ninja
+RUN R -e \
+	'.libPaths("/usr/lib/R/library"); install.packages(c("devtools", "optimx", "futile.logger", "RcppArmadillo", "lava", "knitr", "testthat", "rmarkdown"))'
 
-COPY build/export /root/target
+WORKDIR /project
 
-WORKDIR /root/target
-
-CMD bash
+CMD RD CMD check --library=/usr/lib/R/library --as-cran targeted

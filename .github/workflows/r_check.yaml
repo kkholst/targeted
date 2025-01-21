@@ -1,49 +1,64 @@
-name: R tests
+# runs r cmd check + unit tests in inst/tinytest
+on:
+  pull_request:
+    branches: [main, develop]
 
-on: [push]
+name: r-cmd-check
 
 jobs:
-  r_targeted:
+  r-cmd-check:
+    runs-on: ${{ matrix.config.os }}
+
+    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+
     strategy:
       fail-fast: false
       matrix:
         config:
           - {os: ubuntu-latest,   r: 'release'}
 
-    runs-on: ${{ matrix.config.os }}
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+
     steps:
-      - name: Checkout repository incl. submodules
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-tinytex@v2
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: ${{ matrix.config.r }}
-      - uses: r-lib/actions/setup-tinytex@v2
-      - run: tlmgr --version
+          http-user-agent: ${{ matrix.config.http-user-agent }}
+          use-public-rspm: true
 
       - name: Install dependencies
         run: |
-          sudo apt-get install -y pandoc libcurl4-openssl-dev libharfbuzz-dev libfribidi-dev libfontconfig1-dev libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev
-      - name: Cache R packages
-        uses: actions/cache@v2
+          sudo apt-get install -y pandoc libcurl4-openssl-dev libharfbuzz-dev libfribidi-dev libpoppler-cpp-dev
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          path: |
-            ${{ env.R_LIBS_USER }}
-            !${{ env.R_LIBS_USER }}/pak
-          key: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-${{ hashFiles('.github/r-depends.rds') }}
-          restore-keys: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-
+          extra-packages: |
+            any::rcmdcheck
+            any::remotes
+            any::covr
+            any::pkgdown
+          needs: check
 
-      - name: Install dependencies
-        run: |
-          install.packages(c("remotes","covr","pkgdown","rcmdcheck"), repos="https://cloud.r-project.org")
-          remotes::install_deps("R-package/targeted", dep=T, upgrade=T)
-        shell: Rscript {0}
-      - name: Check
-        run: |
-          make r_check pkg=targeted
-      - name: Upload Coverage to Codecov
-        run: |
-          covr::codecov(path="R-package/targeted", type="all")
-        shell: Rscript {0}
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          upload-snapshots: true
+          # args: 'c("--ignore-vignettes")'
+          # build_args: 'c("--no-build-vignettes")'
 
+      - name: Webpage deployment
+        if: success() && contains('refs/heads/main', github.ref)
+        run: |
+          Rscript -e 'remotes::install_github("kkholst/targeted")'
+          git config --local user.name "$GITHUB_ACTOR"
+          git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          Rscript -e 'pkgdown::deploy_to_branch(new_process = FALSE)'
+
+      - name: Code Coverage
+        if: success() && contains('refs/heads/main', github.ref)
+        run: covr::codecov(type=c("tests", "examples"))
+        shell: Rscript {0}

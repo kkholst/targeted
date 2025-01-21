@@ -1,147 +1,160 @@
-# NOTE: Development has moved to https://github.com/kkholst/targeted 
+<!-- README.md is generated from README.Rmd. Please edit that file -->
 
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Build
-Status](https://github.com/kkholst/target/actions/workflows/target_check.yaml/badge.svg)](https://github.com/kkholst/target/actions/workflows/target_check.yaml)
-[![codecov](https://codecov.io/gh/kkholst/target/branch/develop/graph/badge.svg)](https://codecov.io/gh/kkholst/target)
-
-[![CRAN](https://www.r-pkg.org/badges/version-last-release/targeted)](https://CRAN.R-project.org/package=targeted)
-[![PyPIversion](https://badge.fury.io/py/targeted.svg)](https://badge.fury.io/py/targeted)
-[![RTD](https://readthedocs.org/projects/target/badge/?version=latest&style=flat)](https://target.readthedocs.io/en/latest/)
 
 
-# Introduction
-
-This library provides C++ classes for targeted inference
-and semi-parametric efficient estimators as
-well as bindings for python and R. The library also contains
-implementation of parametric models (including different discrete
-choice models) and model diagnostics tools.
-
-Relevant models includes binary regression models with binary exposure
-and with nuisance models defined by additional covariates. Models for
-the relative risk and risk differences where examined by (Richardson
-et al 2017). Various missing data estimators and causal inference models
-(Bang & Robins 2005, Tsiatis 2006) also fits into this framework.
-
-# Documentation
-
-The main documentation can be found here:
-https://targetlib.org/ ([PDF version](https://target.readthedocs.io/_/downloads/en/latest/pdf/))
+<!-- badges: start -->
+  [![R-CMD-check](https://github.com/kkholst/targeted/workflows/R-CMD-check/badge.svg?branch=master)](https://github.com/kkholst/targeted/actions)    
+  [![coverage](https://app.codecov.io/github/kkholst/targeted/coverage.svg?branch=main)](https://app.codecov.io/github/kkholst/targeted?branch=main)
+  [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/license/apache-2-0)
+  [![cran](https://www.r-pkg.org/badges/version-last-release/targeted)](https://cranlogs.r-pkg.org/downloads/total/last-month/targeted)
+<!-- badges: end -->
 
 
-## Examples
+# Targeted Inference in R: targeted <a href="https://kkholst.github.io/targeted/"><img src="man/figures/logo.svg" align="right" height="75" /></a>
 
-### R
-
-https://kkholst.github.io/targeted
-
-```r
-library('targeted')
-
-# Simulation
-m <- lvm(y[-2] ~ 1*x,
-         lp.target[1] ~ 1,
-         lp.nuisance[-1] ~ 2*x)
-distribution(m, ~a) <- binomial.lvm('logit')
-m <- binomial.rr(m, 'y', 'a', 'lp.target', 'lp.nuisance')
-dd <- sim(m, 5e2, seed=1)
-
-# Double-robust estimator
-summary(fit <- targeted::riskreg(y ~ a | 1 | x | x, data=dd, type="rr"))
-#
-#  Relative risk model
-#   Response:  y
-#   Exposure:  a
-#
-#             Estimate Std.Err    2.5%    97.5%   P-value
-# log(RR):
-#  (Intercept)  0.86136 0.11574  0.6345  1.08820 9.895e-14
-# log(OP):
-#  (Intercept) -0.88518 0.22802 -1.3321 -0.43827 1.036e-04
-#  x            2.35193 0.28399  1.7953  2.90854 1.213e-16
-# logit(Pr):
-#  (Intercept) -0.07873 0.08857 -0.2523  0.09485 3.740e-01
-#  x            0.02894 0.08291 -0.1336  0.19145 7.270e-01
-```
-
-### Python
-
-https://pypi.org/project/targeted/
-
-```python
-import targeted as tg
-from targeted.formula import riskreg
-
-d = tg.getdata()
-val = riskreg(d, 'y~a', interaction='x', nuisance='x+z')
-
-print(val)
-## Riskreg. Estimate: [ 1.17486406 -0.23623467]
-```
-
-### C++
-
-https://www.targetlib.org/cppapi/
-
-```cpp
-#include <target/target.h>
-using namespace arma;
-
-void main() {
-
-  ...
-
-  targeted::RR<double> model(y, a, x1, x2, x3, p, w);
-  mat pp0 = model.TargetedBinary::pa();
-  mat U = model.score(false);
-  mat res = model.est(alpha);
-}
-
-```
+Various methods for targeted and semiparametric inference including
+augmented inverse probability weighted estimators for missing data and
+causal inference (Bang and Robins (2005)
+<10.1111/j.1541-0420.2005.00377.x>) and estimators for risk
+differences and relative risks (Richardson et al. (2017)
+<10.1080/01621459.2016.1192546>).
 
 ## Installation
 
-This program may be compiled as a shared library or as stand-alone
-python and R libraries.
+You can install the released version of targeted from [CRAN](<https://CRAN.R-project.org>) with:
 
-To compile and run the unit tests:
-```
-make test
-```
 
-Syntax checks (requires ``cppcheck`` and ``cclint``), code coverage,
-and check for memory leaks
-```
-make check coverage
-make valgrind
+```r
+install.packages("targeted")
 ```
 
-### R
+And the development version from [GitHub](<https://github.com/>) with:
 
-The R package can be built and installed with
-```
-make r
-```
 
-### Python
-
-The python package can be installed directly from PyPi (wheels
-available for Mac OS X and Linux):
-```
-pip install targeted
-```
-or installed from source
-```
-make py
+```r
+# install.packages("devtools")
+remotes::install_github("kkholst/targeted")
 ```
 
-### Dependencies
+## Examples
 
-The following dependencies are included as submodules:
 
-1. Armadillo <http://arma.sourceforge.net/docs.html>
-2. doctest (unit tests only) <https://github.com/onqtam/doctest/>
-3. pybind11++ (python bindings only) <https://pybind11.readthedocs.io>
-4. spdlog (logging) <https://github.com/gabime/spdlog>
+### Targeted risk regression
+
+
+```r
+library(targeted)
+#> Loading required package: lava
+library(magrittr)
+```
+
+Simulate some data:
+
+
+```r
+m <- lvm() %>%
+    regression(a ~ x+z) %>%
+    regression(lp.target ~ 1) %>%
+    regression(lp.nuisance ~ x + z) %>%
+    distribution('a', binomial.lvm("logit")) %>%
+    binomial.rr('y', 'a', 'lp.target', 'lp.nuisance')
+
+par <- c('a'=-2, 'lp.target'=1, 'lp.nuisance'=-1, 'lp.nuisance~x'=2)
+d <- lava::sim(m, n=1e4, seed=1, p=par) %>%
+    subset(select=c('y', 'a','x','z'))
+
+head(d)
+#>   y a          x          z
+#> 1 0 0 -0.6264538 -0.8043316
+#> 2 0 0  0.1836433 -1.0565257
+#> 3 0 0 -0.8356286 -1.0353958
+#> 4 0 0  1.5952808 -1.1855604
+#> 5 1 0  0.3295078 -0.5004395
+#> 6 0 0 -0.8204684 -0.5249887
+```
+
+
+```r
+fit <- riskreg(y ~ a, nuisance=~x+z, data=d, type="rr")
+fit
+#>             Estimate Std.Err   2.5% 97.5%    P-value
+#> (Intercept)   0.9722 0.02896 0.9155 1.029 4.281e-247
+```
+
+Here the same design matrix is used for both the propensity model and
+the nuisance parameter (odds-product) model
+
+
+```r
+summary(fit)
+#> riskreg(formula = y ~ a, nuisance = ~x + z, data = d, type = "rr")
+#> 
+#> Relative risk model
+#>   Response:  y 
+#>   Exposure:  a 
+#> 
+#>              Estimate Std.Err    2.5%   97.5%    P-value
+#> log(RR):                                                
+#>  (Intercept)   0.9722 0.02896  0.9155  1.0290 4.281e-247
+#> log(OP):                                                
+#>  (Intercept)  -0.9636 0.06603 -1.0930 -0.8342  3.072e-48
+#>  x             2.0549 0.07901  1.9000  2.2098 4.182e-149
+#>  z             1.0329 0.06728  0.9010  1.1648  3.468e-53
+#> logit(Pr):                                              
+#>  (Intercept)  -1.9753 0.05631 -2.0856 -1.8649 1.284e-269
+#>  x             0.9484 0.04186  0.8664  1.0305 1.235e-113
+#>  z             1.0336 0.04878  0.9380  1.1292  1.187e-99
+```
+
+Double-robustness illustrated by using a wrong propensity
+model but a correct nuisance paramter (odds-product) model:
+
+
+```r
+riskreg(y ~ a, nuisance=~x+z, propensity=~z, data=d, type="rr")
+#>             Estimate Std.Err   2.5% 97.5%    P-value
+#> (Intercept)   0.9709 0.02893 0.9142 1.028 7.053e-247
+```
+
+Or vice-versa
+
+
+```r
+riskreg(y ~ a, nuisance=~z, propensity=~x+z, data=d, type="rr")
+#>             Estimate Std.Err   2.5% 97.5%    P-value
+#> (Intercept)   0.9931 0.03597 0.9226 1.064 8.286e-168
+```
+
+Whereas the MLE yields a biased estimate of the relative risk:
+
+
+```r
+fit_mle <- with(d, riskreg_mle(y, a, x1=model.matrix(~1,d), x2=model.matrix(~z, d)))
+estimate(fit_mle, 1)
+#>      Estimate Std.Err  2.5% 97.5% P-value
+#> [p1]    1.289 0.02855 1.233 1.345       0
+#> 
+#>  Null Hypothesis: 
+#>   [p1] = 0
+```
+
+To obtain an estimate of the risk-difference (here wrong model) we simply chance the `type` argument
+
+
+```r
+riskreg(y ~ a, nuisance=~x+z, data=d, type="rd")
+#>             Estimate Std.Err   2.5%  97.5%    P-value
+#> (Intercept)   0.5102 0.01613 0.4786 0.5418 1.135e-219
+```
+
+
+Interactions with the exposure can be examined with the `target` argument
+
+
+```r
+riskreg(y ~ a, target=a~x, nuisance=~x+z, data=d, type="rr")
+#>             Estimate Std.Err    2.5%    97.5%    P-value
+#> (Intercept)   1.0241 0.03659  0.9524  1.09584 1.986e-172
+#> x            -0.0825 0.03469 -0.1505 -0.01451  1.739e-02
+```
