@@ -11,11 +11,11 @@ knitr::opts_chunk$set(
 ```
 
 <!-- badges: start -->
-  [![travis](https://travis-ci.com/kkholst/targeted.svg?branch=main)](https://travis-ci.com/kkholst/targeted)
-
-[![codecov](https://codecov.io/gh/kkholst/targeted/branch/develop/graph/badge.svg)](https://codecov.io/gh/kkholst/targeted)   [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](
+[![r-cmd-check](https://github.com/kkholst/targeted/actions/workflows/r_check.yaml/badge.svg?branch=main)](https://github.com/kkholst/targeted/actions/workflows/r_check.yaml)
+[![codecov](https://codecov.io/github/kkholst/targeted/graph/badge.svg?token=MMSEDLWIZd)](https://codecov.io/github/kkholst/targeted)
+[![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](
   https://opensource.org/license/apache-2-0)
-  [![cran](https://www.r-pkg.org/badges/version-last-release/targeted)](https://cranlogs.r-pkg.org/downloads/total/last-month/targeted)
+[![cran](https://www.r-pkg.org/badges/version-last-release/targeted)](https://cranlogs.r-pkg.org/downloads/total/last-month/targeted)
 <!-- badges: end -->
 
 
