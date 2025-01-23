@@ -1,4 +1,4 @@
-##' @export
+#' @export
 predictor <- function(...) {
   ml_model$new(...)
 }
@@ -17,7 +17,7 @@ predictor_argument_description <- function(call) {
     return(desc)
   }
 
-##' @export
+#' @export
 predictor_glm <- function(formula,
                           info = "glm",
                           family = gaussian(),
@@ -45,7 +45,7 @@ predictor_glm <- function(formula,
   return(mod)
 }
 
-##' @export
+#' @export
 predictor_glmnet <- function(formula,
                              info = "glmnet",
                              family = gaussian(),
@@ -97,7 +97,7 @@ predictor_glmnet <- function(formula,
 
 
 
-##' @export
+#' @export
 predictor_hal <- function(formula,
                           info = "hal9001::fit_hal",
                           smoothness_orders = 0,
@@ -131,7 +131,7 @@ predictor_hal <- function(formula,
              )
 }
 
-##' @export
+#' @export
 predictor_gam <- function(formula,
                           info = "mgcv::gam",
                           family = gaussian(),
@@ -163,7 +163,7 @@ predictor_gam <- function(formula,
   return(mod)
 }
 
-##' @export
+#' @export
 predictor_isoreg <- function(formula,
                              info = "targeted::isoregw",
                              ...) {
@@ -186,59 +186,59 @@ predictor_isoreg <- function(formula,
   return(mod)
 }
 
-##' @export
-##' @title Superlearner (stacked/ensemble learner)
-##' @description This function creates a predictor object (class [ml_model])
-##'   from a list of existing [ml_model] objects. When estimating this model a
-##'   stacked prediction will be created by weighting together the predictions
-##'   of each of the initial models. The weights are learned using
-##'   cross-validation.
-##' @param model.list List of [ml_model] objects (i.e. [predictor_glm])
-##' @param info Optional model description to store in model object
-##' @param nfolds Number of folds to use in cross validation
-##' @param meta.learner meta.learner function (default non-negative least
-##'   squares). Must be a function of the response (nx1 vector), `y`, and the
-##'   predictions (nxp matrix), `pred`.
-##' @param model.score model scoring method (see [ml_model])
-##' @param ... additional argument to `superlearner`
-##' @aliases predictor_sl superlearner
-##' @references Luedtke & van der Laan (2016) Super-Learning of an Optimal
-##'   Dynamic Treatment Rule, The International Journal of Biostatistics.
-##' @seealso ml_model predictor_glm predictor_xgboost
-##' @examples
-##' sim1 <- function(n = 5e2) {
-##'    n <- 5e2
-##'    x1 <- rnorm(n, sd = 2)
-##'    x2 <- rnorm(n)
-##'    y <- x1 + cos(x1) + rnorm(n, sd = 0.5**.5)
-##'    d <- data.frame(y, x1, x2)
-##'    d
-##' }
-##' d <- sim1() |> mets::dsort(~x1)
-##'
-##' m <- list(
-##'   "mean" = predictor_glm(y ~ 1),
-##'   "glm" = predictor_glm(y ~ x1 + x2),
-##'   "iso" = predictor_isoreg(y ~ x1)
-##' )
-##'
-##' s <- predictor_sl(m, nfolds=10)
-##' s$estimate(d)
-##' pr <- s$predict(d)
-##' if (interactive()) {
-##'     plot(y ~ x1, data = d)
-##'     points(d$x1, pr, col = 2, cex = 0.5)
-##'     lines(cos(x1) + x1 ~ x1, data = d,
-##'           lwd = 4, col = lava::Col("darkblue", 0.3))
-##' }
-##' print(s)
-##' ## weights(s)
-##' ## score(s)
-##'
-##' cvres <- summary(s, data=d, nfolds=3, rep=2)
-##' cvres
-##' ## coef(cvres)
-##' ## score(cvres)
+#' @export
+#' @title Superlearner (stacked/ensemble learner)
+#' @description This function creates a predictor object (class [ml_model])
+#'   from a list of existing [ml_model] objects. When estimating this model a
+#'   stacked prediction will be created by weighting together the predictions
+#'   of each of the initial models. The weights are learned using
+#'   cross-validation.
+#' @param model.list List of [ml_model] objects (i.e. [predictor_glm])
+#' @param info Optional model description to store in model object
+#' @param nfolds Number of folds to use in cross validation
+#' @param meta.learner meta.learner function (default non-negative least
+#'   squares). Must be a function of the response (nx1 vector), `y`, and the
+#'   predictions (nxp matrix), `pred`.
+#' @param model.score model scoring method (see [ml_model])
+#' @param ... additional argument to `superlearner`
+#' @aliases predictor_sl superlearner
+#' @references Luedtke & van der Laan (2016) Super-Learning of an Optimal
+#'   Dynamic Treatment Rule, The International Journal of Biostatistics.
+#' @seealso ml_model predictor_glm predictor_xgboost
+#' @examples
+#' sim1 <- function(n = 5e2) {
+#'    n <- 5e2
+#'    x1 <- rnorm(n, sd = 2)
+#'    x2 <- rnorm(n)
+#'    y <- x1 + cos(x1) + rnorm(n, sd = 0.5**.5)
+#'    d <- data.frame(y, x1, x2)
+#'    d
+#' }
+#' d <- sim1() |> mets::dsort(~x1)
+#'
+#' m <- list(
+#'   "mean" = predictor_glm(y ~ 1),
+#'   "glm" = predictor_glm(y ~ x1 + x2),
+#'   "iso" = predictor_isoreg(y ~ x1)
+#' )
+#'
+#' s <- predictor_sl(m, nfolds=10)
+#' s$estimate(d)
+#' pr <- s$predict(d)
+#' if (interactive()) {
+#'     plot(y ~ x1, data = d)
+#'     points(d$x1, pr, col = 2, cex = 0.5)
+#'     lines(cos(x1) + x1 ~ x1, data = d,
+#'           lwd = 4, col = lava::Col("darkblue", 0.3))
+#' }
+#' print(s)
+#' ## weights(s)
+#' ## score(s)
+#'
+#' cvres <- summary(s, data=d, nfolds=3, rep=2)
+#' cvres
+#' ## coef(cvres)
+#' ## score(cvres)
 predictor_sl <- function(model.list,
                          info = NULL,
                          nfolds = 5L,
@@ -286,12 +286,12 @@ predictor_sl <- function(model.list,
   return(mod)
 }
 
-##' @export
+#' @export
 weights.predictor_sl <- function(object, ...) {
   return(object$fit$weights)
 }
 
-##' @export
+#' @export
 score.predictor_sl <- function(x, ...) {
   return(x$fit$model.score)
 }
@@ -311,7 +311,7 @@ score_sl <- function(response, prediction, weights, object, newdata, ...) {
     c(res, w)
 }
 
-##' @export
+#' @export
 summary.predictor_sl <- function(object, data, nfolds = 5, rep = 1, ...) {
   res <- cv(list("performance"=object),
       data = data,
@@ -321,7 +321,7 @@ summary.predictor_sl <- function(object, data, nfolds = 5, rep = 1, ...) {
   res
 }
 
-##' @export
+#' @export
 predictor_xgboost <-
   function(formula,
            max_depth = 2L,
@@ -374,27 +374,27 @@ predictor_xgboost <-
     return(mod)
   }
 
-##' @export
+#' @export
 predictor_xgboost_multiclass <- function(formula, ...) {
   predictor_xgboost(formula, ..., objective="multi:softprob")
 }
 
-##' @export
+#' @export
 predictor_xgboost_binary <- function(formula, ...) {
   predictor_xgboost(formula, ..., objective="reg:logistic")
 }
 
-##' @export
+#' @export
 predictor_xgboost_count <- function(formula, ...) {
   predictor_xgboost(formula, ..., objective="count:poisson")
 }
 
-##' @export
+#' @export
 predictor_xgboost_cox <- function(formula, ...) {
   predictor_xgboost(formula, ..., objective="survival:cox")
 }
 
-##' @export
+#' @export
 predictor_grf <- function(formula,
                           num.trees = 2000,
                           min.node.size = 5,
@@ -422,7 +422,7 @@ predictor_grf <- function(formula,
 }
 
 
-##' @export
+#' @export
 predictor_grf_binary <- function(formula,
                                  ...) {
   predictor_grf(formula,
@@ -432,29 +432,29 @@ predictor_grf_binary <- function(formula,
 }
 
 
-##' ML model
-##'
-##' Wrapper for ml_model
-##' @export
-##' @param formula formula
-##' @param model model (sl, rf, pf, glm, ...)
-##' @param ... additional arguments to model object
-##' @details
-##' model 'sl' (SuperLearner::SuperLearner)
-##' args: SL.library, cvControl, family, method
-##' example:
-##'
-##' model 'grf' (grf::regression_forest)
-##' args: num.trees, mtry, sample.weights, sample.fraction, min.node.size, ...
-##' example:
-##'
-##' model 'grf.binary' (grf::probability_forest)
-##' args: num.trees, mtry, sample.weights, ...
-##' example:
-##'
-##' model 'glm'
-##' args: family, weights, offset, ...
-##'
+#' ML model
+#'
+#' Wrapper for ml_model
+#' @export
+#' @param formula formula
+#' @param model model (sl, rf, pf, glm, ...)
+#' @param ... additional arguments to model object
+#' @details
+#' model 'sl' (SuperLearner::SuperLearner)
+#' args: SL.library, cvControl, family, method
+#' example:
+#'
+#' model 'grf' (grf::regression_forest)
+#' args: num.trees, mtry, sample.weights, sample.fraction, min.node.size, ...
+#' example:
+#'
+#' model 'grf.binary' (grf::probability_forest)
+#' args: num.trees, mtry, sample.weights, ...
+#' example:
+#'
+#' model 'glm'
+#' args: family, weights, offset, ...
+#'
 ML <- function(formula, model="glm", ...) {
   model <- tolower(model)
   dots <- list(...)

@@ -1,23 +1,23 @@
-##' Naive Bayes Classifier
-##'
-##' @title Naive Bayes
-##' @param formula Formula with syntax: response ~ predictors | weights
-##' @param data data.frame
-##' @param weights optional frequency weights
-##' @param kernel If TRUE a kernel estimator is used for numeric predictors (otherwise a gaussian model is used)
-##' @param laplace.smooth Laplace smoothing
-##' @param prior optional prior probabilities (default estimated from data)
-##' @param ... additional arguments to lower level functions
-##' @aliases NB NB2
-##' @export
-##' @return An object of class '\code{NB}' is returned. See
-##'   \code{\link{NB-class}} for more details about this class and
-##'   its generic functions.
-##' @author Klaus K. Holst
-##' @examples
-##' data(iris)
-##' m2 <- NB(Species ~ Sepal.Width + Petal.Length, data=iris)
-##' pr2 <- predict(m2, newdata=iris)
+#' Naive Bayes Classifier
+#'
+#' @title Naive Bayes
+#' @param formula Formula with syntax: response ~ predictors | weights
+#' @param data data.frame
+#' @param weights optional frequency weights
+#' @param kernel If TRUE a kernel estimator is used for numeric predictors (otherwise a gaussian model is used)
+#' @param laplace.smooth Laplace smoothing
+#' @param prior optional prior probabilities (default estimated from data)
+#' @param ... additional arguments to lower level functions
+#' @aliases NB NB2
+#' @export
+#' @return An object of class '\code{NB}' is returned. See
+#'   \code{\link{NB-class}} for more details about this class and
+#'   its generic functions.
+#' @author Klaus K. Holst
+#' @examples
+#' data(iris)
+#' m2 <- NB(Species ~ Sepal.Width + Petal.Length, data=iris)
+#' pr2 <- predict(m2, newdata=iris)
 NB <- function(formula, data, weights=NULL,
        kernel=FALSE, laplace.smooth=0, prior=NULL, ...) {
     if (missing(data)) stop("Need data as data.frame or data.table")

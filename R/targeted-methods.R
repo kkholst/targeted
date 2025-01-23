@@ -30,30 +30,30 @@
 NULL
 
 
-##' @export
+#' @export
 print.targeted <- function(x, ...) {
     print(x$estimate, ...)
 }
 
-##' @export
+#' @export
 print.summary.targeted <- function(x, ...) {
     print(x$call)
     cat("\n")
     print(x$estimate, ...)
 }
 
-##' @export
+#' @export
 summary.targeted <- function(object, ...) {
   structure(list(estimate=object$estimate, call=object$call),
             class="summary.targeted")
 }
 
-##' @export
+#' @export
 IC.targeted <- function(x, ...) {
     lava::IC(x$estimate, ...)
 }
 
-##' @export
+#' @export
 logLik.targeted <- function(object, ...) {
     val <- object$logLik
     if (is.null(val)) return(NULL)
@@ -61,12 +61,12 @@ logLik.targeted <- function(object, ...) {
               class="logLik")
 }
 
-##' @export
+#' @export
 vcov.targeted <- function(object, ...) {
     vcov(object$estimate, ...)
 }
 
-##' @export
+#' @export
 coef.targeted <- function(object, ...) {
     coef(object$estimate, ...)
 }
