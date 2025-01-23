@@ -1,6 +1,9 @@
 name: target library (cpp) tests
 
-on: [push]
+on:
+  pull_request:
+    branches: [dev]
+    types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
 
