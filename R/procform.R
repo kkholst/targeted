@@ -1,5 +1,5 @@
 procform <- function(formula=NULL, sep="\\|", nsep=1, return.formula=FALSE, data=NULL,
-             no.match=TRUE, regex=FALSE, return.list=TRUE, specials=NULL, ...) {# {{{
+             no.match=TRUE, regex=FALSE, return.list=TRUE, specials=NULL, ...) {
     res <- NULL
     if (is.null(formula)) {
         res <- colnames(data)
