@@ -1,13 +1,12 @@
 ^.github$
-^.lintr$
+^\.git$
 ^.gitignore$
+^.editorconfig$
+^.lintr$
+^CPPLINT.cfg$
 ^Dockerfile$
 ^Makefile$
-^LICENSE$
-^dependencies$
 ^tmp$
-^\.travis\.yml$
-^\.git$
 ^Makefile$
 ^src/target/lib$
 ^README\.Rmd$
@@ -17,7 +16,6 @@
 ^doc$
 ^Meta$
 ^_pkgdown\.yml$
-^docs$
-^pkgdown$
+^.codecov.yml
 ^.*\.Rproj$
 ^\.Rproj\.user$
