@@ -72,5 +72,28 @@ test_cate_deprecated_arguments <- function() {
     pattern = "Use `cate.model` instead."
   )
   expect_equivalent(parameter(e1)[1:2], parameter(aa3)["E[y(1)]", 1:2])
+
+  # user is informed when deprecated treatment argument is used
+  expect_warning(aa4 <- cate(
+    response.model = ML(qmod),
+    propensity.model = ML(a ~ x, family = binomial),
+    treatment = ~ 1,
+    data = d) |> estimate(),
+    pattern = "The `treatment` argument"
+  )
+  expect_equivalent(parameter(e1)[1:2], parameter(aa4)["E[y(1)]", 1:2])
+
+  # function fails when old treatment arg and new cate.model arg are used
+  # together
+  expect_error(
+    suppressWarnings( # suppress deprecating warning of cate_model arg
+      cate(
+        response.model = ML(qmod),
+        propensity.model = ML(a ~ x, family = binomial),
+        cate_model = ~ 2,
+        treatment = ~ 1,
+        data = d)
+    ), pattern = "Calling `cate` with both the obsolete"
+  )
 }
 test_cate_deprecated_arguments()

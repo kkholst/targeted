@@ -146,7 +146,8 @@ cate <- function(response.model,
   deprecate_argument("cate_model", "cate.model")
 
   if ("treatment" %in% names(dots)) { ## Backward compatibility
-    if (!is.null(cate.model)) { # FIXME: always TRUE because of default value
+    # ~1 is current default value of cate.model
+    if (!isTRUE(all.equal(cate.model, ~1))) {
       stop(
         "Calling `cate` with both the obsolete 'treatment'",
         " and the new 'cate.model' argument"
@@ -156,6 +157,8 @@ cate <- function(response.model,
     if (missing(propensity.model)) {
       propensity.model <- lava::getoutcome(cate.model)
     }
+    deprecate_argument("treatment", "cate.model") # only used to inform user
+    # that treatment argument is deprecated
   }
 
   if (is.character(propensity.model)) {
@@ -393,4 +396,3 @@ cate <- function(response.model,
   class(res) <- c("cate.targeted", "targeted")
   return(res)
 }
-
