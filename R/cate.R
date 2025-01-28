@@ -297,7 +297,6 @@ cate <- function(response.model,
       return(res)
     }
     if (!is.null(mc.cores)) {
-      browser()
       val <- parallel::mclapply(1:rep, f,
         mc.cores = mc.cores
       )
