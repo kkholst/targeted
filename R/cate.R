@@ -154,11 +154,14 @@ cate <- function(response.model,
       )
     }
     cate.model <- dots$treatment
-    if (missing(propensity.model)) {
-      propensity.model <- lava::getoutcome(cate.model)
-    }
     deprecate_argument("treatment", "cate.model") # only used to inform user
     # that treatment argument is deprecated
+  }
+  if (missing(propensity.model)) {
+    propensity.model <- lava::getoutcome(cate.model)
+  }
+  if (length(propensity.model) == 0) {
+    stop("Empty `propensity.model`")
   }
 
   if (is.character(propensity.model)) {
