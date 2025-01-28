@@ -6,10 +6,7 @@ a <- rbinom(n, 1, expit(1 + x))
 y <- 1 + a + x - a * x + rnorm(n)
 d <- data.frame(y = y, a = a, x = x)
 
-simcate <- function(qmod) {
-  q1 <- predict(lm(qmod, data = d),
-    newdata = transform(d, a = 1)
-  )
+true_estimate1 <- function(q1) {
   g <- glm(a ~ x, data = d, family = binomial)
   pi <- predict(g, type = "response")
   ic0 <- with(d, a / pi * (y - q1) + q1)
@@ -21,7 +18,14 @@ simcate <- function(qmod) {
   E1 <- colMeans(cbind(D, D * x))
   ic1 <- IC(g) %*% E1
   ic <- ic0 + ic1
-  e1 <- estimate(coef = est, IC = ic)
+  return(estimate(coef = est, IC = ic))
+}
+
+simcate <- function(qmod) {
+  q1 <- predict(lm(qmod, data = d),
+    newdata = transform(d, a = 1)
+  )
+  e1 <- true_estimate1(q1)
 
   aa <- cate(
     ML(qmod),
@@ -36,3 +40,37 @@ simcate <- function(qmod) {
 }
 simcate(y ~ a * x) # cate: correct q-model
 simcate(y ~ a + x) # cate: mis-specified q-model
+
+
+test_cate_deprecated_arguments <- function() {
+  qmod <- y ~ a * x
+  q1 <- predict(lm(qmod, data = d), newdata = transform(d, a = 1))
+  e1 <- true_estimate1(q1)
+  # use deprecated argument names to verify that cate continues to work as
+  # expected
+  expect_warning(aa1 <- cate(
+    response_model = ML(qmod),
+    propensity.model = ML(a ~ x, family = binomial),
+    data = d) |> estimate(),
+    pattern = "Use `response.model` instead."
+  )
+  expect_equivalent(parameter(e1)[1:2], parameter(aa1)["E[y(1)]", 1:2])
+
+  expect_warning(aa2 <- cate(
+    response.model = ML(qmod),
+    propensity_model = ML(a ~ x, family = binomial),
+    data = d) |> estimate(),
+    pattern = "Use `propensity.model` instead."
+  )
+  expect_equivalent(parameter(e1)[1:2], parameter(aa2)["E[y(1)]", 1:2])
+
+  expect_warning(aa3 <- cate(
+    response.model = ML(qmod),
+    propensity.model = ML(a ~ x, family = binomial),
+    cate_model = ~ 1,
+    data = d) |> estimate(),
+    pattern = "Use `cate.model` instead."
+  )
+  expect_equivalent(parameter(e1)[1:2], parameter(aa3)["E[y(1)]", 1:2])
+}
+test_cate_deprecated_arguments()
