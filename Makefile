@@ -46,6 +46,7 @@ check:
 lint:
 	@echo 'devtools::lint(".")' | $(R)
 
+test: test-installed
 test-installed: # tests locally installed version package
 	@echo 'tinytest::test_package("$(PKG)")' | $(R)
 
