@@ -16,7 +16,12 @@ easier for us maintainers and smooth out the experience for all involved.
 
 ## Branches and branch prefixes
 
-We currently maintain a single active development branch `develop`.
+The package is developed on `dev` while the latest stable release is made
+available on `main`. Releases follow a frequency of about 12 weeks, except for
+hotfixes or when larger features become available. All feature branches should
+be created of `dev`. Branches containing hotfixes should contrary be created of
+`main` to avoid merging unfinished features from `dev` into `main`.
+
 
 ### Branch prefixes
 
@@ -31,12 +36,12 @@ prefix and hyphens (-) are used for separation. For example,
 
 ### Pull requests
 
-All pull requests (PRs) must be made on `develop`.
+All pull requests (PRs) must be made on `dev`.
 The title of the PR should follow the format of
 [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) and a
 summary of the proposed changes must be provided in the body of the PR. This
 makes it easier for maintainers as title and body can be reused once all commits
-are squashed before merging the feature branch into `develop`.
+are squashed before merging the feature branch into `dev`.
 
 ## Continuous integration
 
