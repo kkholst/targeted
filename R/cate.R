@@ -128,7 +128,7 @@ cate <- function(response.model,
   deprecate_argument <- function(old.name, new.name) {
     if (old.name %in% names(dots)) {
       warning("The `", old.name, "` argument of `cate()` is deprecated and",
-      " will be removed in targeted 0.9. Use `", new.name, "` instead.",
+      " will be removed in targeted 1.0. Use `", new.name, "` instead.",
       call. = FALSE
       )
       # if both old and new arguments are supplied, the
