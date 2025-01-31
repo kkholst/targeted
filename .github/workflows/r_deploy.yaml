@@ -53,7 +53,7 @@ jobs:
 
       - name: Setting up R repository
         run: |
-          echo 'drat::insertPackage(action="archive", repodir="www/pkg", file=paste0(tmp/", list.files(tmp/", "gz$")))' | R --no-save --no-restore --silent
+          echo 'drat::insertPackage(action="archive", repodir="www/pkg", file=paste0("tmp/", list.files("tmp/", "gz$")))' | R --no-save --no-restore --silent
 
       - name: Deploy
         run: |
