@@ -70,7 +70,7 @@ c1 <- calibration(p1, d0$y, breaks=100)
 if (interactive()) {
   plot(c1)
   plot(c2,col="red",add=TRUE)
-  abline(a=0,b=1)##'
+  abline(a=0,b=1)#'
   with(c1$xy[[1]], points(pred,freq,type="b", col="red"))
 }
 
@@ -83,7 +83,7 @@ cal <- calibration(p1, dd[[2]]$y)
 p2 <- predict(mod, newdata=dd[[3]])
 pp <- predict(c1, p2)
 cc <- calibration(pp, dd[[3]]$y)
-if (interactive()) {##'
+if (interactive()) {#'
   plot(cal)
   plot(cc, add=TRUE, col="blue")
 }

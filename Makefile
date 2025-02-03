@@ -2,6 +2,7 @@ PKG ?= targeted
 R = R --silent --no-save --no-echo
 BUILD_DIR = build
 GETVER = $(shell cat DESCRIPTION | grep Version | cut -d":" -f2 | tr -d '[:blank:]')
+make_build_dir = rm -Rf $(BUILD_DIR) && mkdir -p $(BUILD_DIR)
 
 default: check
 
@@ -25,17 +26,17 @@ clean:
 
 .PHONY: build
 build:
-	@rm -Rf $(BUILD_DIR) && mkdir -p $(BUILD_DIR)
+	@$(make_build_dir)
 	@echo 'pkgbuild::build(path=".", dest_path="$(BUILD_DIR)", args="--compact-vignettes=qpdf --resave-data=best")' | $(R)
 
 install:
-	@echo 'devtools::install("$(pkg)", upgrade = "never")' | $(R)
+	@echo 'devtools::install(".", upgrade = "never")' | $(R)
 
 dependencies-install:
-	@echo 'devtools::install_deps("$(pkg)", dependencies = TRUE)' | $(R)
+	@echo 'devtools::install_deps(".", dependencies = TRUE)' | $(R)
 
 dependencies-upgrade:
-	@echo 'devtools::install("$(pkg)", upgrade = "always")' | $(R)
+	@echo 'devtools::install(".", upgrade = "always")' | $(R)
 
 check-cran: build
 	@$(R) CMD check build/$(PKG)_$(GETVER).tar.gz --timings --as-cran --no-multiarch --run-donttest
@@ -56,3 +57,9 @@ test-loadall:
 coverage:
 	@echo 'covr::report(file="tests/coverage-report.html")' | $(R)
 	@open tests/coverage-report.html
+
+.PHONY: man
+man:
+	@$(make_build_dir)
+	@echo 'devtools::build_manual(".", path = "$(BUILD_DIR)")' | $(R)
+	@open build/$(PKG)_$(GETVER).pdf

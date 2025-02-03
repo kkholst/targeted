@@ -69,7 +69,9 @@ under right censoring based on plug-in estimates of \eqn{P(T \leq \tau|A=a)} and
 An efficient one-step estimator of \eqn{P(T \leq \tau|A=a)} is constructed using
 the efficient influence function
 \deqn{
-\frac{I\{A=a\}}{P(A = a)} \Big(\frac{\Delta}{S^c_{0}(\tilde T|X)} I\{\tilde T \leq \tau\} + \int_0^\tau \frac{S_0(u|X)-S_0(\tau|X)}{S_0(u|X)S^c_0(u|X)} d M^c_0(u|X))\Big)\\
+\frac{I\{A=a\}}{P(A = a)} \Big(\frac{\Delta}{S^c_{0}(\tilde T|X)} I\{\tilde T \leq \tau\} + \int_0^\tau \frac{S_0(u|X)-S_0(\tau|X)}{S_0(u|X)S^c_0(u|X)} d M^c_0(u|X)\Big)
+}
+\deqn{
 + \Big(1 - \frac{I\{A=a\}}{P(A = a)}\Big)F_0(\tau|A=a, W) - P(T \leq \tau|A=a).
 }
 An efficient one-step estimator of \eqn{E[D|A=1]} is constructed using the efficient influence function
