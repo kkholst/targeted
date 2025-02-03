@@ -1,9 +1,10 @@
 # runs r cmd check + unit tests in inst/tinytest
+name: r-cmd-check
+
 on:
   pull_request:
-    branches: [main, develop]
-
-name: r-cmd-check
+    branches: [dev]
+    types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
   r-cmd-check:
