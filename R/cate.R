@@ -125,17 +125,43 @@ cate <- function(response.model,
   dots <- list(...)
   n <- nrow(data)
 
+  deprecate_argument <- function(old.name, new.name) {
+    if (old.name %in% names(dots)) {
+      warning("The `", old.name, "` argument of `cate()` is deprecated and",
+      " will be removed in targeted 1.0. Use `", new.name, "` instead.",
+      call. = FALSE
+      )
+      # if both old and new arguments are supplied, the
+      # old argument takes priority over the new one. this is unlikely to happen
+      assign(new.name, value = dots[[old.name]], envir = parent.frame())
+      # old argument needs to be removed from dots because parallel::mcmapply
+      # expects ... to be a vector or list inputs. thus tries to replicate
+      # the argument n times. Does not affect paralle::mclapply
+      dots[[old.name]] <<- NULL
+    }
+  }
+
+  deprecate_argument("response_model", "response.model")
+  deprecate_argument("propensity_model", "propensity.model")
+  deprecate_argument("cate_model", "cate.model")
+
   if ("treatment" %in% names(dots)) { ## Backward compatibility
-    if (!is.null(cate.model)) {
+    # ~1 is current default value of cate.model
+    if (!isTRUE(all.equal(cate.model, ~1))) {
       stop(
         "Calling `cate` with both the obsolete 'treatment'",
         " and the new 'cate.model' argument"
       )
     }
     cate.model <- dots$treatment
-    if (missing(propensity.model)) {
-      propensity.model <- lava::getoutcome(cate.model)
-    }
+    deprecate_argument("treatment", "cate.model") # only used to inform user
+    # that treatment argument is deprecated
+  }
+  if (missing(propensity.model)) {
+    propensity.model <- lava::getoutcome(cate.model)
+  }
+  if (length(propensity.model) == 0) {
+    stop("Empty `propensity.model`")
   }
 
   if (is.character(propensity.model)) {
@@ -213,9 +239,9 @@ cate <- function(response.model,
         treatment_var = treatment_var,
         data = data, folds = folds,
         stratify = stratify
-      ),
-      ...
+      )
     )
+    myargs <- c(myargs, dots)
     if (!is.null(mc.cores)) {
       myargs$mc.cores <- ifelse(rep == 1, mc.cores, 1)
       val <- do.call(parallel::mcmapply, myargs)
@@ -272,7 +298,7 @@ cate <- function(response.model,
     }
     if (!is.null(mc.cores)) {
       val <- parallel::mclapply(1:rep, f,
-        mc.cores = mc.cores, ...
+        mc.cores = mc.cores
       )
     } else {
       myargs <- list(X=1:rep, FUN=f, ...)
@@ -372,4 +398,3 @@ cate <- function(response.model,
   class(res) <- c("cate.targeted", "targeted")
   return(res)
 }
-

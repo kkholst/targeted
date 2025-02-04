@@ -1,15 +1,15 @@
-##' Naive Bayes Classifier predictions
-##' @title Predictions for Naive Bayes Classifier
-##' @param object density object
-##' @param newdata new data on which to make predictions
-##' @param expectation Variable to calculate conditional expectation wrt
-##' probabilities from NB classifier
-##' @param threshold Threshold parameters. First element defines the threshold
-##' on the probabilities and the second element the value to set those
-##' truncated probabilities to.
-##' @param ... Additional arguments to lower level functions
-##' @export
-##' @author Klaus K. Holst
+#' Naive Bayes Classifier predictions
+#' @title Predictions for Naive Bayes Classifier
+#' @param object density object
+#' @param newdata new data on which to make predictions
+#' @param expectation Variable to calculate conditional expectation wrt
+#' probabilities from NB classifier
+#' @param threshold Threshold parameters. First element defines the threshold
+#' on the probabilities and the second element the value to set those
+#' truncated probabilities to.
+#' @param ... Additional arguments to lower level functions
+#' @export
+#' @author Klaus K. Holst
 predict.NB <- function(object, newdata, expectation=NULL,
                        threshold=c(1e-3, 1e-3), ...) {
     if (missing(newdata)) stop("Need new data to make predictions")
