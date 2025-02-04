@@ -83,17 +83,11 @@ uninstall:
 
 .PHONY: doc
 doc:
-	@cd doc; $(MAKE) html
+	@cd doc; doxygen
 	@cd doc/latex; $(MAKE)
-
-html:
-	@cd doc; $(MAKE) html
-
-docs:
-	sphinx-autobuild --open-browser doc/source doc/build
+	$(OPEN) doc/html/index.html
 
 cleandoc:
-	@cd doc; $(MAKE) clean
 	@rm -Rf doc/latex doc/html doc/xml
 
 markdown:

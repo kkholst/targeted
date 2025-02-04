@@ -81,6 +81,20 @@ expect_equal(output, 2)
 More information about unit testing with **tinytest** is provided in this
 [vignette](https://cran.r-project.org/web/packages/tinytest/vignettes/using_tinytest.pdf).
 
+C++ tests are located in the subdirectory `./src/target/tests`
+using [doctest](https://github.com/doctest/doctest)
+
+## Documentation
+
+The C++ code is documented using Doxygen.
+- http://www.doxygen.nl/manual/
+- http://www.doxygen.nl/manual/commands.html
+
+The R code is documented using roxygen2
+https://cran.r-project.org/web/packages/roxygen2/vignettes/roxygen2.html
+
+Longer documentation are written as R vignettes.
+
 ## Attribution
 
 This guide is based on the **contributing.md**.
