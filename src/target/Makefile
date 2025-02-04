@@ -40,9 +40,7 @@ cleansrc:
 
 clean: cleansrc
 
-cleanall: cleansrc py_clean cleandoc
-	@$(MAKE) pkg=gof r_clean
-	@$(MAKE) pkg=targeted r_clean
+cleanall: cleansrc cleandoc
 
 init: cleansrc
 	@echo "Build options: $(BUILD)"
@@ -80,105 +78,6 @@ uninstall:
 	$(NINJA) -C $(BUILD_DIR) uninstall
 
 ##################################################
-## R package
-##################################################
-r_build: r_clean
-	@$(R) --slave -e "source('config/utilities.R'); \
-	load_packages(c('Rcpp', 'RcppArmadillo', 'lava', 'optimx', 'futile.logger'))"
-	@$(R) --slave -e "Rcpp::compileAttributes('R-package/${pkg}')"
-	@$(R) CMD INSTALL R-package/${pkg}
-
-
-# use tinytest::test_package to achieve identical unit testing behave for this
-# rule and the r_check rule
-r_test: r_build
-	@echo 'tinytest::test_package("targeted")' | $(R)
-
-r_test_loadall:
-	@echo 'devtools::load_all("R-package/${pkg}"); tinytest::test_all("R-package/${pkg}/")' | $(R)
-
-r_lint:
-	@echo 'devtools::lint("./R-package/$(pkg)")' | $(R)
-
-r_run:
-	@cd misc; $(R) --silent -f $(TESTR).R
-
-r_doc:
-	@$(R) -e 'roxygen2::roxygenize("R-package/${pkg}")'
-roxygen: r_doc
-
-dep_file = R-package/${pkg}/src/dependencies
-pkg_dep := $(shell if [ -f "$(dep_file)" ]; then cat ${dep_file}; fi)
-pkg_cpp = $(foreach module, ${pkg_dep}, $(patsubst %, src/%.cpp, $(module)))
-pkg_hpp = $(foreach module, $(pkg_dep), $(patsubst %, include/target/%.hpp, $(module)))
-
-r_export:
-	@rm -Rf $(BUILD_DIR)/R/$(pkg)
-	@mkdir -p $(BUILD_DIR)/R/$(pkg)
-	cd R-package/${pkg}; $(GIT) archive HEAD | (cd ../../$(BUILD_DIR)/R/$(pkg); tar x )
-	@if [ -z "$(pkg_dep)" ]; then \
-	cp src/*.cpp $(BUILD_DIR)/R/$(pkg)/src; \
-	cp -a include/target $(BUILD_DIR)/R/$(pkg)/inst/include/; \
-	else \
-	cp $(pkg_cpp) $(BUILD_DIR)/R/$(pkg)/src; \
-	mkdir -p $(BUILD_DIR)/R/$(pkg)/inst/include/target; \
-	cp $(pkg_hpp) $(BUILD_DIR)/R/$(pkg)/inst/include/target; \
-	fi
-	sed -i $(SED_NOBACKUP) '/^OBJECTS/d' $(BUILD_DIR)/R/$(pkg)/src/Makevars
-	sed -i $(SED_NOBACKUP) '/^SOURCES/d' $(BUILD_DIR)/R/$(pkg)/src/Makevars
-
-r_crancheck: r_export
-	@$(R) --slave -e "source('config/utilities.R'); \
-	load_packages(c('devtools'))"
-	@$(R) -e "pkgbuild::build('$(BUILD_DIR)/R/$(pkg)', args='--compact-vignettes=qpdf --resave-data=best')"
-	cd $(BUILD_DIR)/R; $(R) CMD check `$(GETVER) $(pkg)` --timings --as-cran --no-multiarch --run-donttest
-
-r_check: r_export
-	@$(R) --slave -e "Rcpp::compileAttributes('R-package/${pkg}')"
-	@echo 'rcmdcheck::rcmdcheck("build/R/targeted", build_args=c("--no-build-vignettes"), args=c("--ignore-vignettes", "--no-multiarch"))' | $(R)
-
-r: r_build r_run
-
-r_clean:
-	@rm -Rf R-package/${pkg}/src/*.o R-package/${pkg}/src/*.so R-package/${pkg}.Rcheck
-
-r_sync: r_export
-	@if [ -d "../$(pkg)" ]; then \
-	cp -rfv $(BUILD_DIR)/R/$(pkg)/.	 ../$(pkg)/; fi
-
-##################################################
-## Python package
-##################################################
-py_build:
-	@cd python-package/$(pkg); $(PYTHON) setup.py install
-
-py_test:
-	@cd python-package/$(pkg); $(MAKE) test
-
-py_run:
-	@$(PYTHON) misc/$(TESTPY).py
-
-py: py_build py_run
-
-PYTHON_EXPORT = $(BUILD_DIR)/python/$(pkg)
-PYTHON_EXPORT_LIBS = $(foreach file, target-cpp target-inc doctest armadillo pybind11, \
-	$(patsubst %, $(PYTHON_EXPORT)/lib/%, $(file)))
-
-py_export: cleansrc py_clean
-	@rm -Rf $(PYTHON_EXPORT); mkdir -p $(PYTHON_EXPORT)
-	@cd python-package/$(pkg); $(GIT) archive HEAD | (cd ../../$(PYTHON_EXPORT); tar x)
-	@rm -Rf $(PYTHON_EXPORT_LIBS)
-	@cp -a src $(PYTHON_EXPORT)/lib/target-cpp
-	@cp -a include $(PYTHON_EXPORT)/lib/target-inc
-	@cp -a lib/armadillo $(PYTHON_EXPORT)/lib
-	@cp -a lib/doctest $(PYTHON_EXPORT)/lib
-	@cp -a lib/pybind11 $(PYTHON_EXPORT)/lib
-	@echo "Python package exported to: ${PYTHON_EXPORT}"
-
-py_clean:
-	@cd python-package/$(pkg); $(MAKE) --no-print-directory clean
-
-##################################################
 ## Documentation
 ##################################################
 
@@ -210,9 +109,6 @@ t: checkinit run
 
 test: checkinit build
 	$(BUILD_DIR)/$(TARGET)_test -s
-
-testall: test r py r_test py_test
-
 ##################################################
 ## Code coverage
 ##################################################
