@@ -22,10 +22,46 @@ knitr::opts_chunk$set(
  #dev="png",
  comment = "#>"
 )
-library(targeted)
+library("targeted")
 ```
 
 # Introduction
+
+```{r data}
+data(pbc, package="survival")
+```
+
+Describe Mayo Clinic Primary Biliary Cholangitis Data...
+
+In the following we are interested in predicting events (death or transplant)
+before 2 years.
+
+```{r}
+pbc <- transform(pbc, y = (time < 730) * (status > 0))
+```
+
+
+```{r}
+m0 <- predictor_glm(y ~ 1)
+m1 <- predictor_glm(y ~ age + sex + bili + edema + albumin)
+m2 <- predictor_nb(y ~ age + sex + bili + edema + albumin, kernel = TRUE)
+
+
+```
+
+```{r}
+cv(list(benchmark = m0, glm = m1, nb = m2), data = pbc)
+```
+
+```{r calibration}
+
+```
+
+
+
+
+
+
 
 # Defining new learners with `predictor`
 
