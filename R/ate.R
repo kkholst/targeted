@@ -1,55 +1,55 @@
-##' Augmented Inverse Probability Weighting estimator for the Average (Causal)
-##' Treatment Effect. All nuisance models are here parametric (glm). For a more
-##' general approach see the \code{cate} implementation. In this implementation
-##' the standard errors are correct even when the nuisance models are
-##' misspecified (the influence curve is calculated including the term coming
-##' from the parametric nuisance models). The estimate is consistent if either
-##' the propensity model or the outcome model / Q-model is correctly specified.
-##'
-##' @title AIPW (doubly-robust) estimator for Average Treatement Effect
-##' @param formula Formula (see details below)
-##' @param data data.frame
-##' @param weights optional frequency weights
-##' @param offset optional offset (character or vector). can also be specified
-##'   in the formula.
-##' @param family Exponential family argument for outcome model
-##' @param nuisance outcome regression formula (Q-model)
-##' @param propensity propensity model formula
-##' @param all If TRUE all standard errors are calculated (default TRUE when
-##'   exposure only has two levels)
-##' @param labels Optional treatment labels
-##' @param ... Additional arguments to lower level functions
-##' @return An object of class '\code{ate.targeted}' is returned. See
-##'   \code{\link{targeted-class}} for more details about this class and its
-##'   generic functions.
-##' @details The formula may either be specified as: response ~ treatment |
-##'   nuisance-formula | propensity-formula
-##'
-##' For example: \code{ate(y~a | x+z+a | x*z, data=...)}
-##'
-##' Alternatively, as a list: \code{ate(list(y~a, ~x+z, ~x*z), data=...)}
-##'
-##' Or using the nuisance (and propensity argument):
-##' \code{ate(y~a, nuisance=~x+z, ...)}
-##' @export
-##' @seealso cate
-##' @author Klaus K. Holst
-##' @aliases ate
-##' @examples
-##' m <- lvm(y ~ a+x, a~x)
-##' distribution(m, ~y) <- binomial.lvm()
-##' m <- ordinal(m, K=4, ~a)
-##' transform(m, ~a) <- factor
-##' d <- sim(m, 1e3, seed=1)
-##' (a <- ate(y~a|a*x|x, data=d))
-##' ## ate(y~a, nuisance=~a*x, propensity=~x, ...)
-##'
-##' # Comparison with randomized experiment
-##' m0 <- cancel(m, a~x)
-##' lm(y~a-1, sim(m0,2e4))
-##'
-##' # Choosing a different contrast for the association measures
-##' summary(a, contrast=c(2,4))
+#' Augmented Inverse Probability Weighting estimator for the Average (Causal)
+#' Treatment Effect. All nuisance models are here parametric (glm). For a more
+#' general approach see the \code{cate} implementation. In this implementation
+#' the standard errors are correct even when the nuisance models are
+#' mis-specified (the influence curve is calculated including the term coming
+#' from the parametric nuisance models). The estimate is consistent if either
+#' the propensity model or the outcome model / Q-model is correctly specified.
+#'
+#' @title AIPW (doubly-robust) estimator for Average Treatment Effect
+#' @param formula Formula (see details below)
+#' @param data data.frame
+#' @param weights optional frequency weights
+#' @param offset optional offset (character or vector). can also be specified
+#'   in the formula.
+#' @param family Exponential family argument for outcome model
+#' @param nuisance outcome regression formula (Q-model)
+#' @param propensity propensity model formula
+#' @param all If TRUE all standard errors are calculated (default TRUE when
+#'   exposure only has two levels)
+#' @param labels Optional treatment labels
+#' @param ... Additional arguments to lower level functions
+#' @return An object of class '\code{ate.targeted}' is returned. See
+#'   \code{\link{targeted-class}} for more details about this class and its
+#'   generic functions.
+#' @details The formula may either be specified as: response ~ treatment |
+#'   nuisance-formula | propensity-formula
+#'
+#' For example: \code{ate(y~a | x+z+a | x*z, data=...)}
+#'
+#' Alternatively, as a list: \code{ate(list(y~a, ~x+z, ~x*z), data=...)}
+#'
+#' Or using the nuisance (and propensity argument):
+#' \code{ate(y~a, nuisance=~x+z, ...)}
+#' @export
+#' @seealso cate
+#' @author Klaus K. Holst
+#' @aliases ate
+#' @examples
+#' m <- lvm(y ~ a+x, a~x)
+#' distribution(m, ~y) <- binomial.lvm()
+#' m <- ordinal(m, K=4, ~a)
+#' transform(m, ~a) <- factor
+#' d <- sim(m, 1e3, seed=1)
+#' (a <- ate(y~a|a*x|x, data=d))
+#' ## ate(y~a, nuisance=~a*x, propensity=~x, ...)
+#'
+#' # Comparison with randomized experiment
+#' m0 <- cancel(m, a~x)
+#' lm(y~a-1, sim(m0,2e4))
+#'
+#' # Choosing a different contrast for the association measures
+#' summary(a, contrast=c(2,4))
 ate <- function(formula,
                 data=parent.frame(), weights, offset,
                 family=stats::gaussian(identity),
@@ -196,7 +196,7 @@ ate <- function(formula,
 }
 
 
-##' @export
+#' @export
 print.summary.ate.targeted <- function(x, ...) {
     nam <- x$names
     cat("\nAugmented Inverse Probability Weighting estimator\n")
@@ -238,7 +238,7 @@ print.summary.ate.targeted <- function(x, ...) {
 }
 
 
-##' @export
+#' @export
 summary.ate.targeted <- function(object, contrast=c(2:1), ...) {
   nn <- lapply(object[c("estimate", "outcome.reg", "propensity.model")],
                function(x) length(coef(x)))

@@ -1,37 +1,37 @@
-##' @title Binary regression models with right censored outcomes
-##' @param response Response formula (e.g., Surv(time, event) ~ D + W).
-##' @param censoring Censoring formula (e.g., Surv(time, event == 0) ~ D + A +
-##'   W)).
-##' @param treatment Optional treatment model (ml_model)
-##' @param prediction Optional prediction model (ml_model)
-##' @param data data.frame.
-##' @param newdata Optional data.frame. In this case the uncentered influence
-##'   function evalued in 'newdata' is returned with nuisance parameters
-##'   obtained from 'data'.
-##' @param tau Time-point of interest, see Details.
-##' @param type "risk", "treatment", "rmst", "brier"
-##' @param M Number of folds in cross-fitting (M=1 is no cross-fitting).
-##' @param call.response Model call for the response model (e.g. "mets::phreg").
-##' @param args.response Additional arguments to the response model.
-##' @param call.censoring Similar to call.response.
-##' @param args.censoring Similar to args.response.
-##' @param preprocess (optional) Data pre-processing function.
-##' @param efficient If FALSE an IPCW estimator is returned
-##' @param control See details
-##' @param ... Additional arguments to lower level data pre-processing
-##'   functions.
-##' @return estimate object
-##' @details The one-step estimator depends on the calculation of an integral
-##'   wrt. the martingale process corresponding to the counting process N(t) =
-##'   I(C>min(T,tau)). This can be decomposed into an integral wrt the counting
-##'   process, \eqn{dN_c(t)} and the compensator \eqn{d\Lambda_c(t)} where the
-##'   latter term can be computational intensive to calculate. Rather than
-##'   calculating this integral in all observed time points, we can make a
-##'   coarser evaluation which can be controlled by setting
-##'   \code{control=(sample=N)}. With \code{N=0} the (computational intensive)
-##'   standard evaluation is used.##'
-##' @author Klaus K. Holst, Andreas Nordland
-##' @export
+#' @title Binary regression models with right censored outcomes
+#' @param response Response formula (e.g., Surv(time, event) ~ D + W).
+#' @param censoring Censoring formula (e.g., Surv(time, event == 0) ~ D + A +
+#'   W)).
+#' @param treatment Optional treatment model (ml_model)
+#' @param prediction Optional prediction model (ml_model)
+#' @param data data.frame.
+#' @param newdata Optional data.frame. In this case the uncentered influence
+#'   function evalued in 'newdata' is returned with nuisance parameters
+#'   obtained from 'data'.
+#' @param tau Time-point of interest, see Details.
+#' @param type "risk", "treatment", "rmst", "brier"
+#' @param M Number of folds in cross-fitting (M=1 is no cross-fitting).
+#' @param call.response Model call for the response model (e.g. "mets::phreg").
+#' @param args.response Additional arguments to the response model.
+#' @param call.censoring Similar to call.response.
+#' @param args.censoring Similar to args.response.
+#' @param preprocess (optional) Data pre-processing function.
+#' @param efficient If FALSE an IPCW estimator is returned
+#' @param control See details
+#' @param ... Additional arguments to lower level data pre-processing
+#'   functions.
+#' @return estimate object
+#' @details The one-step estimator depends on the calculation of an integral
+#'   wrt. the martingale process corresponding to the counting process N(t) =
+#'   I(C>min(T,tau)). This can be decomposed into an integral wrt the counting
+#'   process, \eqn{dN_c(t)} and the compensator \eqn{d\Lambda_c(t)} where the
+#'   latter term can be computational intensive to calculate. Rather than
+#'   calculating this integral in all observed time points, we can make a
+#'   coarser evaluation which can be controlled by setting
+#'   \code{control=(sample=N)}. With \code{N=0} the (computational intensive)
+#'   standard evaluation is used.#'
+#' @author Klaus K. Holst, Andreas Nordland
+#' @export
 riskreg_cens <- function(response,
                         censoring,
                         treatment = NULL,
