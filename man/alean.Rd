@@ -39,8 +39,7 @@ alean(
 alean.targeted object
 }
 \description{
-Assumption lean inference via cross-fitting (Double ML). See
-<doi:10.1111/rssb.12504
+Assumption lean inference via cross-fitting (Double ML). See \url{http://doi.org/10.1111/rssb.12504}
 }
 \details{
 Let \eqn{Y} be the response variable, \eqn{A} the exposure and \eqn{W}

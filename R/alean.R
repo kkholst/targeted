@@ -1,5 +1,4 @@
-#' Assumption lean inference via cross-fitting (Double ML). See
-#' <doi:10.1111/rssb.12504
+#' Assumption lean inference via cross-fitting (Double ML). See \url{http://doi.org/10.1111/rssb.12504}
 #'
 #' Let \eqn{Y} be the response variable, \eqn{A} the exposure and \eqn{W}
 #' covariates. The target parameter is: \deqn{\Psi(P) = \frac{E(Cov[A,
