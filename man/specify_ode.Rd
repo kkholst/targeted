@@ -48,7 +48,7 @@ As an example of model with exogenous inputs consider the following ODE:
 This could be specified as
 \code{mod <- 'double t = x(0);
               dy = p(0) + p(1)*y + p(2)*x(1)*y + p(3)*x(1)*t;'}
-\code{dy <- specify_ode(mod)}##'
+\code{dy <- specify_ode(mod)}#'
 }
 \seealso{
 solve_ode

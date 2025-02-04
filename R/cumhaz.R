@@ -1,4 +1,3 @@
-
 cumhaz <- function(object, newdata, times=NULL, individual.time=FALSE, ...) {
   if (inherits(object, "phreg")) {
     if (is.null(times)) times <- object$times

@@ -1,12 +1,12 @@
-##' Similar to `expand.grid` function, this function creates all combinations
-##' of the input arguments but returns the result as a list.
-##' @title Create a list from all combination of input variables
-##' @param ... input variables
-##' @return list
-##' @author Klaus Kähler Holst
-##' @examples
-##' expand.list(x=2:4, z=c("a","b"))
-##' @export
+#' Similar to `expand.grid` function, this function creates all combinations
+#' of the input arguments but returns the result as a list.
+#' @title Create a list from all combination of input variables
+#' @param ... input variables
+#' @return list
+#' @author Klaus Kähler Holst
+#' @examples
+#' expand.list(x=2:4, z=c("a","b"))
+#' @export
 expand.list <- function(...) {
   dots <- list(...)
   nam <- names(dots)

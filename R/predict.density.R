@@ -1,11 +1,11 @@
-##' Kernel density estimator predictions
-##'
-##' @title Prediction for kernel density estimates
-##' @param object density object
-##' @param xnew New data on which to make predictions for
-##' @param ... additional arguments to lower level functions
-##' @export
-##' @author Klaus K. Holst
+#' Kernel density estimator predictions
+#'
+#' @title Prediction for kernel density estimates
+#' @param object density object
+#' @param xnew New data on which to make predictions for
+#' @param ... additional arguments to lower level functions
+#' @export
+#' @author Klaus K. Holst
 predict.density <-
 function(object, xnew, ...) {
     neval <- length(object$x)

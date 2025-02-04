@@ -1,4 +1,4 @@
-##' @export
+#' @export
 print.NB <-
 function(x, ...) {
     print(x$call)

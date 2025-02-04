@@ -99,7 +99,7 @@ superlearner <- function(model.list,
   structure(res, class = "superlearner")
 }
 
-##' @export
+#' @export
 print.superlearner <- function(x, ...) {
   res <- cbind("score" = x$model.score, "weight" = x$weights)
   if (!is.null(x$fit)) {
@@ -111,20 +111,20 @@ print.superlearner <- function(x, ...) {
 }
 
 
-##' SuperLearner wrapper for ml_model
-##'
-##' @title SuperLearner wrapper for ml_model
-##' @aliases SL
-##' @param formula Model design
-##' @param ... Additional arguments for SuperLearner::SuperLearner
-##' @param SL.library character vector of prediction algorithms
-##' @param binomial boolean specifying binomial or gaussian family (default
-##'   FALSE)
-##' @param data Optional data.frame
-##' @param info model information (optional)
-##' @return ml_model object
-##' @author Klaus Kähler Holst
-##' @export
+#' SuperLearner wrapper for ml_model
+#'
+#' @title SuperLearner wrapper for ml_model
+#' @aliases SL
+#' @param formula Model design
+#' @param ... Additional arguments for SuperLearner::SuperLearner
+#' @param SL.library character vector of prediction algorithms
+#' @param binomial boolean specifying binomial or gaussian family (default
+#'   FALSE)
+#' @param data Optional data.frame
+#' @param info model information (optional)
+#' @return ml_model object
+#' @author Klaus Kähler Holst
+#' @export
 SL <- function(formula=~., ...,
                SL.library=c("SL.mean", "SL.glm"),
                binomial=FALSE,

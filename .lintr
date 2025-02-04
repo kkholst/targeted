@@ -9,3 +9,7 @@ linters: linters_with_defaults(
   spaces_left_parentheses_linter = NULL
   )
 encoding: "UTF-8"
+exclusions: list(
+    "inst/misc",
+    "vignettes"
+  )

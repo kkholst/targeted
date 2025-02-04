@@ -19,7 +19,7 @@ NB_Xprep <- function(X, xlev, ...) { ## Input is data.table
     return(structure(X, nlevels=xlev, levels=levs))
 }
 
-##' @export
+#' @export
 NB2 <- function(formula, data, weights=NULL,
          laplace.smooth=0, y, x, ...) {
     if (missing(y)) {
@@ -61,7 +61,7 @@ NB2 <- function(formula, data, weights=NULL,
 }
 
 
-##' @export
+#' @export
 predict.NB2 <- function(object,newdata, threshold=1e-3, ...) {
     if (missing(newdata)) stop("Need new data to make predictions")
     if (!data.table::is.data.table(newdata)) newdata <- data.table::data.table(newdata)

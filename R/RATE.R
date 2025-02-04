@@ -1,22 +1,22 @@
-##' Estimation of the Average Treatment Effect among Responders
-##'
-##' @title Responder Average Treatment Effect
-##' @param response Response formula (e.g, Y~D*A)
-##' @param post.treatment Post treatment marker formula (e.g., D~W)
-##' @param treatment Treatment formula (e.g, A~1)
-##' @param data data.frame
-##' @param family Exponential family for response (default gaussian)
-##' @param M Number of folds in cross-fitting (M=1 is no cross-fitting)
-##' @param pr.treatment (optional) Randomization probability of treatment.
-##' @param treatment.level Treatment level in binary treatment (default 1)
-##' @param SL.args.response Arguments to SuperLearner for the response model
-##' @param SL.args.post.treatment Arguments to SuperLearner for the post treatment indicator
-##' @param preprocess (optional) Data preprocessing function
-##' @param efficient If TRUE, the estimate will be efficient. If FALSE, the estimate will be a simple plug-in estimate.
-##' @param ... Additional arguments to lower level functions
-##' @return estimate object
-##' @author Andreas Nordland, Klaus K. Holst
-##' @export
+#' Estimation of the Average Treatment Effect among Responders
+#'
+#' @title Responder Average Treatment Effect
+#' @param response Response formula (e.g, Y~D*A)
+#' @param post.treatment Post treatment marker formula (e.g., D~W)
+#' @param treatment Treatment formula (e.g, A~1)
+#' @param data data.frame
+#' @param family Exponential family for response (default gaussian)
+#' @param M Number of folds in cross-fitting (M=1 is no cross-fitting)
+#' @param pr.treatment (optional) Randomization probability of treatment.
+#' @param treatment.level Treatment level in binary treatment (default 1)
+#' @param SL.args.response Arguments to SuperLearner for the response model
+#' @param SL.args.post.treatment Arguments to SuperLearner for the post treatment indicator
+#' @param preprocess (optional) Data preprocessing function
+#' @param efficient If TRUE, the estimate will be efficient. If FALSE, the estimate will be a simple plug-in estimate.
+#' @param ... Additional arguments to lower level functions
+#' @return estimate object
+#' @author Andreas Nordland, Klaus K. Holst
+#' @export
 RATE <- function(response, post.treatment, treatment,
                  data, family = gaussian(), M = 5,
                  pr.treatment, treatment.level,
@@ -128,45 +128,45 @@ RATE <- function(response, post.treatment, treatment,
   return(lava::estimate(NULL, coef = estimates, IC = IC))
 }
 
-##' Estimation of the Average Treatment Effect among Responders for Survival Outcomes
-##'
-##' Estimation of
-##' \deqn{
-##' \frac{P(T \leq \tau|A=1) - P(T \leq \tau|A=1)}{E[D|A=1]}
-##' }
-##' under right censoring based on plug-in estimates of \eqn{P(T \leq \tau|A=a)} and \eqn{E[D|A=1]}.
-##'
-##' An efficient one-step estimator of \eqn{P(T \leq \tau|A=a)} is constructed using
-##' the efficient influence function
-##' \deqn{
-##' \frac{I\{A=a\}}{P(A = a)} \Big(\frac{\Delta}{S^c_{0}(\tilde T|X)} I\{\tilde T \leq \tau\} + \int_0^\tau \frac{S_0(u|X)-S_0(\tau|X)}{S_0(u|X)S^c_0(u|X)} d M^c_0(u|X))\Big)\\
-##' + \Big(1 - \frac{I\{A=a\}}{P(A = a)}\Big)F_0(\tau|A=a, W) - P(T \leq \tau|A=a).
-##' }
-##' An efficient one-step estimator of \eqn{E[D|A=1]} is constructed using the efficient influence function
-##' \deqn{
-##' \frac{A}{P(A = 1)}\left(D-E[D|A=1, W]\right) + E[D|A=1, W] -E[D|A=1].
-##' }
-##'
-##'
-##' @title Responder Average Treatment Effect
-##' @param response Response formula (e.g., Surv(time, event) ~ D + W).
-##' @param post.treatment Post treatment marker formula (e.g., D ~ W).
-##' @param treatment Treatment formula (e.g., A ~ 1).
-##' @param censoring Censoring formula (e.g., Surv(time, event == 0) ~ D + A + W)).
-##' @param tau Time-point of interest, see Details.
-##' @param data data.frame.
-##' @param M Number of folds in cross-fitting (M=1 is no cross-fitting).
-##' @param pr.treatment (optional) Randomization probability of treatment.
-##' @param call.response Model call for the response model (e.g. "mets::phreg").
-##' @param args.response Additional arguments to the response model.
-##' @param SL.args.post.treatment Additional arguments to SuperLearner for the post treatment indicator model.
-##' @param call.censoring Similar to call.response.
-##' @param args.censoring Similar to args.response.
-##' @param preprocess (optional) Data pre-processing function.
-##' @param ... Additional arguments to lower level data pre-processing functions.
-##' @return estimate object
-##' @author Andreas Nordland, Klaus K. Holst
-##' @export
+#' Estimation of the Average Treatment Effect among Responders for Survival Outcomes
+#'
+#' Estimation of
+#' \deqn{
+#' \frac{P(T \leq \tau|A=1) - P(T \leq \tau|A=1)}{E[D|A=1]}
+#' }
+#' under right censoring based on plug-in estimates of \eqn{P(T \leq \tau|A=a)} and \eqn{E[D|A=1]}.
+#'
+#' An efficient one-step estimator of \eqn{P(T \leq \tau|A=a)} is constructed using
+#' the efficient influence function
+#' \deqn{
+#' \frac{I\{A=a\}}{P(A = a)} \Big(\frac{\Delta}{S^c_{0}(\tilde T|X)} I\{\tilde T \leq \tau\} + \int_0^\tau \frac{S_0(u|X)-S_0(\tau|X)}{S_0(u|X)S^c_0(u|X)} d M^c_0(u|X))\Big)\\
+#' + \Big(1 - \frac{I\{A=a\}}{P(A = a)}\Big)F_0(\tau|A=a, W) - P(T \leq \tau|A=a).
+#' }
+#' An efficient one-step estimator of \eqn{E[D|A=1]} is constructed using the efficient influence function
+#' \deqn{
+#' \frac{A}{P(A = 1)}\left(D-E[D|A=1, W]\right) + E[D|A=1, W] -E[D|A=1].
+#' }
+#'
+#'
+#' @title Responder Average Treatment Effect
+#' @param response Response formula (e.g., Surv(time, event) ~ D + W).
+#' @param post.treatment Post treatment marker formula (e.g., D ~ W).
+#' @param treatment Treatment formula (e.g., A ~ 1).
+#' @param censoring Censoring formula (e.g., Surv(time, event == 0) ~ D + A + W)).
+#' @param tau Time-point of interest, see Details.
+#' @param data data.frame.
+#' @param M Number of folds in cross-fitting (M=1 is no cross-fitting).
+#' @param pr.treatment (optional) Randomization probability of treatment.
+#' @param call.response Model call for the response model (e.g. "mets::phreg").
+#' @param args.response Additional arguments to the response model.
+#' @param SL.args.post.treatment Additional arguments to SuperLearner for the post treatment indicator model.
+#' @param call.censoring Similar to call.response.
+#' @param args.censoring Similar to args.response.
+#' @param preprocess (optional) Data pre-processing function.
+#' @param ... Additional arguments to lower level data pre-processing functions.
+#' @return estimate object
+#' @author Andreas Nordland, Klaus K. Holst
+#' @export
 RATE.surv <- function(response, post.treatment, treatment, censoring,
                       tau,
                       data,

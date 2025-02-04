@@ -1,4 +1,3 @@
-
 getjumps <- function(time, dy) {
   jumps <- which(dy < 0)
   stop <- NULL

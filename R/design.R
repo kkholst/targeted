@@ -1,16 +1,16 @@
-##' Extract design matrix from data.frame and formula
-##' @title Extract design matrix
-##' @param formula formula
-##' @param data data.frame
-##' @param intercept If FALSE (default) an intercept is not included
-##' @param rm_envir Remove environment
-##' @param ... additional arguments (e.g, specials such weights, offsets,
-##'   subset)
-##' @param specials character vector specifying functions in the formula that
-##'   should be marked as special in the [terms] object
-##' @return An object of class 'design'
-##' @author Klaus Kähler Holst
-##' @export
+#' Extract design matrix from data.frame and formula
+#' @title Extract design matrix
+#' @param formula formula
+#' @param data data.frame
+#' @param intercept If FALSE (default) an intercept is not included
+#' @param rm_envir Remove environment
+#' @param ... additional arguments (e.g, specials such weights, offsets,
+#'   subset)
+#' @param specials character vector specifying functions in the formula that
+#'   should be marked as special in the [terms] object
+#' @return An object of class 'design'
+#' @author Klaus Kähler Holst
+#' @export
 design <- function(formula, data, intercept=FALSE,
                    rm_envir=FALSE, ..., specials = c("weights", "offset")) {
   tt <- terms(formula, data = data)
@@ -42,7 +42,7 @@ design <- function(formula, data, intercept=FALSE,
   structure(res, class="design")
 }
 
-##' @export
+#' @export
 update.design <- function(object, data = NULL, ...,
                           specials = c("weights", "offset")) {
   if (is.null(data))  data <- object$data
@@ -66,7 +66,7 @@ update.design <- function(object, data = NULL, ...,
   return(object)
 }
 
-##' @export
+#' @export
 model.matrix.design <- function(object, drop.intercept = FALSE, ...) {
   if (drop.intercept) {
     intercept <- which(attr(object$x, "assign") == 0)
@@ -77,33 +77,33 @@ model.matrix.design <- function(object, drop.intercept = FALSE, ...) {
   return(object$x)
 }
 
-##' @export
+#' @export
 weights.design <- function(object, ...) {
   specials(object, "weights")
 }
 
-##' @export
+#' @export
 offsets <- function(object, ...) UseMethod("offsets")
 
-##' @export
+#' @export
 offsets.design <- function(object, ...) {
   specials(object, "offset")
 }
 
-##' @export
+#' @export
 specials <- function(object, ...) UseMethod("specials")
 
-##' @export
-##' @title Extract model component from [design] object
-##' @param object [design] object
-##' @param which model component (e.g., "offset", "weights", ...)
-##' @aliases specials specials.design offsets offsets.design weights.design
-##' @param ...  Additional arguments to lower level functions
+#' @export
+#' @title Extract model component from [design] object
+#' @param object [design] object
+#' @param which model component (e.g., "offset", "weights", ...)
+#' @aliases specials specials.design offsets offsets.design weights.design
+#' @param ...  Additional arguments to lower level functions
 specials.design <- function(object, which, ...) {
   return(object[[which]])
 }
 
-##' @export
+#' @export
 summary.design <- function(object, ...) {
   object$x <- object$x[0, ]
   object$y <- NULL

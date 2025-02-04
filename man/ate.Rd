@@ -2,7 +2,7 @@
 % Please edit documentation in R/ate.R
 \name{ate}
 \alias{ate}
-\title{AIPW (doubly-robust) estimator for Average Treatement Effect}
+\title{AIPW (doubly-robust) estimator for Average Treatment Effect}
 \usage{
 ate(
   formula,
@@ -50,7 +50,7 @@ Augmented Inverse Probability Weighting estimator for the Average (Causal)
 Treatment Effect. All nuisance models are here parametric (glm). For a more
 general approach see the \code{cate} implementation. In this implementation
 the standard errors are correct even when the nuisance models are
-misspecified (the influence curve is calculated including the term coming
+mis-specified (the influence curve is calculated including the term coming
 from the parametric nuisance models). The estimate is consistent if either
 the propensity model or the outcome model / Q-model is correctly specified.
 }
