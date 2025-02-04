@@ -8,6 +8,9 @@ for details about how to contribute code to this project. Please make sure to
 read the relevant section before making your contribution. It will make it a lot
 easier for us maintainers and smooth out the experience for all involved.
 
+**Suggestions or bug reports** can be posted here: https://github.com/kkholst/targeted/issues.
+For bug reports please include a small reproducible example which clearly demonstrates the bug.
+
 ## Table of Contents
 
 - [Branches and branch prefixes](#branches-and-branch-prefixes)
@@ -81,19 +84,35 @@ expect_equal(output, 2)
 More information about unit testing with **tinytest** is provided in this
 [vignette](https://cran.r-project.org/web/packages/tinytest/vignettes/using_tinytest.pdf).
 
+### Documentation
+
+The R code is documented using
+[roxygen2](https://cran.r-project.org/web/packages/roxygen2/vignettes/roxygen2.html).
+
+Longer documentation are located in the `vignettes` directory in R-markdown format.
+
+
+## C++ development
+
+The **target** library follows the (Google's C++ style guide)[http://google.github.io/styleguide/cppguide.html>].
+
+The code should be checked using the ``cppcheck`` static code
+analyzer and ``cclint`` (which may installed from PyPi using ``pip3
+install cclint``).
+
+From the `src/target` directory these checks are made with `make check`.
+
+The C++ code is documented using (Doxygen)
+[http://www.doxygen.nl/manual/] ([ref](http://www.doxygen.nl/manual/commands.html)).
+
+### Unit tests
 C++ tests are located in the subdirectory `./src/target/tests`
-using [doctest](https://github.com/doctest/doctest)
+using [doctest](https://github.com/doctest/doctest), and can be executed with
+`make test` from the `src/targeto` directory.
 
-## Documentation
+The Undefined Behaviour Sanitizer via ``clang++`` can be executed with `make sanitizer`
+which runs the unit-tests and examples from the directory ``misc``.
 
-The C++ code is documented using Doxygen.
-- http://www.doxygen.nl/manual/
-- http://www.doxygen.nl/manual/commands.html
-
-The R code is documented using roxygen2
-https://cran.r-project.org/web/packages/roxygen2/vignettes/roxygen2.html
-
-Longer documentation are written as R vignettes.
 
 ## Attribution
 
