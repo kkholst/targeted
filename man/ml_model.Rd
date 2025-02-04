@@ -15,6 +15,7 @@
 \alias{predictor_xgboost_binary}
 \alias{predictor_hal}
 \alias{predictor_isoreg}
+\alias{predictor_nb}
 \title{R6 class for prediction models}
 \description{
 Provides standardized estimation and prediction methods
