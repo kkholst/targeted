@@ -1,23 +1,26 @@
-#' Assumption lean inference via cross-fitting (Double ML). See \url{http://doi.org/10.1111/rssb.12504}
+#' Assumption lean inference via cross-fitting (Double ML). See
+#' \url{http://doi.org/10.1111/rssb.12504}
 #'
 #' Let \eqn{Y} be the response variable, \eqn{A} the exposure and \eqn{W}
 #' covariates. The target parameter is: \deqn{\Psi(P) = \frac{E(Cov[A,
 #' g\{E(Y|A,W)\}\mid W])} {E\{Var(A\mid W)\}} }
 #'
-#' The \code{response_model} is the model for \eqn{E(Y|A,W)}, and
-#' \code{exposure_model} is the model for \eqn{E(A|W)}.
+#' The \code{response.model} is the model for \eqn{E(Y|A,W)}, and
+#' \code{exposure.model} is the model for \eqn{E(A|W)}.
 #' \code{link} specifies \eqn{g}.
 #'
 #' @title Assumption Lean inference for generalized linear model parameters
-#' @param response_model formula or ml_model object (formula => glm)
-#' @param exposure_model  model for the exposure
+#' @param response.model formula or ml_model object (formula => glm)
+#' @param exposure.model model for the exposure
 #' @param data data.frame
 #' @param link Link function (g)
-#' @param g_model Model for \eqn{E[g(Y|A,W)|W]}
+#' @param g.model Model for \eqn{E[g(Y|A,W)|W]}
 #' @param nfolds Number of folds
-#' @param silent supress all messages and progressbars
-#' @param mc.cores mc.cores Optional number of cores. parallel::mcmapply used instead of future
-#' @param ... additional arguments to future.apply::future_mapply
+#' @param silent Suppress all messages and progressbars
+#' @param mc.cores Optional number of cores. When supplied, [parallel::mcmapply]
+#' is used instead of [future.apply::future_mapply]
+#' @param ... additional arguments to [future.apply::future_mapply] or
+#' [parallel::mclapply]
 #' @return alean.targeted object
 #' @author Klaus Kähler Holst
 #' @examples
@@ -35,23 +38,23 @@
 #' library(splines)
 #' f <- binomial()
 #' d <- sim1(1e4, family=f)
-#' e <- alean(response_model=ML(y ~ a + bs(l, df=3), family=binomial),
-#'            exposure_model=ML(a ~ bs(l, df=3), family=f),
+#' e <- alean(response.model=ML(y ~ a + bs(l, df=3), family=binomial),
+#'            exposure.model=ML(a ~ bs(l, df=3), family=f),
 #'            data=d,
 #'            link = "logit", mc.cores=1, nfolds=1)
 #' e
 #'
-#' e <- alean(response_model=ML(y ~ a + l, family=binomial),
-#'            exposure_model=ML(a ~ l),
+#' e <- alean(response.model=ML(y ~ a + l, family=binomial),
+#'            exposure.model=ML(a ~ l),
 #'            data=d,
 #'            link = "logit", mc.cores=1, nfolds=1)
 #' e
 #' @export
-alean <- function(response_model,
-                  exposure_model,
+alean <- function(response.model,
+                  exposure.model,
                   data,
                   link = "identity",
-                  g_model,
+                  g.model,
                   nfolds=1,
                   silent=FALSE,
                   mc.cores,
