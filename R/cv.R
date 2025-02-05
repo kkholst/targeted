@@ -18,6 +18,7 @@
 #' @param args.future Arguments to future.apply::future_mapply
 #' @param mc.cores Optional number of cores. [parallel::mcmapply] used instead
 #'   of future
+#' @param silent suppress all messages and progressbars
 #' @param ... Additional arguments parsed to models in models
 #' @author Klaus K. Holst
 #' @return An object of class '\code{cross_validated}' is returned. See
@@ -43,7 +44,9 @@ cv <- function(models, data, response = NULL,
                weights = NULL,
                model.score = scoring,
                seed = NULL, shared = NULL, args.pred = NULL,
-               args.future = list(), mc.cores, ...) {
+               args.future = list(), mc.cores,
+               silent = FALSE,
+               ...) {
 
   if (!is.list(models)) stop("Expected a list of models")
   nam <- names(models)
@@ -182,7 +185,8 @@ cv <- function(models, data, response = NULL,
   dim <- c(rep, nfolds, M, P)
   perf_arr <- array(0, dim)
   dimnames(perf_arr) <- list(NULL, NULL, nam, nam_perf)
-  pb <- progressr::progressor(along = seq_len(nrow(arg)))
+  if (!silent)
+    pb <- progressr::progressor(along = seq_len(nrow(arg)))
   ff <- function(i) {
     R <- arg[i, 1]
     k <- arg[i, 2]
@@ -244,7 +248,7 @@ cv <- function(models, data, response = NULL,
       )
       perfs <- c(perfs, list(newperf))
     }
-    pb()
+    if (!silent) pb()
     do.call(rbind, perfs)
   }
 
