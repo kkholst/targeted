@@ -5,21 +5,30 @@
 \title{Assumption Lean inference for generalized linear model parameters}
 \usage{
 alean(
-  response_model,
-  exposure_model,
+  response.model,
+  exposure.model,
   data,
   link = "identity",
-  g_model,
+  g.model,
   nfolds = 1,
   silent = FALSE,
   mc.cores,
+  response_model = deprecated,
+  exposure_model = deprecated,
+  g_model = deprecated,
   ...
 )
 }
 \arguments{
+\item{response.model}{formula or ml_model object (formula => glm)}
+
+\item{exposure.model}{model for the exposure}
+
 \item{data}{data.frame}
 
 \item{link}{Link function (g)}
+
+\item{g.model}{Model for \eqn{E[g(Y|A,W)|W]}}
 
 \item{nfolds}{Number of folds}
 
@@ -28,14 +37,12 @@ alean(
 \item{mc.cores}{Optional number of cores. When supplied, \link[parallel:mclapply]{parallel::mcmapply}
 is used instead of \link[future.apply:future_mapply]{future.apply::future_mapply}}
 
+\item{response_model}{Deprecated. Use response.model instead.}
+
+\item{g_model}{Deprecated. Use g.model instead.}
+
 \item{...}{additional arguments to \link[future.apply:future_mapply]{future.apply::future_mapply} or
 \link[parallel:mclapply]{parallel::mclapply}}
-
-\item{response.model}{formula or ml_model object (formula => glm)}
-
-\item{exposure.model}{model for the exposure}
-
-\item{g.model}{Model for \eqn{E[g(Y|A,W)|W]}}
 }
 \value{
 alean.targeted object
@@ -55,29 +62,34 @@ The \code{response.model} is the model for \eqn{E(Y|A,W)}, and
 }
 \examples{
 
-sim1 <- function(n, family=gaussian(), ...) {
-   m <- lvm() |>
-     distribution(~ y, binomial.lvm()) |>
-     regression('a', value=function(l) l) |>
-     regression('y', value=function(a,l) a + l)
-     if (family$family=="binomial")
-        distribution(m, ~a) <- binomial.lvm()
-   sim(m, n)
+sim1 <- function(n, family = gaussian(), ...) {
+  m <- lvm() |>
+    distribution(~y, binomial.lvm()) |>
+    regression("a", value = function(l) l) |>
+    regression("y", value = function(a, l) a + l)
+  if (family$family == "binomial") {
+    distribution(m, ~a) <- binomial.lvm()
+  }
+  sim(m, n)
 }
 
 library(splines)
 f <- binomial()
-d <- sim1(1e4, family=f)
-e <- alean(response.model=ML(y ~ a + bs(l, df=3), family=binomial),
-           exposure.model=ML(a ~ bs(l, df=3), family=f),
-           data=d,
-           link = "logit", mc.cores=1, nfolds=1)
+d <- sim1(1e4, family = f)
+e <- alean(
+  response.model = ML(y ~ a + bs(l, df = 3), family = binomial),
+  exposure.model = ML(a ~ bs(l, df = 3), family = f),
+  data = d,
+  link = "logit", mc.cores = 1, nfolds = 1
+)
 e
 
-e <- alean(response.model=ML(y ~ a + l, family=binomial),
-           exposure.model=ML(a ~ l),
-           data=d,
-           link = "logit", mc.cores=1, nfolds=1)
+e <- alean(
+  response.model = ML(y ~ a + l, family = binomial),
+  exposure.model = ML(a ~ l),
+  data = d,
+  link = "logit", mc.cores = 1, nfolds = 1
+)
 e
 }
 \author{

@@ -10,6 +10,8 @@
 
 \item{cate_model}{Deprecated. Use cate.model instead.}
 
+\item{g_model}{Deprecated. Use g.model instead.}
+
 \item{treatment}{Deprecated. Use cate.model instead.}
 }
 \description{

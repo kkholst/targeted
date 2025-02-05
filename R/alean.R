@@ -8,7 +8,7 @@
 #' The \code{response.model} is the model for \eqn{E(Y|A,W)}, and
 #' \code{exposure.model} is the model for \eqn{E(A|W)}.
 #' \code{link} specifies \eqn{g}.
-#'
+#' @inheritParams deprecated_argument_names
 #' @title Assumption Lean inference for generalized linear model parameters
 #' @param response.model formula or ml_model object (formula => glm)
 #' @param exposure.model model for the exposure
@@ -25,29 +25,34 @@
 #' @author Klaus Kähler Holst
 #' @examples
 #'
-#' sim1 <- function(n, family=gaussian(), ...) {
-#'    m <- lvm() |>
-#'      distribution(~ y, binomial.lvm()) |>
-#'      regression('a', value=function(l) l) |>
-#'      regression('y', value=function(a,l) a + l)
-#'      if (family$family=="binomial")
-#'         distribution(m, ~a) <- binomial.lvm()
-#'    sim(m, n)
+#' sim1 <- function(n, family = gaussian(), ...) {
+#'   m <- lvm() |>
+#'     distribution(~y, binomial.lvm()) |>
+#'     regression("a", value = function(l) l) |>
+#'     regression("y", value = function(a, l) a + l)
+#'   if (family$family == "binomial") {
+#'     distribution(m, ~a) <- binomial.lvm()
+#'   }
+#'   sim(m, n)
 #' }
 #'
 #' library(splines)
 #' f <- binomial()
-#' d <- sim1(1e4, family=f)
-#' e <- alean(response.model=ML(y ~ a + bs(l, df=3), family=binomial),
-#'            exposure.model=ML(a ~ bs(l, df=3), family=f),
-#'            data=d,
-#'            link = "logit", mc.cores=1, nfolds=1)
+#' d <- sim1(1e4, family = f)
+#' e <- alean(
+#'   response.model = ML(y ~ a + bs(l, df = 3), family = binomial),
+#'   exposure.model = ML(a ~ bs(l, df = 3), family = f),
+#'   data = d,
+#'   link = "logit", mc.cores = 1, nfolds = 1
+#' )
 #' e
 #'
-#' e <- alean(response.model=ML(y ~ a + l, family=binomial),
-#'            exposure.model=ML(a ~ l),
-#'            data=d,
-#'            link = "logit", mc.cores=1, nfolds=1)
+#' e <- alean(
+#'   response.model = ML(y ~ a + l, family = binomial),
+#'   exposure.model = ML(a ~ l),
+#'   data = d,
+#'   link = "logit", mc.cores = 1, nfolds = 1
+#' )
 #' e
 #' @export
 alean <- function(response.model,
@@ -55,49 +60,65 @@ alean <- function(response.model,
                   data,
                   link = "identity",
                   g.model,
-                  nfolds=1,
-                  silent=FALSE,
+                  nfolds = 1,
+                  silent = FALSE,
                   mc.cores,
+                  response_model = deprecated,
+                  exposure_model = deprecated,
+                  g_model = deprecated,
                   ...) {
+  dvers <- "1.0.0"
+  if (!missing(response_model)) {
+    deprecate_arg_warn("response_model", "response.model", "alean", dvers)
+    response.model <- response_model
+  }
+
+  if (!missing(exposure_model)) {
+    deprecate_arg_warn("exposure_model", "exposure.model", "alean", dvers)
+    exposure.model <- exposure_model
+  }
+
+  if (!missing(g_model)) {
+    deprecate_arg_warn("g_model", "g.model", "alean", dvers)
+    g.model <- g_model
+  }
 
   cl <- match.call()
-  if (inherits(response_model, "formula")) {
-    response_model <- ML(response_model)
+  if (inherits(response.model, "formula")) {
+    response.model <- ML(response.model)
   }
-  if (inherits(exposure_model, "formula")) {
-    A_var <- lava::getoutcome(exposure_model)
+  if (inherits(exposure.model, "formula")) {
+    A_var <- lava::getoutcome(exposure.model)
     family <- stats::gaussian()
     if (!is.numeric(data[, A_var])) {
       family <- stats::binomial()
     }
-    exposure_model <- ML(exposure_model, family = family)
+    exposure.model <- ML(exposure.model, family = family)
   }
-  A_var <- lava::getoutcome(exposure_model$formula)
-  A <- exposure_model$response(data)
+  A_var <- lava::getoutcome(exposure.model$formula)
+  A <- exposure.model$response(data)
   A_levels <- sort(unique(A))
   g_model_response <- "gEY_0"
-  if (missing(g_model)) {
-    tf <- terms(response_model$formula)
+  if (missing(g.model)) {
+    tf <- terms(response.model$formula)
     tf <- drop.terms(tf, which(attr(tf, "factors")[A_var, ] == 1))
-    g_model <- ML(formula(tf))
+    g.model <- ML(formula(tf))
   }
-  g_model$update(update(
-    g_model$formula,
+  g.model$update(update(
+    g.model$formula,
     reformulate(".", response = g_model_response)
-    ))
+  ))
 
   glink <- stats::quasi(link)
   g <- glink$linkfun
-  ginv <- glink$linkinv
   dginv <- glink$mu.eta
-  dg <- function(x) 1/dginv(g(x)) ## Dh^-1 = 1/(h'(h^-1(x)))
+  dg <- function(x) 1 / dginv(g(x)) # Dh^-1 = 1/(h'(h^-1(x)))
 
   n <- NROW(data)
-  if (nfolds<1) nfolds <- 1
+  if (nfolds < 1) nfolds <- 1
   folds <- split(sample(1:n, n), rep(1:nfolds, length.out = n))
   folds <- lapply(folds, sort)
-  ff <- Reduce(c, folds)
-  idx <- order(ff)
+
   scores <- list()
   fargs <- seq_len(nfolds)
   if (!silent) {
@@ -105,12 +126,12 @@ alean <- function(response.model,
   }
 
   procfold <- function(fold, ...) {
-    Ymod <- response_model$clone(deep = TRUE)
-    Amod <- exposure_model$clone(deep = TRUE)
-    gmod <- g_model$clone(deep = TRUE)
+    Ymod <- response.model$clone(deep = TRUE)
+    Amod <- exposure.model$clone(deep = TRUE)
+    gmod <- g.model$clone(deep = TRUE)
 
     fold <- folds[[fold]]
-    if (length(fold) == NROW(data)) { ## No cross-fitting
+    if (length(fold) == NROW(data)) { # No cross-fitting
       dtrain <- data
       deval <- data
     } else {
@@ -118,8 +139,6 @@ alean <- function(response.model,
       deval <- data[fold, ]
     }
 
-    tmp <- Ymod$estimate(dtrain) ## E(Y|A,L)
-    tmp <- Amod$estimate(dtrain) ## E(A|L)
     EA <- Amod$predict(newdata = deval)
     EY <- Ymod$predict(newdata = deval)
     dtrain[, g_model_response] <- g(EY)
@@ -131,7 +150,6 @@ alean <- function(response.model,
       X[, A_var] <- A_levels[1]
       Eg <- Eg + (1 - EA) * Ymod$predict(newdata = X)
     } else {
-      tmp <- gmod$estimate(dtrain)
       Eg <- gmod$predict(newdata = deval)
     }
     Y <- Ymod$response(deval, na.action = na.pass)
@@ -164,11 +182,13 @@ alean <- function(response.model,
   names(est) <- A_var
   IF <- cbind(A. * (mu - est * A.) / mean(A.^2))
   rownames(IF) <- rownames(data)
-  estimate <- estimate(coef=est, IC=IF)
-  res <- list(folds=folds, scores=scores,
-              IF=IF, est=est,
-              call=cl,
-              estimate=estimate)
+  estimate <- estimate(coef = est, IC = IF)
+  res <- list(
+    folds = folds, scores = scores,
+    IF = IF, est = est,
+    call = cl,
+    estimate = estimate
+  )
   class(res) <- c("alean.targeted", "targeted")
   return(res)
 }
