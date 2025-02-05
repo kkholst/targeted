@@ -1,7 +1,9 @@
 #' Find the non-dominated point of a set (minima of a point set).
 #'
-#' A point x dominates y if it is never worse and at least in one case strictly better.
-#' Formally, let f_i denote the ith coordinate of the condition (objective) function,
+#' A point x dominates y if it is never worse and at least
+#' in one case strictly better.
+#' Formally, let f_i denote the ith coordinate of the
+#' condition (objective) function,
 #' then for all i: f_i(x)<=f_i(y) and there exists j: f_j(x)<f_j(y).
 #'
 #' Based on the algorithm of Kung et al. 1975.

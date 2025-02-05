@@ -32,7 +32,7 @@
 #'   standard evaluation is used.#'
 #' @author Klaus K. Holst, Andreas Nordland
 #' @export
-riskreg_cens <- function(response,
+riskreg_cens <- function(response, # nolint
                         censoring,
                         treatment = NULL,
                         prediction = NULL,

@@ -1,8 +1,10 @@
 #' @title targeted class object
 #'
-#' @description The functions \code{\link{riskreg}} and \code{\link{ate}} returns an object of the type \code{targeted}.
+#' @description The functions \code{\link{riskreg}} and \code{\link{ate}}
+#'   returns an object of the type \code{targeted}.
 #'
-#' An object of class '\code{targeted}' is a list with at least the following components:
+#' An object of class '\code{targeted}' is a list with at least the
+#' following components:
 #' \describe{
 #'   \item{estimate}{An \code{estimate} object with the target parameter
 #'   estimates (see \code{\link[lava]{estimate.default}})}
@@ -12,13 +14,16 @@
 #' }
 #'
 #' @section S3 generics:
-#' The following S3 generic functions are available for an object of class \code{targeted}:
+#' The following S3 generic functions are available for an object of
+#' class \code{targeted}:
 #' \describe{
 #'   \item{\code{coef}}{Extract target coefficients of the estimated model.}
-#'   \item{\code{vcov}}{Extract the variance-covariance matrix of the target parameters.}
+#'   \item{\code{vcov}}{Extract the variance-covariance matrix of
+#' the target parameters.}
 #'   \item{\code{IC}}{Extract the estimated influence function.}
 #'   \item{\code{print}}{Print estimates of the target parameters.}
-#'   \item{\code{summary}}{Extract information on both target parameters and estimated nuisance model.}'
+#'   \item{\code{summary}}{Extract information on both target parameeters and
+#' estimated nuisance model.}'
 #'  }
 #'
 #' @aliases targeted-class riskreg.targeted ate.targeted
@@ -32,41 +37,46 @@ NULL
 
 #' @export
 print.targeted <- function(x, ...) {
-    print(x$estimate, ...)
+  print(x$estimate, ...)
 }
 
 #' @export
 print.summary.targeted <- function(x, ...) {
-    print(x$call)
-    cat("\n")
-    print(x$estimate, ...)
+  print(x$call)
+  cat("\n")
+  print(x$estimate, ...)
 }
 
 #' @export
 summary.targeted <- function(object, ...) {
-  structure(list(estimate=object$estimate, call=object$call),
-            class="summary.targeted")
+  structure(list(estimate = object$estimate, call = object$call),
+    class = "summary.targeted"
+  )
 }
 
 #' @export
 IC.targeted <- function(x, ...) {
-    lava::IC(x$estimate, ...)
+  lava::IC(x$estimate, ...)
 }
 
 #' @export
 logLik.targeted <- function(object, ...) {
-    val <- object$logLik
-    if (is.null(val)) return(NULL)
-    structure(val, nobs=object$nobs, nall=object$nobs, df=length(coef(object)),
-              class="logLik")
+  val <- object$logLik
+  if (is.null(val)) {
+    return(NULL)
+  }
+  structure(val,
+    nobs = object$nobs, nall = object$nobs, df = length(coef(object)),
+    class = "logLik"
+  )
 }
 
 #' @export
 vcov.targeted <- function(object, ...) {
-    vcov(object$estimate, ...)
+  vcov(object$estimate, ...)
 }
 
 #' @export
 coef.targeted <- function(object, ...) {
-    coef(object$estimate, ...)
+  coef(object$estimate, ...)
 }

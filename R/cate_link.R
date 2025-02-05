@@ -8,8 +8,8 @@ score_fold <- function(fold,
   deval <- data[fold, ]
 
   # training
-  tmp <- propensity_model$estimate(dtrain)
-  tmp <- response_model$estimate(dtrain)
+  tmp <- propensity_model$estimate(dtrain) # nolint
+  tmp <- response_model$estimate(dtrain) # nolint
   A <- propensity_model$response(dtrain)
   Y <- response_model$response(dtrain)
   X <- dtrain
@@ -105,8 +105,9 @@ crr <- function(treatment,
 
   response_var <- lava::getoutcome(response_model$formula, data=data)
   treatment_var <- lava::getoutcome(treatment)
-  treatment_f <- function(treatment_level, x=paste0(".-", response_var))
+  treatment_f <- function(treatment_level, x = paste0(".-", response_var)) {
     as.formula(paste0("I(", treatment_var, "==", treatment_level, ") ~ ", x))
+  }
   if (missing(propensity_model)) {
     propensity_model <- SL(treatment_f(contrast[1]), ..., binomial=TRUE)
   }
@@ -155,10 +156,13 @@ crr <- function(treatment,
   score <- score * II[[2]]^(-2)
 
   if (type=="dml1") {
-    est1 <- lapply(folds, function(x) cate_fold1(x,
-                                                 data = data,
-                                                 score = score,
-                                                 cate_des = desA))
+    est1 <- lapply(folds, function(x) {
+      cate_fold1(x,
+        data = data,
+        score = score,
+        cate_des = desA
+      )
+    })
     est <- colMeans(Reduce(rbind, est1))
   } else {
     est <- coef(lm(score ~ -1+desA$x))
@@ -249,9 +253,9 @@ cate_link <- function(treatment,
 
   response_var <- lava::getoutcome(response_model$formula, data=data)
   treatment_var <- lava::getoutcome(treatment)
-  treatment_f <- function(treatment_level, x=paste0(".-", response_var))
+  treatment_f <- function(treatment_level, x = paste0(".-", response_var)) {
     as.formula(paste0("I(", treatment_var, "==", treatment_level, ") ~ ", x))
-
+  }
   if (missing(propensity_model)) {
     propensity_model <- SL(treatment_f(contrast[1]), ..., binomial=TRUE)
   }
@@ -311,10 +315,13 @@ cate_link <- function(treatment,
   }
 
   if (type=="dml1") {
-    est1 <- lapply(folds, function(x) cate_fold1(x,
-                                                 data = data,
-                                                 score = score,
-                                                 cate_des = desA))
+    est1 <- lapply(folds, function(x) {
+      cate_fold1(x,
+        data = data,
+        score = score,
+        cate_des = desA
+      )
+    })
     est <- colMeans(Reduce(rbind, est1))
   } else {
     est <- coef(lm(score ~ -1+desA$x))

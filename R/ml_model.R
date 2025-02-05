@@ -35,7 +35,7 @@
 #' ## tmp <- ff$estimate(y, x=x)
 #' ## ff$predict(x)
 #' @export
-ml_model <- R6::R6Class("ml_model",
+ml_model <- R6::R6Class("ml_model", # nolint
     public = list(
       #' @field info Optional information/name of the model
       info = NULL,

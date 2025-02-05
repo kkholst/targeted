@@ -25,7 +25,7 @@ quantitative_scoring1 <- function(response, prediction, weights=NULL, ...) {
     mae(response, prediction, weights=weights, ...))
 }
 
-multiclass_scoring1 <-
+multiclass_scoring1 <- # nolint
   function(response, prediction, levels = NULL, weights = NULL, messages = 1) {
     if (is.null(levels) && NCOL(prediction)>1) {
       levels <- colnames(prediction)
@@ -111,7 +111,8 @@ multiclass_scoring1 <-
 #' @return Numeric matrix of dimension m x p, where m is the number of
 #'   different models and p is the number of model metrics
 #' @export
-scoring <- function(response, ..., type="quantitative",
+scoring <- function(response, ...,
+                    type="quantitative",
                     levels=NULL, metrics=NULL,
                     weights=NULL, names=NULL, object=NULL, newdata=NULL,
                     messages=1) {
