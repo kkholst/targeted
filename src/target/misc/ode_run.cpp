@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
 
 
     mat ty = arma::join_horiz(t, y);
-    ty.save("y.csv", arma::csv_ascii);
+    ty.save("build/y.csv", arma::csv_ascii);
 
     return 0;
 }
