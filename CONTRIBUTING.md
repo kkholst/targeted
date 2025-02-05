@@ -19,7 +19,7 @@ For bug reports please include a small reproducible example which clearly demons
 
 ## Branches and branch prefixes
 
-We currently maintain a single active development branch `dev`.
+We currently maintain a single active development branch `develop`.
 
 ### Branch prefixes
 
@@ -34,12 +34,12 @@ prefix and hyphens (-) are used for separation. For example,
 
 ### Pull requests
 
-All pull requests (PRs) must be made on `dev`.
+All pull requests (PRs) must be made on `develop`.
 The title of the PR should follow the format of
 [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) and a
 summary of the proposed changes must be provided in the body of the PR. This
 makes it easier for maintainers as title and body can be reused once all commits
-are squashed before merging the feature branch into `dev`.
+are squashed before merging the feature branch into `develop`.
 
 ## Continuous integration
 

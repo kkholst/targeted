@@ -1,7 +1,9 @@
 # runs r cmd check + unit tests in inst/tinytest
-name: r-cmd-check
+on:
+  pull_request:
+    branches: [main, develop]
 
-on: [push]
+name: r-cmd-check
 
 jobs:
   r-cmd-check:

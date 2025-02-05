@@ -1,4 +1,4 @@
-name: target library (cpp) tests
+name: target library tests
 
 on: [push]
 
