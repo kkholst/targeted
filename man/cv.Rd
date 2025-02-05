@@ -17,6 +17,7 @@ cv(
   args.pred = NULL,
   args.future = list(),
   mc.cores,
+  silent = FALSE,
   ...
 )
 }
@@ -49,6 +50,8 @@ below)}
 
 \item{mc.cores}{Optional number of cores. \link[parallel:mclapply]{parallel::mcmapply} used instead
 of future}
+
+\item{silent}{suppress all messages and progressbars}
 
 \item{...}{Additional arguments parsed to models in models}
 }

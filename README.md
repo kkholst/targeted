@@ -4,10 +4,11 @@
 
 
 <!-- badges: start -->
-  [![R-CMD-check](https://github.com/kkholst/targeted/workflows/R-CMD-check/badge.svg?branch=master)](https://github.com/kkholst/targeted/actions)    
-  [![coverage](https://app.codecov.io/github/kkholst/targeted/coverage.svg?branch=main)](https://app.codecov.io/github/kkholst/targeted?branch=main)
-  [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/license/apache-2-0)
-  [![cran](https://www.r-pkg.org/badges/version-last-release/targeted)](https://cranlogs.r-pkg.org/downloads/total/last-month/targeted)
+[![r-cmd-check](https://github.com/kkholst/targeted/actions/workflows/r_check.yaml/badge.svg?branch=main)](https://github.com/kkholst/targeted/actions/workflows/r_check.yaml)
+[![codecov](https://codecov.io/github/kkholst/targeted/graph/badge.svg?token=MMSEDLWIZd)](https://codecov.io/github/kkholst/targeted)
+  [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](
+  https://opensource.org/license/apache-2-0)
+[![cran](https://www.r-pkg.org/badges/version-last-release/targeted)](https://cranlogs.r-pkg.org/downloads/total/last-month/targeted)
 <!-- badges: end -->
 
 
