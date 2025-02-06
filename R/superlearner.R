@@ -135,7 +135,7 @@ SL <- function(formula=~., ...,
       stop("Package 'SuperLearner' required.")
   }
   pred <- as.character(formula)
-  pred <- ifelse (length(pred)==2, pred[2], pred[3])
+  pred <- ifelse(length(pred)==2, pred[2], pred[3])
   if (pred=="1") {
     SL.library <- "SL.mean"
   }

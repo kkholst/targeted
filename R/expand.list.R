@@ -31,7 +31,7 @@ expand.list <- function(...) {
   names(dots) <- nam
   dat <- do.call(expand.grid, c(dots,
             list(KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)))
-  res <- lapply(seq(NROW(dat)),
+  res <- lapply(seq_len(NROW(dat)),
                 function(i) {
                   res <- as.list(dat[i, ])
                   if (length(nulls)>0) res[nulls] <- list(NULL)

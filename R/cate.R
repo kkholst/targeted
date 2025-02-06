@@ -13,7 +13,7 @@ ate_if_fold <- function(fold, data,
   X <- deval
   if (stratify) {
     idx <- which(dtrain[, treatment]==level)
-    tmp <- response.model$estimate(dtrain[idx, , drop=FALSE])
+    tmp <- response.model$estimate(dtrain[idx, , drop=FALSE]) # nolint
   } else {
     tmp <- response.model$estimate(dtrain)
     X[, treatment] <- level
@@ -110,7 +110,7 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #' }
 #'
 #' @export
-cate <- function(response.model,
+cate <- function(response.model, # nolint
                  propensity.model,
                  cate.model = ~1,
                  contrast = c(1, 0),

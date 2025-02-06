@@ -269,7 +269,7 @@ predictor_sl <- function(model.list,
         length(model.list) == ncol(res)) {
         colnames(res) <- names(model.list)
       } else {
-        colnames(res) <- paste0("model", 1:length(model.list))
+        colnames(res) <- paste0("model", seq_len(length(model.list)))
       }
       if (!all.learners) {
         res <- as.vector(res %*% object$weights)
@@ -349,7 +349,7 @@ predictor_xgboost <-
         matrix(val, nrow = NROW(d), byrow = TRUE)
       }
     }
-    args$predict
+    args$predict <- pred
     args$estimate <- function(x, y, ..., nfolds, nrounds) {
       d <- xgboost::xgb.DMatrix(x, label = y)
       if (nfolds > 1L) {
@@ -457,14 +457,6 @@ predictor_grf_binary <- function(formula,
 #'
 ML <- function(formula, model="glm", ...) {
   model <- tolower(model)
-  dots <- list(...)
-  addargs <- function(..., dots, args = list()) {
-      for (p in names(args)) {
-          if (!(p %in% names(dots))) dots[p] <- args[[p]]
-      }
-      c(list(...), dots)
-  }
-
   ## SL / SuperLearner
   if (model == "sl") {
       return(predictor_sl(formula, ...))

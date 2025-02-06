@@ -45,7 +45,7 @@ check:
 	@_R_CHECK_FORCE_SUGGESTS_=0 echo 'res <- rcmdcheck::rcmdcheck(".", build_args=c("--no-build-vignettes"), args=c("--ignore-vignettes"))' | $(R)
 
 lint:
-	@echo 'devtools::lint(".")' | $(R)
+	@echo 'devtools::lint(".", show_progress = TRUE)' | $(R)
 
 test: test-installed
 test-installed: # tests locally installed version package

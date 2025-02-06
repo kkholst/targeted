@@ -81,7 +81,8 @@
 #' ## Model with same design matrix for nuisance and propensity model:
 #' with(d, riskreg_fit(y, a, nuisance=X, type="rr"))
 #'
-#' ## a <- riskreg(y ~ a, target=~z, nuisance=~x,  propensity=~x, data=d, type="rr")
+#' ## a <- riskreg(y ~ a, target=~z, nuisance=~x,
+#' ## propensity=~x, data=d, type="rr")
 #' a <- riskreg(y ~ a | z, nuisance=~x,  propensity=~x, data=d, type="rr")
 #' a
 #' predict(a, d[1:5,])
@@ -138,20 +139,39 @@ riskreg <- function(formula,
 
 
 #' @export
-riskreg_mle <- function(y, a, x1, x2=x1, weights=rep(1, length(y)), std.err=TRUE,
-                        type="rr", start=NULL, control=list(), ...) {
+riskreg_mle <- function(y, a, x1, x2=x1,
+                        weights=rep(1, length(y)),
+                        std.err=TRUE,
+                        type="rr",
+                        start=NULL,
+                        control=list(),
+                        ...) {
     x1 <- cbind(x1)
     x2 <- cbind(x2)
     type <- substr(type, 1, 2)
-    f <- function(p) -as.vector(bin_logl(y=y, a=cbind(a),
-                                      x1=cbind(x1), x2=cbind(x2),
-                                      par=p, weights=weights, type=type))
-    df <- function(p, ...) -bin_dlogl(y=y, a=cbind(a),
-                              x1=cbind(x1), x2=cbind(x2),
-                              par=p, weights=weights, type=type, ...)
-    d2f <- function(theta) deriv(function(p) -bin_dlogl_c(y=y, a=cbind(a),
-                                        x1=cbind(x1), x2=cbind(x2),
-                                        par=p, weights=weights, type=type), theta)
+    f <- function(p) {
+      -as.vector(bin_logl(
+        y = y, a = cbind(a),
+        x1 = cbind(x1), x2 = cbind(x2),
+        par = p, weights = weights, type = type
+      ))
+    }
+    df <- function(p, ...) {
+      -bin_dlogl(
+        y = y, a = cbind(a),
+        x1 = cbind(x1), x2 = cbind(x2),
+        par = p, weights = weights, type = type, ...
+      )
+    }
+    d2f <- function(theta) {
+      deriv(function(p) {
+        -bin_dlogl_c(
+          y = y, a = cbind(a),
+          x1 = cbind(x1), x2 = cbind(x2),
+          par = p, weights = weights, type = type
+        )
+      }, theta)
+    }
     # Starting values
     if (is.null(start))
         start <- rep(0.0, ncol(x1)+ncol(x2))
@@ -173,19 +193,21 @@ riskreg_mle <- function(y, a, x1, x2=x1, weights=rep(1, length(y)), std.err=TRUE
     }
     est$IC <- ii * NROW(ii)
     rownames(est$IC) <- rownames(cbind(y))
-    structure(list(estimate=est, npar=c(ncol(x1), ncol(x2)), logLik=loglik, nobs=length(y),
+    structure(list(estimate=est, npar=c(ncol(x1), ncol(x2)),
+                   logLik=loglik, nobs=length(y),
                    opt=op, bread=V*NROW(ii), type=type, estimator="mle"),
               class=c("riskreg.targeted", "targeted"))
 }
 
 
 #' @export
-riskreg_fit <- function(y, a,
+riskreg_fit <- function(y, a, # nolint
                  target=NULL, nuisance=NULL, propensity=nuisance,
                  weights=rep(1, length(y)), optimal=TRUE,
                  std.err=TRUE, type="rr", start=NULL, control=list(),
                  mle, ...) {
-    ones <- cbind(rep(1, length(y))); colnames(ones) <- c("(Intercept)")
+  ones <- cbind(rep(1, length(y)))
+  colnames(ones) <- c("(Intercept)")
     if (is.null(target)) target <- ones
     if (is.null(nuisance)) nuisance <- ones
     if (is.null(propensity)) propensity <- ones
@@ -201,9 +223,12 @@ riskreg_fit <- function(y, a,
     theta0 <- coef(mle$estimate)
     alpha0 <- start
     if (is.null(alpha0)) {
-        alpha0 <- theta0[seq(NCOL(target))]
+        alpha0 <- theta0[seq_len(NCOL(target))]
     }
-    propmod <- glm.fit(y=a, x=propensity, weights=weights, family=binomial("logit"))
+    propmod <- glm.fit(
+      y = a, x = propensity,
+      weights = weights, family = binomial("logit")
+    )
     gamma <- propmod$coefficients
     pr <- propmod$fitted
     omega <- 1
@@ -211,7 +236,9 @@ riskreg_fit <- function(y, a,
     type <- gsub("[0-9]", "", type)
     if (optimal) {
         pp <- bin_pa(y=y, a=a, x1=target, x2=nuisance, par=theta0, type=type)
-        p0 <- pp[, 2]; p1 <- pp[, 3]; targetpar <- pp[, 4]
+        p0 <- pp[, 2]
+        p1 <- pp[, 3]
+        targetpar <- pp[, 4]
         if (type=="rd" || type=="rd2") {
             ## E(A drho/(Pa(1-Pa))|V) = pr*drho/[p1(1-p1)]
             nom <- pr*(1-targetpar^2)/(p1*(1-p1))
@@ -244,9 +271,11 @@ riskreg_fit <- function(y, a,
     opt <- nlminb(alpha0, f, control=control)
     if (opt$objective>1e-3) {
         suppressWarnings(
-            op <- optimx::optimx(alpha0, f,
-                                 method=c("Nelder-Mead", "BFGS", "nlminb", "Rcgmin"),
-                                 control=control))
+          op <- optimx::optimx(alpha0, f,
+            method = c("Nelder-Mead", "BFGS", "nlminb", "Rcgmin"),
+            control = control
+          )
+        )
         op1 <- head(summary(op, order="value"), 1)
         opt <- list(objective=op1[, "value", drop=TRUE],
                     par=unlist(op1[, seq_along(alpha0), drop=TRUE]))
@@ -260,13 +289,18 @@ riskreg_fit <- function(y, a,
         alphahat <- opt$par
         alpha.index <- seq_along(opt$par)
         theta.index <- seq_along(theta0) + length(alpha.index)
-        gamma.index <- seq_along(gamma) + length(alpha.index) + length(theta.index)
+        gamma.index <- seq_along(gamma) +
+          length(alpha.index) + length(theta.index)
         pp <- c(alphahat, thetahat)
-        U <- function(p) bin_esteq_c(y=y, a=a,
-                              x1=target, x2=nuisance, x3=propensity,
-                              alpha=p[seq_along(alphahat)],
-                              par=p[seq_along(thetahat)+length(alphahat)],
-                              weights=weights1, type=type)
+        U <- function(p) {
+          bin_esteq_c(
+            y = y, a = a,
+            x1 = target, x2 = nuisance, x3 = propensity,
+            alpha = p[seq_along(alphahat)],
+            par = p[seq_along(thetahat) + length(alphahat)],
+            weights = weights1, type = type
+          )
+        }
         DU  <- deriv(U, pp)
         U0 <- u(alphahat, indiv=TRUE)
         iid.gamma <- fast_iid(y, pr, propensity, weights)/length(y)
@@ -289,8 +323,11 @@ riskreg_fit <- function(y, a,
     est$IC <- ii * NROW(ii)
     rownames(est$IC) <- rownames(cbind(y))
     propmod <- lava::estimate(coef=coef(propmod), vcov=Vprop, colnames)
-    structure(list(estimate=est, opt=opt, npar=c(ncol(target), ncol(nuisance), ncol(propensity)), nobs=length(y),
-                   mle=mle, prop=propmod, type=type, estimator="dre"),
+  structure(list(estimate=est, opt=opt,
+                 npar=c(ncol(target), ncol(nuisance), ncol(propensity)),
+                 nobs=length(y),
+                 mle=mle, prop=propmod, type=type,
+                 estimator="dre"),
               class=c("riskreg.targeted", "targeted"))
 }
 
@@ -310,14 +347,21 @@ print.summary.riskreg.targeted <- function(x, ...) {
     cat("  Response: ", nam[[1]], "\n")
     cat("  Exposure: ", nam[[2]], "\n")
     cat("\n")
-    if (x$estimator=="mle") {
-        print(x$estimate, unique.names=FALSE,
-              sep.which=c(0, length(nam[[3]])),
-              sep.labels=paste0(c(model, "log(OP)"), ":"), ...)
+    if (x$estimator == "mle") {
+      print(x$estimate,
+        unique.names = FALSE,
+        sep.which = c(0, length(nam[[3]])),
+        sep.labels = paste0(c(model, "log(OP)"), ":"), ...
+      )
     } else {
-        print(x$estimate, unique.names=FALSE,
-              sep.which=c(0, length(nam[[3]]), length(nam[[3]])+length(nam[[4]])),
-              sep.labels=paste0(c(model, "log(OP)", "logit(Pr)"), ":"), ...)
+      print(x$estimate,
+        unique.names = FALSE,
+        sep.which = c(
+          0, length(nam[[3]]),
+          length(nam[[3]]) + length(nam[[4]])
+        ),
+        sep.labels = paste0(c(model, "log(OP)", "logit(Pr)"), ":"), ...
+      )
     }
     cat("\n")
 }
@@ -339,19 +383,32 @@ summary.riskreg.targeted <- function(object, ...) {
     } else {
         cc <- rbind(object$mle$estimate$coefmat, object$prop$coefmat)
         cc[seq_len(object$npar[1]), ] <- object$estimate$coefmat
-        cc <- lava::estimate(coef=cc[, 1], vcov=diag(cc[, 2]^2, ncol=nrow(cc)), labels=rownames(cc))
+        cc <- lava::estimate(
+          coef = cc[, 1],
+          vcov = diag(cc[, 2]^2, ncol = nrow(cc)),
+          labels = rownames(cc)
+          )
     }
-    structure(list(estimate=cc, npar=object$npar, estimator=object$estimator, call=object$call,
-                   model=model, type=type, names=nam), class="summary.riskreg.targeted")
+    structure(
+      list(
+        estimate = cc,
+        npar = object$npar,
+        estimator = object$estimator,
+        call = object$call,
+        model = model, type = type, names = nam
+      ),
+      class = "summary.riskreg.targeted"
+    )
 }
 
 
+# a: Binary exposure (optional if newdata is provide)
+# X: Nuisance design matrix (odds-product) (optional)
+# Z: Relative risk/Risk difference design matrix (optional)
 #' @export
 predict.riskreg.targeted <- function(object,
                                      newdata,
-                                     a, ## Binary exposure (optional if newdata is provide)
-                                     X, ## Nuisance design matrix (odds-product) (optional)
-                                     Z, ## Relative risk/Risk difference design matrix (optional)
+                                     a, X, Z,
                                      ...) {
   if (missing(Z))
     Z <- with(object, update(des.target, newdata)$x)

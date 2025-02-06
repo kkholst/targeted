@@ -39,7 +39,8 @@
 #' x <- cv(list(m0=f0,m1=f1,m2=f2),rep=10, data=iris, formula=Sepal.Length~.)
 #' x
 #' @export
-cv <- function(models, data, response = NULL,
+cv <- function(models, data, # nolint
+               response = NULL,
                nfolds = 5, rep = 1,
                weights = NULL,
                model.score = scoring,
