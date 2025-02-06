@@ -139,6 +139,8 @@ alean <- function(response.model,
       deval <- data[fold, ]
     }
 
+    tmp <- Ymod$estimate(dtrain) ## E(Y|A,L)
+    tmp <- Amod$estimate(dtrain) ## E(A|L)
     EA <- Amod$predict(newdata = deval)
     EY <- Ymod$predict(newdata = deval)
     dtrain[, g_model_response] <- g(EY)
@@ -150,6 +152,7 @@ alean <- function(response.model,
       X[, A_var] <- A_levels[1]
       Eg <- Eg + (1 - EA) * Ymod$predict(newdata = X)
     } else {
+      tmp <- gmod$estimate(dtrain)
       Eg <- gmod$predict(newdata = deval)
     }
     Y <- Ymod$response(deval, na.action = na.pass)
