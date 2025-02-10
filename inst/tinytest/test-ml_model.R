@@ -7,10 +7,7 @@ ddata$y <- with(ddata, x1 * 2 - x2 + rnorm(n))
 # test various ways to initialize an ml_model
 test_initialize <- function() {
   # formula supplied + used in estimate function
-  m1 <- ml_model$new(
-    formula = y ~ -1 + x1 + x2,
-    estimate = glm
-  )
+  m1 <- ml_model$new(formula = y ~ -1 + x1 + x2, estimate = glm)
   m1$estimate(ddata)
 
   # formula supplied + not used in estimate function -> use targeted::design
@@ -47,9 +44,7 @@ test_initialize <- function() {
   fit <- glm(y ~ -1 + x1 + x2, data = ddata, weights = ww)
 
   m1_weights <- ml_model$new(
-    formula = y ~ -1 + x1 + x2,
-    estimate = glm,
-    weights = ww
+    formula = y ~ -1 + x1 + x2, estimate = glm, weights = ww
   )
   m1_weights$estimate(ddata)
   expect_equal(coef(m1_weights$fit), coef(fit))
@@ -63,10 +58,12 @@ test_estimate <- function() {
   # verify that optional arguments are passed on to fitfun
   ww <- rep(c(0, 1), length.out = n)
   m1 <- ml_model$new(formula = y ~ x1 + x2, estimate = glm)
-  m1$estimate(ddata, weights = ww)
+  fit_ml <- m1$estimate(ddata, weights = ww)
 
   fit <- glm(y ~ x1 + x2, data = ddata, weights = ww)
   expect_equal(coef(m1$fit), coef(fit))
+  # verify that estimate method returns output of estimate function
+  expect_equal(coef(fit_ml), coef(fit))
 
   # arguments to fitfun when supplied during initialization cannot be
   # overridden during estimate method call
@@ -77,3 +74,24 @@ test_estimate <- function() {
   )
 }
 test_estimate()
+
+# test predict method
+test_predict <- function() {
+  m <- ml_model$new(formula = y ~ x1 + x2, estimate = glm)
+  fit_ml <- m$estimate(ddata)
+
+  fit_glm <- glm(y ~ x1 + x2, data = ddata)
+
+  expect_equal(m$predict(ddata), predict(fit_glm, ddata))
+  # method also works as expect when supplying fitted object
+  expect_equal(m$predict(ddata, object = fit_ml), predict(fit_glm, ddata))
+
+  devtools::load_all()
+  m1 <- ml_model$new(
+    formula = y ~ x1 + x2,
+    estimate = glm,
+    predict = \(newdata, object) predict(object, newdata)
+  )
+  m1$estimate(ddata)
+  m1$predict(ddata)
+}
