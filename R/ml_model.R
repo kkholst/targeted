@@ -99,11 +99,11 @@ ml_model <- R6::R6Class("ml_model", # nolint
       }
       if (no_formula) {
         private$fitfun <- function(...) {
-          args <-  c(list(...), dots)
+          args <- c(list(...), dots)
           do.call(private$init.estimate, args)
         }
         private$predfun <- function(...) {
-          args <-  c(list(...), predict.args)
+          args <- c(list(...), predict.args)
           do.call(private$init.predict, args)
         }
       } else {
@@ -161,10 +161,12 @@ ml_model <- R6::R6Class("ml_model", # nolint
         predict = formals(predict)
       )
 
-      private$call <- list(estimate=substitute(estimate),
-                           predict=substitute(predict),
-                           argslist=substitute(dots),
-                           predict.args=substitute(predict.args))
+      private$call <- list(
+        estimate = substitute(estimate),
+        predict = substitute(predict),
+        argslist = substitute(dots),
+        predict.args = substitute(predict.args)
+      )
      },
 
      #' @description
@@ -173,7 +175,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
      #' @param ... Additional arguments to estimation method
      #' @param store Logical determining if estimated model should be
      #'   stored inside the class.
-     estimate = function(data, ..., store=TRUE) {
+     estimate = function(data, ..., store = TRUE) {
        res <- private$fitfun(data, ...)
        if (store) private$fitted <- res
        return(invisible(res))
