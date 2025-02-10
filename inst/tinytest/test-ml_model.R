@@ -4,6 +4,9 @@ n <- 1e3
 ddata <- data.frame(x1 = rnorm(n), x2 = rnorm(n))
 ddata$y <- with(ddata, x1 * 2 - x2 + rnorm(n))
 
+ddata_count <- data.frame(x = rnorm(n), w = rep(c(1, 2), length.out = n))
+ddata_count$y <- with(ddata_count, rpois(n, exp(2 + 0.5 * x) * w))
+
 # test various ways to initialize an ml_model
 test_initialize <- function() {
   # formula supplied + used in estimate function
@@ -50,6 +53,18 @@ test_initialize <- function() {
   expect_equal(coef(m1_weights$fit), coef(fit))
   # additional check to verify that weights change the estimates
   expect_false(all(coef(m1_weights$fit) == coef(m1$fit)))
+
+  # test that predict.args are passed on correctly to predict function
+  m_count <- ml_model$new(
+    formula = y ~ x + offset(w), estimate = glm, family = poisson,
+    predict.args = list(type = "response")
+  )
+  m_count$estimate(ddata_count)
+  fit_count <- glm(y ~ x + offset(w), family = poisson, data = ddata_count)
+  expect_equal(
+    m_count$predict(ddata_count),
+    predict(fit_count, ddata_count, type = "response")
+  )
 }
 test_initialize()
 
@@ -77,21 +92,34 @@ test_estimate()
 
 # test predict method
 test_predict <- function() {
-  m <- ml_model$new(formula = y ~ x1 + x2, estimate = glm)
-  fit_ml <- m$estimate(ddata)
+  fit_glm <- glm(y ~ x + offset(w), family = poisson, data = ddata_count)
 
-  fit_glm <- glm(y ~ x1 + x2, data = ddata)
-
-  expect_equal(m$predict(ddata), predict(fit_glm, ddata))
-  # method also works as expect when supplying fitted object
-  expect_equal(m$predict(ddata, object = fit_ml), predict(fit_glm, ddata))
-
-  devtools::load_all()
-  m1 <- ml_model$new(
-    formula = y ~ x1 + x2,
-    estimate = glm,
-    predict = \(newdata, object) predict(object, newdata)
+  m <- ml_model$new(
+    formula = y ~ x + offset(w), estimate = glm, family = poisson
   )
-  m1$estimate(ddata)
-  m1$predict(ddata)
+  fit_ml <- m$estimate(ddata_count)
+
+  expect_equal(m$predict(ddata_count), predict(fit_glm, ddata_count))
+  # method also works as expect when supplying fitted object
+  expect_equal(
+    m$predict(ddata_count, object = fit_ml),
+    predict(fit_glm, ddata_count)
+  )
+  # method passes on additional arguments to underlying predict function
+  expect_equal(
+    m$predict(ddata_count, type = "response"),
+    predict(fit_glm, ddata_count, type = "response")
+  )
+
+  # error when trying to override predict.args during predict method call
+  m_err <- ml_model$new(
+    formula = y ~ x + offset(w), estimate = glm, family = poisson,
+    predict.args = list(type = "response")
+  )
+  m_err$estimate(ddata_count)
+  expect_error(
+    m_err$predict(ddata_count, type = "link"),
+    pattern = 'formal argument "type" matched by multiple actual arguments'
+  )
 }
+test_predict()
