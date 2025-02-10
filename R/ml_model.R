@@ -44,7 +44,8 @@ ml_model <- R6::R6Class("ml_model", # nolint
       formals = NULL,
       #' @field formula Formula specifying response and design matrix
       formula = NULL,
-      #' @field args additional arguments specified during initialization
+      #' @field args optional arguments to fitting function specified during
+      #' initialization
       args = NULL,
       #' @field description optional description field
       description = NULL,
@@ -64,14 +65,14 @@ ml_model <- R6::R6Class("ml_model", # nolint
      #' @param response.arg name of response argument
      #' @param x.arg name of design matrix argument
      #' @param ... optional arguments to fitting function
-      initialize = function(formula=NULL,
+      initialize = function(formula = NULL,
                            estimate,
-                           predict=stats::predict,
-                           predict.args=NULL,
-                           info=NULL,
+                           predict = stats::predict,
+                           predict.args = NULL,
+                           info = NULL,
                            specials = c(),
-                           response.arg="y",
-                           x.arg="x",
+                           response.arg = "y",
+                           x.arg = "x",
                            ...) {
       dots <- list(...)
       if (!is.null(dots$fit)) { ## Backward compatibility
@@ -84,9 +85,9 @@ ml_model <- R6::R6Class("ml_model", # nolint
       estimate <- add_dots(estimate)
 
       des.args <- list(specials = specials)
-      fit_formula <- "formula"%in%formalArgs(estimate)
+      fit_formula <- "formula" %in% formalArgs(estimate)
       fit_response_arg <- response.arg %in% formalArgs(estimate)
-      fit_x_arg <- x.arg%in%formalArgs(estimate)
+      fit_x_arg <- x.arg %in% formalArgs(estimate)
       fit_data_arg <- "data" %in% formalArgs(estimate)
       private$init.estimate <- estimate
       private$init.predict <- predict
