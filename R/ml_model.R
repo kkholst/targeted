@@ -186,7 +186,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
      #' @param newdata data.frame
      #' @param ... Additional arguments to prediction method
      #' @param object Optional model fit object
-     predict = function(newdata, ..., object=NULL) {
+     predict = function(newdata, ..., object = NULL) {
        if (is.null(object)) object <- private$fitted
        if (is.null(object)) stop("Provide estimated model object")
        private$predfun(object, newdata, ...)
@@ -195,8 +195,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
      #' @description
      #' Update formula
      #' @param formula formula or character which defines the new response
-     #' @param ... Additional arguments to lower level functions
-     update = function(formula, ...) {
+     update = function(formula) {
        if (is.character(formula)) {
          if (grepl("~", formula))
            formula <- as.formula(formula)
@@ -210,8 +209,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
 
      #' @description
      #' Print method
-     #' @param ... Additional arguments to lower level functions
-     print = function(...) {
+     print = function() {
        cat("Prediction Model (class ml_model)",
            "\n_________________________________\n\n")
        if (!is.null(self$info))
