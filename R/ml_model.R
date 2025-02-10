@@ -16,7 +16,7 @@
 #'   ml_model$new(formula,
 #'     info = "grf::probability_forest",
 #'     estimate = function(x, y, ...) {
-#'       grf::probability_forest(X = x, Y = y, ...),
+#'       grf::probability_forest(X = x, Y = y, ...)
 #'     },
 #'     predict = function(object, newdata) {
 #'       predict(object, newdata)$predictions
