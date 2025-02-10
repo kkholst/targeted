@@ -53,7 +53,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
      #' Create a new prediction model object
      #' @param formula formula specifying outcome and design matrix
      #' @param estimate function for fitting the model (must be a function
-     #'   response, 'y', and design matrix, 'x'. Alternatively, a function
+     #'  with response, 'y', and design matrix, 'x'. Alternatively, a function
      #'  with a single 'formula' argument)
      #' @param predict prediction function (must be a function of model
      #' object, 'object', and new design matrix, 'newdata')
