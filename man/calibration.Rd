@@ -25,7 +25,8 @@ calibration(
 
 \item{threshold}{do not calibrate if less then 'threshold' events}
 
-\item{method}{either 'isotonic' (pava), 'logistic', 'mspline' (monotone spline), 'bin' (local constant)}
+\item{method}{either 'isotonic' (pava), 'logistic',
+'mspline' (monotone spline), 'bin' (local constant)}
 
 \item{breaks}{optional number of bins (only for method 'bin')}
 
@@ -34,7 +35,8 @@ calibration(
 \item{...}{additional arguments to lower level functions}
 }
 \value{
-An object of class '\code{calibration}' is returned. See \code{\link{calibration-class}}
+An object of class '\code{calibration}' is returned.
+See \code{\link{calibration-class}}
 for more details about this class and its generic functions.
 }
 \description{
