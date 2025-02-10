@@ -290,8 +290,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
      #' @description
      #' Get options
      #' @param arg name of option to get value of
-     #' @param ... additional arguments to lower level functions
-     opt = function(arg, ...) {
+     opt = function(arg) {
        return(self$args[[arg]])
      }
 
