@@ -21,27 +21,39 @@ Provides standardized estimation and prediction methods
 }
 \examples{
 data(iris)
-rf <- function(formula, ...)
-ml_model$new(formula, info="grf::probability_forest",
-  estimate=function(x,y, ...) grf::probability_forest(X=x, Y=y, ...),
-  predict=function(object, newdata)
-             predict(object, newdata)$predictions, ...)
+rf <- function(formula, ...) {
+  ml_model$new(formula,
+    info = "grf::probability_forest",
+    estimate = function(x, y, ...) {
+      grf::probability_forest(X = x, Y = y, ...),
+    }
+    predict = function(object, newdata) {
+      predict(object, newdata)$predictions
+    },
+    ...
+  )
+}
 
-args <- expand.list(num.trees=c(100,200), mtry=1:3,
-          formula=c(Species ~ ., Species ~ Sepal.Length + Sepal.Width))
+args <- expand.list(
+  num.trees = c(100, 200), mtry = 1:3,
+  formula = c(Species ~ ., Species ~ Sepal.Length + Sepal.Width)
+)
 models <- lapply(args, function(par) do.call(rf, par))
 
 x <- models[[1]]$clone()
 x$estimate(iris)
-predict(x, newdata=head(iris))
+predict(x, newdata = head(iris))
 
-\donttest{ # Reduce Ex. timing
-a <- targeted::cv(models, data=iris)
+\donttest{
+# Reduce Ex. timing
+a <- targeted::cv(models, data = iris)
 cbind(coef(a), attr(args, "table"))
 }
 
-ff <- ml_model$new(estimate=function(y,x) lm.fit(x=x, y=y),
-        predict=function(object, newdata) newdata\%*\%object$coefficients)
+ff <- ml_model$new(
+  estimate = function(y, x) lm.fit(x = x, y = y),
+  predict = function(object, newdata) newdata \%*\% object$coefficients
+)
 ## tmp <- ff$estimate(y, x=x)
 ## ff$predict(x)
 }
