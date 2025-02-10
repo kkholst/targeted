@@ -57,3 +57,23 @@ test_initialize <- function() {
   expect_false(all(coef(m1_weights$fit) == coef(m1$fit)))
 }
 test_initialize()
+
+# test estimation method
+test_estimate <- function() {
+  # verify that optional arguments are passed on to fitfun
+  ww <- rep(c(0, 1), length.out = n)
+  m1 <- ml_model$new(formula = y ~ x1 + x2, estimate = glm)
+  m1$estimate(ddata, weights = ww)
+
+  fit <- glm(y ~ x1 + x2, data = ddata, weights = ww)
+  expect_equal(coef(m1$fit), coef(fit))
+
+  # arguments to fitfun when supplied during initialization cannot be
+  # overridden during estimate method call
+  m2 <- ml_model$new(formula = y ~ x1 + x2, estimate = glm, weights = ww)
+  expect_error(
+    m2$estimate(data = ddata, weights = ww),
+    pattern = 'formal argument "weights" matched by multiple actual arguments'
+  )
+}
+test_estimate()
