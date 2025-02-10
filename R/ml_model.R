@@ -74,7 +74,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
     #' @param info optional description of the model
     #' @param predict.args optional arguments to prediction function
     #' @param specials optional additional terms (weights, offset,
-    #'  id, subset, ...) passed to [targeted::design] via the special argument
+    #'  id, subset, ...) passed to 'estimate'
     #' @param response.arg name of response argument
     #' @param x.arg name of design matrix argument
     #' @param ... optional arguments to fitting function
