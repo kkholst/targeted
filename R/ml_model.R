@@ -264,8 +264,8 @@ ml_model <- R6::R6Class("ml_model", # nolint
      #' @param data data.frame
      #' @param eval when FALSE return the untransformed outcome
      #' (i.e., return 'a' if formula defined as I(a==1) ~ ...)
-     #' @param ... additional arguments to 'design'
-     response = function(data, eval=TRUE, ...) {
+     #' @param ... additional arguments to [targeted::design]
+     response = function(data, eval = TRUE, ...) {
        if (is.null(self$formula)) {
          if (!is.null(self$responsevar)) {
            return(data[, self$responsevar, drop = TRUE])
@@ -282,7 +282,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
      #' @description
      #' Extract design matrix (features) from data
      #' @param data data.frame
-     #' @param ... additional arguments to 'design'
+     #' @param ... additional arguments to [targeted::design]
      design = function(data, ...) {
        design(self$formula, data=data, ...)$x
      },
