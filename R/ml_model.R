@@ -336,8 +336,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
 )
 #' @export
 estimate.ml_model <- function(x, ...) {
-  val <- x$estimate(...)
-  val
+  x$estimate(...)
 }
 
 #' @export
