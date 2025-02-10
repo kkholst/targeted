@@ -115,6 +115,7 @@ Create a new prediction model object
   info = NULL,
   specials = c(),
   response.arg = "y",
+  intercept = FALSE,
   x.arg = "x",
   ...
 )}\if{html}{\out{</div>}}
@@ -140,6 +141,8 @@ object, 'object', and new design matrix, 'newdata')}
 id, subset, ...) passed to 'estimate'}
 
 \item{\code{response.arg}}{name of response argument}
+
+\item{\code{intercept}}{(logical) include intercept in design matrix}
 
 \item{\code{x.arg}}{name of design matrix argument}
 

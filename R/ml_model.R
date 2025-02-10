@@ -76,6 +76,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
     #' @param specials optional additional terms (weights, offset,
     #'  id, subset, ...) passed to 'estimate'
     #' @param response.arg name of response argument
+    #' @param intercept (logical) include intercept in design matrix
     #' @param x.arg name of design matrix argument
     #' @param ... optional arguments to fitting function
     initialize = function(formula = NULL,
@@ -85,6 +86,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
                           info = NULL,
                           specials = c(),
                           response.arg = "y",
+                          intercept = FALSE,
                           x.arg = "x",
                           ...) {
       dots <- list(...)
@@ -97,7 +99,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
       }
       estimate <- add_dots(estimate)
 
-      des.args <- list(specials = specials)
+      des.args <- list(specials = specials, intercept = intercept)
       fit_formula <- "formula" %in% formalArgs(estimate)
       fit_response_arg <- response.arg %in% formalArgs(estimate)
       fit_x_arg <- x.arg %in% formalArgs(estimate)
