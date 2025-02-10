@@ -22,7 +22,8 @@ NB(
 
 \item{weights}{optional frequency weights}
 
-\item{kernel}{If TRUE a kernel estimator is used for numeric predictors (otherwise a gaussian model is used)}
+\item{kernel}{If TRUE a kernel estimator is used for numeric predictors
+(otherwise a gaussian model is used)}
 
 \item{laplace.smooth}{Laplace smoothing}
 
@@ -40,8 +41,8 @@ Naive Bayes Classifier
 }
 \examples{
 data(iris)
-m2 <- NB(Species ~ Sepal.Width + Petal.Length, data=iris)
-pr2 <- predict(m2, newdata=iris)
+m2 <- NB(Species ~ Sepal.Width + Petal.Length, data = iris)
+pr2 <- predict(m2, newdata = iris)
 }
 \author{
 Klaus K. Holst

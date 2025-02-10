@@ -11,12 +11,14 @@ objects of the S3 class '\code{NB}'
 The functions \code{\link{NB}} returns an object of the type
 \code{NB}.
 
-An object of class '\code{NB}' is a list with at least the following components:
+An object of class '\code{NB}' is a list with at least
+the following components:
 
 \describe{
-\item{prior}{Matrix with prior probabilities, i.e. marginal class probabilities Pr(class)}
-\item{pcond}{list of matrices with conditional probabilities of the features given
-the classes (one list element per class), Pr(x|class)}
+\item{prior}{Matrix with prior probabilities,
+i.e. marginal class probabilities Pr(class)}
+\item{pcond}{list of matrices with conditional probabilities
+of the features given the classes (one list element per class), Pr(x|class)}
 \item{classes}{Names (character vector) of the classes}
 \item{xvar}{number of repetitions of the CV}
 \item{xmodel}{Number of folds of the CV}
@@ -25,7 +27,8 @@ the classes (one list element per class), Pr(x|class)}
 }
 \section{S3 generics}{
 
-The following S3 generic functions are available for an object of class \code{NB}:
+The following S3 generic functions are available for an object
+of class \code{NB}:
 \describe{
 \item{\code{predict}}{Predict class probabilities for new features data.}
 \item{\code{print}}{Basic print method.}
