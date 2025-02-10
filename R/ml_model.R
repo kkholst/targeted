@@ -1,5 +1,6 @@
 #' @title R6 class for prediction models
 #' @description Provides standardized estimation and prediction methods
+#' @param data data.frame
 #' @author Klaus Kähler Holst
 #' @aliases ml_model predictor
 #' predictor_glm predictor_gam predictor_glmnet
@@ -107,7 +108,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
           do.call(private$init.predict, args)
         }
       } else {
-        if (fit_formula) {  ## Formula in arguments of estimation procedure
+        if (fit_formula) {  # Formula in arguments of estimation procedure
           private$fitfun <- function(data, ...) {
             args <- c(
               self$args, list(formula = self$formula, data = data),
@@ -116,7 +117,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
             return(do.call(private$init.estimate, args))
           }
         } else {
-          ##  Formula automatically processed into design matrix & response
+          #  Formula automatically processed into design matrix & response
           private$fitfun <- function(data, ...) {
             xx <- do.call(
               targeted::design,
@@ -171,7 +172,6 @@ ml_model <- R6::R6Class("ml_model", # nolint
 
      #' @description
      #' Estimation method
-     #' @param data data.frame
      #' @param ... Additional arguments to estimation method
      #' @param store Logical determining if estimated model should be
      #'   stored inside the class.
@@ -261,7 +261,6 @@ ml_model <- R6::R6Class("ml_model", # nolint
 
      #' @description
      #' Extract response from data
-     #' @param data data.frame
      #' @param eval when FALSE return the untransformed outcome
      #' (i.e., return 'a' if formula defined as I(a==1) ~ ...)
      #' @param ... additional arguments to [targeted::design]
@@ -281,7 +280,6 @@ ml_model <- R6::R6Class("ml_model", # nolint
 
      #' @description
      #' Extract design matrix (features) from data
-     #' @param data data.frame
      #' @param ... additional arguments to [targeted::design]
      design = function(data, ...) {
        design(self$formula, data=data, ...)$x
@@ -302,22 +300,22 @@ ml_model <- R6::R6Class("ml_model", # nolint
    ),
 
    private = list(
-     ## @field init.estimate Original estimate method supplied at initialization
+     # @field init.estimate Original estimate method supplied at initialization
      init.estimate = NULL,
-     ## @field init.predict Original predict method supplied at initialization
+     # @field init.predict Original predict method supplied at initialization
      init.predict = NULL,
-     ## @field predfun Prediction method
+     # @field predfun Prediction method
      predfun = NULL,
-     ## @field fitfun Estimation method
+     # @field fitfun Estimation method
      fitfun = NULL,
-     ## @field fitted Fitted model object
+     # @field fitted Fitted model object
      fitted = NULL,
-     ## @field call Information on the initialized model
+     # @field call Information on the initialized model
      call = NULL,
-     ## @field optional field containing name of response variable
+     # @field optional field containing name of response variable
      responsevar = NULL,
-     ## When x$clone(deep=TRUE) is called, the deep_clone gets invoked once for
-     ## each field, with the name and value.
+     # When x$clone(deep=TRUE) is called, the deep_clone gets invoked once for
+     # each field, with the name and value.
      deep_clone = function(name, value) {
        if (name == "fitfun") {
          env <- list2env(
@@ -329,14 +327,13 @@ ml_model <- R6::R6Class("ml_model", # nolint
          environment(value) <- env
          return(value)
        } else {
-         ## For everything else, just return it. This results in a shallow
-         ## copy of s3.
+         # For everything else, just return it. This results in a shallow
+         # copy of s3.
          return(value)
        }
      }
    )
 )
-##
 #' @export
 estimate.ml_model <- function(x, ...) {
   val <- x$estimate(...)

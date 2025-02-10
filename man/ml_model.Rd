@@ -61,7 +61,8 @@ prediction functions}
 
 \item{\code{formula}}{Formula specifying response and design matrix}
 
-\item{\code{args}}{additional arguments specified during initialization}
+\item{\code{args}}{optional arguments to fitting function specified during
+initialization}
 
 \item{\code{description}}{optional description field}
 }
@@ -113,7 +114,7 @@ Create a new prediction model object
 \item{\code{formula}}{formula specifying outcome and design matrix}
 
 \item{\code{estimate}}{function for fitting the model (must be a function
-response, 'y', and design matrix, 'x'. Alternatively, a function
+with response, 'y', and design matrix, 'x'. Alternatively, a function
 with a single 'formula' argument)}
 
 \item{\code{predict}}{prediction function (must be a function of model
@@ -184,15 +185,13 @@ Prediction method
 \subsection{Method \code{update()}}{
 Update formula
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ml_model$update(formula, ...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{ml_model$update(formula)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{formula}}{formula or character which defines the new response}
-
-\item{\code{...}}{Additional arguments to lower level functions}
 }
 \if{html}{\out{</div>}}
 }
@@ -203,16 +202,9 @@ Update formula
 \subsection{Method \code{print()}}{
 Print method
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ml_model$print(...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{ml_model$print()}\if{html}{\out{</div>}}
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{...}}{Additional arguments to lower level functions}
-}
-\if{html}{\out{</div>}}
-}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ml_model-response"></a>}}
@@ -231,7 +223,7 @@ Extract response from data
 \item{\code{eval}}{when FALSE return the untransformed outcome
 (i.e., return 'a' if formula defined as I(a==1) ~ ...)}
 
-\item{\code{...}}{additional arguments to 'design'}
+\item{\code{...}}{additional arguments to \link{design}}
 }
 \if{html}{\out{</div>}}
 }
@@ -250,7 +242,7 @@ Extract design matrix (features) from data
 \describe{
 \item{\code{data}}{data.frame}
 
-\item{\code{...}}{additional arguments to 'design'}
+\item{\code{...}}{additional arguments to \link{design}}
 }
 \if{html}{\out{</div>}}
 }
@@ -261,15 +253,13 @@ Extract design matrix (features) from data
 \subsection{Method \code{opt()}}{
 Get options
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ml_model$opt(arg, ...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{ml_model$opt(arg)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{arg}}{name of option to get value of}
-
-\item{\code{...}}{additional arguments to lower level functions}
 }
 \if{html}{\out{</div>}}
 }
