@@ -73,8 +73,8 @@ ml_model <- R6::R6Class("ml_model", # nolint
     #' object, 'object', and new design matrix, 'newdata')
     #' @param info optional description of the model
     #' @param predict.args optional arguments to prediction function
-    #' @param specials optional additional terms (weights, offset,
-    #'  id, subset, ...) passed to 'estimate'
+    #' @param specials optional specials terms (weights, offset,
+    #'  id, subset, ...) passed on to [targeted::design]
     #' @param response.arg name of response argument
     #' @param intercept (logical) include intercept in design matrix
     #' @param x.arg name of design matrix argument

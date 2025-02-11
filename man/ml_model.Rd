@@ -137,8 +137,8 @@ object, 'object', and new design matrix, 'newdata')}
 
 \item{\code{info}}{optional description of the model}
 
-\item{\code{specials}}{optional additional terms (weights, offset,
-id, subset, ...) passed to 'estimate'}
+\item{\code{specials}}{optional specials terms (weights, offset,
+id, subset, ...) passed on to \link{design}}
 
 \item{\code{response.arg}}{name of response argument}
 
