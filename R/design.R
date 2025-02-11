@@ -1,41 +1,104 @@
+model.extract2 <- function(frame, component) {
+  component <- as.character(substitute(component))
+  if (component %in% c("response", "offset")) {
+    return(model.extract(frame, component))
+  }
+  vname <- paste0("(", component, ")")
+  if (!(vname %in% names(frame))) {
+    regex <- paste0("^", component, "\\(.*\\)$")
+    if (any(grepl(regex, names(frame)))) {
+      vname <- grep(regex, names(frame))
+      if (length(vname) > 1) stop("model.extract2: non-unique component")
+    }
+  }
+  rval <- frame[[vname]]
+
+  if (!is.null(rval)) {
+    if (length(rval) == nrow(frame)) {
+      names(rval) <- attr(frame, "row.names")
+    } else if (is.matrix(rval) && nrow(rval) == nrow(frame)) {
+      t1 <- dimnames(rval)
+      dimnames(rval) <- list(
+        attr(frame, "row.names"),
+        t1[[2L]]
+      )
+    }
+  }
+  rval
+}
+
 #' Extract design matrix from data.frame and formula
 #' @title Extract design matrix
 #' @param formula formula
 #' @param data data.frame
-#' @param intercept If FALSE (default) an intercept is not included
+#' @param intercept (logical) If FALSE an intercept is not included in the
+#'   design matrix
+#' @param response (logical) if FALSE the response variable is dropped
 #' @param rm_envir Remove environment
-#' @param ... additional arguments (e.g, specials such weights, offsets,
-#'   subset)
+#' @param ... additional arguments (e.g, specials such weights, offsets, ...)
 #' @param specials character vector specifying functions in the formula that
 #'   should be marked as special in the [terms] object
+#' @param xlev a named list of character vectors giving the full set of levels
+#'   to be assumed for each factor
 #' @return An object of class 'design'
 #' @author Klaus Kähler Holst
 #' @export
-design <- function(formula, data, intercept=FALSE,
-                   rm_envir=FALSE, ..., specials = c("weights", "offset")) {
-  tt <- terms(formula, data = data)
-  if (!intercept)
-    attr(tt, "intercept") <- 0
-  mf <- model.frame(tt, data=data, ...)
-  x_levels <- .getXlevels(tt, mf)
-  x <- model.matrix(mf, data=data)
-  y <- model.response(mf, type="any")
+design <- function(formula, data,
+                   intercept = FALSE,
+                   response = FALSE,
+                   rm_envir = FALSE, ...,
+                   specials = c("weights", "offset"),
+                   xlev = NULL) {
+  tt <- terms(formula, data = data, specials = specials)
+  mf <- model.frame(tt,
+    data = data, ...,
+    xlev = xlev,
+    drop.unused.levels = FALSE
+    )
+  y <- model.response(mf, type = "any")
+  if (!response) tt <- delete.response(tt)
   specials <- union(
     specials,
     names(substitute(list(...)))[-1]
   )
+  if (is.null(xlev)) {
+    xlev <- .getXlevels(tt, mf)
+  }
+  xlev0 <- xlev
   specials_list <- c()
-  if (length(specials)>0) {
+  if (length(specials) > 0) {
+    des <- attr(tt, "factors")
+    sterm.pos <- c()
     for (s in specials) {
-      w <- eval(substitute(model.extract(mf, s), list(s=s)))
+      w <- eval(substitute(model.extract2(mf, s), list(s = s)))
       specials_list <- c(specials_list, list(w))
+      sterm <- rownames(des)[attr(tt, "specials")[[s]]]
+      if (length(sterm) > 0) {
+        sterm.pos <- c(sterm.pos, match(sterm, colnames(des))[1])
+      }
     }
     names(specials_list) <- specials
+    if (length(sterm.pos) > 0) {
+      tmp.terms <- drop.terms(tt, sterm.pos)
+      xlev0 <- .getXlevels(tmp.terms, mf)
+      mf <- model.frame(tmp.terms,
+        data = data, ...,
+        xlev = xlev0,
+        drop.unused.levels = FALSE
+      )
+    }
   }
-  tt <- delete.response(tt)
-  if (rm_envir)
-    attr(tt, ".Environment") <- NULL
-  res <- c(list(terms=tt, xlevels=x_levels, x=x, y=y,
+
+  x <- model.matrix(mf, data = data, xlev = xlev0)
+  has_intercept <- attr(tt, "intercept") == 1L
+  if (!intercept && has_intercept) {
+    has_intercept <- FALSE
+    x <- x[, -1, drop = FALSE]
+  }
+
+  if (rm_envir) attr(tt, ".Environment") <- NULL
+  res <- c(list(terms=tt, xlevels=xlev, x=x, y=y,
+                intercept = has_intercept,
                 data=data[0, ], ## Empty data.frame to capture structure of data
                 specials=specials),
            specials_list)
@@ -43,37 +106,20 @@ design <- function(formula, data, intercept=FALSE,
 }
 
 #' @export
-update.design <- function(object, data = NULL, ...,
-                          specials = c("weights", "offset")) {
-  if (is.null(data))  data <- object$data
-  mf <- model.frame(object$terms, data=data, ...,
-                    xlev = object$xlevels,
-                    drop.unused.levels=FALSE)
-  x <- model.matrix(mf, data=data, ..., xlev = object$xlevels)
-  object[["y"]] <- NULL
-  for (s in object$specials) {
-    object[[s]] <- NULL
-  }
-  specials2 <- names(substitute(list(...)))[-1]
-  for (s in specials2) {
-    object[[s]] <- eval(substitute(model.extract(mf, s), list(s = s)))
-  }
-  for (s in specials) {
-    object[[s]] <- do.call(model.extract, list(mf, s))
-  }
-  object$specials <- specials
-  object$x <- x
+update.design <- function(object, data = NULL, ...) {
+  if (is.null(data)) data <- object$data
+  return(
+    design(object$terms,
+      data = data, ...,
+      xlev = object$xlevels,
+      specials = object$specials
+    )
+  )
   return(object)
 }
 
 #' @export
-model.matrix.design <- function(object, drop.intercept = FALSE, ...) {
-  if (drop.intercept) {
-    intercept <- which(attr(object$x, "assign") == 0)
-    if (length(intercept) > 0) {
-      return(object$x[, -intercept, drop = FALSE])
-    }
-  }
+model.matrix.design <- function(object, ...) {
   return(object$x)
 }
 
