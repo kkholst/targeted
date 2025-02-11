@@ -23,7 +23,7 @@ test_initialize <- function() {
 
   expect_equal(m1$predict(newdata = ddata), m2$predict(newdata = ddata)[, 1])
 
-  # no formula supplied but passed when estimating model
+  # no formula supplied but passed when estimating models
   m3 <- ml_model$new(
     estimate = \(formula, data) glm(formula, data = data)
   )
@@ -75,18 +75,15 @@ test_estimate <- function() {
   m1 <- ml_model$new(formula = y ~ x1 + x2, estimate = glm)
   fit_ml <- m1$estimate(ddata, weights = ww)
 
-  fit <- glm(y ~ x1 + x2, data = ddata, weights = ww)
-  expect_equal(coef(m1$fit), coef(fit))
+  fit_glm <- glm(y ~ x1 + x2, data = ddata, weights = ww)
+  expect_equal(coef(m1$fit), coef(fit_glm))
   # verify that estimate method returns output of estimate function
-  expect_equal(coef(fit_ml), coef(fit))
+  expect_equal(coef(fit_ml), coef(fit_glm))
 
-  # arguments to fitfun when supplied during initialization cannot be
-  # overridden during estimate method call
-  m2 <- ml_model$new(formula = y ~ x1 + x2, estimate = glm, weights = ww)
-  expect_error(
-    m2$estimate(data = ddata, weights = ww),
-    pattern = 'formal argument "weights" matched by multiple actual arguments'
-  )
+  # arguments to fitfun when supplied during initialization can be overriden
+  m2 <- ml_model$new(formula = y ~ x1 + x2, estimate = glm, weights = rep(1, n))
+  m2$estimate(data = ddata, weights = ww)
+  expect_equal(coef(m2$fit), coef(fit_glm))
 }
 test_estimate()
 
@@ -112,14 +109,14 @@ test_predict <- function() {
   )
 
   # error when trying to override predict.args during predict method call
-  m_err <- ml_model$new(
+  m1 <- ml_model$new(
     formula = y ~ x + offset(w), estimate = glm, family = poisson,
-    predict.args = list(type = "response")
+    predict.args = list(type = "link")
   )
-  m_err$estimate(ddata_count)
-  expect_error(
-    m_err$predict(ddata_count, type = "link"),
-    pattern = 'formal argument "type" matched by multiple actual arguments'
+  m1$estimate(ddata_count)
+  expect_equal(
+    m1$predict(ddata_count, type = "response"),
+    predict(fit_glm, ddata_count, type = "response")
   )
 }
 test_predict()
