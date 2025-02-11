@@ -7,11 +7,12 @@
 design(
   formula,
   data,
+  ...,
   intercept = FALSE,
   response = FALSE,
   rm_envir = FALSE,
-  ...,
   specials = c("weights", "offset"),
+  specials.call = NULL,
   xlev = NULL
 )
 }
@@ -20,6 +21,8 @@ design(
 
 \item{data}{data.frame}
 
+\item{...}{additional arguments (e.g, specials such weights, offsets, ...)}
+
 \item{intercept}{(logical) If FALSE an intercept is not included in the
 design matrix}
 
@@ -27,10 +30,10 @@ design matrix}
 
 \item{rm_envir}{Remove environment}
 
-\item{...}{additional arguments (e.g, specials such weights, offsets, ...)}
-
 \item{specials}{character vector specifying functions in the formula that
 should be marked as special in the \link{terms} object}
+
+\item{specials.call}{(call) specials optionally defined as a call-type}
 
 \item{xlev}{a named list of character vectors giving the full set of levels
 to be assumed for each factor}

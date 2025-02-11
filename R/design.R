@@ -38,18 +38,21 @@ model.extract2 <- function(frame, component) {
 #' @param ... additional arguments (e.g, specials such weights, offsets, ...)
 #' @param specials character vector specifying functions in the formula that
 #'   should be marked as special in the [terms] object
+#' @param specials.call (call) specials optionally defined as a call-type
 #' @param xlev a named list of character vectors giving the full set of levels
 #'   to be assumed for each factor
 #' @return An object of class 'design'
 #' @author Klaus Kähler Holst
 #' @export
-design <- function(formula, data,
+design <- function(formula, data, ...,
                    intercept = FALSE,
                    response = FALSE,
-                   rm_envir = FALSE, ...,
+                   rm_envir = FALSE,
                    specials = c("weights", "offset"),
+                   specials.call = NULL,
                    xlev = NULL) {
   tt <- terms(formula, data = data, specials = specials)
+  dots <- substitute(list(...))
   mf <- model.frame(tt,
     data = data, ...,
     xlev = xlev,
@@ -65,19 +68,19 @@ design <- function(formula, data,
     xlev <- .getXlevels(tt, mf)
   }
   xlev0 <- xlev
-  specials_list <- c()
+  specials.list <- c()
   if (length(specials) > 0) {
     des <- attr(tt, "factors")
     sterm.pos <- c()
     for (s in specials) {
       w <- eval(substitute(model.extract2(mf, s), list(s = s)))
-      specials_list <- c(specials_list, list(w))
+      specials.list <- c(specials.list, list(w))
       sterm <- rownames(des)[attr(tt, "specials")[[s]]]
       if (length(sterm) > 0) {
         sterm.pos <- c(sterm.pos, match(sterm, colnames(des))[1])
       }
     }
-    names(specials_list) <- specials
+    names(specials.list) <- specials
     if (length(sterm.pos) > 0) {
       tmp.terms <- drop.terms(tt, sterm.pos)
       xlev0 <- .getXlevels(tmp.terms, mf)
@@ -86,6 +89,14 @@ design <- function(formula, data,
         xlev = xlev0,
         drop.unused.levels = FALSE
       )
+    }
+  }
+  if (!is.null(specials.call)) {
+    specials.list2 <- eval(specials.call, data)
+    for (n in names(specials.list2)) {
+      if (is.null(specials.list[[n]])) {
+        specials.list[[n]] <- specials.list2[[n]]
+      }
     }
   }
 
@@ -97,11 +108,18 @@ design <- function(formula, data,
   }
 
   if (rm_envir) attr(tt, ".Environment") <- NULL
-  res <- c(list(terms=tt, xlevels=xlev, x=x, y=y,
-                intercept = has_intercept,
-                data=data[0, ], ## Empty data.frame to capture structure of data
-                specials=specials),
-           specials_list)
+  if (is.null(specials.call)) specials.call <- dots
+
+  res <- c(
+    list(
+      terms = tt, xlevels = xlev, x = x, y = y,
+      intercept = has_intercept,
+      data = data[0, ], ## Empty data.frame to capture structure of data
+      specials = specials,
+      specials.call = specials.call
+    ),
+    specials.list
+  )
   structure(res, class="design")
 }
 
@@ -112,7 +130,8 @@ update.design <- function(object, data = NULL, ...) {
     design(object$terms,
       data = data, ...,
       xlev = object$xlevels,
-      specials = object$specials
+      specials = object$specials,
+      specials.call = object$specials.call
     )
   )
   return(object)
