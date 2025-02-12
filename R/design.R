@@ -1,7 +1,10 @@
 model.extract2 <- function(frame, component) {
   component <- as.character(substitute(component))
   if (component %in% c("response", "offset")) {
-    return(model.extract(frame, component))
+    return(do.call(
+      model.extract,
+      list(frame = frame, component = component)
+    ))
   }
   vname <- paste0("(", component, ")")
   if (!(vname %in% names(frame))) {
@@ -62,11 +65,12 @@ design <- function(formula, data, ...,
     drop.unused.levels = FALSE
     )
   y <- model.response(mf, type = "any")
+  # delete response to generate design matrix when creating making predictions
   if (!response) tt <- delete.response(tt)
   specials <- union(
     specials,
-    names(substitute(list(...)))[-1]
-  )
+    names(dots)[-1] # removing "" at first position when calling dots, which
+  ) # is a call object
   if (is.null(xlev)) {
     xlev <- .getXlevels(tt, mf)
   }
