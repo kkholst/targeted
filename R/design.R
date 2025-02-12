@@ -53,6 +53,9 @@ design <- function(formula, data, ...,
                    xlev = NULL) {
   tt <- terms(formula, data = data, specials = specials)
   dots <- substitute(list(...))
+  if ("subset" %in% names(dots)) stop(
+    "subset is not an allowed specials argument for targeted::design"
+  )
   mf <- model.frame(tt,
     data = data, ...,
     xlev = xlev,

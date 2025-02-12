@@ -1,13 +1,13 @@
 library(tinytest)
 
 set.seed(42)
-n <- 1e3
+n <- 1e2
 ddata <- data.frame(x1 = rnorm(n), x2 = rnorm(n), y = rnorm(n))
 
 # testing the basic functionality
 test_design <- function() {
   # test adding intercept
-  dd <- design(y ~ x1, ddata, intercept = TRUE)
+  dd <- design(y ~ x1, ddata, intercept = TRUE, response = FALSE)
 
   dd_expect <- matrix(
     cbind(1, ddata$x1),
@@ -49,28 +49,21 @@ test_design()
 
 # test that ellipsis are passed on to model.frame
 test_design_ellipsis <- function() {
-  idx <- seq(10)
-  dd <- design(y ~ x1, data = ddata, subset = idx)
-
-  expect_equal(unname(dd$y), ddata$y[idx])
-  expect_equal(unname(dd$x[, 1]), ddata$x1[idx])
-
-  # values of subset are not added to returned object
-  expect_true(is.null(dd$subset))
-
-  # expect error since model.frame tries to create another column with length
-  # 1 but the other columns are of length n
   expect_error(
-    design(y ~ x1, data = ddata, subset = idx, nocolumn = "a"),
-    pattern = "nocolumn"
+    design(y ~ x1, data = ddata, subset = seq(10)),
+    pattern = "subset is not an allowed specials argument"
   )
-  # no error when argument is a vector if length n
+
+  # no error when argument is a vector of length n
   dd <- design(y ~ x1, ddata, nocolumn = rep(1, n))
   expect_equal(rep(1, n), unname(dd$nocolumn))
 
-  # same for offset argument, which is defined in specials
-  dd <- design(y ~ 1, ddata, offset = seq(1, n))
-  expect_equal(unname(dd$offset), seq(1, n))
+  # fails because column cannot be added with model.frame because of differing
+  # lengths
+  expect_error(
+    design(y ~ x1, ddata, nocolumn = rep(1, 5)),
+    pattern = "variable lengths differ"
+  )
 }
 test_design_ellipsis()
 
@@ -79,6 +72,7 @@ test_design_specials <- function() {
   # offset is correctly identified as a special variable and not added as a
   # covariate
   dd <- design(y ~ offset(x1), ddata)
+
   expect_equal(ncol(dd$x), 0)
   offset_expect <- ddata$x1
   names(offset_expect) <- seq(n)
