@@ -66,7 +66,6 @@ design <- function(formula, data, ...,
     )
   mf <- model.frame(tt, data=data, ...)
 
-  head(model.matrix(mf, data = data))
   y <- model.response(mf, type = "any")
   # delete response to generate design matrix when creating making predictions
   if (!response) tt <- delete.response(tt)
@@ -81,7 +80,7 @@ design <- function(formula, data, ...,
   specials.list <- c()
   if (length(specials) > 0) {
     des <- attr(tt, "factors")
-    # sterm.pos <- c()
+
     sterm.list <- c()
     for (s in specials) {
       w <- eval(substitute(model.extract2(mf, s), list(s = s)))
@@ -111,7 +110,6 @@ design <- function(formula, data, ...,
   }
 
   x <- model.matrix(mf, data = data, xlev = xlev0)
-  # TODO: why handle intercept only down here?
   has_intercept <- attr(tt, "intercept") == 1L
   if (!intercept && has_intercept) {
     has_intercept <- FALSE
@@ -138,7 +136,7 @@ design <- function(formula, data, ...,
 update.design <- function(object, data = NULL, ...) {
   if (is.null(data)) data <- object$data
   design(object$terms,
-    data = data, ..., #TODO: do we want to pass ... here?
+    data = data,
     xlev = object$xlevels,
     specials = object$specials,
     specials.call = object$specials.call
