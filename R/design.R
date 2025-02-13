@@ -78,18 +78,18 @@ design <- function(formula, data, ...,
   specials.list <- c()
   if (length(specials) > 0) {
     des <- attr(tt, "factors")
-    sterm.pos <- c()
+    # sterm.pos <- c()
+    sterm.list <- c()
     for (s in specials) {
       w <- eval(substitute(model.extract2(mf, s), list(s = s)))
       specials.list <- c(specials.list, list(w))
       sterm <- rownames(des)[attr(tt, "specials")[[s]]]
-      if (length(sterm) > 0) {
-        sterm.pos <- c(sterm.pos, match(sterm, colnames(des))[1])
-      }
+      sterm.list <- c(sterm.list, sterm)
     }
     names(specials.list) <- specials
-    if (length(sterm.pos) > 0) {
-      tmp.terms <- drop.terms(tt, sterm.pos)
+    if (length(sterm.list) > 0) {
+      upd <- paste(" ~ . - ", paste(sterm.list, collapse = " - "))
+      tmp.terms <- update(tt, upd) |> terms()
       xlev0 <- .getXlevels(tmp.terms, mf)
       mf <- model.frame(tmp.terms,
         data = data, ...,

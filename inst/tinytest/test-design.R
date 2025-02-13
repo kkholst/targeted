@@ -94,8 +94,20 @@ test_design_specials <- function() {
   # specifying a variable accidentally doesn't have an effect
   dd <- design(y ~ x1, ddata, specials = "x1")
   expect_equivalent(as.matrix(ddata$x1), dd$x)
-  
 
+  # a user defined specials is handled correctly
+  sq <- identity # nolint
+  dd <- design(y ~ x1 + sq(x1), ddata, specials = "sq")
+  expect_equal(dd$x[, 1], dd$sq)
+
+  # formula with only one variable, which is a special
+  dd <- design(y ~ sq(x1), ddata, specials = "sq")
+  expect_equal(ddata$x1, unname(dd$sq))
+
+  # with two specials
+  dd <- design(y ~ sq(x1) + offset(x1), ddata, specials = c("sq", "offset"))
+  expect_equal(ddata$x1, unname(dd$sq))
+  expect_equal(ddata$x1, unname(dd$offset))
 }
 test_design_specials()
 
