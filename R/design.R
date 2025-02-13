@@ -64,6 +64,9 @@ design <- function(formula, data, ...,
     xlev = xlev,
     drop.unused.levels = FALSE
     )
+  mf <- model.frame(tt, data=data, ...)
+
+  head(model.matrix(mf, data = data))
   y <- model.response(mf, type = "any")
   # delete response to generate design matrix when creating making predictions
   if (!response) tt <- delete.response(tt)
@@ -108,6 +111,7 @@ design <- function(formula, data, ...,
   }
 
   x <- model.matrix(mf, data = data, xlev = xlev0)
+  # TODO: why handle intercept only down here?
   has_intercept <- attr(tt, "intercept") == 1L
   if (!intercept && has_intercept) {
     has_intercept <- FALSE
@@ -133,15 +137,12 @@ design <- function(formula, data, ...,
 #' @export
 update.design <- function(object, data = NULL, ...) {
   if (is.null(data)) data <- object$data
-  return(
-    design(object$terms,
-      data = data, ...,
-      xlev = object$xlevels,
-      specials = object$specials,
-      specials.call = object$specials.call
-    )
+  design(object$terms,
+    data = data, ..., #TODO: do we want to pass ... here?
+    xlev = object$xlevels,
+    specials = object$specials,
+    specials.call = object$specials.call
   )
-  return(object)
 }
 
 #' @export

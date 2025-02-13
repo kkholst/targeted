@@ -192,4 +192,24 @@ test_design_factor <- function() {
   )
   expect_equivalent(dd_expect_inter2, dd$x)
 }
-test_design_factor()
+# test_design_factor()
+
+# test update.design s3 method
+test_update.design <- function() {
+  dd <- design(y ~ x1, ddata)
+  dd_upd <- update(dd, head(ddata, 10))
+  expect_equal(unname(dd_upd$x[, 1]), ddata$x1[1:10])
+  expect_equal(names(dd_upd$x[, 1]), as.character(1:10))
+
+  # specials are updated correctly
+  sq <- \(x) x ** 2
+  dd <- design(y ~ sq(x1), ddata, specials = "sq")
+  dd_upd <- update(dd, head(ddata, 10))
+  expect_equal(unname(dd_upd$sq), sq(ddata$x1[1:10]))
+
+  # returned design object can be updated again
+  dd_upd <- update(dd_upd, head(ddata, 20))
+  expect_equal(unname(dd_upd$sq), sq(ddata$x1[1:20]))
+}
+test_update.design()
+
