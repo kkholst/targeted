@@ -115,6 +115,13 @@ design <- function(formula, data, ...,
     has_intercept <- FALSE
     x <- x[, -1, drop = FALSE]
   }
+  if (intercept && (!"(Intercept)" %in% colnames(x))) {
+    # ensure that intercept is added to design matrix when removed in formula
+    # via - 1
+    x_intercept <- matrix(1, nrow = nrow(x))
+    colnames(x_intercept) <- "(Intercept)"
+    x <- cbind(x_intercept, x)
+  }
 
   if (rm_envir) attr(tt, ".Environment") <- NULL
   if (is.null(specials.call)) specials.call <- dots

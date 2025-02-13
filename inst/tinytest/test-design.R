@@ -7,7 +7,7 @@ ddata <- data.frame(x1 = rnorm(n), x2 = rnorm(n), y = rnorm(n))
 # testing the basic functionality
 test_design <- function() {
   # test adding intercept
-  dd <- design(y ~ x1, ddata, intercept = TRUE, response = FALSE)
+  dd <- design(y ~ x1, ddata, intercept = TRUE)
 
   dd_expect <- matrix(
     cbind(1, ddata$x1),
@@ -24,8 +24,13 @@ test_design <- function() {
   expect_equal(yy, dd$y)
 
   # intercept is not added even when specified in formula
-  dd <- design(y ~ x1, ddata)
+  dd <- design(y ~ 1 + x1, ddata)
   expect_equivalent(as.matrix(ddata$x1), dd$x)
+
+  # intercept is added to design matrix even though removed in formula argument
+  dd <- design(y ~ - 1 + x1, ddata, intercept = TRUE)
+  expect_equivalent(dd_expect, dd$x)
+  expect_equal(colnames(dd_expect), colnames(dd$x))
 
   # raise error when specifying a variable inside the formula that doesn't
   # exist in data
@@ -161,7 +166,8 @@ test_design_na_handling()
 test_design_factor <- function() {
   ddata_fact <- ddata
   ddata_fact$x3 <- as.factor(rep(c("a", "b"), length.out = n))
-  dd <- design(y ~ x3, ddata_fact)
+  dd <- design(y ~ -1 + x3, ddata_fact)
+  head(dd$x)
 
   # factors levels are collected in xlevels attribute
   expect_equal(dd$xlevels, list(x3 = c("a", "b")))
@@ -210,6 +216,19 @@ test_update.design <- function() {
   # returned design object can be updated again
   dd_upd <- update(dd_upd, head(ddata, 20))
   expect_equal(unname(dd_upd$sq), sq(ddata$x1[1:20]))
+
+  # test intercept
 }
 test_update.design()
 
+test_update.design_factors <- function() {
+  ddata_fact <- ddata
+  ddata_fact$x3 <- as.factor(rep(c("a", "b"), length.out = n))
+  dd <- design(y ~ x3, ddata_fact)
+
+  expect_silent(update(dd, head(ddata_fact, 1)))
+
+  dd <- design(y ~ x3, ddata_fact)
+  ddata_fact$x3 <- rep(c("a", "b"), length.out = n)
+  # expect_silent(update(dd, head(ddata_fact, 1))) # fails
+}
