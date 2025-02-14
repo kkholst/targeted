@@ -91,6 +91,7 @@ design <- function(formula, data, ...,
     names(specials.list) <- specials
     if (length(sterm.list) > 0) {
       upd <- paste(" ~ . - ", paste(sterm.list, collapse = " - "))
+      reformulate
       tmp.terms <- update(tt, upd) |> terms()
       xlev0 <- .getXlevels(tmp.terms, mf)
       mf <- model.frame(tmp.terms,
@@ -114,13 +115,6 @@ design <- function(formula, data, ...,
   if (!intercept && has_intercept) {
     has_intercept <- FALSE
     x <- x[, -1, drop = FALSE]
-  }
-  if (intercept && (!"(Intercept)" %in% colnames(x))) {
-    # ensure that intercept is added to design matrix when removed in formula
-    # via - 1
-    x_intercept <- matrix(1, nrow = nrow(x))
-    colnames(x_intercept) <- "(Intercept)"
-    x <- cbind(x_intercept, x)
   }
 
   if (rm_envir) attr(tt, ".Environment") <- NULL

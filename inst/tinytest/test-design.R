@@ -27,10 +27,9 @@ test_design <- function() {
   dd <- design(y ~ 1 + x1, ddata)
   expect_equivalent(as.matrix(ddata$x1), dd$x)
 
-  # intercept is added to design matrix even though removed in formula argument
+  # intercept is not added with intercept argument
   dd <- design(y ~ - 1 + x1, ddata, intercept = TRUE)
-  expect_equivalent(dd_expect, dd$x)
-  expect_equal(colnames(dd_expect), colnames(dd$x))
+  expect_equal(colnames(dd$x), "x1")
 
   # raise error when specifying a variable inside the formula that doesn't
   # exist in data
@@ -166,8 +165,9 @@ test_design_na_handling()
 test_design_factor <- function() {
   ddata_fact <- ddata
   ddata_fact$x3 <- as.factor(rep(c("a", "b"), length.out = n))
-  dd <- design(y ~ -1 + x3, ddata_fact)
-  head(dd$x)
+  # removing intercept in formula ensures that both levels are added as
+  # covariates
+  dd <- design(y ~ -1 + x3, ddata_fact, intercept = TRUE)
 
   # factors levels are collected in xlevels attribute
   expect_equal(dd$xlevels, list(x3 = c("a", "b")))
@@ -180,7 +180,7 @@ test_design_factor <- function() {
   expect_equal(paste0("x3", c("a", "b")), colnames(dd$x))
 
   # interactions with numerical values work as expected
-  dd <- design(y ~ x3:x1, ddata_fact)
+  dd <- design(y ~ -1 + x3:x1, ddata_fact)
   dd_expect_inter <- dd_expect * matrix(rep(ddata$x1, 2), nrow = n)
   expect_equivalent(dd_expect_inter, dd$x)
   nn <- paste0("x3", c("a", "b"))
@@ -188,17 +188,26 @@ test_design_factor <- function() {
 
   # characters are automatically converted to factors
   ddata_fact$x4 <- rep(c("a", "b"), length.out = n)
-  dd <- design(y ~ x4, ddata_fact)
+  dd <- design(y ~ -1 + x4, ddata_fact)
   expect_equivalent(dd_expect, dd$x)
 
-  dd <- design(y ~ x3:x4, ddata_fact)
+  dd <- design(y ~ -1 + x3:x4, ddata_fact)
   dd_expect_inter2 <- cbind(
     dd_expect * matrix(c(1, 0), nrow = n, ncol = 2), # x4a
     dd_expect * matrix(c(0, 1), nrow = n, ncol = 2) # x4b
   )
   expect_equivalent(dd_expect_inter2, dd$x)
+
+  # not removing the intercept in formula removes the first level of the factor
+  dd <- design(y ~ x3, ddata_fact)
+  expect_equal(unname(dd$x[, 1]), rep(c(0, 1), length.out = nrow(dd$x)))
+  expect_equal(colnames(dd$x), "x3b")
+
+  # order of levels can be controlled with xlev argument
+  dd <- design(y ~ x3, ddata_fact, xlev = list(x3 = c("b", "a")))
+  expect_equal(colnames(dd$x), "x3a")
 }
-# test_design_factor()
+test_design_factor()
 
 # test update.design s3 method
 test_update.design <- function() {
