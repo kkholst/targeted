@@ -47,7 +47,7 @@ model.extract2 <- function(frame, component) {
 #' @return An object of class 'design'
 #' @author Klaus Kähler Holst
 #' @export
-design <- function(formula, data, ...,
+design <- function(formula, data, ..., # nolint
                    intercept = FALSE,
                    response = FALSE,
                    rm_envir = FALSE,
@@ -139,6 +139,7 @@ update.design <- function(object, data = NULL, ...) {
   design(object$terms,
     data = data,
     xlev = object$xlevels,
+    intercept = object$intercept,
     specials = object$specials,
     specials.call = object$specials.call
   )

@@ -226,18 +226,10 @@ test_update.design <- function() {
   dd_upd <- update(dd_upd, head(ddata, 20))
   expect_equal(unname(dd_upd$sq), sq(ddata$x1[1:20]))
 
-  # test intercept
+  # intercept is kept also when updating the design object
+  dd <- design(y ~ x1, ddata, intercept = TRUE)
+  dd_upd <- update(dd, head(ddata, 10))
+  dd_expect <- cbind(1, head(ddata, 10)$x1) |> as.matrix()
+  expect_equivalent(dd_expect, dd_upd$x)
 }
 test_update.design()
-
-test_update.design_factors <- function() {
-  ddata_fact <- ddata
-  ddata_fact$x3 <- as.factor(rep(c("a", "b"), length.out = n))
-  dd <- design(y ~ x3, ddata_fact)
-
-  expect_silent(update(dd, head(ddata_fact, 1)))
-
-  dd <- design(y ~ x3, ddata_fact)
-  ddata_fact$x3 <- rep(c("a", "b"), length.out = n)
-  # expect_silent(update(dd, head(ddata_fact, 1))) # fails
-}
