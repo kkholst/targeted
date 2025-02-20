@@ -283,9 +283,9 @@ plot.calibration <- function(x, cl = 2,
     xx[1] <- xx[1] + 1e-12
     xx[length(xx)] <- xx[length(xx)] - 1e-12
     yy <- x$stepfun[[cl]](xx)
-    lines(xx, yy, type = type, ...)
+    return(lines(xx, yy, type = type, ...))
   } else {
-    plot(x$stepfun[[cl]], add = TRUE, type = type, ...)
+    return(plot(x$stepfun[[cl]], add = TRUE, type = type, ...))
   }
 }
 
@@ -295,6 +295,7 @@ print.calibration <- function(x, ...) {
   print(x$call)
   cat("\nCalibration model:", x$model, "\n")
   cat("Number of classes:", length(x$classes), "\n")
+  return(invisible())
 }
 
 #' @export
@@ -305,5 +306,5 @@ predict.calibration <- function(object, newdata, ...) {
     res <- calibrate(object, pr, ...)[, 2]
     return(res)
   }
-  calibrate(object, newdata, ...)
+  return(calibrate(object, newdata, ...))
 }
