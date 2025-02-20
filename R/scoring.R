@@ -21,8 +21,11 @@ mae <- function(response, prediction, weights=NULL, ...) {
 }
 
 quantitative_scoring1 <- function(response, prediction, weights=NULL, ...) {
-  c(mse(response, prediction, weights=weights, ...),
-    mae(response, prediction, weights=weights, ...))
+  res <- c(
+    mse(response, prediction, weights=weights, ...),
+    mae(response, prediction, weights=weights, ...)
+  )
+  return(res)
 }
 
 multiclass_scoring1 <- # nolint
