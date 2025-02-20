@@ -150,7 +150,7 @@ calibration <- function(pr, cl, #nolint
                     res <- a(x)
                     res[res<0] <- 0
                     res[res>1] <- 1
-                    res
+                    return(res)
                 }
                 stepfuns <- c(stepfuns, f)
             }
