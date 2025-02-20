@@ -44,7 +44,7 @@ ate_if_fold <- function(fold, data,
 cate_fold1 <- function(fold, data, score, cate_des) {
   y <- score[fold]
   x <- update(cate_des, data[fold, , drop = FALSE])$x
-  lm.fit(y = y, x = x)$coef
+  return(lm.fit(y = y, x = x)$coef)
 }
 
 #' Conditional Average Treatment Effect estimation with cross-fitting.
@@ -178,7 +178,7 @@ cate <- function(response.model, # nolint
     stop("Expected contrast vector of length 1 or 2.")
   }
   propensity_outcome <- function(treatment_level) {
-    paste0("I(", treatment_var, "==", treatment_level, ")")
+    return(paste0("I(", treatment_var, "==", treatment_level, ")"))
   }
   if (missing(propensity.model)) {
     response_var <- lava::getoutcome(response.model$formula, data=data)
@@ -276,9 +276,7 @@ cate <- function(response.model, # nolint
         list(unlist(lapply(ii, function(x) val[[x]]$pmod))[idx])
       )
       if (!is.null(val[[1]]$adj)) {
-        A <- lapply(ii, function(x) {
-          val[[x]]$adj
-        })
+        A <- lapply(ii, function(x) val[[x]]$adj)
         adj <- c(adj, list(Reduce(rbind, A)[idx, , drop = FALSE]))
       }
     }
@@ -286,7 +284,7 @@ cate <- function(response.model, # nolint
     names(qval) <- contrast
     names(pval) <- contrast
     if (length(adj) > 0) names(adj) <- contrast
-    list(scores = scores, adj = adj, qval = qval, pval = pval)
+    return(list(scores = scores, adj = adj, qval = qval, pval = pval))
   }
 
   if (rep > 1) {
