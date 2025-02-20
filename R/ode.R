@@ -101,7 +101,7 @@ solve_ode <- function(ode_ptr, input, init, par=0) {
   if (is.function(ode_ptr)) {
     return(.ode_solve2(ode_ptr, cbind(input), rbind(init), rbind(par)))
   }
-  .ode_solve(ode_ptr, cbind(input), rbind(init), rbind(par))
+  return(.ode_solve(ode_ptr, cbind(input), rbind(init), rbind(par)))
 }
 
 ## Dormand-Prince method. Adaptive step-size, see E. Hairer, S. P. Norsett G.
