@@ -113,11 +113,11 @@ ml_model <- R6::R6Class("ml_model", # nolint
       if (no_formula) {
         private$fitfun <- function(...) {
           args <- c(list(...), dots)
-          do.call(private$init.estimate, args)
+          return(do.call(private$init.estimate, args))
         }
         private$predfun <- function(...) {
           args <- c(list(...), predict.args)
-          do.call(private$init.predict, args)
+          return(do.call(private$init.predict, args))
         }
       } else {
         if (fit_formula) { # Formula in arguments of estimation procedure
@@ -174,8 +174,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
         estimate = formals(estimate),
         predict = formals(predict)
       )
-
-      private$call <- list(
+      private$call <- list( # nolint
         estimate = substitute(estimate),
         predict = substitute(predict),
         argslist = substitute(dots),
@@ -202,7 +201,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
     predict = function(newdata, ..., object = NULL) {
       if (is.null(object)) object <- private$fitted
       if (is.null(object)) stop("Provide estimated model object")
-      private$predfun(object, newdata, ...)
+      return(private$predfun(object, newdata, ...))
     },
 
     #' @description
@@ -219,6 +218,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
       self$formula <- formula
       environment(private$fitfun)$formula <- formula
       environment(private$fitfun)$self <- self
+      return(invisible(formula))
     },
 
     #' @description
@@ -274,6 +274,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
         cat("\n_________________________________\n\n")
         print(self$fit)
       }
+      return(invisible())
     },
 
     #' @description
@@ -292,14 +293,14 @@ ml_model <- R6::R6Class("ml_model", # nolint
       if (!eval) {
         return(data[, all.vars(newf), drop = TRUE])
       }
-      design(newf, data = data, ...)$y
+      return(design(newf, data = data, ...)$y)
     },
 
     #' @description
     #' Extract design matrix (features) from data
     #' @param ... additional arguments to [targeted::design]
     design = function(data, ...) {
-      design(self$formula, data = data, ...)$x
+      return(design(self$formula, data = data, ...)$x)
     },
 
     #' @description
@@ -351,10 +352,10 @@ ml_model <- R6::R6Class("ml_model", # nolint
 
 #' @export
 estimate.ml_model <- function(x, ...) {
-  x$estimate(...)
+  return(x$estimate(...))
 }
 
 #' @export
 predict.ml_model <- function(object, ...) {
-  object$predict(...)
+  return(object$predict(...))
 }
