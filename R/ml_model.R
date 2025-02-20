@@ -111,17 +111,17 @@ ml_model <- R6::R6Class("ml_model", # nolint
       }
       if (no_formula) {
         private$fitfun <- function(...) {
-          args <- update_args(self$args, ...)
+          args <- private$update_args(self$args, ...)
           do.call(private$init.estimate, args)
         }
         private$predfun <- function(...) {
-          args <- update_args(predict.args, ...)
+          args <- private$update_args(predict.args, ...)
           do.call(private$init.predict, args)
         }
       } else {
         if (fit_formula) { # Formula in arguments of estimation procedure
           private$fitfun <- function(data, ...) {
-            args <- update_args(self$args, ...)
+            args <- private$update_args(self$args, ...)
             args <- c(
               args, list(formula = self$formula, data = data)
             )
@@ -134,7 +134,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
               targeted::design,
               c(list(formula = self$formula, data = data), des.args)
             )
-            args <- update_args(self$args, ...)
+            args <- private$update_args(self$args, ...)
             args <- c(list(xx$x), args)
             if (fit_x_arg) {
               names(args)[1] <- x.arg
@@ -154,7 +154,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
         }
         private$predfun <- function(object, data, ...) {
           if (fit_formula || no_formula) {
-            predict_args_call <- update_args(predict.args, ...)
+            predict_args_call <- private$update_args(predict.args, ...)
             args <- c(list(object, newdata = data), predict_args_call)
           } else {
             args <- list(...)
@@ -349,8 +349,22 @@ ml_model <- R6::R6Class("ml_model", # nolint
         # copy of s3.
         return(value)
       }
+    },
+    # #' Utility to update list of arguments with ellipsis
+    # #' @param args list or NULL
+    update_args = function(args, ...) {
+      if (is.null(args)) args <- list() # because predict.args = NULL by default
+      dots <- list(...)
+
+      # update args for unnamed list of arguments
+      if (length(dots) > 0 && is.null(names(dots))) {
+        args <- c(args, dots)
+      } else {
+        args[names(dots)] <- dots
+      }
+      return(args)
     }
-  )
+   )
 )
 
 #' @export
@@ -361,19 +375,4 @@ estimate.ml_model <- function(x, ...) {
 #' @export
 predict.ml_model <- function(object, ...) {
   object$predict(...)
-}
-
-#' Utility to update list of arguments with ellipsis
-#' @param args list or NULL
-update_args <- function(args, ...) {
-  if (is.null(args)) args <- list() # because predict.args = NULL by default
-  dots <- list(...)
-
-  # update args for unnamed list of arguments
-  if (length(dots) > 0 && is.null(names(dots))) {
-    args <- dots
-  } else {
-    args[names(dots)] <- dots
-  }
-  return(args)
 }
