@@ -170,9 +170,7 @@ procform <- function(formula=NULL, # nolint
     if (!is.null(specials)) {
       specials <- lapply(
         specials,
-        function(x) {
-          as.formula(paste0(c("~", paste0(x, collapse = "+"))))
-        }
+        function(x) as.formula(paste0(c("~", paste0(x, collapse = "+"))))
       )
     }
   }

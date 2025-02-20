@@ -76,9 +76,9 @@ NB <- function(formula, data, weights = NULL,
   pcond <- lapply(cls, function(i) {
     idx <- which(y == i)
     m0 <- with(ff, as.data.frame(X[idx, predictor, with = FALSE, drop = FALSE]))
-    lapply(m0, estcond, weights = weights[idx])
+    return(lapply(m0, estcond, weights = weights[idx]))
   })
-  structure(
+  res <- structure(
     list(
       prior = prior0, ## Pr(class)
       conditional = pcond, ## Pr(x|class)
@@ -90,4 +90,5 @@ NB <- function(formula, data, weights = NULL,
     ),
     class = "NB"
   )
+  return(res)
 }
