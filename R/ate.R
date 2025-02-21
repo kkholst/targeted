@@ -181,7 +181,7 @@ ate <- function(formula, # nolint
   est <- lava::estimate(coef=coefs, vcov=V, labels=nlabels)
   est$IC <- iids * NROW(iids)
   rownames(est$IC) <- rownames(data)
-  structure(list(estimate=est,
+  obj <- structure(list(estimate=est,
                  outcome.reg=outreg,
                  propensity.model=propmod,
                  names=unlist(nn)[1:2],
@@ -193,6 +193,7 @@ ate <- function(formula, # nolint
                  all=all,
                  family=family),
             class=c("ate.targeted", "targeted"))
+  return(obj)
 }
 
 #' @export
@@ -260,11 +261,11 @@ summary.ate.targeted <- function(object, contrast=c(2:1), ...) {
     if (object$family$family == "binomial") {
       asso <- estimate(object$estimate,
                        function(x) {
-                         c(
+                         return(c(
                            x[contrast[1]] / x[contrast[2]],
                            lava::OR(x[contrast]),
                            x[contrast[1]] - x[contrast[2]]
-                         )
+                         ))
                        },
                        labels = c("RR", "OR", "RD")
                        )
@@ -275,7 +276,7 @@ summary.ate.targeted <- function(object, contrast=c(2:1), ...) {
                        )
     }
   }
-  structure(list(estimate=cc, npar=nn, type=object$type, asso=asso,
+  obj <- structure(list(estimate=cc, npar=nn, type=object$type, asso=asso,
                  family=object$family,
                  names=c(object$names, "",
                          "Outcome model:", "Propensity model:"),
@@ -284,4 +285,5 @@ summary.ate.targeted <- function(object, contrast=c(2:1), ...) {
                               unlist(lapply(object$formula, deparse))),
                  contrast=contrast),
             class="summary.ate.targeted")
+  return(obj)
 }

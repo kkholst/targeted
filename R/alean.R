@@ -136,7 +136,7 @@ alean <- function(response_model,
     mu <- dg(EY) * (Y - EY) + g(EY) - Eg
     A. <- (A - EA)
     if (!silent) pb()
-    cbind(mu, A.)
+    return(cbind(mu, A.))
   }
 
   if (!missing(mc.cores)) {
