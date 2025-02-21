@@ -31,15 +31,16 @@ expand.list <- function(...) {
   names(dots) <- nam
   dat <- do.call(expand.grid, c(dots,
             list(KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)))
-  res <- lapply(seq_len(NROW(dat)),
-                function(i) {
-                  res <- as.list(dat[i, ])
-                  if (length(nulls)>0) res[nulls] <- list(NULL)
-                  if (length(formulas)>0) {
-                    res[[formulas]] <- as.formula(res[[formulas]])
-                    environment(res[[formulas]]) <- baseenv()
-                  }
-                  res
-                })
-  structure(res, table=dat)
+  fun <- function(i) {
+    res <- as.list(dat[i, ])
+    if (length(nulls)>0) res[nulls] <- list(NULL)
+    if (length(formulas)>0) {
+      res[[formulas]] <- as.formula(res[[formulas]])
+      environment(res[[formulas]]) <- baseenv()
+    }
+    return(res)
+  }
+  res <- lapply(seq_len(NROW(dat)), fun)
+
+  return(structure(res, table=dat))
 }

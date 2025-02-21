@@ -87,5 +87,5 @@ predict.NB <- function(object, newdata, # nolint
     }
   }
   colnames(lposterior) <- object$classes
-  exp(lposterior)
+  return(exp(lposterior))
 }

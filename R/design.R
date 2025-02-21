@@ -27,7 +27,7 @@ model.extract2 <- function(frame, component) {
       )
     }
   }
-  rval
+  return(rval)
 }
 
 #' Extract design matrix from data.frame and formula
@@ -130,18 +130,20 @@ design <- function(formula, data, ..., # nolint
     ),
     specials.list
   )
-  structure(res, class="design")
+  return(structure(res, class="design"))
 }
 
 #' @export
 update.design <- function(object, data = NULL, ...) {
   if (is.null(data)) data <- object$data
-  design(object$terms,
-    data = data,
-    xlev = object$xlevels,
-    intercept = object$intercept,
-    specials = object$specials,
-    specials.call = object$specials.call
+  return(
+    design(object$terms,
+      data = data,
+      xlev = object$xlevels,
+      intercept = object$intercept,
+      specials = object$specials,
+      specials.call = object$specials.call
+    )
   )
 }
 
@@ -152,7 +154,7 @@ model.matrix.design <- function(object, ...) {
 
 #' @export
 weights.design <- function(object, ...) {
-  specials(object, "weights")
+  return(specials(object, "weights"))
 }
 
 #' @export
@@ -160,7 +162,7 @@ offsets <- function(object, ...) UseMethod("offsets")
 
 #' @export
 offsets.design <- function(object, ...) {
-  specials(object, "offset")
+  return(specials(object, "offset"))
 }
 
 #' @export

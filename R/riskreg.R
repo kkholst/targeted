@@ -150,27 +150,31 @@ riskreg_mle <- function(y, a, x1, x2=x1,
     x2 <- cbind(x2)
     type <- substr(type, 1, 2)
     f <- function(p) {
-      -as.vector(bin_logl(
+      res <- -as.vector(bin_logl(
         y = y, a = cbind(a),
         x1 = cbind(x1), x2 = cbind(x2),
         par = p, weights = weights, type = type
       ))
+      return(res)
     }
     df <- function(p, ...) {
-      -bin_dlogl(
+      res <- -bin_dlogl(
         y = y, a = cbind(a),
         x1 = cbind(x1), x2 = cbind(x2),
         par = p, weights = weights, type = type, ...
       )
+      return(res)
     }
     d2f <- function(theta) {
-      deriv(function(p) {
-        -bin_dlogl_c(
+      res <- deriv(function(p) {
+        res_inner <- -bin_dlogl_c(
           y = y, a = cbind(a),
           x1 = cbind(x1), x2 = cbind(x2),
           par = p, weights = weights, type = type
         )
+        return(res_inner)
       }, theta)
+      return(res)
     }
     # Starting values
     if (is.null(start))
@@ -193,10 +197,11 @@ riskreg_mle <- function(y, a, x1, x2=x1,
     }
     est$IC <- ii * NROW(ii)
     rownames(est$IC) <- rownames(cbind(y))
-    structure(list(estimate=est, npar=c(ncol(x1), ncol(x2)),
+    obj <- structure(list(estimate=est, npar=c(ncol(x1), ncol(x2)),
                    logLik=loglik, nobs=length(y),
                    opt=op, bread=V*NROW(ii), type=type, estimator="mle"),
               class=c("riskreg.targeted", "targeted"))
+    return(obj)
 }
 
 
@@ -293,13 +298,13 @@ riskreg_fit <- function(y, a, # nolint
           length(alpha.index) + length(theta.index)
         pp <- c(alphahat, thetahat)
         U <- function(p) {
-          bin_esteq_c(
+          return(bin_esteq_c(
             y = y, a = a,
             x1 = target, x2 = nuisance, x3 = propensity,
             alpha = p[seq_along(alphahat)],
             par = p[seq_along(thetahat) + length(alphahat)],
             weights = weights1, type = type
-          )
+          ))
         }
         DU  <- deriv(U, pp)
         U0 <- u(alphahat, indiv=TRUE)
@@ -323,12 +328,13 @@ riskreg_fit <- function(y, a, # nolint
     est$IC <- ii * NROW(ii)
     rownames(est$IC) <- rownames(cbind(y))
     propmod <- lava::estimate(coef=coef(propmod), vcov=Vprop, colnames)
-  structure(list(estimate=est, opt=opt,
+  obj <- structure(list(estimate=est, opt=opt,
                  npar=c(ncol(target), ncol(nuisance), ncol(propensity)),
                  nobs=length(y),
                  mle=mle, prop=propmod, type=type,
                  estimator="dre"),
               class=c("riskreg.targeted", "targeted"))
+  return(obj)
 }
 
 
@@ -389,7 +395,7 @@ summary.riskreg.targeted <- function(object, ...) {
           labels = rownames(cc)
           )
     }
-    structure(
+    obj <- structure(
       list(
         estimate = cc,
         npar = object$npar,
@@ -399,6 +405,7 @@ summary.riskreg.targeted <- function(object, ...) {
       ),
       class = "summary.riskreg.targeted"
     )
+    return(obj)
 }
 
 

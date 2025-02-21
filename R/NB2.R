@@ -99,5 +99,5 @@ predict.NB2 <- function(object, newdata, threshold=1e-3, ...) {
                 xord, (object$xmodel=="multinomial")*1L,
                 object$prior, threshold)
   colnames(lp) <- object$classes
-  exp(lp)
+  return(exp(lp))
 }
