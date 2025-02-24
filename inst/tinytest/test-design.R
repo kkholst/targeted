@@ -112,6 +112,11 @@ test_design_specials <- function() {
   dd <- design(y ~ sq(x1) + offset(x1), ddata, specials = c("sq", "offset"))
   expect_equal(ddata$x1, unname(dd$sq))
   expect_equal(ddata$x1, unname(dd$offset))
+
+  # test default weight special
+  weights <- identity
+  dd <- design(y ~ weights(x1), ddata)
+  expect_equal(unname(dd$weights), ddata$x1)
 }
 test_design_specials()
 
@@ -216,6 +221,11 @@ test_update.design <- function() {
   expect_equal(unname(dd_upd$x[, 1]), ddata$x1[1:10])
   expect_equal(names(dd_upd$x[, 1]), as.character(1:10))
 
+  # return design object without data when data = NULL
+  dd_upd <- update(dd)
+  expect_equal(nrow(dd_upd$x), 0)
+  expect_equal(colnames(dd_upd$x), "x1")
+
   # specials are updated correctly
   sq <- \(x) x ** 2
   dd <- design(y ~ sq(x1), ddata, specials = "sq")
@@ -233,3 +243,78 @@ test_update.design <- function() {
   expect_equivalent(dd_expect, dd_upd$x)
 }
 test_update.design()
+
+# test update.design with factors
+test_update.design.factors <- function() {
+  ddata_fact <- ddata
+  ddata_fact$x3 <- as.factor(rep(c("a", "b"), length.out = n))
+  dd <- design(y ~ x3, ddata_fact)
+
+  # works as expected when new data contains both levels
+  dd_upd <- update(dd, head(ddata_fact, 10))
+  expect_equal(unname(dd_upd$x[, 1]), rep(c(0, 1), length.out = 10))
+  expect_equal(colnames(dd_upd$x), "x3b")
+
+  # new data does not contain some levels that the original data contains.
+  # in this case ddata_fact does not contain factor "b"
+  dd_upd <- update(dd, head(ddata_fact, 1))
+  expect_equal(dd_upd$x[, 1], 0)
+  expect_equal(colnames(dd_upd$x), "x3b")
+
+  # also works when characters are internally converted to factors
+  dd <- design(y ~ x3, ddata_fact)
+  ddata_fact$x3 <- rep(c("a", "b"), length.out = n)
+  dd_upd <- update(dd, head(ddata_fact, 1))
+
+  # expect error when new data contains different levels
+  newdata <- ddata_fact
+  newdata$x3 <- rep(c("a", "c"), length.out = n)
+  expect_error(
+    update(dd, newdata),
+    pattern = "factor x3 has new levels c"
+  )
+
+  # intercept is handled correctly for factors
+  dd <- design(y ~ -1 + x3, ddata_fact, intercept = TRUE)
+  dd_upd <- update(dd, head(ddata_fact))
+  expect_equivalent(dd_upd$x, head(dd$x))
+
+  # same as above
+  dd <- design(y ~ -1 + x3, ddata_fact)
+  dd_upd <- update(dd, head(ddata_fact))
+  expect_equivalent(dd_upd$x, head(dd$x))
+}
+test_update.design.factors()
+
+test_model.matrix.design <- function() {
+  dd <- design(y ~ x1, ddata)
+  # simply return x attribute
+  expect_equal(model.matrix(dd), dd$x)
+
+  # also works when no covariates are specified on RHS
+  dd <- design(y ~ -1, ddata)
+  expect_equal(model.matrix(dd), dd$x)
+}
+test_model.matrix.design()
+
+# tests also offsets.design and weights.design
+test_specials.design <- function() {
+  sq <- \(x) x ** 2
+  weights <- identity
+  dd <- design(
+    y ~ sq(x1) + offset(x1) + weights(x1),
+    ddata,
+    specials = c("sq", "offset", "weights")
+  )
+
+  # simply return special attribute
+  expect_equal(dd[["sq"]], specials(dd, "sq"))
+
+  # return NULL when special does not exist
+  expect_null(specials(dd, "sqq"))
+
+  # test offsets and weights s3 method
+  expect_equal(offsets(dd), specials(dd, "offset"))
+  expect_equal(weights.design(dd), specials(dd, "weights"))
+}
+test_specials.design()
