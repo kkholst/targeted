@@ -27,7 +27,7 @@ superlearner <- function(model.list,
                          ...) {
   pred_mod <- function(models, data) {
     res <- lapply(models, \(x) x$predict(data))
-    Reduce(cbind, res)
+    return(Reduce(cbind, res))
   }
   if (is.character(model.score)) {
     model.score <- get(model.score)
@@ -45,21 +45,19 @@ superlearner <- function(model.list,
     lapply(mod, \(x) x$estimate(train))
     pred.test <- pred_mod(mod, test)
     pb()
-    list(pred = pred.test, fold = fold)
+    return(list(pred = pred.test, fold = fold))
   }
   if (!is.null(mc.cores)) {
     if (mc.cores == 1L) {
       ## disable parallelization
       pred.folds <- lapply(folds, function(fold) {
-        onefold(fold, data, model.list, pb)
+        return(onefold(fold, data, model.list, pb))
       })
     } else {
       ## mclapply
       pred.folds <- parallel::mclapply(
         folds,
-        function(fold) {
-          onefold(fold, data, model.list, pb)
-        },
+        function(fold) onefold(fold, data, model.list, pb),
         mc.cores = mc.cores, ...
         )
     }
@@ -69,9 +67,7 @@ superlearner <- function(model.list,
       future.apply::future_lapply,
       list(
         X = folds,
-        FUN = function(fold) {
-          onefold(fold, data, model.list, pb)
-        },
+        FUN = function(fold) onefold(fold, data, model.list, pb),
         future.seed = future.seed,
         ...
       )
@@ -96,7 +92,7 @@ superlearner <- function(model.list,
     fit = mod,
     folds = folds
   )
-  structure(res, class = "superlearner")
+  return(structure(res, class = "superlearner"))
 }
 
 #' @export
@@ -107,7 +103,7 @@ print.superlearner <- function(x, ...) {
   } else {
     rownames(res) <- paste("model", seq_along(x$fit))
   }
-  print(res)
+  return(print(res))
 }
 
 
@@ -161,7 +157,7 @@ SL <- function(formula=~., ...,
           )
         )
       }
-      res
+      return(res)
     },
     predict = function(object, newdata) {
       pr <- predict(object, newdata = newdata)$pred

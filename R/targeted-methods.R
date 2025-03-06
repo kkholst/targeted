@@ -49,14 +49,15 @@ print.summary.targeted <- function(x, ...) {
 
 #' @export
 summary.targeted <- function(object, ...) {
-  structure(list(estimate = object$estimate, call = object$call),
+  obj <- structure(list(estimate = object$estimate, call = object$call),
     class = "summary.targeted"
   )
+  return(obj)
 }
 
 #' @export
 IC.targeted <- function(x, ...) {
-  lava::IC(x$estimate, ...)
+  return(lava::IC(x$estimate, ...))
 }
 
 #' @export
@@ -65,18 +66,19 @@ logLik.targeted <- function(object, ...) {
   if (is.null(val)) {
     return(NULL)
   }
-  structure(val,
+  obj <- structure(val,
     nobs = object$nobs, nall = object$nobs, df = length(coef(object)),
     class = "logLik"
   )
+  return(obj)
 }
 
 #' @export
 vcov.targeted <- function(object, ...) {
-  vcov(object$estimate, ...)
+  return(vcov(object$estimate, ...))
 }
 
 #' @export
 coef.targeted <- function(object, ...) {
-  coef(object$estimate, ...)
+  return(coef(object$estimate, ...))
 }

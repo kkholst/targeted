@@ -39,7 +39,7 @@ design <- function(formula, data, intercept=FALSE,
                 data=data[0, ], ## Empty data.frame to capture structure of data
                 specials=specials),
            specials_list)
-  structure(res, class="design")
+  return(structure(res, class="design"))
 }
 
 #' @export
@@ -79,7 +79,7 @@ model.matrix.design <- function(object, drop.intercept = FALSE, ...) {
 
 #' @export
 weights.design <- function(object, ...) {
-  specials(object, "weights")
+  return(specials(object, "weights"))
 }
 
 #' @export
@@ -87,7 +87,7 @@ offsets <- function(object, ...) UseMethod("offsets")
 
 #' @export
 offsets.design <- function(object, ...) {
-  specials(object, "offset")
+  return(specials(object, "offset"))
 }
 
 #' @export

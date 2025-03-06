@@ -106,7 +106,9 @@ crr <- function(treatment,
   response_var <- lava::getoutcome(response_model$formula, data=data)
   treatment_var <- lava::getoutcome(treatment)
   treatment_f <- function(treatment_level, x = paste0(".-", response_var)) {
-    as.formula(paste0("I(", treatment_var, "==", treatment_level, ") ~ ", x))
+    return(
+      as.formula(paste0("I(", treatment_var, "==", treatment_level, ") ~ ", x))
+    )
   }
   if (missing(propensity_model)) {
     propensity_model <- SL(treatment_f(contrast[1]), ..., binomial=TRUE)
@@ -157,11 +159,11 @@ crr <- function(treatment,
 
   if (type=="dml1") {
     est1 <- lapply(folds, function(x) {
-      cate_fold1(x,
+      return(cate_fold1(x,
         data = data,
         score = score,
         cate_des = desA
-      )
+      ))
     })
     est <- colMeans(Reduce(rbind, est1))
   } else {
@@ -254,7 +256,9 @@ cate_link <- function(treatment,
   response_var <- lava::getoutcome(response_model$formula, data=data)
   treatment_var <- lava::getoutcome(treatment)
   treatment_f <- function(treatment_level, x = paste0(".-", response_var)) {
-    as.formula(paste0("I(", treatment_var, "==", treatment_level, ") ~ ", x))
+    return(
+      as.formula(paste0("I(", treatment_var, "==", treatment_level, ") ~ ", x))
+    )
   }
   if (missing(propensity_model)) {
     propensity_model <- SL(treatment_f(contrast[1]), ..., binomial=TRUE)
@@ -316,11 +320,11 @@ cate_link <- function(treatment,
 
   if (type=="dml1") {
     est1 <- lapply(folds, function(x) {
-      cate_fold1(x,
+      return(cate_fold1(x,
         data = data,
         score = score,
         cate_des = desA
-      )
+      ))
     })
     est <- colMeans(Reduce(rbind, est1))
   } else {
