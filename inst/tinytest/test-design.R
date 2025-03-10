@@ -296,25 +296,3 @@ test_model.matrix.design <- function() {
   expect_equal(model.matrix(dd), dd$x)
 }
 test_model.matrix.design()
-
-# tests also offsets.design and weights.design
-test_specials.design <- function() {
-  sq <- \(x) x ** 2
-  weights <- identity
-  dd <- design(
-    y ~ sq(x1) + offset(x1) + weights(x1),
-    ddata,
-    specials = c("sq", "offset", "weights")
-  )
-
-  # simply return special attribute
-  expect_equal(dd[["sq"]], specials(dd, "sq"))
-
-  # return NULL when special does not exist
-  expect_null(specials(dd, "sqq"))
-
-  # test offsets and weights s3 method
-  expect_equal(offsets(dd), specials(dd, "offset"))
-  expect_equal(weights.design(dd), specials(dd, "weights"))
-}
-test_specials.design()

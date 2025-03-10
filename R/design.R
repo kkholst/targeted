@@ -152,18 +152,6 @@ model.matrix.design <- function(object, ...) {
   return(object$x)
 }
 
-#' @export
-weights.design <- function(object, ...) {
-  return(specials(object, "weights"))
-}
-
-#' @export
-offsets <- function(object, ...) UseMethod("offsets")
-
-#' @export
-offsets.design <- function(object, ...) {
-  return(specials(object, "offset"))
-}
 
 #' @export
 specials <- function(object, ...) UseMethod("specials")
