@@ -114,19 +114,19 @@ ml_model <- R6::R6Class("ml_model", # nolint
       }
       if (no_formula) {
         private$fitfun <- function(...) {
-          args <- c(list(...), dots)
-          return(do.call(private$init.estimate, args))
+          args <- private$update_args(self$args, ...)
+          do.call(private$init.estimate, args)
         }
         private$predfun <- function(...) {
-          args <- c(list(...), predict.args)
-          return(do.call(private$init.predict, args))
+          args <- private$update_args(predict.args, ...)
+          do.call(private$init.predict, args)
         }
       } else {
         if (fit_formula) { # Formula in arguments of estimation procedure
           private$fitfun <- function(data, ...) {
+            args <- private$update_args(self$args, ...)
             args <- c(
-              self$args, list(formula = self$formula, data = data),
-              list(...)
+              args, list(formula = self$formula, data = data)
             )
             return(do.call(private$init.estimate, args))
           }
@@ -137,7 +137,8 @@ ml_model <- R6::R6Class("ml_model", # nolint
               targeted::design,
               c(list(formula = self$formula, data = data), des.args)
             )
-            args <- c(list(xx$x), list(...), self$args)
+            args <- private$update_args(self$args, ...)
+            args <- c(list(xx$x), args)
             if (fit_x_arg) {
               names(args)[1] <- x.arg
             } else {
@@ -156,16 +157,20 @@ ml_model <- R6::R6Class("ml_model", # nolint
         }
         private$predfun <- function(object, data, ...) {
           if (fit_formula || no_formula) {
-            args <- c(list(object, newdata = data), predict.args, list(...))
+            predict_args_call <- private$update_args(predict.args, ...)
+            args <- c(list(object, newdata = data), predict_args_call)
           } else {
             args <- list(...)
             des <- update(attr(object, "design"), data)
             for (s in des$specials) {
               if (is.null(args[[s]])) args[[s]] <- des[[s]]
             }
+            predict_args_call <- predict.args
+            predict_args_call[names(args)] <- args
+
             args <- c(list(object,
               newdata = model.matrix(des)
-            ), predict.args, args)
+            ), predict_args_call)
           }
           return(do.call(private$init.predict, args))
         }
@@ -348,8 +353,22 @@ ml_model <- R6::R6Class("ml_model", # nolint
         # copy of s3.
         return(value)
       }
+    },
+    # #' Utility to update list of arguments with ellipsis
+    # #' @param args list or NULL
+    update_args = function(args, ...) {
+      if (is.null(args)) args <- list() # because predict.args = NULL by default
+      dots <- list(...)
+
+      # update args for unnamed list of arguments
+      if (length(dots) > 0 && is.null(names(dots))) {
+        args <- c(args, dots)
+      } else {
+        args[names(dots)] <- dots
+      }
+      return(args)
     }
-  )
+   )
 )
 
 #' @export
