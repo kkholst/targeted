@@ -115,11 +115,11 @@ ml_model <- R6::R6Class("ml_model", # nolint
       if (no_formula) {
         private$fitfun <- function(...) {
           args <- private$update_args(self$args, ...)
-          do.call(private$init.estimate, args)
+          return(do.call(private$init.estimate, args))
         }
         private$predfun <- function(...) {
           args <- private$update_args(predict.args, ...)
-          do.call(private$init.predict, args)
+          return(do.call(private$init.predict, args))
         }
       } else {
         if (fit_formula) { # Formula in arguments of estimation procedure
