@@ -39,11 +39,13 @@ RATE(
 
 \item{SL.args.response}{Arguments to SuperLearner for the response model}
 
-\item{SL.args.post.treatment}{Arguments to SuperLearner for the post treatment indicator}
+\item{SL.args.post.treatment}{Arguments to SuperLearner for the post
+treatment indicator}
 
 \item{preprocess}{(optional) Data preprocessing function}
 
-\item{efficient}{If TRUE, the estimate will be efficient. If FALSE, the estimate will be a simple plug-in estimate.}
+\item{efficient}{If TRUE, the estimate will be efficient. If FALSE, the
+estimate will be a simple plug-in estimate.}
 
 \item{...}{Additional arguments to lower level functions}
 }
