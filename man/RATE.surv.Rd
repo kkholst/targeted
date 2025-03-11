@@ -25,18 +25,18 @@ RATE.surv(
 \arguments{
 \item{response}{Response formula (e.g., Surv(time, event) ~ D + W).}
 
-\item{post.treatment}{Post treatment marker formula (e.g., D ~ W).}
+\item{post.treatment}{Post treatment marker formula (e.g., D~W)}
 
-\item{treatment}{Treatment formula (e.g., A ~ 1).}
+\item{treatment}{Treatment formula (e.g, A~1)}
 
 \item{censoring}{Censoring formula (e.g., Surv(time, event == 0) ~ D + A +
 W)).}
 
 \item{tau}{Time-point of interest, see Details.}
 
-\item{data}{data.frame.}
+\item{data}{data.frame}
 
-\item{M}{Number of folds in cross-fitting (M=1 is no cross-fitting).}
+\item{M}{Number of folds in cross-fitting (M=1 is no cross-fitting)}
 
 \item{pr.treatment}{(optional) Randomization probability of treatment.}
 
@@ -44,16 +44,16 @@ W)).}
 
 \item{args.response}{Additional arguments to the response model.}
 
-\item{SL.args.post.treatment}{Additional arguments to SuperLearner for the
-post treatment indicator model.}
+\item{SL.args.post.treatment}{Arguments to SuperLearner for the post
+treatment indicator}
 
 \item{call.censoring}{Similar to call.response.}
 
 \item{args.censoring}{Similar to args.response.}
 
-\item{preprocess}{(optional) Data pre-processing function.}
+\item{preprocess}{(optional) Data preprocessing function}
 
-\item{...}{Additional arguments to lower level data pre-processing functions.}
+\item{...}{Additional arguments to lower level functions}
 }
 \value{
 estimate object

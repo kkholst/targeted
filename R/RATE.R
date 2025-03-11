@@ -1,9 +1,9 @@
 #' Estimation of the Average Treatment Effect among Responders
 #'
 #' @title Responder Average Treatment Effect
-#' @param response Response formula (e.g, Y~D*A)
-#' @param post.treatment Post treatment marker formula (e.g., D~W)
-#' @param treatment Treatment formula (e.g, A~1)
+#' @param response Response formula (e.g, Y ~ D*A)
+#' @param post.treatment Post treatment marker formula (e.g., D ~ W)
+#' @param treatment Treatment formula (e.g, A ~ 1)
 #' @param data data.frame
 #' @param family Exponential family for response (default gaussian)
 #' @param M Number of folds in cross-fitting (M=1 is no cross-fitting)
@@ -166,24 +166,15 @@ RATE <- function(response, post.treatment, treatment,
 #'
 #' @title Responder Average Treatment Effect
 #' @param response Response formula (e.g., Surv(time, event) ~ D + W).
-#' @param post.treatment Post treatment marker formula (e.g., D ~ W).
-#' @param treatment Treatment formula (e.g., A ~ 1).
 #' @param censoring Censoring formula (e.g., Surv(time, event == 0) ~ D + A +
 #' W)).
 #' @param tau Time-point of interest, see Details.
-#' @param data data.frame.
-#' @param M Number of folds in cross-fitting (M=1 is no cross-fitting).
-#' @param pr.treatment (optional) Randomization probability of treatment.
 #' @param call.response Model call for the response model (e.g. "mets::phreg").
 #' @param args.response Additional arguments to the response model.
-#' @param SL.args.post.treatment Additional arguments to SuperLearner for the
-#' post treatment indicator model.
 #' @param call.censoring Similar to call.response.
 #' @param args.censoring Similar to args.response.
-#' @param preprocess (optional) Data pre-processing function.
-#' @param ... Additional arguments to lower level data pre-processing functions.
-#' @return estimate object
 #' @author Andreas Nordland, Klaus K. Holst
+#' @inherit RATE
 #' @export
 RATE.surv <- function(response, post.treatment, treatment, censoring,
                       tau,
