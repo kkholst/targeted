@@ -3,7 +3,6 @@
 \name{ml_model}
 \alias{ml_model}
 \alias{predictor}
-\alias{predictor_glm}
 \alias{predictor_gam}
 \alias{predictor_glmnet}
 \alias{predictor_grf}

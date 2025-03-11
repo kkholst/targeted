@@ -1,4 +1,7 @@
+#' @title ml_model generator
 #' @export
+#' @param ... Additional arguments to [ml_model$new]
+#' @return [ml_model] object
 predictor <- function(...) return(ml_model$new(...))
 
 predictor_argument_description <- function(call) {
@@ -15,7 +18,10 @@ predictor_argument_description <- function(call) {
     return(desc)
   }
 
+#' @description [ml_model] generator function for [stats::glm].
 #' @export
+#' @inherit predictor
+#' @inheritParams stats::glm
 predictor_glm <- function(formula,
                           info = "glm",
                           family = gaussian(),

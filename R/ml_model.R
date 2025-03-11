@@ -3,7 +3,7 @@
 #' @param data data.frame
 #' @author Klaus Kähler Holst
 #' @aliases ml_model predictor
-#' predictor_glm predictor_gam predictor_glmnet
+#' predictor_gam predictor_glmnet
 #' predictor_grf predictor_grf_binary
 #' predictor_xgboost predictor_xgboost_multiclass
 #' predictor_xgboost_count predictor_xgboost_cox
