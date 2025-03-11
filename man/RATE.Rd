@@ -21,11 +21,11 @@ RATE(
 )
 }
 \arguments{
-\item{response}{Response formula (e.g, Y~D*A)}
+\item{response}{Response formula (e.g, Y ~ D*A)}
 
-\item{post.treatment}{Post treatment marker formula (e.g., D~W)}
+\item{post.treatment}{Post treatment marker formula (e.g., D ~ W)}
 
-\item{treatment}{Treatment formula (e.g, A~1)}
+\item{treatment}{Treatment formula (e.g, A ~ 1)}
 
 \item{data}{data.frame}
 

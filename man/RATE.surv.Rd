@@ -25,9 +25,9 @@ RATE.surv(
 \arguments{
 \item{response}{Response formula (e.g., Surv(time, event) ~ D + W).}
 
-\item{post.treatment}{Post treatment marker formula (e.g., D~W)}
+\item{post.treatment}{Post treatment marker formula (e.g., D ~ W)}
 
-\item{treatment}{Treatment formula (e.g, A~1)}
+\item{treatment}{Treatment formula (e.g, A ~ 1)}
 
 \item{censoring}{Censoring formula (e.g., Surv(time, event == 0) ~ D + A +
 W)).}
