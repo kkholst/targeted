@@ -152,18 +152,15 @@ model.matrix.design <- function(object, ...) {
   return(object$x)
 }
 
-
-#' @export
-specials <- function(object, ...) UseMethod("specials")
-
 #' @export
 #' @title Extract model component from [design] object
 #' @param object [design] object
-#' @param which model component (e.g., "offset", "weights", ...)
-#' @aliases specials specials.design offsets offsets.design weights.design
+#' @param specials extract variables marked as special
+#' (e.g., "offset", "weights", ...)
 #' @param ...  Additional arguments to lower level functions
-specials.design <- function(object, which, ...) {
-  return(object[[which]])
+terms.design <- function(x, specials, ...) {
+  if (missing(specials)) return(x$terms)
+  return(x[[specials]])
 }
 
 #' @export
