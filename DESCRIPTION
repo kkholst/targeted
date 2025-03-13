@@ -58,7 +58,7 @@ Suggests:
     ranger,
     randomForestSRC
 BugReports: https://github.com/kkholst/targeted/issues
-SystemRequirements: C++14, GNU make
+SystemRequirements: C++14
 URL: https://kkholst.github.io/targeted/
 License: Apache License (== 2.0)
 LinkingTo: Rcpp, RcppArmadillo

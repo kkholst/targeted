@@ -21,11 +21,14 @@ mae <- function(response, prediction, weights=NULL, ...) {
 }
 
 quantitative_scoring1 <- function(response, prediction, weights=NULL, ...) {
-  c(mse(response, prediction, weights=weights, ...),
-    mae(response, prediction, weights=weights, ...))
+  res <- c(
+    mse(response, prediction, weights=weights, ...),
+    mae(response, prediction, weights=weights, ...)
+  )
+  return(res)
 }
 
-multiclass_scoring1 <-
+multiclass_scoring1 <- # nolint
   function(response, prediction, levels = NULL, weights = NULL, messages = 1) {
     if (is.null(levels) && NCOL(prediction)>1) {
       levels <- colnames(prediction)
@@ -78,40 +81,41 @@ multiclass_scoring1 <-
     return(list("brier" = B, "-logscore" = -L))
   }
 
-##' Predictive model scoring
-##'
-##' @title Predictive model scoring
-##' @param response Observed response
-##' @param ... model predictions (continuous predictions or class probabilities
-##'   (matrices))
-##' @param type continuous or categorical response (the latter is automatically
-##'   chosen if response is a factor, otherwise a continuous response is
-##'   assumed)
-##' @param metrics which metrics to report
-##' @param weights optional frequency weights
-##' @param names optional names of models coments (given as ..., alternatively
-##'   these can be named arguments)
-##' @param object optional model object
-##' @param newdata optional new data.frame
-##' @param levels (optional) unique levels in response variable
-##' @param messages controls amount of messages/warnings (0: none)
-##' @examples
-##' data(iris)
-##' set.seed(1)
-##' dat <- csplit(iris,2)
-##' g1 <- NB(Species ~ Sepal.Width + Petal.Length, data=dat[[1]])
-##' g2 <- NB(Species ~ Sepal.Width, data=dat[[1]])
-##' pr1 <- predict(g1, newdata=dat[[2]], wide=TRUE)
-##' pr2 <- predict(g2, newdata=dat[[2]], wide=TRUE)
-##' table(colnames(pr1)[apply(pr1,1,which.max)], dat[[2]]$Species)
-##' table(colnames(pr2)[apply(pr2,1,which.max)], dat[[2]]$Species)
-##' scoring(dat[[2]]$Species, pr1=pr1, pr2=pr2)
-##' ## quantitative response:
-##' scoring(response=1:10, prediction=rnorm(1:10))
-##' @return Numeric matrix of dimension m x p, where m is the number of
-##'   different models and p is the number of model metrics
-##' @export
-scoring <- function(response, ..., type="quantitative",
+#' Predictive model scoring
+#'
+#' @title Predictive model scoring
+#' @param response Observed response
+#' @param ... model predictions (continuous predictions or class probabilities
+#'   (matrices))
+#' @param type continuous or categorical response (the latter is automatically
+#'   chosen if response is a factor, otherwise a continuous response is
+#'   assumed)
+#' @param metrics which metrics to report
+#' @param weights optional frequency weights
+#' @param names optional names of models coments (given as ..., alternatively
+#'   these can be named arguments)
+#' @param object optional model object
+#' @param newdata optional new data.frame
+#' @param levels (optional) unique levels in response variable
+#' @param messages controls amount of messages/warnings (0: none)
+#' @examples
+#' data(iris)
+#' set.seed(1)
+#' dat <- csplit(iris,2)
+#' g1 <- NB(Species ~ Sepal.Width + Petal.Length, data=dat[[1]])
+#' g2 <- NB(Species ~ Sepal.Width, data=dat[[1]])
+#' pr1 <- predict(g1, newdata=dat[[2]], wide=TRUE)
+#' pr2 <- predict(g2, newdata=dat[[2]], wide=TRUE)
+#' table(colnames(pr1)[apply(pr1,1,which.max)], dat[[2]]$Species)
+#' table(colnames(pr2)[apply(pr2,1,which.max)], dat[[2]]$Species)
+#' scoring(dat[[2]]$Species, pr1=pr1, pr2=pr2)
+#' ## quantitative response:
+#' scoring(response=1:10, prediction=rnorm(1:10))
+#' @return Numeric matrix of dimension m x p, where m is the number of
+#'   different models and p is the number of model metrics
+#' @export
+scoring <- function(response, ...,
+                    type="quantitative",
                     levels=NULL, metrics=NULL,
                     weights=NULL, names=NULL, object=NULL, newdata=NULL,
                     messages=1) {

@@ -1,7 +1,5 @@
-##' @export
-predictor <- function(...) {
-  ml_model$new(...)
-}
+#' @export
+predictor <- function(...) return(ml_model$new(...))
 
 predictor_argument_description <- function(call) {
     ar <- lapply(
@@ -17,7 +15,7 @@ predictor_argument_description <- function(call) {
     return(desc)
   }
 
-##' @export
+#' @export
 predictor_glm <- function(formula,
                           info = "glm",
                           family = gaussian(),
@@ -25,17 +23,12 @@ predictor_glm <- function(formula,
                           ...) {
   args <- c(as.list(environment(), all.names = FALSE), list(...))
     args$estimate <- function(formula, data, family, ...) {
-    stats::glm(formula,
-               data = data,
-               family = family,
-      ...
+    return(
+      stats::glm(formula, data = data, family = family, ...)
     )
   }
   args$predict <- function(object, newdata, ...) {
-    stats::predict(object,
-      newdata = newdata,
-      type = "response"
-    )
+    return(stats::predict(object, newdata = newdata, type = "response"))
   }
   args$offset <- NULL
   mod <- do.call(ml_model$new, args)
@@ -45,7 +38,7 @@ predictor_glm <- function(formula,
   return(mod)
 }
 
-##' @export
+#' @export
 predictor_glmnet <- function(formula,
                              info = "glmnet",
                              family = gaussian(),
@@ -63,19 +56,13 @@ predictor_glmnet <- function(formula,
       )
       return(res)
     }
-    glmnet::glmnet(
-      x = x, y = y,
-      ...
+    return(glmnet::glmnet(x = x, y = y, ...)
     )
   }
   pred <- function(object, newdata, ...) {
-    predict(object,
-      newx = newdata,
-      family = family,
-      type = "response",
-      s = "lambda.min",
-      ...
-    )
+    res <- predict(object, newx = newdata, family = family, type = "response",
+      s = "lambda.min", ...)
+    return(res)
   }
   mod <- ml_model$new(
     formula = formula,
@@ -94,10 +81,7 @@ predictor_glmnet <- function(formula,
   return(mod)
 }
 
-
-
-
-##' @export
+#' @export
 predictor_hal <- function(formula,
                           info = "hal9001::fit_hal",
                           smoothness_orders = 0,
@@ -105,11 +89,7 @@ predictor_hal <- function(formula,
                           family = "gaussian",
                           ...) {
   est <- function(y, x, ...) {
-    hal9001::fit_hal(
-      X = x,
-      Y = y,
-      ...
-    )
+    return(hal9001::fit_hal(X = x, Y = y, ...))
   }
   pred <- function(fit, newdata, offset = NULL, ...) {
     res <- predict(fit,
@@ -119,7 +99,7 @@ predictor_hal <- function(formula,
     )
     return(res)
   }
-  ml_model$new(formula = formula,
+  mod <- ml_model$new(formula = formula,
              estimate = est,
              predict = pred,
              info = info,
@@ -128,10 +108,11 @@ predictor_hal <- function(formula,
              reduce_basis = reduce_basis,
              family = family,
              ...
-             )
+  )
+  return(mod)
 }
 
-##' @export
+#' @export
 predictor_gam <- function(formula,
                           info = "mgcv::gam",
                           family = gaussian(),
@@ -141,14 +122,10 @@ predictor_gam <- function(formula,
   args <- list(
     formula = formula,
     estimate = function(formula, data, ...) {
-      mgcv::gam(
-        formula = formula,
-        data = data,
-        ...
-      )
+      return(mgcv::gam(formula = formula, data = data, ...))
     },
     predict = function(object, newdata) {
-      stats::predict(object, newdata = newdata, type = "response")
+      return(stats::predict(object, newdata = newdata, type = "response"))
     },
     family = family,
     select = select,
@@ -163,7 +140,7 @@ predictor_gam <- function(formula,
   return(mod)
 }
 
-##' @export
+#' @export
 predictor_isoreg <- function(formula,
                              info = "targeted::isoregw",
                              ...) {
@@ -172,12 +149,8 @@ predictor_isoreg <- function(formula,
   }
   mod <- ml_model$new(formula,
     info = info,
-    estimate = function(y, x, ...) {
-      isoregw(y = y, x = x)
-    },
-    predict = function(object, newdata, ...) {
-      object(newdata)
-    },
+    estimate = function(y, x, ...) return(isoregw(y = y, x = x)),
+    predict = function(object, newdata, ...) return(object(newdata)),
     ...
     )
   mod$description <- predictor_argument_description(
@@ -186,59 +159,59 @@ predictor_isoreg <- function(formula,
   return(mod)
 }
 
-##' @export
-##' @title Superlearner (stacked/ensemble learner)
-##' @description This function creates a predictor object (class [ml_model])
-##'   from a list of existing [ml_model] objects. When estimating this model a
-##'   stacked prediction will be created by weighting together the predictions
-##'   of each of the initial models. The weights are learned using
-##'   cross-validation.
-##' @param model.list List of [ml_model] objects (i.e. [predictor_glm])
-##' @param info Optional model description to store in model object
-##' @param nfolds Number of folds to use in cross validation
-##' @param meta.learner meta.learner function (default non-negative least
-##'   squares). Must be a function of the response (nx1 vector), `y`, and the
-##'   predictions (nxp matrix), `pred`.
-##' @param model.score model scoring method (see [ml_model])
-##' @param ... additional argument to `superlearner`
-##' @aliases predictor_sl superlearner
-##' @references Luedtke & van der Laan (2016) Super-Learning of an Optimal
-##'   Dynamic Treatment Rule, The International Journal of Biostatistics.
-##' @seealso ml_model predictor_glm predictor_xgboost
-##' @examples
-##' sim1 <- function(n = 5e2) {
-##'    n <- 5e2
-##'    x1 <- rnorm(n, sd = 2)
-##'    x2 <- rnorm(n)
-##'    y <- x1 + cos(x1) + rnorm(n, sd = 0.5**.5)
-##'    d <- data.frame(y, x1, x2)
-##'    d
-##' }
-##' d <- sim1() |> mets::dsort(~x1)
-##'
-##' m <- list(
-##'   "mean" = predictor_glm(y ~ 1),
-##'   "glm" = predictor_glm(y ~ x1 + x2),
-##'   "iso" = predictor_isoreg(y ~ x1)
-##' )
-##'
-##' s <- predictor_sl(m, nfolds=10)
-##' s$estimate(d)
-##' pr <- s$predict(d)
-##' if (interactive()) {
-##'     plot(y ~ x1, data = d)
-##'     points(d$x1, pr, col = 2, cex = 0.5)
-##'     lines(cos(x1) + x1 ~ x1, data = d,
-##'           lwd = 4, col = lava::Col("darkblue", 0.3))
-##' }
-##' print(s)
-##' ## weights(s)
-##' ## score(s)
-##'
-##' cvres <- summary(s, data=d, nfolds=3, rep=2)
-##' cvres
-##' ## coef(cvres)
-##' ## score(cvres)
+#' @export
+#' @title Superlearner (stacked/ensemble learner)
+#' @description This function creates a predictor object (class [ml_model])
+#'   from a list of existing [ml_model] objects. When estimating this model a
+#'   stacked prediction will be created by weighting together the predictions
+#'   of each of the initial models. The weights are learned using
+#'   cross-validation.
+#' @param model.list List of [ml_model] objects (i.e. [predictor_glm])
+#' @param info Optional model description to store in model object
+#' @param nfolds Number of folds to use in cross validation
+#' @param meta.learner meta.learner function (default non-negative least
+#'   squares). Must be a function of the response (nx1 vector), `y`, and the
+#'   predictions (nxp matrix), `pred`.
+#' @param model.score model scoring method (see [ml_model])
+#' @param ... additional argument to `superlearner`
+#' @aliases predictor_sl superlearner
+#' @references Luedtke & van der Laan (2016) Super-Learning of an Optimal
+#'   Dynamic Treatment Rule, The International Journal of Biostatistics.
+#' @seealso ml_model predictor_glm predictor_xgboost
+#' @examples
+#' sim1 <- function(n = 5e2) {
+#'    n <- 5e2
+#'    x1 <- rnorm(n, sd = 2)
+#'    x2 <- rnorm(n)
+#'    y <- x1 + cos(x1) + rnorm(n, sd = 0.5**.5)
+#'    d <- data.frame(y, x1, x2)
+#'    d
+#' }
+#' d <- sim1() |> mets::dsort(~x1)
+#'
+#' m <- list(
+#'   "mean" = predictor_glm(y ~ 1),
+#'   "glm" = predictor_glm(y ~ x1 + x2),
+#'   "iso" = predictor_isoreg(y ~ x1)
+#' )
+#'
+#' s <- predictor_sl(m, nfolds=10)
+#' s$estimate(d)
+#' pr <- s$predict(d)
+#' if (interactive()) {
+#'     plot(y ~ x1, data = d)
+#'     points(d$x1, pr, col = 2, cex = 0.5)
+#'     lines(cos(x1) + x1 ~ x1, data = d,
+#'           lwd = 4, col = lava::Col("darkblue", 0.3))
+#' }
+#' print(s)
+#' ## weights(s)
+#' ## score(s)
+#'
+#' cvres <- summary(s, data=d, nfolds=3, rep=2)
+#' cvres
+#' ## coef(cvres)
+#' ## score(cvres)
 predictor_sl <- function(model.list,
                          info = NULL,
                          nfolds = 5L,
@@ -257,10 +230,7 @@ predictor_sl <- function(model.list,
   args$info <- info
   args <- c(args, list(
     estimate = function(data, ...) {
-      superlearner(
-        data = data,
-        ...
-      )
+      return(superlearner(data = data, ...))
     },
     predict = function(object, newdata, all.learners = FALSE, ...) {
       pr <- lapply(object$fit, \(x) x$predict(newdata))
@@ -269,7 +239,7 @@ predictor_sl <- function(model.list,
         length(model.list) == ncol(res)) {
         colnames(res) <- names(model.list)
       } else {
-        colnames(res) <- paste0("model", 1:length(model.list))
+        colnames(res) <- paste0("model", seq_len(length(model.list)))
       }
       if (!all.learners) {
         res <- as.vector(res %*% object$weights)
@@ -286,12 +256,12 @@ predictor_sl <- function(model.list,
   return(mod)
 }
 
-##' @export
+#' @export
 weights.predictor_sl <- function(object, ...) {
   return(object$fit$weights)
 }
 
-##' @export
+#' @export
 score.predictor_sl <- function(x, ...) {
   return(x$fit$model.score)
 }
@@ -308,20 +278,20 @@ score_sl <- function(response, prediction, weights, object, newdata, ...) {
     names(res) <- paste0("score.", nn)
     w <- weights(object)
     names(w) <- paste0("weight.", nn[-1])
-    c(res, w)
+    return(c(res, w))
 }
 
-##' @export
+#' @export
 summary.predictor_sl <- function(object, data, nfolds = 5, rep = 1, ...) {
   res <- cv(list("performance"=object),
       data = data,
       nfolds = nfolds, rep = rep,
       model.score = score_sl
       )
-  res
+  return(res)
 }
 
-##' @export
+#' @export
 predictor_xgboost <-
   function(formula,
            max_depth = 2L,
@@ -340,16 +310,16 @@ predictor_xgboost <-
     }
     pred <- function(object, newdata, ...) {
       d <- xgboost::xgb.DMatrix(newdata)
-      predict(object, d, ...)
+      return(predict(object, d, ...))
     }
     if (objective == "multi:softprob") {
       pred <- function(object, newdata, ...) {
         d <- xgboost::xgb.DMatrix(newdata)
         val <- predict(object, d, ...)
-        matrix(val, nrow = NROW(d), byrow = TRUE)
+        return(matrix(val, nrow = NROW(d), byrow = TRUE))
       }
     }
-    args$predict
+    args$predict <- pred
     args$estimate <- function(x, y, ..., nfolds, nrounds) {
       d <- xgboost::xgb.DMatrix(x, label = y)
       if (nfolds > 1L) {
@@ -361,11 +331,8 @@ predictor_xgboost <-
         )
         nrounds <- which.min(val$evaluation_log[[4]])
       }
-      xgboost::xgboost(
-        d,
-        nrounds = nrounds,
-        ...
-      )
+      res <- xgboost::xgboost(d, nrounds = nrounds, ...)
+      return(res)
     }
     mod <- do.call(ml_model$new, args)
     mod$description <- predictor_argument_description(
@@ -374,27 +341,27 @@ predictor_xgboost <-
     return(mod)
   }
 
-##' @export
+#' @export
 predictor_xgboost_multiclass <- function(formula, ...) {
-  predictor_xgboost(formula, ..., objective="multi:softprob")
+  return(predictor_xgboost(formula, ..., objective="multi:softprob"))
 }
 
-##' @export
+#' @export
 predictor_xgboost_binary <- function(formula, ...) {
-  predictor_xgboost(formula, ..., objective="reg:logistic")
+  return(predictor_xgboost(formula, ..., objective="reg:logistic"))
 }
 
-##' @export
+#' @export
 predictor_xgboost_count <- function(formula, ...) {
-  predictor_xgboost(formula, ..., objective="count:poisson")
+  return(predictor_xgboost(formula, ..., objective="count:poisson"))
 }
 
-##' @export
+#' @export
 predictor_xgboost_cox <- function(formula, ...) {
-  predictor_xgboost(formula, ..., objective="survival:cox")
+  return(predictor_xgboost(formula, ..., objective="survival:cox"))
 }
 
-##' @export
+#' @export
 predictor_grf <- function(formula,
                           num.trees = 2000,
                           min.node.size = 5,
@@ -408,11 +375,11 @@ predictor_grf <- function(formula,
   args$model <- NULL
   est <- utils::getFromNamespace(gsub("^grf::", "", model), "grf")
   pred <- function(object, newdata, ...) {
-    predict(object, newdata, ...)$predictions
+    return(predict(object, newdata, ...)$predictions)
   }
   args$predict <- pred
   args$estimate <- function(x, y, ...) {
-      est(X = x, Y = y, ...)
+      return(est(X = x, Y = y, ...))
   }
   mod <- do.call(ml_model$new, args)
   mod$description <- predictor_argument_description(
@@ -422,49 +389,42 @@ predictor_grf <- function(formula,
 }
 
 
-##' @export
+#' @export
 predictor_grf_binary <- function(formula,
                                  ...) {
-  predictor_grf(formula,
+  mod <- predictor_grf(formula,
     model = "grf::probability_forest",
     ...
-   )
+  )
+  return(mod)
 }
 
 
-##' ML model
-##'
-##' Wrapper for ml_model
-##' @export
-##' @param formula formula
-##' @param model model (sl, rf, pf, glm, ...)
-##' @param ... additional arguments to model object
-##' @details
-##' model 'sl' (SuperLearner::SuperLearner)
-##' args: SL.library, cvControl, family, method
-##' example:
-##'
-##' model 'grf' (grf::regression_forest)
-##' args: num.trees, mtry, sample.weights, sample.fraction, min.node.size, ...
-##' example:
-##'
-##' model 'grf.binary' (grf::probability_forest)
-##' args: num.trees, mtry, sample.weights, ...
-##' example:
-##'
-##' model 'glm'
-##' args: family, weights, offset, ...
-##'
+#' ML model
+#'
+#' Wrapper for ml_model
+#' @export
+#' @param formula formula
+#' @param model model (sl, rf, pf, glm, ...)
+#' @param ... additional arguments to model object
+#' @details
+#' model 'sl' (SuperLearner::SuperLearner)
+#' args: SL.library, cvControl, family, method
+#' example:
+#'
+#' model 'grf' (grf::regression_forest)
+#' args: num.trees, mtry, sample.weights, sample.fraction, min.node.size, ...
+#' example:
+#'
+#' model 'grf.binary' (grf::probability_forest)
+#' args: num.trees, mtry, sample.weights, ...
+#' example:
+#'
+#' model 'glm'
+#' args: family, weights, offset, ...
+#'
 ML <- function(formula, model="glm", ...) {
   model <- tolower(model)
-  dots <- list(...)
-  addargs <- function(..., dots, args = list()) {
-      for (p in names(args)) {
-          if (!(p %in% names(dots))) dots[p] <- args[[p]]
-      }
-      c(list(...), dots)
-  }
-
   ## SL / SuperLearner
   if (model == "sl") {
       return(predictor_sl(formula, ...))

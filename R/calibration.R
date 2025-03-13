@@ -1,67 +1,72 @@
-
-##' Calibration for multiclassication methods
-##'
-##' @title Calibration (training)
-##' @param pr matrix with probabilities for each class
-##' @param cl class variable
-##' @param weights counts
-##' @param threshold do not calibrate if less then 'threshold' events
-##' @param method either 'isotonic' (pava), 'logistic', 'mspline' (monotone spline), 'bin' (local constant)
-##' @param breaks optional number of bins (only for method 'bin')
-##' @param df degrees of freedom (only for spline methods)
-##' @param ... additional arguments to lower level functions
-##' @author Klaus K. Holst
-##' @details ...
-##' @aliases calibration calibrate
-##' @return An object of class '\code{calibration}' is returned. See \code{\link{calibration-class}}
-##' for more details about this class and its generic functions.
-##' @export
-##' @examples
-##' sim1 <- function(n, beta=c(-3, rep(.5,10)), rho=.5) {
-##'  p <- length(beta)-1
-##'  xx <- lava::rmvn0(n,sigma=diag(nrow=p)*(1-rho)+rho)
-##'  y <- rbinom(n, 1, lava::expit(cbind(1,xx)%*%beta))
-##'  d <- data.frame(y=y, xx)
-##'  names(d) <- c("y",paste0("x",1:p))
-##'  return(d)
-##' }
-##'
-##' set.seed(1)
-##' beta <- c(-2,rep(1,10))
-##' d <- sim1(1e4, beta=beta)
-##' a1 <- NB(y ~ ., data=d)
-##' a2 <- glm(y ~ ., data=d, family=binomial)
-##' ## a3 <- randomForest(factor(y) ~ ., data=d, family=binomial)
-##'
-##' d0 <- sim1(1e4, beta=beta)
-##' p1 <- predict(a1, newdata=d0)
-##' p2 <- predict(a2, newdata=d0, type="response")
-##' ## p3 <- predict(a3, newdata=d0, type="prob")
-##'
-##' c2 <- calibration(p2, d0$y, method="isotonic")
-##' c1 <- calibration(p1, d0$y, breaks=100)
-##' if (interactive()) {
-##'   plot(c1)
-##'   plot(c2,col="red",add=TRUE)
-##'   abline(a=0,b=1)##'
-##'   with(c1$xy[[1]], points(pred,freq,type="b", col="red"))
-##' }
-##'
-##' set.seed(1)
-##' beta <- c(-2,rep(1,10))
-##' dd <- lava::csplit(sim1(1e4, beta=beta), k=3)
-##' mod <- NB(y ~ ., data=dd[[1]])
-##' p1 <- predict(mod, newdata=dd[[2]])
-##' cal <- calibration(p1, dd[[2]]$y)
-##' p2 <- predict(mod, newdata=dd[[3]])
-##' pp <- predict(c1, p2)
-##' cc <- calibration(pp, dd[[3]]$y)
-##' if (interactive()) {##'
-##'   plot(cal)
-##'   plot(cc, add=TRUE, col="blue")
-##' }
-calibration <- function(pr, cl, weights=NULL, threshold=10,
-                        method="bin", breaks=nclass.Sturges, df=3, ...) {
+#' Calibration for multiclassication methods
+#'
+#' @title Calibration (training)
+#' @param pr matrix with probabilities for each class
+#' @param cl class variable
+#' @param weights counts
+#' @param threshold do not calibrate if less then 'threshold' events
+#' @param method either 'isotonic' (pava), 'logistic',
+#' 'mspline' (monotone spline), 'bin' (local constant)
+#' @param breaks optional number of bins (only for method 'bin')
+#' @param df degrees of freedom (only for spline methods)
+#' @param ... additional arguments to lower level functions
+#' @author Klaus K. Holst
+#' @details ...
+#' @aliases calibration calibrate
+#' @return An object of class '\code{calibration}' is returned.
+#' See \code{\link{calibration-class}}
+#' for more details about this class and its generic functions.
+#' @export
+#' @examples
+#' sim1 <- function(n, beta=c(-3, rep(.5,10)), rho=.5) {
+#'  p <- length(beta)-1
+#'  xx <- lava::rmvn0(n,sigma=diag(nrow=p)*(1-rho)+rho)
+#'  y <- rbinom(n, 1, lava::expit(cbind(1,xx)%*%beta))
+#'  d <- data.frame(y=y, xx)
+#'  names(d) <- c("y",paste0("x",1:p))
+#'  return(d)
+#' }
+#'
+#' set.seed(1)
+#' beta <- c(-2,rep(1,10))
+#' d <- sim1(1e4, beta=beta)
+#' a1 <- NB(y ~ ., data=d)
+#' a2 <- glm(y ~ ., data=d, family=binomial)
+#' ## a3 <- randomForest(factor(y) ~ ., data=d, family=binomial)
+#'
+#' d0 <- sim1(1e4, beta=beta)
+#' p1 <- predict(a1, newdata=d0)
+#' p2 <- predict(a2, newdata=d0, type="response")
+#' ## p3 <- predict(a3, newdata=d0, type="prob")
+#'
+#' c2 <- calibration(p2, d0$y, method="isotonic")
+#' c1 <- calibration(p1, d0$y, breaks=100)
+#' if (interactive()) {
+#'   plot(c1)
+#'   plot(c2,col="red",add=TRUE)
+#'   abline(a=0,b=1)#'
+#'   with(c1$xy[[1]], points(pred,freq,type="b", col="red"))
+#' }
+#'
+#' set.seed(1)
+#' beta <- c(-2,rep(1,10))
+#' dd <- lava::csplit(sim1(1e4, beta=beta), k=3)
+#' mod <- NB(y ~ ., data=dd[[1]])
+#' p1 <- predict(mod, newdata=dd[[2]])
+#' cal <- calibration(p1, dd[[2]]$y)
+#' p2 <- predict(mod, newdata=dd[[3]])
+#' pp <- predict(c1, p2)
+#' cc <- calibration(pp, dd[[3]]$y)
+#' if (interactive()) {#'
+#'   plot(cal)
+#'   plot(cc, add=TRUE, col="blue")
+#' }
+calibration <- function(pr, cl, #nolint
+                        weights=NULL,
+                        threshold=10,
+                        method="bin",
+                        breaks=nclass.Sturges,
+                        df=3, ...) {
     if (!is.matrix(pr) && !is.data.frame(pr) && !is.numeric(pr)) {
         pr <- predict(pr, ...)
     }
@@ -75,7 +80,8 @@ calibration <- function(pr, cl, weights=NULL, threshold=10,
             lastcl <- tail(unique_cl, 1)
             firstcl <- unique_cl[1]
         }
-        pr <- cbind(pr); colnames(pr) <- lastcl
+        pr <- cbind(pr)
+        colnames(pr) <- lastcl
         if (length(unique_cl)==2) {
             pr <- cbind(1-pr, pr)
             colnames(pr) <- c(firstcl, lastcl)
@@ -105,7 +111,7 @@ calibration <- function(pr, cl, weights=NULL, threshold=10,
             qtl <- seq(0, 1, length.out=ncuts)
         }
     }
-    for (i in seq(ncol(pr))) {
+    for (i in seq_len(ncol(pr))) {
         y <- (cl==classes[i])
         sy <- if (!is.null(weights)) sum(y*weights) else sum(y)
         ## Check if enough observations falls in class 'i'
@@ -120,22 +126,31 @@ calibration <- function(pr, cl, weights=NULL, threshold=10,
                 } else {
                     if (method%in%c("mspline")) {
                         if (requireNamespace("mgcv", quietly=TRUE)) {
-                            m <- glm(y~mgcv::mono.con(pr[, i]), weights=weights, family=binomial)
+                          m <- glm(y ~ mgcv::mono.con(pr[, i]),
+                                   weights = weights,
+                                   family = binomial
+                            )
                         } else {
                             method <- "ns"
                         }
                     }
                     if (method%in%c("ns")) { ## Natural cubic spline
-                        m <- glm(y~splines::ns(pr[, i], df=df), weights=weights, family=binomial)
+                      m <- glm(y ~ splines::ns(pr[, i], df = df),
+                               weights = weights,
+                               family = binomial
+                        )
                     }
                 }
                 phat <- predict(m, type="response")
                 f <- function(x) {
-                    a <- approxfun(c(0, pr[, i], 1), c(0, phat, 1), method="constant")
+                  a <- approxfun(c(0, pr[, i], 1),
+                                 c(0, phat, 1),
+                      method = "constant"
+                    )
                     res <- a(x)
                     res[res<0] <- 0
                     res[res>1] <- 1
-                    res
+                    return(res)
                 }
                 stepfuns <- c(stepfuns, f)
             }
@@ -155,8 +170,15 @@ calibration <- function(pr, cl, weights=NULL, threshold=10,
                     phat <- as.vector(by(y, val, mean))
                 }
                 mpt <- diff(cpt)/2+cpt[-length(cpt)] # mid-point
-                xy <- c(xy, list(data.frame(cpt=cpt, pred=c(0, mpt), freq=c(0, phat))))
-                f <- suppressWarnings(approxfun(c(0, cpt, 1), c(0, phat, 1, 1), method="constant", rule=2))
+                xy <- c(xy, list(data.frame(
+                              cpt = cpt,
+                              pred = c(0, mpt),
+                              freq = c(0, phat)
+                )))
+                f <- suppressWarnings(approxfun(c(0, cpt, 1),
+                                                c(0, phat, 1, 1),
+                  method = "constant", rule = 2
+                ))
                 stepfuns <- c(stepfuns, f)
             }
         } else {
@@ -176,20 +198,26 @@ calibration <- function(pr, cl, weights=NULL, threshold=10,
 }
 
 
+
 #' @title calibration class object
 #'
-#' @description The functions \code{\link{calibration}} returns an object of the class \code{calibration}.
+#' @description The functions \code{\link{calibration}} returns an object
+#' of the class \code{calibration}.
 #'
-#' An object of class '\code{calibration}' is a list with at least the following components:
+#' An object of class '\code{calibration}' is a list with at least the
+#' following components:
 #' \describe{
-#'   \item{stepfun}{estimated step-functions (see \code{stepfun}) for each class}
+#'   \item{stepfun}{estimated step-functions
+#' (see \code{stepfun}) for each class}
 #'   \item{classes}{the unique classes}
 #'   \item{model}{model/method type (string)}
-#'   \item{xy}{list of data.frame's with predictions (pr) and estimated probabilities of success (only for 'bin' method)}
+#'   \item{xy}{list of data.frame's with predictions (pr) and estimated
+#' probabilities of success (only for 'bin' method)}
 #' }
 #'
 #' @section S3 generics:
-#' The following S3 generic functions are available for an object of class \code{targeted}:
+#' The following S3 generic functions are available for an object
+#' of class \code{targeted}:
 #' \describe{
 #'   \item{\code{predict}}{Apply calibration to new data.}
 #'   \item{\code{plot}}{Plot the calibration curves (reliability plot).}
@@ -205,64 +233,78 @@ calibration <- function(pr, cl, weights=NULL, threshold=10,
 NULL
 
 
-##' @export
-calibrate <- function(object, pr, normalize=TRUE, ...) {
-    classes <- object$classes
-    namesprovided <- FALSE
-    class <- colnames(pr)
-    if (is.null(class)) {
-        class <- seq(NCOL(pr))
-    } else nonames <- TRUE
-    for (cl in class) {
-        if (!(cl%in%classes) && !namesprovided) {
-            ## Do not calibrate,
-            ## p0 <- rep(epsilon,NROW(pr))
-        } else {
-            p0 <- pr[, cl]
-            f <- object$stepfun[[cl]]
-            pr[, cl] <- f(p0)
-        }
-    }
-    if (normalize)
-        pr <- t(apply(pr, 1, function(x) x/sum(x)))
-    return(pr)
-}
-
-
-##' @export
-plot.calibration <- function(x, cl=2, add=FALSE,
-                             xlab="Prediction", ylab="Fraction of positives",
-                             main="Calibration plot", type="s", ...) {
-    if (!add) {
-        plot(0, 0, type="n", xlim=c(0, 1), ylim=c(0, 1), xlab=xlab, ylab=ylab, main=main)
-        abline(a=0, b=1, col="lightgray")
-    }
-    if (length(x$xy)>0) {
-        xx <- x$xy[[cl]]$cpt
-        xx[1] <- xx[1]+1e-12
-        xx[length(xx)] <- xx[length(xx)]-1e-12
-        yy <- x$stepfun[[cl]](xx)
-        lines(xx, yy, type=type, ...)
+#' @export
+calibrate <- function(object, pr, normalize = TRUE, ...) {
+  classes <- object$classes
+  namesprovided <- FALSE
+  class <- colnames(pr)
+  if (is.null(class)) {
+    class <- seq_len(NCOL(pr))
+  }
+  for (cl in class) {
+    if (!(cl %in% classes) && !namesprovided) {
+      ## Do not calibrate,
+      ## p0 <- rep(epsilon,NROW(pr))
     } else {
-        plot(x$stepfun[[cl]], add=TRUE, type=type, ...)
+      p0 <- pr[, cl]
+      f <- object$stepfun[[cl]]
+      pr[, cl] <- f(p0)
     }
+  }
+  if (normalize) {
+    pr <- t(apply(pr, 1, function(x) x / sum(x)))
+  }
+  return(pr)
 }
 
-##' @export
+
+
+#' @export
+plot.calibration <- function(x, cl = 2,
+                             add = FALSE,
+                             xlab = "Prediction",
+                             ylab = "Fraction of positives",
+                             main = "Calibration plot",
+                             type = "s",
+                             ...) {
+  if (!add) {
+    plot(0, 0,
+      type = "n",
+      xlim = c(0, 1),
+      ylim = c(0, 1),
+      xlab = xlab,
+      ylab = ylab,
+      main = main
+    )
+    abline(a = 0, b = 1, col = "lightgray")
+  }
+  if (length(x$xy) > 0) {
+    xx <- x$xy[[cl]]$cpt
+    xx[1] <- xx[1] + 1e-12
+    xx[length(xx)] <- xx[length(xx)] - 1e-12
+    yy <- x$stepfun[[cl]](xx)
+    return(lines(xx, yy, type = type, ...))
+  } else {
+    return(plot(x$stepfun[[cl]], add = TRUE, type = type, ...))
+  }
+}
+
+#' @export
 print.calibration <- function(x, ...) {
-    cat("Call: "); print(x$call)
-    cat("\nCalibration model:", x$model, "\n")
-    cat("Number of classes:", length(x$classes), "\n")
+  cat("Call: ")
+  print(x$call)
+  cat("\nCalibration model:", x$model, "\n")
+  cat("Number of classes:", length(x$classes), "\n")
+  return(invisible())
 }
 
-##' @export
+#' @export
 predict.calibration <- function(object, newdata, ...) {
-    if (data.table::is.data.table(newdata)) newdata <- as.data.frame(newdata)
-    if (NCOL(newdata)==1) {
-        pr <- cbind(1-newdata, newdata)
-        res <- calibrate(object, pr, ...)[, 2]
-        return(res)
-    }
-    calibrate(object, newdata, ...)
+  if (data.table::is.data.table(newdata)) newdata <- as.data.frame(newdata)
+  if (NCOL(newdata) == 1) {
+    pr <- cbind(1 - newdata, newdata)
+    res <- calibrate(object, pr, ...)[, 2]
+    return(res)
+  }
+  return(calibrate(object, newdata, ...))
 }
-

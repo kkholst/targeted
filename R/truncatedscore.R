@@ -1,19 +1,21 @@
 qprob <- function(corr) {
-  0.5 - mets::pmvn(upper = cbind(0, 0), sigma = corr, cor = TRUE)
+  return(0.5 - mets::pmvn(upper = cbind(0, 0), sigma = corr, cor = TRUE))
 }
 
 prob_fct <- function(x, alpha, corr) {
   q <- qprob(corr)
-  0.5 * pchisq(x, 1, lower.tail = FALSE) +
+  res <- 0.5 * pchisq(x, 1, lower.tail = FALSE) +
     q * pchisq(x, 2, lower.tail = FALSE) - alpha
+  return(res)
 }
 
 q_fct <- function(alpha, corr) {
-  uniroot(prob_fct,
+  root <- uniroot(prob_fct,
           alpha = alpha,
           corr = corr,
           interval = c(0, 10)
   )$root
+  return(root)
 }
 
 ###############################################################
@@ -94,12 +96,13 @@ test_intersectsignedwald <- function(thetahat1,
     # estimate = 1
   ), class = "htest")
 
-  list(
+  res <- list(
     critval.intersect = critval.intersect,
     test.intersect = test.int,
     test.1 = test.1,
     test.2 = test.2
   )
+  return(res)
 
 }
 
@@ -341,9 +344,9 @@ print.summary.truncatedscore <- function(x, ...) {
 
 #' @export
 parameter.summary.truncatedscore <- function(x, ...) {
-  x$tests
+  return(x$tests)
 }
 #' @export
 coef.summary.truncatedscore <- function(object, ...) {
-  object$tests
+  return(object$tests)
 }

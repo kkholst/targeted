@@ -25,7 +25,8 @@ calibration(
 
 \item{threshold}{do not calibrate if less then 'threshold' events}
 
-\item{method}{either 'isotonic' (pava), 'logistic', 'mspline' (monotone spline), 'bin' (local constant)}
+\item{method}{either 'isotonic' (pava), 'logistic',
+'mspline' (monotone spline), 'bin' (local constant)}
 
 \item{breaks}{optional number of bins (only for method 'bin')}
 
@@ -34,7 +35,8 @@ calibration(
 \item{...}{additional arguments to lower level functions}
 }
 \value{
-An object of class '\code{calibration}' is returned. See \code{\link{calibration-class}}
+An object of class '\code{calibration}' is returned.
+See \code{\link{calibration-class}}
 for more details about this class and its generic functions.
 }
 \description{
@@ -70,7 +72,7 @@ c1 <- calibration(p1, d0$y, breaks=100)
 if (interactive()) {
   plot(c1)
   plot(c2,col="red",add=TRUE)
-  abline(a=0,b=1)##'
+  abline(a=0,b=1)#'
   with(c1$xy[[1]], points(pred,freq,type="b", col="red"))
 }
 
@@ -83,7 +85,7 @@ cal <- calibration(p1, dd[[2]]$y)
 p2 <- predict(mod, newdata=dd[[3]])
 pp <- predict(c1, p2)
 cc <- calibration(pp, dd[[3]]$y)
-if (interactive()) {##'
+if (interactive()) {#'
   plot(cal)
   plot(cc, add=TRUE, col="blue")
 }

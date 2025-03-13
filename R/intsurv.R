@@ -1,18 +1,7 @@
 
-getjumps <- function(time, dy) {
-  jumps <- which(dy < 0)
-  stop <- NULL
-  if (jumps[length(jumps)] < length(dy)) {
-    stop <- time[stop]
-  }
-  dt <- c(0, time[jumps], stop)
-  surv <- surv[jumps]
-}
-
-
 subjumps <- function(jumptimes, tau, size=100L) {
   jt <- jumptimes[jumptimes<=tau]
-  tt <- seq(min(jt), min(max(jt),tau), length.out=size)
+  tt <- seq(min(jt), min(max(jt), tau), length.out=size)
   tt <- jt[unique(mets::fast.approx(jt, tt))]
   return(tt)
 }
@@ -35,53 +24,58 @@ intsurv <- function(time, surv, stop = max(time), jumps.only=FALSE) {
   res <- numeric(n)
   res[idx] <- rev(cumsum(rev(sj*dt)))
 
-  list(
+  return(list(
     t = tj,
     s = sj,
     dt = dt,
     cint = res,
-    value = sum(sj*dt)
-  )
+    value = sum(sj * dt)
+  ))
 }
 
 
-intsurv2 <- function(object, data, time, stop = max(time), sample = 0, blocksize = 0) {
-  tau <- min(max(as.vector(time)), stop)
-  n <- NROW(data)
-  Lc <- vector(mode = "numeric", length = n)
-  tt <- time
-  if (sample > 0) {
-    tt <- subjumps(time, size = sample, tau = tau)
-  }
-  blocks <- list(1:n)
-  if (blocksize > 0) {
-    blocks <- lava::csplit(1:n, k = min(n, blocksize))
-  }
+## intsurv2 <- function(object, data, time, stop = max(time),
+##                      sample = 0, blocksize = 0) {
+##   tau <- min(max(as.vector(time)), stop)
+##   n <- NROW(data)
+##   Lc <- vector(mode = "numeric", length = n)
+##   tt <- time
+##   if (sample > 0) {
+##          tt <- subjumps(time, size = sample, tau = tau)
+##   }
+##   blocks <- list(1:n)
+##   if (blocksize > 0) {
+##          blocks <- lava::csplit(1:n, k = min(n, blocksize))
+##   }
 
-  res <- numeric(n)
-  for (b in blocks) {
-    S <- cumhaz(object, newdata = data[b, ], times = tt)$surv
-    i <- 0
-    for (r in b) { ## Loop over each row in the data
-      i <- i + 1
-      int <- intsurv(tt, S[i, ], tau)
-      res[r] <- 0
-    }
-  }
-  return(res)
-}
+##   res <- numeric(n)
+##   for (b in blocks) {
+##          S <- cumhaz(object, newdata = data[b, ], times = tt)$surv
+##     i <- 0
+##     for (r in b) { ## Loop over each row in the data
+##          i <- i + 1
+##       int <- intsurv(tt, S[i, ], tau)
+##       res[r] <- 0
+##     }
+##   }
+##   return(res)
+## }
 
-##' Computes an approximation of $\int_start^\stop S(t) dt$, where $S(t)$ is a survival function, for a selection of start and stop time points.
+##' Computes an approximation of \eqn{\int_start^\stop S(t) dt}, where
+##' \eqn{S(t)} is a survival function, for a selection of start and stop time
+##' points.
 ##'
 ##' @title Integral approximation of a time dependent function.
 ##' @param times Numeric vector, sorted time points.
-##' @param surv Numeric vector, values of a survival function evaluated at time points given by \code{times}.
+##' @param surv Numeric vector, values of a survival function evaluated at time
+##'   points given by \code{times}.
 ##' @param start Numeric vector, start of the integral.
 ##' @param stop Numeric vector, end of the integral.
 ##' @param extend
 ##' @return Numeric vector, value of the integral.
 ##' @author Andreas Nordland
-int_surv <- function(times, surv, start = 0, stop = max(times), extend = FALSE) {
+int_surv <- function(times, surv,
+                     start = 0, stop = max(times), extend = FALSE) {
   times <- as.vector(times)
   surv <- as.vector(surv)
 
@@ -103,14 +97,14 @@ int_surv <- function(times, surv, start = 0, stop = max(times), extend = FALSE) 
   )
   dim_start_stop <- max(length(start), length(stop))
   stopifnot(
-    length(start) == 1 | length(start) == dim_start_stop,
-    length(stop) == 1 | length(stop) == dim_start_stop
+    length(start) == 1 || length(start) == dim_start_stop,
+    length(stop) == 1 || length(stop) == dim_start_stop
   )
 
-  if (length(start) == 1 & length(stop) > 1) {
+  if (length(start) == 1 && length(stop) > 1) {
     start <- rep(start, times = dim_start_stop)
   }
-  if (length(stop) == 1 & length(start) > 1) {
+  if (length(stop) == 1 && length(start) > 1) {
     stop <- rep(stop, times = dim_start_stop)
   }
 

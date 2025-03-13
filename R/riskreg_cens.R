@@ -75,18 +75,18 @@ riskreg_cens <- function(response,
   data[, "_weight"] <- 1
   if (type[1]=="risk") {
     m <- function(time, data) {
-      (time<=tau)
+      return(time<=tau)
     }
     h <- function(data, time, S, S.tau, tau) {
-      (S-S.tau)/S * (time<=tau)
+      return((S-S.tau)/S * (time<=tau))
     }
   } else if (type[1]=="rmst") {
     m <- function(time, data) {
-      pmin(time, tau)
+      return(pmin(time, tau))
     }
     h <- function(data, time, S, S.tau, tau) {
       I <- intsurv(time, S, tau)$cint
-      (as.vector(time)*as.vector(S) + I) / as.vector(S) *(time<=tau)
+      return((as.vector(time)*as.vector(S) + I) / as.vector(S) *(time<=tau))
     }
   } else if (type[1]=="brier") {
     if (is.null(prediction)) {
@@ -107,25 +107,31 @@ riskreg_cens <- function(response,
     if (length(A.levels)!=2) stop("Expected binary treatment variable (0,1).")
     if (type == "rmst") {
       m <- function(time, data) {
-        pmin(time, tau)*data[, "_weight"] +
+        return(pmin(time, tau)*data[, "_weight"] +
           data[, "_pred"]*(1 - data[, "_weight"])
+        )
       }
       h <- function(data, time, S, S.tau, tau) {
         I <- intsurv(time, S, tau)$cint
-        (as.vector(time)*as.vector(S) +
+        return(
+          (as.vector(time)*as.vector(S) +
          I)/as.vector(S) * (time<=tau) * as.vector(data[, "_weight"]) +
           as.vector(data[, "_pred"])*(1 - as.vector(data[, "_weight"]))
+        )
       }
     } else {
       type <- "treatment"
       m <- function(time, data) {
-        (time<=tau)*data[, "_weight"] +
+        return(
+          (time<=tau)*data[, "_weight"] +
           data[, "_pred"]*(1 - data[, "_weight"])
+        )
       }
       h <- function(data, time, S, S.tau, tau) {
-        res <- (S-S.tau)/S * as.vector(data[, "_weight"])*(time<=tau) +
+        return(
+          (S-S.tau)/S * as.vector(data[, "_weight"])*(time<=tau) +
           as.vector(data[, "_pred"])*(1 - as.vector(data[, "_weight"]))
-        res
+        )
       }
     }
   }
@@ -138,11 +144,13 @@ riskreg_cens <- function(response,
       data[, "_pred"] <- prediction
     }
     m <- function(time, data) {
-      ((time<=tau) - as.vector(data[, "_pred"]))^2
+      return(((time<=tau) - as.vector(data[, "_pred"]))^2)
     }
     h <- function(data, time, S, S.tau, tau) {
-      (S - S.tau) / S * (1 - 2 * as.vector(data[, "_pred"])) * (time <= tau) +
+      return(
+        (S - S.tau) / S * (1 - 2 * as.vector(data[, "_pred"])) * (time <= tau) +
         as.vector(data[, "_pred"])^2
+      )
     }
   }
 
@@ -299,7 +307,7 @@ binreg_augmentation <- function(T.est,
               individual.time = TRUE)$surv
   S.tau <- cumhaz(T.est,
                   newdata = data.C,
-                  times = tau)$surv[ , 1]
+                  times = tau)$surv[, 1]
   Sc <- cumhaz(C.est,
                newdata = data.C,
                times = time.C,

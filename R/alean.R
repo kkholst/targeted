@@ -1,53 +1,54 @@
-##' Assumption lean inference via cross-fitting (Double ML). See
-##' <doi:10.1111/rssb.12504
-##'
-##' Let \eqn{Y} be the response variable, \eqn{A} the exposure and \eqn{W}
-##' covariates. The target parameter is: \deqn{\Psi(P) = \frac{E(Cov[A,
-##' g\{E(Y|A,W)\}\mid W])} {E\{Var(A\mid W)\}} }
-##'
-##' The \code{response_model} is the model for \eqn{E(Y|A,W)}, and
-##' \code{exposure_model} is the model for \eqn{E(A|W)}.
-##' \code{link} specifies \eqn{g}.
-##'
-##' @title Assumption Lean inference for generalized linear model parameters
-##' @param response_model formula or ml_model object (formula => glm)
-##' @param exposure_model  model for the exposure
-##' @param data data.frame
-##' @param link Link function (g)
-##' @param g_model Model for \eqn{E[g(Y|A,W)|W]}
-##' @param nfolds Number of folds
-##' @param silent supress all messages and progressbars
-##' @param mc.cores mc.cores Optional number of cores. parallel::mcmapply used instead of future
-##' @param ... additional arguments to future.apply::future_mapply
-##' @return alean.targeted object
-##' @author Klaus Kähler Holst
-##' @examples
-##'
-##' sim1 <- function(n, family=gaussian(), ...) {
-##'    m <- lvm() |>
-##'      distribution(~ y, binomial.lvm()) |>
-##'      regression('a', value=function(l) l) |>
-##'      regression('y', value=function(a,l) a + l)
-##'      if (family$family=="binomial")
-##'         distribution(m, ~a) <- binomial.lvm()
-##'    sim(m, n)
-##' }
-##'
-##' library(splines)
-##' f <- binomial()
-##' d <- sim1(1e4, family=f)
-##' e <- alean(response_model=ML(y ~ a + bs(l, df=3), family=binomial),
-##'            exposure_model=ML(a ~ bs(l, df=3), family=f),
-##'            data=d,
-##'            link = "logit", mc.cores=1, nfolds=1)
-##' e
-##'
-##' e <- alean(response_model=ML(y ~ a + l, family=binomial),
-##'            exposure_model=ML(a ~ l),
-##'            data=d,
-##'            link = "logit", mc.cores=1, nfolds=1)
-##' e
-##' @export
+#' Assumption lean inference via cross-fitting (Double ML). See
+#' <doi:10.1111/rssb.12504
+#'
+#' Let \eqn{Y} be the response variable, \eqn{A} the exposure and \eqn{W}
+#' covariates. The target parameter is: \deqn{\Psi(P) = \frac{E(Cov[A,
+#' g\{E(Y|A,W)\}\mid W])} {E\{Var(A\mid W)\}} }
+#'
+#' The \code{response_model} is the model for \eqn{E(Y|A,W)}, and
+#' \code{exposure_model} is the model for \eqn{E(A|W)}.
+#' \code{link} specifies \eqn{g}.
+#'
+#' @title Assumption Lean inference for generalized linear model parameters
+#' @param response_model formula or ml_model object (formula => glm)
+#' @param exposure_model  model for the exposure
+#' @param data data.frame
+#' @param link Link function (g)
+#' @param g_model Model for \eqn{E[g(Y|A,W)|W]}
+#' @param nfolds Number of folds
+#' @param silent supress all messages and progressbars
+#' @param mc.cores mc.cores Optional number of cores.
+#' parallel::mcmapply used instead of future
+#' @param ... additional arguments to future.apply::future_mapply
+#' @return alean.targeted object
+#' @author Klaus Kähler Holst
+#' @examples
+#'
+#' sim1 <- function(n, family=gaussian(), ...) {
+#'    m <- lvm() |>
+#'      distribution(~ y, binomial.lvm()) |>
+#'      regression('a', value=function(l) l) |>
+#'      regression('y', value=function(a,l) a + l)
+#'      if (family$family=="binomial")
+#'         distribution(m, ~a) <- binomial.lvm()
+#'    sim(m, n)
+#' }
+#'
+#' library(splines)
+#' f <- binomial()
+#' d <- sim1(1e4, family=f)
+#' e <- alean(response_model=ML(y ~ a + bs(l, df=3), family=binomial),
+#'            exposure_model=ML(a ~ bs(l, df=3), family=f),
+#'            data=d,
+#'            link = "logit", mc.cores=1, nfolds=1)
+#' e
+#'
+#' e <- alean(response_model=ML(y ~ a + l, family=binomial),
+#'            exposure_model=ML(a ~ l),
+#'            data=d,
+#'            link = "logit", mc.cores=1, nfolds=1)
+#' e
+#' @export
 alean <- function(response_model,
                   exposure_model,
                   data,
@@ -86,7 +87,7 @@ alean <- function(response_model,
 
   glink <- stats::quasi(link)
   g <- glink$linkfun
-  ginv <- glink$linkinv
+  # ginv <- glink$linkinv
   dginv <- glink$mu.eta
   dg <- function(x) 1/dginv(g(x)) ## Dh^-1 = 1/(h'(h^-1(x)))
 
@@ -94,8 +95,6 @@ alean <- function(response_model,
   if (nfolds<1) nfolds <- 1
   folds <- split(sample(1:n, n), rep(1:nfolds, length.out = n))
   folds <- lapply(folds, sort)
-  ff <- Reduce(c, folds)
-  idx <- order(ff)
   scores <- list()
   fargs <- seq_len(nfolds)
   if (!silent) {
@@ -116,8 +115,8 @@ alean <- function(response_model,
       deval <- data[fold, ]
     }
 
-    tmp <- Ymod$estimate(dtrain) ## E(Y|A,L)
-    tmp <- Amod$estimate(dtrain) ## E(A|L)
+    Ymod$estimate(dtrain) # E(Y|A,L)
+    Amod$estimate(dtrain) # E(A|L)
     EA <- Amod$predict(newdata = deval)
     EY <- Ymod$predict(newdata = deval)
     dtrain[, g_model_response] <- g(EY)
@@ -129,7 +128,7 @@ alean <- function(response_model,
       X[, A_var] <- A_levels[1]
       Eg <- Eg + (1 - EA) * Ymod$predict(newdata = X)
     } else {
-      tmp <- gmod$estimate(dtrain)
+      gmod$estimate(dtrain)
       Eg <- gmod$predict(newdata = deval)
     }
     Y <- Ymod$response(deval, na.action = na.pass)
@@ -137,7 +136,7 @@ alean <- function(response_model,
     mu <- dg(EY) * (Y - EY) + g(EY) - Eg
     A. <- (A - EA)
     if (!silent) pb()
-    cbind(mu, A.)
+    return(cbind(mu, A.))
   }
 
   if (!missing(mc.cores)) {
@@ -170,4 +169,3 @@ alean <- function(response_model,
   class(res) <- c("alean.targeted", "targeted")
   return(res)
 }
-

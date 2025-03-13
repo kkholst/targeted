@@ -19,7 +19,7 @@ cumhaz(
 \item{newdata}{data.frame}
 
 \item{times}{numeric vector: Time points at which the survival model is
-evalauted. Must be a sorted vector with unique elements. If NULL, the time
+evaluated. Must be a sorted vector with unique elements. If NULL, the time
 points associated with the survival model is used.}
 
 \item{individual.time}{logical: If TRUE the survival object is evaluated at
@@ -32,7 +32,7 @@ and the length of times must be the same.}
 List with elements:
 \itemize{
 \item time: numeric vector
-\item chf: cummulative hazard function. If individual.time = FALSE, matrix
+\item chf: cumulative hazard function. If individual.time = FALSE, matrix
 with dimension (nrow(newdata), length(times)). If individual.time = TRUE,
 vector of length length(times).
 \item surv: survival function, exp(-chf).

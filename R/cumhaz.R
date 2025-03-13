@@ -19,10 +19,9 @@
 #' }
 #' @author Klaus K. Holst, Andreas Nordland
 #' @export
-cumhaz <- function(object, newdata, times = NULL, individual.time = FALSE,
-  extend = FALSE, ...) {
+cumhaz <- function(object, newdata, times = NULL,
+                   individual.time = FALSE, extend = FALSE, ...) {
   n <- nrow(newdata)
-
   ## input check: times
   if (!is.null(times)) {
     stopifnot(
