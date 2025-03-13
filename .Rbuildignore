@@ -8,11 +8,17 @@
 ^Makefile$
 ^Makefile$
 ^src/target/lib$
+^src/target/build$
+^src/target/doc$
+^src/target/misc$
+^src/target/tests$
+^src/target/config$
 ^README\.Rmd$
 ^LICENSE$
 ^examples$
 ^TODO$
 ^doc$
+^www$
 ^Meta$
 ^_pkgdown\.yml$
 ^.codecov.yml
