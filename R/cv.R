@@ -39,7 +39,8 @@
 #' x <- cv(list(m0=f0,m1=f1,m2=f2),rep=10, data=iris, formula=Sepal.Length~.)
 #' x
 #' @export
-cv <- function(models, data, response = NULL,
+cv <- function(models, data, # nolint
+               response = NULL,
                nfolds = 5, rep = 1,
                weights = NULL,
                model.score = scoring,
@@ -90,7 +91,7 @@ cv <- function(models, data, response = NULL,
       models[[i]] <- list(
         fit = f,
         predict = function(fit, newdata, ...) {
-          predict(fit, newdata = newdata, ...)
+          return(predict(fit, newdata = newdata, ...))
         }
       )
     }
@@ -249,7 +250,7 @@ cv <- function(models, data, response = NULL,
       perfs <- c(perfs, list(newperf))
     }
     if (!silent) pb()
-    do.call(rbind, perfs)
+    return(do.call(rbind, perfs))
   }
 
   if (missing(mc.cores)) {
@@ -273,7 +274,7 @@ cv <- function(models, data, response = NULL,
     perf_arr[R, k, , ] <- val[[i]]
   }
 
-  structure(list(
+  obj <- structure(list(
     cv = perf_arr,
     call = match.call(),
     names = nam,
@@ -282,6 +283,7 @@ cv <- function(models, data, response = NULL,
   ),
   class = "cross_validated"
   )
+  return(obj)
 }
 
 #' @export
@@ -307,7 +309,7 @@ coef.cross_validated <- function(object, min=FALSE, ...) {
   if (min) {
     res <- apply(res, 2, which.min)
   }
-  res
+  return(res)
 }
 
 #' @export

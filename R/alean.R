@@ -17,7 +17,8 @@
 #' @param g_model Model for \eqn{E[g(Y|A,W)|W]}
 #' @param nfolds Number of folds
 #' @param silent supress all messages and progressbars
-#' @param mc.cores mc.cores Optional number of cores. parallel::mcmapply used instead of future
+#' @param mc.cores mc.cores Optional number of cores.
+#' parallel::mcmapply used instead of future
 #' @param ... additional arguments to future.apply::future_mapply
 #' @return alean.targeted object
 #' @author Klaus Kähler Holst
@@ -86,7 +87,7 @@ alean <- function(response_model,
 
   glink <- stats::quasi(link)
   g <- glink$linkfun
-  ginv <- glink$linkinv
+  # ginv <- glink$linkinv
   dginv <- glink$mu.eta
   dg <- function(x) 1/dginv(g(x)) ## Dh^-1 = 1/(h'(h^-1(x)))
 
@@ -94,8 +95,6 @@ alean <- function(response_model,
   if (nfolds<1) nfolds <- 1
   folds <- split(sample(1:n, n), rep(1:nfolds, length.out = n))
   folds <- lapply(folds, sort)
-  ff <- Reduce(c, folds)
-  idx <- order(ff)
   scores <- list()
   fargs <- seq_len(nfolds)
   if (!silent) {
@@ -116,8 +115,8 @@ alean <- function(response_model,
       deval <- data[fold, ]
     }
 
-    tmp <- Ymod$estimate(dtrain) ## E(Y|A,L)
-    tmp <- Amod$estimate(dtrain) ## E(A|L)
+    Ymod$estimate(dtrain) # E(Y|A,L)
+    Amod$estimate(dtrain) # E(A|L)
     EA <- Amod$predict(newdata = deval)
     EY <- Ymod$predict(newdata = deval)
     dtrain[, g_model_response] <- g(EY)
@@ -129,7 +128,7 @@ alean <- function(response_model,
       X[, A_var] <- A_levels[1]
       Eg <- Eg + (1 - EA) * Ymod$predict(newdata = X)
     } else {
-      tmp <- gmod$estimate(dtrain)
+      gmod$estimate(dtrain)
       Eg <- gmod$predict(newdata = deval)
     }
     Y <- Ymod$response(deval, na.action = na.pass)
@@ -137,7 +136,7 @@ alean <- function(response_model,
     mu <- dg(EY) * (Y - EY) + g(EY) - Eg
     A. <- (A - EA)
     if (!silent) pb()
-    cbind(mu, A.)
+    return(cbind(mu, A.))
   }
 
   if (!missing(mc.cores)) {
