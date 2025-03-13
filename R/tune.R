@@ -1,20 +1,14 @@
-##'
-##'
-##'
-##' @title Hyperparameter tuning
-##' @param model
-##' @param bounds
-##' @param data
-##' @param n_iter
-##' @param kappa
-##' @param init_points
-##' @param nfolds
-##' @param model.score
-##' @param ...
-##' @return list with
-##' @details
-##'
-##' @author Klaus Kähler Holst
+#' @title Hyperparameter tuning
+#' @param model
+#' @param data
+#' @param nfolds
+#' @param model.score
+#' @param ... Additional arguments to
+#' [rBayesianOptimization::BayesianOptimization]
+#' @return list with
+#' @details
+#' @inherit rBayesianOptimization::BayesianOptimization
+#' @author Klaus Kähler Holst
 tune <- function(model, bounds, data,
                  n_iter = 15,
                  kappa = 2.576,
