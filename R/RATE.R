@@ -371,7 +371,7 @@ HMc.tau <- function(T.est, C.est, data, time, event, tau) {
   time.C <- time[event == 0]
 
   S <- diag(cumhaz(T.est, newdata = data.C, times = time.C)$surv)
-  S.tau <- cumhaz(T.est, newdata = data.C, times = tau)$surv[ , 1]
+  S.tau <- cumhaz(T.est, newdata = data.C, times = tau)$surv[, 1]
   Sc <- diag(cumhaz(C.est, newdata = data.C, times = time.C)$surv)
   stopifnot(all(S * Sc > 0))
 

@@ -42,7 +42,7 @@ obtained from 'data'.}
 
 \item{tau}{Time-point of interest, see Details.}
 
-\item{type}{"risk", "treatment", "rmst", "brier"}
+\item{type}{"risk", "treatment", "brier"}
 
 \item{M}{Number of folds in cross-fitting (M=1 is no cross-fitting).}
 
@@ -78,7 +78,7 @@ latter term can be computational intensive to calculate. Rather than
 calculating this integral in all observed time points, we can make a
 coarser evaluation which can be controlled by setting
 \code{control=(sample=N)}. With \code{N=0} the (computational intensive)
-standard evaluation is used.##'
+standard evaluation is used.
 }
 \author{
 Klaus K. Holst, Andreas Nordland

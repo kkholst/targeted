@@ -68,8 +68,10 @@ fit_treatment_model <- function(data,
   if (length(A_levels) != 2) {
     stop("Expected binary treatment variable.")
   }
-  A_var <- all.vars(update(formula(treatment), ~1)) # name of the treatment variable
-  A_value <- (A == A_levels[2]) * 1 # binary representation of the treatment variable
+  # name of the treatment variable:
+  A_var <- all.vars(update(formula(treatment), ~1))
+  # binary representation of the treatment variable:
+  A_value <- (A == A_levels[2]) * 1
 
   ## overwriting the treatment variable with the binary representation:
   data[, A_var] <- A_value

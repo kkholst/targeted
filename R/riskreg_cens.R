@@ -9,7 +9,7 @@
 ##'   function evalued in 'newdata' is returned with nuisance parameters
 ##'   obtained from 'data'.
 ##' @param tau Time-point of interest, see Details.
-##' @param type "risk", "treatment", "rmst", "brier"
+##' @param type "risk", "treatment", "brier"
 ##' @param M Number of folds in cross-fitting (M=1 is no cross-fitting).
 ##' @param call.response Model call for the response model (e.g. "mets::phreg").
 ##' @param args.response Additional arguments to the response model.
@@ -29,7 +29,7 @@
 ##'   calculating this integral in all observed time points, we can make a
 ##'   coarser evaluation which can be controlled by setting
 ##'   \code{control=(sample=N)}. With \code{N=0} the (computational intensive)
-##'   standard evaluation is used.##'
+##'   standard evaluation is used.
 ##' @author Klaus K. Holst, Andreas Nordland
 ##' @export
 riskreg_cens <- function(response,
@@ -80,14 +80,14 @@ riskreg_cens <- function(response,
     h <- function(data, time, S, S.tau, tau) {
       return((S-S.tau)/S * (time<=tau))
     }
-  } else if (type[1]=="rmst") {
-    m <- function(time, data) {
-      return(pmin(time, tau))
-    }
-    h <- function(data, time, S, S.tau, tau) {
-      I <- intsurv(time, S, tau)$cint
-      return((as.vector(time)*as.vector(S) + I) / as.vector(S) *(time<=tau))
-    }
+  ## } else if (type[1]=="rmst") {
+  ##   m <- function(time, data) {
+  ##     return(pmin(time, tau))
+  ##   }
+  ##   h <- function(data, time, S, S.tau, tau) {
+  ##     I <- intsurv(time, S, tau)$cint
+  ##     return((as.vector(time)*as.vector(S) + I) / as.vector(S) *(time<=tau))
+  ##   }
   } else if (type[1]=="brier") {
     if (is.null(prediction)) {
       stop("Supply prediction method")
@@ -105,21 +105,22 @@ riskreg_cens <- function(response,
     A.var <- all.vars(update(formula(treatment), ~1))
     A.value <- data[which(A)[1], A.var]
     if (length(A.levels)!=2) stop("Expected binary treatment variable (0,1).")
-    if (type == "rmst") {
-      m <- function(time, data) {
-        return(pmin(time, tau)*data[, "_weight"] +
-          data[, "_pred"]*(1 - data[, "_weight"])
-        )
-      }
-      h <- function(data, time, S, S.tau, tau) {
-        I <- intsurv(time, S, tau)$cint
-        return(
-          (as.vector(time)*as.vector(S) +
-         I)/as.vector(S) * (time<=tau) * as.vector(data[, "_weight"]) +
-          as.vector(data[, "_pred"])*(1 - as.vector(data[, "_weight"]))
-        )
-      }
-    } else {
+    ## if (type == "rmst") {
+    ##   m <- function(time, data) {
+    ##     return(pmin(time, tau)*data[, "_weight"] +
+    ##       data[, "_pred"]*(1 - data[, "_weight"])
+    ##     )
+    ##   }
+    ##   h <- function(data, time, S, S.tau, tau) {
+    ##     I <- intsurv(time, S, tau)$cint
+    ##     return(
+    ##       (as.vector(time)*as.vector(S) +
+    ##      I)/as.vector(S) * (time<=tau) * as.vector(data[, "_weight"]) +
+    ##       as.vector(data[, "_pred"])*(1 - as.vector(data[, "_weight"]))
+    ##     )
+    ##   }
+    ## } else
+    {
       type <- "treatment"
       m <- function(time, data) {
         return(
@@ -197,15 +198,16 @@ riskreg_cens <- function(response,
       pr.A <- treatment$predict(valid_data)
       valid_data.a <- valid_data
       valid_data.a[, A.var] <- A.value
-      if (type=="rmst") {
-        rms <- intsurv2(T.est, valid_data.a,
-          time = valid.time,
-          stop = tau,
-          sample = control$sample,
-          blocksize = control$blocksize
-          )
-        valid_data[, "_pred"] <- rms
-      } else {
+      ## if (type=="rmst") {
+      ##   rms <- intsurv2(T.est, valid_data.a,
+      ##     time = valid.time,
+      ##     stop = tau,
+      ##     sample = control$sample,
+      ##     blocksize = control$blocksize
+      ##     )
+      ##   valid_data[, "_pred"] <- rms
+      ## } else
+      {
         Fhat <- 1 - as.vector(cumhaz(T.est,
                                      newdata = valid_data.a,
                                      times = tau)$surv)

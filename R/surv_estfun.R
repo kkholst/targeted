@@ -1,13 +1,54 @@
-##' @title Treatment level estimating functions for survival outcomes under right censoring
-##' @param type Character string, outcome of interest: "risk": P(T <= tau|A=a), "surv": P(T > tau|A=a)
+## H(u|X_i, A_i) = E[I\{T_i \leq \tau\} | T_i > u, X_i, A_i] =
+## I\{u \leq \tau \} \frac{S(u|X_i, A_i) - S(\tau|X_i, A_i)}{S(u|X_i, A_i)}
+H_constructor_risk <- function(T_model, tau, individual_time, ...) {
+  force(T_model)
+  force(tau)
+  force(individual_time)
+
+  H <- function(u, data) {
+    S <- cumhaz(
+      T_model,
+      newdata = data,
+      times = u,
+      individual.time = individual_time
+    )$surv
+
+    S_tau <- cumhaz(
+      T_model,
+      newdata = data,
+      times = tau,
+      individual_time = individual_time
+    )$surv
+    S_tau <- as.vector(S_tau)
+
+    if (individual_time == FALSE) {
+      res <- apply(S, 2, function(x) x - S_tau)
+      res <- res / S
+      indicator <- (u <= tau)
+      res <- apply(res, 1, function(x) x * indicator)
+      res <- t(res)
+    } else {
+      res <- (S - S_tau) / S * (u <= tau)
+      res <- as.vector(res)
+    }
+    return(res)
+  }
+  return(H)
+}
+
+
+##' @title Treatment level estimating functions for survival outcomes under
+##'   right censoring
+##' @param type Character string, outcome of interest: "risk": P(T <= tau|A=a),
+##'   "surv": P(T > tau|A=a)
 ##' @param data data.frame
 ##' @param tau Numeric, time-point of interest
 ##' @param survival_models List of survival models, see fit_survival_models()
 ##' @param treatment_model Treatment model, see fit_treatment_model()
 ##' @param control List of control parameters, list(sample, blocksize)
-##' @return List with matrix elements estimating_functions, or, and ipw.
+##' @return List with matrix elements estfun, or, and ipw.
 ##' @author Andreas Nordland
-survival_treatment_level_estimating_functions <- function(type = "risk",
+survival_treatment_level_estfun <- function(type = "risk",
                                                           data,
                                                           tau,
                                                           survival_models,
@@ -65,15 +106,16 @@ survival_treatment_level_estimating_functions <- function(type = "risk",
     h <- (time <= tau)
     H_constructor <- H_constructor_risk
   } else if (type == "surv") {
-    h <- (time > tau)
-    H_constructor <- H_constructor_surv
+    stop("Not yet implemented")
+    ## h <- (time > tau)
+    ## H_constructor <- H_constructor_surv
   } else if (type == "rmst") {
-    h <- pmin(time, tau)
-    H_constructor <- H_constructor_rmst
+    stop("Not yet implemented")
+    ## h <- pmin(time, tau)
+    ## H_constructor <- H_constructor_rmst
   } else {
     stop("unknown type. Must be either risk or prob.")
   }
-
   ## calculating the right censoring augmentation integral:
   rcai <- rcai(
     T_model = T_model,

@@ -9,7 +9,8 @@ int_surv(times, surv, start = 0, stop = max(times), extend = FALSE)
 \arguments{
 \item{times}{Numeric vector, sorted time points.}
 
-\item{surv}{Numeric vector, values of a survival function evaluated at time points given by \code{times}.}
+\item{surv}{Numeric vector, values of a survival function evaluated at time
+points given by \code{times}.}
 
 \item{start}{Numeric vector, start of the integral.}
 
@@ -19,7 +20,9 @@ int_surv(times, surv, start = 0, stop = max(times), extend = FALSE)
 Numeric vector, value of the integral.
 }
 \description{
-Computes an approximation of $\int_start^\stop S(t) dt$, where $S(t)$ is a survival function, for a selection of start and stop time points.
+Computes an approximation of \eqn{\int_start^stop S(t) dt}, where
+\eqn{S(t)} is a survival function, for a selection of start and stop time
+points.
 }
 \author{
 Andreas Nordland

@@ -7,6 +7,9 @@
 #' @param individual.time logical: If TRUE the survival object is evaluated at
 #' different time points for each row in newdata. The number of rows in newdata
 #' and the length of times must be the same.
+#' @param extend if TRUE, prints information for all specified
+#'  'times’, even if there are no subjects left at the end of the
+#'  specified ‘times’ (see [survival::summary.survfit]).
 #' @param ... Additional arguments.
 #' @return List with elements:
 #' \itemize{
@@ -92,7 +95,7 @@ cumhaz <- function(object, newdata, times = NULL,
         strata = ssf$strata, time = ssf$time, chf = ssf$cumhaz
       )
       if (individual.time == FALSE) {
-        ssf_df_wide <- dcast(
+        ssf_df_wide <- data.table::dcast(
           ssf_df, strata ~ time, value.var = "chf"
         )
         tt <- colnames(ssf_df_wide)[-1] |> as.numeric()
@@ -153,7 +156,7 @@ cumhaz <- function(object, newdata, times = NULL,
       strata <- data.table(strata = strata(mf))
 
       if (individual.time == FALSE) {
-        ssf_df_wide <- dcast(ssf_df, strata ~ time, value.var = "chf")
+        ssf_df_wide <- data.table::dcast(ssf_df, strata ~ time, value.var = "chf")
         tt <- colnames(ssf_df_wide)[-1] |> as.numeric()
 
         chf <- merge(strata, ssf_df_wide, by = "strata", all.x = TRUE,

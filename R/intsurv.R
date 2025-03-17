@@ -61,7 +61,7 @@ intsurv <- function(time, surv, stop = max(time), jumps.only=FALSE) {
 ##   return(res)
 ## }
 
-##' Computes an approximation of \eqn{\int_start^\stop S(t) dt}, where
+##' Computes an approximation of \eqn{\int_start^stop S(t) dt}, where
 ##' \eqn{S(t)} is a survival function, for a selection of start and stop time
 ##' points.
 ##'
@@ -132,7 +132,7 @@ int_surv <- function(times, surv,
         diff_times_k <- diff(c(start_k, times[idx], stop_k))
         surv_k <- c(surv[idx[1] - 1], surv[idx])
       } else {
-        idx_last <- last(which(times <= stop_k))
+        idx_last <- data.table::last(which(times <= stop_k))
         diff_times_k <- diff(c(start_k, stop_k))
         surv_k <- surv[idx_last]
       }
