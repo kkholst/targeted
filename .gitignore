@@ -3,6 +3,7 @@ pkgdown
 man/figures/logo.*
 docs
 inst/doc
+vignettes/*_files
 vignettes/*.html
 vignettes/figure/*chunk*
 vignettes/*.R

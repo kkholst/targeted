@@ -1,14 +1,15 @@
 #' @title Hyperparameter tuning
-#' @param model
-#' @param data
-#' @param nfolds
-#' @param model.score
+#' @param model [ml_model] object
+#' @param data data.frame
+#' @param nfolds Number of folds to use in cross-validation
+#' @param model.score model scoring (default MSE)
 #' @param ... Additional arguments to
 #' [rBayesianOptimization::BayesianOptimization]
-#' @return list with
-#' @details
+#' @return list
 #' @inherit rBayesianOptimization::BayesianOptimization
 #' @author Klaus Kähler Holst
+#' @export
+#' @aliases tune tuner
 tune <- function(model, bounds, data,
                  n_iter = 15,
                  kappa = 2.576,
@@ -21,10 +22,11 @@ tune <- function(model, bounds, data,
     cl[1] <- expression(model)
     f <- eval(cl)
     res <- targeted::cv(list(f),
-        model.score = model.score,
-        nfolds = nfolds,
-        data = data,
-        silent=TRUE)
+      model.score = model.score,
+      nfolds = nfolds,
+      data = data,
+      silent = TRUE
+    )
     list(Score = -coef(res)[1], Pred = 0)
   }
   bo.args <- c(list(
@@ -74,7 +76,7 @@ tune <- function(model, bounds, data,
     )
 }
 
-
+#' @export
 tuner <- function(mod, bounds, data, ...) {
   modwrap <- function(...) {
     args <- list(...)

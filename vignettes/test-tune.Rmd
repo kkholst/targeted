@@ -1,0 +1,83 @@
+---
+title: "Test `tune` function"
+output:
+  knitr:::html_vignette:
+    fig_caption: yes
+    fig_width: 5.15
+    fig_height: 3.5
+    fig_align: center
+---
+
+```{r, include = FALSE}
+library(targeted)
+```
+
+
+Mayo Clinic Primary Biliary Cholangitis Data
+```{r}
+data(pbc, package = "survival")
+```
+
+In the following we are interested in predicting events (death or transplant)
+before 2 years.
+```{r}
+pbc <- transform(pbc, y = (time < 730) * (status > 0))
+```
+
+A couple of benchmark models
+```{r}
+m0 <- predictor_glm(y ~ 1)
+m1 <- predictor_glm(y ~ age + sex + bili + edema + albumin)
+## m2 <- predictor_nb(y ~ age + sex + bili + edema + albumin, kernel = TRUE)
+cv(list(benchmark = m0, glm = m1), data = pbc)
+```
+
+Next we tune the hyper-parameters of a xgboost model with the `tuner` function.
+As inputs we need to provide a `ml_model` object and
+a list of parameters to optimize over, here defined by the `bounds` variable.
+For continuous variables (`eta`, `nrounds`) the lower and upper bounds are
+defined numeric vectors, for categorical variables (`max_depth`) the possible
+values are defined as a list element. A grid search is performed over all
+combinations of the categorical variables, and a Bayesian Optimization routine
+is run over the remaining continuous variables with the categorical variables fixed.
+```{r}
+mod <- predictor_xgboost_binary(
+  y ~ age + sex + bili + edema + albumin
+)
+bounds <- list(
+  eta = c(0.001, 1),
+  nrounds = c(1, 100),
+  max_depth = list(1,3,6)
+)
+a <- tuner(mod, bounds, pbc, n_iter = 5)
+a
+```
+
+[OBS: I suggest this function should be implemented as a R6 class method
+allowing to tune models with syntax `mod$tune(...)`]
+Arguments can be given to control the underlying cross-validation assessment and
+scoring method (default is MSE).
+The returned object contains all the function evaluations and argument values
+that was explored (`history`), the model object with the hyper-parameters set to
+the best identified values (`model`), the best model score (`value`, here
+MSE/Brier score), and the best hyper-parameters (`best`)
+```{r}
+names(a)
+a$history
+```
+
+```{r}
+cv(list(xgb=a$model, m0=m0), pbc)
+```
+Alternative way:
+
+```{r}
+model <- function(eta, nrounds, max_depth) {
+  predictor_xgboost_binary(
+    y ~ age + sex + bili + edema + albumin,
+    eta = eta, nrounds = nrounds, max_depth = max_depth
+  )
+}
+b <- targeted:::tune(model, bounds, pbc, n_iter = 2)
+b
+```

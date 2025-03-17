@@ -2,6 +2,7 @@
 % Please edit documentation in R/tune.R
 \name{tune}
 \alias{tune}
+\alias{tuner}
 \title{Hyperparameter tuning}
 \usage{
 tune(
@@ -17,10 +18,14 @@ tune(
 )
 }
 \arguments{
+\item{model}{\link{ml_model} object}
+
 \item{bounds}{A named list of lower and upper bounds for each hyperparameter.
 The names of the list should be identical to the arguments of FUN.
 All the sample points in init_grid_dt should be in the range of bounds.
 Please use "L" suffix to indicate integer hyperparameter.}
+
+\item{data}{data.frame}
 
 \item{n_iter}{Total number of times the Bayesian Optimization is to repeated.}
 
@@ -30,11 +35,15 @@ increasing kappa will make the optimized hyperparameters pursuing exploration.}
 \item{init_points}{Number of randomly chosen points to sample the
 target function before Bayesian Optimization fitting the Gaussian Process.}
 
+\item{nfolds}{Number of folds to use in cross-validation}
+
+\item{model.score}{model scoring (default MSE)}
+
 \item{...}{Additional arguments to
 \link[rBayesianOptimization:BayesianOptimization]{rBayesianOptimization::BayesianOptimization}}
 }
 \value{
-list with
+list
 }
 \description{
 Bayesian Optimization of Hyperparameters.
