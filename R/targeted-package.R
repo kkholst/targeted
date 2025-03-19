@@ -35,3 +35,14 @@
 #' }
 loadModule("riskregmodel", TRUE)
 NULL
+
+##' Simulated data set with clinical measurements that
+##'
+##' Scores truncated by death
+##' @name truncatedscore
+##' @docType data
+##' @keywords data
+##' @source Simulated data
+##' @examples
+##' data(truncatedscore)
+NULL
