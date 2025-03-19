@@ -131,6 +131,7 @@ test_intersectsignedwald <- function(thetahat1,
 #' @param cens.code (integer) Censoring code.
 #' @param naive (logical) If TRUE, the unadjusted estimates ignoring baseline
 #'   covariates is returned as the attribute 'naive'.
+#' @param control optimization routine parameters.
 #' @param ... Additional arguments passed to [mets::binregATE].
 #' @return [lava::estimate.default] object
 #' @author Klaus Kähler Holst
@@ -171,6 +172,7 @@ estimate_truncatedscore <- function(
                      cause = NULL,
                      cens.code = 0,
                      naive = FALSE,
+                     control=list(),
                      ...
                      ) {
   if (inherits(mod.y, "formula")) {
@@ -242,14 +244,18 @@ estimate_truncatedscore <- function(
       mod.event <- update(mod.event, ff)
     }
   }
-  b <- ate_mets(
-    mod.marg = formula_event,
-    mod.covar = mod.event,
-    data = data,
-    time = time,
-    cause = cause,
-    cens.code = cens.code
-  )
+  if (is.null(control$riskmethod)) {
+    control$riskmethod <- "ate_mets"
+  }
+  b <- do.call(control$riskmethod,
+          list(
+            mod.marg = formula_event,
+            mod.covar = mod.event,
+            data = data,
+            time = time,
+            cause = cause,
+            cens.code = cens.code
+          ))
   b <- estimate(
     b,
     function(p) c(1 - p[1], 1 - p[2], -p[3]),
@@ -380,7 +386,7 @@ ate_riskRegression <- function(mod.marg,
                                mod.covar = ~1,
                                data,
                                time,
-                               cens.code = 0) {
+                               cens.code = 0, ...) {
   trt.var <- tail(all.vars(mod.marg), 1)
   y <- design(mod.marg, data)$y
   data[["time_"]] <- y[, 1]
@@ -388,9 +394,9 @@ ate_riskRegression <- function(mod.marg,
   data[["trt_"]] <- factor(data[[trt.var]])
   mod.trt <- reformulate("1", "trt_")
   treat <- glm(mod.trt,
-    data = data,
-    family = binomial(link = "logit")
-  )
+               data = data,
+               family = binomial(link = "logit")
+               )
   formula_outcome <- update(
     mod.covar,
     survival::Surv(time_, status_) ~ trt_:. + strata(trt_)
@@ -400,18 +406,20 @@ ate_riskRegression <- function(mod.marg,
     list(formula_outcome, data = data, x = TRUE, y = TRUE)
   )
   cens <- survival::coxph(
-    survival::Surv(time_, !status_) ~ trt_,
-    data = data, x = TRUE, y = TRUE
-  )
+                      survival::Surv(time_, !status_) ~ trt_,
+                      data = data, x = TRUE, y = TRUE
+                    )
   rr <- riskRegression::ate(fit,
-    data = data,
-    treatment = treat,
-    censor = cens, times = time, cause = 1,
-    estimator = "AIPTW", verbose = FALSE
+                            data = data,
+                            treatment = treat,
+                            censor = cens, times = time, cause = 1,
+                            estimator = "AIPTW", verbose = FALSE
+                            )
+  rr1 <- estimate(
+    coef = rr$meanRisk$estimate,
+    IC = Reduce(cbind, rr$iid[[1]]) * nrow(data)
   )
-  rr1 <- with(rr$meanRisk, estimate(coef = estimate, vcov = diag(se**2)))
-  rrd <- with(rr$diffRisk, estimate(coef = estimate, vcov = se**2))
-  res <- rr1 + rrd
+  res <- estimate(rr1, function(p) c(p, diff(p)))
   return(estimate(res, labels = c("p0", "p1", "riskdiff")))
 }
 
