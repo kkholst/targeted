@@ -76,14 +76,14 @@ print(s)
 parameter(s)
 
 # the above is equivalent to
-a <- estimate_truncatedscore(
-  data = dat,
-  mod.y = y ~ a * (x1 + x2),
-  mod.r = r ~ a * (x1 + x2),
-  mod.a = a ~ 1,
-  mod.event = mets::Event(time, status) ~ x1+x2,
-  time = 2
-)
+# a <- estimate_truncatedscore(
+#   data = truncatedscore,
+#   mod.y = y ~ a * (x1 + x2),
+#   mod.r = r ~ a * (x1 + x2),
+#   mod.a = a ~ 1,
+#   mod.event = mets::Event(time, status) ~ x1+x2,
+#   time = 2
+# )
 }
 \author{
 Klaus Kähler Holst
