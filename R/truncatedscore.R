@@ -143,7 +143,7 @@ test_intersectsignedwald <- function(thetahat1,
 #'   mod.y = mod1,
 #'   mod.r = mod2,
 #'   mod.a = a ~ 1,
-#'   mod.event = mets::Event(time, status) ~ a * (x1+x2),
+#'   mod.event = mets::Event(time, status) ~ x1+x2,
 #'   time = 2
 #' )
 #' s <- summary(a, noninf.t = -0.1)
@@ -156,7 +156,7 @@ test_intersectsignedwald <- function(thetahat1,
 #'   mod.y = y ~ a * (x1 + x2),
 #'   mod.r = r ~ a * (x1 + x2),
 #'   mod.a = a ~ 1,
-#'   mod.event = mets::Event(time, status) ~ a * (x1+x2),
+#'   mod.event = mets::Event(time, status) ~ x1+x2,
 #'   time = 2
 #' )
 #' }
@@ -168,7 +168,7 @@ estimate_truncatedscore <- function(
                      mod.a,
                      mod.event,
                      time,
-                     cause = 1,
+                     cause = NULL,
                      cens.code = 0,
                      naive = FALSE,
                      ...
@@ -217,7 +217,7 @@ estimate_truncatedscore <- function(
     est1 <- m1 + mean(ic1)
     ic <- cbind(ic, ic1 - mean(ic1))
     est <- c(est, est1)
-    lab0 <- c(lab0, sprintf("E(Y|T>=%f,A=%s)", time, aval))
+    lab0 <- c(lab0, sprintf("E(Y|T>=%.1f,A=%s)", time, aval))
   }
   lab0 <- c(lab0, "diff")
   res <- estimate(
@@ -226,48 +226,74 @@ estimate_truncatedscore <- function(
     labels = lab0,
     id = rownames(data)
   )
-  data[, treatment] <- factor(data[, treatment])
-  mod.event <- update(mod.event, as.formula(sprintf("~ %s+ .", treatment)))
-  b <- mets::binregATE(mod.event,
-    data = data, time = time,
-    outcome = "cif", cause = cause, cens.code = cens.code,
-    ...
-    )
-  lab <- paste0(gsub(
-    "^treat", sprintf("Risk\\(T<%f|A=", time),
-    names(b$riskDR)[1:2]), ")")
-  lab <- c(lab, "riskdiff")
-  best <- estimate(
-    coef = c(b$riskDR, b$riskDR[2] - b$riskDR[1]),
-    IC = NROW(b$riskDR.iid) * cbind(
-      b$riskDR.iid,
-      b$riskDR.iid[, 2] - b$riskDR.iid[, 1]
-    ),
+  formula_event <- update(
+    mod.event,
+    as.formula(paste("~", treatment))
+  )
+  fac <- attr(terms(mod.event), "factors")
+  if (treatment %in% rownames(fac)) {
+    idx <- which(fac[treatment, ] == 1)
+    if (length(idx) > 0) {
+      xx <- colnames(fac)[idx]
+      ff <- as.formula(paste(
+        ". ~ . -",
+        paste(xx, collapse = "-")
+      ))
+      mod.event <- update(mod.event, ff)
+    }
+  }
+  b <- ate_mets(
+    mod.marg = formula_event,
+    mod.covar = mod.event,
+    data = data,
+    time = time,
+    cause = cause,
+    cens.code = cens.code
+  )
+  b <- estimate(
+    b,
+    function(p) c(1 - p[1], 1 - p[2], -p[3]),
     id = rownames(data)
   )
-  best <- estimate(best, labels=lab)
-  res <- merge(res, best)
+  if (!is.null(cause)) {
+    lab <- paste0(gsub(
+      "^p", sprintf("P\\(T>=%.1f|cause=%s,A=", time, cause),
+      names(coef(b))[1:2]
+    ), ")")
+  } else {
+      lab <- paste0(gsub(
+      "^p", sprintf("P\\(T>=%.1f|A=", time),
+      names(coef(b))[1:2]
+    ), ")")
+  }
+  lab <- c(lab, "riskdiff")
+  b <- estimate(b, labels=lab)
+  res <- merge(res, b)
   if (naive) {
-    eventmod0 <- update(mod.event, as.formula(sprintf("~ %s", treatment)))
-    b0 <- mets::binregATE(eventmod0,
-      data = data, time = time,
-      outcome = "cif", cause = cause, cens.code = cens.code, ...
-    )
-    best0 <- estimate(
-      coef = with(b0, c(riskDR, riskDR[2] - riskDR[1])),
-      IC = with(b0, NROW(riskDR.iid) * cbind(
-        riskDR.iid,
-        riskDR.iid[, 2] - riskDR.iid[, 1]
-      )),
-      id = rownames(data), labels = lab
-    )
+    if (is.null(cause)) {
+      b0 <- ate_phreg(
+        formula_event,
+        data = data, time = time, cens.code = cens.code
+      )
+    } else {
+      b0 <- ate_cmprsk(
+        formula_event,
+        data = data, time = time, cens.code = cens.code,
+        cause = cause
+      )
+    }
+    best0 <- estimate(b0, function(p) {
+      return(c(1 - p[1], 1 - p[2], -p[3]))
+    }, labels = lab)
+    best0$vcov <- vcov(b0)
     res0 <- estimate(
       coef = c(est.naive, est.naive[2] - est.naive[1]),
       IC = cbind(ic.naive, ic.naive[, 2] - ic.naive[, 1]),
       labels = lab0,
-      id = rownames(data)
+      id = seq_len(NROW(ic.naive))
     )
-    res0 <- res0 + best0
+    res0 <- merge(res0, best0)
+    res0$model.index <- list(1:3, 4:6)
     res <- structure(res, naive = list(res0))
   }
   res$landmark.time <- time
@@ -280,7 +306,7 @@ summary.truncatedscore <- function(object,
                                    noninf.y = 0,
                                    noninf.t = 0,
                                    alpha = 0.05,
-                                   parameter.sign = c(y = 1L, t = -1L),
+                                   parameter.sign = c(y = 1L, t = 1L),
                                    ...) {
 
   idx <- if (sign(parameter.sign[1]) < 0) c(1, 2) else c(2, 1)
@@ -327,19 +353,16 @@ summary.truncatedscore <- function(object,
 #' @export
 print.summary.truncatedscore <- function(x, ...) {
   cat("\n")
-  cli::cli_rule("Parameter estimates")
+  cli::cli_h2("Parameter estimates")
   print(x$object)
   cat("\n")
-  cli::cli_rule("One-sided tests")
-  cat("\nb1 = ", x$labels[1], "\n")
+  cli::cli_h2("One-sided tests")
+  cat("\nb1 = ", x$labels[1], "\n", sep="")
   print(x$test.1)
-  cli::cli_h3("")
-  cat("\nb2 = ", x$labels[2], "\n")
+  cat("\nb2 = ", x$labels[2], "\n", sep="")
   print(x$test.2)
-  cli::cli_rule("Intersection test")
+  cli::cli_h2("Intersection test")
   print(x$test.intersect)
-  cli::cli_rule()
-  cat("\n")
 }
 
 #' @export
@@ -349,4 +372,145 @@ parameter.summary.truncatedscore <- function(x, ...) {
 #' @export
 coef.summary.truncatedscore <- function(object, ...) {
   return(object$tests)
+}
+
+
+
+ate_riskRegression <- function(mod.marg,
+                               mod.covar = ~1,
+                               data,
+                               time,
+                               cens.code = 0) {
+  trt.var <- tail(all.vars(mod.marg), 1)
+  y <- design(mod.marg, data)$y
+  data[["time_"]] <- y[, 1]
+  data[["status_"]] <- (y[, 2] != cens.code) * 1
+  data[["trt_"]] <- factor(data[[trt.var]])
+  mod.trt <- reformulate("1", "trt_")
+  treat <- glm(mod.trt,
+    data = data,
+    family = binomial(link = "logit")
+  )
+  formula_outcome <- update(
+    mod.covar,
+    survival::Surv(time_, status_) ~ trt_:. + strata(trt_)
+  )
+  fit <- do.call(
+    survival::coxph,
+    list(formula_outcome, data = data, x = TRUE, y = TRUE)
+  )
+  cens <- survival::coxph(
+    survival::Surv(time_, !status_) ~ trt_,
+    data = data, x = TRUE, y = TRUE
+  )
+  rr <- riskRegression::ate(fit,
+    data = data,
+    treatment = treat,
+    censor = cens, times = time, cause = 1,
+    estimator = "AIPTW", verbose = FALSE
+  )
+  rr1 <- with(rr$meanRisk, estimate(coef = estimate, vcov = diag(se**2)))
+  rrd <- with(rr$diffRisk, estimate(coef = estimate, vcov = se**2))
+  res <- rr1 + rrd
+  return(estimate(res, labels = c("p0", "p1", "riskdiff")))
+}
+
+
+ate_cmprsk <- function(mod.marg,
+                            data,
+                            time,
+                            cens.code = 0,
+                            cause = 1) {
+  trt.var <- tail(all.vars(mod.marg), 1)
+  trt <- factor(data[[trt.var]])
+  trt <- (trt == levels(trt)[2]) * 1
+  y <- design(mod.marg, data)$y
+  a <- cmprsk::cuminc(y[, 1], y[, 2],
+    trt,
+    cencode = cens.code
+  ) |> cmprsk::timepoints(time)
+  idx0 <- which(rownames(a$est) == paste("0", cause)) # a=0, cause
+  idx1 <- which(rownames(a$est) == paste("1", cause)) # a=1, cause
+  res <- estimate(
+    coef = a$est[c(idx0, idx1)],
+    vcov = diag(c(a$var[c(idx0, idx1)])),
+  ) |> estimate(function(p) c(p, diff(p)),
+    labels = c("p0", "p1", "riskdiff")
+  )
+  return(res)
+}
+
+ate_km <- function(mod.marg,
+                        data,
+                        time, cens.code = 0) {
+  trt.var <- tail(all.vars(mod.marg), 1)
+  y <- design(mod.marg, data)$y
+  data[["time_"]] <- y[, 1]
+  data[["status_"]] <- (y[, 2] != cens.code) * 1
+  data[["trt_"]] <- factor(data[[trt.var]])
+  km <- survfit(Surv(time_, status_) ~ strata(trt_), data = data) |>
+    summary(time = time)
+  b2 <- estimate(coef = 1-km$surv, vcov = diag(km$std.err**2))
+  res <- b2 + estimate(b2, diff)
+  return(estimate(res, labels = c("p0", "p1", "riskdiff")))
+}
+
+
+ate_phreg <- function(mod.marg,
+                      data,
+                      time, cens.code = 0) {
+  trt.var <- tail(all.vars(mod.marg), 1)
+  y <- design(mod.marg, data)$y
+  data[["time_"]] <- y[, 1]
+  data[["status_"]] <- (y[, 2] != cens.code) * 1
+  data[["trt_"]] <- factor(data[[trt.var]])
+  data[["id_"]] <- seq_len(nrow(data))
+  d1 <- subset(data, trt_ == 1) # nolint
+  d0 <- subset(data, trt_ == 0) # nolint
+  fit1 <- mets::phreg(Event(time_, status_) ~ 1, data = d1)
+  fit0 <- mets::phreg(Event(time_, status_) ~ 1, data = d0)
+  surv <- function(object, time, ...) {
+    ic <- mets::IC(object, baseline = TRUE, time = time, ...)
+    est <- mets::predictCumhaz(object$cumhaz, new.time = time)[1, 2]
+    res <- lava::estimate(NULL, coef = est, IC = ic) |>
+      lava::estimate(function(x) 1 - exp(-x), labels = paste0("surv:", time))
+    return(res)
+  }
+  s1 <- estimate(surv(fit1, 2), id=d1$id_)
+  s0 <- estimate(surv(fit0, 2), id=d0$id_)
+  res <- s0 + s1
+  res <- res + estimate(res, diff)
+  return(estimate(res, labels = c("p0", "p1", "riskdiff")))
+}
+
+
+ate_mets <- function(mod.marg,
+                     mod.covar = ~1,
+                     data,
+                     time,
+                     cens.code = 0,
+                     cause = NULL) {
+  trt.var <- tail(all.vars(mod.marg), 1)
+  y <- design(mod.marg, data)$y
+  data[["time_"]] <- y[, 1]
+  data[["status_"]] <- y[, 2]
+  data[["trt_"]] <- factor(data[[trt.var]])
+  if (is.null(cause)) {
+    data[["status_"]] <- (y[, 2] != cens.code) * 1
+    cause <- 1
+  }
+  b <- mets::binregATE(
+    update(mod.covar, mets::Event(time_, status_) ~ trt_ * .),
+    data = data,
+    time = time,
+    cens.model = reformulate("strata(trt_)"),
+    outcome = "cif",
+    cause = cause,
+    cens.code = cens.code
+    )
+  res <- estimate(coef = b$riskDR, IC = b$riskDR.iid * (nrow(b$riskDR.iid))) |>
+    estimate(function(p) c(p, diff(p)),
+      labels = c("p0", "p1", "riskdiff")
+      )
+  return(res)
 }
