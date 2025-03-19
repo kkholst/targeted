@@ -245,7 +245,7 @@ estimate_truncatedscore <- function(
     }
   }
   if (is.null(control$riskmethod)) {
-    control$riskmethod <- "ate_mets"
+    control$riskmethod <- "ate_riskRegression"
   }
   b <- do.call(control$riskmethod,
           list(
@@ -422,7 +422,6 @@ ate_riskRegression <- function(mod.marg,
   res <- estimate(rr1, function(p) c(p, diff(p)))
   return(estimate(res, labels = c("p0", "p1", "riskdiff")))
 }
-
 
 ate_cmprsk <- function(mod.marg,
                             data,
