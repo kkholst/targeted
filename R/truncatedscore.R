@@ -136,11 +136,11 @@ test_intersectsignedwald <- function(thetahat1,
 #' @return [lava::estimate.default] object
 #' @author Klaus Kähler Holst
 #' @examples
-#' \dontrun{
+#' data(truncatedscore)
 #' mod1 <- predictor_glm(y ~ a * (x1 + x2))
 #' mod2 <- predictor_glm(r ~ a * (x1 + x2), family = binomial)
 #' a <- estimate_truncatedscore(
-#'   data = dat,
+#'   data = truncatedscore,
 #'   mod.y = mod1,
 #'   mod.r = mod2,
 #'   mod.a = a ~ 1,
@@ -160,7 +160,6 @@ test_intersectsignedwald <- function(thetahat1,
 #'   mod.event = mets::Event(time, status) ~ x1+x2,
 #'   time = 2
 #' )
-#' }
 #' @export
 estimate_truncatedscore <- function(
                      data,
@@ -471,9 +470,10 @@ ate_phreg <- function(mod.marg,
   data[["time_"]] <- y[, 1]
   data[["status_"]] <- (y[, 2] != cens.code) * 1
   data[["trt_"]] <- factor(data[[trt.var]])
+  data[["trt_"]] <- (data[["trt_"]]==levels(data[["trt_"]])[2]) * 1
   data[["id_"]] <- seq_len(nrow(data))
-  d1 <- subset(data, trt_ == 1) # nolint
-  d0 <- subset(data, trt_ == 0) # nolint
+  d1 <- data[which(data$trt_ == 1), ]
+  d0 <- data[which(data$trt_ == 0), ]
   fit1 <- mets::phreg(Event(time_, status_) ~ 1, data = d1)
   fit0 <- mets::phreg(Event(time_, status_) ~ 1, data = d0)
   surv <- function(object, time, ...) {

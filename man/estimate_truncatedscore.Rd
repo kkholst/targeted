@@ -11,9 +11,10 @@ estimate_truncatedscore(
   mod.a,
   mod.event,
   time,
-  cause = 1,
+  cause = NULL,
   cens.code = 0,
   naive = FALSE,
+  control = list(),
   ...
 )
 }
@@ -43,6 +44,8 @@ statement).}
 \item{naive}{(logical) If TRUE, the unadjusted estimates ignoring baseline
 covariates is returned as the attribute 'naive'.}
 
+\item{control}{optimization routine parameters.}
+
 \item{...}{Additional arguments passed to \link[mets:binregATE]{mets::binregATE}.}
 }
 \value{
@@ -57,15 +60,15 @@ The following are our two target parameters
 \deqn{P(T<t,\epsilon=1|A=1)- P(T<t,\epsilon=1|A=0)}
 }
 \examples{
-\dontrun{
+data(truncatedscore)
 mod1 <- predictor_glm(y ~ a * (x1 + x2))
 mod2 <- predictor_glm(r ~ a * (x1 + x2), family = binomial)
 a <- estimate_truncatedscore(
-  data = dat,
+  data = truncatedscore,
   mod.y = mod1,
   mod.r = mod2,
   mod.a = a ~ 1,
-  mod.event = mets::Event(time, status) ~ a * (x1+x2),
+  mod.event = mets::Event(time, status) ~ x1+x2,
   time = 2
 )
 s <- summary(a, noninf.t = -0.1)
@@ -78,10 +81,9 @@ a <- estimate_truncatedscore(
   mod.y = y ~ a * (x1 + x2),
   mod.r = r ~ a * (x1 + x2),
   mod.a = a ~ 1,
-  mod.event = mets::Event(time, status) ~ a * (x1+x2),
+  mod.event = mets::Event(time, status) ~ x1+x2,
   time = 2
 )
-}
 }
 \author{
 Klaus Kähler Holst
