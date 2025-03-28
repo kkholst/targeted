@@ -8,5 +8,5 @@ Suggests: cmprsk, e1071, glmnet, grf, hal9001, mgcv, tinytest,
         rmarkdown, scatterplot3d, SuperLearner (>= 2.0-28), knitr,
         xgboost, viridisLite
 License: Apache License (== 2.0)
-MD5sum: 2a427e3d53685c9fefab8a4b24097a77
+MD5sum: 1b54e202bbbd68128dcff964723d09ef
 NeedsCompilation: yes
