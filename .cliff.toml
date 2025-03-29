@@ -80,12 +80,12 @@ commit_preprocessors = [
   # If the spelling is incorrect, it will be automatically fixed.
 ]
 commit_parsers = [
-    { message = "^feat", group = "Features" },
-    { message = "^fix", group = "Bug Fixes" },
+    { message = "^feat", group = "<!-- 0 -->Features" },
+    { message = "^develop", group = "<!-- 2 -->Developer" },
+    { message = "^fix", group = "<!-- 1 -->Bug Fixes" },
     { message = "^doc", group = "Documentation", default_scope = "unscoped" },
     { message = "^perf", group = "Performance" },
     { message = "^refactor", group = "Developer" },
-    { message = "^develop", group = "Developer" },
     { message = "^style", group = "Styling" },
     { message = "^test", group = "Testing" },
     { message = "^chore\\(release\\): prepare for", skip = true },
