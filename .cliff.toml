@@ -79,11 +79,13 @@ commit_preprocessors = [
   # Check spelling of the commit with https://github.com/crate-ci/typos
   # If the spelling is incorrect, it will be automatically fixed.
 ]
+# the order of the groups is specified following the example on
+# https://git-cliff.org/docs/tips-and-tricks
 commit_parsers = [
     { message = "^feat", group = "<!-- 0 -->Features" },
     { message = "^develop", group = "<!-- 2 -->Developer" },
     { message = "^fix", group = "<!-- 1 -->Bug Fixes" },
-    { message = "^doc", group = "Documentation", default_scope = "unscoped" },
+    { message = "^doc", group = "<!-- 3 --> Documentation", default_scope = "unscoped" },
     { message = "^perf", group = "Performance" },
     { message = "^refactor", group = "Developer" },
     { message = "^style", group = "Styling" },
