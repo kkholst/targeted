@@ -218,7 +218,7 @@ estimate_truncatedscore <- function(
     est1 <- m1 + mean(ic1)
     ic <- cbind(ic, ic1 - mean(ic1))
     est <- c(est, est1)
-    lab0 <- c(lab0, sprintf("E(Y|T>=%.1f,A=%s)", time, aval))
+    lab0 <- c(lab0, sprintf("E(Y|T>%.1f,A=%s)", time, aval))
   }
   lab0 <- c(lab0, "diff")
   res <- estimate(
@@ -262,12 +262,12 @@ estimate_truncatedscore <- function(
   )
   if (!is.null(cause)) {
     lab <- paste0(gsub(
-      "^p", sprintf("P\\(T>=%.1f|cause=%s,A=", time, cause),
+      "^p", sprintf("P\\(T>%.1f|cause=%s,A=", time, cause),
       names(coef(b))[1:2]
     ), ")")
   } else {
     lab <- paste0(gsub(
-      "^p", sprintf("P\\(T>=%.1f|A=", time),
+      "^p", sprintf("P\\(T>%.1f|A=", time),
       names(coef(b))[1:2]
     ), ")")
   }
