@@ -55,15 +55,11 @@ body = """
 {% endfor %}\n
 """
 # template for the changelog footer
-footer = """
-## [0.1.0] - 2024-05-31
-
-Initial stable release.
-"""
+# footer =
 # remove the leading and trailing whitespace from the templates
 trim = true
 postprocessors = [
-  { pattern = '<REPO>', replace = "https://github.com/NN-AI-Analytics/trialsim/" }, # replace repository URL
+  { pattern = '<REPO>', replace = "https://github.com/kkholst/targeted/" }, # replace repository URL
 ]
 
 [git]
