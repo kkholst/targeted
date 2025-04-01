@@ -131,7 +131,7 @@ test_intersectsignedwald <- function(thetahat1,
 #' @param cens.code (integer) Censoring code.
 #' @param naive (logical) If TRUE, the unadjusted estimates ignoring baseline
 #'   covariates is returned as the attribute 'naive'.
-#' @param control optimization routine parameters.
+#' @param control (list) optimization routine parameters.
 #' @param ... Additional arguments passed to [mets::binregATE].
 #' @return [lava::estimate.default] object
 #' @author Klaus Kähler Holst
@@ -266,13 +266,13 @@ estimate_truncatedscore <- function(
       names(coef(b))[1:2]
     ), ")")
   } else {
-      lab <- paste0(gsub(
+    lab <- paste0(gsub(
       "^p", sprintf("P\\(T>=%.1f|A=", time),
       names(coef(b))[1:2]
     ), ")")
   }
   lab <- c(lab, "riskdiff")
-  b <- estimate(b, labels=lab)
+  b <- estimate(b, labels = lab)
   res <- merge(res, b)
   if (naive) {
     if (is.null(cause)) {
@@ -362,9 +362,9 @@ print.summary.truncatedscore <- function(x, ...) {
   print(x$object)
   cat("\n")
   cli::cli_h2("One-sided tests")
-  cat("\nb1 = ", x$labels[1], "\n", sep="")
+  cat("\nb1 = ", x$labels[1], "\n", sep = "")
   print(x$test.1)
-  cat("\nb2 = ", x$labels[2], "\n", sep="")
+  cat("\nb2 = ", x$labels[2], "\n", sep = "")
   print(x$test.2)
   cli::cli_h2("Intersection test")
   print(x$test.intersect)
@@ -379,8 +379,6 @@ coef.summary.truncatedscore <- function(object, ...) {
   return(object$tests)
 }
 
-
-
 ate_riskRegression <- function(mod.marg,
                                mod.covar = ~1,
                                data,
@@ -393,9 +391,9 @@ ate_riskRegression <- function(mod.marg,
   data[["trt_"]] <- factor(data[[trt.var]])
   mod.trt <- reformulate("1", "trt_")
   treat <- glm(mod.trt,
-               data = data,
-               family = binomial(link = "logit")
-               )
+    data = data,
+    family = binomial(link = "logit")
+  )
   formula_outcome <- update(
     mod.covar,
     survival::Surv(time_, status_) ~ trt_:. + strata(trt_)
@@ -422,11 +420,7 @@ ate_riskRegression <- function(mod.marg,
   return(estimate(res, labels = c("p0", "p1", "riskdiff")))
 }
 
-ate_cmprsk <- function(mod.marg,
-                            data,
-                            time,
-                            cens.code = 0,
-                            cause = 1) {
+ate_cmprsk <- function(mod.marg, data, time, cens.code = 0, cause = 1) {
   trt.var <- tail(all.vars(mod.marg), 1)
   trt <- factor(data[[trt.var]])
   trt <- (trt == levels(trt)[2]) * 1
@@ -446,9 +440,7 @@ ate_cmprsk <- function(mod.marg,
   return(res)
 }
 
-ate_km <- function(mod.marg,
-                        data,
-                        time, cens.code = 0) {
+ate_km <- function(mod.marg, data, time, cens.code = 0) {
   trt.var <- tail(all.vars(mod.marg), 1)
   y <- design(mod.marg, data)$y
   data[["time_"]] <- y[, 1]
@@ -461,10 +453,7 @@ ate_km <- function(mod.marg,
   return(estimate(res, labels = c("p0", "p1", "riskdiff")))
 }
 
-
-ate_phreg <- function(mod.marg,
-                      data,
-                      time, cens.code = 0) {
+ate_phreg <- function(mod.marg, data, time, cens.code = 0) {
   trt.var <- tail(all.vars(mod.marg), 1)
   y <- design(mod.marg, data)$y
   data[["time_"]] <- y[, 1]
@@ -491,12 +480,8 @@ ate_phreg <- function(mod.marg,
 }
 
 
-ate_mets <- function(mod.marg,
-                     mod.covar = ~1,
-                     data,
-                     time,
-                     cens.code = 0,
-                     cause = NULL) {
+ate_mets <- function(mod.marg, mod.covar = ~1, data, time, cens.code = 0,
+  cause = NULL) {
   trt.var <- tail(all.vars(mod.marg), 1)
   y <- design(mod.marg, data)$y
   data[["time_"]] <- y[, 1]

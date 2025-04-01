@@ -44,7 +44,7 @@ statement).}
 \item{naive}{(logical) If TRUE, the unadjusted estimates ignoring baseline
 covariates is returned as the attribute 'naive'.}
 
-\item{control}{optimization routine parameters.}
+\item{control}{(list) optimization routine parameters.}
 
 \item{...}{Additional arguments passed to \link[mets:binregATE]{mets::binregATE}.}
 }
