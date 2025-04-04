@@ -3,8 +3,17 @@ R = R --silent --no-save --no-echo
 BUILD_DIR = build
 GETVER = $(shell cat DESCRIPTION | grep Version | cut -d":" -f2 | tr -d '[:blank:]')
 make_build_dir = rm -Rf $(BUILD_DIR) && mkdir -p $(BUILD_DIR)
+CLIFF_CFG = .cliff.toml
+CHANGELOG = CHANGELOG.md
 
 default: check
+
+# generate changelog for unreleased commits
+cliff-unreleased:
+	@git cliff --unreleased -c $(CLIFF_CFG)
+
+cliff-unreleased-prepend:
+	@git cliff --unreleased -c $(CLIFF_CFG) -p $(CHANGELOG)
 
 rcpp:
 	@echo 'Rcpp::compileAttributes(".")' | $(R)
