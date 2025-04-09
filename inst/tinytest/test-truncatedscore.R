@@ -1,5 +1,7 @@
 library("tinytest")
-library("mets")
+suppressPackageStartupMessages(
+  library("mets")
+)
 
 data("truncatedscore")
 a <- estimate_truncatedscore(
