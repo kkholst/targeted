@@ -153,8 +153,8 @@ test_design <- function() {
   m <- ml_model$new(formula = y ~ x1 + x2, estimate = glm.fit, intercept = TRUE)
   m$estimate(ddata)
 
-  # options defined for targeted::design upon ml initialization are passed on
-  # to method call
+  # options defined for targeted::design upon ml model initialization are passed
+  # on to method call
   fit <- glm.fit(x = m$design(ddata), y = m$response(ddata))
   expect_equal(coef(m$fit), coef(fit))
 
