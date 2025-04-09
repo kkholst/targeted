@@ -112,6 +112,13 @@ test_estimate <- function() {
   m4$estimate(ddata_count, specials = c("offset"))
   expect_true(all(coef(fit) != coef(m4$fit)))
 
+  # ml model can also be used with a formula argument. verify that family
+  # argument is passed correctly on to fitfun upon initialization + offset
+  # during method call
+  m4 <- ml_model$new(estimate = glm.fit, family = poisson())
+  .design <- design(y ~ x + offset(log(w)), ddata_count, intercept = TRUE)
+  m4$estimate(.design$x, .design$y, offset = .design$offset)
+  expect_equal(coef(fit), coef(m4$fit))
 }
 test_estimate()
 
