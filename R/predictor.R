@@ -187,7 +187,7 @@ predictor_isoreg <- function(formula,
 #'    d <- data.frame(y, x1, x2)
 #'    d
 #' }
-#' d <- sim1() |> mets::dsort(~x1)
+#' d <- sim1()
 #'
 #' m <- list(
 #'   "mean" = predictor_glm(y ~ 1),
@@ -201,7 +201,7 @@ predictor_isoreg <- function(formula,
 #' if (interactive()) {
 #'     plot(y ~ x1, data = d)
 #'     points(d$x1, pr, col = 2, cex = 0.5)
-#'     lines(cos(x1) + x1 ~ x1, data = d,
+#'     lines(cos(x1) + x1 ~ x1, data = d[order(d$x1), ],
 #'           lwd = 4, col = lava::Col("darkblue", 0.3))
 #' }
 #' print(s)
@@ -252,6 +252,7 @@ predictor_sl <- function(model.list,
   cl <- rlang::call_match(defaults = TRUE)
   cl$formula <- lapply(model.list, \(x) x$formula)
   mod$description <- predictor_argument_description(cl)
+  mod$model.score <- model.score
   class(mod) <- c("predictor_sl", class(mod))
   return(mod)
 }

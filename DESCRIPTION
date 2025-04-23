@@ -30,34 +30,34 @@ Depends:
     lava (>= 1.8.0),
     survival
 Imports:
+    R6,
+    Rcpp (>= 1.0.0),
     cli,
     data.table,
     future.apply,
-    nnls,
-    optimx,
-	progressr,
     methods,
     mets,
-    R6,
-    Rcpp (>= 1.0.0),
+    nnls,
+    optimx,
+    progressr,
     rlang
 Suggests:
+    SuperLearner (>= 2.0-28),
     cmprsk,
     e1071,
     glmnet,
     grf,
     hal9001,
+    knitr,
     mgcv,
-    tinytest,
     riskRegression,
     rmarkdown,
     scatterplot3d,
-    SuperLearner (>= 2.0-28),
-    knitr,
-    xgboost,
-    viridisLite
+    tinytest,
+    viridisLite,
+    xgboost
 BugReports: https://github.com/kkholst/targeted/issues
-SystemRequirements: C++11, GNU make
+SystemRequirements: C++11
 URL: https://kkholst.github.io/targeted/
 License: Apache License (== 2.0)
 LinkingTo: Rcpp, RcppArmadillo
