@@ -296,7 +296,8 @@ print.cross_validated <- function(x, ...) {
   cat("Call: ")
   print(x$call)
   cat("\n", x$fold, "-fold cross-validation", sep="")
-  cat(" with ", x$rep, " repetitions\n\n", sep="")
+  if (x$rep > 1) cat(" with ", x$rep, " repetitions", sep="")
+  cat("\n\n")
   res <- coef(x)
   print(res, quote=FALSE)
 }
