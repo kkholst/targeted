@@ -160,6 +160,36 @@ predictor_isoreg <- function(formula,
 }
 
 #' @export
+predictor_mars <- function(formula,
+                           info = "earth::earth",
+                           degree = 1,
+                           nprune = NULL,
+                           glm = NULL,
+                             ...) {
+  mod <- ml_model$new(formula,
+    info = info,
+    estimate = function(y, x, ...) {
+      return(
+        earth::earth(y = y, x = x,
+                     degree = degree,
+                     nprune = nprune,
+                     glm = glm,
+                     ...)
+      )
+    },
+    predict = function(object, newdata, type = "response", ...) {
+      return(predict(object, newdata=newdata,
+                     type = type, ...))
+    },
+    ...
+    )
+  mod$description <- predictor_argument_description(
+    rlang::call_match(defaults = TRUE)
+  )
+  return(mod)
+}
+
+#' @export
 #' @title Superlearner (stacked/ensemble learner)
 #' @description This function creates a predictor object (class [ml_model])
 #'   from a list of existing [ml_model] objects. When estimating this model a
@@ -252,7 +282,7 @@ predictor_sl <- function(model.list,
   cl <- rlang::call_match(defaults = TRUE)
   cl$formula <- lapply(model.list, \(x) x$formula)
   mod$description <- predictor_argument_description(cl)
-  mod$model.score <- model.score
+  attr(mod, "model.score") <- model.score
   class(mod) <- c("predictor_sl", class(mod))
   return(mod)
 }
@@ -267,28 +297,36 @@ score.predictor_sl <- function(x, ...) {
   return(x$fit$model.score)
 }
 
-
-score_sl <- function(response, prediction, weights, object, newdata, ...) {
-    pr.all <- object$predict(newdata, all.learners = TRUE)
-    pr <- object$predict(newdata)
-    risk.all <- apply(pr.all, 2, function(x) mse(x, response))
-    risk <- mse(response, pr)
-    res <- c(risk, risk.all)
-    names(res)[1] <- "sl"
-    nn <- names(res)
-    names(res) <- paste0("score.", nn)
-    w <- weights(object)
-    names(w) <- paste0("weight.", nn[-1])
-    return(c(res, w))
+score_sl <- function(response,
+                     newdata,
+                     object,
+                     ...) {
+  pr.all <- object$predict(newdata, all.learners = TRUE)
+  pr <- object$predict(newdata)
+  risk.all <- apply(pr.all, 2, function(x) mse(x, response))
+  risk <- mse(response, pr)
+  res <- c(risk, risk.all)
+  names(res)[1] <- "sl"
+  nn <- names(res)
+  names(res) <- paste0("score.", nn)
+  w <- weights(object)
+  names(w) <- paste0("weight.", nn[-1])
+  return(c(res, w))
 }
 
 #' @export
-summary.predictor_sl <- function(object, data, nfolds = 5, rep = 1, ...) {
+summary.predictor_sl <- function(object,
+                                 data,
+                                 nfolds = 5,
+                                 rep = 1,
+                                 model.score,
+                                 ...) {
   res <- cv(list("performance"=object),
-      data = data,
-      nfolds = nfolds, rep = rep,
-      model.score = score_sl
-      )
+            data = data,
+            nfolds = nfolds, rep = rep,
+            model.score = score_sl
+            )
+
   return(res)
 }
 

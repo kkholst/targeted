@@ -45,6 +45,7 @@ Suggests:
     SuperLearner (>= 2.0-28),
     cmprsk,
     e1071,
+    earth,
     glmnet,
     grf,
     hal9001,
