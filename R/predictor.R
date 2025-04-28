@@ -190,6 +190,49 @@ predictor_mars <- function(formula,
 }
 
 #' @export
+predictor_svm <- function(formula,
+                          info = "e1071::svm",
+                          cost = 1,
+                          epsilon = 0.1,
+                          kernel = "radial",
+                          probability = FALSE,
+                          ...) {
+  if (probability) {
+    formula <- update(formula, factor(.) ~ .)
+    pred <- function(object, newdata, ...) {
+      pr <- attr(predict(object, newdata, probability=TRUE), "probabilities")
+      if (NCOL(pr)==2L) pr <- pr[, 2]
+      return(pr)
+    }
+  } else {
+    pred <- function(object, newdata, ...) {
+      return(predict(object, newdata, ...))
+    }
+  }
+
+  mod <- ml_model$new(formula,
+    info = info,
+    estimate = function(formula, data, ...) {
+      return(
+        e1071::svm(formula,
+                   data = data,
+                   cost = cost,
+                   epsilon = epsilon,
+                   kernel = kernel,
+                   probability = probability,
+                   ...)
+      )
+    },
+    predict = pred,
+    ...
+    )
+  mod$description <- predictor_argument_description(
+    rlang::call_match(defaults = TRUE)
+  )
+  return(mod)
+}
+
+#' @export
 #' @title Superlearner (stacked/ensemble learner)
 #' @description This function creates a predictor object (class [ml_model])
 #'   from a list of existing [ml_model] objects. When estimating this model a
