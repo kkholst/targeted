@@ -293,13 +293,16 @@ summary.cross_validated <- function(object, ...) {
 
 #' @export
 print.cross_validated <- function(x, ...) {
-  cat("Call: ")
-  print(x$call)
-  cat("\n", x$fold, "-fold cross-validation", sep="")
+  if (!is.null(x$call)) {
+    cat("Call: ")
+    print(x$call)
+    cat("\n")
+  }
+  cat(x$fold, "-fold cross-validation", sep="")
   if (x$rep > 1) cat(" with ", x$rep, " repetitions", sep="")
   cat("\n\n")
   res <- coef(x)
-  print(res, quote=FALSE)
+  print(res, quote = FALSE, na.print = "")
 }
 
 #' @export

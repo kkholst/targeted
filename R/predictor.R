@@ -343,17 +343,21 @@ score.predictor_sl <- function(x, ...) {
 score_sl <- function(response,
                      newdata,
                      object,
+                     model.score = mse,
                      ...) {
   pr.all <- object$predict(newdata, all.learners = TRUE)
   pr <- object$predict(newdata)
-  risk.all <- apply(pr.all, 2, function(x) mse(x, response))
-  risk <- mse(response, pr)
+  risk.all <- apply(pr.all, 2, function(x) model.score(x, response)[1])
+  risk <- model.score(response, pr)[1]
+  nam <- names(risk)
+  if (is.null(nam)) nam <- "score"
+  nam <- paste0(nam, ".")
   res <- c(risk, risk.all)
   names(res)[1] <- "sl"
   nn <- names(res)
-  names(res) <- paste0("score.", nn)
-  w <- weights(object)
-  names(w) <- paste0("weight.", nn[-1])
+  names(res) <- paste0(nam, nn)
+  w <- c(NA, weights(object))
+  names(w) <- paste0("weight.", nn)
   return(c(res, w))
 }
 
@@ -362,14 +366,26 @@ summary.predictor_sl <- function(object,
                                  data,
                                  nfolds = 5,
                                  rep = 1,
-                                 model.score,
+                                 model.score = mse,
                                  ...) {
   res <- cv(list("performance"=object),
             data = data,
             nfolds = nfolds, rep = rep,
-            model.score = score_sl
+            model.score = function(...) score_sl(..., model.score = model.score)
             )
-
+  nam <- dimnames(res$cv)
+  nam <- nam[[length(nam)]]
+  st <- strsplit(c(nam[1], tail(nam, 1)), "\\.")
+  type <- unlist(lapply(st, \(x) x[1]))
+  n <- length(nam)/2
+  nam <- gsub(paste0(type[1], "\\."), "", nam[seq_len(n)])
+  cvs <- abind::abind(res$cv[, , , 1:n, drop=FALSE],
+                      res$cv[, , , (n+1):(2*n), drop=FALSE], along=3) |>
+    aperm(c(1,2,4,3))
+  dimnames(cvs)[[3]] <- nam
+  dimnames(cvs)[[4]] <- type
+  res$cv <- cvs
+  res$call <- NULL
   return(res)
 }
 
@@ -470,7 +486,6 @@ predictor_grf <- function(formula,
   return(mod)
 }
 
-
 #' @export
 predictor_grf_binary <- function(formula,
                                  ...) {
@@ -480,7 +495,6 @@ predictor_grf_binary <- function(formula,
   )
   return(mod)
 }
-
 
 #' ML model
 #'
