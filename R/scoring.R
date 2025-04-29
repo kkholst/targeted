@@ -117,26 +117,36 @@ multiclass_scoring1 <- # nolint
 scoring <- function(response, ...,
                     type="quantitative",
                     levels=NULL, metrics=NULL,
-                    weights=NULL, names=NULL, object=NULL, newdata=NULL,
+                    weights=NULL, names=NULL, object=NULL,
+                    newdata=NULL,
                     messages=1) {
+  val <- list(...)
+  if (missing(response) && inherits(object, "ml_model")) {
+    if (is.null(newdata)) stop("`newdata` data.frame needed")
+    response <- object$response(newdata)
+    if (length(val) == 0) {
+      val <- list(object$predict(newdata))
+    }
+    if (is.null(names)) names <- object$info
+  }
   if (is.factor(response) || is.character(response)) {
     type <- "multiclass"
   }
   if (tolower(type) %in% c("quantitative", "cont", "continuous")) {
-    S <- suppressWarnings(lapply(list(...),
+    S <- suppressWarnings(lapply(val,
       quantitative_scoring1,
       response = response,
       weights = weights, messages = messages
     ))
   } else {
-    S <- suppressWarnings(lapply(list(...),
+    S <- suppressWarnings(lapply(val,
       multiclass_scoring1,
       response = response,
       levels = levels, weights = weights, messages = messages
     ))
   }
   if (is.null(names)) {
-    names <- base::names(list(...))
+    names <- base::names(val)
   }
   res <- matrix(unlist(S), byrow=TRUE, ncol=length(S[[1]]))
   rownames(res) <- names
