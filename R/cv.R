@@ -286,9 +286,22 @@ cv <- function(models, data, # nolint
   return(obj)
 }
 
+summary_cv <- function(x) {
+  x0 <- na.omit(x)
+  res <- rep(NA, 4)
+  if (length(x0) > 0L) {
+    res <- c(mean(x0), sd(x0), min(x0), max(x0))
+  }
+  names(res) <- c("mean", "sd", "min", "max")
+  return(res)
+}
+
 #' @export
-summary.cross_validated <- function(object, ...) {
-  return(coef(object))
+summary.cross_validated <- function(object,
+                                    summary.function = summary_cv, ...) {
+  res <- apply(object$cv, 3:4, summary.function) |>
+    aperm(c(2, 1, 3))
+  return(res)
 }
 
 #' @export

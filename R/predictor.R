@@ -379,14 +379,29 @@ summary.predictor_sl <- function(object,
   type <- unlist(lapply(st, \(x) x[1]))
   n <- length(nam)/2
   nam <- gsub(paste0(type[1], "\\."), "", nam[seq_len(n)])
-  cvs <- abind::abind(res$cv[, , , 1:n, drop=FALSE],
-                      res$cv[, , , (n+1):(2*n), drop=FALSE], along=3) |>
-    aperm(c(1,2,4,3))
-  dimnames(cvs)[[3]] <- nam
-  dimnames(cvs)[[4]] <- type
+  score <- res$cv[, , , 1:n, drop=FALSE]
+  weight <- res$cv[, , , (n+1):(2*n), drop=FALSE]
+  cvs <- abind::abind(score, weight, along=3)
+  dimnames(cvs)[[4]] <- nam
+  dimnames(cvs)[[3]] <- type
+  cvs <- aperm(cvs, c(1, 2, 4, 3))
+  res$names <- nam
   res$cv <- cvs
   res$call <- NULL
+  class(res) <- c("summary.predictor_sl", "cross_validated")
   return(res)
+}
+
+#' @export
+print.summary.predictor_sl <- function(x, digits=5, ...) {
+  res <- round(summary.cross_validated(x)*1e5, digits=0) / 1e5
+  cat(x$fold, "-fold cross-validation", sep="")
+  if (x$rep > 1) cat(" with ", x$rep, " repetitions", sep="")
+  cat("\n\n")
+  cli::cli_h3(dimnames(res)[[3]][2])
+  print(res[, , 2], na.print="-")
+  cli::cli_h3(dimnames(res)[[3]][1])
+  print(res[, , 1], na.print="-")
 }
 
 #' @export
