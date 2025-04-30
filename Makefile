@@ -63,6 +63,12 @@ test-installed: # tests locally installed version package
 test-loadall:
 	@echo 'devtools::load_all("."); tinytest::test_all(".")' | $(R)
 
+slowtest: test-slow
+test-slow:
+	@$(R) -q -e 'library("targeted"); tinytest::run_test_dir("inst/slowtest")'
+
+test-all: test test-slow
+
 coverage:
 	@echo 'covr::report(file="tests/coverage-report.html")' | $(R)
 	@open tests/coverage-report.html
