@@ -399,6 +399,13 @@ predictor_grf_binary <- function(formula,
   return(mod)
 }
 
+#' ML model
+#'
+#' Wrapper for ml_model
+#' @export
+#' @param formula formula
+#' @param model model (sl, rf, pf, glm, ...)
+#' @param ... additional arguments to model object
 ML <- function(formula, model="glm", ...) {
   stop(
     "targeted::ML has been removed in targeted 0.6. ",
