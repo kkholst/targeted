@@ -399,7 +399,6 @@ predictor_grf_binary <- function(formula,
   return(mod)
 }
 
-
 #' ML model
 #'
 #' Wrapper for ml_model
@@ -407,58 +406,9 @@ predictor_grf_binary <- function(formula,
 #' @param formula formula
 #' @param model model (sl, rf, pf, glm, ...)
 #' @param ... additional arguments to model object
-#' @details
-#' model 'sl' (SuperLearner::SuperLearner)
-#' args: SL.library, cvControl, family, method
-#' example:
-#'
-#' model 'grf' (grf::regression_forest)
-#' args: num.trees, mtry, sample.weights, sample.fraction, min.node.size, ...
-#' example:
-#'
-#' model 'grf.binary' (grf::probability_forest)
-#' args: num.trees, mtry, sample.weights, ...
-#' example:
-#'
-#' model 'glm'
-#' args: family, weights, offset, ...
-#'
 ML <- function(formula, model="glm", ...) {
-  model <- tolower(model)
-  ## SL / SuperLearner
-  if (model == "sl") {
-      return(predictor_sl(formula, ...))
-  }
-  ## grf
-  if (model %in% c("grf", "rf", "regression_forest")) {
-    return(predictor_grf(formula, ...))
-  }
-  if (model %in% c("grf.binary", "pf", "probability_forest")) {
-    return(predictor_grf_binary(formula, ...))
-  }
-
-  ## xgboost
-  if (model %in% c(
-    "xgboost", "xgb", "xgboost.multiclass",
-    "xgboost.binary", "xgboost.count", "xgboost.survival"
-  )) {
-    obj <- switch(model,
-      xgboost.multiclass = "multi:softprob",
-      xgboost.binary = "reg:logistic",
-      xgboost.survival = "survival:cox",
-      xgboost.count = "count:poisson",
-      "reg:squarederror"
-    )
-    return(predictor_xgboost(formula, ..., objective = obj))
-  }
-
-  ## GAM
-  if (model %in% c("mgcv", "gam")) {
-    return(predictor_gam(formula, ...))
-  }
-
-  ## glm, default
-  m <- predictor_glm(formula, ...)
-  return(m)
-
+  stop(
+    "targeted::ML has been removed in targeted 0.6. ",
+    "Please use the targeted::predictor_ functions instead."
+  )
 }
