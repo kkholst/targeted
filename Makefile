@@ -65,7 +65,7 @@ test-loadall:
 
 slowtest: test-slow
 test-slow:
-	@$(R) -q -e 'library("targeted"); tinytest::run_test_dir("inst/slowtest")'
+	@$(R) -q -e 'future::plan("multicore"); library("targeted"); tinytest::run_test_dir("inst/slowtest")'
 
 test-all: test test-slow
 
