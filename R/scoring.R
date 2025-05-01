@@ -148,10 +148,10 @@ scoring <- function(response, ...,
   if (is.null(names)) {
     names <- base::names(val)
   }
-  res <- matrix(unlist(S), byrow=TRUE, ncol=length(S[[1]]))
+  res <- matrix(unlist(S), byrow = TRUE, ncol = length(S[[1]]))
   rownames(res) <- names
   colnames(res) <- names(S[[1]])
   if (!is.null(metrics))
-    res <- res[, metrics, drop=FALSE]
+    res <- res[, metrics, drop = FALSE]
   return(res)
 }

@@ -53,7 +53,7 @@ m <- list(
   "iso" = predictor_isoreg(y ~ x1)
 )
 
-s <- predictor_sl(m, nfolds=10)
+s <- predictor_sl(m, nfolds = 10)
 s$estimate(d)
 pr <- s$predict(d)
 if (interactive()) {
@@ -63,13 +63,13 @@ if (interactive()) {
           lwd = 4, col = lava::Col("darkblue", 0.3))
 }
 print(s)
-## weights(s)
-## score(s)
+# weights(s)
+# score(s)
 
-cvres <- summary(s, data=d, nfolds=3, rep=2)
+cvres <- summary(s, data = d, nfolds = 3, rep = 2)
 cvres
-## coef(cvres)
-## score(cvres)
+# coef(cvres)
+# score(cvres)
 }
 \references{
 Luedtke & van der Laan (2016) Super-Learning of an Optimal

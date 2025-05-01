@@ -170,19 +170,16 @@ predictor_mars <- function(formula,
     info = info,
     estimate = function(y, x, ...) {
       return(
-        earth::earth(y = y, x = x,
-                     degree = degree,
-                     nprune = nprune,
-                     glm = glm,
-                     ...)
+        earth::earth(y = y, x = x, degree = degree, nprune = nprune, glm = glm,
+          ...
+        )
       )
     },
     predict = function(object, newdata, type = "response", ...) {
-      return(predict(object, newdata=newdata,
-                     type = type, ...))
+      return(predict(object, newdata = newdata, type = type, ...))
     },
     ...
-    )
+  )
   mod$description <- predictor_argument_description(
     rlang::call_match(defaults = TRUE)
   )
@@ -200,8 +197,8 @@ predictor_svm <- function(formula,
   if (probability) {
     formula <- update(formula, factor(.) ~ .)
     pred <- function(object, newdata, ...) {
-      pr <- attr(predict(object, newdata, probability=TRUE), "probabilities")
-      if (NCOL(pr)==2L) pr <- pr[, 2]
+      pr <- attr(predict(object, newdata, probability = TRUE), "probabilities")
+      if (NCOL(pr) == 2L) pr <- pr[, 2]
       return(pr)
     }
   } else {
@@ -214,18 +211,14 @@ predictor_svm <- function(formula,
     info = info,
     estimate = function(formula, data, ...) {
       return(
-        e1071::svm(formula,
-                   data = data,
-                   cost = cost,
-                   epsilon = epsilon,
-                   kernel = kernel,
-                   probability = probability,
-                   ...)
+        e1071::svm(formula, data = data, cost = cost, epsilon = epsilon,
+          kernel = kernel, probability = probability, ...
+        )
       )
     },
     predict = pred,
     ...
-    )
+  )
   mod$description <- predictor_argument_description(
     rlang::call_match(defaults = TRUE)
   )
@@ -268,7 +261,7 @@ predictor_svm <- function(formula,
 #'   "iso" = predictor_isoreg(y ~ x1)
 #' )
 #'
-#' s <- predictor_sl(m, nfolds=10)
+#' s <- predictor_sl(m, nfolds = 10)
 #' s$estimate(d)
 #' pr <- s$predict(d)
 #' if (interactive()) {
@@ -278,13 +271,13 @@ predictor_svm <- function(formula,
 #'           lwd = 4, col = lava::Col("darkblue", 0.3))
 #' }
 #' print(s)
-#' ## weights(s)
-#' ## score(s)
+#' # weights(s)
+#' # score(s)
 #'
-#' cvres <- summary(s, data=d, nfolds=3, rep=2)
+#' cvres <- summary(s, data = d, nfolds = 3, rep = 2)
 #' cvres
-#' ## coef(cvres)
-#' ## score(cvres)
+#' # coef(cvres)
+#' # score(cvres)
 predictor_sl <- function(model.list,
                          info = NULL,
                          nfolds = 5L,
@@ -405,8 +398,7 @@ print.summary.predictor_sl <- function(x, digits=5, ...) {
 }
 
 #' @export
-predictor_xgboost <-
-  function(formula,
+predictor_xgboost <- function(formula,
            max_depth = 2L,
            eta = 1.0,
            nrounds = 2L,
@@ -452,7 +444,7 @@ predictor_xgboost <-
       rlang::call_match(defaults = TRUE)
     )
     return(mod)
-  }
+}
 
 #' @export
 predictor_xgboost_multiclass <- function(formula, ...) {
