@@ -398,3 +398,10 @@ predictor_grf_binary <- function(formula,
   )
   return(mod)
 }
+
+ML <- function(formula, model="glm", ...) {
+  stop(
+    "targeted::ML has been removed in targeted 0.6. ",
+    "Please use the targeted::predictor_ functions instead."
+  )
+}
