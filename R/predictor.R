@@ -1,7 +1,8 @@
 #' @title ml_model generator
-#' @param ... Additional arguments to [ml_model$new()][ml_model]
-#' @param info (character) Additional information that describes the instantiated [ml_model] object.
-#' @return [ml_model] object
+#' @param ... Additional arguments to [ml_model$new()][ml_model].
+#' @param info (character) Additional information that describes the
+#' instantiated [ml_model] object.
+#' @return [ml_model] object.
 #' @name predictor
 NULL
 # predictor <- function(...) return(ml_model$new(...))
