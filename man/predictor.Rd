@@ -3,11 +3,10 @@
 \name{predictor}
 \alias{predictor}
 \title{ml_model generator}
-\usage{
-predictor(...)
-}
 \arguments{
-\item{...}{Additional arguments to \link{ml_model$new}}
+\item{...}{Additional arguments to \link[=ml_model]{ml_model$new()}}
+
+\item{info}{(character) Additional information that describes the instantiated \link{ml_model} object.}
 }
 \value{
 \link{ml_model} object

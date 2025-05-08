@@ -1,8 +1,10 @@
 #' @title ml_model generator
-#' @export
-#' @param ... Additional arguments to [ml_model$new]
+#' @param ... Additional arguments to [ml_model$new()][ml_model]
+#' @param info (character) Additional information that describes the instantiated [ml_model] object.
 #' @return [ml_model] object
-predictor <- function(...) return(ml_model$new(...))
+#' @name predictor
+NULL
+# predictor <- function(...) return(ml_model$new(...))
 
 predictor_argument_description <- function(call) {
     ar <- lapply(
@@ -87,7 +89,10 @@ predictor_glmnet <- function(formula,
   return(mod)
 }
 
+#' @description [ml_model] generator function for [hal9001::fit_hal].
 #' @export
+#' @inherit predictor
+#' @inheritParams hal9001::fit_hal
 predictor_hal <- function(formula,
                           info = "hal9001::fit_hal",
                           smoothness_orders = 0,

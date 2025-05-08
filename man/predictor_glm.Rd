@@ -12,6 +12,8 @@ predictor_glm(formula, info = "glm", family = gaussian(), offset = NULL, ...)
     model to be fitted.  The details of model specification are given
     under \sQuote{Details}.}
 
+\item{info}{(character) Additional information that describes the instantiated \link{ml_model} object.}
+
 \item{family}{a description of the error distribution and link
     function to be used in the model.  For \code{glm} this can be a
     character string naming a family function, a family function or the
@@ -26,7 +28,7 @@ predictor_glm(formula, info = "glm", family = gaussian(), offset = NULL, ...)
     included in the formula instead or as well, and if more than one is
     specified their sum is used.  See \code{\link[stats]{model.offset}}.}
 
-\item{...}{Additional arguments to \link{ml_model$new}}
+\item{...}{Additional arguments to \link[=ml_model]{ml_model$new()}}
 }
 \value{
 \link{ml_model} object
