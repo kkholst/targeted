@@ -179,7 +179,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
         estimate = formals(estimate),
         predict = formals(predict)
       )
-      private$init <- list( # nolint
+      private$init <- list(
         estimate.args = list(...),
         predict.args = predict.args
       )
