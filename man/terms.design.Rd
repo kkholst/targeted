@@ -7,12 +7,12 @@
 \method{terms}{design}(x, specials, ...)
 }
 \arguments{
+\item{x}{\link{design} object}
+
 \item{specials}{extract variables marked as special
 (e.g., "offset", "weights", ...)}
 
 \item{...}{Additional arguments to lower level functions}
-
-\item{object}{\link{design} object}
 }
 \description{
 Extract model component from \link{design} object
