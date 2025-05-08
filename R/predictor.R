@@ -1,19 +1,6 @@
 #' @export
 predictor <- function(...) return(ml_model$new(...))
 
-predictor_argument_description <- function(call) {
-    ar <- lapply(
-      rlang::call_args(call),
-      deparse
-    )
-    ar["info"] <- NULL
-    nn <- names(ar)
-    desc <- "Arguments:\n"
-    for (i in seq_along(nn)) {
-      desc <- paste0(desc, "\t", nn[i], " = ", ar[i], "\n")
-    }
-    return(desc)
-  }
 
 #' @export
 predictor_glm <- function(formula,
@@ -32,9 +19,7 @@ predictor_glm <- function(formula,
   }
   args$offset <- NULL
   mod <- do.call(ml_model$new, args)
-  mod$description <- predictor_argument_description(
-    rlang::call_match(defaults = TRUE)
-  )
+
   return(mod)
 }
 
@@ -75,9 +60,7 @@ predictor_glmnet <- function(formula,
     nfolds = nfolds,
     ...
     )
-  mod$description <- predictor_argument_description(
-    rlang::call_match(defaults = TRUE)
-  )
+
   return(mod)
 }
 
@@ -134,9 +117,7 @@ predictor_gam <- function(formula,
     ...
   )
   mod <- do.call(ml_model$new, args)
-  mod$description <- predictor_argument_description(
-    rlang::call_match(defaults = TRUE)
-  )
+
   return(mod)
 }
 
@@ -153,9 +134,7 @@ predictor_isoreg <- function(formula,
     predict = function(object, newdata, ...) return(object(newdata)),
     ...
     )
-  mod$description <- predictor_argument_description(
-    rlang::call_match(defaults = TRUE)
-  )
+
   return(mod)
 }
 
@@ -251,7 +230,7 @@ predictor_sl <- function(model.list,
   mod$update(model.list[[1]]$formula)
   cl <- rlang::call_match(defaults = TRUE)
   cl$formula <- lapply(model.list, \(x) x$formula)
-  mod$description <- predictor_argument_description(cl)
+
   class(mod) <- c("predictor_sl", class(mod))
   return(mod)
 }
@@ -335,9 +314,7 @@ predictor_xgboost <-
       return(res)
     }
     mod <- do.call(ml_model$new, args)
-    mod$description <- predictor_argument_description(
-      rlang::call_match(defaults = TRUE)
-    )
+
     return(mod)
   }
 
@@ -382,9 +359,7 @@ predictor_grf <- function(formula,
       return(est(X = x, Y = y, ...))
   }
   mod <- do.call(ml_model$new, args)
-  mod$description <- predictor_argument_description(
-    rlang::call_match(defaults = TRUE)
-  )
+
   return(mod)
 }
 
