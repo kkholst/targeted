@@ -44,9 +44,6 @@ pbc <- transform(pbc, y = (time < 730) * (status > 0))
 ```{r}
 m0 <- predictor_glm(y ~ 1)
 m1 <- predictor_glm(y ~ age + sex + bili + edema + albumin)
-m2 <- predictor_nb(y ~ age + sex + bili + edema + albumin, kernel = TRUE)
-
-
 ```
 
 ```{r}
