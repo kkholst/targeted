@@ -408,11 +408,8 @@ predictor_nb <- function(formula,
   args <- list(
     formula = formula,
     estimate = function(formula, data, ...) {
-      NB(
-        formula = formula,
-        data = data,
-        ...
-      )
+      return(NB(formula = formula, data = data, ...)
+    )
     },
     predict = function(object, newdata, simplify=TRUE, ...) {
       pr <- stats::predict(object, newdata = newdata, ...)
