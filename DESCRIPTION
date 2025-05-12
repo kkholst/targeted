@@ -49,6 +49,7 @@ Suggests:
     hal9001,
     mgcv,
     tinytest,
+    riskRegression,
     rmarkdown,
     scatterplot3d,
     SuperLearner (>= 2.0-28),
@@ -56,7 +57,7 @@ Suggests:
     xgboost,
     viridisLite
 BugReports: https://github.com/kkholst/targeted/issues
-SystemRequirements: C++14, GNU make
+SystemRequirements: C++11, GNU make
 URL: https://kkholst.github.io/targeted/
 License: Apache License (== 2.0)
 LinkingTo: Rcpp, RcppArmadillo

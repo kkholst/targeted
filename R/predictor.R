@@ -1,7 +1,5 @@
 #' @export
-predictor <- function(...) {
-  ml_model$new(...)
-}
+predictor <- function(...) return(ml_model$new(...))
 
 predictor_argument_description <- function(call) {
     ar <- lapply(
@@ -25,17 +23,12 @@ predictor_glm <- function(formula,
                           ...) {
   args <- c(as.list(environment(), all.names = FALSE), list(...))
     args$estimate <- function(formula, data, family, ...) {
-    stats::glm(formula,
-               data = data,
-               family = family,
-      ...
+    return(
+      stats::glm(formula, data = data, family = family, ...)
     )
   }
   args$predict <- function(object, newdata, ...) {
-    stats::predict(object,
-      newdata = newdata,
-      type = "response"
-    )
+    return(stats::predict(object, newdata = newdata, type = "response"))
   }
   args$offset <- NULL
   mod <- do.call(ml_model$new, args)
@@ -63,19 +56,13 @@ predictor_glmnet <- function(formula,
       )
       return(res)
     }
-    glmnet::glmnet(
-      x = x, y = y,
-      ...
+    return(glmnet::glmnet(x = x, y = y, ...)
     )
   }
   pred <- function(object, newdata, ...) {
-    predict(object,
-      newx = newdata,
-      family = family,
-      type = "response",
-      s = "lambda.min",
-      ...
-    )
+    res <- predict(object, newx = newdata, family = family, type = "response",
+      s = "lambda.min", ...)
+    return(res)
   }
   mod <- ml_model$new(
     formula = formula,
@@ -94,9 +81,6 @@ predictor_glmnet <- function(formula,
   return(mod)
 }
 
-
-
-
 #' @export
 predictor_hal <- function(formula,
                           info = "hal9001::fit_hal",
@@ -105,11 +89,7 @@ predictor_hal <- function(formula,
                           family = "gaussian",
                           ...) {
   est <- function(y, x, ...) {
-    hal9001::fit_hal(
-      X = x,
-      Y = y,
-      ...
-    )
+    return(hal9001::fit_hal(X = x, Y = y, ...))
   }
   pred <- function(fit, newdata, offset = NULL, ...) {
     res <- predict(fit,
@@ -119,7 +99,7 @@ predictor_hal <- function(formula,
     )
     return(res)
   }
-  ml_model$new(formula = formula,
+  mod <- ml_model$new(formula = formula,
              estimate = est,
              predict = pred,
              info = info,
@@ -128,7 +108,8 @@ predictor_hal <- function(formula,
              reduce_basis = reduce_basis,
              family = family,
              ...
-             )
+  )
+  return(mod)
 }
 
 #' @export
@@ -141,14 +122,10 @@ predictor_gam <- function(formula,
   args <- list(
     formula = formula,
     estimate = function(formula, data, ...) {
-      mgcv::gam(
-        formula = formula,
-        data = data,
-        ...
-      )
+      return(mgcv::gam(formula = formula, data = data, ...))
     },
     predict = function(object, newdata) {
-      stats::predict(object, newdata = newdata, type = "response")
+      return(stats::predict(object, newdata = newdata, type = "response"))
     },
     family = family,
     select = select,
@@ -172,12 +149,8 @@ predictor_isoreg <- function(formula,
   }
   mod <- ml_model$new(formula,
     info = info,
-    estimate = function(y, x, ...) {
-      isoregw(y = y, x = x)
-    },
-    predict = function(object, newdata, ...) {
-      object(newdata)
-    },
+    estimate = function(y, x, ...) return(isoregw(y = y, x = x)),
+    predict = function(object, newdata, ...) return(object(newdata)),
     ...
     )
   mod$description <- predictor_argument_description(
@@ -257,10 +230,7 @@ predictor_sl <- function(model.list,
   args$info <- info
   args <- c(args, list(
     estimate = function(data, ...) {
-      superlearner(
-        data = data,
-        ...
-      )
+      return(superlearner(data = data, ...))
     },
     predict = function(object, newdata, all.learners = FALSE, ...) {
       pr <- lapply(object$fit, \(x) x$predict(newdata))
@@ -269,7 +239,7 @@ predictor_sl <- function(model.list,
         length(model.list) == ncol(res)) {
         colnames(res) <- names(model.list)
       } else {
-        colnames(res) <- paste0("model", 1:length(model.list))
+        colnames(res) <- paste0("model", seq_len(length(model.list)))
       }
       if (!all.learners) {
         res <- as.vector(res %*% object$weights)
@@ -308,7 +278,7 @@ score_sl <- function(response, prediction, weights, object, newdata, ...) {
     names(res) <- paste0("score.", nn)
     w <- weights(object)
     names(w) <- paste0("weight.", nn[-1])
-    c(res, w)
+    return(c(res, w))
 }
 
 #' @export
@@ -318,7 +288,7 @@ summary.predictor_sl <- function(object, data, nfolds = 5, rep = 1, ...) {
       nfolds = nfolds, rep = rep,
       model.score = score_sl
       )
-  res
+  return(res)
 }
 
 #' @export
@@ -340,16 +310,16 @@ predictor_xgboost <-
     }
     pred <- function(object, newdata, ...) {
       d <- xgboost::xgb.DMatrix(newdata)
-      predict(object, d, ...)
+      return(predict(object, d, ...))
     }
     if (objective == "multi:softprob") {
       pred <- function(object, newdata, ...) {
         d <- xgboost::xgb.DMatrix(newdata)
         val <- predict(object, d, ...)
-        matrix(val, nrow = NROW(d), byrow = TRUE)
+        return(matrix(val, nrow = NROW(d), byrow = TRUE))
       }
     }
-    args$predict
+    args$predict <- pred
     args$estimate <- function(x, y, ..., nfolds, nrounds) {
       d <- xgboost::xgb.DMatrix(x, label = y)
       if (nfolds > 1L) {
@@ -361,11 +331,8 @@ predictor_xgboost <-
         )
         nrounds <- which.min(val$evaluation_log[[4]])
       }
-      xgboost::xgboost(
-        d,
-        nrounds = nrounds,
-        ...
-      )
+      res <- xgboost::xgboost(d, nrounds = nrounds, ...)
+      return(res)
     }
     mod <- do.call(ml_model$new, args)
     mod$description <- predictor_argument_description(
@@ -376,22 +343,22 @@ predictor_xgboost <-
 
 #' @export
 predictor_xgboost_multiclass <- function(formula, ...) {
-  predictor_xgboost(formula, ..., objective="multi:softprob")
+  return(predictor_xgboost(formula, ..., objective="multi:softprob"))
 }
 
 #' @export
 predictor_xgboost_binary <- function(formula, ...) {
-  predictor_xgboost(formula, ..., objective="reg:logistic")
+  return(predictor_xgboost(formula, ..., objective="reg:logistic"))
 }
 
 #' @export
 predictor_xgboost_count <- function(formula, ...) {
-  predictor_xgboost(formula, ..., objective="count:poisson")
+  return(predictor_xgboost(formula, ..., objective="count:poisson"))
 }
 
 #' @export
 predictor_xgboost_cox <- function(formula, ...) {
-  predictor_xgboost(formula, ..., objective="survival:cox")
+  return(predictor_xgboost(formula, ..., objective="survival:cox"))
 }
 
 #' @export
@@ -408,11 +375,11 @@ predictor_grf <- function(formula,
   args$model <- NULL
   est <- utils::getFromNamespace(gsub("^grf::", "", model), "grf")
   pred <- function(object, newdata, ...) {
-    predict(object, newdata, ...)$predictions
+    return(predict(object, newdata, ...)$predictions)
   }
   args$predict <- pred
   args$estimate <- function(x, y, ...) {
-      est(X = x, Y = y, ...)
+      return(est(X = x, Y = y, ...))
   }
   mod <- do.call(ml_model$new, args)
   mod$description <- predictor_argument_description(
@@ -425,10 +392,11 @@ predictor_grf <- function(formula,
 #' @export
 predictor_grf_binary <- function(formula,
                                  ...) {
-  predictor_grf(formula,
+  mod <- predictor_grf(formula,
     model = "grf::probability_forest",
     ...
-   )
+  )
+  return(mod)
 }
 
 #' @export
@@ -471,66 +439,9 @@ predictor_nb <- function(formula,
 #' @param formula formula
 #' @param model model (sl, rf, pf, glm, ...)
 #' @param ... additional arguments to model object
-#' @details
-#' model 'sl' (SuperLearner::SuperLearner)
-#' args: SL.library, cvControl, family, method
-#' example:
-#'
-#' model 'grf' (grf::regression_forest)
-#' args: num.trees, mtry, sample.weights, sample.fraction, min.node.size, ...
-#' example:
-#'
-#' model 'grf.binary' (grf::probability_forest)
-#' args: num.trees, mtry, sample.weights, ...
-#' example:
-#'
-#' model 'glm'
-#' args: family, weights, offset, ...
-#'
 ML <- function(formula, model="glm", ...) {
-  model <- tolower(model)
-  dots <- list(...)
-  addargs <- function(..., dots, args = list()) {
-      for (p in names(args)) {
-          if (!(p %in% names(dots))) dots[p] <- args[[p]]
-      }
-      c(list(...), dots)
-  }
-
-  ## SL / SuperLearner
-  if (model == "sl") {
-      return(predictor_sl(formula, ...))
-  }
-  ## grf
-  if (model %in% c("grf", "rf", "regression_forest")) {
-    return(predictor_grf(formula, ...))
-  }
-  if (model %in% c("grf.binary", "pf", "probability_forest")) {
-    return(predictor_grf_binary(formula, ...))
-  }
-
-  ## xgboost
-  if (model %in% c(
-    "xgboost", "xgb", "xgboost.multiclass",
-    "xgboost.binary", "xgboost.count", "xgboost.survival"
-  )) {
-    obj <- switch(model,
-      xgboost.multiclass = "multi:softprob",
-      xgboost.binary = "reg:logistic",
-      xgboost.survival = "survival:cox",
-      xgboost.count = "count:poisson",
-      "reg:squarederror"
-    )
-    return(predictor_xgboost(formula, ..., objective = obj))
-  }
-
-  ## GAM
-  if (model %in% c("mgcv", "gam")) {
-    return(predictor_gam(formula, ...))
-  }
-
-  ## glm, default
-  m <- predictor_glm(formula, ...)
-  return(m)
-
+  stop(
+    "targeted::ML has been removed in targeted 0.6. ",
+    "Please use the targeted::predictor_ functions instead."
+  )
 }

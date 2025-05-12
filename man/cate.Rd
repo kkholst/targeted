@@ -15,6 +15,10 @@ cate(
   silent = FALSE,
   stratify = FALSE,
   mc.cores = NULL,
+  response_model = deprecated,
+  cate_model = deprecated,
+  propensity_model = deprecated,
+  treatment = deprecated,
   ...
 )
 }
@@ -34,12 +38,20 @@ average treatment effects}
 
 \item{rep}{Number of replications of cross-fitting procedure}
 
-\item{silent}{supress all messages and progressbars}
+\item{silent}{suppress all messages and progressbars}
 
 \item{stratify}{If TRUE the response.model will be stratified by treatment}
 
 \item{mc.cores}{mc.cores Optional number of cores. parallel::mcmapply used
 instead of future}
+
+\item{response_model}{Deprecated. Use response.model instead.}
+
+\item{cate_model}{Deprecated. Use cate.model instead.}
+
+\item{propensity_model}{Deprecated. Use propensity.model instead.}
+
+\item{treatment}{Deprecated. Use cate.model instead.}
 
 \item{...}{additional arguments to future.apply::future_mapply}
 }
@@ -81,8 +93,8 @@ cate(cate.model=~1+w2,
 
 \dontrun{ ## superlearner example
 mod1 <- list(
-   glm=predictor_glm(y~w1+w2),
-   gam=predictor_gam(y~s(w1) + s(w2))
+   glm = predictor_glm(y~w1+w2),
+   gam = predictor_gam(y~s(w1) + s(w2))
 )
 s1 <- predictor_sl(mod1, nfolds=5)
 cate(cate.model=~1,

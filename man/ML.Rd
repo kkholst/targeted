@@ -16,19 +16,3 @@ ML(formula, model = "glm", ...)
 \description{
 Wrapper for ml_model
 }
-\details{
-model 'sl' (SuperLearner::SuperLearner)
-args: SL.library, cvControl, family, method
-example:
-
-model 'grf' (grf::regression_forest)
-args: num.trees, mtry, sample.weights, sample.fraction, min.node.size, ...
-example:
-
-model 'grf.binary' (grf::probability_forest)
-args: num.trees, mtry, sample.weights, ...
-example:
-
-model 'glm'
-args: family, weights, offset, ...
-}

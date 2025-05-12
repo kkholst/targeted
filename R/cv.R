@@ -18,6 +18,7 @@
 #' @param args.future Arguments to future.apply::future_mapply
 #' @param mc.cores Optional number of cores. [parallel::mcmapply] used instead
 #'   of future
+#' @param silent suppress all messages and progressbars
 #' @param ... Additional arguments parsed to models in models
 #' @author Klaus K. Holst
 #' @return An object of class '\code{cross_validated}' is returned. See
@@ -38,12 +39,15 @@
 #' x <- cv(list(m0=f0,m1=f1,m2=f2),rep=10, data=iris, formula=Sepal.Length~.)
 #' x
 #' @export
-cv <- function(models, data, response = NULL,
+cv <- function(models, data, # nolint
+               response = NULL,
                nfolds = 5, rep = 1,
                weights = NULL,
                model.score = scoring,
                seed = NULL, shared = NULL, args.pred = NULL,
-               args.future = list(), mc.cores, ...) {
+               args.future = list(), mc.cores,
+               silent = FALSE,
+               ...) {
 
   if (!is.list(models)) stop("Expected a list of models")
   nam <- names(models)
@@ -87,7 +91,7 @@ cv <- function(models, data, response = NULL,
       models[[i]] <- list(
         fit = f,
         predict = function(fit, newdata, ...) {
-          predict(fit, newdata = newdata, ...)
+          return(predict(fit, newdata = newdata, ...))
         }
       )
     }
@@ -182,7 +186,8 @@ cv <- function(models, data, response = NULL,
   dim <- c(rep, nfolds, M, P)
   perf_arr <- array(0, dim)
   dimnames(perf_arr) <- list(NULL, NULL, nam, nam_perf)
-  pb <- progressr::progressor(along = seq_len(nrow(arg)))
+  if (!silent)
+    pb <- progressr::progressor(along = seq_len(nrow(arg)))
   ff <- function(i) {
     R <- arg[i, 1]
     k <- arg[i, 2]
@@ -244,8 +249,8 @@ cv <- function(models, data, response = NULL,
       )
       perfs <- c(perfs, list(newperf))
     }
-    pb()
-    do.call(rbind, perfs)
+    if (!silent) pb()
+    return(do.call(rbind, perfs))
   }
 
   if (missing(mc.cores)) {
@@ -269,7 +274,7 @@ cv <- function(models, data, response = NULL,
     perf_arr[R, k, , ] <- val[[i]]
   }
 
-  structure(list(
+  obj <- structure(list(
     cv = perf_arr,
     call = match.call(),
     names = nam,
@@ -278,6 +283,7 @@ cv <- function(models, data, response = NULL,
   ),
   class = "cross_validated"
   )
+  return(obj)
 }
 
 #' @export
@@ -303,7 +309,7 @@ coef.cross_validated <- function(object, min=FALSE, ...) {
   if (min) {
     res <- apply(res, 2, which.min)
   }
-  res
+  return(res)
 }
 
 #' @export

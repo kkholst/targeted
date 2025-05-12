@@ -8,6 +8,9 @@ for details about how to contribute code to this project. Please make sure to
 read the relevant section before making your contribution. It will make it a lot
 easier for us maintainers and smooth out the experience for all involved.
 
+**Suggestions or bug reports** can be posted here: https://github.com/kkholst/targeted/issues.
+For bug reports please include a small reproducible example which clearly demonstrates the bug.
+
 ## Table of Contents
 
 - [Branches and branch prefixes](#branches-and-branch-prefixes)
@@ -16,7 +19,7 @@ easier for us maintainers and smooth out the experience for all involved.
 
 ## Branches and branch prefixes
 
-We currently maintain a single active development branch `develop`.
+We currently maintain a single active development branch `dev`.
 
 ### Branch prefixes
 
@@ -27,16 +30,17 @@ prefix and hyphens (-) are used for separation. For example,
 *feature/*: Branches for developing new features.\
 *bugfix/*: Branches for fixing non-critical bugs.\
 *hotfix/*: Branches for fixing critical bugs.\
-*docs/*: Branches for writing, updating, or fixing documentation.
+*docs/*: Branches for writing, updating, or fixing documentation.\
+*develop/*: Branches for anything else.
 
 ### Pull requests
 
-All pull requests (PRs) must be made on `develop`.
+All pull requests (PRs) must be made on `dev`.
 The title of the PR should follow the format of
 [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) and a
 summary of the proposed changes must be provided in the body of the PR. This
 makes it easier for maintainers as title and body can be reused once all commits
-are squashed before merging the feature branch into `develop`.
+are squashed before merging the feature branch into `dev`.
 
 ## Continuous integration
 
@@ -56,7 +60,12 @@ largest extent the
 checked via the code linter. A notable difference is that we use dots for long
 argument names of functions. For example, instead of `predict_args` we use
 `predict.args`. We remain using snake case for names of functions and R6 class
-methods.
+methods. We declare argument types of parameters in the roxygen documentation by following
+
+```{r}
+#' @param n (integer) Number of observations (sample size)
+#' @param estimators (list or function) List of estimators or a single unnamed estimator
+```
 
 ### Unit testing
 
@@ -80,6 +89,35 @@ expect_equal(output, 2)
 
 More information about unit testing with **tinytest** is provided in this
 [vignette](https://cran.r-project.org/web/packages/tinytest/vignettes/using_tinytest.pdf).
+
+### Documentation
+
+The R code is documented using
+[roxygen2](https://cran.r-project.org/web/packages/roxygen2/vignettes/roxygen2.html).
+
+Longer documentation are located in the `vignettes` directory in R-markdown format.
+
+## C++ development
+
+The **target** library follows the (Google's C++ style guide)[http://google.github.io/styleguide/cppguide.html>].
+
+The code should be checked using the ``cppcheck`` static code
+analyzer and ``cclint`` (which may installed from PyPi using ``pip3
+install cclint``).
+
+From the `src/target` directory these checks are made with `make check`.
+
+The C++ code is documented using (Doxygen)
+[http://www.doxygen.nl/manual/] ([ref](http://www.doxygen.nl/manual/commands.html)).
+
+### Unit tests
+
+C++ tests are located in the subdirectory `./src/target/tests`
+using [doctest](https://github.com/doctest/doctest), and can be executed with
+`make test` from the `src/targeto` directory.
+
+The Undefined Behaviour Sanitizer via ``clang++`` can be executed with `make sanitizer`
+which runs the unit-tests and examples from the directory ``misc``.
 
 ## Attribution
 
