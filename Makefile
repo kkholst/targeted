@@ -2,8 +2,18 @@ PKG ?= targeted
 R = R --silent --no-save --no-echo
 BUILD_DIR = build
 GETVER = $(shell cat DESCRIPTION | grep Version | cut -d":" -f2 | tr -d '[:blank:]')
+make_build_dir = rm -Rf $(BUILD_DIR) && mkdir -p $(BUILD_DIR)
+CLIFF_CFG = .cliff.toml
+CHANGELOG = CHANGELOG.md
 
 default: check
+
+# generate changelog for unreleased commits
+cliff-unreleased:
+	@git cliff --unreleased -c $(CLIFF_CFG)
+
+cliff-unreleased-prepend:
+	@git cliff --unreleased -c $(CLIFF_CFG) -p $(CHANGELOG)
 
 rcpp:
 	@echo 'Rcpp::compileAttributes(".")' | $(R)
@@ -25,17 +35,17 @@ clean:
 
 .PHONY: build
 build:
-	@rm -Rf $(BUILD_DIR) && mkdir -p $(BUILD_DIR)
+	@$(make_build_dir)
 	@echo 'pkgbuild::build(path=".", dest_path="$(BUILD_DIR)", args="--compact-vignettes=qpdf --resave-data=best")' | $(R)
 
 install:
-	@echo 'devtools::install("$(pkg)", upgrade = "never")' | $(R)
+	@echo 'devtools::install(".", upgrade = "never")' | $(R)
 
 dependencies-install:
-	@echo 'devtools::install_deps("$(pkg)", dependencies = TRUE)' | $(R)
+	@echo 'devtools::install_deps(".", dependencies = TRUE)' | $(R)
 
 dependencies-upgrade:
-	@echo 'devtools::install("$(pkg)", upgrade = "always")' | $(R)
+	@echo 'devtools::install(".", upgrade = "always")' | $(R)
 
 check-cran: build
 	@$(R) CMD check build/$(PKG)_$(GETVER).tar.gz --timings --as-cran --no-multiarch --run-donttest
@@ -44,7 +54,7 @@ check:
 	@_R_CHECK_FORCE_SUGGESTS_=0 echo 'res <- rcmdcheck::rcmdcheck(".", build_args=c("--no-build-vignettes"), args=c("--ignore-vignettes"))' | $(R)
 
 lint:
-	@echo 'devtools::lint(".")' | $(R)
+	@echo 'lintr::lint_package(show_progress = TRUE, exclusions = list("R/intsurv.R", "R/cumhaz.R"))' | $(R)
 
 test: test-installed
 test-installed: # tests locally installed version package
@@ -56,3 +66,9 @@ test-loadall:
 coverage:
 	@echo 'covr::report(file="tests/coverage-report.html")' | $(R)
 	@open tests/coverage-report.html
+
+.PHONY: man
+man:
+	@$(make_build_dir)
+	@echo 'devtools::build_manual(".", path = "$(BUILD_DIR)")' | $(R)
+	@open build/$(PKG)_$(GETVER).pdf

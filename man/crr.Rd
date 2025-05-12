@@ -61,11 +61,11 @@ lava::sim(m, n = n)
 d <- sim1(n = 2e3, seed = 1)
 if (require("SuperLearner",quietly=TRUE)) {
   e <- crr(data=d,
-           type = "dml2",
-           treatment = a ~ v,
-           response_model = ML(y~ a*(x + v + I(v^2))),
-           importance_model = ML(D_ ~ v + I(v^2)),
-           propensity_model = ML(a ~ x + v + I(v^2), family=binomial),
+   type = "dml2",
+   treatment = a ~ v,
+   response_model = predictor_glm(y~ a*(x + v + I(v^2))),
+   importance_model = predictor_glm(D_ ~ v + I(v^2)),
+   propensity_model = predictor_glm(a ~ x + v + I(v^2), family=binomial),
            nfolds = 2)
   summary(e) # the true parameters are c(1,1)
 }

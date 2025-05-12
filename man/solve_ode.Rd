@@ -22,7 +22,8 @@ Matrix with solution
 Solve ODE with Runge-Kutta method (RK4)
 }
 \details{
-The external point should be created with the function \code{targeted::specify_ode}.
+The external point should be created with the function
+\code{targeted::specify_ode}.
 }
 \examples{
 example(specify_ode)

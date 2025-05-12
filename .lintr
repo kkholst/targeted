@@ -6,10 +6,15 @@ linters: linters_with_defaults(
   object_length_linter(40),
   indentation_linter = NULL,
   brace_linter(allow_single_line = FALSE),
-  spaces_left_parentheses_linter = NULL
+  spaces_left_parentheses_linter = NULL,
+  return_linter(return_style = "explicit", except_regex = "^cat|^print|^deprecate")
   )
 encoding: "UTF-8"
 exclusions: list(
     "inst/misc",
-    "vignettes"
+    "vignettes",
+    "R/RcppExports.R",
+    "inst" = list( # disable return linter for unit tests
+      return_linter = Inf
+    )
   )

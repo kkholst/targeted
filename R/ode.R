@@ -1,7 +1,8 @@
 #' Define compiled code for ordinary differential equation.
 #'
 #' The model (\code{code}) should be specified as the body of of C++ function.
-#' The following variables are defined bye default (see the argument \code{pname})
+#' The following variables are defined bye default
+#' (see the argument \code{pname})
 #' \describe{
 #' \item{dy}{Vector with derivatives, i.e. the rhs of the ODE (the result).}
 #' \item{x}{Vector with the first element being the time, and the following
@@ -10,7 +11,8 @@
 #' \item{p}{Parameter vector}
 #' }
 #' \eqn{y'(t) = f_{p}(x(t), y(t))}
-#' All variables are treated as Armadillo (http://arma.sourceforge.net/) vectors/matrices.
+#' All variables are treated as Armadillo (http://arma.sourceforge.net/)
+#' vectors/matrices.
 #'
 #' As an example consider the *Lorenz Equations*
 #' \eqn{\frac{dx_{t}}{dt} = \sigma(y_{t}-x_{t})}
@@ -24,7 +26,8 @@
 #' \code{dy <- specify_ode(ode)}
 #'
 #' As an example of model with exogenous inputs consider the following ODE:
-#' \eqn{y'(t) = \beta_{0} + \beta_{1}y(t) + \beta_{2}y(t)x(t) + \beta_{3}x(t)\cdot t}
+#' \eqn{y'(t) = \beta_{0} + \beta_{1}y(t) +
+#' \beta_{2}y(t)x(t) + \beta_{3}x(t)\cdot t}
 #' This could be specified as
 #' \code{mod <- 'double t = x(0);
 #'               dy = p(0) + p(1)*y + p(2)*x(1)*y + p(3)*x(1)*t;'}
@@ -73,7 +76,7 @@ odeptr_t make_dy() {
 "
   make_dy <- NULL # Avoid warning about missing global variable
   rcpp_code <- paste(hd, fun, code, fptr, fname, tl)
-  res <- Rcpp::sourceCpp(code=rcpp_code)
+  res <- Rcpp::sourceCpp(code=rcpp_code) # nolint
   f <- make_dy()
   return(f)
 }
@@ -81,7 +84,8 @@ odeptr_t make_dy() {
 
 #' Solve ODE with Runge-Kutta method (RK4)
 #'
-#' The external point should be created with the function \code{targeted::specify_ode}.
+#' The external point should be created with the function
+#' \code{targeted::specify_ode}.
 #' @title Solve ODE
 #' @param ode_ptr pointer (externalptr) to C++ function or an R function
 #' @param input Input matrix. 1st column specifies the time points
@@ -97,13 +101,14 @@ solve_ode <- function(ode_ptr, input, init, par=0) {
   if (is.function(ode_ptr)) {
     return(.ode_solve2(ode_ptr, cbind(input), rbind(init), rbind(par)))
   }
-  .ode_solve(ode_ptr, cbind(input), rbind(init), rbind(par))
+  return(.ode_solve(ode_ptr, cbind(input), rbind(init), rbind(par)))
 }
 
 ## Dormand-Prince method. Adaptive step-size, see E. Hairer, S. P. Norsett G.
 ## Wanner, "Solving Ordinary Differential Equations I: Nonstiff Problems", Sec.
 ## II.
-solve_ode_adaptive <- function(f, y0, t0, t1,  h0=0.1,
+solve_ode_adaptive <- function(f, y0, t0, t1, # nolint
+                               h0=0.1,
                                control=list()) {
 
   control0 <- list(hmax=h0, hmin=1e-20,
@@ -114,37 +119,42 @@ solve_ode_adaptive <- function(f, y0, t0, t1,  h0=0.1,
 
   # Adaptive step size
   cs <- c(0, 1/5, 3/10, 4/5, 8/9, 1, 1)
-  as <- matrix(0, 7,7)
-  as[,1] <- c(0,1/5, 3/40, 44/45, 19327/6561, 9017/3168, 35/384)
-  as[,2] <- c(0,0, 9/40, -56/15, -25360/2187, -355/33, 0)
-  as[,3] <- c(0,0,0, 32/9, 64448/6561, 46732/5247, 500/1113)
-  as[,4] <- c(0,0,0,0, -212/729, 49/176, 125/192)
-  as[,5] <- c(0,0,0,0,0, -5103/18656, -2187/6784)
-  as[,6] <- c(0, 0, 0, 0, 0, 0, 11 / 84)
-  bs <-  rbind(as[7,],
-               c(5179/57600, 0, 7571/16695, 393/640, -92097/339200, 187/2100, 1/40))
+  as <- matrix(0, 7, 7)
+  as[, 1] <- c(0, 1/5, 3/40, 44/45, 19327/6561, 9017/3168, 35/384)
+  as[, 2] <- c(0, 0, 9/40, -56/15, -25360/2187, -355/33, 0)
+  as[, 3] <- c(0, 0, 0, 32/9, 64448/6561, 46732/5247, 500/1113)
+  as[, 4] <- c(0, 0, 0, 0, -212/729, 49/176, 125/192)
+  as[, 5] <- c(0, 0, 0, 0, 0, -5103/18656, -2187/6784)
+  as[, 6] <- c(0, 0, 0, 0, 0, 0, 11/84)
+  bs <- rbind(
+    as[7, ],
+    c(
+      5179 / 57600, 0, 7571 / 16695, 393 / 640,
+      -92097 / 339200, 187 / 2100, 1 / 40
+    )
+  )
   q <- nrow(as) - 1
 
   intstep <- function(t, h, y) {
     k <- matrix(0, nrow = q + 1, ncol = length(y0))
-    for (i in seq(nrow(k))) {
+    for (i in seq_len(nrow(k))) {
       yval <- y
       for (j in seq_along(i-1))
-        yval <- yval + as[i,j]*k[j,]
-      k[i,] <- h*f(t+cs[i]*h, yval)
+        yval <- yval + as[i, j]*k[j, ]
+      k[i, ] <- h*f(t+cs[i]*h, yval)
     }
     # Estimate y(x+h) as weighted average of the q increments
-    if (identical(as[,q+1], bs[1,])) {
+    if (identical(as[, q+1], bs[1, ])) {
       y1 <- yval
     } else {
       y1 <- y
       for (j in seq_len(q+1))
-        y1 <- y1 + bs[1,j]*k[j,]
+        y1 <- y1 + bs[1, j]*k[j, ]
     }
     ## Estimate y(x+h) as weighted average of the q+1 increments
     y2 <- y
     for (j in seq_len(q+1))
-        y2 <- y2 + bs[2,j]*k[j,]
+        y2 <- y2 + bs[2, j]*k[j, ]
 
     return(list(y1, y2))
   }
@@ -177,7 +187,7 @@ solve_ode_adaptive <- function(f, y0, t0, t1,  h0=0.1,
   }
 
   t <- t0
-  h <- max(h0,1e-30)
+  h <- max(h0, 1e-30)
   y <- y0
   r0 <- c(t, y)
   fac <- control$fac_max

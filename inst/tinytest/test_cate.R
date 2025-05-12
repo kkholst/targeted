@@ -26,10 +26,9 @@ simcate <- function(qmod) {
     newdata = transform(d, a = 1)
   )
   e1 <- true_estimate1(q1)
-
   aa <- cate(
-    ML(qmod),
-    ML(a ~ x, family = binomial),
+    predictor_glm(qmod),
+    predictor_glm(a ~ x, family = binomial),
     data = d, nfolds = 1
   ) |> estimate()
 
@@ -48,52 +47,57 @@ test_cate_deprecated_arguments <- function() {
   e1 <- true_estimate1(q1)
   # use deprecated argument names to verify that cate continues to work as
   # expected
-  expect_warning(aa1 <- cate(
-    response_model = ML(qmod),
-    propensity.model = ML(a ~ x, family = binomial),
-    data = d) |> estimate(),
-    pattern = "Use `response.model` instead."
+  expect_warning(
+    aa1 <- cate(
+      response_model = predictor_glm(qmod),
+      propensity.model = predictor_glm(a ~ x, family = binomial),
+      data = d
+    ) |> estimate(),
+    pattern = "Please use the `response.model` argument instead"
   )
   expect_equivalent(parameter(e1)[1:2], parameter(aa1)["E[y(1)]", 1:2])
 
-  expect_warning(aa2 <- cate(
-    response.model = ML(qmod),
-    propensity_model = ML(a ~ x, family = binomial),
-    data = d) |> estimate(),
-    pattern = "Use `propensity.model` instead."
+  expect_warning(
+    aa2 <- cate(
+      response.model = predictor_glm(qmod),
+      propensity_model = predictor_glm(a ~ x, family = binomial),
+      data = d
+    ) |> estimate(),
+    pattern = "Please use the `propensity.model` argument instead"
   )
   expect_equivalent(parameter(e1)[1:2], parameter(aa2)["E[y(1)]", 1:2])
 
-  expect_warning(aa3 <- cate(
-    response.model = ML(qmod),
-    propensity.model = ML(a ~ x, family = binomial),
-    cate_model = ~ 1,
-    data = d) |> estimate(),
-    pattern = "Use `cate.model` instead."
-  )
-  expect_equivalent(parameter(e1)[1:2], parameter(aa3)["E[y(1)]", 1:2])
-
   # user is informed when deprecated treatment argument is used
   expect_warning(aa4 <- cate(
-    response.model = ML(qmod),
-    propensity.model = ML(a ~ x, family = binomial),
+    response.model = predictor_glm(qmod),
+    propensity.model = predictor_glm(a ~ x, family = binomial),
     treatment = ~ 1,
     data = d) |> estimate(),
-    pattern = "The `treatment` argument"
+    pattern = "Please use the `cate.model` argument instead"
+  )
+  expect_equivalent(parameter(e1)[1:2], parameter(aa4)["E[y(1)]", 1:2])
+
+  # same with cate_model argument
+  expect_warning(aa4 <- cate(
+    response.model = predictor_glm(qmod),
+    propensity.model = predictor_glm(a ~ x, family = binomial),
+    cate_model = ~ 1,
+    data = d) |> estimate(),
+    pattern = "Please use the `cate.model` argument instead"
   )
   expect_equivalent(parameter(e1)[1:2], parameter(aa4)["E[y(1)]", 1:2])
 
   # function fails when old treatment arg and new cate.model arg are used
   # together
   expect_error(
-    suppressWarnings( # suppress deprecating warning of cate_model arg
-      cate(
-        response.model = ML(qmod),
-        propensity.model = ML(a ~ x, family = binomial),
-        cate_model = ~ 2,
-        treatment = ~ 1,
-        data = d)
-    ), pattern = "Calling `cate` with both the obsolete"
+    cate(
+      response.model = predictor_glm(qmod),
+      propensity.model = predictor_glm(a ~ x, family = binomial),
+      cate.model = ~2,
+      treatment = ~1,
+      data = d
+    ),
+    pattern = "Calling `cate` with both the obsolete"
   )
 }
 test_cate_deprecated_arguments()

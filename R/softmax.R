@@ -10,5 +10,5 @@ softmax <- function(x, log=FALSE, ref=TRUE, ...) {
     if (is.vector(x) || NCOL(x)==1) {
         return(.softmax(cbind(x), log=log, ref=TRUE)[, -1, drop=is.vector(x)])
     }
-    .softmax(cbind(x), log=log, ref=ref)
+    return(.softmax(cbind(x), log=log, ref=ref))
 }

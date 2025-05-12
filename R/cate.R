@@ -13,7 +13,7 @@ ate_if_fold <- function(fold, data,
   X <- deval
   if (stratify) {
     idx <- which(dtrain[, treatment]==level)
-    tmp <- response.model$estimate(dtrain[idx, , drop=FALSE])
+    tmp <- response.model$estimate(dtrain[idx, , drop=FALSE]) # nolint
   } else {
     tmp <- response.model$estimate(dtrain)
     X[, treatment] <- level
@@ -44,7 +44,7 @@ ate_if_fold <- function(fold, data,
 cate_fold1 <- function(fold, data, score, cate_des) {
   y <- score[fold]
   x <- update(cate_des, data[fold, , drop = FALSE])$x
-  lm.fit(y = y, x = x)$coef
+  return(lm.fit(y = y, x = x)$coef)
 }
 
 #' Conditional Average Treatment Effect estimation with cross-fitting.
@@ -56,6 +56,7 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #' \beta)} denote a parametric working model, then the target parameter is the
 #' mean-squared error \deqn{\beta(P) = \operatorname{argmin}_{\beta}
 #' E_{P}[\{\Psi_{1}(P)(V)-\Psi_{0}(P)(V)\} - m(V; \beta)]^{2}}
+#' @inheritParams deprecated_argument_names
 #' @title Conditional Average Treatment Effect estimation
 #' @param response.model formula or ml_model object (formula => glm)
 #' @param propensity.model formula or ml_model object (formula => glm)
@@ -65,7 +66,7 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #' @param data data.frame
 #' @param nfolds Number of folds
 #' @param rep Number of replications of cross-fitting procedure
-#' @param silent supress all messages and progressbars
+#' @param silent suppress all messages and progressbars
 #' @param stratify If TRUE the response.model will be stratified by treatment
 #' @param mc.cores mc.cores Optional number of cores. parallel::mcmapply used
 #'   instead of future
@@ -97,8 +98,8 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #'
 #' \dontrun{ ## superlearner example
 #' mod1 <- list(
-#'    glm=predictor_glm(y~w1+w2),
-#'    gam=predictor_gam(y~s(w1) + s(w2))
+#'    glm = predictor_glm(y~w1+w2),
+#'    gam = predictor_gam(y~s(w1) + s(w2))
 #' )
 #' s1 <- predictor_sl(mod1, nfolds=5)
 #' cate(cate.model=~1,
@@ -109,7 +110,7 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #' }
 #'
 #' @export
-cate <- function(response.model,
+cate <- function(response.model, # nolint
                  propensity.model,
                  cate.model = ~1,
                  contrast = c(1, 0),
@@ -119,33 +120,32 @@ cate <- function(response.model,
                  silent = FALSE,
                  stratify = FALSE,
                  mc.cores = NULL,
+                 response_model = deprecated,
+                 cate_model = deprecated,
+                 propensity_model = deprecated,
+                 treatment = deprecated,
                  ...) {
 
   cl <- match.call()
-  dots <- list(...)
   n <- nrow(data)
 
-  deprecate_argument <- function(old.name, new.name) {
-    if (old.name %in% names(dots)) {
-      warning("The `", old.name, "` argument of `cate()` is deprecated and",
-      " will be removed in targeted 1.0. Use `", new.name, "` instead.",
-      call. = FALSE
-      )
-      # if both old and new arguments are supplied, the
-      # old argument takes priority over the new one. this is unlikely to happen
-      assign(new.name, value = dots[[old.name]], envir = parent.frame())
-      # old argument needs to be removed from dots because parallel::mcmapply
-      # expects ... to be a vector or list inputs. thus tries to replicate
-      # the argument n times. Does not affect paralle::mclapply
-      dots[[old.name]] <<- NULL
-    }
+  dvers <- "1.0.0"
+  if (!missing(response_model)) {
+    deprecate_arg_warn("response_model", "response.model", "cate", dvers)
+    response.model <- response_model
   }
 
-  deprecate_argument("response_model", "response.model")
-  deprecate_argument("propensity_model", "propensity.model")
-  deprecate_argument("cate_model", "cate.model")
+  if (!missing(propensity_model)) {
+    deprecate_arg_warn("propensity_model", "propensity.model", "cate", dvers)
+    propensity.model <- propensity_model
+  }
 
-  if ("treatment" %in% names(dots)) { ## Backward compatibility
+  if (!missing(cate_model)) {
+    deprecate_arg_warn("cate_model", "cate.model", "cate", dvers)
+    cate.model <- cate_model
+  }
+
+  if (!missing(treatment)) { ## Backward compatibility
     # ~1 is current default value of cate.model
     if (!isTRUE(all.equal(cate.model, ~1))) {
       stop(
@@ -153,10 +153,11 @@ cate <- function(response.model,
         " and the new 'cate.model' argument"
       )
     }
-    cate.model <- dots$treatment
-    deprecate_argument("treatment", "cate.model") # only used to inform user
-    # that treatment argument is deprecated
+    # only used to inform user that treatment argument is deprecated
+    deprecate_arg_warn("treatment", "cate.model", "cate", dvers)
+    cate.model <- treatment
   }
+
   if (missing(propensity.model)) {
     propensity.model <- lava::getoutcome(cate.model)
   }
@@ -170,14 +171,14 @@ cate <- function(response.model,
 
   desA <- design(cate.model, data, intercept=TRUE, rm_envir=FALSE)
   if (inherits(response.model, "formula")) {
-    response.model <- ML(response.model)
+    response.model <- predictor_glm(response.model)
   }
 
   if (length(contrast) > 2) {
     stop("Expected contrast vector of length 1 or 2.")
   }
   propensity_outcome <- function(treatment_level) {
-    paste0("I(", treatment_var, "==", treatment_level, ")")
+    return(paste0("I(", treatment_var, "==", treatment_level, ")"))
   }
   if (missing(propensity.model)) {
     response_var <- lava::getoutcome(response.model$formula, data=data)
@@ -185,10 +186,10 @@ cate <- function(response.model,
       paste0(" . - ", response_var),
       response=propensity_outcome(contrast[1])
     )
-    propensity.model <- ML(newf, family=binomial)
+    propensity.model <- predictor_glm(newf, family=binomial)
   }
   if (inherits(propensity.model, "formula")) {
-    propensity.model <- ML(propensity.model, family = binomial)
+    propensity.model <- predictor_glm(propensity.model, family = binomial)
   }
   treatment_var <- lava::getoutcome(propensity.model$formula)
 
@@ -239,9 +240,8 @@ cate <- function(response.model,
         treatment_var = treatment_var,
         data = data, folds = folds,
         stratify = stratify
-      )
+      ), ...
     )
-    myargs <- c(myargs, dots)
     if (!is.null(mc.cores)) {
       myargs$mc.cores <- ifelse(rep == 1, mc.cores, 1)
       val <- do.call(parallel::mcmapply, myargs)
@@ -276,9 +276,7 @@ cate <- function(response.model,
         list(unlist(lapply(ii, function(x) val[[x]]$pmod))[idx])
       )
       if (!is.null(val[[1]]$adj)) {
-        A <- lapply(ii, function(x) {
-          val[[x]]$adj
-        })
+        A <- lapply(ii, function(x) val[[x]]$adj)
         adj <- c(adj, list(Reduce(rbind, A)[idx, , drop = FALSE]))
       }
     }
@@ -286,7 +284,7 @@ cate <- function(response.model,
     names(qval) <- contrast
     names(pval) <- contrast
     if (length(adj) > 0) names(adj) <- contrast
-    list(scores = scores, adj = adj, qval = qval, pval = pval)
+    return(list(scores = scores, adj = adj, qval = qval, pval = pval))
   }
 
   if (rep > 1) {

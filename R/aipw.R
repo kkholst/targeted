@@ -24,7 +24,7 @@ aipw <- function(response_model,
                  data,
                  ...) {
   if (inherits(response_model, "formula")) {
-    response_model <- ML(response_model)
+    response_model <- predictor_glm(response_model)
   }
   resp <- lava::getoutcome(response_model$formula)
   r <- !is.na(model.frame(
@@ -36,12 +36,13 @@ aipw <- function(response_model,
       propensity_model <- update(response_model$formula, as.formula("R_ ~ ."))
   }
   if (inherits(propensity_model, "formula")) {
-    propensity_model <- ML(propensity_model, family=binomial)
+    propensity_model <- predictor_glm(propensity_model, family = binomial)
   }
-  cate(response.model = response_model,
+  res <- cate(response.model = response_model,
        propensity.model = propensity_model,
        cate.model = formula,
       data = data, contrast = 1, stratify = TRUE,
       ...
   )
+  return(res)
 }
