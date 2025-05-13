@@ -1,5 +1,6 @@
 #' @title R6 class for prediction models
-#' @description Provides standardized estimation and prediction methods
+#' @description Interface for standardized estimation and prediction The
+#' following built-in learners are provided: [predictor_glm], [predictor_gam]
 #' @param data data.frame
 #' @author Klaus Kähler Holst
 #' @aliases ml_model

@@ -14,7 +14,8 @@
 \alias{predictor_isoreg}
 \title{R6 class for prediction models}
 \description{
-Provides standardized estimation and prediction methods
+Interface for standardized estimation and prediction The
+following built-in learners are provided: \link{predictor_glm}, \link{predictor_gam}
 }
 \examples{
 data(iris)
