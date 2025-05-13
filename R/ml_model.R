@@ -9,13 +9,9 @@
 #' predictor_xgboost_count predictor_xgboost_cox
 #' predictor_xgboost_binary
 #' predictor_hal predictor_isoreg
-<<<<<<< HEAD
 #' predictor_svm
 #' predictor_mars
-||||||| 5dd52b7
-=======
 #' predictor_nb
->>>>>>> dev
 #' @seealso predictor_sl
 #' @examples
 #' data(iris)
