@@ -27,52 +27,58 @@ library("targeted")
 
 # Introduction
 
+Methods for targeted and semiparametric inference rely on fitting nuisance
+models to observed data when estimating the estimand of interest. The
+`{targeted}` implements the [R6 reference class](https://r6.r-lib.org/)
+`learner` to harmonize common statistical and machine learning models for the
+usage as nuisance models across the various implemented estimators. Commonly
+used models are instantiated as `learner` class objects through the `learner_`
+functions. These functions are wrappers for statistical and machine learning
+models that have been implemented in other R packages. This is conceptually
+similar to packages such as `{caret}` and `{mlr3}`. Besides implementing a large
+number of prediction models, they provide extensive functionalities for data
+preprocessing, model selection and diagnostics, and hyper-parameter
+optimization. The design of the `learner` class and accompanied functions is
+much leaner, as our use-cases often only require a standardized interface for
+estimating models and generating predictions, instead of the full predictive
+modelling pipeline.
+
+We use the Mayo Clinic Primary Biliary Cholangitis data (`?survival::pbc`)
+to exemplify the usage of the `learner` class objects. Our interest is to
+predict the composite event of death or transplant before 2 years.
 ```{r data}
 data(pbc, package="survival")
-```
-
-Describe Mayo Clinic Primary Biliary Cholangitis Data...
-
-In the following we are interested in predicting events (death or transplant)
-before 2 years.
-
-```{r}
 pbc <- transform(pbc, y = (time < 730) * (status > 0))
 ```
 
+A logistic regression model with a single `age` covariate is defined and
+estimated via
 
-```{r}
-m0 <- predictor_glm(y ~ 1)
-m1 <- predictor_glm(y ~ age + sex + bili + edema + albumin)
+```{r logistic1}
+lr <- predictor_glm(y ~ age, family = binomial())
+lr$estimate(pbc)
 ```
 
-```{r}
-cv(list(benchmark = m0, glm = m1, nb = m2), data = pbc)
+and predictions of class probabilities for new data are obtained by
+
+```{r logistic2}
+lr$predict(newdata = data.frame(age = c(20, 40, 60, 80)))
 ```
 
-```{r calibration}
+The remainder of this vignette is structured as follows. We first provide more
+details about the built-in learners that wrap statistical and machine
+learning models from other R packages. Once the usage of the returned
+`learner` class objects has been introduced, we provide details to implement
+new learners.
 
-```
+# Built-in learners
 
+# Usage
 
+cross validation
 
+updating
 
+specials
 
-
-
-# Defining new learners with `predictor`
-
-predictor()
-
-
-## Methods
-estimate
-predict
-
-# Built-in model wrappers
-
-# Cross-validation
-
-# Calibration
-
-# Super Learners
+# Defining new learners
