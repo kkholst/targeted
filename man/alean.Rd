@@ -67,14 +67,16 @@ sim1 <- function(n, family=gaussian(), ...) {
 library(splines)
 f <- binomial()
 d <- sim1(1e4, family=f)
-e <- alean(response_model=ML(y ~ a + bs(l, df=3), family=binomial),
-           exposure_model=ML(a ~ bs(l, df=3), family=f),
-           data=d,
-           link = "logit", mc.cores=1, nfolds=1)
+e <- alean(
+ response_model=predictor_glm(y ~ a + bs(l, df=3), family=binomial),
+ exposure_model=predictor_glm(a ~ bs(l, df=3), family=f),
+ data=d,
+ link = "logit", mc.cores=1, nfolds=1
+)
 e
 
-e <- alean(response_model=ML(y ~ a + l, family=binomial),
-           exposure_model=ML(a ~ l),
+e <- alean(response_model=predictor_glm(y ~ a + l, family=binomial),
+           exposure_model=predictor_glm(a ~ l),
            data=d,
            link = "logit", mc.cores=1, nfolds=1)
 e

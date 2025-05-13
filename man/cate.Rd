@@ -93,8 +93,8 @@ cate(cate.model=~1+w2,
 
 \dontrun{ ## superlearner example
 mod1 <- list(
-   glm=predictor_glm(y~w1+w2),
-   gam=predictor_gam(y~s(w1) + s(w2))
+   glm = predictor_glm(y~w1+w2),
+   gam = predictor_gam(y~s(w1) + s(w2))
 )
 s1 <- predictor_sl(mod1, nfolds=5)
 cate(cate.model=~1,
