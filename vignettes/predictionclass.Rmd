@@ -73,6 +73,11 @@ new learners.
 
 # Built-in learners
 
+- start with listing all estimators
+- passing arguments to fit and predict function, related to inherited roxygen
+documentation (exposing most commonly used arguments)
+- 
+
 # Usage
 
 cross validation
@@ -80,5 +85,7 @@ cross validation
 updating
 
 specials
+
+cloning
 
 # Defining new learners
