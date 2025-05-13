@@ -133,17 +133,17 @@ scoring <- function(response, ...,
     type <- "multiclass"
   }
   if (tolower(type) %in% c("quantitative", "cont", "continuous")) {
-    S <- suppressWarnings(lapply(val,
+    S <- lapply(val,
       quantitative_scoring1,
       response = response,
       weights = weights, messages = messages
-    ))
+    )
   } else {
-    S <- suppressWarnings(lapply(val,
+    S <- lapply(val,
       multiclass_scoring1,
       response = response,
       levels = levels, weights = weights, messages = messages
-    ))
+    )
   }
   if (is.null(names)) {
     names <- base::names(val)
