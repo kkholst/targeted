@@ -61,8 +61,6 @@ ml_model <- R6::R6Class("ml_model", # nolint
     #' @field args optional arguments to fitting function specified during
     #' initialization
     args = NULL,
-    #' @field description optional description field
-    description = NULL,
 
     #' @description
     #' Create a new prediction model object
@@ -182,11 +180,9 @@ ml_model <- R6::R6Class("ml_model", # nolint
         estimate = formals(estimate),
         predict = formals(predict)
       )
-      private$call <- list( # nolint
-        estimate = substitute(estimate),
-        predict = substitute(predict),
-        argslist = substitute(dots),
-        predict.args = substitute(predict.args)
+      private$init <- list(
+        estimate.args = list(...),
+        predict.args = predict.args
       )
     },
 
@@ -232,56 +228,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
     #' @description
     #' Print method
     print = function() {
-      cat(
-        "Prediction Model (class ml_model)",
-        "\n_________________________________\n\n"
-      )
-      if (!is.null(self$info)) {
-        cat(self$info, "\n\n")
-      }
-
-      if (!is.null(self$description)) {
-        cat(self$description)
-      } else {
-        cat("Arguments:\n")
-        argslist <- gsub("^list\\(", "",
-          deparse(private$call$argslist),
-          perl = TRUE
-        )
-        argslist <- gsub("\\)$", "", argslist)
-        argslist <- strsplit(
-          paste(argslist, collapse = ""),
-          ","
-        ) |>
-          _[[1]] |>
-          lapply(lava::trim) |>
-          unlist()
-        cat(
-          paste0("\t", paste(argslist, collapse = "\n\t")),
-          "\n",
-          sep = ""
-        )
-      }
-
-      ## if (!is.null(self$formula)) {
-      ##   cat("Model:\n",
-      ##     "\t", deparse1(self$formula), "\n",
-      ##     sep = ""
-      ##   )
-      ## }
-      ## cat("\`estimate` method:`\n",
-      ##     "\tfunction(", paste(names(self$formals[[1]]),
-      ##                          collapse=", "), ")\n", sep="")
-      ## cat("`predict` method:\n",
-      ##   "\tfunction(", paste(names(self$formals[[2]]),
-      ##     collapse = ", "
-      ##   ), ")\n",
-      ## sep = ""
-      ## )
-      if (!is.null(self$fit)) {
-        cat("\n_________________________________\n\n")
-        print(self$fit)
-      }
+      ml_model_print(self, private)
       return(invisible())
     },
 
@@ -338,8 +285,8 @@ ml_model <- R6::R6Class("ml_model", # nolint
     fitfun = NULL,
     # @field fitted Fitted model object
     fitted = NULL,
-    # @field call Information on the initialized model
-    call = NULL,
+    # @field init Information on the initialized model
+    init = NULL,
     # @field optional field containing name of response variable
     responsevar = NULL,
     # When x$clone(deep=TRUE) is called, the deep_clone gets invoked once for
@@ -385,4 +332,51 @@ estimate.ml_model <- function(x, ...) {
 #' @export
 predict.ml_model <- function(object, ...) {
   return(object$predict(...))
+}
+
+format_fit_predict_args <- function(args) {
+  if (length(args) == 0) return(" ")
+  funs <- c(is.numeric, is.character, is.integer, is.logical, is.null)
+
+  # print family attribute of family objects instead of printing only that the
+  # argument is of class <family>
+  mask <- unlist(lapply(args, \(x) inherits(x, "family")))
+  vals <- lapply(args[mask], \(x) x$family)
+  args[mask] <- vals
+
+  mask <- unlist(lapply(args, \(x) any(sapply(funs, \(f) f(x)))))
+  args_class <- paste0("<", lapply(args, \(x) class(x)[[1]]), ">")
+  args[!mask] <- args_class[!mask]
+
+  return(paste0(names(args), "=", args, collapse =", "))
+}
+
+ml_model_print <- function(self, private) {
+  .ruler <- function(x, n, unicode = "\u2500") {
+    rule <- paste0(rep(unicode, n), collapse = "")
+    cat(paste0(rule, x, rule, "\n"))
+  }
+
+  .ruler(" ml_model object ", 10)
+
+  if (!is.null(self$info)) {
+    cat(self$info, "\n\n")
+  }
+
+  cat(
+    "Estimate arguments:",
+    format_fit_predict_args(private$init$estimate.args),
+    "\nPredict arguments:",
+    format_fit_predict_args(private$init$predict.args),
+    "\nFormula:",
+    capture.output(print(self$formula)),
+    "\n"
+  )
+
+  if (!is.null(private$fitted)) {
+    .ruler("\u2500", 18)
+    cat(capture.output(print(self$fit)), sep ="\n")
+  }
+
+  return(invisible())
 }
