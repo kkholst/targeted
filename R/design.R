@@ -154,7 +154,7 @@ model.matrix.design <- function(object, ...) {
 
 #' @export
 #' @title Extract model component from [design] object
-#' @param object [design] object
+#' @param x [design] object
 #' @param specials extract variables marked as special
 #' (e.g., "offset", "weights", ...)
 #' @param ...  Additional arguments to lower level functions

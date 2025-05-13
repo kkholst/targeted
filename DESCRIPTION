@@ -49,6 +49,7 @@ Suggests:
     hal9001,
     mgcv,
     tinytest,
+    riskRegression,
     rmarkdown,
     scatterplot3d,
     SuperLearner (>= 2.0-28),

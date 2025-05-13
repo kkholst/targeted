@@ -99,7 +99,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
       }
       estimate <- add_dots(estimate)
 
-      des.args <- list(specials = specials, intercept = intercept)
+      private$des.args <- list(specials = specials, intercept = intercept)
       fit_formula <- "formula" %in% formalArgs(estimate)
       fit_response_arg <- response.arg %in% formalArgs(estimate)
       fit_x_arg <- x.arg %in% formalArgs(estimate)
@@ -135,7 +135,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
           private$fitfun <- function(data, ...) {
             xx <- do.call(
               targeted::design,
-              c(list(formula = self$formula, data = data), des.args)
+              c(list(formula = self$formula, data = data), private$des.args)
             )
             args <- private$update_args(self$args, ...)
             args <- c(list(xx$x), args)
@@ -307,7 +307,10 @@ ml_model <- R6::R6Class("ml_model", # nolint
     #' Extract design matrix (features) from data
     #' @param ... additional arguments to [targeted::design]
     design = function(data, ...) {
-      return(design(self$formula, data = data, ...)$x)
+      args <- c(private$des.args, list(data = data))
+      args[...names()] <- list(...)
+      return(do.call(design, c(list(self$formula), args))$x)
+      # return(design(self$formula, data = data, ...)$x)
     },
 
     #' @description
@@ -322,6 +325,8 @@ ml_model <- R6::R6Class("ml_model", # nolint
     fit = function() private$fitted
   ),
   private = list(
+    # @field des.args Arguments for targeted::design
+    des.args = NULL,
     # @field init.estimate Original estimate method supplied at initialization
     init.estimate = NULL,
     # @field init.predict Original predict method supplied at initialization

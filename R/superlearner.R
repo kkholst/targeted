@@ -24,6 +24,7 @@ superlearner <- function(model.list,
                          model.score = mse,
                          mc.cores = NULL,
                          future.seed = TRUE,
+                         silent = TRUE,
                          ...) {
   pred_mod <- function(models, data) {
     res <- lapply(models, \(x) x$predict(data))
@@ -36,7 +37,7 @@ superlearner <- function(model.list,
   n <- nrow(data)
   folds <- lava::csplit(n, nfolds)
   pred <- matrix(NA, n, length(model.list))
-  pb <- progressr::progressor(along = seq_len(nfolds))
+  if (!silent) pb <- progressr::progressor(along = seq_len(nfolds))
   onefold <- function(fold, data, model.list, pb) {
     n <- nrow(data)
     test <- data[fold, , drop = FALSE]
@@ -44,7 +45,7 @@ superlearner <- function(model.list,
     mod <- lapply(model.list, \(x) x$clone(deep = TRUE))
     lapply(mod, \(x) x$estimate(train))
     pred.test <- pred_mod(mod, test)
-    pb()
+    if (!silent) pb()
     return(list(pred = pred.test, fold = fold))
   }
   if (!is.null(mc.cores)) {
