@@ -1,19 +1,6 @@
 #' @export
 predictor <- function(...) return(ml_model$new(...))
 
-predictor_argument_description <- function(call) {
-    ar <- lapply(
-      rlang::call_args(call),
-      deparse
-    )
-    ar["info"] <- NULL
-    nn <- names(ar)
-    desc <- "Arguments:\n"
-    for (i in seq_along(nn)) {
-      desc <- paste0(desc, "\t", nn[i], " = ", ar[i], "\n")
-    }
-    return(desc)
-  }
 
 #' @export
 predictor_glm <- function(formula,
@@ -32,9 +19,7 @@ predictor_glm <- function(formula,
   }
   args$offset <- NULL
   mod <- do.call(ml_model$new, args)
-  mod$description <- predictor_argument_description(
-    rlang::call_match(defaults = TRUE)
-  )
+
   return(mod)
 }
 
@@ -75,9 +60,7 @@ predictor_glmnet <- function(formula,
     nfolds = nfolds,
     ...
     )
-  mod$description <- predictor_argument_description(
-    rlang::call_match(defaults = TRUE)
-  )
+
   return(mod)
 }
 
@@ -134,9 +117,7 @@ predictor_gam <- function(formula,
     ...
   )
   mod <- do.call(ml_model$new, args)
-  mod$description <- predictor_argument_description(
-    rlang::call_match(defaults = TRUE)
-  )
+
   return(mod)
 }
 
@@ -153,9 +134,7 @@ predictor_isoreg <- function(formula,
     predict = function(object, newdata, ...) return(object(newdata)),
     ...
     )
-  mod$description <- predictor_argument_description(
-    rlang::call_match(defaults = TRUE)
-  )
+
   return(mod)
 }
 
@@ -251,7 +230,7 @@ predictor_sl <- function(model.list,
   mod$update(model.list[[1]]$formula)
   cl <- rlang::call_match(defaults = TRUE)
   cl$formula <- lapply(model.list, \(x) x$formula)
-  mod$description <- predictor_argument_description(cl)
+
   class(mod) <- c("predictor_sl", class(mod))
   return(mod)
 }
@@ -335,9 +314,7 @@ predictor_xgboost <-
       return(res)
     }
     mod <- do.call(ml_model$new, args)
-    mod$description <- predictor_argument_description(
-      rlang::call_match(defaults = TRUE)
-    )
+
     return(mod)
   }
 
@@ -382,9 +359,7 @@ predictor_grf <- function(formula,
       return(est(X = x, Y = y, ...))
   }
   mod <- do.call(ml_model$new, args)
-  mod$description <- predictor_argument_description(
-    rlang::call_match(defaults = TRUE)
-  )
+
   return(mod)
 }
 
@@ -399,6 +374,35 @@ predictor_grf_binary <- function(formula,
   return(mod)
 }
 
+#' @export
+predictor_nb <- function(formula,
+                         info = "Naive Bayes",
+                         laplace.smooth = 0,
+                         kernel = FALSE,
+                         ...) {
+  args <- list(
+    formula = formula,
+    estimate = function(formula, data, ...) {
+      return(NB(formula = formula, data = data, ...)
+    )
+    },
+    predict = function(object, newdata, simplify=TRUE, ...) {
+      pr <- stats::predict(object, newdata = newdata, ...)
+      if (simplify && NCOL(pr)==2L) pr <- pr[, 2]
+      return(pr)
+    },
+    laplace.smooth = laplace.smooth,
+    kernel = kernel,
+    info = info,
+    specials = c("weights", "offset"),
+    ...
+  )
+  mod <- do.call(ml_model$new, args)
+  mod$description <- predictor_argument_description(
+    rlang::call_match(defaults = TRUE)
+  )
+  return(mod)
+}
 
 #' ML model
 #'
@@ -407,58 +411,9 @@ predictor_grf_binary <- function(formula,
 #' @param formula formula
 #' @param model model (sl, rf, pf, glm, ...)
 #' @param ... additional arguments to model object
-#' @details
-#' model 'sl' (SuperLearner::SuperLearner)
-#' args: SL.library, cvControl, family, method
-#' example:
-#'
-#' model 'grf' (grf::regression_forest)
-#' args: num.trees, mtry, sample.weights, sample.fraction, min.node.size, ...
-#' example:
-#'
-#' model 'grf.binary' (grf::probability_forest)
-#' args: num.trees, mtry, sample.weights, ...
-#' example:
-#'
-#' model 'glm'
-#' args: family, weights, offset, ...
-#'
 ML <- function(formula, model="glm", ...) {
-  model <- tolower(model)
-  ## SL / SuperLearner
-  if (model == "sl") {
-      return(predictor_sl(formula, ...))
-  }
-  ## grf
-  if (model %in% c("grf", "rf", "regression_forest")) {
-    return(predictor_grf(formula, ...))
-  }
-  if (model %in% c("grf.binary", "pf", "probability_forest")) {
-    return(predictor_grf_binary(formula, ...))
-  }
-
-  ## xgboost
-  if (model %in% c(
-    "xgboost", "xgb", "xgboost.multiclass",
-    "xgboost.binary", "xgboost.count", "xgboost.survival"
-  )) {
-    obj <- switch(model,
-      xgboost.multiclass = "multi:softprob",
-      xgboost.binary = "reg:logistic",
-      xgboost.survival = "survival:cox",
-      xgboost.count = "count:poisson",
-      "reg:squarederror"
-    )
-    return(predictor_xgboost(formula, ..., objective = obj))
-  }
-
-  ## GAM
-  if (model %in% c("mgcv", "gam")) {
-    return(predictor_gam(formula, ...))
-  }
-
-  ## glm, default
-  m <- predictor_glm(formula, ...)
-  return(m)
-
+  stop(
+    "targeted::ML has been removed in targeted 0.6. ",
+    "Please use the targeted::predictor_ functions instead."
+  )
 }
