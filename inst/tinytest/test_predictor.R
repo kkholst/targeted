@@ -1,3 +1,4 @@
+set.seed(42)
 sim1 <- function(n = 5e2) {
    x1 <- rnorm(n, sd = 2)
    x2 <- rnorm(n)
@@ -9,20 +10,31 @@ sim1 <- function(n = 5e2) {
 }
 d <- sim1()
 
-simcount <- function(n = 5e3) {
-
+simcount <- function(n = 5e2) {
+  x <- rnorm(n)
+  w <- 50 + rexp(n, rate = 1 / 5)
+  y <- rpois(n, exp(2 + 0.5 * x + log(w)) * rgamma(n, 1 / 2, 1 / 2))
+  return(data.frame(y, x, w))
 }
+dcount <- simcount()
 
 
 test_predictor_glm <- function() {
   # basic check that default arguments for predictor_glm perform linear
   # regression
-  fit1 <- glm(y ~ x1, data = d)
+  fit_ref <- glm(y ~ x1, data = d)
   lr <- predictor_glm(y ~ x1)
   lr$estimate(d)
 
-  expect_equal(coef(lr$fit), coef(fit1))
+  expect_equal(coef(lr$fit), coef(fit_ref))
 
+  # poisson regression with offset
+  fit_ref <- glm(y ~ x + offset(log(w)), data = dcount, family = poisson)
+  lr <- predictor_glm(y ~ x + offset(log(w)), family = poisson)
+  lr$estimate(dcount)
+  expect_equal(coef(lr$fit), coef(fit_ref))
+
+  
   # test offset
   # test predictions on link scale
 }
