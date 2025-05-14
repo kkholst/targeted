@@ -13,8 +13,15 @@ predictor_glm <- function(formula,
       stop("MASS library required")
     }
     fitfun <- function(formula, data, ...) { # nolint because of different
-    # argument types for fitfun
-      MASS::glm.nb(formula, data = data, ...)
+      # argument types for fitfun
+      dots <- list(...)
+      dots$family <- NULL # removed because glm.nb does not support family arg
+      args <- c(list(formula, data = data), dots)
+      res <- do.call(MASS::glm.nb, args)
+      res$call[[1]] <- quote(MASS::glm.nb) # modify call attribute to avoid
+      # cluttered print statement due to the usage of do.call statement above
+      res$call$data <- quote(data)
+      return(res)
     }
   } else {
     fitfun <- function(formula, data, family, ...) {
@@ -24,7 +31,10 @@ predictor_glm <- function(formula,
 
   args$estimate <- fitfun
   args$predict <- function(object, newdata, ...) {
-    return(stats::predict(object, newdata = newdata, type = "response"))
+    dots <- list(...)
+    if (!("type" %in% names(dots))) dots$type <- "response"
+    args <- c(list(object, newdata = newdata), dots)
+    do.call(stats::predict, args)
   }
   mod <- do.call(ml_model$new, args)
 

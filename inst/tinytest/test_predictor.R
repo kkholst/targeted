@@ -34,10 +34,31 @@ test_predictor_glm <- function() {
   lr$estimate(dcount)
   expect_equal(coef(lr$fit), coef(fit_ref))
 
-  
-  # test offset
-  # test predictions on link scale
+  # default options are to generate predictions on response scale
+  newd <- data.frame(x = c(-1, 1), w = c(50, 100))
+  expect_equal(lr$predict(newd), predict(fit_ref, newd, type = "response"))
+
+  # predictions can be generated on link scale
+  expect_equal(lr$predict(newd, type = "link"), predict(fit_ref, newd))
+
+  # arguments for predict methods can be passed to ml_model in predictor_glm
+  # call
+  lr <- predictor_glm(y ~ x + offset(log(w)), family = poisson,
+    predict.args = list(type = "link"))
+  lr$estimate(dcount)
+  expect_equal(lr$predict(newd), predict(fit_ref, newd))
+
+  # arguments can be again overwritten during method call (unlikely to be used
+  # in practice)
+  expect_equal(
+    lr$predict(newd, type = "response"),
+    predict(fit_ref, newd, type = "response")
+  )
+
+  # test support for negative binomial regression with MASS
+  lr <- predictor_glm(y ~ x + offset(log(w)), family = "nb")
+  lr$estimate(dcount)
+  fit_ref <- MASS::glm.nb(y ~ x + offset(log(w)), data = dcount)
+  expect_equal(lr$fit$theta, fit_ref$theta)
 }
 test_predictor_glm()
-
-
