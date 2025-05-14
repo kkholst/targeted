@@ -88,14 +88,14 @@ multiclass_scoring1 <- # nolint
 #' @param ... model predictions (continuous predictions or class probabilities
 #'   (matrices))
 #' @param type continuous or categorical response (the latter is automatically
-#'   chosen if response is a factor, otherwise a continuous response is
-#'   assumed)
+#'   chosen if response is a factor, otherwise a continuous response is assumed)
 #' @param metrics which metrics to report
 #' @param weights optional frequency weights
-#' @param names optional names of models coments (given as ..., alternatively
-#'   these can be named arguments)
+#' @param names (optional) character vector of the model names in the output. If
+#'   omitted these will be taken from the names of the ellipsis argument (...)
 #' @param object optional model object
-#' @param newdata optional new data.frame
+#' @param newdata (optional) data.frame on which to evaluate the model
+#'   performance
 #' @param levels (optional) unique levels in response variable
 #' @param messages controls amount of messages/warnings (0: none)
 #' @examples

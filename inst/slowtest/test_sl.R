@@ -27,7 +27,6 @@ test_sl <- function() {
   c1 <- cv(m, data = d, rep = 2)
 
   s <- predictor_sl(m, nfolds = 10)
-  s$estimate(d)
   b <- summary(s, nfolds = 10, rep = 2, data = d)
   # sm <- cv(list(s), d, rep=1, model.score=mse) |> summary()
   sm <- summary(b)["sl",,"mse"]
