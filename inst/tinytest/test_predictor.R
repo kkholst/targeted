@@ -1,5 +1,4 @@
-sim1 <- function(n = 5e3) {
-   n <- 5e2
+sim1 <- function(n = 5e2) {
    x1 <- rnorm(n, sd = 2)
    x2 <- rnorm(n)
    lp <- x2*x1 + cos(x1)
