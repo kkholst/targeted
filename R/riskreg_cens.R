@@ -114,12 +114,8 @@ riskreg_cens <- function(response,
   }
   if (!is.null(prediction)) { # Brier score
     type <- "brier"
-    if (is.character(prediction)) {
-      prediction <- data[, prediction]
-    }
-    if (is.numeric(prediction)) {
-      data[, "_pred"] <- prediction
-    }
+    if (is.character(prediction)) prediction <- data[, prediction]
+    if (is.numeric(prediction)) data[, "_pred"] <- prediction
     m <- function(time, data) {
       return(((time<=tau) - as.vector(data[, "_pred"]))^2)
     }
@@ -142,16 +138,14 @@ riskreg_cens <- function(response,
 
     # time-to-event outcome model
     T.args <- c(
-      list(formula = response,
-           data = train_data),
+      list(formula = response, data = train_data),
       args.response
     )
     T.est <- do.call(what = call.response, T.args)
 
     # censoring model
     C.args <- c(
-      list(formula = censoring,
-           data = train_data),
+      list(formula = censoring, data = train_data),
       args.censoring
     )
     C.est <- do.call(what = call.censoring, C.args)
@@ -175,8 +169,9 @@ riskreg_cens <- function(response,
       valid_data.a <- valid_data
       valid_data.a[, A.var] <- A.value
 
-      Fhat <- 1 - as.vector(cumhaz(T.est, newdata = valid_data.a,
-        times = tau)$surv)
+      Fhat <- 1 - as.vector(
+        cumhaz(T.est, newdata = valid_data.a, times = tau)$surv
+      )
       valid_data[, "_pred"] <- Fhat
 
       rm(valid_data.a)
@@ -216,7 +211,6 @@ riskreg_cens <- function(response,
     phi.0 <- cbind(delta * mf / as.vector(sc) + aug)
     return(phi.0)
   }
-
 
   if (!missing(newdata)) {
     ph <- fit.phis(train_data = data, valid_data = newdata)
