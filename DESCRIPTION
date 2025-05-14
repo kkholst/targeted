@@ -52,6 +52,8 @@ Suggests:
     hal9001,
     knitr,
     mgcv,
+    randomForestSRC,
+    ranger,
     riskRegression,
     rmarkdown,
     scatterplot3d,
