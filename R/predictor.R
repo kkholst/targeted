@@ -286,7 +286,7 @@ predictor_sl <- function(model.list,
   mod$update(model.list[[1]]$formula)
   cl <- rlang::call_match(defaults = TRUE)
   cl$formula <- lapply(model.list, \(x) x$formula)
-  mod$description <- predictor_argument_description(cl)
+  # mod$description <- predictor_argument_description(cl)
   attr(mod, "model.score") <- model.score
   class(mod) <- c("predictor_sl", class(mod))
   return(mod)
