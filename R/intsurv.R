@@ -5,33 +5,6 @@ subjumps <- function(jumptimes, tau, size = 100L) {
   return(tt)
 }
 
-
-intsurv <- function(time, surv, stop = max(time), jumps.only = FALSE) {
-  stop <- min(max(as.vector(time)), stop)
-  n <- length(time)
-  idx <- which(as.vector(time) <= stop)
-  time <- as.vector(time)[idx]
-  surv <- as.vector(surv)[idx]
-  if (jumps.only) {
-    jumps <- which(diff(surv) < 0) + 1
-    time <- time[jumps]
-    surv <- surv[jumps]
-  }
-  tj <- c(0, time)
-  sj <- surv
-  dt <- diff(tj)
-  res <- numeric(n)
-  res[idx] <- rev(cumsum(rev(sj * dt)))
-
-  return(list(
-    t = tj,
-    s = sj,
-    dt = dt,
-    cint = res,
-    value = sum(sj * dt)
-  ))
-}
-
 #' @title Integral approximation of a time dependent function.
 #' Computes an approximation of \eqn{\int_start^stop S(t) dt}, where
 #' \eqn{S(t)} is a survival function, for a selection of start and stop time
