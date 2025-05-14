@@ -1,13 +1,12 @@
-
-subjumps <- function(jumptimes, tau, size=100L) {
-  jt <- jumptimes[jumptimes<=tau]
-  tt <- seq(min(jt), min(max(jt), tau), length.out=size)
+subjumps <- function(jumptimes, tau, size = 100L) {
+  jt <- jumptimes[jumptimes <= tau]
+  tt <- seq(min(jt), min(max(jt), tau), length.out = size)
   tt <- jt[unique(mets::fast.approx(jt, tt))]
   return(tt)
 }
 
 
-intsurv <- function(time, surv, stop = max(time), jumps.only=FALSE) {
+intsurv <- function(time, surv, stop = max(time), jumps.only = FALSE) {
   stop <- min(max(as.vector(time)), stop)
   n <- length(time)
   idx <- which(as.vector(time) <= stop)
@@ -22,7 +21,7 @@ intsurv <- function(time, surv, stop = max(time), jumps.only=FALSE) {
   sj <- surv
   dt <- diff(tj)
   res <- numeric(n)
-  res[idx] <- rev(cumsum(rev(sj*dt)))
+  res[idx] <- rev(cumsum(rev(sj * dt)))
 
   return(list(
     t = tj,
@@ -32,34 +31,6 @@ intsurv <- function(time, surv, stop = max(time), jumps.only=FALSE) {
     value = sum(sj * dt)
   ))
 }
-
-
-## intsurv2 <- function(object, data, time, stop = max(time),
-##                      sample = 0, blocksize = 0) {
-##   tau <- min(max(as.vector(time)), stop)
-##   n <- NROW(data)
-##   Lc <- vector(mode = "numeric", length = n)
-##   tt <- time
-##   if (sample > 0) {
-##          tt <- subjumps(time, size = sample, tau = tau)
-##   }
-##   blocks <- list(1:n)
-##   if (blocksize > 0) {
-##          blocks <- lava::csplit(1:n, k = min(n, blocksize))
-##   }
-
-##   res <- numeric(n)
-##   for (b in blocks) {
-##          S <- cumhaz(object, newdata = data[b, ], times = tt)$surv
-##     i <- 0
-##     for (r in b) { ## Loop over each row in the data
-##          i <- i + 1
-##       int <- intsurv(tt, S[i, ], tau)
-##       res[r] <- 0
-##     }
-##   }
-##   return(res)
-## }
 
 #' Computes an approximation of \eqn{\int_start^stop S(t) dt}, where
 #' \eqn{S(t)} is a survival function, for a selection of start and stop time
@@ -79,7 +50,7 @@ int_surv <- function(times, surv,
   times <- as.vector(times)
   surv <- as.vector(surv)
 
-  ## input checks:
+  # input checks:
   stopifnot(
     is.numeric(times),
     !is.unsorted(times),
