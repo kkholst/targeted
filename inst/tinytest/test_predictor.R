@@ -60,5 +60,8 @@ test_predictor_glm <- function() {
   lr$estimate(dcount)
   fit_ref <- MASS::glm.nb(y ~ x + offset(log(w)), data = dcount)
   expect_equal(lr$fit$theta, fit_ref$theta)
+
+  # predict method also works as expected
+  expect_equal(lr$predict(newd), predict(fit_ref, newd, type = "response"))
 }
 test_predictor_glm()
