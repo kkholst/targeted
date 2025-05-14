@@ -335,8 +335,7 @@ score_sl <- function(response,
   return(c(res, w))
 }
 
-#' @export
-summary.predictor_sl <- function(object,
+cv_predictor_sl <- function(object,
                                  data,
                                  nfolds = 5,
                                  rep = 1,
@@ -362,12 +361,12 @@ summary.predictor_sl <- function(object,
   res$names <- nam
   res$cv <- cvs
   res$call <- NULL
-  class(res) <- c("summary.predictor_sl", "cross_validated")
+  class(res) <- c("cross_validated.predictor_sl", "cross_validated")
   return(res)
 }
 
 #' @export
-print.summary.predictor_sl <- function(x, digits=5, ...) {
+print.cross_validated.predictor_sl <- function(x, digits=5, ...) {
   res <- round(summary.cross_validated(x)*1e5, digits=0) / 1e5
   cat(x$fold, "-fold cross-validation", sep="")
   if (x$rep > 1) cat(" with ", x$rep, " repetitions", sep="")

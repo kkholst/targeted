@@ -39,7 +39,7 @@
 #' x <- cv(list(m0=f0,m1=f1,m2=f2),rep=10, data=iris, formula=Sepal.Length~.)
 #' x
 #' @export
-cv <- function(models, data, # nolint
+cv <- function(models, data,
                response = NULL,
                nfolds = 5, rep = 1,
                weights = NULL,
@@ -49,6 +49,9 @@ cv <- function(models, data, # nolint
                silent = FALSE,
                ...) {
 
+  if (inherits(models, "predictor_sl")) {
+
+  }
   if (!is.list(models)) stop("Expected a list of models")
   nam <- names(models)
   if (is.null(nam)) nam <- paste0("model", seq_along(models))
