@@ -163,7 +163,6 @@ RATE <- function(response, post.treatment, treatment,
 #' \frac{A}{P(A = 1)}\left(D-E[D|A=1, W]\right) + E[D|A=1, W] -E[D|A=1].
 #' }
 #'
-#'
 #' @title Responder Average Treatment Effect
 #' @param response Response formula (e.g., Surv(time, event) ~ D + W).
 #' @param censoring Censoring formula (e.g., Surv(time, event == 0) ~ D + A +
@@ -342,56 +341,17 @@ RATE.surv <- function(response, post.treatment, treatment, censoring,
   return(out)
 }
 
-cumhaz <- function(object, newdata, times = NULL, ...) {
-  if (inherits(object, "phreg")) {
-    if (is.null(times)) times <- object$times
-    pp <- predict(object,
-      newdata = newdata,
-      times = times,
-      individual.times = FALSE, ...
-    )
-    chf <- t(pp$cumhaz)
-    tt <- pp$times
-  } else if (inherits(object, "rfsrc")) {
-    pp <- predict(object, newdata = newdata, oob = TRUE, ...)
-    chf <- t(rbind(pp$chf))
-    tt <- pp$time.interest
-    if (!is.null(times)) {
-      idx <- mets::fast.approx(tt, times)
-      chf <- chf[idx, , drop = FALSE]
-      tt <- times
-    }
-  } else if (inherits(object, "ranger")) {
-    num.threads <- object$call$num.threads
-    pp <- predict(object, type = "response", data = newdata,
-      num.threads = num.threads, ...)
-    chf <- t(rbind(pp$chf))
-    tt <- pp$unique.death.times
-    if (!is.null(times)) {
-      idx <- mets::fast.approx(tt, times)
-      chf <- chf[idx, , drop = FALSE]
-      tt <- times
-    }
-  } else if (inherits(object, "coxph")) {
-    pp <- survfit(object, newdata = newdata)
-    pp <- summary(pp, time = times)
-    chf <- rbind(pp$cumhaz)
-    tt <- pp$time
-  }
-  return(
-    list(time = tt, chf = chf, surv = exp(-chf), dchf = diff(rbind(0, chf)))
-  )
-}
+
 
 F.tau <- function(T.est, D.est, data, tau, a, treatment, post.treatment) {
   data[lava::getoutcome(treatment)] <- a
   pred.D <- predict(D.est, type = "response", data)
 
   data[lava::getoutcome(post.treatment)] <- 1
-  surv.T.D1 <- cumhaz(T.est, newdata = data, times = tau)$surv[1, ]
+  surv.T.D1 <- cumhaz(T.est, newdata = data, times = tau)$surv[, 1]
 
   data[lava::getoutcome(post.treatment)] <- 0
-  surv.T.D0 <- cumhaz(T.est, newdata = data, times = tau)$surv[1, ]
+  surv.T.D0 <- cumhaz(T.est, newdata = data, times = tau)$surv[, 1]
 
   surv <- pred.D * surv.T.D1 + (1 - pred.D) * surv.T.D0
 
@@ -411,7 +371,7 @@ HMc.tau <- function(T.est, C.est, data, time, event, tau) {
   time.C <- time[event == 0]
 
   S <- diag(cumhaz(T.est, newdata = data.C, times = time.C)$surv)
-  S.tau <- cumhaz(T.est, newdata = data.C, times = tau)$surv[1, ]
+  S.tau <- cumhaz(T.est, newdata = data.C, times = tau)$surv[, 1]
   Sc <- diag(cumhaz(C.est, newdata = data.C, times = time.C)$surv)
   stopifnot(all(S * Sc > 0))
 

@@ -6,7 +6,6 @@
 ^CPPLINT.cfg$
 ^Dockerfile$
 ^Makefile$
-^tmp$
 ^Makefile$
 ^src/target/lib$
 ^src/target/build$
@@ -25,3 +24,7 @@
 ^.codecov.yml
 ^.*\.Rproj$
 ^\.Rproj\.user$
+tmp$
+build$
+Rcheck$
+^www$
