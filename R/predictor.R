@@ -13,8 +13,8 @@ predictor_glm <- function(formula,
       stop("MASS library required")
     }
     fitfun <- function(formula, data, family, ...) {
-      # family is a "pseudo" argument avoid multiple local function definitions
-      # for ‘fitfun’ with different formal arguments warnings
+      # family is a "pseudo" argument to avoid "multiple local function
+      # definitions for ‘fitfun’ with different formal arguments" warnings
       MASS::glm.nb(formula, data = data, ...)
     }
   } else {
