@@ -53,7 +53,7 @@ Suggests:
     knitr,
     mgcv,
     randomForestSRC,
-    ranger
+    ranger,
     riskRegression,
     rmarkdown,
     scatterplot3d,
