@@ -3,10 +3,10 @@ on:
   pull_request:
     branches: [main, dev]
 
-name: check-documentation
+name: check-roxygen
 
 jobs:
-  check-documentation:
+  check-roxygen:
     runs-on: ${{ matrix.config.os }}
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
     strategy:
