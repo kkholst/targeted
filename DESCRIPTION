@@ -43,6 +43,7 @@ Imports:
     rlang
 Suggests:
     cmprsk,
+    MASS,
     e1071,
     glmnet,
     grf,

@@ -12,16 +12,10 @@ predictor_glm <- function(formula,
     if (!requireNamespace("MASS", quietly = TRUE)) {
       stop("MASS library required")
     }
-    fitfun <- function(formula, data, ...) { # nolint because of different
-      # argument types for fitfun
-      dots <- list(...)
-      dots$family <- NULL # removed because glm.nb does not support family arg
-      args <- c(list(formula, data = data), dots)
-      res <- do.call(MASS::glm.nb, args)
-      res$call[[1]] <- quote(MASS::glm.nb) # modify call attribute to avoid
-      # cluttered print statement due to the usage of do.call statement above
-      res$call$data <- quote(data)
-      return(res)
+    fitfun <- function(formula, data, family, ...) {
+      # family is a "pseudo" argument avoid multiple local function definitions
+      # for ‘fitfun’ with different formal arguments warnings
+      MASS::glm.nb(formula, data = data, ...)
     }
   } else {
     fitfun <- function(formula, data, family, ...) {
