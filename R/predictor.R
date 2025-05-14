@@ -155,9 +155,6 @@ predictor_mars <- function(formula,
     },
     ...
   )
-  mod$description <- predictor_argument_description(
-    rlang::call_match(defaults = TRUE)
-  )
   return(mod)
 }
 
@@ -193,9 +190,6 @@ predictor_svm <- function(formula,
     },
     predict = pred,
     ...
-  )
-  mod$description <- predictor_argument_description(
-    rlang::call_match(defaults = TRUE)
   )
   return(mod)
 }
