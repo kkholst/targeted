@@ -45,6 +45,7 @@ Imports:
 Suggests:
     SuperLearner (>= 2.0-28),
     cmprsk,
+    MASS,
     e1071,
     earth,
     glmnet,
