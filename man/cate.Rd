@@ -15,6 +15,7 @@ cate(
   silent = FALSE,
   stratify = FALSE,
   mc.cores = NULL,
+  second.order = TRUE,
   response_model = deprecated,
   cate_model = deprecated,
   propensity_model = deprecated,
@@ -44,6 +45,9 @@ average treatment effects}
 
 \item{mc.cores}{mc.cores Optional number of cores. parallel::mcmapply used
 instead of future}
+
+\item{second.order}{Add seconder order term to IF to handle misspecification
+of outcome models}
 
 \item{response_model}{Deprecated. Use response.model instead.}
 
