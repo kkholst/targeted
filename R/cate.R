@@ -364,7 +364,7 @@ cate <- function(response.model, # nolint
   IF0 <- c()
   for (i in seq_along(est0)) {
     newIF <- scores[[i]] - est0[i]
-    if (length(adj) > 0 & second.order) {
+    if (length(adj) > 0 && second.order) {
       pmod <- propensity.model$clone(deep = TRUE)
       newf <- reformulate(
         as.character(pmod$formula)[[3]],
