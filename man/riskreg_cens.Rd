@@ -37,7 +37,7 @@ W)).}
 \item{data}{data.frame.}
 
 \item{newdata}{Optional data.frame. In this case the uncentered influence
-function evalued in 'newdata' is returned with nuisance parameters
+function evaluated in 'newdata' is returned with nuisance parameters
 obtained from 'data'.}
 
 \item{tau}{Time-point of interest, see Details.}

@@ -32,17 +32,18 @@ intsurv <- function(time, surv, stop = max(time), jumps.only = FALSE) {
   ))
 }
 
+#' @title Integral approximation of a time dependent function.
 #' Computes an approximation of \eqn{\int_start^stop S(t) dt}, where
 #' \eqn{S(t)} is a survival function, for a selection of start and stop time
 #' points.
 #'
-#' @title Integral approximation of a time dependent function.
 #' @param times Numeric vector, sorted time points.
 #' @param surv Numeric vector, values of a survival function evaluated at time
 #'   points given by \code{times}.
 #' @param start Numeric vector, start of the integral.
 #' @param stop Numeric vector, end of the integral.
-#' @param extend
+#' @param extend (logical) If TRUE, integral is extended beyond the last
+#' observed time point
 #' @return Numeric vector, value of the integral.
 #' @author Andreas Nordland
 int_surv <- function(times, surv,
