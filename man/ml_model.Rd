@@ -17,6 +17,7 @@
 \alias{predictor_isoreg}
 \alias{predictor_svm}
 \alias{predictor_mars}
+\alias{predictor_nb}
 \title{R6 class for prediction models}
 \description{
 Provides standardized estimation and prediction methods
