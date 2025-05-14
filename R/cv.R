@@ -286,19 +286,36 @@ cv <- function(models, data, # nolint
   return(obj)
 }
 
+summary_cv <- function(x) {
+  x0 <- na.omit(x)
+  res <- rep(NA, 4)
+  if (length(x0) > 0L) {
+    res <- c(mean(x0), sd(x0), min(x0), max(x0))
+  }
+  names(res) <- c("mean", "sd", "min", "max")
+  return(res)
+}
+
 #' @export
-summary.cross_validated <- function(object, ...) {
-  return(coef(object))
+summary.cross_validated <- function(object,
+                                    summary.function = summary_cv, ...) {
+  res <- apply(object$cv, 3:4, summary.function) |>
+    aperm(c(2, 1, 3))
+  return(res)
 }
 
 #' @export
 print.cross_validated <- function(x, ...) {
-  cat("Call: ")
-  print(x$call)
-  cat("\n", x$fold, "-fold cross-validation", sep="")
-  cat(" with ", x$rep, " repetitions\n\n", sep="")
+  if (!is.null(x$call)) {
+    cat("Call: ")
+    print(x$call)
+    cat("\n")
+  }
+  cat(x$fold, "-fold cross-validation", sep="")
+  if (x$rep > 1) cat(" with ", x$rep, " repetitions", sep="")
+  cat("\n\n")
   res <- coef(x)
-  print(res, quote=FALSE)
+  print(res, quote = FALSE, na.print = "")
 }
 
 #' @export

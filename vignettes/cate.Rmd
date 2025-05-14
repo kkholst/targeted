@@ -9,7 +9,7 @@ output:
     fig_height: 3.5
     fig_align: center
 vignette: >
-  %\VignetteIndexEntry{Average Treatment Effects}
+  %\VignetteIndexEntry{Conditional Average Treatment Effects}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
