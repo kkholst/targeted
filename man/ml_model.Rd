@@ -77,8 +77,6 @@ prediction functions}
 
 \item{\code{args}}{optional arguments to fitting function specified during
 initialization}
-
-\item{\code{description}}{optional description field}
 }
 \if{html}{\out{</div>}}
 }

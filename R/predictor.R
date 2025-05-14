@@ -421,22 +421,22 @@ predictor_xgboost <- function(formula,
 
 #' @export
 predictor_xgboost_multiclass <- function(formula, ...) {
-  return(predictor_xgboost(formula, ..., objective="multi:softprob"))
+  return(predictor_xgboost(formula, ..., objective = "multi:softprob"))
 }
 
 #' @export
 predictor_xgboost_binary <- function(formula, ...) {
-  return(predictor_xgboost(formula, ..., objective="reg:logistic"))
+  return(predictor_xgboost(formula, ..., objective = "reg:logistic"))
 }
 
 #' @export
 predictor_xgboost_count <- function(formula, ...) {
-  return(predictor_xgboost(formula, ..., objective="count:poisson"))
+  return(predictor_xgboost(formula, ..., objective = "count:poisson"))
 }
 
 #' @export
 predictor_xgboost_cox <- function(formula, ...) {
-  return(predictor_xgboost(formula, ..., objective="survival:cox"))
+  return(predictor_xgboost(formula, ..., objective = "survival:cox"))
 }
 
 #' @export
@@ -486,9 +486,9 @@ predictor_nb <- function(formula,
       return(NB(formula = formula, data = data, ...)
     )
     },
-    predict = function(object, newdata, simplify=TRUE, ...) {
+    predict = function(object, newdata, simplify = TRUE, ...) {
       pr <- stats::predict(object, newdata = newdata, ...)
-      if (simplify && NCOL(pr)==2L) pr <- pr[, 2]
+      if (simplify && NCOL(pr) == 2L) pr <- pr[, 2]
       return(pr)
     },
     laplace.smooth = laplace.smooth,
@@ -498,9 +498,6 @@ predictor_nb <- function(formula,
     ...
   )
   mod <- do.call(ml_model$new, args)
-  mod$description <- predictor_argument_description(
-    rlang::call_match(defaults = TRUE)
-  )
   return(mod)
 }
 
