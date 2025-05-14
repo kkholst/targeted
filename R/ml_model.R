@@ -9,6 +9,8 @@
 #' predictor_xgboost_count predictor_xgboost_cox
 #' predictor_xgboost_binary
 #' predictor_hal predictor_isoreg
+#' predictor_svm
+#' predictor_mars
 #' predictor_nb
 #' @seealso predictor_sl
 #' @examples

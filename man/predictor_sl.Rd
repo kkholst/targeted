@@ -45,7 +45,7 @@ sim1 <- function(n = 5e2) {
    d <- data.frame(y, x1, x2)
    d
 }
-d <- sim1() |> mets::dsort(~x1)
+d <- sim1()
 
 m <- list(
   "mean" = predictor_glm(y ~ 1),
@@ -53,23 +53,23 @@ m <- list(
   "iso" = predictor_isoreg(y ~ x1)
 )
 
-s <- predictor_sl(m, nfolds=10)
+s <- predictor_sl(m, nfolds = 10)
 s$estimate(d)
 pr <- s$predict(d)
 if (interactive()) {
     plot(y ~ x1, data = d)
     points(d$x1, pr, col = 2, cex = 0.5)
-    lines(cos(x1) + x1 ~ x1, data = d,
+    lines(cos(x1) + x1 ~ x1, data = d[order(d$x1), ],
           lwd = 4, col = lava::Col("darkblue", 0.3))
 }
 print(s)
-## weights(s)
-## score(s)
+# weights(s)
+# score(s)
 
-cvres <- summary(s, data=d, nfolds=3, rep=2)
+cvres <- summary(s, data = d, nfolds = 3, rep = 2)
 cvres
-## coef(cvres)
-## score(cvres)
+# coef(cvres)
+# score(cvres)
 }
 \references{
 Luedtke & van der Laan (2016) Super-Learning of an Optimal
