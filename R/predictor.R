@@ -9,11 +9,20 @@ predictor_glm <- function(formula,
                           offset = NULL,
                           ...) {
   args <- c(as.list(environment(), all.names = FALSE), list(...))
-    args$estimate <- function(formula, data, family, ...) {
-    return(
+  if (is.character(family) && tolower(family) %in% c("nb", "negbin")) {
+    if (!requireNamespace("MASS", quietly = TRUE)) {
+      stop("MASS library required")
+    }
+    fitfun <- function(formula, data, ...) {
+      MASS::glm.nb(formula, data = data, ...)
+    }
+  } else {
+    fitfun <- function(formula, data, family, ...) {
       stats::glm(formula, data = data, family = family, ...)
-    )
+    }
   }
+
+  args$estimate <- fitfun
   args$predict <- function(object, newdata, ...) {
     return(stats::predict(object, newdata = newdata, type = "response"))
   }
