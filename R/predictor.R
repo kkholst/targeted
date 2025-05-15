@@ -432,7 +432,6 @@ predictor_xgboost <- function(formula,
       return(res)
     }
     mod <- do.call(ml_model$new, args)
-
     return(mod)
 }
 
