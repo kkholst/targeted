@@ -24,7 +24,7 @@
 #'     predict = function(object, newdata) {
 #'       predict(object, newdata)$predictions
 #'     },
-#'     ...
+#'     estimate.args = list(...)
 #'   )
 #' }
 #'
@@ -60,8 +60,8 @@ ml_model <- R6::R6Class("ml_model", # nolint
     formals = NULL,
     #' @field formula Formula specifying response and design matrix
     formula = NULL,
-    #' @field args optional arguments to fitting function specified during
-    #' initialization
+    #' @field estimate.args optional arguments to fitting function specified
+    #' during initialization
     estimate.args = NULL,
 
     #' @description
