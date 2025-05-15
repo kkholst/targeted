@@ -90,14 +90,6 @@ ml_model <- R6::R6Class("ml_model", # nolint
                           response.arg = "y",
                           intercept = FALSE,
                           x.arg = "x") {
-      # dots <- list(...)
-      # if (!is.null(dots$fit)) { ## Backward compatibility
-      #   .Deprecated("Use argument 'estimate' instead of 'fit'")
-      #   if (missing(estimate)) {
-      #     estimate <- dots$fit
-      #   }
-      #   dots$fit <- NULL
-      # }
       estimate <- add_dots(estimate)
 
       private$des.args <- list(specials = specials, intercept = intercept)
