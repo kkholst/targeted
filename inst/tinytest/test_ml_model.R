@@ -60,6 +60,7 @@ test_initialize <- function() {
     predict.args = list(type = "response")
   )
   m_count$estimate(ddata_count)
+
   fit_count <- glm(y ~ x + offset(w), family = poisson, data = ddata_count)
   expect_equal(
     m_count$predict(ddata_count),
@@ -84,6 +85,40 @@ test_estimate <- function() {
   m2 <- ml_model$new(formula = y ~ x1 + x2, estimate = glm, weights = rep(1, n))
   m2$estimate(data = ddata, weights = ww)
   expect_equal(coef(m2$fit), coef(fit_glm))
+
+  # test estimate function which takes x, y as arguments
+  m3 <- ml_model$new(formula = y ~ x1 + x2, estimate = glm.fit,
+    intercept = TRUE, weights = ww) # intercept = TRUE is required because no
+    # intercept is added when deriving the design matrix from the provided
+    # formula argument
+  m3$estimate(ddata)
+  expect_equal(coef(m3$fit), coef(fit_glm))
+
+  # verify that arguments are passed on to fitfun
+  m3$estimate(data = ddata, weights = rep(1, n))
+  expect_true(all(coef(m3$fit) != coef(fit_glm)))
+
+  # specials are correctly handled for estimating method with x, y arguments
+  m4 <- ml_model$new(formula = y ~ x + offset(log(w)), estimate = glm.fit,
+    intercept = TRUE, specials = "offset", family = poisson())
+  m4$estimate(ddata_count)
+  fit <- glm(y ~ x + offset(log(w)), data = ddata_count, family = poisson())
+  expect_equal(coef(fit), coef(m4$fit))
+
+  # it is currently not possible for the estimate method call to pass arguments
+  # to targeted::design inside the fitfun
+  m4 <- ml_model$new(formula = y ~ x + offset(log(w)), estimate = glm.fit,
+    intercept = TRUE, family = poisson())
+  m4$estimate(ddata_count, specials = c("offset"))
+  expect_true(all(coef(fit) != coef(m4$fit)))
+
+  # ml model can also be used with a formula argument. verify that family
+  # argument is passed correctly on to fitfun upon initialization + offset
+  # during method call
+  m4 <- ml_model$new(estimate = glm.fit, family = poisson())
+  .design <- design(y ~ x + offset(log(w)), ddata_count, intercept = TRUE)
+  m4$estimate(.design$x, .design$y, offset = .design$offset)
+  expect_equal(coef(fit), coef(m4$fit))
 }
 test_estimate()
 
@@ -120,3 +155,18 @@ test_predict <- function() {
   )
 }
 test_predict()
+
+test_design <- function() {
+  m <- ml_model$new(formula = y ~ x1 + x2, estimate = glm.fit, intercept = TRUE)
+  m$estimate(ddata)
+
+  # options defined for targeted::design upon ml model initialization are passed
+  # on to method call
+  fit <- glm.fit(x = m$design(ddata), y = m$response(ddata))
+  expect_equal(coef(m$fit), coef(fit))
+
+  # defined options can be overruled during method call
+  fit <- glm.fit(x = m$design(ddata, intercept = FALSE), y = m$response(ddata))
+  expect_false("(Intercept)" %in% names(coef(fit)))
+}
+test_design()

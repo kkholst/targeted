@@ -48,13 +48,13 @@ dependencies-upgrade:
 	@echo 'devtools::install(".", upgrade = "always")' | $(R)
 
 check-cran: build
-	@$(R) CMD check build/$(PKG)_$(GETVER).tar.gz --timings --as-cran --no-multiarch --run-donttest
+	@$(R) CMD check $(BUILD_DIR)/$(PKG)_$(GETVER).tar.gz --timings --as-cran --no-multiarch --run-donttest
 
 check:
 	@_R_CHECK_FORCE_SUGGESTS_=0 echo 'res <- rcmdcheck::rcmdcheck(".", build_args=c("--no-build-vignettes"), args=c("--ignore-vignettes"))' | $(R)
 
 lint:
-	@echo 'lintr::lint_package(show_progress = TRUE, exclusions = list("R/intsurv.R", "R/cumhaz.R"))' | $(R)
+	@echo 'lintr::lint_package(show_progress = TRUE)' | $(R)
 
 test: test-installed
 test-installed: # tests locally installed version package
@@ -62,6 +62,12 @@ test-installed: # tests locally installed version package
 
 test-loadall:
 	@echo 'devtools::load_all("."); tinytest::test_all(".")' | $(R)
+
+slowtest: test-slow
+test-slow:
+	@echo 'future::plan("multicore"); library("targeted"); res <- tinytest::run_test_dir("inst/slowtest"); if (summary(res)["Total", "fails"] > 0) {print(res); quit(status = 2)}' | $(R)
+
+test-all: test test-slow
 
 coverage:
 	@echo 'covr::report(file="tests/coverage-report.html")' | $(R)

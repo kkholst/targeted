@@ -59,6 +59,7 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #' @inheritParams deprecated_argument_names
 #' @title Conditional Average Treatment Effect estimation
 #' @param response.model formula or ml_model object (formula => glm)
+#' @param ... additional arguments to future.apply::future_mapply
 #' @param propensity.model formula or ml_model object (formula => glm)
 #' @param cate.model formula specifying regression design for conditional
 #'   average treatment effects
@@ -70,7 +71,8 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #' @param stratify If TRUE the response.model will be stratified by treatment
 #' @param mc.cores mc.cores Optional number of cores. parallel::mcmapply used
 #'   instead of future
-#' @param ... additional arguments to future.apply::future_mapply
+#' @param second.order Add seconder order term to IF to handle misspecification
+#'   of outcome models
 #' @return cate.targeted object
 #' @author Klaus Kähler Holst, Andreas Nordland
 #' @references Mark J. van der Laan (2006) Statistical Inference for Variable
@@ -98,8 +100,8 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #'
 #' \dontrun{ ## superlearner example
 #' mod1 <- list(
-#'    glm=predictor_glm(y~w1+w2),
-#'    gam=predictor_gam(y~s(w1) + s(w2))
+#'    glm = predictor_glm(y~w1+w2),
+#'    gam = predictor_gam(y~s(w1) + s(w2))
 #' )
 #' s1 <- predictor_sl(mod1, nfolds=5)
 #' cate(cate.model=~1,
@@ -120,6 +122,7 @@ cate <- function(response.model, # nolint
                  silent = FALSE,
                  stratify = FALSE,
                  mc.cores = NULL,
+                 second.order = TRUE,
                  response_model = deprecated,
                  cate_model = deprecated,
                  propensity_model = deprecated,
@@ -171,7 +174,7 @@ cate <- function(response.model, # nolint
 
   desA <- design(cate.model, data, intercept=TRUE, rm_envir=FALSE)
   if (inherits(response.model, "formula")) {
-    response.model <- ML(response.model)
+    response.model <- predictor_glm(response.model)
   }
 
   if (length(contrast) > 2) {
@@ -186,10 +189,10 @@ cate <- function(response.model, # nolint
       paste0(" . - ", response_var),
       response=propensity_outcome(contrast[1])
     )
-    propensity.model <- ML(newf, family=binomial)
+    propensity.model <- predictor_glm(newf, family=binomial)
   }
   if (inherits(propensity.model, "formula")) {
-    propensity.model <- ML(propensity.model, family = binomial)
+    propensity.model <- predictor_glm(propensity.model, family = binomial)
   }
   treatment_var <- lava::getoutcome(propensity.model$formula)
 
@@ -361,7 +364,7 @@ cate <- function(response.model, # nolint
   IF0 <- c()
   for (i in seq_along(est0)) {
     newIF <- scores[[i]] - est0[i]
-    if (length(adj) > 0) {
+    if (length(adj) > 0 && second.order) {
       pmod <- propensity.model$clone(deep = TRUE)
       newf <- reformulate(
         as.character(pmod$formula)[[3]],

@@ -5,21 +5,7 @@
 #' @return [ml_model] object.
 #' @name predictor
 NULL
-# predictor <- function(...) return(ml_model$new(...))
 
-predictor_argument_description <- function(call) {
-    ar <- lapply(
-      rlang::call_args(call),
-      deparse
-    )
-    ar["info"] <- NULL
-    nn <- names(ar)
-    desc <- "Arguments:\n"
-    for (i in seq_along(nn)) {
-      desc <- paste0(desc, "\t", nn[i], " = ", ar[i], "\n")
-    }
-    return(desc)
-  }
 
 #' @description [ml_model] generator function for [stats::glm].
 #' @export
@@ -28,22 +14,32 @@ predictor_argument_description <- function(call) {
 predictor_glm <- function(formula,
                           info = "glm",
                           family = gaussian(),
-                          offset = NULL,
                           ...) {
   args <- c(as.list(environment(), all.names = FALSE), list(...))
-    args$estimate <- function(formula, data, family, ...) {
-    return(
+  if (is.character(family) && tolower(family) %in% c("nb", "negbin")) {
+    if (!requireNamespace("MASS", quietly = TRUE)) {
+      stop("MASS library required")
+    }
+    fitfun <- function(formula, data, family, ...) {
+      # family is a "pseudo" argument to avoid "multiple local function
+      # definitions for ‘fitfun’ with different formal arguments" warnings
+      MASS::glm.nb(formula, data = data, ...)
+    }
+  } else {
+    fitfun <- function(formula, data, family, ...) {
       stats::glm(formula, data = data, family = family, ...)
-    )
+    }
   }
+
+  args$estimate <- fitfun
   args$predict <- function(object, newdata, ...) {
-    return(stats::predict(object, newdata = newdata, type = "response"))
+    dots <- list(...)
+    if (!("type" %in% names(dots))) dots$type <- "response"
+    args <- c(list(object, newdata = newdata), dots)
+    do.call(stats::predict, args)
   }
-  args$offset <- NULL
   mod <- do.call(ml_model$new, args)
-  mod$description <- predictor_argument_description(
-    rlang::call_match(defaults = TRUE)
-  )
+
   return(mod)
 }
 
@@ -84,9 +80,7 @@ predictor_glmnet <- function(formula,
     nfolds = nfolds,
     ...
     )
-  mod$description <- predictor_argument_description(
-    rlang::call_match(defaults = TRUE)
-  )
+
   return(mod)
 }
 
@@ -146,9 +140,7 @@ predictor_gam <- function(formula,
     ...
   )
   mod <- do.call(ml_model$new, args)
-  mod$description <- predictor_argument_description(
-    rlang::call_match(defaults = TRUE)
-  )
+
   return(mod)
 }
 
@@ -165,8 +157,66 @@ predictor_isoreg <- function(formula,
     predict = function(object, newdata, ...) return(object(newdata)),
     ...
     )
-  mod$description <- predictor_argument_description(
-    rlang::call_match(defaults = TRUE)
+
+  return(mod)
+}
+
+#' @export
+predictor_mars <- function(formula,
+                           info = "earth::earth",
+                           degree = 1,
+                           nprune = NULL,
+                           glm = NULL,
+                             ...) {
+  mod <- ml_model$new(formula,
+    info = info,
+    estimate = function(y, x, ...) {
+      return(
+        earth::earth(y = y, x = x, degree = degree, nprune = nprune, glm = glm,
+          ...
+        )
+      )
+    },
+    predict = function(object, newdata, type = "response", ...) {
+      return(predict(object, newdata = newdata, type = type, ...))
+    },
+    ...
+  )
+  return(mod)
+}
+
+#' @export
+predictor_svm <- function(formula,
+                          info = "e1071::svm",
+                          cost = 1,
+                          epsilon = 0.1,
+                          kernel = "radial",
+                          probability = FALSE,
+                          ...) {
+  if (probability) {
+    formula <- update(formula, factor(.) ~ .)
+    pred <- function(object, newdata, ...) {
+      pr <- attr(predict(object, newdata, probability = TRUE), "probabilities")
+      if (NCOL(pr) == 2L) pr <- pr[, 2]
+      return(pr)
+    }
+  } else {
+    pred <- function(object, newdata, ...) {
+      return(predict(object, newdata, ...))
+    }
+  }
+
+  mod <- ml_model$new(formula,
+    info = info,
+    estimate = function(formula, data, ...) {
+      return(
+        e1071::svm(formula, data = data, cost = cost, epsilon = epsilon,
+          kernel = kernel, probability = probability, ...
+        )
+      )
+    },
+    predict = pred,
+    ...
   )
   return(mod)
 }
@@ -199,7 +249,7 @@ predictor_isoreg <- function(formula,
 #'    d <- data.frame(y, x1, x2)
 #'    d
 #' }
-#' d <- sim1() |> mets::dsort(~x1)
+#' d <- sim1()
 #'
 #' m <- list(
 #'   "mean" = predictor_glm(y ~ 1),
@@ -207,23 +257,23 @@ predictor_isoreg <- function(formula,
 #'   "iso" = predictor_isoreg(y ~ x1)
 #' )
 #'
-#' s <- predictor_sl(m, nfolds=10)
+#' s <- predictor_sl(m, nfolds = 10)
 #' s$estimate(d)
 #' pr <- s$predict(d)
 #' if (interactive()) {
 #'     plot(y ~ x1, data = d)
 #'     points(d$x1, pr, col = 2, cex = 0.5)
-#'     lines(cos(x1) + x1 ~ x1, data = d,
+#'     lines(cos(x1) + x1 ~ x1, data = d[order(d$x1), ],
 #'           lwd = 4, col = lava::Col("darkblue", 0.3))
 #' }
 #' print(s)
-#' ## weights(s)
-#' ## score(s)
+#' # weights(s)
+#' # score(s)
 #'
-#' cvres <- summary(s, data=d, nfolds=3, rep=2)
+#' cvres <- summary(s, data = d, nfolds = 3, rep = 2)
 #' cvres
-#' ## coef(cvres)
-#' ## score(cvres)
+#' # coef(cvres)
+#' # score(cvres)
 predictor_sl <- function(model.list,
                          info = NULL,
                          nfolds = 5L,
@@ -263,7 +313,8 @@ predictor_sl <- function(model.list,
   mod$update(model.list[[1]]$formula)
   cl <- rlang::call_match(defaults = TRUE)
   cl$formula <- lapply(model.list, \(x) x$formula)
-  mod$description <- predictor_argument_description(cl)
+  # mod$description <- predictor_argument_description(cl)
+  attr(mod, "model.score") <- model.score
   class(mod) <- c("predictor_sl", class(mod))
   return(mod)
 }
@@ -278,34 +329,72 @@ score.predictor_sl <- function(x, ...) {
   return(x$fit$model.score)
 }
 
-
-score_sl <- function(response, prediction, weights, object, newdata, ...) {
-    pr.all <- object$predict(newdata, all.learners = TRUE)
-    pr <- object$predict(newdata)
-    risk.all <- apply(pr.all, 2, function(x) mse(x, response))
-    risk <- mse(response, pr)
-    res <- c(risk, risk.all)
-    names(res)[1] <- "sl"
-    nn <- names(res)
-    names(res) <- paste0("score.", nn)
-    w <- weights(object)
-    names(w) <- paste0("weight.", nn[-1])
-    return(c(res, w))
+score_sl <- function(response,
+                     newdata,
+                     object,
+                     model.score = mse,
+                     ...) {
+  pr.all <- object$predict(newdata, all.learners = TRUE)
+  pr <- object$predict(newdata)
+  risk.all <- apply(pr.all, 2, function(x) model.score(x, response)[1])
+  risk <- model.score(response, pr)[1]
+  nam <- names(risk)
+  if (is.null(nam)) nam <- "score"
+  nam <- paste0(nam, ".")
+  res <- c(risk, risk.all)
+  names(res)[1] <- "sl"
+  nn <- names(res)
+  names(res) <- paste0(nam, nn)
+  w <- c(NA, weights(object))
+  names(w) <- paste0("weight.", nn)
+  return(c(res, w))
 }
 
 #' @export
-summary.predictor_sl <- function(object, data, nfolds = 5, rep = 1, ...) {
+summary.predictor_sl <- function(object,
+                                 data,
+                                 nfolds = 5,
+                                 rep = 1,
+                                 model.score = mse,
+                                 ...) {
   res <- cv(list("performance"=object),
-      data = data,
-      nfolds = nfolds, rep = rep,
-      model.score = score_sl
-      )
+            data = data,
+            nfolds = nfolds, rep = rep,
+            model.score = function(...) score_sl(..., model.score = model.score)
+            )
+  nam <- dimnames(res$cv)
+  nam <- nam[[length(nam)]]
+  st <- strsplit(c(nam[1], tail(nam, 1)), "\\.")
+  type <- unlist(lapply(st, \(x) x[1]))
+  n <- length(nam)/2
+  nam <- gsub(paste0(type[1], "\\."), "", nam[seq_len(n)])
+  score <- res$cv[, , , 1:n, drop=FALSE]
+  weight <- res$cv[, , , (n+1):(2*n), drop=FALSE]
+  cvs <- abind::abind(score, weight, along=3)
+  dimnames(cvs)[[4]] <- nam
+  dimnames(cvs)[[3]] <- type
+  cvs <- aperm(cvs, c(1, 2, 4, 3))
+  res$names <- nam
+  res$cv <- cvs
+  res$call <- NULL
+  class(res) <- c("summary.predictor_sl", "cross_validated")
   return(res)
 }
 
 #' @export
-predictor_xgboost <-
-  function(formula,
+print.summary.predictor_sl <- function(x, digits=5, ...) {
+  res <- round(summary.cross_validated(x)*1e5, digits=0) / 1e5
+  cat(x$fold, "-fold cross-validation", sep="")
+  if (x$rep > 1) cat(" with ", x$rep, " repetitions", sep="")
+  cat("\n\n")
+  cli::cli_h3(dimnames(res)[[3]][2])
+  print(res[, , 2], na.print="-")
+  cli::cli_h3(dimnames(res)[[3]][1])
+  print(res[, , 1], na.print="-")
+}
+
+#' @export
+predictor_xgboost <- function(formula,
            max_depth = 2L,
            eta = 1.0,
            nrounds = 2L,
@@ -347,30 +436,28 @@ predictor_xgboost <-
       return(res)
     }
     mod <- do.call(ml_model$new, args)
-    mod$description <- predictor_argument_description(
-      rlang::call_match(defaults = TRUE)
-    )
+
     return(mod)
-  }
+}
 
 #' @export
 predictor_xgboost_multiclass <- function(formula, ...) {
-  return(predictor_xgboost(formula, ..., objective="multi:softprob"))
+  return(predictor_xgboost(formula, ..., objective = "multi:softprob"))
 }
 
 #' @export
 predictor_xgboost_binary <- function(formula, ...) {
-  return(predictor_xgboost(formula, ..., objective="reg:logistic"))
+  return(predictor_xgboost(formula, ..., objective = "reg:logistic"))
 }
 
 #' @export
 predictor_xgboost_count <- function(formula, ...) {
-  return(predictor_xgboost(formula, ..., objective="count:poisson"))
+  return(predictor_xgboost(formula, ..., objective = "count:poisson"))
 }
 
 #' @export
 predictor_xgboost_cox <- function(formula, ...) {
-  return(predictor_xgboost(formula, ..., objective="survival:cox"))
+  return(predictor_xgboost(formula, ..., objective = "survival:cox"))
 }
 
 #' @export
@@ -394,12 +481,9 @@ predictor_grf <- function(formula,
       return(est(X = x, Y = y, ...))
   }
   mod <- do.call(ml_model$new, args)
-  mod$description <- predictor_argument_description(
-    rlang::call_match(defaults = TRUE)
-  )
+
   return(mod)
 }
-
 
 #' @export
 predictor_grf_binary <- function(formula,
@@ -411,6 +495,32 @@ predictor_grf_binary <- function(formula,
   return(mod)
 }
 
+#' @export
+predictor_nb <- function(formula,
+                         info = "Naive Bayes",
+                         laplace.smooth = 0,
+                         kernel = FALSE,
+                         ...) {
+  args <- list(
+    formula = formula,
+    estimate = function(formula, data, ...) {
+      return(NB(formula = formula, data = data, ...)
+    )
+    },
+    predict = function(object, newdata, simplify = TRUE, ...) {
+      pr <- stats::predict(object, newdata = newdata, ...)
+      if (simplify && NCOL(pr) == 2L) pr <- pr[, 2]
+      return(pr)
+    },
+    laplace.smooth = laplace.smooth,
+    kernel = kernel,
+    info = info,
+    specials = c("weights", "offset"),
+    ...
+  )
+  mod <- do.call(ml_model$new, args)
+  return(mod)
+}
 
 #' ML model
 #'
@@ -419,58 +529,9 @@ predictor_grf_binary <- function(formula,
 #' @param formula formula
 #' @param model model (sl, rf, pf, glm, ...)
 #' @param ... additional arguments to model object
-#' @details
-#' model 'sl' (SuperLearner::SuperLearner)
-#' args: SL.library, cvControl, family, method
-#' example:
-#'
-#' model 'grf' (grf::regression_forest)
-#' args: num.trees, mtry, sample.weights, sample.fraction, min.node.size, ...
-#' example:
-#'
-#' model 'grf.binary' (grf::probability_forest)
-#' args: num.trees, mtry, sample.weights, ...
-#' example:
-#'
-#' model 'glm'
-#' args: family, weights, offset, ...
-#'
 ML <- function(formula, model="glm", ...) {
-  model <- tolower(model)
-  ## SL / SuperLearner
-  if (model == "sl") {
-      return(predictor_sl(formula, ...))
-  }
-  ## grf
-  if (model %in% c("grf", "rf", "regression_forest")) {
-    return(predictor_grf(formula, ...))
-  }
-  if (model %in% c("grf.binary", "pf", "probability_forest")) {
-    return(predictor_grf_binary(formula, ...))
-  }
-
-  ## xgboost
-  if (model %in% c(
-    "xgboost", "xgb", "xgboost.multiclass",
-    "xgboost.binary", "xgboost.count", "xgboost.survival"
-  )) {
-    obj <- switch(model,
-      xgboost.multiclass = "multi:softprob",
-      xgboost.binary = "reg:logistic",
-      xgboost.survival = "survival:cox",
-      xgboost.count = "count:poisson",
-      "reg:squarederror"
-    )
-    return(predictor_xgboost(formula, ..., objective = obj))
-  }
-
-  ## GAM
-  if (model %in% c("mgcv", "gam")) {
-    return(predictor_gam(formula, ...))
-  }
-
-  ## glm, default
-  m <- predictor_glm(formula, ...)
-  return(m)
-
+  stop(
+    "targeted::ML has been removed in targeted 0.6. ",
+    "Please use the targeted::predictor_ functions instead."
+  )
 }

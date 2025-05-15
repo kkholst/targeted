@@ -4,7 +4,7 @@
 \alias{predictor_glm}
 \title{ml_model generator}
 \usage{
-predictor_glm(formula, info = "glm", family = gaussian(), offset = NULL, ...)
+predictor_glm(formula, info = "glm", family = gaussian(), ...)
 }
 \arguments{
 \item{formula}{an object of class \code{"\link[stats]{formula}"} (or one that
@@ -21,13 +21,6 @@ instantiated \link{ml_model} object.}
     result of a call to a family function.  For \code{glm.fit} only the
     third option is supported.  (See \code{\link[stats]{family}} for details of
     family functions.)}
-
-\item{offset}{this can be used to specify an \emph{a priori} known
-    component to be included in the linear predictor during fitting.
-    This should be \code{NULL} or a numeric vector of length equal to
-    the number of cases.  One or more \code{\link[stats]{offset}} terms can be
-    included in the formula instead or as well, and if more than one is
-    specified their sum is used.  See \code{\link[stats]{model.offset}}.}
 
 \item{...}{Additional arguments to \link[=ml_model]{ml_model$new()}.}
 }
