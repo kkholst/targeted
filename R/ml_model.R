@@ -3,17 +3,10 @@
 #' following built-in learners are provided: [predictor_glm], [predictor_gam]
 #' @param data data.frame
 #' @author Klaus Kähler Holst
-#' @aliases ml_model
-#' predictor_gam predictor_glmnet
-#' predictor_grf predictor_grf_binary
-#' predictor_xgboost predictor_xgboost_multiclass
-#' predictor_xgboost_count predictor_xgboost_cox
-#' predictor_xgboost_binary
-#' predictor_hal predictor_isoreg
-#' predictor_svm
-#' predictor_mars
-#' predictor_nb
-#' @seealso predictor_sl
+#' @aliases predictor_gam predictor_grf predictor_grf_binary predictor_isoreg
+#' predictor_mars predictor_nb predictor_svm predictor_xgboost_binary
+#' predictor_xgboost predictor_xgboost_count predictor_xgboost_cox
+#' predictor_xgboost_multiclass
 #' @examples
 #' data(iris)
 #' rf <- function(formula, ...) {

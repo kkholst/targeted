@@ -2,15 +2,13 @@
 % Please edit documentation in R/predictor.R
 \name{predictor_glm}
 \alias{predictor_glm}
-\title{ml_model generator}
+\title{Instantiate a learner}
 \usage{
 predictor_glm(formula, info = "glm", family = gaussian(), ...)
 }
 \arguments{
-\item{formula}{an object of class \code{"\link[stats]{formula}"} (or one that
-    can be coerced to that class): a symbolic description of the
-    model to be fitted.  The details of model specification are given
-    under \sQuote{Details}.}
+\item{formula}{(formula or character) Formula specifying response and design
+matrix.}
 
 \item{info}{(character) Additional information that describes the
 instantiated \link{ml_model} object.}
@@ -28,5 +26,7 @@ instantiated \link{ml_model} object.}
 \link{ml_model} object.
 }
 \description{
-\link{ml_model} generator function for \link[stats:glm]{stats::glm}.
+\link{ml_model} generator function for generalized linear models with
+\link[stats:glm]{stats::glm} and \link[MASS:glm.nb]{MASS::glm.nb}. Negative binomial regression is supported
+with \code{family = "nb"} (or alternatively \code{family = "negbin"}).
 }

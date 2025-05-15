@@ -1,13 +1,17 @@
-#' @title ml_model generator
+#' @title Instantiate a learner
 #' @param ... Additional arguments to [ml_model$new()][ml_model].
 #' @param info (character) Additional information that describes the
 #' instantiated [ml_model] object.
+#' @param formula (formula or character) Formula specifying response and design
+#' matrix.
 #' @return [ml_model] object.
 #' @name predictor
 NULL
 
 
-#' @description [ml_model] generator function for [stats::glm].
+#' @description [ml_model] generator function for generalized linear models with
+#' [stats::glm] and [MASS::glm.nb]. Negative binomial regression is supported
+#' with `family = "nb"` (or alternatively `family = "negbin"`).
 #' @export
 #' @inherit predictor
 #' @inheritParams stats::glm
@@ -43,7 +47,12 @@ predictor_glm <- function(formula,
   return(mod)
 }
 
+#' @description [ml_model] generator function for [glmnet::cv.glmnet]. Defaults
+#' to [glmnet::glmnet] for `nfolds = 1`.
 #' @export
+#' @inherit predictor
+#' @inheritParams glmnet::glmnet
+#' @inheritParams glmnet::cv.glmnet
 predictor_glmnet <- function(formula,
                              info = "glmnet",
                              family = gaussian(),

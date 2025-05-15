@@ -2,16 +2,19 @@
 % Please edit documentation in R/predictor.R
 \name{predictor}
 \alias{predictor}
-\title{ml_model generator}
+\title{Instantiate a learner}
 \arguments{
 \item{...}{Additional arguments to \link[=ml_model]{ml_model$new()}.}
 
 \item{info}{(character) Additional information that describes the
 instantiated \link{ml_model} object.}
+
+\item{formula}{(formula or character) Formula specifying response and design
+matrix.}
 }
 \value{
 \link{ml_model} object.
 }
 \description{
-ml_model generator
+Instantiate a learner
 }

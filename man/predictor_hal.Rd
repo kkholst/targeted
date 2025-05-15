@@ -2,7 +2,7 @@
 % Please edit documentation in R/predictor.R
 \name{predictor_hal}
 \alias{predictor_hal}
-\title{ml_model generator}
+\title{Instantiate a learner}
 \usage{
 predictor_hal(
   formula,
@@ -14,8 +14,8 @@ predictor_hal(
 )
 }
 \arguments{
-\item{formula}{A character string formula to be used in
-\code{\link[hal9001]{formula_hal}}. See its documentation for details.}
+\item{formula}{(formula or character) Formula specifying response and design
+matrix.}
 
 \item{info}{(character) Additional information that describes the
 instantiated \link{ml_model} object.}
