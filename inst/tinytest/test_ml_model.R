@@ -170,3 +170,19 @@ test_design <- function() {
   expect_false("(Intercept)" %in% names(coef(fit)))
 }
 test_design()
+
+test_update <- function() {
+  lr <- ml_model$new(formula = y ~ -1 + x1 + x2, estimate = glm)
+  lr$update(y ~ x1)
+  lr$estimate(ddata)
+
+  fit_ref <- glm(y ~ x1, data = ddata)
+  expect_equal(coef(lr$fit), coef(fit_ref))
+
+  # also supports character arguments
+  lr$update("y ~ x1 + x2")
+  lr$estimate(ddata)
+  fit_ref <- glm(y ~ x1 + x2, data = ddata)
+  expect_equal(coef(lr$fit), coef(fit_ref))
+}
+test_update()
