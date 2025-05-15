@@ -215,10 +215,11 @@ predictor_svm <- function(formula,
 #'   stacked prediction will be created by weighting together the predictions
 #'   of each of the initial models. The weights are learned using
 #'   cross-validation.
-#' @param model.list List of [ml_model] objects (i.e. [predictor_glm])
+#' @param model.list (list) List of [ml_model] objects (i.e. [predictor_glm])
 #' @param info Optional model description to store in model object
 #' @param nfolds Number of folds to use in cross validation
-#' @param learner.args Additional arguments to [ml_model$new()][ml_model].
+#' @param learner.args (list) Additional arguments to
+#' [ml_model$new()][ml_model].
 #' @param meta.learner meta.learner function (default non-negative least
 #'   squares). Must be a function of the response (nx1 vector), `y`, and the
 #'   predictions (nxp matrix), `pred`.

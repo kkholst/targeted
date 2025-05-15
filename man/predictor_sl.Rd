@@ -16,7 +16,7 @@ predictor_sl(
 )
 }
 \arguments{
-\item{model.list}{List of \link{ml_model} objects (i.e. \link{predictor_glm})}
+\item{model.list}{(list) List of \link{ml_model} objects (i.e. \link{predictor_glm})}
 
 \item{info}{Optional model description to store in model object}
 
@@ -28,7 +28,8 @@ predictions (nxp matrix), \code{pred}.}
 
 \item{model.score}{model scoring method (see \link{ml_model})}
 
-\item{learner.args}{Additional arguments to \link[=ml_model]{ml_model$new()}.}
+\item{learner.args}{(list) Additional arguments to
+\link[=ml_model]{ml_model$new()}.}
 
 \item{...}{additional argument to \code{superlearner}}
 }
