@@ -5,7 +5,7 @@
 \title{Instantiate a learner}
 \usage{
 predictor_sl(
-  learner.list,
+  learners,
   info = NULL,
   nfolds = 5L,
   meta.learner = metalearner_nnls,

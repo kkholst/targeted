@@ -273,7 +273,7 @@ predictor_svm <- function(formula,
 #' cvres
 #' # coef(cvres)
 #' # score(cvres)
-predictor_sl <- function(learner.list,
+predictor_sl <- function(learners,
                          info = NULL,
                          nfolds = 5L,
                          meta.learner = metalearner_nnls,
@@ -283,14 +283,14 @@ predictor_sl <- function(learner.list,
 
   if (is.null(info)) {
     info <- "superlearner\n"
-    nn <- names(learner.list)
+    nn <- names(learners)
     for (i in seq_along(nn)) {
       info <- paste0(info, "\t", nn[i])
       if (i < length(nn)) info <- paste0(info, "\n")
     }
   }
   args <- c(learner.args, list(info = info))
-  estimate.args <- list(learner.list = learner.list, nfolds = nfolds,
+  estimate.args <- list(learners = learners, nfolds = nfolds,
     meta.learner = meta.learner, model.score = model.score
   )
   args$estimate.args <- c(estimate.args, list(...))
@@ -301,7 +301,7 @@ predictor_sl <- function(learner.list,
   }
 
   mod <- do.call(ml_model$new, args)
-  mod$update(learner.list[[1]]$formula)
+  mod$update(learners[[1]]$formula)
 
   attr(mod, "model.score") <- model.score
   class(mod) <- c("predictor_sl", class(mod))

@@ -41,7 +41,7 @@ get_learner_names <- function(model.list, name.prefix) {
 #'   stacked prediction will be created by weighting together the predictions
 #'   of each of the initial models. The weights are learned using
 #'   cross-validation.
-#' @param learner.list (list) List of [ml_model] objects (i.e. [predictor_glm])
+#' @param learners (list) List of [ml_model] objects (i.e. [predictor_glm])
 #' @param info Optional model description to store in model object
 #' @param nfolds Number of folds to use in cross validation
 #' @param meta.learner meta.learner (function) Algorithm to learn the ensemble
@@ -54,7 +54,7 @@ get_learner_names <- function(model.list, name.prefix) {
 #' [future.apply::future_lapply].
 #' @references Luedtke & van der Laan (2016) Super-Learning of an Optimal
 #'   Dynamic Treatment Rule, The International Journal of Biostatistics.
-superlearner <- function(learner.list,
+superlearner <- function(learners,
                          data,
                          nfolds = 10,
                          meta.learner = metalearner_nnls,
@@ -72,10 +72,10 @@ superlearner <- function(learner.list,
     model.score <- get(model.score)
   }
   # TODO: check that all models are ml_models
-  model.names <- get_learner_names(learner.list, name.prefix)
+  model.names <- get_learner_names(learners, name.prefix)
   n <- nrow(data)
   folds <- lava::csplit(n, nfolds)
-  pred <- matrix(NA, n, length(learner.list))
+  pred <- matrix(NA, n, length(learners))
   if (!silent) pb <- progressr::progressor(along = seq_len(nfolds))
   onefold <- function(fold, data, model.list, pb) {
     n <- nrow(data)
@@ -91,13 +91,13 @@ superlearner <- function(learner.list,
     if (mc.cores == 1L) {
       ## disable parallelization
       pred.folds <- lapply(folds, function(fold) {
-        return(onefold(fold, data, learner.list, pb))
+        return(onefold(fold, data, learners, pb))
       })
     } else {
       ## mclapply
       pred.folds <- parallel::mclapply(
         folds,
-        function(fold) onefold(fold, data, learner.list, pb),
+        function(fold) onefold(fold, data, learners, pb),
         mc.cores = mc.cores, ...
         )
     }
@@ -107,7 +107,7 @@ superlearner <- function(learner.list,
       future.apply::future_lapply,
       list(
         X = folds,
-        FUN = function(fold) onefold(fold, data, learner.list, pb),
+        FUN = function(fold) onefold(fold, data, learners, pb),
         future.seed = future.seed,
         ...
       )
@@ -116,10 +116,10 @@ superlearner <- function(learner.list,
   for (i in seq_along(pred.folds)) {
     pred[pred.folds[[i]]$fold, ] <- pred.folds[[i]]$pred
   }
-  mod <- lapply(learner.list, \(x) x$clone())
+  mod <- lapply(learners, \(x) x$clone())
   names(mod) <- model.names
   ## Meta-learner
-  y <- learner.list[[1]]$response(data)
+  y <- learners[[1]]$response(data)
   risk <- apply(pred, 2, \(x) model.score(y, x))
   names(risk) <- model.names
   w <- meta.learner(y = y, pred = pred)

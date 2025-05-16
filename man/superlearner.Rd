@@ -5,7 +5,7 @@
 \title{Superlearner (stacked/ensemble learner)}
 \usage{
 superlearner(
-  learner.list,
+  learners,
   data,
   nfolds = 10,
   meta.learner = metalearner_nnls,
@@ -18,7 +18,7 @@ superlearner(
 )
 }
 \arguments{
-\item{learner.list}{(list) List of \link{ml_model} objects (i.e. \link{predictor_glm})}
+\item{learners}{(list) List of \link{ml_model} objects (i.e. \link{predictor_glm})}
 
 \item{nfolds}{Number of folds to use in cross validation}
 
