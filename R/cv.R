@@ -308,7 +308,7 @@ score_sl <- function(response,
   pr.all <- object$predict(newdata, all.learners = TRUE)
   pr <- object$predict(newdata)
   risk.all <- apply(pr.all, 2, function(x) model.score(x, response))
-  risk <- model.score(response, pr)[1,]
+  risk <- model.score(response, pr)[1, ]
   nam <- names(risk)
   if (is.null(nam)) nam <- "score"
   nam <- paste0(nam, ".")

@@ -66,7 +66,7 @@ print(s)
 # weights(s)
 # score(s)
 
-cvres <- summary(s, data = d, nfolds = 3, rep = 2)
+cvres <- cv(s, data = d, nfolds = 3, rep = 2)
 cvres
 # coef(cvres)
 # score(cvres)

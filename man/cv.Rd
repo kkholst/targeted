@@ -53,7 +53,7 @@ of future}
 
 \item{silent}{suppress all messages and progressbars}
 
-\item{...}{Additional arguments parsed to models in models}
+\item{...}{Additional arguments parsed to \code{models}}
 }
 \value{
 An object of class '\code{cross_validated}' is returned. See
