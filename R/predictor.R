@@ -236,7 +236,7 @@ predictor_svm <- function(formula,
 }
 
 
-#' @description [ml_model] generator function for [superlearner]
+#' @description [learner] generator function for [superlearner]
 #' @export
 #' @inherit predictor
 #' @param ... Additional arguments to [superlearner]
@@ -295,10 +295,7 @@ predictor_sl <- function(learners,
   )
   args$estimate.args <- c(estimate.args, list(...))
   args$estimate <- function(data, ...) superlearner(data = data, ...)
-  args$predict <- function(object, newdata, all.learners = FALSE, ...) {
-    # TODO
-    stop("requires fix")
-  }
+  args$predict <- function(object, newdata, ...) predict(object, newdata, ...)
 
   mod <- do.call(ml_model$new, args)
   mod$update(learners[[1]]$formula)

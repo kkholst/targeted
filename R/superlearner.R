@@ -36,24 +36,44 @@ get_learner_names <- function(model.list, name.prefix) {
 
 #' @export
 #' @title Superlearner (stacked/ensemble learner)
-#' @description This function creates a predictor object (class [ml_model])
-#'   from a list of existing [ml_model] objects. When estimating this model a
+#' @description This function creates a predictor object (class [learner])
+#'   from a list of existing [learner] objects. When estimating this model a
 #'   stacked prediction will be created by weighting together the predictions
-#'   of each of the initial models. The weights are learned using
+#'   of each of the initial learners The weights are learned using
 #'   cross-validation.
-#' @param learners (list) List of [ml_model] objects (i.e. [predictor_glm])
+#' @param data (data.frame) Data containing the response variable and
+#' covariates.
+#' @param learners (list) List of [learner] objects (i.e. [predictor_glm])
 #' @param info Optional model description to store in model object
 #' @param nfolds Number of folds to use in cross validation
 #' @param meta.learner meta.learner (function) Algorithm to learn the ensemble
 #' weights (default non-negative least squares). Must be a function of the
 #' response (nx1 vector), `y`, and the predictions (nxp matrix), `pred`, with
 #' p being the number of learners.
-#' @param model.score (function) Model scoring method (see [ml_model])
-#' @param name.prefix (character)
+#' @param model.score (function) Model scoring method (see [learner])
+#' @param name.prefix (character) Prefix used to name learner objects in
+#' `learners` without names. If NULL, then obtain the name from the info field
+#' of a learner.
 #' @param ... Additional arguments to [parallel::mclapply] or
 #' [future.apply::future_lapply].
 #' @references Luedtke & van der Laan (2016) Super-Learning of an Optimal
 #'   Dynamic Treatment Rule, The International Journal of Biostatistics.
+#' @seealso [predict.superlearner]
+#' @examples
+#' sim1 <- function(n = 5e2) {
+#'    x1 <- rnorm(n, sd = 2)
+#'    x2 <- rnorm(n)
+#'    y <- x1 + cos(x1) + rnorm(n, sd = 0.5**.5)
+#'    data.frame(y, x1, x2)
+#' }
+
+#' m <- list(
+#'   "mean" = predictor_glm(y ~ 1),
+#'   "glm" = predictor_glm(y ~ x1 + x2)
+#' )
+#' sl <- superlearner(m, data = sim1(), nfolds = 2)
+#' predict(sl, newdata = sim1(n = 5))
+#' predict(sl, newdata = sim1(n = 5), all.learners = TRUE)
 superlearner <- function(learners,
                          data,
                          nfolds = 10,
@@ -71,17 +91,21 @@ superlearner <- function(learners,
   if (is.character(model.score)) {
     model.score <- get(model.score)
   }
-  # TODO: check that all models are ml_models
+
+  if (any(!unlist(lapply(learners, \(lr) inherits(lr, "learner"))))) stop(
+    "All provided learners must be of class targeted::learner"
+  )
+
   model.names <- get_learner_names(learners, name.prefix)
   n <- nrow(data)
   folds <- lava::csplit(n, nfolds)
   pred <- matrix(NA, n, length(learners))
   if (!silent) pb <- progressr::progressor(along = seq_len(nfolds))
-  onefold <- function(fold, data, model.list, pb) {
+  onefold <- function(fold, data, learners, pb) {
     n <- nrow(data)
     test <- data[fold, , drop = FALSE]
     train <- data[setdiff(1:n, fold), , drop = FALSE]
-    mod <- lapply(model.list, \(x) x$clone(deep = TRUE))
+    mod <- lapply(learners, \(x) x$clone(deep = TRUE))
     lapply(mod, \(x) x$estimate(train))
     pred.test <- pred_mod(mod, test)
     if (!silent) pb()
@@ -147,25 +171,31 @@ print.superlearner <- function(x, ...) {
   return(print(res))
 }
 
+#' @title Predict Method for superlearner Fits
+#' @description Obtains predictions for ensemble model or individual learners.
 #' @export
+#' @param object (superlearner) Fitted [superlearner] object.
+#' @param newdata (data.frame) Data in which to look for variables with which to
+#' predict.
+#' @param all.learners (logical) If FALSE (default), then return the predictions
+#' from the ensemble model. Otherwise, return predictions of from all individual
+#' learners.
+#' @param ... Not used.
+#' @return numeric (`all.learners = FALSE`) or matrix (`all.learners = TRUE`)
 predict.superlearner <- function(object, newdata, all.learners = FALSE, ...) {
   pr <- lapply(object$fit, \(x) x$predict(newdata))
   res <- Reduce(cbind, pr)
-  .names <- names(object$fit)
-  if (!is.null(names(model.list)) &&
-    length(model.list) == ncol(res)) {
-    colnames(res) <- names(model.list)
-  } else {
-    colnames(res) <- paste0("model", seq_len(length(model.list)))
-  }
+  colnames(res) <- names(object$fit)
+
   if (!all.learners) {
     res <- as.vector(res %*% object$weights)
   }
+  return(res)
 }
 
-#' SuperLearner wrapper for ml_model
+#' SuperLearner wrapper for learner
 #'
-#' @title SuperLearner wrapper for ml_model
+#' @title SuperLearner wrapper for learner
 #' @aliases SL
 #' @param formula Model design
 #' @param ... Additional arguments for SuperLearner::SuperLearner
@@ -174,7 +204,7 @@ predict.superlearner <- function(object, newdata, all.learners = FALSE, ...) {
 #'   FALSE)
 #' @param data Optional data.frame
 #' @param info model information (optional)
-#' @return ml_model object
+#' @return learner object
 #' @author Klaus Kähler Holst
 #' @export
 SL <- function(formula=~., ...,
@@ -191,7 +221,7 @@ SL <- function(formula=~., ...,
   if (pred=="1") {
     SL.library <- "SL.mean"
   }
-  m <- ml_model$new(formula,
+  m <- learner$new(formula,
     info = info,
     estimate = function(x, y) {
       Y <- as.numeric(y)

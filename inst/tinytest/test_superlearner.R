@@ -37,5 +37,25 @@ test_superlearner <- function() {
 
   sl <- superlearner(lrs, data = d0, nfolds = 2, name.prefix = "lr")
   expect_equal(names(sl$fit), c("lr1", "lr"))
+
+  expect_error(
+    superlearner(list(\(data) glm(y ~ 1, data = data)), data = d0),
+    pattern = "All provided learners must be of class targeted::learner"
+  )
 }
 test_superlearner()
+
+test_predict.superlearner <- function() {
+  lrs <- list(mean = predictor_glm(y ~ 1), glm = predictor_glm(y ~ x1))
+  sl <- superlearner(lrs, data = d0, nfolds = 2)
+
+  # test that names are correctly re-used when predictions for all learners
+  # should be returned
+  pred <- predict(sl, d0, all.learners = TRUE)
+  expect_equal(colnames(pred), names(lrs))
+  expect_equal(dim(pred), c(nrow(d0), length(lrs)))
+
+  pred <- predict(sl, d0)
+  expect_equal(length(pred), nrow(d0))
+}
+test_predict.superlearner()

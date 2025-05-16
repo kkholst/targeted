@@ -18,7 +18,10 @@ superlearner(
 )
 }
 \arguments{
-\item{learners}{(list) List of \link{ml_model} objects (i.e. \link{predictor_glm})}
+\item{learners}{(list) List of \link{learner} objects (i.e. \link{predictor_glm})}
+
+\item{data}{(data.frame) Data containing the response variable and
+covariates.}
 
 \item{nfolds}{Number of folds to use in cross validation}
 
@@ -27,9 +30,11 @@ weights (default non-negative least squares). Must be a function of the
 response (nx1 vector), \code{y}, and the predictions (nxp matrix), \code{pred}, with
 p being the number of learners.}
 
-\item{model.score}{(function) Model scoring method (see \link{ml_model})}
+\item{model.score}{(function) Model scoring method (see \link{learner})}
 
-\item{name.prefix}{(character)}
+\item{name.prefix}{(character) Prefix used to name learner objects in
+\code{learners} without names. If NULL, then obtain the name from the info field
+of a learner.}
 
 \item{...}{Additional arguments to \link[parallel:mclapply]{parallel::mclapply} or
 \link[future.apply:future_lapply]{future.apply::future_lapply}.}
@@ -37,13 +42,31 @@ p being the number of learners.}
 \item{info}{Optional model description to store in model object}
 }
 \description{
-This function creates a predictor object (class \link{ml_model})
-from a list of existing \link{ml_model} objects. When estimating this model a
+This function creates a predictor object (class \link{learner})
+from a list of existing \link{learner} objects. When estimating this model a
 stacked prediction will be created by weighting together the predictions
-of each of the initial models. The weights are learned using
+of each of the initial learners The weights are learned using
 cross-validation.
+}
+\examples{
+sim1 <- function(n = 5e2) {
+   x1 <- rnorm(n, sd = 2)
+   x2 <- rnorm(n)
+   y <- x1 + cos(x1) + rnorm(n, sd = 0.5**.5)
+   data.frame(y, x1, x2)
+}
+m <- list(
+  "mean" = predictor_glm(y ~ 1),
+  "glm" = predictor_glm(y ~ x1 + x2)
+)
+sl <- superlearner(m, data = sim1(), nfolds = 2)
+predict(sl, newdata = sim1(n = 5))
+predict(sl, newdata = sim1(n = 5), all.learners = TRUE)
 }
 \references{
 Luedtke & van der Laan (2016) Super-Learning of an Optimal
 Dynamic Treatment Rule, The International Journal of Biostatistics.
+}
+\seealso{
+\link{predict.superlearner}
 }

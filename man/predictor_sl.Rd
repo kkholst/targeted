@@ -27,7 +27,7 @@ predictor_sl(
 \link{ml_model} object.
 }
 \description{
-\link{ml_model} generator function for \link{superlearner}
+\link{learner} generator function for \link{superlearner}
 }
 \examples{
 sim1 <- function(n = 5e2) {
