@@ -19,7 +19,7 @@
 #' @param mc.cores Optional number of cores. [parallel::mcmapply] used instead
 #'   of future
 #' @param silent suppress all messages and progressbars
-#' @param ... Additional arguments parsed to models in models
+#' @param ... Additional arguments parsed to `models`
 #' @author Klaus K. Holst
 #' @return An object of class '\code{cross_validated}' is returned. See
 #'   \code{\link{cross_validated-class}} for more details about this class and
@@ -50,7 +50,18 @@ cv <- function(models, data,
                ...) {
 
   if (inherits(models, "predictor_sl")) {
-
+    return(
+      cv_predictor_sl(models,
+                      data=data,
+                      response = response,
+                      weights = weights,
+                      model.score = model.score,
+                      seed = seed, shared = shared,
+                      args.pred = args.pred,
+                      args.future = args.future,
+                      nfolds = nfolds, rep = rep,
+                      ...)
+    )
   }
   if (!is.list(models)) stop("Expected a list of models")
   nam <- names(models)
@@ -288,6 +299,82 @@ cv <- function(models, data,
   )
   return(obj)
 }
+
+score_sl <- function(response,
+                     newdata,
+                     object,
+                     model.score = mse,
+                     ...) {
+  pr.all <- object$predict(newdata, all.learners = TRUE)
+  pr <- object$predict(newdata)
+  risk.all <- apply(pr.all, 2, function(x) model.score(x, response))
+  risk <- model.score(response, pr)[1,]
+  nam <- names(risk)
+  if (is.null(nam)) nam <- "score"
+  nam <- paste0(nam, ".")
+  risk <- cbind(risk, risk.all)
+  colnames(risk)[1] <- "sl"
+  nn <- colnames(risk)
+  names(risk) <- paste0(nam, nn)
+  w <- rbind(c(NA, weights(object)))
+  rownames(w) <- "weight"
+  risk <- rbind(risk, w)
+  res <- c()
+  for (i in seq_len(nrow(risk))) {
+    x <- risk[i, ]
+    names(x) <- paste0(rownames(risk)[i], ".", colnames(risk), sep="")
+    res <- c(res, x)
+  }
+  return(res)
+}
+
+cv_predictor_sl <- function(object,
+                                 data,
+                                 nfolds = 5,
+                                 rep = 1,
+                                 model.score = mse,
+                                 ...) {
+  res <- cv(list("performance"=object),
+            data = data,
+            nfolds = nfolds, rep = rep,
+            model.score = function(...) score_sl(..., model.score = model.score)
+            )
+  nam <- dimnames(res$cv)
+  nam <- nam[[length(nam)]]
+  st <- strsplit(nam, "\\.")
+  type <- unlist(lapply(st, \(x) x[1])) |> unique() # metrics
+  n <- length(nam)/length(type) # number of models
+  nam <- gsub(paste0(type[1], "\\."), "", nam[seq_len(n)])
+
+  idx <- 1:n
+  cvs <- c()
+  for (i in seq_len(length(type))) {
+    score <- res$cv[, , , idx + (i-1)*n, drop=FALSE]
+    cvs <- abind::abind(cvs, score, along=3)
+  }
+  dimnames(cvs)[[4]] <- nam
+  dimnames(cvs)[[3]] <- type
+  cvs <- aperm(cvs, c(1, 2, 4, 3))
+  res$names <- nam
+  res$cv <- cvs
+  res$call <- NULL
+  class(res) <- c("cross_validated.predictor_sl", "cross_validated")
+  return(res)
+}
+
+#' @export
+print.cross_validated.predictor_sl <- function(x, digits=5, ...) {
+  res <- round(summary.cross_validated(x)*1e5, digits=0) / 1e5
+  cat("\n", x$fold, "-fold cross-validation", sep="")
+  if (x$rep > 1) cat(" with ", x$rep, " repetitions", sep="")
+  cat("\n")
+  p <- dim(res)[3]
+  for (i in seq_len(p)) {
+    cli::cli_h3(dimnames(res)[[3]][i])
+    print(res[, , i], na.print="-")
+  }
+}
+
 
 summary_cv <- function(x) {
   x0 <- na.omit(x)
