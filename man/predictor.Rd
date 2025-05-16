@@ -4,13 +4,14 @@
 \alias{predictor}
 \title{Instantiate a learner}
 \arguments{
-\item{...}{Additional arguments to \link[=ml_model]{ml_model$new()}.}
-
-\item{info}{(character) Additional information that describes the
-instantiated \link{ml_model} object.}
+\item{info}{(character) Optional information to describe the instantiated
+\link{ml_model} object.}
 
 \item{formula}{(formula or character) Formula specifying response and design
 matrix.}
+
+\item{learner.args}{(list) Additional arguments to
+\link[=ml_model]{ml_model$new()}.}
 }
 \value{
 \link{ml_model} object.

@@ -18,8 +18,8 @@ predictor_glmnet(
 \item{formula}{(formula or character) Formula specifying response and design
 matrix.}
 
-\item{info}{(character) Additional information that describes the
-instantiated \link{ml_model} object.}
+\item{info}{(character) Optional information to describe the instantiated
+\link{ml_model} object.}
 
 \item{family}{Either a character string representing
 one of the built-in families, or else a \code{glm()} family object. For more
@@ -44,7 +44,8 @@ and its often faster to fit a whole path than compute a single fit.}
 as large as the sample size (leave-one-out CV), it is not recommended for
 large datasets. Smallest value allowable is \code{nfolds=3}}
 
-\item{...}{Additional arguments to \link[=ml_model]{ml_model$new()}.}
+\item{...}{Additional argument used in \code{relax.glmnet}. These include
+some of the original arguments to 'glmnet', and each must be named if used.}
 }
 \value{
 \link{ml_model} object.

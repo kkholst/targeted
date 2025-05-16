@@ -17,8 +17,8 @@ predictor_hal(
 \item{formula}{(formula or character) Formula specifying response and design
 matrix.}
 
-\item{info}{(character) Additional information that describes the
-instantiated \link{ml_model} object.}
+\item{info}{(character) Optional information to describe the instantiated
+\link{ml_model} object.}
 
 \item{smoothness_orders}{An \code{integer}, specifying the smoothness of the
 basis functions. See details for \code{smoothness_orders} for more
@@ -44,7 +44,7 @@ character family (if supported). For example, one should set
 \code{family = "binomial"} instead of \code{family = binomial()} when
 calling \code{fit_hal}.}
 
-\item{...}{Additional arguments to \link[=ml_model]{ml_model$new()}.}
+\item{...}{Additional arguments to \link[hal9001:fit_hal]{hal9001::fit_hal}.}
 }
 \value{
 \link{ml_model} object.

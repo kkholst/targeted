@@ -1,9 +1,10 @@
 #' @title Instantiate a learner
-#' @param ... Additional arguments to [ml_model$new()][ml_model].
-#' @param info (character) Additional information that describes the
-#' instantiated [ml_model] object.
+#' @param info (character) Optional information to describe the instantiated
+#' [ml_model] object.
 #' @param formula (formula or character) Formula specifying response and design
 #' matrix.
+#' @param learner.args (list) Additional arguments to
+#' [ml_model$new()][ml_model].
 #' @return [ml_model] object.
 #' @name predictor
 NULL
@@ -12,6 +13,7 @@ NULL
 #' @description [ml_model] generator function for generalized linear models with
 #' [stats::glm] and [MASS::glm.nb]. Negative binomial regression is supported
 #' with `family = "nb"` (or alternatively `family = "negbin"`).
+#' @param ... Additional arguments to [stats::glm] or [MASS::glm.nb].
 #' @export
 #' @inherit predictor
 #' @inheritParams stats::glm
@@ -97,6 +99,7 @@ predictor_glmnet <- function(formula,
 
 #' @description [ml_model] generator function for [hal9001::fit_hal].
 #' @export
+#' @param ... Additional arguments to [hal9001::fit_hal].
 #' @inherit predictor
 #' @inheritParams hal9001::fit_hal
 predictor_hal <- function(formula,
@@ -233,6 +236,7 @@ predictor_svm <- function(formula,
 }
 
 #' @export
+#' @inherit predictor
 #' @title Superlearner (stacked/ensemble learner)
 #' @description This function creates a predictor object (class [ml_model])
 #'   from a list of existing [ml_model] objects. When estimating this model a
@@ -240,10 +244,7 @@ predictor_svm <- function(formula,
 #'   of each of the initial models. The weights are learned using
 #'   cross-validation.
 #' @param model.list (list) List of [ml_model] objects (i.e. [predictor_glm])
-#' @param info Optional model description to store in model object
 #' @param nfolds Number of folds to use in cross validation
-#' @param learner.args (list) Additional arguments to
-#' [ml_model$new()][ml_model].
 #' @param meta.learner meta.learner function (default non-negative least
 #'   squares). Must be a function of the response (nx1 vector), `y`, and the
 #'   predictions (nxp matrix), `pred`.

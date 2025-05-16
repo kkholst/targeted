@@ -4,14 +4,20 @@
 \alias{predictor_glm}
 \title{Instantiate a learner}
 \usage{
-predictor_glm(formula, info = "glm", family = gaussian(), ...)
+predictor_glm(
+  formula,
+  info = "glm",
+  family = gaussian(),
+  learner.args = NULL,
+  ...
+)
 }
 \arguments{
 \item{formula}{(formula or character) Formula specifying response and design
 matrix.}
 
-\item{info}{(character) Additional information that describes the
-instantiated \link{ml_model} object.}
+\item{info}{(character) Optional information to describe the instantiated
+\link{ml_model} object.}
 
 \item{family}{a description of the error distribution and link
     function to be used in the model.  For \code{glm} this can be a
@@ -20,7 +26,10 @@ instantiated \link{ml_model} object.}
     third option is supported.  (See \code{\link[stats]{family}} for details of
     family functions.)}
 
-\item{...}{Additional arguments to \link[=ml_model]{ml_model$new()}.}
+\item{learner.args}{(list) Additional arguments to
+\link[=ml_model]{ml_model$new()}.}
+
+\item{...}{Additional arguments to \link[stats:glm]{stats::glm} or \link[MASS:glm.nb]{MASS::glm.nb}.}
 }
 \value{
 \link{ml_model} object.
