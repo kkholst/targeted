@@ -246,8 +246,7 @@ predictor_svm <- function(formula,
 #'    x1 <- rnorm(n, sd = 2)
 #'    x2 <- rnorm(n)
 #'    y <- x1 + cos(x1) + rnorm(n, sd = 0.5**.5)
-#'    d <- data.frame(y, x1, x2)
-#'    d
+#'    data.frame(y, x1, x2)
 #' }
 #' d <- sim1()
 #'
@@ -306,16 +305,6 @@ predictor_sl <- function(learners,
   return(mod)
 }
 
-#' @export
-weights.predictor_sl <- function(object, ...) {
-  return(object$fit$weights)
-}
-
-#' @export
-score.predictor_sl <- function(x, ...) {
-  return(x$fit$model.score)
-}
-
 score_sl <- function(response,
                      newdata,
                      object,
@@ -332,7 +321,7 @@ score_sl <- function(response,
   names(res)[1] <- "sl"
   nn <- names(res)
   names(res) <- paste0(nam, nn)
-  w <- c(NA, weights(object))
+  w <- c(NA, weights(object$fit))
   names(w) <- paste0("weight.", nn)
   return(c(res, w))
 }

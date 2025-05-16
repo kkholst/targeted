@@ -56,7 +56,7 @@ get_learner_names <- function(model.list, name.prefix) {
 #' of a learner.
 #' @param mc.cores (integer) If not NULL, then [parallel::mcmapply] is used with
 #' `mc.cores` number of cores for parallelization instead of the [future.apply]
-#' package.
+#' package. Parallelization is disabled with `mc.cores = 1`.
 #' @param silent (logical) Suppress all messages and progressbars
 #' @param future.seed (logical or integer) Argument passed on to
 #' [future.apply::future_lapply]. If TRUE, then [.Random.seed] is used if it
@@ -65,7 +65,7 @@ get_learner_names <- function(model.list, name.prefix) {
 #' [future.apply::future_lapply].
 #' @references Luedtke & van der Laan (2016) Super-Learning of an Optimal
 #'   Dynamic Treatment Rule, The International Journal of Biostatistics.
-#' @seealso [predict.superlearner]
+#' @seealso [predict.superlearner] [weights.superlearner] [score.superlearner]
 #' @examples
 #' sim1 <- function(n = 5e2) {
 #'    x1 <- rnorm(n, sd = 2)
@@ -177,6 +177,18 @@ print.superlearner <- function(x, ...) {
   }
   return(print(res))
 }
+
+
+#' @export
+weights.superlearner <- function(object, ...) {
+  return(object$weights)
+}
+
+#' @export
+score.superlearner <- function(x, ...) {
+  return(x$model.score)
+}
+
 
 #' @title Predict Method for superlearner Fits
 #' @description Obtains predictions for ensemble model or individual learners.
