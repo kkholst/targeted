@@ -17,6 +17,28 @@ metalearner_nnls <- function(y, pred, method = "nnls") {
   return(coefs / sum(coefs))
 }
 
+
+
+#' @export
+#' @title Superlearner (stacked/ensemble learner)
+#' @description This function creates a predictor object (class [ml_model])
+#'   from a list of existing [ml_model] objects. When estimating this model a
+#'   stacked prediction will be created by weighting together the predictions
+#'   of each of the initial models. The weights are learned using
+#'   cross-validation.
+#' @param model.list (list) List of [ml_model] objects (i.e. [predictor_glm])
+#' @param info Optional model description to store in model object
+#' @param nfolds Number of folds to use in cross validation
+#' @param learner.args (list) Additional arguments to
+#' [ml_model$new()][ml_model].
+#' @param meta.learner meta.learner function (default non-negative least
+#'   squares). Must be a function of the response (nx1 vector), `y`, and the
+#'   predictions (nxp matrix), `pred`.
+#' @param model.score model scoring method (see [ml_model])
+#' @param ... Additional arguments to [parallel::mclapply] or
+#' [future.apply::future_lapply].
+#' @references Luedtke & van der Laan (2016) Super-Learning of an Optimal
+#'   Dynamic Treatment Rule, The International Journal of Biostatistics.
 superlearner <- function(model.list,
                          data,
                          nfolds = 10,
@@ -106,7 +128,6 @@ print.superlearner <- function(x, ...) {
   }
   return(print(res))
 }
-
 
 #' SuperLearner wrapper for ml_model
 #'
