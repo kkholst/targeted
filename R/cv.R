@@ -24,7 +24,7 @@
 #' @return An object of class '\code{cross_validated}' is returned. See
 #'   \code{\link{cross_validated-class}} for more details about this class and
 #'   its generic functions.
-#' @details models should be list of objects of class ml_model. Alternatively,
+#' @details models should be list of objects of class [learner]. Alternatively,
 #'   each element of models should be a list with a fitting function and a
 #'   prediction function.
 #'
@@ -99,7 +99,7 @@ cv <- function(models, data,
   for (i in seq_along(models)) {
     f <- models[[i]]
     if ((!is.list(f) || length(f) == 1) &&
-      !inherits(f, "ml_model")) {
+      !inherits(f, "learner")) {
       # No predict function provided. Assume 'predict' works on fitted object
       if (is.list(f)) f <- f[[1]]
       models[[i]] <- list(
@@ -121,7 +121,7 @@ cv <- function(models, data,
 
   arg_response <- rep(FALSE, length(models))
   for (i in seq_along(models)) {
-    if (inherits(models[[i]], "ml_model")) {
+    if (inherits(models[[i]], "learner")) {
       if (!is.null(response) && response.arg %in%
           names(models[[i]]$formals$estimate)) {
         arg_response[i] <- TRUE
@@ -137,7 +137,7 @@ cv <- function(models, data,
   if (arg_response[1]) {
     arglist[response.arg] <- list(response)
   }
-  if (inherits(f, "ml_model")) {
+  if (inherits(f, "learner")) {
     fit0 <- do.call(f$estimate, arglist)
     if (is.null(response)) {
       response <- f$response(data)
@@ -148,7 +148,7 @@ cv <- function(models, data,
     fit0 <- do.call(f[[1]], arglist)
   }
   if (is.null(response)) {
-    if (inherits(f, "ml_model")) {
+    if (inherits(f, "learner")) {
       response <- f$response(data)
     } else {
       response <- tryCatch(data[, lava::endogenous(fit0), drop = TRUE],
@@ -158,7 +158,7 @@ cv <- function(models, data,
     if (is.null(response)) stop("Provide 'response'")
   }
   # In-sample predictive performance:
-  if (inherits(f, "ml_model")) {
+  if (inherits(f, "learner")) {
     pred0 <- do.call(
       f$predict,
       c(list(newdata = data), args.pred)
@@ -230,7 +230,7 @@ cv <- function(models, data,
         arglist[response.arg] <- NULL
       }
       f <- models[[j]]
-      if (inherits(f, "ml_model")) {
+      if (inherits(f, "learner")) {
         f <- f$clone(deep = TRUE)
         do.call(f$estimate, arglist)
         fits <- c(fits, f)
@@ -240,7 +240,7 @@ cv <- function(models, data,
     }
     perfs <- list()
     for (j in seq_along(fits)) {
-      if (inherits(fits[[j]], "ml_model")) {
+      if (inherits(fits[[j]], "learner")) {
         pred <- do.call(
           fits[[j]]$predict,
           c(list(newdata = dtest), args.pred)

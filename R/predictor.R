@@ -1,9 +1,29 @@
+#' @title Instantiate a learner
+#' @param info (character) Optional information to describe the instantiated
+#' [ml_model] object.
+#' @param formula (formula or character) Formula specifying response and design
+#' matrix.
+#' @param learner.args (list) Additional arguments to
+#' [ml_model$new()][ml_model].
+#' @return [ml_model] object.
+#' @name predictor
+NULL
+
+
+#' @description [ml_model] generator function for generalized linear models with
+#' [stats::glm] and [MASS::glm.nb]. Negative binomial regression is supported
+#' with `family = "nb"` (or alternatively `family = "negbin"`).
+#' @param ... Additional arguments to [stats::glm] or [MASS::glm.nb].
 #' @export
+#' @inherit predictor
+#' @inheritParams stats::glm
 predictor_glm <- function(formula,
                           info = "glm",
                           family = gaussian(),
+                          learner.args = NULL,
                           ...) {
-  args <- c(as.list(environment(), all.names = FALSE), list(...))
+  args <- c(learner.args, list(formula = formula, info = info))
+  args$estimate.args <- c(list(family = family), list(...))
   if (is.character(family) && tolower(family) %in% c("nb", "negbin")) {
     if (!requireNamespace("MASS", quietly = TRUE)) {
       stop("MASS library required")
@@ -31,7 +51,12 @@ predictor_glm <- function(formula,
   return(mod)
 }
 
+#' @description [ml_model] generator function for [glmnet::cv.glmnet]. Defaults
+#' to [glmnet::glmnet] for `nfolds = 1`.
 #' @export
+#' @inherit predictor
+#' @inheritParams glmnet::glmnet
+#' @inheritParams glmnet::cv.glmnet
 predictor_glmnet <- function(formula,
                              info = "glmnet",
                              family = gaussian(),
@@ -72,7 +97,11 @@ predictor_glmnet <- function(formula,
   return(mod)
 }
 
+#' @description [ml_model] generator function for [hal9001::fit_hal].
 #' @export
+#' @param ... Additional arguments to [hal9001::fit_hal].
+#' @inherit predictor
+#' @inheritParams hal9001::fit_hal
 predictor_hal <- function(formula,
                           info = "hal9001::fit_hal",
                           smoothness_orders = 0,
@@ -207,14 +236,14 @@ predictor_svm <- function(formula,
 }
 
 #' @export
+#' @inherit predictor
 #' @title Superlearner (stacked/ensemble learner)
 #' @description This function creates a predictor object (class [ml_model])
 #'   from a list of existing [ml_model] objects. When estimating this model a
 #'   stacked prediction will be created by weighting together the predictions
 #'   of each of the initial models. The weights are learned using
 #'   cross-validation.
-#' @param model.list List of [ml_model] objects (i.e. [predictor_glm])
-#' @param info Optional model description to store in model object
+#' @param model.list (list) List of [ml_model] objects (i.e. [predictor_glm])
 #' @param nfolds Number of folds to use in cross validation
 #' @param meta.learner meta.learner function (default non-negative least
 #'   squares). Must be a function of the response (nx1 vector), `y`, and the
@@ -264,8 +293,9 @@ predictor_sl <- function(model.list,
                          nfolds = 5L,
                          meta.learner = metalearner_nnls,
                          model.score = mse,
+                         learner.args = NULL,
                          ...) {
-  args <- c(as.list(environment(), all.names = FALSE), ...)
+
   if (is.null(info)) {
     info <- "superlearner\n"
     nn <- names(model.list)
@@ -274,31 +304,30 @@ predictor_sl <- function(model.list,
       if (i < length(nn)) info <- paste0(info, "\n")
     }
   }
-  args$info <- info
-  args <- c(args, list(
-    estimate = function(data, ...) {
-      return(superlearner(data = data, ...))
-    },
-    predict = function(object, newdata, all.learners = FALSE, ...) {
-      pr <- lapply(object$fit, \(x) x$predict(newdata))
-      res <- Reduce(cbind, pr)
-      if (!is.null(names(model.list)) &&
-        length(model.list) == ncol(res)) {
-        colnames(res) <- names(model.list)
-      } else {
-        colnames(res) <- paste0("model", seq_len(length(model.list)))
-      }
-      if (!all.learners) {
-        res <- as.vector(res %*% object$weights)
-      }
-      return(res)
+  args <- c(learner.args, list(info = info))
+  estimate.args <- list(model.list = model.list, nfolds = nfolds,
+    meta.learner = meta.learner, model.score = model.score
+  )
+  args$estimate.args <- c(estimate.args, list(...))
+  args$estimate <- function(data, ...) superlearner(data = data, ...)
+  args$predict <- function(object, newdata, all.learners = FALSE, ...) {
+    pr <- lapply(object$fit, \(x) x$predict(newdata))
+    res <- Reduce(cbind, pr)
+    if (!is.null(names(model.list)) &&
+      length(model.list) == ncol(res)) {
+      colnames(res) <- names(model.list)
+    } else {
+      colnames(res) <- paste0("model", seq_len(length(model.list)))
     }
-    ))
+    if (!all.learners) {
+      res <- as.vector(res %*% object$weights)
+    }
+    return(res)
+  }
+
   mod <- do.call(ml_model$new, args)
   mod$update(model.list[[1]]$formula)
-  cl <- rlang::call_match(defaults = TRUE)
-  cl$formula <- lapply(model.list, \(x) x$formula)
-  # mod$description <- predictor_argument_description(cl)
+
   attr(mod, "model.score") <- model.score
   class(mod) <- c("predictor_sl", class(mod))
   return(mod)
@@ -325,8 +354,15 @@ predictor_xgboost <- function(formula,
            nfolds = 1L,
            objective = "reg:squarederror",
            info = paste("xgboost", objective),
+           learner.args = NULL,
            ...) {
-    args <- c(as.list(environment(), all.names = FALSE), ...)
+    args <- c(learner.args, list(formula = formula, info = info))
+    estimate.args <- list(max_depth = max_depth, eta = eta,
+      nrounds = nrounds, subsample = subsample, lambda = lambda,
+      verbose = verbose, nfolds = nfolds, objective = objective
+    )
+    args$estimate.args <- c(estimate.args, list(...))
+
     if (!requireNamespace("xgboost")) {
       stop("xgboost library required")
     }
@@ -357,7 +393,6 @@ predictor_xgboost <- function(formula,
       return(res)
     }
     mod <- do.call(ml_model$new, args)
-
     return(mod)
 }
 

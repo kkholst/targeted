@@ -64,7 +64,7 @@ its generic functions.
 Generic cross-validation function
 }
 \details{
-models should be list of objects of class ml_model. Alternatively,
+models should be list of objects of class \link{learner}. Alternatively,
 each element of models should be a list with a fitting function and a
 prediction function.
 
