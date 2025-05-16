@@ -1,4 +1,22 @@
+#' @title Instantiate a learner
+#' @param info (character) Optional information to describe the instantiated
+#' [ml_model] object.
+#' @param formula (formula or character) Formula specifying response and design
+#' matrix.
+#' @param learner.args (list) Additional arguments to
+#' [ml_model$new()][ml_model].
+#' @return [ml_model] object.
+#' @name predictor
+NULL
+
+
+#' @description [ml_model] generator function for generalized linear models with
+#' [stats::glm] and [MASS::glm.nb]. Negative binomial regression is supported
+#' with `family = "nb"` (or alternatively `family = "negbin"`).
+#' @param ... Additional arguments to [stats::glm] or [MASS::glm.nb].
 #' @export
+#' @inherit predictor
+#' @inheritParams stats::glm
 predictor_glm <- function(formula,
                           info = "glm",
                           family = gaussian(),
@@ -33,7 +51,12 @@ predictor_glm <- function(formula,
   return(mod)
 }
 
+#' @description [ml_model] generator function for [glmnet::cv.glmnet]. Defaults
+#' to [glmnet::glmnet] for `nfolds = 1`.
 #' @export
+#' @inherit predictor
+#' @inheritParams glmnet::glmnet
+#' @inheritParams glmnet::cv.glmnet
 predictor_glmnet <- function(formula,
                              info = "glmnet",
                              family = gaussian(),
@@ -74,7 +97,11 @@ predictor_glmnet <- function(formula,
   return(mod)
 }
 
+#' @description [ml_model] generator function for [hal9001::fit_hal].
 #' @export
+#' @param ... Additional arguments to [hal9001::fit_hal].
+#' @inherit predictor
+#' @inheritParams hal9001::fit_hal
 predictor_hal <- function(formula,
                           info = "hal9001::fit_hal",
                           smoothness_orders = 0,
@@ -209,6 +236,9 @@ predictor_svm <- function(formula,
 }
 
 
+#' @description [ml_model] generator function for [superlearner]
+#' @export
+#' @inherit predictor
 #' @param ... additional argument to [superlearner]
 #' @examples
 #' sim1 <- function(n = 5e2) {
