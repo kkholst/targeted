@@ -58,7 +58,7 @@ ff <- learner$new(
 ## ff$predict(x)
 }
 \author{
-Klaus Kähler Holst
+Klaus Kähler Holst, Benedikt Sommer
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
