@@ -47,7 +47,8 @@ test_initialize <- function() {
   fit <- glm(y ~ -1 + x1 + x2, data = ddata, weights = ww)
 
   m1_weights <- ml_model$new(
-    formula = y ~ -1 + x1 + x2, estimate = glm, weights = ww
+    formula = y ~ -1 + x1 + x2, estimate = glm,
+    estimate.args = list(weights = ww)
   )
   m1_weights$estimate(ddata)
   expect_equal(coef(m1_weights$fit), coef(fit))
@@ -56,7 +57,8 @@ test_initialize <- function() {
 
   # test that predict.args are passed on correctly to predict function
   m_count <- ml_model$new(
-    formula = y ~ x + offset(w), estimate = glm, family = poisson,
+    formula = y ~ x + offset(w), estimate = glm,
+    estimate.args = list(family = poisson),
     predict.args = list(type = "response")
   )
   m_count$estimate(ddata_count)
@@ -82,15 +84,17 @@ test_estimate <- function() {
   expect_equal(coef(fit_ml), coef(fit_glm))
 
   # arguments to fitfun when supplied during initialization can be overriden
-  m2 <- ml_model$new(formula = y ~ x1 + x2, estimate = glm, weights = rep(1, n))
+  m2 <- ml_model$new(formula = y ~ x1 + x2, estimate = glm,
+    estimate.args = list(weights = rep(1, n))
+  )
   m2$estimate(data = ddata, weights = ww)
   expect_equal(coef(m2$fit), coef(fit_glm))
 
   # test estimate function which takes x, y as arguments
   m3 <- ml_model$new(formula = y ~ x1 + x2, estimate = glm.fit,
-    intercept = TRUE, weights = ww) # intercept = TRUE is required because no
-    # intercept is added when deriving the design matrix from the provided
-    # formula argument
+    intercept = TRUE, estimate.args = list(weights = ww)
+  ) # intercept = TRUE is required because no intercept is added when deriving
+  # the design matrix from the provided formula argument
   m3$estimate(ddata)
   expect_equal(coef(m3$fit), coef(fit_glm))
 
@@ -100,7 +104,9 @@ test_estimate <- function() {
 
   # specials are correctly handled for estimating method with x, y arguments
   m4 <- ml_model$new(formula = y ~ x + offset(log(w)), estimate = glm.fit,
-    intercept = TRUE, specials = "offset", family = poisson())
+    intercept = TRUE, specials = "offset",
+    estimate.args = list(family = poisson())
+  )
   m4$estimate(ddata_count)
   fit <- glm(y ~ x + offset(log(w)), data = ddata_count, family = poisson())
   expect_equal(coef(fit), coef(m4$fit))
@@ -108,14 +114,17 @@ test_estimate <- function() {
   # it is currently not possible for the estimate method call to pass arguments
   # to targeted::design inside the fitfun
   m4 <- ml_model$new(formula = y ~ x + offset(log(w)), estimate = glm.fit,
-    intercept = TRUE, family = poisson())
+    intercept = TRUE, estimate.args = list(family = poisson())
+  )
   m4$estimate(ddata_count, specials = c("offset"))
   expect_true(all(coef(fit) != coef(m4$fit)))
 
   # ml model can also be used with a formula argument. verify that family
   # argument is passed correctly on to fitfun upon initialization + offset
   # during method call
-  m4 <- ml_model$new(estimate = glm.fit, family = poisson())
+  m4 <- ml_model$new(
+    estimate = glm.fit, estimate.args = list(family = poisson())
+  )
   .design <- design(y ~ x + offset(log(w)), ddata_count, intercept = TRUE)
   m4$estimate(.design$x, .design$y, offset = .design$offset)
   expect_equal(coef(fit), coef(m4$fit))
@@ -127,7 +136,8 @@ test_predict <- function() {
   fit_glm <- glm(y ~ x + offset(w), family = poisson, data = ddata_count)
 
   m <- ml_model$new(
-    formula = y ~ x + offset(w), estimate = glm, family = poisson
+    formula = y ~ x + offset(w), estimate = glm,
+    estimate.args = list(family = poisson)
   )
   fit_ml <- m$estimate(ddata_count)
 
@@ -145,7 +155,8 @@ test_predict <- function() {
 
   # error when trying to override predict.args during predict method call
   m1 <- ml_model$new(
-    formula = y ~ x + offset(w), estimate = glm, family = poisson,
+    formula = y ~ x + offset(w), estimate = glm,
+    estimate.args = list(family = poisson),
     predict.args = list(type = "link")
   )
   m1$estimate(ddata_count)
@@ -170,3 +181,19 @@ test_design <- function() {
   expect_false("(Intercept)" %in% names(coef(fit)))
 }
 test_design()
+
+test_update <- function() {
+  lr <- ml_model$new(formula = y ~ -1 + x1 + x2, estimate = glm)
+  lr$update(y ~ x1)
+  lr$estimate(ddata)
+
+  fit_ref <- glm(y ~ x1, data = ddata)
+  expect_equal(coef(lr$fit), coef(fit_ref))
+
+  # also supports character arguments
+  lr$update("y ~ x1 + x2")
+  lr$estimate(ddata)
+  fit_ref <- glm(y ~ x1 + x2, data = ddata)
+  expect_equal(coef(lr$fit), coef(fit_ref))
+}
+test_update()

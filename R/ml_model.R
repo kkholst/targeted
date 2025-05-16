@@ -18,7 +18,7 @@
 #'     predict = function(object, newdata) {
 #'       predict(object, newdata)$predictions
 #'     },
-#'     ...
+#'     estimate.args = list(...)
 #'   )
 #' }
 #'
@@ -54,9 +54,9 @@ ml_model <- R6::R6Class("ml_model", # nolint
     formals = NULL,
     #' @field formula Formula specifying response and design matrix
     formula = NULL,
-    #' @field args optional arguments to fitting function specified during
-    #' initialization
-    args = NULL,
+    #' @field estimate.args optional arguments to fitting function specified
+    #' during initialization
+    estimate.args = NULL,
 
     #' @description
     #' Create a new prediction model object
@@ -68,30 +68,22 @@ ml_model <- R6::R6Class("ml_model", # nolint
     #' object, 'object', and new design matrix, 'newdata')
     #' @param info optional description of the model
     #' @param predict.args optional arguments to prediction function
+    #' @param estimate.args optional arguments to estimate function
     #' @param specials optional specials terms (weights, offset,
     #'  id, subset, ...) passed on to [targeted::design]
     #' @param response.arg name of response argument
     #' @param intercept (logical) include intercept in design matrix
     #' @param x.arg name of design matrix argument
-    #' @param ... optional arguments to fitting function
     initialize = function(formula = NULL,
                           estimate,
                           predict = stats::predict,
                           predict.args = NULL,
+                          estimate.args = NULL,
                           info = NULL,
                           specials = c(),
                           response.arg = "y",
                           intercept = FALSE,
-                          x.arg = "x",
-                          ...) {
-      dots <- list(...)
-      if (!is.null(dots$fit)) { ## Backward compatibility
-        .Deprecated("Use argument 'estimate' instead of 'fit'")
-        if (missing(estimate)) {
-          estimate <- dots$fit
-        }
-        dots$fit <- NULL
-      }
+                          x.arg = "x") {
       estimate <- add_dots(estimate)
 
       private$des.args <- list(specials = specials, intercept = intercept)
@@ -102,14 +94,14 @@ ml_model <- R6::R6Class("ml_model", # nolint
       private$init.estimate <- estimate
       private$init.predict <- predict
 
-      self$args <- dots
+      self$estimate.args <- estimate.args
       no_formula <- is.null(formula)
       if (!no_formula && is.character(formula) || is.function(formula)) {
         no_formula <- TRUE
       }
       if (no_formula) {
         private$fitfun <- function(...) {
-          args <- private$update_args(self$args, ...)
+          args <- private$update_args(self$estimate.args, ...)
           return(do.call(private$init.estimate, args))
         }
         private$predfun <- function(...) {
@@ -119,7 +111,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
       } else {
         if (fit_formula) { # Formula in arguments of estimation procedure
           private$fitfun <- function(data, ...) {
-            args <- private$update_args(self$args, ...)
+            args <- private$update_args(self$estimate.args, ...)
             args <- c(
               args, list(formula = self$formula, data = data)
             )
@@ -132,7 +124,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
               targeted::design,
               c(list(formula = self$formula, data = data), private$des.args)
             )
-            args <- private$update_args(self$args, ...)
+            args <- private$update_args(self$estimate.args, ...)
             args <- c(list(xx$x), args)
             if (fit_x_arg) {
               names(args)[1] <- x.arg
@@ -177,7 +169,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
         predict = formals(predict)
       )
       private$init <- list(
-        estimate.args = list(...),
+        estimate.args = estimate.args,
         predict.args = predict.args
       )
     },
@@ -261,7 +253,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
     #' Get options
     #' @param arg name of option to get value of
     opt = function(arg) {
-      return(self$args[[arg]])
+      return(self$estimate.args[[arg]])
     }
   ),
   active = list(

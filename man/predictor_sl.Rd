@@ -11,11 +11,12 @@ predictor_sl(
   nfolds = 5L,
   meta.learner = metalearner_nnls,
   model.score = mse,
+  learner.args = NULL,
   ...
 )
 }
 \arguments{
-\item{model.list}{List of \link{ml_model} objects (i.e. \link{predictor_glm})}
+\item{model.list}{(list) List of \link{ml_model} objects (i.e. \link{predictor_glm})}
 
 \item{info}{Optional model description to store in model object}
 
@@ -26,6 +27,9 @@ squares). Must be a function of the response (nx1 vector), \code{y}, and the
 predictions (nxp matrix), \code{pred}.}
 
 \item{model.score}{model scoring method (see \link{ml_model})}
+
+\item{learner.args}{(list) Additional arguments to
+\link[=ml_model]{ml_model$new()}.}
 
 \item{...}{additional argument to \code{superlearner}}
 }

@@ -45,7 +45,8 @@ test_predictor_glm <- function() {
   # arguments for predict methods can be passed to ml_model in predictor_glm
   # call
   lr <- predictor_glm(y ~ x + offset(log(w)), family = poisson,
-    predict.args = list(type = "link"))
+    learner.args = list(predict.args = list(type = "link")),
+  )
   lr$estimate(dcount)
   expect_equal(lr$predict(newd), predict(fit_ref, newd))
 

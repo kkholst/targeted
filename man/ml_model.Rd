@@ -30,7 +30,7 @@ rf <- function(formula, ...) {
     predict = function(object, newdata) {
       predict(object, newdata)$predictions
     },
-    ...
+    estimate.args = list(...)
   )
 }
 
@@ -70,8 +70,8 @@ prediction functions}
 
 \item{\code{formula}}{Formula specifying response and design matrix}
 
-\item{\code{args}}{optional arguments to fitting function specified during
-initialization}
+\item{\code{estimate.args}}{optional arguments to fitting function specified
+during initialization}
 }
 \if{html}{\out{</div>}}
 }
@@ -107,12 +107,12 @@ Create a new prediction model object
   estimate,
   predict = stats::predict,
   predict.args = NULL,
+  estimate.args = NULL,
   info = NULL,
   specials = c(),
   response.arg = "y",
   intercept = FALSE,
-  x.arg = "x",
-  ...
+  x.arg = "x"
 )}\if{html}{\out{</div>}}
 }
 
@@ -130,6 +130,8 @@ object, 'object', and new design matrix, 'newdata')}
 
 \item{\code{predict.args}}{optional arguments to prediction function}
 
+\item{\code{estimate.args}}{optional arguments to estimate function}
+
 \item{\code{info}}{optional description of the model}
 
 \item{\code{specials}}{optional specials terms (weights, offset,
@@ -140,8 +142,6 @@ id, subset, ...) passed on to \link{design}}
 \item{\code{intercept}}{(logical) include intercept in design matrix}
 
 \item{\code{x.arg}}{name of design matrix argument}
-
-\item{\code{...}}{optional arguments to fitting function}
 }
 \if{html}{\out{</div>}}
 }
