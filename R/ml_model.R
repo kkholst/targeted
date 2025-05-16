@@ -2,7 +2,7 @@
 #' @description Interface for standardized estimation and prediction The
 #' following built-in learners are provided: [predictor_glm], [predictor_gam]
 #' @param data data.frame
-#' @author Klaus Kähler Holst
+#' @author Klaus Kähler Holst, Benedikt Sommer
 #' @aliases predictor_gam predictor_grf predictor_grf_binary predictor_isoreg
 #' predictor_mars predictor_nb predictor_svm predictor_xgboost_binary
 #' predictor_xgboost predictor_xgboost_count predictor_xgboost_cox
@@ -10,7 +10,7 @@
 #' @examples
 #' data(iris)
 #' rf <- function(formula, ...) {
-#'   ml_model$new(formula,
+#'   learner$new(formula,
 #'     info = "grf::probability_forest",
 #'     estimate = function(x, y, ...) {
 #'       grf::probability_forest(X = x, Y = y, ...)
@@ -38,14 +38,14 @@
 #' cbind(coef(a), attr(args, "table"))
 #' }
 #'
-#' ff <- ml_model$new(
+#' ff <- learner$new(
 #'   estimate = function(y, x) lm.fit(x = x, y = y),
 #'   predict = function(object, newdata) newdata %*% object$coefficients
 #' )
 #' ## tmp <- ff$estimate(y, x=x)
 #' ## ff$predict(x)
 #' @export
-ml_model <- R6::R6Class("ml_model", # nolint
+learner <- R6::R6Class("learner", # nolint
   public = list(
     #' @field info Optional information/name of the model
     info = NULL,
@@ -216,7 +216,7 @@ ml_model <- R6::R6Class("ml_model", # nolint
     #' @description
     #' Print method
     print = function() {
-      ml_model_print(self, private)
+      learner_print(self, private)
       return(invisible())
     },
 
@@ -313,12 +313,12 @@ ml_model <- R6::R6Class("ml_model", # nolint
 )
 
 #' @export
-estimate.ml_model <- function(x, ...) {
+estimate.learner <- function(x, ...) {
   return(x$estimate(...))
 }
 
 #' @export
-predict.ml_model <- function(object, ...) {
+predict.learner <- function(object, ...) {
   return(object$predict(...))
 }
 
@@ -339,13 +339,13 @@ format_fit_predict_args <- function(args) {
   return(paste0(names(args), "=", args, collapse =", "))
 }
 
-ml_model_print <- function(self, private) {
+learner_print <- function(self, private) {
   .ruler <- function(x, n, unicode = "\u2500") {
     rule <- paste0(rep(unicode, n), collapse = "")
     cat(paste0(rule, x, rule, "\n"))
   }
 
-  .ruler(" ml_model object ", 10)
+  .ruler(" learner object ", 10)
 
   if (!is.null(self$info)) {
     cat(self$info, "\n\n")
@@ -367,4 +367,24 @@ ml_model_print <- function(self, private) {
   }
 
   return(invisible())
+}
+
+#' @title R6 class for prediction models
+#' @description Replaced by [learner]
+#' @export
+ml_model <- R6Class("ml_model",
+  inherit = learner
+  # TODO: deprecating warning in initializer
+)
+
+#' @export
+estimate.ml_model <- function(x, ...) {
+  # TODO: deprecate
+  return(x$estimate(...))
+}
+
+#' @export
+predict.ml_model <- function(object, ...) {
+  # TODO: deprecate
+  return(object$predict(...))
 }
