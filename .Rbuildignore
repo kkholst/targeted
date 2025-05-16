@@ -5,6 +5,7 @@
 ^.lintr$
 ^CPPLINT.cfg$
 ^Dockerfile$
+^CONTRIBUTING.md$
 ^Makefile$
 ^tmp$
 ^Makefile$
