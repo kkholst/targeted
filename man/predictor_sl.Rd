@@ -18,7 +18,8 @@ predictor_sl(
 \arguments{
 \item{model.list}{(list) List of \link{ml_model} objects (i.e. \link{predictor_glm})}
 
-\item{info}{Optional model description to store in model object}
+\item{info}{(character) Optional information to describe the instantiated
+\link{ml_model} object.}
 
 \item{nfolds}{Number of folds to use in cross validation}
 
@@ -32,6 +33,9 @@ predictions (nxp matrix), \code{pred}.}
 \link[=ml_model]{ml_model$new()}.}
 
 \item{...}{additional argument to \code{superlearner}}
+}
+\value{
+\link{ml_model} object.
 }
 \description{
 This function creates a predictor object (class \link{ml_model})
