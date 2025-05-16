@@ -31,10 +31,11 @@ metalearner_nnls <- function(y, pred, method = "nnls") {
 #' @param nfolds Number of folds to use in cross validation
 #' @param learner.args (list) Additional arguments to
 #' [ml_model$new()][ml_model].
-#' @param meta.learner meta.learner function (default non-negative least
-#'   squares). Must be a function of the response (nx1 vector), `y`, and the
-#'   predictions (nxp matrix), `pred`.
-#' @param model.score model scoring method (see [ml_model])
+#' @param meta.learner meta.learner (function) Algorithm to learn the ensemble
+#' weights (default non-negative least squares). Must be a function of the
+#' response (nx1 vector), `y`, and the predictions (nxp matrix), `pred`, with
+#' p being the number of learners.
+#' @param model.score (function) Model scoring method (see [ml_model])
 #' @param ... Additional arguments to [parallel::mclapply] or
 #' [future.apply::future_lapply].
 #' @references Luedtke & van der Laan (2016) Super-Learning of an Optimal
@@ -127,6 +128,22 @@ print.superlearner <- function(x, ...) {
     rownames(res) <- paste("model", seq_along(x$fit))
   }
   return(print(res))
+}
+
+#' @export
+predict.superlearner <- function(object, newdata, all.learners = FALSE, ...) {
+  pr <- lapply(object$fit, \(x) x$predict(newdata))
+  res <- Reduce(cbind, pr)
+  .names <- names(object$fit)
+  if (!is.null(names(model.list)) &&
+    length(model.list) == ncol(res)) {
+    colnames(res) <- names(model.list)
+  } else {
+    colnames(res) <- paste0("model", seq_len(length(model.list)))
+  }
+  if (!all.learners) {
+    res <- as.vector(res %*% object$weights)
+  }
 }
 
 #' SuperLearner wrapper for ml_model

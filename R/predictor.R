@@ -239,10 +239,9 @@ predictor_svm <- function(formula,
 #' @description [ml_model] generator function for [superlearner]
 #' @export
 #' @inherit predictor
-#' @param ... additional argument to [superlearner]
+#' @param ... Additional arguments to [superlearner]
 #' @examples
 #' sim1 <- function(n = 5e2) {
-#'    n <- 5e2
 #'    x1 <- rnorm(n, sd = 2)
 #'    x2 <- rnorm(n)
 #'    y <- x1 + cos(x1) + rnorm(n, sd = 0.5**.5)
@@ -297,18 +296,8 @@ predictor_sl <- function(model.list,
   args$estimate.args <- c(estimate.args, list(...))
   args$estimate <- function(data, ...) superlearner(data = data, ...)
   args$predict <- function(object, newdata, all.learners = FALSE, ...) {
-    pr <- lapply(object$fit, \(x) x$predict(newdata))
-    res <- Reduce(cbind, pr)
-    if (!is.null(names(model.list)) &&
-      length(model.list) == ncol(res)) {
-      colnames(res) <- names(model.list)
-    } else {
-      colnames(res) <- paste0("model", seq_len(length(model.list)))
-    }
-    if (!all.learners) {
-      res <- as.vector(res %*% object$weights)
-    }
-    return(res)
+    # TODO
+    stop("requires fix")
   }
 
   mod <- do.call(ml_model$new, args)
