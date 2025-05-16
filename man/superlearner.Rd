@@ -23,14 +23,25 @@ superlearner(
 \item{data}{(data.frame) Data containing the response variable and
 covariates.}
 
-\item{nfolds}{Number of folds to use in cross validation}
+\item{nfolds}{(integer) Number of folds to use in cross-validation to
+estimate the ensemble weights.}
 
-\item{meta.learner}{meta.learner (function) Algorithm to learn the ensemble
+\item{meta.learner}{(function) Algorithm to learn the ensemble
 weights (default non-negative least squares). Must be a function of the
 response (nx1 vector), \code{y}, and the predictions (nxp matrix), \code{pred}, with
 p being the number of learners.}
 
 \item{model.score}{(function) Model scoring method (see \link{learner})}
+
+\item{mc.cores}{(integer) If not NULL, then \link[parallel:mclapply]{parallel::mcmapply} is used with
+\code{mc.cores} number of cores for parallelization instead of the \link{future.apply}
+package.}
+
+\item{future.seed}{(logical or integer) Argument passed on to
+\link[future.apply:future_lapply]{future.apply::future_lapply}. If TRUE, then \link{.Random.seed} is used if it
+holds a L'Ecuyer-CMRG RNG seed, otherwise one is created randomly.}
+
+\item{silent}{(logical) Suppress all messages and progressbars}
 
 \item{name.prefix}{(character) Prefix used to name learner objects in
 \code{learners} without names. If NULL, then obtain the name from the info field
@@ -38,8 +49,6 @@ of a learner.}
 
 \item{...}{Additional arguments to \link[parallel:mclapply]{parallel::mclapply} or
 \link[future.apply:future_lapply]{future.apply::future_lapply}.}
-
-\item{info}{Optional model description to store in model object}
 }
 \description{
 This function creates a predictor object (class \link{learner})

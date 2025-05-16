@@ -15,8 +15,20 @@ predictor_sl(
 )
 }
 \arguments{
+\item{learners}{(list) List of \link{learner} objects (i.e. \link{predictor_glm})}
+
 \item{info}{(character) Optional information to describe the instantiated
 \link{ml_model} object.}
+
+\item{nfolds}{(integer) Number of folds to use in cross-validation to
+estimate the ensemble weights.}
+
+\item{meta.learner}{(function) Algorithm to learn the ensemble
+weights (default non-negative least squares). Must be a function of the
+response (nx1 vector), \code{y}, and the predictions (nxp matrix), \code{pred}, with
+p being the number of learners.}
+
+\item{model.score}{(function) Model scoring method (see \link{learner})}
 
 \item{learner.args}{(list) Additional arguments to
 \link[=ml_model]{ml_model$new()}.}

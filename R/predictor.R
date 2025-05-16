@@ -239,6 +239,7 @@ predictor_svm <- function(formula,
 #' @description [learner] generator function for [superlearner]
 #' @export
 #' @inherit predictor
+#' @inheritParams superlearner
 #' @param ... Additional arguments to [superlearner]
 #' @examples
 #' sim1 <- function(n = 5e2) {

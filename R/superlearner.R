@@ -44,9 +44,9 @@ get_learner_names <- function(model.list, name.prefix) {
 #' @param data (data.frame) Data containing the response variable and
 #' covariates.
 #' @param learners (list) List of [learner] objects (i.e. [predictor_glm])
-#' @param info Optional model description to store in model object
-#' @param nfolds Number of folds to use in cross validation
-#' @param meta.learner meta.learner (function) Algorithm to learn the ensemble
+#' @param nfolds (integer) Number of folds to use in cross-validation to
+#' estimate the ensemble weights.
+#' @param meta.learner (function) Algorithm to learn the ensemble
 #' weights (default non-negative least squares). Must be a function of the
 #' response (nx1 vector), `y`, and the predictions (nxp matrix), `pred`, with
 #' p being the number of learners.
@@ -54,6 +54,13 @@ get_learner_names <- function(model.list, name.prefix) {
 #' @param name.prefix (character) Prefix used to name learner objects in
 #' `learners` without names. If NULL, then obtain the name from the info field
 #' of a learner.
+#' @param mc.cores (integer) If not NULL, then [parallel::mcmapply] is used with
+#' `mc.cores` number of cores for parallelization instead of the [future.apply]
+#' package.
+#' @param silent (logical) Suppress all messages and progressbars
+#' @param future.seed (logical or integer) Argument passed on to
+#' [future.apply::future_lapply]. If TRUE, then [.Random.seed] is used if it
+#' holds a L'Ecuyer-CMRG RNG seed, otherwise one is created randomly.
 #' @param ... Additional arguments to [parallel::mclapply] or
 #' [future.apply::future_lapply].
 #' @references Luedtke & van der Laan (2016) Super-Learning of an Optimal
