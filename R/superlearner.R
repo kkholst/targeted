@@ -17,7 +17,22 @@ metalearner_nnls <- function(y, pred, method = "nnls") {
   return(coefs / sum(coefs))
 }
 
+get_learner_names <- function(model.list, name.prefix) {
+  .names <- names(model.list)
+  if (is.null(.names)) .names <- rep("", length(model.list))
 
+  if (is.null(name.prefix)) {
+    # NULL check because learner$new has info = NULL by default
+    new_names <- lapply(
+      model.list,
+      \(lr) ifelse(is.null(lr$info), "", lr$info)
+    ) |> unlist()
+  } else {
+    new_names <- paste0(name.prefix, seq_along(model.list))
+  }
+  .names[.names == ""] <- new_names[.names == ""]
+  return(.names)
+}
 
 #' @export
 #' @title Superlearner (stacked/ensemble learner)
@@ -26,21 +41,20 @@ metalearner_nnls <- function(y, pred, method = "nnls") {
 #'   stacked prediction will be created by weighting together the predictions
 #'   of each of the initial models. The weights are learned using
 #'   cross-validation.
-#' @param model.list (list) List of [ml_model] objects (i.e. [predictor_glm])
+#' @param learner.list (list) List of [ml_model] objects (i.e. [predictor_glm])
 #' @param info Optional model description to store in model object
 #' @param nfolds Number of folds to use in cross validation
-#' @param learner.args (list) Additional arguments to
-#' [ml_model$new()][ml_model].
 #' @param meta.learner meta.learner (function) Algorithm to learn the ensemble
 #' weights (default non-negative least squares). Must be a function of the
 #' response (nx1 vector), `y`, and the predictions (nxp matrix), `pred`, with
 #' p being the number of learners.
 #' @param model.score (function) Model scoring method (see [ml_model])
+#' @param name.prefix (character)
 #' @param ... Additional arguments to [parallel::mclapply] or
 #' [future.apply::future_lapply].
 #' @references Luedtke & van der Laan (2016) Super-Learning of an Optimal
 #'   Dynamic Treatment Rule, The International Journal of Biostatistics.
-superlearner <- function(model.list,
+superlearner <- function(learner.list,
                          data,
                          nfolds = 10,
                          meta.learner = metalearner_nnls,
@@ -48,6 +62,7 @@ superlearner <- function(model.list,
                          mc.cores = NULL,
                          future.seed = TRUE,
                          silent = TRUE,
+                         name.prefix = NULL,
                          ...) {
   pred_mod <- function(models, data) {
     res <- lapply(models, \(x) x$predict(data))
@@ -56,10 +71,11 @@ superlearner <- function(model.list,
   if (is.character(model.score)) {
     model.score <- get(model.score)
   }
-  model.names <- names(model.list)
+  # TODO: check that all models are ml_models
+  model.names <- get_learner_names(learner.list, name.prefix)
   n <- nrow(data)
   folds <- lava::csplit(n, nfolds)
-  pred <- matrix(NA, n, length(model.list))
+  pred <- matrix(NA, n, length(learner.list))
   if (!silent) pb <- progressr::progressor(along = seq_len(nfolds))
   onefold <- function(fold, data, model.list, pb) {
     n <- nrow(data)
@@ -75,13 +91,13 @@ superlearner <- function(model.list,
     if (mc.cores == 1L) {
       ## disable parallelization
       pred.folds <- lapply(folds, function(fold) {
-        return(onefold(fold, data, model.list, pb))
+        return(onefold(fold, data, learner.list, pb))
       })
     } else {
       ## mclapply
       pred.folds <- parallel::mclapply(
         folds,
-        function(fold) onefold(fold, data, model.list, pb),
+        function(fold) onefold(fold, data, learner.list, pb),
         mc.cores = mc.cores, ...
         )
     }
@@ -91,7 +107,7 @@ superlearner <- function(model.list,
       future.apply::future_lapply,
       list(
         X = folds,
-        FUN = function(fold) onefold(fold, data, model.list, pb),
+        FUN = function(fold) onefold(fold, data, learner.list, pb),
         future.seed = future.seed,
         ...
       )
@@ -100,9 +116,10 @@ superlearner <- function(model.list,
   for (i in seq_along(pred.folds)) {
     pred[pred.folds[[i]]$fold, ] <- pred.folds[[i]]$pred
   }
-  mod <- lapply(model.list, \(x) x$clone())
+  mod <- lapply(learner.list, \(x) x$clone())
+  names(mod) <- model.names
   ## Meta-learner
-  y <- model.list[[1]]$response(data)
+  y <- learner.list[[1]]$response(data)
   risk <- apply(pred, 2, \(x) model.score(y, x))
   names(risk) <- model.names
   w <- meta.learner(y = y, pred = pred)

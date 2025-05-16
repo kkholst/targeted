@@ -5,7 +5,7 @@
 \title{Superlearner (stacked/ensemble learner)}
 \usage{
 superlearner(
-  model.list,
+  learner.list,
   data,
   nfolds = 10,
   meta.learner = metalearner_nnls,
@@ -13,27 +13,28 @@ superlearner(
   mc.cores = NULL,
   future.seed = TRUE,
   silent = TRUE,
+  name.prefix = NULL,
   ...
 )
 }
 \arguments{
-\item{model.list}{(list) List of \link{ml_model} objects (i.e. \link{predictor_glm})}
+\item{learner.list}{(list) List of \link{ml_model} objects (i.e. \link{predictor_glm})}
 
 \item{nfolds}{Number of folds to use in cross validation}
 
-\item{meta.learner}{meta.learner function (default non-negative least
-squares). Must be a function of the response (nx1 vector), \code{y}, and the
-predictions (nxp matrix), \code{pred}.}
+\item{meta.learner}{meta.learner (function) Algorithm to learn the ensemble
+weights (default non-negative least squares). Must be a function of the
+response (nx1 vector), \code{y}, and the predictions (nxp matrix), \code{pred}, with
+p being the number of learners.}
 
-\item{model.score}{model scoring method (see \link{ml_model})}
+\item{model.score}{(function) Model scoring method (see \link{ml_model})}
+
+\item{name.prefix}{(character)}
 
 \item{...}{Additional arguments to \link[parallel:mclapply]{parallel::mclapply} or
 \link[future.apply:future_lapply]{future.apply::future_lapply}.}
 
 \item{info}{Optional model description to store in model object}
-
-\item{learner.args}{(list) Additional arguments to
-\link[=ml_model]{ml_model$new()}.}
 }
 \description{
 This function creates a predictor object (class \link{ml_model})

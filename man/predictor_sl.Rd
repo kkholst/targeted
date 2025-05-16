@@ -5,7 +5,7 @@
 \title{Instantiate a learner}
 \usage{
 predictor_sl(
-  model.list,
+  learner.list,
   info = NULL,
   nfolds = 5L,
   meta.learner = metalearner_nnls,
@@ -21,7 +21,7 @@ predictor_sl(
 \item{learner.args}{(list) Additional arguments to
 \link[=ml_model]{ml_model$new()}.}
 
-\item{...}{additional argument to \link{superlearner}}
+\item{...}{Additional arguments to \link{superlearner}}
 }
 \value{
 \link{ml_model} object.
@@ -31,7 +31,6 @@ predictor_sl(
 }
 \examples{
 sim1 <- function(n = 5e2) {
-   n <- 5e2
    x1 <- rnorm(n, sd = 2)
    x2 <- rnorm(n)
    y <- x1 + cos(x1) + rnorm(n, sd = 0.5**.5)
