@@ -8,6 +8,8 @@
 }
 \arguments{
 \item{x}{(superlearner) Fitted model.}
+
+\item{...}{Not used.}
 }
 \description{
 Extract average cross-validated score of individual learners

@@ -8,6 +8,8 @@
 }
 \arguments{
 \item{object}{(superlearner) Fitted model.}
+
+\item{...}{Not used.}
 }
 \description{
 Extract ensemble weights

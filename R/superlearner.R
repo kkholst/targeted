@@ -103,6 +103,8 @@ superlearner <- function(learners,
   if (any(!unlist(lapply(learners, \(lr) inherits(lr, "learner"))))) stop(
     "All provided learners must be of class targeted::learner"
   )
+
+  # TODO: this won't work for learners which are initialized without a formula
   if (length(unique(lapply(learners, \(m) all.vars(m$formula)[[1]]))) > 1) {
     stop("All learners must have the same response variable.")
   }
@@ -185,6 +187,7 @@ print.superlearner <- function(x, ...) {
 
 #' @title Extract ensemble weights
 #' @param object (superlearner) Fitted model.
+#' @param ... Not used.
 #' @export
 weights.superlearner <- function(object, ...) {
   return(object$weights)
@@ -192,6 +195,7 @@ weights.superlearner <- function(object, ...) {
 
 #' @title Extract average cross-validated score of individual learners
 #' @param x (superlearner) Fitted model.
+#' @param ... Not used.
 #' @export
 score.superlearner <- function(x, ...) {
   return(x$model.score)
