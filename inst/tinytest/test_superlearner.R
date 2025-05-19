@@ -38,9 +38,15 @@ test_superlearner <- function() {
   sl <- superlearner(lrs, data = d0, nfolds = 2, name.prefix = "lr")
   expect_equal(names(sl$fit), c("lr1", "lr"))
 
+  # type checks
   expect_error(
     superlearner(list(\(data) glm(y ~ 1, data = data)), data = d0),
     pattern = "All provided learners must be of class targeted::learner"
+  )
+
+  expect_error(
+    superlearner(list(predictor_glm(y ~ 1), predictor_glm(x ~ 1)), data = d0),
+    pattern = "All learners must have the same response variable"
   )
 }
 test_superlearner()

@@ -92,7 +92,6 @@ superlearner <- function(learners,
                          silent = TRUE,
                          name.prefix = NULL,
                          ...) {
-  # TODO: test that response of all learners is the same
   pred_mod <- function(models, data) {
     res <- lapply(models, \(x) x$predict(data))
     return(Reduce(cbind, res))
@@ -104,6 +103,9 @@ superlearner <- function(learners,
   if (any(!unlist(lapply(learners, \(lr) inherits(lr, "learner"))))) stop(
     "All provided learners must be of class targeted::learner"
   )
+  if (length(unique(lapply(learners, \(m) all.vars(m$formula)[[1]]))) > 1) {
+    stop("All learners must have the same response variable.")
+  }
 
   model.names <- get_learner_names(learners, name.prefix)
   n <- nrow(data)
