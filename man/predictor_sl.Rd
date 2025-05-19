@@ -73,4 +73,5 @@ cvres <- summary(s, data = d, nfolds = 3, rep = 2)
 cvres
 # coef(cvres)
 # score(cvres)
+# TODO: example showing how to extract weights
 }

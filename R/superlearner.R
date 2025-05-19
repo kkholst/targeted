@@ -91,6 +91,7 @@ superlearner <- function(learners,
                          silent = TRUE,
                          name.prefix = NULL,
                          ...) {
+  # TODO: test that response of all learners is the same
   pred_mod <- function(models, data) {
     res <- lapply(models, \(x) x$predict(data))
     return(Reduce(cbind, res))
@@ -179,13 +180,15 @@ print.superlearner <- function(x, ...) {
 }
 
 
-# TODO: write roxygen documentation
+#' @title Extract ensemble weights
+#' @param object (superlearner) Fitted model.
 #' @export
 weights.superlearner <- function(object, ...) {
   return(object$weights)
 }
 
-# TODO: write roxygen documentation
+#' @title Extract average cross-validated score of individual learners
+#' @param x (superlearner) Fitted model.
 #' @export
 score.superlearner <- function(x, ...) {
   return(x$model.score)
