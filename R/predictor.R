@@ -297,7 +297,7 @@ predictor_sl <- function(learners,
   args$estimate <- function(data, ...) superlearner(data = data, ...)
   args$predict <- function(object, newdata, ...) predict(object, newdata, ...)
 
-  mod <- do.call(ml_model$new, args)
+  mod <- do.call(learner$new, args)
   mod$update(learners[[1]]$formula)
 
   attr(mod, "model.score") <- model.score
