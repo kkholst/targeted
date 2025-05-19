@@ -59,3 +59,18 @@ test_predict.superlearner <- function() {
   expect_equal(length(pred), nrow(d0))
 }
 test_predict.superlearner()
+
+test_weights.superlearner <- function() {
+  lrs <- list(mean = predictor_glm(y ~ 1), glm = predictor_glm(y ~ x1))
+  sl <- superlearner(lrs, data = d0, nfolds = 2)
+
+  expect_equal(weights(sl), sl$weights)
+}
+test_weights.superlearner()
+
+test_score.superlearner <- function() {
+  lrs <- list(mean = predictor_glm(y ~ 1), glm = predictor_glm(y ~ x1))
+  sl <- superlearner(lrs, data = d0, nfolds = 2)
+  expect_equal(score(sl), sl$model.score)
+}
+test_score.superlearner()
