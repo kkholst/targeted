@@ -179,11 +179,13 @@ print.superlearner <- function(x, ...) {
 }
 
 
+# TODO: write roxygen documentation
 #' @export
 weights.superlearner <- function(object, ...) {
   return(object$weights)
 }
 
+# TODO: write roxygen documentation
 #' @export
 score.superlearner <- function(x, ...) {
   return(x$model.score)

@@ -273,6 +273,7 @@ predictor_svm <- function(formula,
 #' cvres
 #' # coef(cvres)
 #' # score(cvres)
+#' # TODO: example showing how to extract weights
 predictor_sl <- function(learners,
                          info = NULL,
                          nfolds = 5L,
