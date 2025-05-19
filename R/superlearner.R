@@ -55,8 +55,9 @@ get_learner_names <- function(model.list, name.prefix) {
 #' `learners` without names. If NULL, then obtain the name from the info field
 #' of a learner.
 #' @param mc.cores (integer) If not NULL, then [parallel::mcmapply] is used with
-#' `mc.cores` number of cores for parallelization instead of the [future.apply]
-#' package. Parallelization is disabled with `mc.cores = 1`.
+#' `mc.cores` number of cores for parallelization instead of the
+#' [future.apply::future_lapply] package. Parallelization is disabled with
+#' `mc.cores = 1`.
 #' @param silent (logical) Suppress all messages and progressbars
 #' @param future.seed (logical or integer) Argument passed on to
 #' [future.apply::future_lapply]. If TRUE, then [.Random.seed] is used if it

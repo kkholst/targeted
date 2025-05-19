@@ -34,8 +34,9 @@ p being the number of learners.}
 \item{model.score}{(function) Model scoring method (see \link{learner})}
 
 \item{mc.cores}{(integer) If not NULL, then \link[parallel:mclapply]{parallel::mcmapply} is used with
-\code{mc.cores} number of cores for parallelization instead of the \link{future.apply}
-package. Parallelization is disabled with \code{mc.cores = 1}.}
+\code{mc.cores} number of cores for parallelization instead of the
+\link[future.apply:future_lapply]{future.apply::future_lapply} package. Parallelization is disabled with
+\code{mc.cores = 1}.}
 
 \item{future.seed}{(logical or integer) Argument passed on to
 \link[future.apply:future_lapply]{future.apply::future_lapply}. If TRUE, then \link{.Random.seed} is used if it
