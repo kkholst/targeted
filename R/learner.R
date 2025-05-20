@@ -71,8 +71,10 @@ learner <- R6::R6Class("learner", # nolint
     #' @param estimate.args optional arguments to estimate function
     #' @param specials optional specials terms (weights, offset,
     #'  id, subset, ...) passed on to [targeted::design]
-    #' @param response.arg name of response argument
     #' @param intercept (logical) include intercept in design matrix
+    #' @param stratify optional formula speciying variables to stratify model
+    #' estimation and prediictions on
+    #' @param response.arg name of response argument
     #' @param x.arg name of design matrix argument
     initialize = function(formula = NULL,
                           estimate,
@@ -80,9 +82,9 @@ learner <- R6::R6Class("learner", # nolint
                           predict.args = NULL,
                           estimate.args = NULL,
                           info = NULL,
-                          specials = c(),
-                          response.arg = "y",
+                          specials = c("strata"),
                           intercept = FALSE,
+                          response.arg = "y",
                           x.arg = "x") {
       estimate <- add_dots(estimate)
 
@@ -245,8 +247,8 @@ learner <- R6::R6Class("learner", # nolint
     design = function(data, ...) {
       args <- c(private$des.args, list(data = data))
       args[...names()] <- list(...)
+      print(args)
       return(do.call(design, c(list(self$formula), args))$x)
-      # return(design(self$formula, data = data, ...)$x)
     },
 
     #' @description
