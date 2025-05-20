@@ -66,12 +66,11 @@ if (interactive()) {
           lwd = 4, col = lava::Col("darkblue", 0.3))
 }
 print(s)
-# weights(s)
-# score(s)
+# weights(s$fit)
+# score(s$fit)
 
 cvres <- summary(s, data = d, nfolds = 3, rep = 2)
 cvres
 # coef(cvres)
 # score(cvres)
-# TODO: example showing how to extract weights
 }

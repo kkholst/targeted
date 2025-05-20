@@ -266,14 +266,13 @@ predictor_svm <- function(formula,
 #'           lwd = 4, col = lava::Col("darkblue", 0.3))
 #' }
 #' print(s)
-#' # weights(s)
-#' # score(s)
+#' # weights(s$fit)
+#' # score(s$fit)
 #'
 #' cvres <- summary(s, data = d, nfolds = 3, rep = 2)
 #' cvres
 #' # coef(cvres)
 #' # score(cvres)
-#' # TODO: example showing how to extract weights
 predictor_sl <- function(learners,
                          info = NULL,
                          nfolds = 5L,
@@ -299,7 +298,14 @@ predictor_sl <- function(learners,
   args$predict <- function(object, newdata, ...) predict(object, newdata, ...)
 
   mod <- do.call(learner$new, args)
-  mod$update(learners[[1]]$formula)
+
+  # duplicate check from superlearner to catch error during instantiation
+  # of a learner instead in the estimate method call
+  if (length(unique(lapply(learners, \(m) all.vars(m$formula)[[1]]))) > 1) {
+    stop("All learners must have the same response variable.")
+  }
+  mod$update(learners[[1]]$formula) # TODO: not clean but will be fixed later
+  # because it requires changes to the learner R6 class and the cv function
 
   attr(mod, "model.score") <- model.score
   class(mod) <- c("predictor_sl", class(mod))
