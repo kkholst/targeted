@@ -2,11 +2,10 @@
 % Please edit documentation in R/predictor.R
 \name{predictor_sl}
 \alias{predictor_sl}
-\alias{superlearner}
-\title{Superlearner (stacked/ensemble learner)}
+\title{Instantiate a learner}
 \usage{
 predictor_sl(
-  model.list,
+  learners,
   info = NULL,
   nfolds = 5L,
   meta.learner = metalearner_nnls,
@@ -16,42 +15,38 @@ predictor_sl(
 )
 }
 \arguments{
-\item{model.list}{(list) List of \link{ml_model} objects (i.e. \link{predictor_glm})}
+\item{learners}{(list) List of \link{learner} objects (i.e. \link{predictor_glm})}
 
 \item{info}{(character) Optional information to describe the instantiated
 \link{ml_model} object.}
 
-\item{nfolds}{Number of folds to use in cross validation}
+\item{nfolds}{(integer) Number of folds to use in cross-validation to
+estimate the ensemble weights.}
 
-\item{meta.learner}{meta.learner function (default non-negative least
-squares). Must be a function of the response (nx1 vector), \code{y}, and the
-predictions (nxp matrix), \code{pred}.}
+\item{meta.learner}{(function) Algorithm to learn the ensemble
+weights (default non-negative least squares). Must be a function of the
+response (nx1 vector), \code{y}, and the predictions (nxp matrix), \code{pred}, with
+p being the number of learners.}
 
-\item{model.score}{model scoring method (see \link{ml_model})}
+\item{model.score}{(function) Model scoring method (see \link{learner})}
 
 \item{learner.args}{(list) Additional arguments to
 \link[=ml_model]{ml_model$new()}.}
 
-\item{...}{additional argument to \code{superlearner}}
+\item{...}{Additional arguments to \link{superlearner}}
 }
 \value{
 \link{ml_model} object.
 }
 \description{
-This function creates a predictor object (class \link{ml_model})
-from a list of existing \link{ml_model} objects. When estimating this model a
-stacked prediction will be created by weighting together the predictions
-of each of the initial models. The weights are learned using
-cross-validation.
+\link{learner} generator function for \link{superlearner}
 }
 \examples{
 sim1 <- function(n = 5e2) {
-   n <- 5e2
    x1 <- rnorm(n, sd = 2)
    x2 <- rnorm(n)
    y <- x1 + cos(x1) + rnorm(n, sd = 0.5**.5)
-   d <- data.frame(y, x1, x2)
-   d
+   data.frame(y, x1, x2)
 }
 d <- sim1()
 
@@ -71,18 +66,11 @@ if (interactive()) {
           lwd = 4, col = lava::Col("darkblue", 0.3))
 }
 print(s)
-# weights(s)
-# score(s)
+# weights(s$fit)
+# score(s$fit)
 
 cvres <- cv(s, data = d, nfolds = 3, rep = 2)
 cvres
 # coef(cvres)
 # score(cvres)
-}
-\references{
-Luedtke & van der Laan (2016) Super-Learning of an Optimal
-Dynamic Treatment Rule, The International Journal of Biostatistics.
-}
-\seealso{
-ml_model predictor_glm predictor_xgboost
 }

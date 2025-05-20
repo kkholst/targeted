@@ -316,7 +316,7 @@ score_sl <- function(response,
   colnames(risk)[1] <- "sl"
   nn <- colnames(risk)
   names(risk) <- paste0(nam, nn)
-  w <- rbind(c(NA, weights(object)))
+  w <- rbind(c(NA, weights(object$fit)))
   rownames(w) <- "weight"
   risk <- rbind(risk, w)
   res <- c()
