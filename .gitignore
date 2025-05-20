@@ -1,5 +1,6 @@
 .RDataTmp
 pkgdown
+.vscode
 man/figures/logo.*
 docs
 inst/doc

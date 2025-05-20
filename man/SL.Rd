@@ -2,7 +2,7 @@
 % Please edit documentation in R/superlearner.R
 \name{SL}
 \alias{SL}
-\title{SuperLearner wrapper for ml_model}
+\title{SuperLearner wrapper for learner}
 \usage{
 SL(
   formula = ~.,
@@ -28,10 +28,10 @@ FALSE)}
 \item{info}{model information (optional)}
 }
 \value{
-ml_model object
+learner object
 }
 \description{
-SuperLearner wrapper for ml_model
+SuperLearner wrapper for learner
 }
 \author{
 Klaus Kähler Holst

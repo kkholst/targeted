@@ -8,6 +8,7 @@
 ^CONTRIBUTING.md$
 ^Makefile$
 ^tmp$
+^.vscode$
 ^Makefile$
 ^src/target/lib$
 ^src/target/build$
