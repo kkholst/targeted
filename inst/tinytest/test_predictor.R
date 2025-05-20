@@ -128,5 +128,9 @@ test_predictor_sl <- function() {
 
   # predictions can also be returned for individual learners
   expect_equal(dim(lr$predict(newdata = sim1(5), all.learners = TRUE)), c(5, 2))
+
+  # nfolds can be overwritten in estimate method call
+  lr$estimate(d, nfolds = 3)
+  expect_equal(length(lr$fit$folds), 3)
 }
 test_predictor_sl()
