@@ -24,14 +24,14 @@
 )
 }
 \arguments{
-\item{object}{List of fitting functions}
+\item{object}{List of \link{learner} objects}
 
 \item{data}{data.frame or matrix}
 
 \item{response}{Response variable (vector or name of column in \code{data}).}
 
-\item{nfolds}{Number of folds (default 5. K=0 splits in 1:n/2, n/2:n with
-last part used for testing)}
+\item{nfolds}{Number of folds (nfolds=0 simple test/train split into two folds 1:(\link{n}/2),
+(\link{n}+1/2):n with last part used for testing)}
 
 \item{rep}{Number of repetitions (default 1)}
 
@@ -76,10 +76,10 @@ is a named list with a single data.frame/matrix then this name will be used
 as the name of the data/design matrix argument in models.
 }
 \examples{
-f0 <- function(data,...) lm(...,data=data)
-f1 <- function(data,...) lm(Sepal.Length~Species,data=data)
-f2 <- function(data,...) lm(Sepal.Length~Species+Petal.Length,data=data)
-x <- cv(list(m0=f0,m1=f1,m2=f2),rep=10, data=iris, formula=Sepal.Length~.)
+m <- list(predictor_glm(Sepal.Length~1),
+          predictor_glm(Sepal.Length~Species),
+          predictor_glm(Sepal.Length~Species + Petal.Length))
+x <- cv(m, rep=10, data=iris)
 x
 }
 \seealso{
