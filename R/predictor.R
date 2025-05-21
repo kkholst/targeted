@@ -240,6 +240,7 @@ predictor_svm <- function(formula,
 #' @export
 #' @inherit predictor
 #' @inheritParams superlearner
+#' @seealso [cv.predictor_sl]
 #' @param ... Additional arguments to [superlearner]
 #' @examples
 #' sim1 <- function(n = 5e2) {

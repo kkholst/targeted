@@ -3,7 +3,6 @@
 \name{cv.default}
 \alias{cv.default}
 \alias{cv}
-\alias{cv.predictor_sl}
 \title{Cross-validation}
 \usage{
 \method{cv}{default}(

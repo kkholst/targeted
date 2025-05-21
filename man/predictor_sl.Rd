@@ -74,3 +74,6 @@ cvres
 # coef(cvres)
 # score(cvres)
 }
+\seealso{
+\link{cv.predictor_sl}
+}

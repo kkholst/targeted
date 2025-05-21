@@ -42,7 +42,7 @@ cv <- function(object, ...) UseMethod("cv")
 #' x <- cv(m, rep=10, data=iris)
 #' x
 #' @seealso [cv.predictor_sl]
-#' @aliases cv cv.default cv.predictor_sl
+#' @aliases cv cv.default
 #' @export
 cv.default <- function(object,
                        data,
@@ -324,7 +324,12 @@ score_sl <- function(response,
   return(res)
 }
 
+#' Cross-validation for [predictor_sl]
+#' @description #TODO: Some description
+#' @param object (predictor_sl) Instantiated [predictor_sl] object.
 #' @export
+#' @inheritParams cv.default
+#' @examples # TODO: add example
 cv.predictor_sl <- function(object,
                             data,
                             nfolds = 5,
