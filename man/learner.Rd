@@ -2,7 +2,6 @@
 % Please edit documentation in R/ml_model.R
 \name{learner}
 \alias{learner}
-\alias{predictor_gam}
 \alias{predictor_grf}
 \alias{predictor_grf_binary}
 \alias{predictor_isoreg}
@@ -17,7 +16,7 @@
 \title{R6 class for prediction models}
 \description{
 Interface for standardized estimation and prediction The
-following built-in learners are provided: \link{learner_glm}, \link{predictor_gam}
+following built-in learners are provided: \link{learner_glm}, \link{learner_gam}
 }
 \examples{
 data(iris)

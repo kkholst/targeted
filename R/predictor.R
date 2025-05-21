@@ -145,8 +145,12 @@ predictor_hal <- function(formula,
   return(mod)
 }
 
+#' @description [learner] generator function for [mgcv::gam].
 #' @export
-predictor_gam <- function(formula,
+#' @param ... Additional arguments to [mgcv::gam].
+#' @inherit learner_shared
+#' @inheritParams mgcv::gam
+learner_gam <- function(formula,
                           info = "mgcv::gam",
                           family = gaussian(),
                           select = FALSE,
