@@ -253,6 +253,7 @@ predictor_svm <- function(formula,
 #' @export
 #' @inherit learner_shared
 #' @inheritParams superlearner
+#' @seealso [cv.predictor_sl]
 #' @param ... Additional arguments to [superlearner]
 #' @examples
 #' sim1 <- function(n = 5e2) {
@@ -282,7 +283,7 @@ predictor_svm <- function(formula,
 #' # weights(s$fit)
 #' # score(s$fit)
 #'
-#' cvres <- summary(s, data = d, nfolds = 3, rep = 2)
+#' cvres <- cv(s, data = d, nfolds = 3, rep = 2)
 #' cvres
 #' # coef(cvres)
 #' # score(cvres)
@@ -323,70 +324,6 @@ predictor_sl <- function(learners,
   attr(mod, "model.score") <- model.score
   class(mod) <- c("predictor_sl", class(mod))
   return(mod)
-}
-
-score_sl <- function(response,
-                     newdata,
-                     object,
-                     model.score = mse,
-                     ...) {
-  pr.all <- object$predict(newdata, all.learners = TRUE)
-  pr <- object$predict(newdata)
-  risk.all <- apply(pr.all, 2, function(x) model.score(x, response)[1])
-  risk <- model.score(response, pr)[1]
-  nam <- names(risk)
-  if (is.null(nam)) nam <- "score"
-  nam <- paste0(nam, ".")
-  res <- c(risk, risk.all)
-  names(res)[1] <- "sl"
-  nn <- names(res)
-  names(res) <- paste0(nam, nn)
-  w <- c(NA, weights(object$fit))
-  names(w) <- paste0("weight.", nn)
-  return(c(res, w))
-}
-
-#' @export
-summary.predictor_sl <- function(object,
-                                 data,
-                                 nfolds = 5,
-                                 rep = 1,
-                                 model.score = mse,
-                                 ...) {
-  res <- cv(list("performance"=object),
-            data = data,
-            nfolds = nfolds, rep = rep,
-            model.score = function(...) score_sl(..., model.score = model.score)
-            )
-  nam <- dimnames(res$cv)
-  nam <- nam[[length(nam)]]
-  st <- strsplit(c(nam[1], tail(nam, 1)), "\\.")
-  type <- unlist(lapply(st, \(x) x[1]))
-  n <- length(nam)/2
-  nam <- gsub(paste0(type[1], "\\."), "", nam[seq_len(n)])
-  score <- res$cv[, , , 1:n, drop=FALSE]
-  weight <- res$cv[, , , (n+1):(2*n), drop=FALSE]
-  cvs <- abind::abind(score, weight, along=3)
-  dimnames(cvs)[[4]] <- nam
-  dimnames(cvs)[[3]] <- type
-  cvs <- aperm(cvs, c(1, 2, 4, 3))
-  res$names <- nam
-  res$cv <- cvs
-  res$call <- NULL
-  class(res) <- c("summary.predictor_sl", "cross_validated")
-  return(res)
-}
-
-#' @export
-print.summary.predictor_sl <- function(x, digits=5, ...) {
-  res <- round(summary.cross_validated(x)*1e5, digits=0) / 1e5
-  cat(x$fold, "-fold cross-validation", sep="")
-  if (x$rep > 1) cat(" with ", x$rep, " repetitions", sep="")
-  cat("\n\n")
-  cli::cli_h3(dimnames(res)[[3]][2])
-  print(res[, , 2], na.print="-")
-  cli::cli_h3(dimnames(res)[[3]][1])
-  print(res[, , 1], na.print="-")
 }
 
 #' @export
