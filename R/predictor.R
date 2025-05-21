@@ -62,7 +62,7 @@ learner_glm <- function(formula,
     args <- c(list(object, newdata = newdata), dots)
     do.call(stats::predict, args)
   }
-  mod <- do.call(ml_model$new, args)
+  mod <- do.call(learner$new, args)
 
   return(mod)
 }
