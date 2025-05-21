@@ -1,8 +1,7 @@
 #' @title Instantiate a learner
 #' @param info (character) Optional information to describe the instantiated
 #' [learner] object.
-#' @param formula (formula or character) Formula specifying response and design
-#' matrix.
+#' @param formula (formula) Formula specifying response and design matrix.
 #' @param learner.args (list) Additional arguments to
 #' [learner$new()][learner].
 #' @return [learner] object.

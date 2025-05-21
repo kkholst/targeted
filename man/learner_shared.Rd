@@ -7,8 +7,7 @@
 \item{info}{(character) Optional information to describe the instantiated
 \link{learner} object.}
 
-\item{formula}{(formula or character) Formula specifying response and design
-matrix.}
+\item{formula}{(formula) Formula specifying response and design matrix.}
 
 \item{learner.args}{(list) Additional arguments to
 \link[=learner]{learner$new()}.}

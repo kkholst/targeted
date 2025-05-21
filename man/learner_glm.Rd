@@ -13,8 +13,7 @@ learner_glm(
 )
 }
 \arguments{
-\item{formula}{(formula or character) Formula specifying response and design
-matrix.}
+\item{formula}{(formula) Formula specifying response and design matrix.}
 
 \item{info}{(character) Optional information to describe the instantiated
 \link{learner} object.}

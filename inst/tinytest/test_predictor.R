@@ -25,7 +25,6 @@ test_learner_glm <- function() {
   fit_ref <- glm(y ~ x1, data = d)
   lr <- learner_glm(y ~ x1)
   lr$estimate(d)
-
   expect_equal(coef(lr$fit), coef(fit_ref))
 
   # poisson regression with offset
