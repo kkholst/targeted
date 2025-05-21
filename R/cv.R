@@ -325,11 +325,26 @@ score_sl <- function(response,
 }
 
 #' Cross-validation for [predictor_sl]
-#' @description #TODO: Some description
+#' @description Cross-validation estimation of the generalization error of the
+#'   super learner and each of the separate models in the ensemble. Both the
+#'   chosen model scoring metrics as well as the model weights of the stacked
+#'   ensemble.
 #' @param object (predictor_sl) Instantiated [predictor_sl] object.
 #' @export
 #' @inheritParams cv.default
-#' @examples # TODO: add example
+#' @examples
+#' sim1 <- function(n = 5e2) {
+#'    x1 <- rnorm(n, sd = 2)
+#'    x2 <- rnorm(n)
+#'    y <- x1 + cos(x1) + rnorm(n, sd = 0.5**.5)
+#'    data.frame(y, x1, x2)
+#' }
+#' sl <- predictor_sl(list(
+#'                    "mean" = predictor_glm(y ~ 1),
+#'                    "glm" = predictor_glm(y ~ x1),
+#'                    "glm2" = predictor_glm(y ~ x1 + x2)
+#'                   ))
+#' cv(sl, data = sim1(), rep = 2)
 cv.predictor_sl <- function(object,
                             data,
                             nfolds = 5,

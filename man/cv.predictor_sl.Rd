@@ -23,8 +23,22 @@ include weights, object and newdata arguments}
 \item{...}{Additional arguments parsed to elements in \code{object}}
 }
 \description{
-#TODO: Some description
+Cross-validation estimation of the generalization error of the
+super learner and each of the separate models in the ensemble. Both the
+chosen model scoring metrics as well as the model weights of the stacked
+ensemble.
 }
 \examples{
-# TODO: add example
+sim1 <- function(n = 5e2) {
+   x1 <- rnorm(n, sd = 2)
+   x2 <- rnorm(n)
+   y <- x1 + cos(x1) + rnorm(n, sd = 0.5**.5)
+   data.frame(y, x1, x2)
+}
+sl <- predictor_sl(list(
+                   "mean" = predictor_glm(y ~ 1),
+                   "glm" = predictor_glm(y ~ x1),
+                   "glm2" = predictor_glm(y ~ x1 + x2)
+                  ))
+cv(sl, data = sim1(), rep = 2)
 }
