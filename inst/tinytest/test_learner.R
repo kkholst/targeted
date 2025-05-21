@@ -7,14 +7,14 @@ ddata$y <- with(ddata, x1 * 2 - x2 + rnorm(n))
 ddata_count <- data.frame(x = rnorm(n), w = rep(c(1, 2), length.out = n))
 ddata_count$y <- with(ddata_count, rpois(n, exp(2 + 0.5 * x) * w))
 
-# test various ways to initialize an ml_model
+# test various ways to initialize an learner object
 test_initialize <- function() {
   # formula supplied + used in estimate function
-  m1 <- ml_model$new(formula = y ~ -1 + x1 + x2, estimate = glm)
+  m1 <- learner$new(formula = y ~ -1 + x1 + x2, estimate = glm)
   m1$estimate(ddata)
 
   # formula supplied + not used in estimate function -> use targeted::design
-  m2 <- ml_model$new(
+  m2 <- learner$new(
     formula = y ~ x1 + x2,
     estimate = glm.fit,
     predict = \(object, newdata) newdata %*% object$coefficients
@@ -24,7 +24,7 @@ test_initialize <- function() {
   expect_equal(m1$predict(newdata = ddata), m2$predict(newdata = ddata)[, 1])
 
   # no formula supplied but passed when estimating models
-  m3 <- ml_model$new(
+  m3 <- learner$new(
     estimate = \(formula, data) glm(formula, data = data)
   )
   m3$estimate(data = ddata, formula = y ~ -1 + x1 + x2)
@@ -32,7 +32,7 @@ test_initialize <- function() {
   expect_equal(m1$predict(newdata = ddata), m3$predict(newdata = ddata))
 
   # test response.arg and x.arg work as expected
-  m4 <- ml_model$new(
+  m4 <- learner$new(
     formula = y ~ x1 + x2,
     estimate = \(yy, xx) glm.fit(y = yy, x = xx),
     predict = \(object, newdata) newdata %*% object$coefficients,
@@ -46,7 +46,7 @@ test_initialize <- function() {
   ww <- rep(c(0, 1), length.out = n)
   fit <- glm(y ~ -1 + x1 + x2, data = ddata, weights = ww)
 
-  m1_weights <- ml_model$new(
+  m1_weights <- learner$new(
     formula = y ~ -1 + x1 + x2, estimate = glm,
     estimate.args = list(weights = ww)
   )
@@ -56,7 +56,7 @@ test_initialize <- function() {
   expect_false(all(coef(m1_weights$fit) == coef(m1$fit)))
 
   # test that predict.args are passed on correctly to predict function
-  m_count <- ml_model$new(
+  m_count <- learner$new(
     formula = y ~ x + offset(w), estimate = glm,
     estimate.args = list(family = poisson),
     predict.args = list(type = "response")
@@ -75,7 +75,7 @@ test_initialize()
 test_estimate <- function() {
   # verify that optional arguments are passed on to fitfun
   ww <- rep(c(0, 1), length.out = n)
-  m1 <- ml_model$new(formula = y ~ x1 + x2, estimate = glm)
+  m1 <- learner$new(formula = y ~ x1 + x2, estimate = glm)
   fit_ml <- m1$estimate(ddata, weights = ww)
 
   fit_glm <- glm(y ~ x1 + x2, data = ddata, weights = ww)
@@ -84,14 +84,14 @@ test_estimate <- function() {
   expect_equal(coef(fit_ml), coef(fit_glm))
 
   # arguments to fitfun when supplied during initialization can be overriden
-  m2 <- ml_model$new(formula = y ~ x1 + x2, estimate = glm,
+  m2 <- learner$new(formula = y ~ x1 + x2, estimate = glm,
     estimate.args = list(weights = rep(1, n))
   )
   m2$estimate(data = ddata, weights = ww)
   expect_equal(coef(m2$fit), coef(fit_glm))
 
   # test estimate function which takes x, y as arguments
-  m3 <- ml_model$new(formula = y ~ x1 + x2, estimate = glm.fit,
+  m3 <- learner$new(formula = y ~ x1 + x2, estimate = glm.fit,
     intercept = TRUE, estimate.args = list(weights = ww)
   ) # intercept = TRUE is required because no intercept is added when deriving
   # the design matrix from the provided formula argument
@@ -103,7 +103,7 @@ test_estimate <- function() {
   expect_true(all(coef(m3$fit) != coef(fit_glm)))
 
   # specials are correctly handled for estimating method with x, y arguments
-  m4 <- ml_model$new(formula = y ~ x + offset(log(w)), estimate = glm.fit,
+  m4 <- learner$new(formula = y ~ x + offset(log(w)), estimate = glm.fit,
     intercept = TRUE, specials = "offset",
     estimate.args = list(family = poisson())
   )
@@ -113,7 +113,7 @@ test_estimate <- function() {
 
   # it is currently not possible for the estimate method call to pass arguments
   # to targeted::design inside the fitfun
-  m4 <- ml_model$new(formula = y ~ x + offset(log(w)), estimate = glm.fit,
+  m4 <- learner$new(formula = y ~ x + offset(log(w)), estimate = glm.fit,
     intercept = TRUE, estimate.args = list(family = poisson())
   )
   m4$estimate(ddata_count, specials = c("offset"))
@@ -122,7 +122,7 @@ test_estimate <- function() {
   # ml model can also be used with a formula argument. verify that family
   # argument is passed correctly on to fitfun upon initialization + offset
   # during method call
-  m4 <- ml_model$new(
+  m4 <- learner$new(
     estimate = glm.fit, estimate.args = list(family = poisson())
   )
   .design <- design(y ~ x + offset(log(w)), ddata_count, intercept = TRUE)
@@ -135,7 +135,7 @@ test_estimate()
 test_predict <- function() {
   fit_glm <- glm(y ~ x + offset(w), family = poisson, data = ddata_count)
 
-  m <- ml_model$new(
+  m <- learner$new(
     formula = y ~ x + offset(w), estimate = glm,
     estimate.args = list(family = poisson)
   )
@@ -154,7 +154,7 @@ test_predict <- function() {
   )
 
   # error when trying to override predict.args during predict method call
-  m1 <- ml_model$new(
+  m1 <- learner$new(
     formula = y ~ x + offset(w), estimate = glm,
     estimate.args = list(family = poisson),
     predict.args = list(type = "link")
@@ -168,22 +168,22 @@ test_predict <- function() {
 test_predict()
 
 test_design <- function() {
-  m <- ml_model$new(formula = y ~ x1 + x2, estimate = glm.fit, intercept = TRUE)
+  m <- learner$new(formula = y ~ x1 + x2, estimate = glm.fit, intercept = TRUE)
   m$estimate(ddata)
 
   # options defined for targeted::design upon ml model initialization are passed
   # on to method call
-  fit <- glm.fit(x = m$design(ddata), y = m$response(ddata))
+  fit <- glm.fit(x = m$design(ddata)$x, y = m$response(ddata))
   expect_equal(coef(m$fit), coef(fit))
 
   # defined options can be overruled during method call
-  fit <- glm.fit(x = m$design(ddata, intercept = FALSE), y = m$response(ddata))
+  fit <- glm.fit(x = m$design(ddata, intercept = FALSE)$x, y = m$response(ddata))
   expect_false("(Intercept)" %in% names(coef(fit)))
 }
 test_design()
 
 test_update <- function() {
-  lr <- ml_model$new(formula = y ~ -1 + x1 + x2, estimate = glm)
+  lr <- learner$new(formula = y ~ -1 + x1 + x2, estimate = glm)
   lr$update(y ~ x1)
   lr$estimate(ddata)
 
