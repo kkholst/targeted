@@ -135,6 +135,34 @@ test_predictor_sl <- function() {
 test_predictor_sl()
 
 test_learner_glmnet <- function() {
-  NULL
+  # nfolds = 1 -> test glmnet::glmnet
+  lr <- learner_glmnet(y ~ x1 + x2, nfolds = 1)
+  lr$estimate(d)
+
+  # verify that nfolds = 1 uses glmnet::glmnet
+  expect_true(inherits(lr$fit, "glmnet"))
+
+  # arguments to estimate method are passed on to underlying fit function
+  lr$estimate(d, lambda = c(2, 1))
+  expect_equal(lr$fit$lambda, c(2, 1))
+
+  # argument can also be specified in function call
+  lr <- learner_glmnet(y ~ x1 + x2, nfolds = 1, lambda = c(2, 1))
+  lr$estimate(d)
+  expect_equal(lr$fit$lambda, c(2, 1))
+
+  # argument can also be overwritten when set during function call
+  lr$estimate(d, lambda = c(3, 2, 1))
+  expect_equal(lr$fit$lambda, c(3, 2, 1))
+
+  # nlambda is passed on to estimate.args via ... in learner_glmnet
+  lr <- learner_glmnet(y ~ x1 + x2, nfolds = 1, nlambda = 3)
+  lr$estimate(d)
+  expect_equal(length(lr$fit$lambda), 3)
+
+  # family argument is passed on correctly
+  d0 <- dcount
+  d0$xx <- rnorm(nrow(d0))
+  lr <- learner_glmnet(y ~ x + xx, nfolds = 1, family = "poisson")
 }
 test_learner_glmnet()

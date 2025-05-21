@@ -79,19 +79,18 @@ learner_glmnet <- function(formula,
                              learner.args = NULL,
                              ...) {
   args <- c(learner.args, list(formula = formula, info = info))
-  args$estimate.args <- list(alpha = alpha, lambda = lambda, nfolds = nfolds,
-    family = family)
-  args$estimate <- function(y, x, ..., nfolds, family) {
+  args$estimate.args <- c(list(alpha = alpha, lambda = lambda, nfolds = nfolds,
+    family = family), list(...))
+  args$estimate <- function(y, x, ..., nfolds) {
     if (nfolds > 1L) {
-      return(glmnet::cv.glmnet(
-        x = x, y = y, nfolds = nfolds, family = family, ...
-      ))
+      return(glmnet::cv.glmnet(x = x, y = y, nfolds = nfolds, ...))
     }
     return(glmnet::glmnet(x = x, y = y, ...))
   }
   args$predict <- function(object, newdata, ...) {
-    args <- c(object, list(newx = newdata), list(...))
-    args[c("type", "s")] <- list(type = "response", s = "lambda.min")
+    args <- c(list(object, newx = newdata, type = "response", s = "lambda.min"))
+    args[...names()] <- list(...)
+
     return(do.call(predict, args))
   }
   return(do.call(learner$new, args))
