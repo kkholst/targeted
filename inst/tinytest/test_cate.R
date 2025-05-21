@@ -27,8 +27,8 @@ simcate <- function(qmod) {
   )
   e1 <- true_estimate1(q1)
   aa <- cate(
-    predictor_glm(qmod),
-    predictor_glm(a ~ x, family = binomial),
+    learner_glm(qmod),
+    learner_glm(a ~ x, family = binomial),
     data = d, nfolds = 1
   ) |> estimate()
 
@@ -49,8 +49,8 @@ test_cate_deprecated_arguments <- function() {
   # expected
   expect_warning(
     aa1 <- cate(
-      response_model = predictor_glm(qmod),
-      propensity.model = predictor_glm(a ~ x, family = binomial),
+      response_model = learner_glm(qmod),
+      propensity.model = learner_glm(a ~ x, family = binomial),
       data = d
     ) |> estimate(),
     pattern = "Please use the `response.model` argument instead"
@@ -59,8 +59,8 @@ test_cate_deprecated_arguments <- function() {
 
   expect_warning(
     aa2 <- cate(
-      response.model = predictor_glm(qmod),
-      propensity_model = predictor_glm(a ~ x, family = binomial),
+      response.model = learner_glm(qmod),
+      propensity_model = learner_glm(a ~ x, family = binomial),
       data = d
     ) |> estimate(),
     pattern = "Please use the `propensity.model` argument instead"
@@ -69,8 +69,8 @@ test_cate_deprecated_arguments <- function() {
 
   # user is informed when deprecated treatment argument is used
   expect_warning(aa4 <- cate(
-    response.model = predictor_glm(qmod),
-    propensity.model = predictor_glm(a ~ x, family = binomial),
+    response.model = learner_glm(qmod),
+    propensity.model = learner_glm(a ~ x, family = binomial),
     treatment = ~ 1,
     data = d) |> estimate(),
     pattern = "Please use the `cate.model` argument instead"
@@ -79,8 +79,8 @@ test_cate_deprecated_arguments <- function() {
 
   # same with cate_model argument
   expect_warning(aa4 <- cate(
-    response.model = predictor_glm(qmod),
-    propensity.model = predictor_glm(a ~ x, family = binomial),
+    response.model = learner_glm(qmod),
+    propensity.model = learner_glm(a ~ x, family = binomial),
     cate_model = ~ 1,
     data = d) |> estimate(),
     pattern = "Please use the `cate.model` argument instead"
@@ -91,8 +91,8 @@ test_cate_deprecated_arguments <- function() {
   # together
   expect_error(
     cate(
-      response.model = predictor_glm(qmod),
-      propensity.model = predictor_glm(a ~ x, family = binomial),
+      response.model = learner_glm(qmod),
+      propensity.model = learner_glm(a ~ x, family = binomial),
       cate.model = ~2,
       treatment = ~1,
       data = d

@@ -1,23 +1,23 @@
 #' @title Instantiate a learner
 #' @param info (character) Optional information to describe the instantiated
-#' [ml_model] object.
+#' [learner] object.
 #' @param formula (formula or character) Formula specifying response and design
 #' matrix.
 #' @param learner.args (list) Additional arguments to
-#' [ml_model$new()][ml_model].
-#' @return [ml_model] object.
-#' @name predictor
+#' [learner$new()][learner].
+#' @return [learner] object.
+#' @name learner_shared
 NULL
 
 
-#' @description [ml_model] generator function for generalized linear models with
+#' @description [learner] generator function for generalized linear models with
 #' [stats::glm] and [MASS::glm.nb]. Negative binomial regression is supported
 #' with `family = "nb"` (or alternatively `family = "negbin"`).
 #' @param ... Additional arguments to [stats::glm] or [MASS::glm.nb].
 #' @export
-#' @inherit predictor
+#' @inherit learner_shared
 #' @inheritParams stats::glm
-predictor_glm <- function(formula,
+learner_glm <- function(formula,
                           info = "glm",
                           family = gaussian(),
                           learner.args = NULL,
@@ -54,7 +54,7 @@ predictor_glm <- function(formula,
 #' @description [ml_model] generator function for [glmnet::cv.glmnet]. Defaults
 #' to [glmnet::glmnet] for `nfolds = 1`.
 #' @export
-#' @inherit predictor
+#' @inherit learner_shared
 #' @inheritParams glmnet::glmnet
 #' @inheritParams glmnet::cv.glmnet
 predictor_glmnet <- function(formula,
@@ -100,7 +100,7 @@ predictor_glmnet <- function(formula,
 #' @description [ml_model] generator function for [hal9001::fit_hal].
 #' @export
 #' @param ... Additional arguments to [hal9001::fit_hal].
-#' @inherit predictor
+#' @inherit learner_shared
 #' @inheritParams hal9001::fit_hal
 predictor_hal <- function(formula,
                           info = "hal9001::fit_hal",
@@ -238,7 +238,7 @@ predictor_svm <- function(formula,
 
 #' @description [learner] generator function for [superlearner]
 #' @export
-#' @inherit predictor
+#' @inherit learner_shared
 #' @inheritParams superlearner
 #' @param ... Additional arguments to [superlearner]
 #' @examples
@@ -251,8 +251,8 @@ predictor_svm <- function(formula,
 #' d <- sim1()
 #'
 #' m <- list(
-#'   "mean" = predictor_glm(y ~ 1),
-#'   "glm" = predictor_glm(y ~ x1 + x2),
+#'   "mean" = learner_glm(y ~ 1),
+#'   "glm" = learner_glm(y ~ x1 + x2),
 #'   "iso" = predictor_isoreg(y ~ x1)
 #' )
 #'

@@ -1,6 +1,6 @@
 #' @title R6 class for prediction models
 #' @description Interface for standardized estimation and prediction The
-#' following built-in learners are provided: [predictor_glm], [predictor_gam]
+#' following built-in learners are provided: [learner_glm], [predictor_gam]
 #' @param data data.frame
 #' @author Klaus Kähler Holst, Benedikt Sommer
 #' @aliases predictor_gam predictor_grf predictor_grf_binary predictor_isoreg

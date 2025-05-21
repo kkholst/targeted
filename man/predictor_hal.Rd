@@ -18,7 +18,7 @@ predictor_hal(
 matrix.}
 
 \item{info}{(character) Optional information to describe the instantiated
-\link{ml_model} object.}
+\link{learner} object.}
 
 \item{smoothness_orders}{An \code{integer}, specifying the smoothness of the
 basis functions. See details for \code{smoothness_orders} for more
@@ -47,7 +47,7 @@ calling \code{fit_hal}.}
 \item{...}{Additional arguments to \link[hal9001:fit_hal]{hal9001::fit_hal}.}
 }
 \value{
-\link{ml_model} object.
+\link{learner} object.
 }
 \description{
 \link{ml_model} generator function for \link[hal9001:fit_hal]{hal9001::fit_hal}.

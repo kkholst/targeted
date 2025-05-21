@@ -18,7 +18,7 @@ superlearner(
 )
 }
 \arguments{
-\item{learners}{(list) List of \link{learner} objects (i.e. \link{predictor_glm})}
+\item{learners}{(list) List of \link{learner} objects (i.e. \link{learner_glm})}
 
 \item{data}{(data.frame) Data containing the response variable and
 covariates.}
@@ -66,8 +66,8 @@ sim1 <- function(n = 5e2) {
    data.frame(y, x1, x2)
 }
 m <- list(
-  "mean" = predictor_glm(y ~ 1),
-  "glm" = predictor_glm(y ~ x1 + x2)
+  "mean" = learner_glm(y ~ 1),
+  "glm" = learner_glm(y ~ x1 + x2)
 )
 sl <- superlearner(m, data = sim1(), nfolds = 2)
 predict(sl, newdata = sim1(n = 5))

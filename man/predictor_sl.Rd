@@ -15,10 +15,10 @@ predictor_sl(
 )
 }
 \arguments{
-\item{learners}{(list) List of \link{learner} objects (i.e. \link{predictor_glm})}
+\item{learners}{(list) List of \link{learner} objects (i.e. \link{learner_glm})}
 
 \item{info}{(character) Optional information to describe the instantiated
-\link{ml_model} object.}
+\link{learner} object.}
 
 \item{nfolds}{(integer) Number of folds to use in cross-validation to
 estimate the ensemble weights.}
@@ -31,12 +31,12 @@ p being the number of learners.}
 \item{model.score}{(function) Model scoring method (see \link{learner})}
 
 \item{learner.args}{(list) Additional arguments to
-\link[=ml_model]{ml_model$new()}.}
+\link[=learner]{learner$new()}.}
 
 \item{...}{Additional arguments to \link{superlearner}}
 }
 \value{
-\link{ml_model} object.
+\link{learner} object.
 }
 \description{
 \link{learner} generator function for \link{superlearner}
@@ -51,8 +51,8 @@ sim1 <- function(n = 5e2) {
 d <- sim1()
 
 m <- list(
-  "mean" = predictor_glm(y ~ 1),
-  "glm" = predictor_glm(y ~ x1 + x2),
+  "mean" = learner_glm(y ~ 1),
+  "glm" = learner_glm(y ~ x1 + x2),
   "iso" = predictor_isoreg(y ~ x1)
 )
 
