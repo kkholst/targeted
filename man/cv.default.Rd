@@ -75,9 +75,9 @@ is a named list with a single data.frame/matrix then this name will be used
 as the name of the data/design matrix argument in models.
 }
 \examples{
-m <- list(predictor_glm(Sepal.Length~1),
-          predictor_glm(Sepal.Length~Species),
-          predictor_glm(Sepal.Length~Species + Petal.Length))
+m <- list(learner_glm(Sepal.Length~1),
+          learner_glm(Sepal.Length~Species),
+          learner_glm(Sepal.Length~Species + Petal.Length))
 x <- cv(m, rep=10, data=iris)
 x
 }

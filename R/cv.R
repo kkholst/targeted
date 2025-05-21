@@ -36,9 +36,9 @@ cv <- function(object, ...) UseMethod("cv")
 #' is a named list with a single data.frame/matrix then this name will be used
 #' as the name of the data/design matrix argument in models.
 #' @examples
-#' m <- list(predictor_glm(Sepal.Length~1),
-#'           predictor_glm(Sepal.Length~Species),
-#'           predictor_glm(Sepal.Length~Species + Petal.Length))
+#' m <- list(learner_glm(Sepal.Length~1),
+#'           learner_glm(Sepal.Length~Species),
+#'           learner_glm(Sepal.Length~Species + Petal.Length))
 #' x <- cv(m, rep=10, data=iris)
 #' x
 #' @seealso [cv.predictor_sl]
@@ -340,9 +340,9 @@ score_sl <- function(response,
 #'    data.frame(y, x1, x2)
 #' }
 #' sl <- predictor_sl(list(
-#'                    "mean" = predictor_glm(y ~ 1),
-#'                    "glm" = predictor_glm(y ~ x1),
-#'                    "glm2" = predictor_glm(y ~ x1 + x2)
+#'                    "mean" = learner_glm(y ~ 1),
+#'                    "glm" = learner_glm(y ~ x1),
+#'                    "glm2" = learner_glm(y ~ x1 + x2)
 #'                   ))
 #' cv(sl, data = sim1(), rep = 2)
 cv.predictor_sl <- function(object,

@@ -36,9 +36,9 @@ sim1 <- function(n = 5e2) {
    data.frame(y, x1, x2)
 }
 sl <- predictor_sl(list(
-                   "mean" = predictor_glm(y ~ 1),
-                   "glm" = predictor_glm(y ~ x1),
-                   "glm2" = predictor_glm(y ~ x1 + x2)
+                   "mean" = learner_glm(y ~ 1),
+                   "glm" = learner_glm(y ~ x1),
+                   "glm2" = learner_glm(y ~ x1 + x2)
                   ))
 cv(sl, data = sim1(), rep = 2)
 }
