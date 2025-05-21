@@ -110,39 +110,44 @@ predictor_glmnet <- function(formula,
   return(mod)
 }
 
-#' @description [ml_model] generator function for [hal9001::fit_hal].
+#' @description [learner] generator function for [hal9001::fit_hal].
 #' @export
 #' @param ... Additional arguments to [hal9001::fit_hal].
 #' @inherit learner_shared
 #' @inheritParams hal9001::fit_hal
-predictor_hal <- function(formula,
-                          info = "hal9001::fit_hal",
-                          smoothness_orders = 0,
-                          reduce_basis = NULL,
-                          family = "gaussian",
-                          ...) {
-  est <- function(y, x, ...) {
-    return(hal9001::fit_hal(X = x, Y = y, ...))
-  }
-  pred <- function(fit, newdata, offset = NULL, ...) {
-    res <- predict(fit,
-      new_data = newdata,
-      offset = offset,
-      type = "response"
-    )
-    return(res)
-  }
-  mod <- ml_model$new(formula = formula,
-             estimate = est,
-             predict = pred,
-             info = info,
-             specials = c("weights", "offset"),
-             smoothness_orders = smoothness_orders,
-             reduce_basis = reduce_basis,
-             family = family,
-             ...
+#' @examples
+#' n <- 5e2
+#' x1 <- rnorm(n, sd = 2)
+#' x2 <- rnorm(n)
+#' y <- x1 + cos(x1) + rnorm(n, sd = 0.5**.5)
+#' d <- data.frame(y, x1, x2)
+#' lr <- learner_hal(y ~ x1 + x2, smoothness_orders = 0.5, reduce_basis = 1)
+#' lr$estimate(d)
+#' lr$predict(data.frame(x1 = 0, x2 = c(-1, 1)))
+learner_hal <- function(formula,
+                        info = "hal9001::fit_hal",
+                        smoothness_orders = 0,
+                        reduce_basis = NULL,
+                        family = "gaussian",
+                        learner.args = NULL,
+                        ...) {
+  args <- c(learner.args, list(formula = formula, info = info))
+  # ensure that offset is always added as a special to be handled by
+  # targeted::design
+  args$specials <- union(args$specials, c("weights", "offset"))
+  args$estimate.args <- c(list(
+    smoothness_orders = smoothness_orders,
+    reduce_basis = reduce_basis,
+    family = family
+  ), list(...)
   )
-  return(mod)
+  args$estimate <- function(y, x, ...) hal9001::fit_hal(X = x, Y = y, ...)
+  args$predict <- function(fit, newdata, ...) {
+    args <- list(fit, new_data = newdata, type = "response")
+    args[...names()] <- list(...)
+    do.call(predict, args)
+  }
+  return(do.call(learner$new, args))
 }
 
 #' @export
