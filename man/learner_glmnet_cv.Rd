@@ -6,7 +6,7 @@
 \usage{
 learner_glmnet_cv(
   formula,
-  info = "glmnet",
+  info = "glmnet::cv.glmnet",
   family = gaussian(),
   lambda = NULL,
   alpha = 1,

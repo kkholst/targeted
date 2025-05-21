@@ -92,7 +92,7 @@ learner_glm <- function(formula, info = "glm", family = gaussian(),
 #' lr$estimate(d0, nfolds = 3)
 #' lr$predict(data.frame(x1 = 1, x2 = 1, w = c(1, 5)))
 learner_glmnet_cv <- function(formula,
-                              info = "glmnet",
+                              info = "glmnet::cv.glmnet",
                               family = gaussian(),
                               lambda = NULL,
                               alpha = 1, ## Elastic net (1 is lasso, 0 is L2)
