@@ -133,3 +133,8 @@ test_predictor_sl <- function() {
   expect_equal(length(lr$fit$folds), 3)
 }
 test_predictor_sl()
+
+test_learner_glmnet <- function() {
+  NULL
+}
+test_learner_glmnet()

@@ -64,50 +64,37 @@ learner_glm <- function(formula, info = "glm", family = gaussian(),
   return(mod)
 }
 
-#' @description [ml_model] generator function for [glmnet::cv.glmnet]. Defaults
+#' @description [learner] generator function for [glmnet::cv.glmnet]. Defaults
 #' to [glmnet::glmnet] for `nfolds = 1`.
 #' @export
 #' @inherit learner_shared
 #' @inheritParams glmnet::glmnet
 #' @inheritParams glmnet::cv.glmnet
-predictor_glmnet <- function(formula,
+learner_glmnet <- function(formula,
                              info = "glmnet",
                              family = gaussian(),
                              alpha = 1, ## Elastic net (1 is lasso, 0 is L2)
                              lambda = NULL, ## penalty
                              nfolds = 10,
+                             learner.args = NULL,
                              ...) {
-  est <- function(y, x, ..., nfolds, family) {
+  args <- c(learner.args, list(formula = formula, info = info))
+  args$estimate.args <- list(alpha = alpha, lambda = lambda, nfolds = nfolds,
+    family = family)
+  args$estimate <- function(y, x, ..., nfolds, family) {
     if (nfolds > 1L) {
-      res <- glmnet::cv.glmnet(
-        x = x, y = y,
-        nfolds = nfolds,
-        family = family,
-        ...
-      )
-      return(res)
+      return(glmnet::cv.glmnet(
+        x = x, y = y, nfolds = nfolds, family = family, ...
+      ))
     }
-    return(glmnet::glmnet(x = x, y = y, ...)
-    )
+    return(glmnet::glmnet(x = x, y = y, ...))
   }
-  pred <- function(object, newdata, ...) {
-    res <- predict(object, newx = newdata, family = family, type = "response",
-      s = "lambda.min", ...)
-    return(res)
+  args$predict <- function(object, newdata, ...) {
+    args <- c(object, list(newx = newdata), list(...))
+    args[c("type", "s")] <- list(type = "response", s = "lambda.min")
+    return(do.call(predict, args))
   }
-  mod <- ml_model$new(
-    formula = formula,
-    estimate = est,
-    predict = pred,
-    info = info,
-    family = family,
-    alpha = alpha,
-    lambda = lambda,
-    nfolds = nfolds,
-    ...
-    )
-
-  return(mod)
+  return(do.call(learner$new, args))
 }
 
 #' @description [ml_model] generator function for [hal9001::fit_hal].
