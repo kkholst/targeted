@@ -116,6 +116,7 @@ predictor_glmnet <- function(formula,
 #' @inherit learner_shared
 #' @inheritParams hal9001::fit_hal
 #' @examples
+#' \dontrun{
 #' n <- 5e2
 #' x1 <- rnorm(n, sd = 2)
 #' x2 <- rnorm(n)
@@ -124,6 +125,7 @@ predictor_glmnet <- function(formula,
 #' lr <- learner_hal(y ~ x1 + x2, smoothness_orders = 0.5, reduce_basis = 1)
 #' lr$estimate(d)
 #' lr$predict(data.frame(x1 = 0, x2 = c(-1, 1)))
+#' }
 learner_hal <- function(formula,
                         info = "hal9001::fit_hal",
                         smoothness_orders = 0,
@@ -133,13 +135,15 @@ learner_hal <- function(formula,
                         ...) {
   args <- c(learner.args, list(formula = formula, info = info))
   # ensure that offset is always added as a special to be handled by
-  # targeted::design
+  # targeted::design inside targeted::learner
   args$specials <- union(args$specials, c("weights", "offset"))
-  args$estimate.args <- c(list(
-    smoothness_orders = smoothness_orders,
-    reduce_basis = reduce_basis,
-    family = family
-  ), list(...)
+  args$estimate.args <- c(
+    list(
+      smoothness_orders = smoothness_orders,
+      reduce_basis = reduce_basis,
+      family = family
+    ),
+    list(...)
   )
   args$estimate <- function(y, x, ...) hal9001::fit_hal(X = x, Y = y, ...)
   args$predict <- function(fit, newdata, ...) {

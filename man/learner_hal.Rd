@@ -55,3 +55,15 @@ calling \code{fit_hal}.}
 \description{
 \link{learner} generator function for \link[hal9001:fit_hal]{hal9001::fit_hal}.
 }
+\examples{
+\dontrun{
+n <- 5e2
+x1 <- rnorm(n, sd = 2)
+x2 <- rnorm(n)
+y <- x1 + cos(x1) + rnorm(n, sd = 0.5**.5)
+d <- data.frame(y, x1, x2)
+lr <- learner_hal(y ~ x1 + x2, smoothness_orders = 0.5, reduce_basis = 1)
+lr$estimate(d)
+lr$predict(data.frame(x1 = 0, x2 = c(-1, 1)))
+}
+}
