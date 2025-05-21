@@ -38,3 +38,21 @@ learner_glm(
 \link[stats:glm]{stats::glm} and \link[MASS:glm.nb]{MASS::glm.nb}. Negative binomial regression is supported
 with \code{family = "nb"} (or alternatively \code{family = "negbin"}).
 }
+\examples{
+n <- 5e2
+x <- rnorm(n)
+w <- 50 + rexp(n, rate = 1 / 5)
+y <- rpois(n, exp(2 + 0.5 * x + log(w)) * rgamma(n, 1 / 2, 1 / 2))
+d0 <- data.frame(y, x, w)
+
+lr <- learner_glm(y ~ x) # linear Gaussian model
+lr$estimate(d0)
+coef(lr$fit)
+
+# negative binomial regression model with offset (using MASS::glm.nb)
+lr <- learner_glm(y ~ x + offset(log(w)), family = "nb")
+lr$estimate(d0)
+coef(lr$fit)
+lr$predict(data.frame(x = 1, w = c(1, 5))) # response scale
+lr$predict(data.frame(x = 1, w = c(1, 5)), type = "link") # link scale
+}

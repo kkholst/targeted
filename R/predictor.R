@@ -14,6 +14,23 @@ NULL
 #' with `family = "nb"` (or alternatively `family = "negbin"`).
 #' @param ... Additional arguments to [stats::glm] or [MASS::glm.nb].
 #' @export
+#' @examples
+#' n <- 5e2
+#' x <- rnorm(n)
+#' w <- 50 + rexp(n, rate = 1 / 5)
+#' y <- rpois(n, exp(2 + 0.5 * x + log(w)) * rgamma(n, 1 / 2, 1 / 2))
+#' d0 <- data.frame(y, x, w)
+#'
+#' lr <- learner_glm(y ~ x) # linear Gaussian model
+#' lr$estimate(d0)
+#' coef(lr$fit)
+#'
+#' # negative binomial regression model with offset (using MASS::glm.nb)
+#' lr <- learner_glm(y ~ x + offset(log(w)), family = "nb")
+#' lr$estimate(d0)
+#' coef(lr$fit)
+#' lr$predict(data.frame(x = 1, w = c(1, 5))) # response scale
+#' lr$predict(data.frame(x = 1, w = c(1, 5)), type = "link") # link scale
 #' @inherit learner_shared
 #' @inheritParams stats::glm
 learner_glm <- function(formula,
