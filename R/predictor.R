@@ -33,11 +33,8 @@ NULL
 #' lr$predict(data.frame(x = 1, w = c(1, 5)), type = "link") # link scale
 #' @inherit learner_shared
 #' @inheritParams stats::glm
-learner_glm <- function(formula,
-                          info = "glm",
-                          family = gaussian(),
-                          learner.args = NULL,
-                          ...) {
+learner_glm <- function(formula, info = "glm", family = gaussian(),
+  learner.args = NULL, ...) {
   args <- c(learner.args, list(formula = formula, info = info))
   args$estimate.args <- c(list(family = family), list(...))
   if (is.character(family) && tolower(family) %in% c("nb", "negbin")) {
