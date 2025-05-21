@@ -15,11 +15,10 @@ predictor_glmnet(
 )
 }
 \arguments{
-\item{formula}{(formula or character) Formula specifying response and design
-matrix.}
+\item{formula}{(formula) Formula specifying response and design matrix.}
 
 \item{info}{(character) Optional information to describe the instantiated
-\link{ml_model} object.}
+\link{learner} object.}
 
 \item{family}{Either a character string representing
 one of the built-in families, or else a \code{glm()} family object. For more
@@ -48,7 +47,7 @@ large datasets. Smallest value allowable is \code{nfolds=3}}
 some of the original arguments to 'glmnet', and each must be named if used.}
 }
 \value{
-\link{ml_model} object.
+\link{learner} object.
 }
 \description{
 \link{ml_model} generator function for \link[glmnet:cv.glmnet]{glmnet::cv.glmnet}. Defaults

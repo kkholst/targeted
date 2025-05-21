@@ -100,13 +100,13 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #'
 #' \dontrun{ ## superlearner example
 #' mod1 <- list(
-#'    glm = predictor_glm(y~w1+w2),
+#'    glm = learner_glm(y~w1+w2),
 #'    gam = predictor_gam(y~s(w1) + s(w2))
 #' )
 #' s1 <- predictor_sl(mod1, nfolds=5)
 #' cate(cate.model=~1,
 #'      response.model=s1,
-#'      propensity.model=predictor_glm(a~w1+w2, family=binomial),
+#'      propensity.model=learner_glm(a~w1+w2, family=binomial),
 #'      data=d,
 #'      stratify=TRUE)
 #' }
@@ -174,7 +174,7 @@ cate <- function(response.model, # nolint
 
   desA <- design(cate.model, data, intercept=TRUE, rm_envir=FALSE)
   if (inherits(response.model, "formula")) {
-    response.model <- predictor_glm(response.model)
+    response.model <- learner_glm(response.model)
   }
 
   if (length(contrast) > 2) {
@@ -189,10 +189,10 @@ cate <- function(response.model, # nolint
       paste0(" . - ", response_var),
       response=propensity_outcome(contrast[1])
     )
-    propensity.model <- predictor_glm(newf, family=binomial)
+    propensity.model <- learner_glm(newf, family=binomial)
   }
   if (inherits(propensity.model, "formula")) {
-    propensity.model <- predictor_glm(propensity.model, family = binomial)
+    propensity.model <- learner_glm(propensity.model, family = binomial)
   }
   treatment_var <- lava::getoutcome(propensity.model$formula)
 
