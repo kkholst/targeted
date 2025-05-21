@@ -135,34 +135,47 @@ test_predictor_sl <- function() {
 test_predictor_sl()
 
 test_learner_glmnet <- function() {
-  # nfolds = 1 -> test glmnet::glmnet
-  lr <- learner_glmnet(y ~ x1 + x2, nfolds = 1)
+  lr <- learner_glmnet_cv(y ~ x1 + x2, nfolds = 3, alpha = 0)
   lr$estimate(d)
 
-  # verify that nfolds = 1 uses glmnet::glmnet
-  expect_true(inherits(lr$fit, "glmnet"))
+  # verify that arguments are passed on to glmnet::cv.glmnet
+  expect_equal(lr$fit$call$nfolds, 3)
+  expect_equal(lr$fit$call$alpha, 0)
 
-  # arguments to estimate method are passed on to underlying fit function
-  lr$estimate(d, lambda = c(2, 1))
-  expect_equal(lr$fit$lambda, c(2, 1))
+  # verify that predictions are generated for lambda.min
+  expect_equal(
+    lr$predict(d), lr$predict(d, s = lr$fit$lambda.min)
+  )
+  # predictions can also be obtained for a range of lambda values
+  expect_equal(
+    dim(lr$predict(data.frame(x1 = c(0, 1), x2 = 1), s = 1:3)), c(2, 3)
+  )
 
-  # argument can also be specified in function call
-  lr <- learner_glmnet(y ~ x1 + x2, nfolds = 1, lambda = c(2, 1))
+  # user supplied lambda sequence
+  .lambda <- c(1e3, 1e2, 1e1)
+  lr <- learner_glmnet_cv(y ~ x1 + x2, nfolds = 3, lambda = .lambda)
   lr$estimate(d)
-  expect_equal(lr$fit$lambda, c(2, 1))
+  expect_equal(lr$fit$lambda, .lambda)
 
-  # argument can also be overwritten when set during function call
-  lr$estimate(d, lambda = c(3, 2, 1))
-  expect_equal(lr$fit$lambda, c(3, 2, 1))
+  # estimate.args can be overwritten in method call
+  lr$estimate(d, nfolds = 4)
+  expect_equal(lr$fit$call$nfolds, 4)
 
-  # nlambda is passed on to estimate.args via ... in learner_glmnet
-  lr <- learner_glmnet(y ~ x1 + x2, nfolds = 1, nlambda = 3)
-  lr$estimate(d)
-  expect_equal(length(lr$fit$lambda), 3)
-
-  # family argument is passed on correctly
+  # poisson regression to verify family argument and type argument for predict
+  # method + offset
   d0 <- dcount
   d0$xx <- rnorm(nrow(d0))
-  lr <- learner_glmnet(y ~ x + xx, nfolds = 1, family = "poisson")
+  lr <- learner_glmnet_cv(y ~ x + xx + offset(log(w)), nfolds = 3,
+    family = "poisson"
+  )
+  lr$estimate(d0)
+
+  # verify that offset is handled correctly
+  pr <- lr$predict(data.frame(x = 1, xx = 1, w = c(1, 5)))
+  expect_equal(pr[1] * 5, pr[2])
+
+  # predictions on link scale / verifies that family argument is correctly used
+  pr_link <- lr$predict(data.frame(x = 1, xx = 1, w = c(1, 5)), type = "link")
+  expect_equal(pr, exp(pr_link))
 }
 test_learner_glmnet()
