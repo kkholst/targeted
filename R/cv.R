@@ -1,4 +1,4 @@
-##' @export
+#' @export
 cv <- function(object, ...) UseMethod("cv")
 
 #' Generic cross-validation function
@@ -7,8 +7,8 @@ cv <- function(object, ...) UseMethod("cv")
 #' @param object List of [learner] objects
 #' @param data data.frame or matrix
 #' @param response Response variable (vector or name of column in `data`).
-#' @param nfolds Number of folds (nfolds=0 simple test/train split into two folds 1:([n]/2),
-#' ([n]+1/2):n with last part used for testing)
+#' @param nfolds Number of folds (nfolds=0 simple test/train split into two
+#' folds 1:(\[n\]/2), (\[n\]+1/2):n with last part used for testing)
 #' @param rep Number of repetitions (default 1)
 #' @param weights Optional frequency weights
 #' @param model.score Model scoring metric (default: MSE / Brier score). Must be

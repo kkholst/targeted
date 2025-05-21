@@ -30,8 +30,8 @@
 
 \item{response}{Response variable (vector or name of column in \code{data}).}
 
-\item{nfolds}{Number of folds (nfolds=0 simple test/train split into two folds 1:(\link{n}/2),
-(\link{n}+1/2):n with last part used for testing)}
+\item{nfolds}{Number of folds (nfolds=0 simple test/train split into two
+folds 1:([n]/2), ([n]+1/2):n with last part used for testing)}
 
 \item{rep}{Number of repetitions (default 1)}
 
