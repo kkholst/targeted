@@ -19,18 +19,17 @@ simcount <- function(n = 5e2) {
 dcount <- simcount()
 
 
-test_predictor_glm <- function() {
-  # basic check that default arguments for predictor_glm perform linear
+test_learner_glm <- function() {
+  # basic check that default arguments for learner_glm perform linear
   # regression
   fit_ref <- glm(y ~ x1, data = d)
-  lr <- predictor_glm(y ~ x1)
+  lr <- learner_glm(y ~ x1)
   lr$estimate(d)
-
   expect_equal(coef(lr$fit), coef(fit_ref))
 
   # poisson regression with offset
   fit_ref <- glm(y ~ x + offset(log(w)), data = dcount, family = poisson)
-  lr <- predictor_glm(y ~ x + offset(log(w)), family = poisson)
+  lr <- learner_glm(y ~ x + offset(log(w)), family = poisson)
   lr$estimate(dcount)
   expect_equal(coef(lr$fit), coef(fit_ref))
 
@@ -41,9 +40,9 @@ test_predictor_glm <- function() {
   # predictions can be generated on link scale
   expect_equal(lr$predict(newd, type = "link"), predict(fit_ref, newd))
 
-  # arguments for predict methods can be passed to ml_model in predictor_glm
+  # arguments for predict methods can be passed to ml_model in learner_glm
   # call
-  lr <- predictor_glm(y ~ x + offset(log(w)), family = poisson,
+  lr <- learner_glm(y ~ x + offset(log(w)), family = poisson,
     learner.args = list(predict.args = list(type = "link")),
   )
   lr$estimate(dcount)
@@ -57,7 +56,7 @@ test_predictor_glm <- function() {
   )
 
   # test support for negative binomial regression with MASS
-  lr <- predictor_glm(y ~ x + offset(log(w)), family = "nb")
+  lr <- learner_glm(y ~ x + offset(log(w)), family = "nb")
   lr$estimate(dcount)
   fit_ref <- MASS::glm.nb(y ~ x + offset(log(w)), data = dcount)
   expect_equal(lr$fit$theta, fit_ref$theta)
@@ -65,7 +64,7 @@ test_predictor_glm <- function() {
   # predict method also works as expected
   expect_equal(lr$predict(newd), predict(fit_ref, newd, type = "response"))
 }
-test_predictor_glm()
+test_learner_glm()
 
 # testing the MARS wrapper
 test_predictor_mars <- function() {
@@ -113,8 +112,8 @@ test_predictor_svm()
 test_predictor_sl <- function() {
   # test with oracle model
   lrs <- list(
-    mean = predictor_glm(y ~ 1),
-    glm = predictor_glm(y ~ x1 + x2 + cos(x1)) # oracle for sim1
+    mean = learner_glm(y ~ 1),
+    glm = learner_glm(y ~ x1 + x2 + cos(x1)) # oracle for sim1
   )
   lr <- predictor_sl(lrs, nfolds = 2)
   lr$estimate(d)

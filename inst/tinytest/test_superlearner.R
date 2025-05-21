@@ -8,7 +8,7 @@ sim1 <- function(n = 5e2) {
 d0 <- sim1()
 
 test_superlearner <- function() {
-  lrs <- list(mean = predictor_glm(y ~ 1), glm = predictor_glm(y ~ x1))
+  lrs <- list(mean = learner_glm(y ~ 1), glm = learner_glm(y ~ x1))
   sl <- superlearner(lrs, data = d0, nfolds = 2)
 
   # basic attribute checks
@@ -25,13 +25,13 @@ test_superlearner <- function() {
   expect_equal(names(sl$fit), c("lr1", "lr2"))
 
   # test info field = NULL
-  lr <- predictor_glm(y ~ x1 - 1)
+  lr <- learner_glm(y ~ x1 - 1)
   lr$info <- NULL
-  sl <- superlearner(list(predictor_glm(y ~ 1), lr), data = d0, nfolds = 2)
+  sl <- superlearner(list(learner_glm(y ~ 1), lr), data = d0, nfolds = 2)
   expect_equal(names(sl$fit), c("glm", ""))
 
   # mix of named and unnamed estimators -> use info field for unnamed estimator
-  lrs <- list(predictor_glm(y ~ 1), lr = lr)
+  lrs <- list(learner_glm(y ~ 1), lr = lr)
   sl <- superlearner(lrs, data = d0, nfolds = 2)
   expect_equal(names(sl$fit), c("glm", "lr"))
 
@@ -45,14 +45,14 @@ test_superlearner <- function() {
   )
 
   expect_error(
-    superlearner(list(predictor_glm(y ~ 1), predictor_glm(x ~ 1)), data = d0),
+    superlearner(list(learner_glm(y ~ 1), learner_glm(x ~ 1)), data = d0),
     pattern = "All learners must have the same response variable"
   )
 }
 test_superlearner()
 
 test_predict.superlearner <- function() {
-  lrs <- list(mean = predictor_glm(y ~ 1), glm = predictor_glm(y ~ x1))
+  lrs <- list(mean = learner_glm(y ~ 1), glm = learner_glm(y ~ x1))
   sl <- superlearner(lrs, data = d0, nfolds = 2)
 
   # test that names are correctly re-used when predictions for all learners
@@ -67,7 +67,7 @@ test_predict.superlearner <- function() {
 test_predict.superlearner()
 
 test_weights.superlearner <- function() {
-  lrs <- list(mean = predictor_glm(y ~ 1), glm = predictor_glm(y ~ x1))
+  lrs <- list(mean = learner_glm(y ~ 1), glm = learner_glm(y ~ x1))
   sl <- superlearner(lrs, data = d0, nfolds = 2)
 
   expect_equal(weights(sl), sl$weights)
@@ -75,7 +75,7 @@ test_weights.superlearner <- function() {
 test_weights.superlearner()
 
 test_score.superlearner <- function() {
-  lrs <- list(mean = predictor_glm(y ~ 1), glm = predictor_glm(y ~ x1))
+  lrs <- list(mean = learner_glm(y ~ 1), glm = learner_glm(y ~ x1))
   sl <- superlearner(lrs, data = d0, nfolds = 2)
   expect_equal(score(sl), sl$model.score)
 }

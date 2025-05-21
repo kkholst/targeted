@@ -17,7 +17,7 @@
 \title{R6 class for prediction models}
 \description{
 Interface for standardized estimation and prediction The
-following built-in learners are provided: \link{predictor_glm}, \link{predictor_gam}
+following built-in learners are provided: \link{learner_glm}, \link{predictor_gam}
 }
 \examples{
 data(iris)

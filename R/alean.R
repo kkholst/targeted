@@ -38,15 +38,15 @@
 #' f <- binomial()
 #' d <- sim1(1e4, family=f)
 #' e <- alean(
-#'  response_model=predictor_glm(y ~ a + bs(l, df=3), family=binomial),
-#'  exposure_model=predictor_glm(a ~ bs(l, df=3), family=f),
+#'  response_model=learner_glm(y ~ a + bs(l, df=3), family=binomial),
+#'  exposure_model=learner_glm(a ~ bs(l, df=3), family=f),
 #'  data=d,
 #'  link = "logit", mc.cores=1, nfolds=1
 #' )
 #' e
 #'
-#' e <- alean(response_model=predictor_glm(y ~ a + l, family=binomial),
-#'            exposure_model=predictor_glm(a ~ l),
+#' e <- alean(response_model=learner_glm(y ~ a + l, family=binomial),
+#'            exposure_model=learner_glm(a ~ l),
 #'            data=d,
 #'            link = "logit", mc.cores=1, nfolds=1)
 #' e
@@ -63,7 +63,7 @@ alean <- function(response_model,
 
   cl <- match.call()
   if (inherits(response_model, "formula")) {
-    response_model <- predictor_glm(response_model)
+    response_model <- learner_glm(response_model)
   }
   if (inherits(exposure_model, "formula")) {
     A_var <- lava::getoutcome(exposure_model)
@@ -71,7 +71,7 @@ alean <- function(response_model,
     if (!is.numeric(data[, A_var])) {
       family <- stats::binomial()
     }
-    exposure_model <- predictor_glm(exposure_model, family = family)
+    exposure_model <- learner_glm(exposure_model, family = family)
   }
   A_var <- lava::getoutcome(exposure_model$formula)
   A <- exposure_model$response(data)
@@ -80,7 +80,7 @@ alean <- function(response_model,
   if (missing(g_model)) {
     tf <- terms(response_model$formula)
     tf <- drop.terms(tf, which(attr(tf, "factors")[A_var, ] == 1))
-    g_model <- predictor_glm(formula(tf))
+    g_model <- learner_glm(formula(tf))
   }
   g_model$update(update(
     g_model$formula,
