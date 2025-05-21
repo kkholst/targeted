@@ -1,16 +1,19 @@
+##' @export
+cv <- function(object, ...) UseMethod("cv")
+
 #' Generic cross-validation function
 #'
 #' @title Cross-validation
-#' @param models List of fitting functions
+#' @param object List of [learner] objects
 #' @param data data.frame or matrix
 #' @param response Response variable (vector or name of column in `data`).
 #' @param nfolds Number of folds (default 5. K=0 splits in 1:n/2, n/2:n with
 #'   last part used for testing)
 #' @param rep Number of repetitions (default 1)
 #' @param weights Optional frequency weights
-#' @param model.score Model scoring metric (default: MSE / Brier score). Must
-#'   be a function with arguments response and prediction, and may optionally
-#' include weights, object and newdata arguments
+#' @param model.score Model scoring metric (default: MSE / Brier score). Must be
+#'   a function with arguments response and prediction, and may optionally
+#'   include weights, object and newdata arguments
 #' @param seed Random seed (argument parsed to future_Apply::future_lapply)
 #' @param shared Function applied to each fold with results send to each model
 #' @param args.pred Optional arguments to prediction function (see details
@@ -19,53 +22,46 @@
 #' @param mc.cores Optional number of cores. [parallel::mcmapply] used instead
 #'   of future
 #' @param silent suppress all messages and progressbars
-#' @param ... Additional arguments parsed to `models`
+#' @param ... Additional arguments parsed to elements in `object`
 #' @author Klaus K. Holst
 #' @return An object of class '\code{cross_validated}' is returned. See
 #'   \code{\link{cross_validated-class}} for more details about this class and
 #'   its generic functions.
-#' @details models should be list of objects of class [learner]. Alternatively,
-#'   each element of models should be a list with a fitting function and a
-#'   prediction function.
+#' @details `object` should be list of objects of class [learner].
+#'   Alternatively, each element of models should be a list with a fitting
+#'   function and a prediction function.
 #'
 #' The `response` argument can optionally be a named list where the name is
 #' then used as the name of the response argument in models. Similarly, if data
 #' is a named list with a single data.frame/matrix then this name will be used
 #' as the name of the data/design matrix argument in models.
 #' @examples
-#' f0 <- function(data,...) lm(...,data=data)
-#' f1 <- function(data,...) lm(Sepal.Length~Species,data=data)
-#' f2 <- function(data,...) lm(Sepal.Length~Species+Petal.Length,data=data)
-#' x <- cv(list(m0=f0,m1=f1,m2=f2),rep=10, data=iris, formula=Sepal.Length~.)
+#' m <- list(predictor_glm(Sepal.Length~1),
+#'           predictor_glm(Sepal.Length~Species),
+#'           predictor_glm(Sepal.Length~Species + Petal.Length))
+#' x <- cv(m, rep=10, data=iris)
 #' x
+#' @seealso [cv.predictor_sl]
+#' @aliases cv cv.default cv.predictor_sl
 #' @export
-cv <- function(models, data,
-               response = NULL,
-               nfolds = 5, rep = 1,
-               weights = NULL,
-               model.score = scoring,
-               seed = NULL, shared = NULL, args.pred = NULL,
-               args.future = list(), mc.cores,
-               silent = FALSE,
-               ...) {
+cv.default <- function(object,
+                       data,
+                       response = NULL,
+                       nfolds = 5,
+                       rep = 1,
+                       weights = NULL,
+                       model.score = scoring,
+                       seed = NULL,
+                       shared = NULL,
+                       args.pred = NULL,
+                       args.future = list(),
+                       mc.cores,
+                       silent = FALSE,
+                       ...) {
 
-  if (inherits(models, "predictor_sl")) {
-    return(
-      cv_predictor_sl(models,
-                      data=data,
-                      response = response,
-                      weights = weights,
-                      model.score = model.score,
-                      seed = seed, shared = shared,
-                      args.pred = args.pred,
-                      args.future = args.future,
-                      nfolds = nfolds, rep = rep,
-                      ...)
-    )
-  }
-  if (!is.list(models)) stop("Expected a list of models")
-  nam <- names(models)
-  if (is.null(nam)) nam <- paste0("model", seq_along(models))
+  if (!is.list(object)) stop("Expected a list of models")
+  nam <- names(object)
+  if (is.null(nam)) nam <- paste0("model", seq_along(object))
   args0 <- list(...)
   if ("K" %in% names(args0)) { # Backward compatibility
     .Deprecated("argument 'K' replaced by 'nfolds'")
@@ -96,13 +92,13 @@ cv <- function(models, data,
     response <- data[, response, drop = TRUE]
   }
 
-  for (i in seq_along(models)) {
-    f <- models[[i]]
+  for (i in seq_along(object)) {
+    f <- object[[i]]
     if ((!is.list(f) || length(f) == 1) &&
       !inherits(f, "learner")) {
       # No predict function provided. Assume 'predict' works on fitted object
       if (is.list(f)) f <- f[[1]]
-      models[[i]] <- list(
+      object[[i]] <- list(
         fit = f,
         predict = function(fit, newdata, ...) {
           return(predict(fit, newdata = newdata, ...))
@@ -119,21 +115,21 @@ cv <- function(models, data,
   arglist <- c(list(data), args)
   if (!is.null(weights)) arglist <- c(arglist, list(weights = weights))
 
-  arg_response <- rep(FALSE, length(models))
-  for (i in seq_along(models)) {
-    if (inherits(models[[i]], "learner")) {
+  arg_response <- rep(FALSE, length(object))
+  for (i in seq_along(object)) {
+    if (inherits(object[[i]], "learner")) {
       if (!is.null(response) && response.arg %in%
-          names(models[[i]]$formals$estimate)) {
+          names(object[[i]]$formals$estimate)) {
         arg_response[i] <- TRUE
       }
     } else {
       if (!is.null(response) && response.arg %in%
-          formalArgs(models[[i]][[1]])) {
+          formalArgs(object[[i]][[1]])) {
         arg_response[i] <- TRUE
       }
     }
   }
-  f <- models[[1]]
+  f <- object[[1]]
   if (arg_response[1]) {
     arglist[response.arg] <- list(response)
   }
@@ -185,7 +181,7 @@ cv <- function(models, data,
     colnames(perf0)
   }
   n <- NROW(data)
-  M <- length(models) # Number of models
+  M <- length(object) # Number of models
   P <- length(perf0) # Number of performance measures
   rm(fit0, pred0, perf0)
 
@@ -196,7 +192,7 @@ cv <- function(models, data,
   } else {
     folds <- lava::foldr(n, nfolds, rep)
   }
-  arg <- expand.grid(R = seq(rep), K = seq(nfolds)) # ,M=seq_along(models))
+  arg <- expand.grid(R = seq(rep), K = seq(nfolds))
   dim <- c(rep, nfolds, M, P)
   perf_arr <- array(0, dim)
   dimnames(perf_arr) <- list(NULL, NULL, nam, nam_perf)
@@ -223,13 +219,13 @@ cv <- function(models, data,
     }
     if (!is.null(weights)) arglist <- c(arglist, list(weights = wtrain))
     fits <- list()
-    for (j in seq_along(models)) {
+    for (j in seq_along(object)) {
       if (arg_response[j]) {
         arglist[response.arg] <- list(ytrain)
       } else {
         arglist[response.arg] <- NULL
       }
-      f <- models[[j]]
+      f <- object[[j]]
       if (inherits(f, "learner")) {
         f <- f$clone(deep = TRUE)
         do.call(f$estimate, arglist)
@@ -247,7 +243,7 @@ cv <- function(models, data,
         )
       } else {
         pred <- do.call(
-          models[[j]][[2]],
+          object[[j]][[2]],
           c(list(fits[[j]], newdata = dtest), args.pred)
         )
       }
@@ -303,16 +299,16 @@ cv <- function(models, data,
 score_sl <- function(response,
                      newdata,
                      object,
-                     model.score = mse,
+                     model.score,
                      ...) {
   pr.all <- object$predict(newdata, all.learners = TRUE)
   pr <- object$predict(newdata)
   risk.all <- apply(pr.all, 2, function(x) model.score(x, response))
-  risk <- model.score(response, pr)[1, ]
+  risk <- cbind(rbind(model.score(response, pr))[1, ])
   nam <- names(risk)
   if (is.null(nam)) nam <- "score"
   nam <- paste0(nam, ".")
-  risk <- cbind(risk, risk.all)
+  risk <- cbind(risk, rbind(risk.all))
   colnames(risk)[1] <- "sl"
   nn <- colnames(risk)
   names(risk) <- paste0(nam, nn)
@@ -328,12 +324,13 @@ score_sl <- function(response,
   return(res)
 }
 
-cv_predictor_sl <- function(object,
-                                 data,
-                                 nfolds = 5,
-                                 rep = 1,
-                                 model.score = mse,
-                                 ...) {
+#' @export
+cv.predictor_sl <- function(object,
+                            data,
+                            nfolds = 5,
+                            rep = 1,
+                            model.score = scoring,
+                            ...) {
   res <- cv(list("performance"=object),
             data = data,
             nfolds = nfolds, rep = rep,
