@@ -70,7 +70,7 @@ learner_glm <- function(formula, info = "glm", family = gaussian(),
 #' @inherit learner_shared
 #' @inheritParams glmnet::glmnet
 #' @inheritParams glmnet::cv.glmnet
-learner_glmnet <- function(formula,
+learner_glmnet_cv <- function(formula,
                              info = "glmnet",
                              family = gaussian(),
                              alpha = 1, ## Elastic net (1 is lasso, 0 is L2)
