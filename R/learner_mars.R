@@ -3,6 +3,19 @@
 #' @inherit learner_shared
 #' @inheritParams earth::earth
 #' @export
+#' @examples
+#' # poisson regression
+#' n <- 5e2
+#' x <- rnorm(n)
+#' w <- 50 + rexp(n, rate = 1 / 5)
+#' y <- rpois(n, exp(2 + 0.5 * x + log(w)) * rgamma(n, 1 / 2, 1 / 2))
+#' d0 <- data.frame(y, x, w)
+#'
+#' lr <- learner_mars(y ~ x + offset(log(w)), degree = 2,
+#'   glm = list(family = poisson())
+#' )
+#' lr$estimate(d0)
+#' lr$predict(data.frame(x = 0, w = c(1, 2)))
 learner_mars <- function(formula,
                            info = "earth::earth",
                            degree = 1,
