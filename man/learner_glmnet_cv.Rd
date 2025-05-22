@@ -21,6 +21,11 @@ learner_glmnet_cv(
 \item{info}{(character) Optional information to describe the instantiated
 \link{learner} object.}
 
+\item{family}{Either a character string representing
+one of the built-in families, or else a \code{glm()} family object. For more
+information, see Details section below or the documentation for response
+type (above).}
+
 \item{lambda}{Optional user-supplied lambda sequence; default is
 \code{NULL}, and \code{glmnet} chooses its own sequence. Note that this is done
 for the full model (master sequence), and separately for each fold.
@@ -28,6 +33,11 @@ The fits are then alligned using the master sequence (see the \code{allignment}
 argument for additional details). Adapting \code{lambda} for each fold
 leads to better convergence. When \code{lambda} is supplied, the same sequence
 is used everywhere, but in some GLMs can lead to convergence issues.}
+
+\item{alpha}{The elasticnet mixing parameter, with \eqn{0\le\alpha\le 1}.
+The penalty is defined as
+\deqn{(1-\alpha)/2||\beta||_2^2+\alpha||\beta||_1.} \code{alpha=1} is the
+lasso penalty, and \code{alpha=0} the ridge penalty.}
 
 \item{nfolds}{number of folds - default is 10. Although \code{nfolds} can be
 as large as the sample size (leave-one-out CV), it is not recommended for

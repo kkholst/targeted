@@ -70,6 +70,7 @@ learner_glm <- function(formula, info = "glm", family = gaussian(),
 #' That is, [glmnet::predict.cv.glmnet] is called with `s = "lambda.min"`.
 #' @inherit learner_shared
 #' @inheritParams glmnet::cv.glmnet
+#' @inheritParams glmnet::glmnet # required to document family and alpha args
 #' @examples
 #' # continuous outcome
 #' n <- 5e2
