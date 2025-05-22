@@ -197,3 +197,15 @@ test_update <- function() {
   expect_equal(coef(lr$fit), coef(fit_ref))
 }
 test_update()
+
+test_response <- function() {
+  lr <- learner$new(formula = I(y > 0) ~ -1 + x1 + x2, estimate = glm)
+
+  expect_equivalent(lr$response(ddata), ddata$y > 0)
+  expect_equivalent(lr$response(ddata, eval = FALSE), ddata$y)
+
+  # different response name then y
+  lr <- learner$new(formula = x1 ~ -1 + y, estimate = glm)
+  expect_equivalent(lr$response(ddata), ddata$x1)
+}
+test_response()
