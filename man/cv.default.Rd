@@ -82,7 +82,7 @@ x <- cv(m, rep=10, data=iris)
 x
 }
 \seealso{
-\link{cv.predictor_sl}
+\link{cv.learner_sl}
 }
 \author{
 Klaus K. Holst
