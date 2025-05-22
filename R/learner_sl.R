@@ -37,13 +37,12 @@
 #' # coef(cvres)
 #' # score(cvres)
 learner_sl <- function(learners,
-                         info = NULL,
-                         nfolds = 5L,
-                         meta.learner = metalearner_nnls,
-                         model.score = mse,
-                         learner.args = NULL,
-                         ...) {
-
+                       info = NULL,
+                       nfolds = 5L,
+                       meta.learner = metalearner_nnls,
+                       model.score = mse,
+                       learner.args = NULL,
+                       ...) {
   if (is.null(info)) {
     info <- "superlearner\n"
     nn <- names(learners)
