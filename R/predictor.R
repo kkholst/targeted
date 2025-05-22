@@ -150,6 +150,18 @@ predictor_hal <- function(formula,
 #' @param ... Additional arguments to [mgcv::gam].
 #' @inherit learner_shared
 #' @inheritParams mgcv::gam
+#' @examples
+#' n <- 5e2
+#' x1 <- rnorm(n, sd = 2)
+#' x2 <- rnorm(n)
+#' y <- x1 + cos(x1) + rnorm(n, sd = 0.5**.5)
+#' d0 <- data.frame(y, x1, x2)
+#'
+#' lr <- learner_gam(y ~ s(x1) + x2)
+#' lr$estimate(d0)
+#' if (interactive()) {
+#'   plot(lr$fit)
+#' }
 learner_gam <- function(formula,
                         info = "mgcv::gam",
                         family = gaussian(),

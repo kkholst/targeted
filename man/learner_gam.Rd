@@ -10,6 +10,7 @@ learner_gam(
   family = gaussian(),
   select = FALSE,
   gamma = 1,
+  learner.args = NULL,
   ...
 )
 }
@@ -35,6 +36,9 @@ smoothing parameter is estimated as zero then the extra penalty has no effect. U
 
 \item{gamma}{Increase this beyond 1 to produce smoother models. \code{gamma} multiplies the effective degrees of freedom in the GCV or UBRE/AIC. \code{n/gamma} can be viewed as an effective sample size in the GCV score, and this also enables it to be used with REML/ML. Ignored with P-RE/ML or the \code{efs} optimizer. }
 
+\item{learner.args}{(list) Additional arguments to
+\link[=learner]{learner$new()}.}
+
 \item{...}{Additional arguments to \link[mgcv:gam]{mgcv::gam}.}
 }
 \value{
@@ -42,4 +46,17 @@ smoothing parameter is estimated as zero then the extra penalty has no effect. U
 }
 \description{
 \link{learner} generator function for \link[mgcv:gam]{mgcv::gam}.
+}
+\examples{
+n <- 5e2
+x1 <- rnorm(n, sd = 2)
+x2 <- rnorm(n)
+y <- x1 + cos(x1) + rnorm(n, sd = 0.5**.5)
+d0 <- data.frame(y, x1, x2)
+
+lr <- learner_gam(y ~ s(x1) + x2)
+lr$estimate(d0)
+if (interactive()) {
+  plot(lr$fit)
+}
 }
