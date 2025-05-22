@@ -1,5 +1,5 @@
 #' @description [learner] generator function for [earth::earth].
-#' @param ... Additional arguments to [earth::earth]
+#' @param ... Additional arguments to [earth::earth].
 #' @inherit learner_shared
 #' @inheritParams earth::earth
 #' @export

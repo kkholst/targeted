@@ -48,7 +48,7 @@ learner_mars(
 \item{learner.args}{(list) Additional arguments to
 \link[=learner]{learner$new()}.}
 
-\item{...}{Additional arguments to \link[earth:earth]{earth::earth}}
+\item{...}{Additional arguments to \link[earth:earth]{earth::earth}.}
 }
 \value{
 \link{learner} object.

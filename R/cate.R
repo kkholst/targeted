@@ -30,7 +30,7 @@ ate_if_fold <- function(fold, data,
   if (inherits(pmod, "glm")) {
     ## Term from estimating propensity model / treatment probabilities that does
     ## not go to zero in probability unless Q-model is correct
-    pX <- propensity.model$design(deval, intercept = TRUE)
+    pX <- propensity.model$design(deval, intercept = TRUE)$x
     dlinkinv <- pmod$family$mu.eta
     adj <- -part1 / pr * dlinkinv(pmod$family$linkfun(pr))
     for (i in seq_len(ncol(pX))) {

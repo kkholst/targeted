@@ -241,7 +241,7 @@ Extract response from data
 \if{html}{\out{<a id="method-learner-design"></a>}}
 \if{latex}{\out{\hypertarget{method-learner-design}{}}}
 \subsection{Method \code{design()}}{
-Extract design matrix (features) from data
+Generate \link{design} object (design matrix and response) from data
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{learner$design(data, ...)}\if{html}{\out{</div>}}
 }
