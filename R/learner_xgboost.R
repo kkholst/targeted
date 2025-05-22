@@ -1,4 +1,11 @@
+#' @description [learner] generator function for [xgboost::xgboost].
 #' @export
+#' @param ... Additional arguments to [xgboost::xgboost].
+#' @inherit learner_shared
+#' @inheritParams xgboost::xgboost
+#' @inheritParams xgboost::xgb.cv
+# # ' @examples
+# TODO examples
 learner_xgboost <- function(formula,
                             max_depth = 2L,
                             eta = 1.0,
@@ -27,29 +34,37 @@ learner_xgboost <- function(formula,
     if (!requireNamespace("xgboost", quietly = TRUE)) {
       stop("xgboost library required")
     }
-    pred <- function(object, newdata, ...) {
+
+    args$predict <- function(object, newdata, ...) {
       d <- xgboost::xgb.DMatrix(newdata)
-      return(predict(object, d, ...))
-    }
-    if (objective == "multi:softprob") {
-      pred <- function(object, newdata, ...) {
-        d <- xgboost::xgb.DMatrix(newdata)
-        val <- predict(object, d, ...)
-        return(matrix(val, nrow = NROW(d), byrow = TRUE))
+      pr <- predict(object, d, ...)
+
+      if (object$call$objective == "multi:softprob") {
+        pr <- matrix(pr, nrow = NROW(d), byrow = TRUE)
       }
+
+      return(pr)
     }
-    args$predict <- pred
-    args$estimate <- function(x, y, ...) {
+    args$estimate <- function(x, y, nrounds, ...) {
       d <- xgboost::xgb.DMatrix(x, label = y)
-      if (list(...)$nfolds > 1L) {
-        val <- xgboost::xgb.cv(data = d, ...)
+      dots <- list(...)
+      if (dots$nfolds > 1L) {
+        val <- do.call(
+          xgboost::xgb.cv,
+          c(list(data = d, nrounds = nrounds), dots)
+        )
         nrounds <- which.min(val$evaluation_log[[4]])
       }
-      res <- xgboost::xgboost(d, nrounds = nrounds, ...)
+      dots$nfolds <- NULL # remove nfolds because it causes a warning when
+      # passed on to xgboost::xgboost
+      res <- do.call(
+        xgboost::xgboost,
+        c(list(data = d, nrounds = nrounds), dots),
+      )
       return(res)
     }
-    mod <- do.call(ml_model$new, args)
-    return(mod)
+
+    return(do.call(learner$new, args))
 }
 
 #' @export

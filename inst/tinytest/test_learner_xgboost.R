@@ -20,5 +20,7 @@ dcount <- simcount()
 
 test_learner_xgboost <- function() {
   lr <- learner_xgboost(y ~ x1 + x2)
+  lr$estimate(d)
+  lr$predict(d)
 }
 test_learner_xgboost()
