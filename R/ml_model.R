@@ -235,7 +235,7 @@ learner <- R6::R6Class("learner", # nolint
     },
 
     #' @description
-    #' Extract design matrix (features) from data
+    #' Generate [targeted::design] object (design matrix and response) from data
     #' @param ... additional arguments to [targeted::design]
     design = function(data, ...) {
       args <- c(private$des.args, list(data = data))

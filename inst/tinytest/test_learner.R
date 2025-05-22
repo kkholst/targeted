@@ -179,6 +179,13 @@ test_design <- function() {
   # defined options can be overruled during method call
   fit <- glm.fit(x = m$design(ddata, intercept = FALSE)$x, y = m$response(ddata))
   expect_false("(Intercept)" %in% names(coef(fit)))
+
+  # raise error when covariate variable cannot be found
+  m <- learner$new(formula = y ~ x1 + x2 + x3, estimate = glm.fit)
+  expect_error(m$design(ddata), pattern = "object 'x3' not found")
+  # same for response
+  m <- learner$new(formula = yy ~ x1 + x2, estimate = glm.fit)
+  expect_error(m$design(ddata), pattern = "object 'yy' not found")
 }
 test_design()
 
@@ -207,5 +214,9 @@ test_response <- function() {
   # different response name then y
   lr <- learner$new(formula = x1 ~ -1 + y, estimate = glm)
   expect_equivalent(lr$response(ddata), ddata$x1)
+
+  # raise error when response variable cannot be found
+  lr <- learner$new(formula = x3 ~ -1 + y, estimate = glm)
+  expect_error(lr$response(ddata), pattern = "object 'x3' not found")
 }
 test_response()
