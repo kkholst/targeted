@@ -27,7 +27,7 @@ test_sl <- function() {
   c1 <- cv(m, data = d, rep = 2)
   learners_mse <- summary(c1)[,,"mse"][,"mean"]
 
-  s <- predictor_sl(m, nfolds = 10)
+  s <- learner_sl(m, nfolds = 10)
   b <- cv(s, nfolds = 10, rep = 2, data = d)
   # sm <- cv(list(s), d, rep=1, model.score=mse) |> summary()
   sm <- summary(b)["sl",,"mse"]
