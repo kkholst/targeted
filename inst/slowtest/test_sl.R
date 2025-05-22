@@ -22,14 +22,18 @@ test_sl <- function() {
     "mean" = learner_glm(y ~ 1),
     "glm"  = learner_glm(y ~ x1 + x2),
     "xgb"  = predictor_xgboost(y ~ x1 + x2, eta = .5, nrounds = 100),
-    "mars" = predictor_mars(y ~ x1+x2, degree = 2)
+    "mars" = predictor_mars(y ~ x1 + x2, degree = 2)
   )
   c1 <- cv(m, data = d, rep = 2)
+  learners_mse <- summary(c1)[,,"mse"][,"mean"]
 
   s <- predictor_sl(m, nfolds = 10)
-  b <- summary(s, nfolds = 10, rep = 2, data = d)
+  b <- cv(s, nfolds = 10, rep = 2, data = d)
   # sm <- cv(list(s), d, rep=1, model.score=mse) |> summary()
   sm <- summary(b)["sl",,"mse"]
+  learners_mse_sl <- summary(b)[-1,,"mse"][,"mean"]
+  # rough comparison of mse calculated from sl with cv of individual learners
+  expect_true(mean((learners_mse - learners_mse_sl)**2)<0.25)
 
   # comparison with SuperLearner library
   slib <- c("SL.mean",
