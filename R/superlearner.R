@@ -43,7 +43,7 @@ get_learner_names <- function(model.list, name.prefix) {
 #'   cross-validation.
 #' @param data (data.frame) Data containing the response variable and
 #' covariates.
-#' @param learners (list) List of [learner] objects (i.e. [predictor_glm])
+#' @param learners (list) List of [learner] objects (i.e. [learner_glm])
 #' @param nfolds (integer) Number of folds to use in cross-validation to
 #' estimate the ensemble weights.
 #' @param meta.learner (function) Algorithm to learn the ensemble
@@ -76,8 +76,8 @@ get_learner_names <- function(model.list, name.prefix) {
 #' }
 
 #' m <- list(
-#'   "mean" = predictor_glm(y ~ 1),
-#'   "glm" = predictor_glm(y ~ x1 + x2)
+#'   "mean" = learner_glm(y ~ 1),
+#'   "glm" = learner_glm(y ~ x1 + x2)
 #' )
 #' sl <- superlearner(m, data = sim1(), nfolds = 2)
 #' predict(sl, newdata = sim1(n = 5))

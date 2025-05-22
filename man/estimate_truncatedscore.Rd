@@ -61,8 +61,8 @@ The following are our two target parameters
 }
 \examples{
 data(truncatedscore)
-mod1 <- predictor_glm(y ~ a * (x1 + x2))
-mod2 <- predictor_glm(r ~ a * (x1 + x2), family = binomial)
+mod1 <- learner_glm(y ~ a * (x1 + x2))
+mod2 <- learner_glm(r ~ a * (x1 + x2), family = binomial)
 a <- estimate_truncatedscore(
   data = truncatedscore,
   mod.y = mod1,

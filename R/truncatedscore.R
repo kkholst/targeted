@@ -137,8 +137,8 @@ test_intersectsignedwald <- function(thetahat1,
 #' @author Klaus Kähler Holst
 #' @examples
 #' data(truncatedscore)
-#' mod1 <- predictor_glm(y ~ a * (x1 + x2))
-#' mod2 <- predictor_glm(r ~ a * (x1 + x2), family = binomial)
+#' mod1 <- learner_glm(y ~ a * (x1 + x2))
+#' mod2 <- learner_glm(r ~ a * (x1 + x2), family = binomial)
 #' a <- estimate_truncatedscore(
 #'   data = truncatedscore,
 #'   mod.y = mod1,
@@ -175,13 +175,13 @@ estimate_truncatedscore <- function(
                      ...
                      ) {
   if (inherits(mod.y, "formula")) {
-    mod.y <- predictor_glm(mod.y)
+    mod.y <- learner_glm(mod.y)
   }
   if (inherits(mod.r, "formula")) {
-    mod.r <- predictor_glm(mod.r, family = binomial)
+    mod.r <- learner_glm(mod.r, family = binomial)
   }
   if (inherits(mod.a, "formula")) {
-    mod.a <- predictor_glm(mod.a, family = binomial)
+    mod.a <- learner_glm(mod.a, family = binomial)
   }
   # Missing data model
   mod.r$estimate(data)

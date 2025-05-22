@@ -1,9 +1,9 @@
 #' @title R6 class for prediction models
 #' @description Interface for standardized estimation and prediction The
-#' following built-in learners are provided: [predictor_glm], [predictor_gam]
+#' following built-in learners are provided: [learner_glm], [learner_gam]
 #' @param data data.frame
 #' @author Klaus Kähler Holst, Benedikt Sommer
-#' @aliases predictor_gam predictor_grf predictor_grf_binary predictor_isoreg
+#' @aliases predictor_grf predictor_grf_binary predictor_isoreg
 #' predictor_mars predictor_nb predictor_svm predictor_xgboost_binary
 #' predictor_xgboost predictor_xgboost_count predictor_xgboost_cox
 #' predictor_xgboost_multiclass
@@ -228,27 +228,21 @@ learner <- R6::R6Class("learner", # nolint
     #' (i.e., return 'a' if formula defined as I(a==1) ~ ...)
     #' @param ... additional arguments to [targeted::design]
     response = function(data, eval = TRUE, ...) {
-      if (is.null(self$formula)) {
-        if (!is.null(self$responsevar)) {
-          return(data[, self$responsevar, drop = TRUE])
-        }
-        return(NULL)
+      if (eval) {
+        return(self$design(data = data, ...)$y)
       }
+      if (is.null(self$formula)) return(NULL)
       newf <- update(self$formula, ~1)
-      if (!eval) {
-        return(data[, all.vars(newf), drop = TRUE])
-      }
-      return(design(newf, data = data, ...)$y)
+      return(data[, all.vars(newf), drop = TRUE])
     },
 
     #' @description
-    #' Extract design matrix (features) from data
+    #' Generate [targeted::design] object (design matrix and response) from data
     #' @param ... additional arguments to [targeted::design]
     design = function(data, ...) {
       args <- c(private$des.args, list(data = data))
       args[...names()] <- list(...)
-      print(args)
-      return(do.call(design, c(list(self$formula), args))$x)
+      return(do.call(design, c(list(self$formula), args)))
     },
 
     #' @description
@@ -277,8 +271,6 @@ learner <- R6::R6Class("learner", # nolint
     fitted = NULL,
     # @field init Information on the initialized model
     init = NULL,
-    # @field optional field containing name of response variable
-    responsevar = NULL,
     # When x$clone(deep=TRUE) is called, the deep_clone gets invoked once for
     # each field, with the name and value.
     deep_clone = function(name, value) {
@@ -389,4 +381,18 @@ estimate.ml_model <- function(x, ...) {
 predict.ml_model <- function(object, ...) {
   # TODO: deprecate
   return(object$predict(...))
+}
+
+#' ML model
+#'
+#' Wrapper for ml_model
+#' @export
+#' @param formula formula
+#' @param model model (sl, rf, pf, glm, ...)
+#' @param ... additional arguments to model object
+ML <- function(formula, model="glm", ...) {
+  stop(
+    "targeted::ML has been removed in targeted 0.6. ",
+    "Please use the targeted::learner_ functions instead."
+  )
 }
