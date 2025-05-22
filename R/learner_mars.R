@@ -17,12 +17,12 @@
 #' lr$estimate(d0)
 #' lr$predict(data.frame(x = 0, w = c(1, 2)))
 learner_mars <- function(formula,
-                           info = "earth::earth",
-                           degree = 1,
-                           nprune = NULL,
-                           glm = NULL,
-                           learner.args = NULL,
-                           ...) {
+                         info = "earth::earth",
+                         degree = 1,
+                         nprune = NULL,
+                         glm = NULL,
+                         learner.args = NULL,
+                         ...) {
   if (!requireNamespace("earth", quietly = TRUE)) {
     stop("earth library required")
   }
