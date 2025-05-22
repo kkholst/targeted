@@ -18,7 +18,6 @@ simcount <- function(n = 5e2) {
 }
 dcount <- simcount()
 
-
 test_learner_glm <- function() {
   # basic check that default arguments for learner_glm perform linear
   # regression
@@ -82,7 +81,6 @@ test_predictor_mars <- function() {
   expect_true(s2 < s1)
 }
 test_predictor_mars()
-
 
 # testing the SVR module
 test_predictor_svm <- function() {

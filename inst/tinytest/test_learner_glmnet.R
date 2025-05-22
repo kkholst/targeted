@@ -10,6 +10,13 @@ sim1 <- function(n = 5e2) {
 }
 d <- sim1(1e4)
 
+simcount <- function(n = 5e2) {
+  x <- rnorm(n)
+  w <- 50 + rexp(n, rate = 1 / 5)
+  y <- rpois(n, exp(2 + 0.5 * x + log(w)) * rgamma(n, 1 / 2, 1 / 2))
+  return(data.frame(y, x, w))
+}
+dcount <- simcount()
 
 test_learner_glmnet <- function() {
   lr <- learner_glmnet_cv(y ~ x1 + x2, nfolds = 3, alpha = 0)
