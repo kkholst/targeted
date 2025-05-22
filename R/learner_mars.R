@@ -10,6 +10,9 @@ learner_mars <- function(formula,
                            glm = NULL,
                            learner.args = NULL,
                            ...) {
+  if (!requireNamespace("earth", quietly = TRUE)) {
+    stop("earth library required")
+  }
   args <- c(learner.args, list(formula = formula, info = info))
   args$estimate.args <- c(
     list(
