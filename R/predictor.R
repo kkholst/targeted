@@ -1,64 +1,3 @@
-#' @description [ml_model] generator function for [hal9001::fit_hal].
-#' @export
-#' @param ... Additional arguments to [hal9001::fit_hal].
-#' @inherit learner_shared
-#' @inheritParams hal9001::fit_hal
-predictor_hal <- function(formula,
-                          info = "hal9001::fit_hal",
-                          smoothness_orders = 0,
-                          reduce_basis = NULL,
-                          family = "gaussian",
-                          ...) {
-  est <- function(y, x, ...) {
-    return(hal9001::fit_hal(X = x, Y = y, ...))
-  }
-  pred <- function(fit, newdata, offset = NULL, ...) {
-    res <- predict(fit,
-      new_data = newdata,
-      offset = offset,
-      type = "response"
-    )
-    return(res)
-  }
-  mod <- ml_model$new(formula = formula,
-             estimate = est,
-             predict = pred,
-             info = info,
-             specials = c("weights", "offset"),
-             smoothness_orders = smoothness_orders,
-             reduce_basis = reduce_basis,
-             family = family,
-             ...
-  )
-  return(mod)
-}
-
-#' @export
-predictor_gam <- function(formula,
-                          info = "mgcv::gam",
-                          family = gaussian(),
-                          select = FALSE,
-                          gamma = 1,
-                          ...) {
-  args <- list(
-    formula = formula,
-    estimate = function(formula, data, ...) {
-      return(mgcv::gam(formula = formula, data = data, ...))
-    },
-    predict = function(object, newdata) {
-      return(stats::predict(object, newdata = newdata, type = "response"))
-    },
-    family = family,
-    select = select,
-    gamma = gamma,
-    info = info,
-    ...
-  )
-  mod <- do.call(ml_model$new, args)
-
-  return(mod)
-}
-
 #' @export
 predictor_isoreg <- function(formula,
                              info = "targeted::isoregw",
@@ -270,18 +209,4 @@ predictor_nb <- function(formula,
   )
   mod <- do.call(ml_model$new, args)
   return(mod)
-}
-
-#' ML model
-#'
-#' Wrapper for ml_model
-#' @export
-#' @param formula formula
-#' @param model model (sl, rf, pf, glm, ...)
-#' @param ... additional arguments to model object
-ML <- function(formula, model="glm", ...) {
-  stop(
-    "targeted::ML has been removed in targeted 0.6. ",
-    "Please use the targeted::predictor_ functions instead."
-  )
 }

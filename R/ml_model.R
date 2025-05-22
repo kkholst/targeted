@@ -388,3 +388,17 @@ predict.ml_model <- function(object, ...) {
   # TODO: deprecate
   return(object$predict(...))
 }
+
+#' ML model
+#'
+#' Wrapper for ml_model
+#' @export
+#' @param formula formula
+#' @param model model (sl, rf, pf, glm, ...)
+#' @param ... additional arguments to model object
+ML <- function(formula, model="glm", ...) {
+  stop(
+    "targeted::ML has been removed in targeted 0.6. ",
+    "Please use the targeted::learner_ functions instead."
+  )
+}
