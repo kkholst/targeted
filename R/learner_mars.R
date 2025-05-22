@@ -19,12 +19,15 @@ learner_mars <- function(formula,
     ),
     list(...)
   )
+  args$specials <- union(args$specials, c("offset"))
 
-  args$estimate <- function(y, x, ...) earth::earth(y = y, x = x, ...)
+  args$estimate <- function(formula, data, ...) earth::earth(formula, data, ...)
   args$predict <- function(object, newdata, ...) {
     args <- list(object, newdata = newdata, type = "response")
     args[...names()] <- list(...)
-    return(do.call(predict::earth, args))
+    pr <- do.call(predict, args)
+    if (ncol(pr) == 1) pr <- as.vector(pr)
+    return(pr)
   }
 
   return(do.call(learner$new, args))
