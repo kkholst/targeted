@@ -151,28 +151,32 @@ predictor_hal <- function(formula,
 #' @inherit learner_shared
 #' @inheritParams mgcv::gam
 learner_gam <- function(formula,
-                          info = "mgcv::gam",
-                          family = gaussian(),
-                          select = FALSE,
-                          gamma = 1,
-                          ...) {
-  args <- list(
-    formula = formula,
-    estimate = function(formula, data, ...) {
-      return(mgcv::gam(formula = formula, data = data, ...))
-    },
-    predict = function(object, newdata) {
-      return(stats::predict(object, newdata = newdata, type = "response"))
-    },
-    family = family,
-    select = select,
-    gamma = gamma,
-    info = info,
-    ...
+                        info = "mgcv::gam",
+                        family = gaussian(),
+                        select = FALSE,
+                        gamma = 1,
+                        learner.args = NULL,
+                        ...) {
+  args <- c(learner.args, list(formula = formula, info = info))
+  args$estimate.args <- c(
+    list(
+      family = family,
+      select = select,
+      gamma = gamma
+    ),
+    list(...)
   )
-  mod <- do.call(ml_model$new, args)
+  args$estimate <- function(formula, data, ...) {
+    return(mgcv::gam(formula = formula, data = data, ...))
+  }
+  args$predict <- function(object, newdata, ...) {
+    args <- list(object, newdata = newdata, type = "response")
+    args[...names()] <- list(...)
+    pr <- do.call(stats::predict, args)
+    return(as.vector(pr))
+  }
 
-  return(mod)
+  return(do.call(learner$new, args))
 }
 
 #' @export

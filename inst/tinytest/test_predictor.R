@@ -133,3 +133,30 @@ test_predictor_sl <- function() {
   expect_equal(length(lr$fit$folds), 3)
 }
 test_predictor_sl()
+
+test_learner_gam <- function() {
+  fit_ref <- mgcv::gam(y ~ s(x1) + x2, data = d)
+
+  # verify that smooth term is handled correctly
+  lr <- learner_gam(y ~ s(x1) + x2)
+  lr$estimate(d)
+  expect_equal(coef(fit_ref), coef(lr$fit))
+
+  # verify that optional arguments are passed on to mgcv::gam
+  fit_ref <- mgcv::gam(y ~ s(x1) + x2, data = d, drop.intercept = TRUE)
+  lr <- learner_gam(y ~ s(x1) + x2, drop.intercept = TRUE)
+  lr$estimate(d)
+  expect_equal(coef(fit_ref), coef(lr$fit))
+  
+  # smooth term + offset + different family argument
+  lr <- learner_gam(y ~ s(x) + offset(log(w)), family = "poisson")
+  lr$estimate(dcount)
+
+  pr <- lr$predict(data.frame(x = 1, w = c(1, 5)))
+  expect_equal(pr[1] * 5, pr[2])
+
+  # verifies that family argument is handled correctly
+  pr_link <- lr$predict(data.frame(x = 1, w = c(1, 5)), type = "link")
+  expect_equal(pr, exp(pr_link))
+}
+test_learner_gam()
