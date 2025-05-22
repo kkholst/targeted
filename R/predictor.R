@@ -76,29 +76,6 @@ predictor_isoreg <- function(formula,
   return(mod)
 }
 
-#' @export
-predictor_mars <- function(formula,
-                           info = "earth::earth",
-                           degree = 1,
-                           nprune = NULL,
-                           glm = NULL,
-                             ...) {
-  mod <- ml_model$new(formula,
-    info = info,
-    estimate = function(y, x, ...) {
-      return(
-        earth::earth(y = y, x = x, degree = degree, nprune = nprune, glm = glm,
-          ...
-        )
-      )
-    },
-    predict = function(object, newdata, type = "response", ...) {
-      return(predict(object, newdata = newdata, type = type, ...))
-    },
-    ...
-  )
-  return(mod)
-}
 
 #' @export
 predictor_svm <- function(formula,
