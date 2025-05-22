@@ -109,13 +109,13 @@ test_predictor_svm <- function() {
 }
 test_predictor_svm()
 
-test_predictor_sl <- function() {
+test_learner_sl <- function() {
   # test with oracle model
   lrs <- list(
     mean = learner_glm(y ~ 1),
     glm = learner_glm(y ~ x1 + x2 + cos(x1)) # oracle for sim1
   )
-  lr <- predictor_sl(lrs, nfolds = 2)
+  lr <- learner_sl(lrs, nfolds = 2)
   lr$estimate(d)
 
   expect_equal(lr$fit$weights, c(mean = 0, glm = 1))
@@ -132,4 +132,4 @@ test_predictor_sl <- function() {
   lr$estimate(d, nfolds = 3)
   expect_equal(length(lr$fit$folds), 3)
 }
-test_predictor_sl()
+test_learner_sl()
