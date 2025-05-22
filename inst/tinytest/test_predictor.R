@@ -18,7 +18,6 @@ simcount <- function(n = 5e2) {
 }
 dcount <- simcount()
 
-
 test_learner_glm <- function() {
   # basic check that default arguments for learner_glm perform linear
   # regression
@@ -83,7 +82,6 @@ test_predictor_mars <- function() {
 }
 test_predictor_mars()
 
-
 # testing the SVR module
 test_predictor_svm <- function() {
   # classification / binary prediction
@@ -108,4 +106,3 @@ test_predictor_svm <- function() {
   expect_true(mean((pr-pr2)^2) > 1e-2)
 }
 test_predictor_svm()
-
