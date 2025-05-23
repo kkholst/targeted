@@ -10,20 +10,36 @@ sim1 <- function(n = 5e2) {
 }
 d <- sim1()
 
-
-# testing the MARS wrapper
-test_predictor_mars <- function() {
-  m1 <- predictor_mars(y ~ x1 + x2, degree = 1)
-  m2 <- predictor_mars(y ~ x1 + x2, degree = 2)
-
-  # Fit models
-  m1$estimate(d)
-  m2$estimate(d)
-
-  # In-sample model score
-  s1 <- scoring(object = m1, newdata = d)[,"mse"]
-  s2 <- scoring(object = m2, newdata = d)[,"mse"]
-
-  expect_true(s2 < s1)
+simcount <- function(n = 5e2) {
+  x <- rnorm(n)
+  w <- 50 + rexp(n, rate = 1 / 5)
+  y <- rpois(n, exp(2 + 0.5 * x + log(w)) * rgamma(n, 1 / 2, 1 / 2))
+  return(data.frame(y, x, w))
 }
-test_predictor_mars()
+dcount <- simcount()
+
+
+test_learner_mars <- function() {
+  fit_ref <- earth::earth(y ~ x1 + x2, degree = 2, data = d, nfold = 3)
+  lr <- learner_mars(y ~ x1 + x2, degree = 2, nfold = 3)
+  lr$estimate(d)
+
+  expect_equal(coef(fit_ref), coef(lr$fit))
+  expect_equivalent(lr$predict(d), predict(fit_ref, d)[, 1])
+  # verifies that optional arguments are passed on via ... to earth::earth
+  expect_equal(lr$fit$call$nfold, 3)
+
+  # verifies glm argument + offset
+  lr <- learner_mars(y ~ x + offset(log(w)), degree = 2,
+    glm = list(family = poisson())
+  )
+  lr$estimate(dcount)
+
+  # offset is handled correctly when making predictions
+  pr <- lr$predict(data.frame(x = 1, w = c(1, 5)))
+  expect_equal(pr[1] * 5, pr[2])
+
+  pr_link <- lr$predict(data.frame(x = 1, w = c(1, 5)), type = "link")
+  expect_equal(pr, exp(pr_link))
+}
+test_learner_mars()

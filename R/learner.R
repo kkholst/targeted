@@ -4,7 +4,7 @@
 #' @param data data.frame
 #' @author Klaus Kähler Holst, Benedikt Sommer
 #' @aliases predictor_grf predictor_grf_binary predictor_isoreg
-#' predictor_mars predictor_nb predictor_svm
+#' predictor_nb predictor_svm
 #' @examples
 #' data(iris)
 #' rf <- function(formula, ...) {
