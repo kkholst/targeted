@@ -12,24 +12,26 @@ d <- sim1()
 
 
 # classification / binary prediction
-# transform outcome internally to factor for probability = TRUE
-set.seed(42)
-lr <- learner_svm(yb ~ x1 * x2, probability = TRUE)
+lr <- learner_svm(as.factor(yb) ~ x1 * x2)
 lr$estimate(d)
 
-set.seed(42)
-lr_fact <- learner_svm(as.factor(yb) ~ x1 * x2, probability = TRUE)
-lr_fact$estimate(d)
-
-expect_equal(lr$predict(d), lr_fact$predict(d))
 # predictions are a vector for binary classification
 expect_null(ncol(lr$predict(d)))
 # predict classes
 expect_true(is.factor(lr$predict(d, probability = FALSE)))
 
+# also perform classification by providing correct type argument
+set.seed(42)
+lr <- learner_svm(yb ~ x1 + x2, type = "C-classification")
+lr$estimate(d)
 
-# don't transform outcome when probability = FALSE -> regression problem
-lr <- learner_svm(yb ~ x1 * x2, probability = FALSE)
+set.seed(42)
+lr_fact <- learner_svm(as.factor(yb) ~ x1 + x2)
+lr_fact$estimate(d)
+expect_equal(lr$predict(d), lr_fact$predict(d))
+
+# don't predict probabilities when outcome is continuous
+lr <- learner_svm(yb ~ x1 * x2)
 lr$estimate(d)
 expect_true(any(lr$predict(d) > 1))
 # predictions are a vector for regression problems
@@ -47,6 +49,6 @@ lr$estimate(d, cost = 2)
 expect_equal(lr$fit$cost, 2)
 
 # multi-class classification
-lr <- learner_svm(Species ~ ., probability = TRUE)
+lr <- learner_svm(Species ~ .)
 lr$estimate(iris)
-lr$predict(head(iris))
+expect_equal(dim(lr$predict(head(iris))), c(6, 3))

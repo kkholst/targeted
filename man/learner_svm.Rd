@@ -10,8 +10,7 @@ learner_svm(
   cost = 1,
   epsilon = 0.1,
   kernel = "radial",
-  probability = FALSE,
-  learner.args = list(predict.args = list(probability = probability)),
+  learner.args = NULL,
   ...
 )
 }
@@ -37,9 +36,6 @@ learner_svm(
       }
     }
 
-\item{probability}{logical indicating whether the model should
-    allow for probability predictions.}
-
 \item{learner.args}{(list) Additional arguments to
 \link[=learner]{learner$new()}.}
 
@@ -49,8 +45,36 @@ learner_svm(
 \link{learner} object.
 }
 \description{
-\link{learner} generator function for \link[e1071:svm]{e1071::svm}.
+\link{learner} generator function for \link[e1071:svm]{e1071::svm}. As shown in the
+examples, the constructed learner returns predicted class probabilities of
+class 2 in case of binary classification. A \verb{n times p} matrix, with \code{n}
+being the number of observations and \code{p} the number of classes, is returned
+for multi-class classification.
 }
 \examples{
-print(1)
+n <- 5e2
+x1 <- rnorm(n, sd = 2)
+x2 <- rnorm(n)
+lp <- x2*x1 + cos(x1)
+yb <- rbinom(n, 1, lava::expit(lp))
+y <-  lp + rnorm(n, sd = 0.5**.5)
+d <- data.frame(y, yb, x1, x2)
+
+# regression
+lr <- learner_svm(y ~ x1 + x2)
+lr$estimate(d)
+lr$predict(head(d))
+
+# binary classification
+lr <- learner_svm(as.factor(yb) ~ x1 + x2)
+# alternative to transforming response variable to factor
+# lr <- learner_svm(yb ~ x1 + x2, type = "C-classification")
+lr$estimate(d)
+lr$predict(head(d)) # predict class probabilities of class 2
+lr$predict(head(d), probability = FALSE) # predict labels
+
+# multi-class classification
+lr <- learner_svm(Species ~ .)
+lr$estimate(iris)
+lr$predict(head(iris))
 }
