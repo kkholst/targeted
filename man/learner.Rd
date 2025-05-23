@@ -2,9 +2,6 @@
 % Please edit documentation in R/learner.R
 \name{learner}
 \alias{learner}
-\alias{predictor_grf}
-\alias{predictor_grf_binary}
-\alias{predictor_isoreg}
 \alias{predictor_nb}
 \alias{predictor_svm}
 \title{R6 class for prediction models}
