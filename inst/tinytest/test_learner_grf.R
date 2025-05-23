@@ -42,6 +42,13 @@ pr <- lr$predict(data.frame(x1 = c(1, 2), x2 = 0))
 expect_equal(length(pr), 2)
 expect_true(is.vector(pr))
 
+# binary classification
+lr <- learner_grf(as.factor(yb) ~ x1 + x2, model = "probability_forest")
+lr$estimate(d)
+pr <- lr$predict(d)
+expect_true(all(pr > 0 & pr < 1))
+expect_equal(NCOL(pr), 1)
+
 # multi-class classification
 lr <- learner_grf(Species ~ ., model = "probability_forest")
 lr$estimate(iris)
