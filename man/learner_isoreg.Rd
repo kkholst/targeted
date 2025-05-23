@@ -23,3 +23,18 @@ learner_isoreg(formula, info = "targeted::isoregw", learner.args = NULL, ...)
 \description{
 \link{learner} object constructor for \link{isoregw}.
 }
+\examples{
+x <- runif(5e3, -5, 5)
+pr <- lava::expit(-1 + x)
+y <- rbinom(length(pr), 1, pr)
+d <- data.frame(y, x)
+
+lr <- learner_isoreg(y ~ x)
+lr$estimate(d)
+pr_iso <- lr$predict(d)
+
+if (interactive()) {
+  plot(pr ~ x, cex=0.3)
+  lines(sort(x), pr_iso[order(x)], col="red", type="s")
+}
+}
