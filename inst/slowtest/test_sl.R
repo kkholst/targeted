@@ -1,7 +1,5 @@
 # superlearner
 library("tinytest")
-library("xgboost") # loading package here to avoid Loading required package
-# message for predictor_xgboost
 suppressPackageStartupMessages(
   library("SuperLearner")
 )
