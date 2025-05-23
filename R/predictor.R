@@ -1,22 +1,4 @@
 #' @export
-predictor_isoreg <- function(formula,
-                             info = "targeted::isoregw",
-                             ...) {
-  if (length(all.vars(formula)) != 2) {
-    stop("predictor_isoreg: expected one outcome and one predictor variable")
-  }
-  mod <- ml_model$new(formula,
-    info = info,
-    estimate = function(y, x, ...) return(isoregw(y = y, x = x)),
-    predict = function(object, newdata, ...) return(object(newdata)),
-    ...
-    )
-
-  return(mod)
-}
-
-
-#' @export
 predictor_svm <- function(formula,
                           info = "e1071::svm",
                           cost = 1,
