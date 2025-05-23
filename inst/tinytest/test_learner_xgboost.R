@@ -39,6 +39,18 @@ test_learner_xgboost <- function() {
   pr2 <- lr$predict(head(d), iterationrange = c(1, 2))
   expect_false(all(pr1 == pr2))
 
+  # verify that arguments can be passed on correctly to learner$new
+  lr <- learner_xgboost(y ~ ., nrounds = 3,
+    learner.args = list(predict.args = list(iterationrange = c(1, 2)))
+  )
+  lr$estimate(d)
+  # iterationrange = NULL is the default for predict.xgb.Booster.
+  # this test verifies that 1. learner.args are passed on correctly
+  # 2. the supplied predict.args can be overruled in predict method call
+  expect_false(
+    all(lr$predict(head(d)) == lr$predict(head(d), iterationrange = NULL))
+  )
+
   # test support for multi-class classification / verifies that objective
   # argument is handled correctly
   d0 <- iris
