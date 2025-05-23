@@ -21,5 +21,5 @@ learner_isoreg(formula, info = "targeted::isoregw", learner.args = NULL, ...)
 \link{learner} object.
 }
 \description{
-\link{learner} generator function for \link{isoregw}.
+\link{learner} object constructor for \link{isoregw}.
 }
