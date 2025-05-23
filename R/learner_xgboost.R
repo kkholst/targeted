@@ -1,19 +1,42 @@
-#' @description [learner] generator function for [xgboost::xgboost].
+#' @description [learner] model constructor for [xgboost::xgboost].
 #' @export
 #' @param ... Additional arguments to [xgboost::xgboost].
+#' @param max_depth (integer) Maximum depth of a tree.
+#' @param eta (numeric) Learning rate.
+#' @param subsample (numeric) Subsample ratio of the training instance.
+#' @param lambda (numeric) L2 regularization term on weights.
+#' @param objective (character) Specify the learning task and the corresponding
+#' learning objective. See [xgboost::xgboost] for all available options.
 #' @inherit learner_shared
 #' @inheritParams xgboost::xgboost
-#' @inheritParams xgboost::xgb.cv
-# # ' @examples
-# TODO examples
+#' @examples
+#' # linear regression
+#' n  <- 1e3
+#' x1 <- rnorm(n, sd = 2)
+#' x2 <- rnorm(n)
+#' lp <- x2*x1 + cos(x1)
+#' yb <- rbinom(n, 1, lava::expit(lp))
+#' y <-  lp + rnorm(n, sd = 0.5**.5)
+#' d0 <- data.frame(y, yb, x1, x2)
+#'
+#' lr <- learner_xgboost(y ~ ., nrounds = 5)
+#' lr$estimate(d0)
+#' lr$predict(head(d0))
+#'
+#' # multi-class classification
+#' d0 <- iris
+#' d0$y <- as.numeric(d0$Species)- 1
+#'
+#' lr <- learner_xgboost(y ~ ., objective = "multi:softprob", num_class = 3)
+#' lr$estimate(d0)
+#' lr$predict(head(d0))
 learner_xgboost <- function(formula,
                             max_depth = 2L,
                             eta = 1.0,
                             nrounds = 2L,
                             subsample = 1.0,
-                            lambda = 1.0,
+                            lambda = 1,
                             verbose = 0,
-                            nfolds = 1L,
                             objective = "reg:squarederror",
                             info = paste("xgboost", objective),
                             learner.args = NULL,
@@ -26,7 +49,6 @@ learner_xgboost <- function(formula,
       subsample = subsample,
       lambda = lambda,
       verbose = verbose,
-      nfolds = nfolds,
       objective = objective
     )
     args$estimate.args <- c(estimate.args, list(...))
@@ -45,44 +67,14 @@ learner_xgboost <- function(formula,
 
       return(pr)
     }
-    args$estimate <- function(x, y, nrounds, ...) {
+    args$estimate <- function(x, y, ...) {
       d <- xgboost::xgb.DMatrix(x, label = y)
-      dots <- list(...)
-      if (dots$nfolds > 1L) {
-        val <- do.call(
-          xgboost::xgb.cv,
-          c(list(data = d, nrounds = nrounds), dots)
-        )
-        nrounds <- which.min(val$evaluation_log[[4]])
-      }
-      dots$nfolds <- NULL # remove nfolds because it causes a warning when
-      # passed on to xgboost::xgboost
       res <- do.call(
         xgboost::xgboost,
-        c(list(data = d, nrounds = nrounds), dots),
+        c(list(data = d), list(...)),
       )
       return(res)
     }
 
     return(do.call(learner$new, args))
-}
-
-#' @export
-learner_xgboost_multiclass <- function(formula, ...) {
-  return(learner_xgboost(formula, ..., objective = "multi:softprob"))
-}
-
-#' @export
-learner_xgboost_binary <- function(formula, ...) {
-  return(learner_xgboost(formula, ..., objective = "reg:logistic"))
-}
-
-#' @export
-learner_xgboost_count <- function(formula, ...) {
-  return(learner_xgboost(formula, ..., objective = "count:poisson"))
-}
-
-#' @export
-learner_xgboost_cox <- function(formula, ...) {
-  return(learner_xgboost(formula, ..., objective = "survival:cox"))
 }

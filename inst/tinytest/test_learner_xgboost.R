@@ -10,17 +10,41 @@ sim1 <- function(n = 5e2) {
 }
 d <- sim1(1e4)
 
-simcount <- function(n = 5e2) {
-  x <- rnorm(n)
-  w <- 50 + rexp(n, rate = 1 / 5)
-  y <- rpois(n, exp(2 + 0.5 * x + log(w)) * rgamma(n, 1 / 2, 1 / 2))
-  return(data.frame(y, x, w))
-}
-dcount <- simcount()
-
 test_learner_xgboost <- function() {
-  lr <- learner_xgboost(y ~ x1 + x2)
+  params <- list(
+    max_depth = 3,
+    eta = 0.5,
+    subsample = 1.0,
+    lambda = 1.0,
+    objective = "reg:squarederror"
+  )
+  args <- c(
+    params,
+    list(formula = y ~ x1 + x2, nrounds = 3L)
+  )
+
+  lr <- do.call(learner_xgboost, args)
   lr$estimate(d)
-  lr$predict(d)
+
+  # all parameters are passed on correctly
+  expect_equal(lr$fit$params[1:length(params)], params)
+
+  # parameters can be overwritten in method call
+  lr$estimate(d, eta = 1)
+  expect_equal(lr$fit$params$eta, 1)
+
+  # arguments can be passed on to predict s3 function
+  pr1 <- lr$predict(head(d)) # use trees from all rounds for predictions
+  # use only trees from first 2 boosting rounds for predictions
+  pr2 <- lr$predict(head(d), iterationrange = c(1, 2))
+  expect_false(all(pr1 == pr2))
+
+  # test support for multi-class classification / verifies that objective
+  # argument is handled correctly
+  d0 <- iris
+  d0$y <- as.numeric(d0$Species)- 1
+  lr <- learner_xgboost(y ~ ., objective = "multi:softprob", num_class = 3)
+  lr$estimate(d0)
+  expect_equal(dim(lr$predict(d0)), c(nrow(d0), 3))
 }
 test_learner_xgboost()
