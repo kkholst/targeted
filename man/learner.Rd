@@ -7,11 +7,6 @@
 \alias{predictor_isoreg}
 \alias{predictor_nb}
 \alias{predictor_svm}
-\alias{predictor_xgboost_binary}
-\alias{predictor_xgboost}
-\alias{predictor_xgboost_count}
-\alias{predictor_xgboost_cox}
-\alias{predictor_xgboost_multiclass}
 \title{R6 class for prediction models}
 \description{
 Interface for standardized estimation and prediction The
