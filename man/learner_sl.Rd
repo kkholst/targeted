@@ -53,7 +53,7 @@ d <- sim1()
 m <- list(
   "mean" = learner_glm(y ~ 1),
   "glm" = learner_glm(y ~ x1 + x2),
-  "iso" = predictor_isoreg(y ~ x1)
+  "iso" = learner_isoreg(y ~ x1)
 )
 
 s <- learner_sl(m, nfolds = 10)
