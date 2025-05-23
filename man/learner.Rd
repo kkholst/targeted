@@ -4,7 +4,6 @@
 \alias{learner}
 \alias{predictor_grf}
 \alias{predictor_grf_binary}
-\alias{predictor_isoreg}
 \alias{predictor_nb}
 \alias{predictor_svm}
 \alias{predictor_xgboost_binary}
