@@ -176,6 +176,19 @@ test_design <- function() {
   fit <- glm.fit(x = m$design(ddata)$x, y = m$response(ddata))
   expect_equal(coef(m$fit), coef(fit))
 
+  # test support for . on RHS of formula
+  lr <- learner$new(formula = y ~ ., estimate = glm.fit, intercept = TRUE)
+  expect_equal(m$design(ddata)$x, lr$design(ddata)$x)
+
+  # remove some features
+  lr <- learner$new(formula = y ~ . -x1, estimate = glm.fit, intercept = FALSE)
+  expect_equal(colnames(lr$design(ddata)$x), "x2")
+
+  # works with offset
+  lr <- learner$new(formula = y ~ . -x1 + offset(x1), estimate = glm.fit,
+    specials = c("offset"))
+  expect_equivalent(lr$design(ddata)$offset, ddata$x1)
+
   # defined options can be overruled during method call
   fit <- glm.fit(x = m$design(ddata, intercept = FALSE)$x, y = m$response(ddata))
   expect_false("(Intercept)" %in% names(coef(fit)))
@@ -186,6 +199,7 @@ test_design <- function() {
   # same for response
   m <- learner$new(formula = yy ~ x1 + x2, estimate = glm.fit)
   expect_error(m$design(ddata), pattern = "object 'yy' not found")
+
 }
 test_design()
 
