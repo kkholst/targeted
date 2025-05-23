@@ -16,6 +16,10 @@ learner_svm <- function(formula,
                           probability = probability
                         )),
                         ...) {
+  if (!requireNamespace("e1071", quietly = TRUE)) {
+    stop("e1071 library required")
+  }
+
   # TODO: do we really need this transformation?
   if (probability) formula <- update(formula, factor(.) ~ .)
   args <- c(learner.args, list(formula = formula, info = info))
