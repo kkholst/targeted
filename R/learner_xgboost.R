@@ -1,5 +1,4 @@
 #' @description [learner] model constructor for [xgboost::xgboost].
-#' @export
 #' @param ... Additional arguments to [xgboost::xgboost].
 #' @param max_depth (integer) Maximum depth of a tree.
 #' @param eta (numeric) Learning rate.
@@ -9,6 +8,7 @@
 #' learning objective. See [xgboost::xgboost] for all available options.
 #' @inherit learner_shared
 #' @inheritParams xgboost::xgboost
+#' @export
 #' @examples
 #' # linear regression
 #' n  <- 1e3
