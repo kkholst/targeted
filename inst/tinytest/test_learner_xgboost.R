@@ -58,5 +58,20 @@ test_learner_xgboost <- function() {
   lr <- learner_xgboost(y ~ ., objective = "multi:softprob", num_class = 3)
   lr$estimate(d0)
   expect_equal(dim(lr$predict(d0)), c(nrow(d0), 3))
+
+  # binary classification with binary:logistic
+  lr <- learner_xgboost(yb ~ x1 + x2, objective = "binary:logistic")
+  lr$estimate(d)
+  pr <- lr$predict(head(d))
+  expect_true(is.vector(pr))
+
+  # binary classification with objective = "multi:softprob"
+  lr <- learner_xgboost(yb ~ x1 + x2, objective = "multi:softprob",
+    num_class = 2
+  )
+  lr$estimate(d)
+  # preserve output format of predict.xgb.Booster
+  expect_equal(dim(lr$predict(head(d))), c(6, 2))
+
 }
 test_learner_xgboost()
