@@ -46,9 +46,6 @@ learner <- R6::R6Class("learner", # nolint
   public = list(
     #' @field info Optional information/name of the model
     info = NULL,
-    #' @field formals List with formal arguments of estimation and
-    #'  prediction functions
-    formals = NULL,
     #' @field formula Formula specifying response and design matrix
     formula = NULL,
     #' @field estimate.args optional arguments to fitting function specified
@@ -161,10 +158,6 @@ learner <- R6::R6Class("learner", # nolint
       }
       self$formula <- formula
       self$info <- info
-      self$formals <- list(
-        estimate = formals(estimate),
-        predict = formals(predict)
-      )
       private$init <- list(
         estimate.args = estimate.args,
         predict.args = predict.args,

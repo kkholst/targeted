@@ -68,9 +68,6 @@ Klaus Kähler Holst, Benedikt Sommer
 \describe{
 \item{\code{info}}{Optional information/name of the model}
 
-\item{\code{formals}}{List with formal arguments of estimation and
-prediction functions}
-
 \item{\code{formula}}{Formula specifying response and design matrix}
 
 \item{\code{estimate.args}}{optional arguments to fitting function specified
