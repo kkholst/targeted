@@ -45,6 +45,7 @@ NB <- function(formula, data, weights = NULL,
   cls <- levels(y)
   prior0 <- xtabs0(weights, y, prop = TRUE)
   if (is.null(prior)) {
+    warning("Argument prior is not implemented.")
     ## user-defined priors
     ## TODO: Assign new values and renormalize
   }
