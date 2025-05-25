@@ -234,3 +234,39 @@ test_response <- function() {
   expect_error(lr$response(ddata), pattern = "object 'x3' not found")
 }
 test_response()
+
+test_summary <- function() {
+  lr <- learner_glm(y ~ x1 + x2, family = "nb")
+  lr_sum <- lr$summary()
+  expect_stdout(print(lr_sum), "formula\\: y \\~ x1 \\+ x2")
+  expect_stdout(print(lr_sum), "estimate: formula, data, family, ...")
+  expect_stdout(print(lr_sum), "estimate.args: family=nb")
+  expect_stdout(print(lr_sum), "predict: object, newdata, ... ")
+  expect_stdout(print(lr_sum), "predict.args: ")
+  expect_stdout(print(lr_sum), "specials: ")
+
+  # simple checks that relevant keys are populated in the returned list
+  expect_equal(lr_sum$info, "glm")
+  expect_equal(lr_sum$intercept, FALSE)
+  expect_equal(lr_sum$x.arg, "x")
+  expect_equal(lr_sum$response.arg, "y")
+
+  # verify that updated response is printed correctly
+  lr$update(y ~ x)
+  expect_stdout(print(lr$summary()), "formula\\: y \\~ x")
+  # same for info
+  lr$info <- "new info"
+  expect_stdout(print(lr$summary()), "new info")
+
+  # verify that console is not cluttered for learner_sl by printing detailed
+  # information about all learners
+  lr <- learner_sl(list(learner_glm(y ~ x), learner_gam(y ~ s(x))), nfolds = 5)
+  lr_sum <- lr$summary()
+  expect_stdout(
+    print(lr_sum),
+    pattern = paste0(
+      "estimate.args: learners=<list>, nfolds=5, meta.learner=<function>, ",
+      "model.score=<function>"
+    ))
+}
+test_summary()

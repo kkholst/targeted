@@ -167,7 +167,13 @@ learner <- R6::R6Class("learner", # nolint
       )
       private$init <- list(
         estimate.args = estimate.args,
-        predict.args = predict.args
+        predict.args = predict.args,
+        estimate = estimate,
+        predict = predict,
+        specials = specials,
+        response.arg = response.arg,
+        intercept = intercept,
+        x.arg = x.arg
       )
     },
 
@@ -216,6 +222,39 @@ learner <- R6::R6Class("learner", # nolint
       learner_print(self, private)
       return(invisible())
     },
+
+    #' @description
+    #' Summary method to provide more extensive information than
+    #' [learner$print()][learner].
+    #' @return summarized_learner object, which is a list with the following
+    #' elements:
+    #' \describe{
+    #'  \item{info}{description of the learner}
+    #'  \item{formula}{formula specifying outcome and design matrix}
+    #'  \item{estimate}{function for fitting the model}
+    #'  \item{estimate.args}{arguments to estimate function}
+    #'  \item{predict}{function for making predictions from fitted model}
+    #'  \item{predict.args}{arguments to predict function}
+    #'  \item{specials}{provided special terms}
+    #'  \item{response.args}{name of response argument in estimate function}
+    #'  \item{intercept}{include intercept in design matrix}
+    #'  \item{x.arg}{name of design matrix argument in estimate function}
+    #' }
+    #' @examples
+    #' lr <- learner_glm(y ~ x, family = "nb")
+    #' lr$summary()
+    #'
+    #' lr_sum <- lr$summary() # store returned summary in new object
+    #' names(lr_sum)
+    #' print(lr_sum)
+    summary = function() {
+      obj <- structure(
+        c(list(formula = self$formula, info = self$info), private$init),
+        class = "summarized_learner"
+      )
+      return(obj)
+    },
+
 
     #' @description
     #' Extract response from data
@@ -356,6 +395,32 @@ learner_print <- function(self, private) {
   }
 
   return(invisible())
+}
+
+#' @export
+print.summarized_learner <- function(x, ...) {
+    .ruler <- function(x, n, unicode = "\u2500") {
+    rule <- paste0(rep(unicode, n), collapse = "")
+    cat(paste0(rule, x, rule, "\n"))
+  }
+
+  .ruler(" learner object ", 10)
+
+  if (!is.null(x$info)) {
+    cat(x$info, "\n\n")
+  }
+
+  cat(
+    "formula:",
+    capture.output(print(x$formula)),
+    "\nestimate:", paste0(names(formals(x$estimate)), collapse = ", "),
+    "\nestimate.args:",
+    format_fit_predict_args(x$estimate.args),
+    "\npredict:", paste0(names(formals(x$predict)), collapse = ", "),
+    "\npredict.args:",
+    format_fit_predict_args(x$predict.args),
+    "\nspecials:", paste(x$specials, collapse = ", ")
+  )
 }
 
 #' @title R6 class for prediction models
