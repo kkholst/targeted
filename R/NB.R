@@ -23,6 +23,7 @@ NB <- function(formula, data, weights = NULL,
                kernel = FALSE, laplace.smooth = 0, prior = NULL, ...) {
   if (missing(data)) stop("Need data as data.frame or data.table")
   if (!data.table::is.data.table(data)) data <- data.table::data.table(data)
+
   ff <- procform(formula, data = as.data.frame(data))
   y <- as.factor(as.matrix(with(ff, data[, response, with = FALSE])))
   if (length(ff$filter) > 0 && is.null(weights)) {
@@ -44,8 +45,8 @@ NB <- function(formula, data, weights = NULL,
   }
   cls <- levels(y)
   prior0 <- xtabs0(weights, y, prop = TRUE)
-  if (is.null(prior)) {
-    warning("Argument prior is not implemented.")
+  if (!is.null(prior)) {
+    warning("prior argument is not implemented and has no effect.")
     ## user-defined priors
     ## TODO: Assign new values and renormalize
   }

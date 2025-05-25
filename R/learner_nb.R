@@ -1,26 +1,52 @@
+#' @description [learner] object constructor for [NB] (Naive-Bayes). As shown in
+#' the examples, the constructed learner returns predicted class probabilities
+#' of class 2 in case of binary classification. A `n times p` matrix, with `n`
+#' being the number of observations and `p` the number of classes, is returned
+#' for multi-class classification.
 #' @export
+#' @param ... Additional arguments to [NB].
+#' @inherit learner_shared
+#' @inheritParams NB
+#' @examples
+#' n <- 5e2
+#' x1 <- rnorm(n, sd = 2)
+#' x2 <- rnorm(n)
+#' y <- rbinom(n, 1, lava::expit(x2*x1 + cos(x1)))
+#' d <- data.frame(y, x1, x2)
+#'
+#' # binary classification
+#' lr <- learner_nb(y ~ x1 + x2)
+#' lr$estimate(d)
+#' lr$predict(head(d))
+#'
+#' # multi-class classification
+#' lr <- learner_nb(Species ~ .)
+#' lr$estimate(iris)
+#' lr$predict(head(iris))
 learner_nb <- function(formula,
-                         info = "Naive Bayes",
-                         laplace.smooth = 0,
-                         kernel = FALSE,
-                         ...) {
-  args <- list(
-    formula = formula,
-    estimate = function(formula, data, ...) {
-      return(NB(formula = formula, data = data, ...)
-    )
-    },
-    predict = function(object, newdata, simplify = TRUE, ...) {
-      pr <- stats::predict(object, newdata = newdata, ...)
-      if (simplify && NCOL(pr) == 2L) pr <- pr[, 2]
-      return(pr)
-    },
-    laplace.smooth = laplace.smooth,
-    kernel = kernel,
-    info = info,
-    specials = c("weights", "offset"),
-    ...
+                       info = "Naive Bayes",
+                       laplace.smooth = 0,
+                       kernel = FALSE,
+                       learner.args = NULL,
+                       ...) {
+  args <- c(learner.args, list(formula = formula, info = info))
+  args$estimate.args <- c(
+    list(
+      laplace.smooth = laplace.smooth,
+      kernel = kernel
+    ),
+    list(...)
   )
-  mod <- do.call(ml_model$new, args)
-  return(mod)
+  args$specials <- union(args$specials, c("weights"))
+
+  args$estimate <- function(formula, data, ...) {
+    NB(formula = formula, data = data, ...)
+  }
+  args$predict <- function(object, newdata, ...) {
+    pr <- stats::predict(object, newdata = newdata, ...)
+    if (NCOL(pr) == 2L) pr <- pr[, 2]
+    return(pr)
+  }
+
+  return(do.call(learner$new, args))
 }
