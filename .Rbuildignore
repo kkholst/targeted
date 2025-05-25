@@ -5,8 +5,10 @@
 ^.lintr$
 ^CPPLINT.cfg$
 ^Dockerfile$
+^CONTRIBUTING.md$
 ^Makefile$
 ^tmp$
+^.vscode$
 ^Makefile$
 ^src/target/lib$
 ^src/target/build$
@@ -25,3 +27,4 @@
 ^.codecov.yml
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\.cliff\.toml$

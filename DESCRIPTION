@@ -2,7 +2,7 @@ Package: targeted
 Type: Package
 Title: Targeted Inference
 Version: 0.6
-Date: 2024-10-30
+Date: 2025-04-29
 Authors@R: c(person(given = "Klaus K.",
                     family = "Holst",
                     role = c("aut", "cre"),
@@ -26,36 +26,41 @@ Description: Various methods for targeted and semiparametric inference including
 	     <doi:10.1080/01621459.2016.1192546>), assumption lean inference for generalized
          linear model parameters (Vansteelandt et al. (2022) <doi:10.1111/rssb.12504>).
 Depends:
-    R (>= 4.0),
+    R (>= 4.1),
     lava (>= 1.8.0),
     survival
 Imports:
+    R6,
+    Rcpp (>= 1.0.0),
+    abind,
     cli,
     data.table,
     future.apply,
-    nnls,
-    optimx,
-	progressr,
     methods,
     mets,
-    R6,
-    Rcpp (>= 1.0.0),
+    nnls,
+    optimx,
+    progressr,
     rlang
 Suggests:
+    SuperLearner (>= 2.0-28),
     cmprsk,
+    MASS,
     e1071,
+    earth,
     glmnet,
     grf,
     hal9001,
+    knitr,
     mgcv,
-    tinytest,
+    randomForestSRC,
+    ranger,
     riskRegression,
     rmarkdown,
     scatterplot3d,
-    SuperLearner (>= 2.0-28),
-    knitr,
-    xgboost,
-    viridisLite
+    tinytest,
+    viridisLite,
+    xgboost
 BugReports: https://github.com/kkholst/targeted/issues
 SystemRequirements: C++11, GNU make
 URL: https://kkholst.github.io/targeted/

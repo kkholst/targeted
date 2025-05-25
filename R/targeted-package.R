@@ -15,10 +15,10 @@
 #'   lm.wfit lm.fit glm lm coef vcov model.frame model.matrix na.pass nlminb
 #'   predict dnorm quantile terms weighted.mean runif .getXlevels
 #'   delete.response model.response gaussian formula model.offset reformulate
-#'   drop.terms weights model.extract cov2cor pchisq uniroot
+#'   drop.terms weights model.extract cov2cor pchisq uniroot sd na.omit
 #' @importFrom rlang hash call_match
 #' @importFrom optimx optimx
-#' @importFrom data.table data.table is.data.table
+#' @importFrom data.table data.table is.data.table dcast :=
 #' @importFrom R6 R6Class
 #' @importFrom survival survfit
 #' @importFrom utils tail head capture.output

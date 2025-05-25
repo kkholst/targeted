@@ -15,6 +15,7 @@ cate(
   silent = FALSE,
   stratify = FALSE,
   mc.cores = NULL,
+  second.order = TRUE,
   response_model = deprecated,
   cate_model = deprecated,
   propensity_model = deprecated,
@@ -44,6 +45,9 @@ average treatment effects}
 
 \item{mc.cores}{mc.cores Optional number of cores. parallel::mcmapply used
 instead of future}
+
+\item{second.order}{Add seconder order term to IF to handle misspecification
+of outcome models}
 
 \item{response_model}{Deprecated. Use response.model instead.}
 
@@ -93,13 +97,13 @@ cate(cate.model=~1+w2,
 
 \dontrun{ ## superlearner example
 mod1 <- list(
-   glm = predictor_glm(y~w1+w2),
-   gam = predictor_gam(y~s(w1) + s(w2))
+   glm = learner_glm(y~w1+w2),
+   gam = learner_gam(y~s(w1) + s(w2))
 )
-s1 <- predictor_sl(mod1, nfolds=5)
+s1 <- learner_sl(mod1, nfolds=5)
 cate(cate.model=~1,
      response.model=s1,
-     propensity.model=predictor_glm(a~w1+w2, family=binomial),
+     propensity.model=learner_glm(a~w1+w2, family=binomial),
      data=d,
      stratify=TRUE)
 }

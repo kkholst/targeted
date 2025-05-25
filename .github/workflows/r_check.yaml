@@ -50,6 +50,12 @@ jobs:
           # args: 'c("--ignore-vignettes")'
           # build_args: 'c("--no-build-vignettes")'
 
+      - name: slow tests
+        if: success() && contains('refs/heads/main', github.ref)
+        run: |
+          Rscript -e 'remotes::install_github("kkholst/targeted")'
+          make slowtest
+
       - name: Webpage deployment
         if: success() && contains('refs/heads/main', github.ref)
         run: |
