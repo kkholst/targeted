@@ -238,7 +238,7 @@ test_response()
 test_summary <- function() {
   lr <- learner_glm(y ~ x1 + x2, family = "nb")
   lr_sum <- lr$summary()
-  expect_stdout(print(lr_sum), "formula\\: y \\~ x1 \\+ x2")
+  expect_stdout(print(lr_sum), "formula: y \\~ x1 \\+ x2")
   expect_stdout(print(lr_sum), "estimate: formula, data, family, ...")
   expect_stdout(print(lr_sum), "estimate.args: family=nb")
   expect_stdout(print(lr_sum), "predict: object, newdata, ... ")
