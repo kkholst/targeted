@@ -3,7 +3,7 @@
 #' following built-in learners are provided: [learner_glm], [learner_gam]
 #' @param data data.frame
 #' @author Klaus Kähler Holst, Benedikt Sommer
-#' @aliases predictor_grf predictor_grf_binary predictor_nb predictor_svm
+#' @aliases predictor_nb predictor_svm
 #' @examples
 #' data(iris)
 #' rf <- function(formula, ...) {
