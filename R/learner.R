@@ -384,7 +384,9 @@ learner_print <- function(self, private) {
 
   if (!is.null(private$fitted)) {
     .ruler("\u2500", 18)
-    cat(capture.output(print(self$fit)), sep ="\n")
+    fit <- self$fit
+    if (!is.null(fit$call)) fit$call <- substitute()
+    cat(capture.output(print(fit)), sep ="\n")
   }
 
   return(invisible())
