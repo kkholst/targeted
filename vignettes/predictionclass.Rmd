@@ -264,10 +264,58 @@ lr$predict(head(pbc), type = "link")
 
 ## Fit function with x and y arguments
 
-Many fitting routines for machine learning models expect a design matrix and
+Most fitting routines for machine learning models expect a design matrix and
 response vector as inputs. The R6 `learner` class supports these fitting
 functions by internally processing the `formula` argument via the
-`targeted::design` function. 
+`targeted::design` function. Take the example of `grf::probability_forest`,
+which expects a `X` (design matrix) and `Y` (response vector) as inputs.
+```{r}
+new_grf <- function(formula, ...) {
+  learner$new(
+    formula = formula,
+    estimate = function(x, y, ...) grf::probability_forest(X = x, Y = y, ...),
+    predict = function(object, newdata) {
+      predict(object, newdata = newdata)$predictions
+    },
+    estimate.args = list(...),
+    info = "grf::probability_forest"
+  )
+}
+lr <- new_grf(as.factor(y) ~ age + bili, num.trees = 100)
+lr$estimate(pbc)
+```
+Compared to the previous case, the `pbc` data object is not directly passed on
+to the fit function. Instead,`targeted::design` constructs the design matrix and
+response vector from the defined `formula` argument. As shown previously,
+```{r}
+dsgn <- lr$design(pbc)
+```
+can be used to inspect the design object. The `x` and `y` attributes of the
+returned `design` object are then passed on to the fit function.
+
+TODO: specials should be explained here
 
 ## Fit function with single data argument
-meta learner
+
+To support ensemble/meta learners, it is also possible to construct a learner
+without providing a formula argument.
+```{r}
+new_sl <- function(learners, ...) {
+  learner$new(
+    info = "new superlearner",
+    estimate = superlearner,
+    predict = targeted:::predict.superlearner,
+    estimate.args = c(list(learners = learners), list(...))
+  )
+}
+lrs <- list(
+  glm = learner_glm(y ~ age, family = "binomial"),
+  gam = learner_gam(y ~ s(age), family = "binomial")
+)
+lr <- new_sl(lrs, nfolds = 2)
+lr$estimate(pbc)
+lr
+```
+In this case, all arguments provided to `lr$estimate` are joined together with
+the specified `estimate.args` and passed on to the defined estimate function (i.e.
+`superlearner`).
