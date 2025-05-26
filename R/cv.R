@@ -119,7 +119,7 @@ cv.default <- function(object,
   for (i in seq_along(object)) {
     if (inherits(object[[i]], "learner")) {
       if (!is.null(response) && response.arg %in%
-          names(object[[i]]$formals$estimate)) {
+          names(formals(object[[i]]$summary()$estimate))) {
         arg_response[i] <- TRUE
       }
     } else {

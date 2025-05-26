@@ -46,6 +46,17 @@ ff <- learner$new(
 )
 ## tmp <- ff$estimate(y, x=x)
 ## ff$predict(x)
+
+## ------------------------------------------------
+## Method `learner$summary`
+## ------------------------------------------------
+
+lr <- learner_glm(y ~ x, family = "nb")
+lr$summary()
+
+lr_sum <- lr$summary() # store returned summary in new object
+names(lr_sum)
+print(lr_sum)
 }
 \author{
 Klaus Kähler Holst, Benedikt Sommer
@@ -54,9 +65,6 @@ Klaus Kähler Holst, Benedikt Sommer
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
 \item{\code{info}}{Optional information/name of the model}
-
-\item{\code{formals}}{List with formal arguments of estimation and
-prediction functions}
 
 \item{\code{formula}}{Formula specifying response and design matrix}
 
@@ -80,6 +88,7 @@ during initialization}
 \item \href{#method-learner-predict}{\code{learner$predict()}}
 \item \href{#method-learner-update}{\code{learner$update()}}
 \item \href{#method-learner-print}{\code{learner$print()}}
+\item \href{#method-learner-summary}{\code{learner$summary()}}
 \item \href{#method-learner-response}{\code{learner$response()}}
 \item \href{#method-learner-design}{\code{learner$design()}}
 \item \href{#method-learner-opt}{\code{learner$opt()}}
@@ -203,6 +212,46 @@ Update formula
 Print method
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{learner$print()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-learner-summary"></a>}}
+\if{latex}{\out{\hypertarget{method-learner-summary}{}}}
+\subsection{Method \code{summary()}}{
+Summary method to provide more extensive information than
+\link[=learner]{learner$print()}.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{learner$summary()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+summarized_learner object, which is a list with the following
+elements:
+\describe{
+\item{info}{description of the learner}
+\item{formula}{formula specifying outcome and design matrix}
+\item{estimate}{function for fitting the model}
+\item{estimate.args}{arguments to estimate function}
+\item{predict}{function for making predictions from fitted model}
+\item{predict.args}{arguments to predict function}
+\item{specials}{provided special terms}
+\item{response.args}{name of response argument in estimate function}
+\item{intercept}{include intercept in design matrix}
+\item{x.arg}{name of design matrix argument in estimate function}
+}
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{lr <- learner_glm(y ~ x, family = "nb")
+lr$summary()
+
+lr_sum <- lr$summary() # store returned summary in new object
+names(lr_sum)
+print(lr_sum)
+}
+\if{html}{\out{</div>}}
+
 }
 
 }

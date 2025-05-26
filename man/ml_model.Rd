@@ -25,6 +25,7 @@ Replaced by \link{learner}
 <li><span class="pkg-link" data-pkg="targeted" data-topic="learner" data-id="predict"><a href='../../targeted/html/learner.html#method-learner-predict'><code>targeted::learner$predict()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="targeted" data-topic="learner" data-id="print"><a href='../../targeted/html/learner.html#method-learner-print'><code>targeted::learner$print()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="targeted" data-topic="learner" data-id="response"><a href='../../targeted/html/learner.html#method-learner-response'><code>targeted::learner$response()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="targeted" data-topic="learner" data-id="summary"><a href='../../targeted/html/learner.html#method-learner-summary'><code>targeted::learner$summary()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="targeted" data-topic="learner" data-id="update"><a href='../../targeted/html/learner.html#method-learner-update'><code>targeted::learner$update()</code></a></span></li>
 </ul>
 </details>
