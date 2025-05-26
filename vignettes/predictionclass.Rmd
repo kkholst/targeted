@@ -1,6 +1,6 @@
 ---
-title: "Prediction model class (`ml_model`)
-author: "Klaus Kähler Holst, Benedikt Sommer"
+title: Prediction model class (`learner`)
+author: Klaus Kähler Holst, Benedikt Sommer
 date: "`r Sys.Date()`"
 output:
   knitr:::html_vignette:
@@ -11,7 +11,7 @@ output:
     toc: true
     toc_depth: 2
 vignette: >
-  %\VignetteIndexEntry{Prediction models - scoring and calibration}
+  %\VignetteIndexEntry{Prediction models}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -28,24 +28,25 @@ library("targeted")
 # Introduction
 
 Methods for targeted and semiparametric inference rely on fitting nuisance
-models to observed data when estimating the estimand of interest. The
-`{targeted}` implements the [R6 reference class](https://r6.r-lib.org/)
+models to observed data when estimating the target parameter of interest. The
+`{targeted}` package implements the [R6 reference class](https://r6.r-lib.org/)
 `learner` to harmonize common statistical and machine learning models for the
 usage as nuisance models across the various implemented estimators. Commonly
-used models are instantiated as `learner` class objects through the `learner_`
+used models are constructed as `learner` class objects through the `learner_`
 functions. These functions are wrappers for statistical and machine learning
 models that have been implemented in other R packages. This is conceptually
 similar to packages such as `{caret}` and `{mlr3}`. Besides implementing a large
-number of prediction models, they provide extensive functionalities for data
-preprocessing, model selection and diagnostics, and hyper-parameter
+number of prediction models, these packages provide extensive functionalities
+for data preprocessing, model selection and diagnostics, and hyper-parameter
 optimization. The design of the `learner` class and accompanied functions is
 much leaner, as our use-cases often only require a standardized interface for
 estimating models and generating predictions, instead of the full predictive
 modelling pipeline.
 
-We use the Mayo Clinic Primary Biliary Cholangitis data (`?survival::pbc`)
-to exemplify the usage of the `learner` class objects. Our interest is to
-predict the composite event of death or transplant before 2 years.
+This vignette uses the Mayo Clinic Primary Biliary Cholangitis data
+(`?survival::pbc`) to exemplify the usage of the `learner` class objects. Our
+interest lies in the prediction of the composite event of death or transplant
+before 2 years.
 ```{r data}
 data(pbc, package="survival")
 pbc <- transform(pbc, y = (time < 730) * (status > 0))
@@ -55,11 +56,12 @@ A logistic regression model with a single `age` covariate is defined and
 estimated via
 
 ```{r logistic1}
-lr <- predictor_glm(y ~ age, family = binomial())
+lr <- learner_glm(y ~ age, family = binomial())
 lr$estimate(pbc)
 ```
 
-and predictions of class probabilities for new data are obtained by
+and predictions for the event `y = 1` (class 2 probabilities) for new data are
+obtained by
 
 ```{r logistic2}
 lr$predict(newdata = data.frame(age = c(20, 40, 60, 80)))
@@ -73,10 +75,49 @@ new learners.
 
 # Built-in learners
 
-- start with listing all estimators
-- passing arguments to fit and predict function, related to inherited roxygen
-documentation (exposing most commonly used arguments)
-- 
+The various constructors for commonly used statistical and machine learning
+models are listed as part of the `learner` class documentation
+```{r, eval = FALSE}
+?learner # help(learner)
+```
+which contains essential information for the usage of the `learner` class
+objects. With the exception of `learner_sl`, all constructors require a
+`formula` argument that specify the response vector and design matrix of a
+learner. This way the construction of a learner is separated from the estimation
+of the underlying model, as shown in the above logistic regression example. A
+result of this design is the convenient specification of ensemble learners
+(superlearner), where individual learners operate on a different subset of
+features.
+
+```{r}
+lr_sl <- learner_sl(
+  learners = list(
+    glm1 = learner_glm(y ~ age * bili, family = "binomial"),
+    glm2 = learner_glm(y ~ age, family = "binomial"),
+    gam = learner_gam(y ~ s(age) + s(bili), family = "binomial")
+  )
+)
+lr_sl$estimate(pbc, nfolds = 10)
+lr_sl
+```
+
+## Details
+All constructors are essentially wrappers for the fit and predict functions of
+the underlying statistical or ML models, with minor modifications to standardize
+the output of the predict functions. For example, the fit function
+`grf::probability_forest` (generalized random forest) that is wrapped inside
+`learner_grf` requires a design matrix `X` and response vector `Y` as inputs.
+
+A key feature of the `learner` class is the internal construction of the design
+matrix and response vector from the specified `formula` argument.
+```{r}
+lr_grf <- learner_grf(y ~ age + log2(bili), model = "probability_forest")
+lr_grf$summary()$estimate
+```
+The during the fitting process constructed design matrix can be inspected via
+```{r}
+lr_grf$design(pbc)$x |> head()
+```
 
 # Usage
 
