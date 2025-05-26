@@ -21,7 +21,7 @@
 #' @importFrom data.table data.table is.data.table dcast :=
 #' @importFrom R6 R6Class
 #' @importFrom survival survfit
-#' @importFrom utils tail head capture.output
+#' @importFrom utils tail head capture.output getFromNamespace
 #' @useDynLib targeted, .registration=TRUE
 #' @aliases targeted-package targeted
 #' @author Klaus K. Holst (Maintainer) <klaus@@holst.it>
