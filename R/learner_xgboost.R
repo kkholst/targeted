@@ -10,7 +10,6 @@
 #' @inheritParams xgboost::xgboost
 #' @export
 #' @examples
-#' # linear regression
 #' n  <- 1e3
 #' x1 <- rnorm(n, sd = 2)
 #' x2 <- rnorm(n)
@@ -19,7 +18,15 @@
 #' y <-  lp + rnorm(n, sd = 0.5**.5)
 #' d0 <- data.frame(y, yb, x1, x2)
 #'
-#' lr <- learner_xgboost(y ~ ., nrounds = 5)
+#' # regression
+#' lr <- learner_xgboost(y ~ x1 + x2, nrounds = 5)
+#' lr$estimate(d0)
+#' lr$predict(head(d0))
+#'
+#' # binary classification
+#' lr <- learner_xgboost(yb ~ x1 + x2, nrounds = 5,
+#'  objective = "binary:logistic"
+#' )
 #' lr$estimate(d0)
 #' lr$predict(head(d0))
 #'
