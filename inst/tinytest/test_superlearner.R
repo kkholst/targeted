@@ -2,7 +2,8 @@ sim1 <- function(n = 5e2) {
    x1 <- rnorm(n, sd = 2)
    x2 <- rnorm(n)
    y <- x1 + cos(x1) + rnorm(n, sd = 0.5**.5)
-   d <- data.frame(y, x1, x2)
+   yb <- as.numeric(y > 0)
+   d <- data.frame(y, yb, x1, x2)
    d
 }
 d0 <- sim1()
@@ -44,9 +45,17 @@ test_superlearner <- function() {
     pattern = "All provided learners must be of class targeted::learner"
   )
 
-  expect_error(
-    superlearner(list(learner_glm(y ~ 1), learner_glm(x ~ 1)), data = d0),
-    pattern = "All learners must have the same response variable"
+  expect_warning(
+    superlearner(list(learner_glm(y ~ 1), learner_glm(x1 ~ 1)), data = d0),
+    pattern = "Different response variables found among learners: y, x1"
+  )
+
+  expect_warning(
+    superlearner(list(
+      learner_glm(yb ~ 1),
+      learner_glm(as.factor(yb) ~ 1, family = "binomial")
+    ), data = d0),
+    pattern = "Different response variables found among learners: yb, as"
   )
 }
 test_superlearner()
