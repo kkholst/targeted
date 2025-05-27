@@ -7,7 +7,7 @@
 Replaced by \link{learner}
 }
 \section{Super class}{
-\code{targeted::learner} -> \code{ml_model}
+\code{\link[targeted:learner]{targeted::learner}} -> \code{ml_model}
 }
 \section{Methods}{
 \subsection{Public methods}{
