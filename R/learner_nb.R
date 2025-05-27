@@ -1,12 +1,12 @@
-#' @description [learner] object constructor for [NB] (Naive-Bayes). As shown in
+#' @description [learner] object constructor for [naivebayes]. As shown in
 #' the examples, the constructed learner returns predicted class probabilities
 #' of class 2 in case of binary classification. A `n times p` matrix, with `n`
 #' being the number of observations and `p` the number of classes, is returned
 #' for multi-class classification.
 #' @export
-#' @param ... Additional arguments to [NB].
+#' @param ... Additional arguments to [naivebayes].
 #' @inherit learner_shared
-#' @inheritParams NB
+#' @inheritParams naivebayes
 #' @examples
 #' n <- 5e2
 #' x1 <- rnorm(n, sd = 2)
@@ -15,15 +15,15 @@
 #' d <- data.frame(y, x1, x2)
 #'
 #' # binary classification
-#' lr <- learner_nb(y ~ x1 + x2)
+#' lr <- learner_naivebayes(y ~ x1 + x2)
 #' lr$estimate(d)
 #' lr$predict(head(d))
 #'
 #' # multi-class classification
-#' lr <- learner_nb(Species ~ .)
+#' lr <- learner_naivebayes(Species ~ .)
 #' lr$estimate(iris)
 #' lr$predict(head(iris))
-learner_nb <- function(formula,
+learner_naivebayes <- function(formula,
                        info = "Naive Bayes",
                        laplace.smooth = 0,
                        kernel = FALSE,
@@ -40,7 +40,7 @@ learner_nb <- function(formula,
   args$specials <- union(args$specials, c("weights"))
 
   args$estimate <- function(formula, data, ...) {
-    NB(formula = formula, data = data, ...)
+    naivebayes(formula = formula, data = data, ...)
   }
   args$predict <- function(object, newdata, ...) {
     pr <- stats::predict(object, newdata = newdata, ...)

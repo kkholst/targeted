@@ -64,3 +64,6 @@ list2str <- function(x) {
   }
   return(res)
 }
+
+#' @export
+weights.numeric <- function(object, ...) object
