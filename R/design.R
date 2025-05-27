@@ -77,6 +77,7 @@ design <- function(formula, data, ..., # nolint
     xlev <- .getXlevels(tt, mf)
   }
   xlev0 <- xlev
+  term.labels <- attr(tt, "term.labels") # predictors
   specials.list <- c()
   if (length(specials) > 0) {
     des <- attr(tt, "factors")
@@ -99,6 +100,9 @@ design <- function(formula, data, ..., # nolint
         xlev = xlev0,
         drop.unused.levels = FALSE
       )
+        # predictors without the specials
+      term.labels <- setdiff(term.labels,
+                             unlist(sterm.list))
     }
   }
   if (!is.null(specials.call)) {
@@ -122,7 +126,10 @@ design <- function(formula, data, ..., # nolint
 
   res <- c(
     list(
-      terms = tt, xlevels = xlev, x = x, y = y,
+      terms = tt,
+      term.labels = term.labels,
+      xlevels = xlev,
+      x = x, y = y,
       intercept = has_intercept,
       data = data[0, ], ## Empty data.frame to capture structure of data
       specials = specials,
