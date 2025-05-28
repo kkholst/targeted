@@ -31,17 +31,6 @@ test_initialize <- function() {
 
   expect_equal(m1$predict(newdata = ddata), m3$predict(newdata = ddata))
 
-  # test response.arg and x.arg work as expected
-  m4 <- learner$new(
-    formula = y ~ x1 + x2,
-    estimate = \(yy, xx) glm.fit(y = yy, x = xx),
-    predict = \(object, newdata) newdata %*% object$coefficients,
-    response.arg = "yy",
-    x.arg = "xx"
-  )
-  m4$estimate(ddata)
-  expect_equal(m1$predict(newdata = ddata), m4$predict(newdata = ddata)[, 1])
-
   # test that optional arguments are passed on to fitting function
   ww <- rep(c(0, 1), length.out = n)
   fit <- glm(y ~ -1 + x1 + x2, data = ddata, weights = ww)
@@ -176,6 +165,19 @@ test_design <- function() {
   fit <- glm.fit(x = m$design(ddata)$x, y = m$response(ddata))
   expect_equal(coef(m$fit), coef(fit))
 
+  # test support for . on RHS of formula
+  lr <- learner$new(formula = y ~ ., estimate = glm.fit, intercept = TRUE)
+  expect_equal(m$design(ddata)$x, lr$design(ddata)$x)
+
+  # remove some features
+  lr <- learner$new(formula = y ~ . -x1, estimate = glm.fit, intercept = FALSE)
+  expect_equal(colnames(lr$design(ddata)$x), "x2")
+
+  # works with offset
+  lr <- learner$new(formula = y ~ . -x1 + offset(x1), estimate = glm.fit,
+    specials = c("offset"))
+  expect_equivalent(lr$design(ddata)$offset, ddata$x1)
+
   # defined options can be overruled during method call
   fit <- glm.fit(x = m$design(ddata, intercept = FALSE)$x, y = m$response(ddata))
   expect_false("(Intercept)" %in% names(coef(fit)))
@@ -186,6 +188,7 @@ test_design <- function() {
   # same for response
   m <- learner$new(formula = yy ~ x1 + x2, estimate = glm.fit)
   expect_error(m$design(ddata), pattern = "object 'yy' not found")
+
 }
 test_design()
 
@@ -220,3 +223,49 @@ test_response <- function() {
   expect_error(lr$response(ddata), pattern = "object 'x3' not found")
 }
 test_response()
+
+test_summary <- function() {
+  lr <- learner_glm(y ~ x1 + x2, family = "nb")
+  lr_sum <- lr$summary()
+  expect_stdout(print(lr_sum), "formula: y \\~ x1 \\+ x2")
+  expect_stdout(print(lr_sum), "estimate: formula, data, family, ...")
+  expect_stdout(print(lr_sum), "estimate.args: family=nb")
+  expect_stdout(print(lr_sum), "predict: object, newdata, ... ")
+  expect_stdout(print(lr_sum), "predict.args: ")
+  expect_stdout(print(lr_sum), "specials: ")
+
+  # simple checks that relevant keys are populated in the returned list
+  expect_equal(lr_sum$info, "glm")
+  expect_equal(lr_sum$intercept, FALSE)
+
+  # verify that updated response is printed correctly
+  lr$update(y ~ x)
+  expect_stdout(print(lr$summary()), "formula\\: y \\~ x")
+  # same for info
+  lr$info <- "new info"
+  expect_stdout(print(lr$summary()), "new info")
+
+  # verify that console is not cluttered for learner_sl by printing detailed
+  # information about all learners
+  lr <- learner_sl(list(learner_glm(y ~ x), learner_gam(y ~ s(x))), nfolds = 5)
+  lr_sum <- lr$summary()
+  expect_stdout(
+    print(lr_sum),
+    pattern = paste0(
+      "estimate.args: learners=<list>, nfolds=5, meta.learner=<function>, ",
+      "model.score=<function>"
+    ))
+}
+test_summary()
+
+test_ml_model <- function() {
+  lr <- learner$new(formula = y ~ -1 + x1 + x2, estimate = glm)
+  expect_warning(
+    ml <- ml_model$new(formula = y ~ -1 + x1 + x2, estimate = glm),
+    pattern = "targeted::ml_model is deprecated"
+  )
+  lr$estimate(ddata)
+  ml$estimate(ddata)
+  expect_equal(coef(lr$fit), coef(ml$fit))
+}
+test_ml_model()

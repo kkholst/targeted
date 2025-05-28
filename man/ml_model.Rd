@@ -12,6 +12,7 @@ Replaced by \link{learner}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
+\item \href{#method-ml_model-new}{\code{ml_model$new()}}
 \item \href{#method-ml_model-clone}{\code{ml_model$clone()}}
 }
 }
@@ -20,15 +21,32 @@ Replaced by \link{learner}
 <ul>
 <li><span class="pkg-link" data-pkg="targeted" data-topic="learner" data-id="design"><a href='../../targeted/html/learner.html#method-learner-design'><code>targeted::learner$design()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="targeted" data-topic="learner" data-id="estimate"><a href='../../targeted/html/learner.html#method-learner-estimate'><code>targeted::learner$estimate()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="targeted" data-topic="learner" data-id="initialize"><a href='../../targeted/html/learner.html#method-learner-initialize'><code>targeted::learner$initialize()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="targeted" data-topic="learner" data-id="opt"><a href='../../targeted/html/learner.html#method-learner-opt'><code>targeted::learner$opt()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="targeted" data-topic="learner" data-id="predict"><a href='../../targeted/html/learner.html#method-learner-predict'><code>targeted::learner$predict()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="targeted" data-topic="learner" data-id="print"><a href='../../targeted/html/learner.html#method-learner-print'><code>targeted::learner$print()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="targeted" data-topic="learner" data-id="response"><a href='../../targeted/html/learner.html#method-learner-response'><code>targeted::learner$response()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="targeted" data-topic="learner" data-id="summary"><a href='../../targeted/html/learner.html#method-learner-summary'><code>targeted::learner$summary()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="targeted" data-topic="learner" data-id="update"><a href='../../targeted/html/learner.html#method-learner-update'><code>targeted::learner$update()</code></a></span></li>
 </ul>
 </details>
 }}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ml_model-new"></a>}}
+\if{latex}{\out{\hypertarget{method-ml_model-new}{}}}
+\subsection{Method \code{new()}}{
+Create a new prediction model object
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ml_model$new(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{deprecated}
+}
+\if{html}{\out{</div>}}
+}
+}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ml_model-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-ml_model-clone}{}}}

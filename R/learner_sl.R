@@ -1,6 +1,7 @@
-#' @description [learner] generator function for [superlearner]
+#' @description Constructs a [learner] class object for fitting a
+#' [superlearner].
 #' @export
-#' @inherit learner_shared
+#' @inherit constructor_shared
 #' @inheritParams superlearner
 #' @seealso [cv.learner_sl]
 #' @param ... Additional arguments to [superlearner]
@@ -16,7 +17,7 @@
 #' m <- list(
 #'   "mean" = learner_glm(y ~ 1),
 #'   "glm" = learner_glm(y ~ x1 + x2),
-#'   "iso" = predictor_isoreg(y ~ x1)
+#'   "iso" = learner_isoreg(y ~ x1)
 #' )
 #'
 #' s <- learner_sl(m, nfolds = 10)

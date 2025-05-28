@@ -2,7 +2,7 @@
 % Please edit documentation in R/learner_hal.R
 \name{learner_hal}
 \alias{learner_hal}
-\title{Instantiate a learner}
+\title{Construct a learner}
 \usage{
 learner_hal(
   formula,
@@ -53,7 +53,8 @@ calling \code{fit_hal}.}
 \link{learner} object.
 }
 \description{
-\link{learner} generator function for \link[hal9001:fit_hal]{hal9001::fit_hal}.
+Constructs a \link{learner} class object for fitting a highly
+adaptive lasso model with \link[hal9001:fit_hal]{hal9001::fit_hal}.
 }
 \examples{
 \dontrun{

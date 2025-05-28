@@ -3,10 +3,10 @@
 #' AIPW for the mean (and linear projections of the EIF) with missing
 #' observations
 #' @export
-#' @param response_model Model for the response given covariates (ml_model or
+#' @param response_model Model for the response given covariates (learner or
 #'   formula)
 #' @param propensity_model Optional missing data mechanism model (propensity
-#'   model) (ml_model or formula)
+#'   model) (learner or formula)
 #' @param data data.frame
 #' @param ... additional arguments (see [cate()])
 #' @param formula design specifying the OLS estimator with outcome given by the

@@ -21,14 +21,14 @@ estimate_truncatedscore(
 \arguments{
 \item{data}{(data.frame)}
 
-\item{mod.y}{(formula or ml_model) Model for clinical outcome given T>time.
+\item{mod.y}{(formula or learner) Model for clinical outcome given T>time.
 Using a formula specifies a glm with an identity link (see example).}
 
-\item{mod.r}{(formula or ml_model) Model for missing data mechanism for
+\item{mod.r}{(formula or learner) Model for missing data mechanism for
 clinical outcome at T=time. Using a formula specifies a glm with a log
 link.}
 
-\item{mod.a}{(formula or ml_model) Treatment model (in RCT should just be 'a
+\item{mod.a}{(formula or learner) Treatment model (in RCT should just be 'a
 ~ 1'). Using a formula specifies a glm with a log link.}
 
 \item{mod.event}{(formula) Model for time-to-event process

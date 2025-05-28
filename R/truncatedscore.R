@@ -116,12 +116,12 @@ test_intersectsignedwald <- function(thetahat1,
 #' \deqn{E(Y|T>t, A=1)- E(Y|T>t, A=0)}
 #' \deqn{P(T<t,\epsilon=1|A=1)- P(T<t,\epsilon=1|A=0)}
 #' @param data (data.frame)
-#' @param mod.y (formula or ml_model) Model for clinical outcome given T>time.
+#' @param mod.y (formula or learner) Model for clinical outcome given T>time.
 #' Using a formula specifies a glm with an identity link (see example).
-#' @param mod.r (formula or ml_model) Model for missing data mechanism for
+#' @param mod.r (formula or learner) Model for missing data mechanism for
 #' clinical outcome at T=time. Using a formula specifies a glm with a log
 #' link.
-#' @param mod.a (formula or ml_model) Treatment model (in RCT should just be 'a
+#' @param mod.a (formula or learner) Treatment model (in RCT should just be 'a
 #' ~ 1'). Using a formula specifies a glm with a log link.
 #' @param mod.event (formula) Model for time-to-event process
 #' ('Event(time,status) ~ x').

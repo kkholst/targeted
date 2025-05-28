@@ -1,7 +1,7 @@
 
 example(pava)
 example(cv)
-example(ml_model)
+example(learner)
 example(calibration)
 example(alean)
 example(riskreg)

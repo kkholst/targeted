@@ -24,9 +24,9 @@ cate(
 )
 }
 \arguments{
-\item{response.model}{formula or ml_model object (formula => glm)}
+\item{response.model}{formula or learner object (formula => learner_glm)}
 
-\item{propensity.model}{formula or ml_model object (formula => glm)}
+\item{propensity.model}{formula or learner object (formula => learner_glm)}
 
 \item{cate.model}{formula specifying regression design for conditional
 average treatment effects}

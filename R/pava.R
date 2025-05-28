@@ -29,16 +29,19 @@ pava <- function(y, x=numeric(0), weights=numeric(0)) {
 
 #' @export
 isoregw <- function(x, y, weights=NULL, ...) {
-    ord <- order(x)
-    if (is.null(weights)) {
-        pv <- pava(y[ord])
-    } else {
-        ## replication weights
-        pv <- try(pava(y[ord], x=numeric(0), weights[ord]), silent=TRUE)
-        if (inherits(pv, "try-error")) return(base::identity)
-    }
-    suppressWarnings(f <- tryCatch(approxfun(x[ord[pv$index]], pv$value,
-                                             rule=2, method="constant"),
-                                   error=function(...) base::identity))
-    return(f)
+  if (NCOL(x) > 1) stop("Expect only one predictor variable.")
+
+  x <- as.vector(x) # in case x is a n x 1 matrix
+  ord <- order(x)
+  if (is.null(weights)) {
+      pv <- pava(y[ord])
+  } else {
+      ## replication weights
+      pv <- try(pava(y[ord], x=numeric(0), weights[ord]), silent=TRUE)
+      if (inherits(pv, "try-error")) return(base::identity)
+  }
+  suppressWarnings(f <- tryCatch(approxfun(x[ord[pv$index]], pv$value,
+                                            rule=2, method="constant"),
+                                  error=function(...) base::identity))
+  return(f)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/learner_sl.R
 \name{learner_sl}
 \alias{learner_sl}
-\title{Instantiate a learner}
+\title{Construct a learner}
 \usage{
 learner_sl(
   learners,
@@ -39,7 +39,8 @@ p being the number of learners.}
 \link{learner} object.
 }
 \description{
-\link{learner} generator function for \link{superlearner}
+Constructs a \link{learner} class object for fitting a
+\link{superlearner}.
 }
 \examples{
 sim1 <- function(n = 5e2) {
@@ -53,7 +54,7 @@ d <- sim1()
 m <- list(
   "mean" = learner_glm(y ~ 1),
   "glm" = learner_glm(y ~ x1 + x2),
-  "iso" = predictor_isoreg(y ~ x1)
+  "iso" = learner_isoreg(y ~ x1)
 )
 
 s <- learner_sl(m, nfolds = 10)

@@ -1,7 +1,8 @@
-#' @description [learner] generator function for [mgcv::gam].
+#' @description Constructs [learner] class object for fitting generalized
+#' additive models with [mgcv::gam].
 #' @export
 #' @param ... Additional arguments to [mgcv::gam].
-#' @inherit learner_shared
+#' @inherit constructor_shared
 #' @inheritParams mgcv::gam
 #' @examples
 #' n <- 5e2

@@ -104,9 +104,10 @@ superlearner <- function(learners,
     "All provided learners must be of class targeted::learner"
   )
 
-  # TODO: this won't work for learners which are initialized without a formula
-  if (length(unique(lapply(learners, \(m) all.vars(m$formula)[[1]]))) > 1) {
-    stop("All learners must have the same response variable.")
+  responses <- unlist(lapply(learners, \(m) as.character(m$formula)[[2]]))
+  if (length(unique(responses)) > 1) {
+    r <- paste0(unique(responses), collapse = ", ")
+    warning("Different response variables found among learners: ", r)
   }
 
   model.names <- get_learner_names(learners, name.prefix)

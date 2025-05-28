@@ -1,7 +1,5 @@
 # superlearner
 library("tinytest")
-library("xgboost") # loading package here to avoid Loading required package
-# message for predictor_xgboost
 suppressPackageStartupMessages(
   library("SuperLearner")
 )
@@ -21,8 +19,8 @@ test_sl <- function() {
   m <- list(
     "mean" = learner_glm(y ~ 1),
     "glm"  = learner_glm(y ~ x1 + x2),
-    "xgb"  = predictor_xgboost(y ~ x1 + x2, eta = .5, nrounds = 100),
-    "mars" = predictor_mars(y ~ x1 + x2, degree = 2)
+    "xgb"  = learner_xgboost(y ~ x1 + x2, eta = .5, nrounds = 100),
+    "mars" = learner_mars(y ~ x1 + x2, degree = 2)
   )
   c1 <- cv(m, data = d, rep = 2)
   learners_mse <- summary(c1)[,,"mse"][,"mean"]

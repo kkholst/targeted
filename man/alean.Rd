@@ -17,7 +17,7 @@ alean(
 )
 }
 \arguments{
-\item{response_model}{formula or ml_model object (formula => glm)}
+\item{response_model}{formula or \link{learner} object (formula => glm)}
 
 \item{exposure_model}{model for the exposure}
 
