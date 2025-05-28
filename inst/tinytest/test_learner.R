@@ -31,17 +31,6 @@ test_initialize <- function() {
 
   expect_equal(m1$predict(newdata = ddata), m3$predict(newdata = ddata))
 
-  # test response.arg and x.arg work as expected
-  m4 <- learner$new(
-    formula = y ~ x1 + x2,
-    estimate = \(yy, xx) glm.fit(y = yy, x = xx),
-    predict = \(object, newdata) newdata %*% object$coefficients,
-    response.arg = "yy",
-    x.arg = "xx"
-  )
-  m4$estimate(ddata)
-  expect_equal(m1$predict(newdata = ddata), m4$predict(newdata = ddata)[, 1])
-
   # test that optional arguments are passed on to fitting function
   ww <- rep(c(0, 1), length.out = n)
   fit <- glm(y ~ -1 + x1 + x2, data = ddata, weights = ww)
@@ -248,8 +237,6 @@ test_summary <- function() {
   # simple checks that relevant keys are populated in the returned list
   expect_equal(lr_sum$info, "glm")
   expect_equal(lr_sum$intercept, FALSE)
-  expect_equal(lr_sum$x.arg, "x")
-  expect_equal(lr_sum$response.arg, "y")
 
   # verify that updated response is printed correctly
   lr$update(y ~ x)

@@ -107,9 +107,7 @@ Create a new prediction model object
   estimate.args = NULL,
   info = NULL,
   specials = c(),
-  response.arg = "y",
-  intercept = FALSE,
-  x.arg = "x"
+  intercept = FALSE
 )}\if{html}{\out{</div>}}
 }
 
@@ -134,11 +132,7 @@ object, 'object', and new design matrix, 'newdata')}
 \item{\code{specials}}{optional specials terms (weights, offset,
 id, subset, ...) passed on to \link{design}}
 
-\item{\code{response.arg}}{name of response argument}
-
 \item{\code{intercept}}{(logical) include intercept in design matrix}
-
-\item{\code{x.arg}}{name of design matrix argument}
 }
 \if{html}{\out{</div>}}
 }
@@ -234,9 +228,7 @@ elements:
 \item{predict}{function for making predictions from fitted model}
 \item{predict.args}{arguments to predict function}
 \item{specials}{provided special terms}
-\item{response.args}{name of response argument in estimate function}
 \item{intercept}{include intercept in design matrix}
-\item{x.arg}{name of design matrix argument in estimate function}
 }
 }
 \subsection{Examples}{
