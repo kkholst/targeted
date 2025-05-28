@@ -118,7 +118,8 @@ Create a new prediction model object
 
 \item{\code{estimate}}{function for fitting the model (must be a function
 with response, 'y', and design matrix, 'x'. Alternatively, a function
-with a single 'formula' argument)}
+with a single 'formula' argument) # TODO: needs fixing + maybe we
+can point to the predictionclass vignette for more information}
 
 \item{\code{predict}}{prediction function (must be a function of model
 object, 'object', and new design matrix, 'newdata')}

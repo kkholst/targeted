@@ -56,7 +56,8 @@ learner <- R6::R6Class("learner", # nolint
     #' @param formula formula specifying outcome and design matrix
     #' @param estimate function for fitting the model (must be a function
     #'  with response, 'y', and design matrix, 'x'. Alternatively, a function
-    #'  with a single 'formula' argument)
+    #'  with a single 'formula' argument) # TODO: needs fixing + maybe we
+    #' can point to the predictionclass vignette for more information
     #' @param predict prediction function (must be a function of model
     #' object, 'object', and new design matrix, 'newdata')
     #' @param info optional description of the model
