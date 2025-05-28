@@ -44,12 +44,23 @@
 #' cbind(coef(a), attr(args, "table"))
 #' }
 #'
-#' ff <- learner$new(
+#' # defining learner via function with arguments y (response)
+#' # and x (design matrix)
+#' f1 <- learner$new(
 #'   estimate = function(y, x) lm.fit(x = x, y = y),
 #'   predict = function(object, newdata) newdata %*% object$coefficients
 #' )
-#' ## tmp <- ff$estimate(y, x=x)
-#' ## ff$predict(x)
+#' # defining the learner via arguments formula and data
+#' f2 <- learner$new(
+#'   estimate = function(formula, data, ...) glm(formula, data, ...)
+#' )
+#' # generic learner defined from function (predict method derived per default
+#' # from stats::predict
+#' f3 <- learner$new(
+#'   estimate = function(dt, ...) {
+#'     lm(y ~ x, data = dt)
+#'   }
+#' )
 #' @export
 learner <- R6::R6Class("learner", # nolint
   public = list(
@@ -64,9 +75,9 @@ learner <- R6::R6Class("learner", # nolint
     #' @description
     #' Create a new prediction model object
     #' @param formula formula specifying outcome and design matrix
-    #' @param estimate function for fitting the model (must be a function
+    #' @param estimate function for fitting the model. This must be a function
     #'  with response, 'y', and design matrix, 'x'. Alternatively, a function
-    #'  with a single 'formula' argument)
+    #'  with a formula and data argument. See the examples section.
     #' @param predict prediction function (must be a function of model
     #' object, 'object', and new design matrix, 'newdata')
     #' @param info optional description of the model
@@ -74,9 +85,7 @@ learner <- R6::R6Class("learner", # nolint
     #' @param estimate.args optional arguments to estimate function
     #' @param specials optional specials terms (weights, offset,
     #'  id, subset, ...) passed on to [targeted::design]
-    #' @param response.arg name of response argument
     #' @param intercept (logical) include intercept in design matrix
-    #' @param x.arg name of design matrix argument
     initialize = function(formula = NULL,
                           estimate,
                           predict = stats::predict,
@@ -84,15 +93,12 @@ learner <- R6::R6Class("learner", # nolint
                           estimate.args = NULL,
                           info = NULL,
                           specials = c(),
-                          response.arg = "y",
-                          intercept = FALSE,
-                          x.arg = "x") {
+                          intercept = FALSE
+                         ) {
       estimate <- add_dots(estimate)
 
       private$des.args <- list(specials = specials, intercept = intercept)
       fit_formula <- "formula" %in% formalArgs(estimate)
-      fit_response_arg <- response.arg %in% formalArgs(estimate)
-      fit_x_arg <- x.arg %in% formalArgs(estimate)
       fit_data_arg <- "data" %in% formalArgs(estimate)
       private$init.estimate <- estimate
       private$init.predict <- predict
@@ -128,15 +134,8 @@ learner <- R6::R6Class("learner", # nolint
               c(list(formula = self$formula, data = data), private$des.args)
             )
             args <- private$update_args(self$estimate.args, ...)
-            args <- c(list(xx$x), args)
-            if (fit_x_arg) {
-              names(args)[1] <- x.arg
-            } else {
-              if (fit_data_arg) names(args)[1] <- "data"
-            }
-            if (fit_response_arg) {
-              args[response.arg] <- list(xx$y)
-            }
+            args <- c(list(x = xx$x, y = xx$y), args)
+
             if (length(xx$specials) > 0) {
               args <- c(args, xx[xx$specials])
             }
@@ -173,9 +172,7 @@ learner <- R6::R6Class("learner", # nolint
         estimate = estimate,
         predict = predict,
         specials = specials,
-        response.arg = response.arg,
-        intercept = intercept,
-        x.arg = x.arg
+        intercept = intercept
       )
     },
 
@@ -238,9 +235,7 @@ learner <- R6::R6Class("learner", # nolint
     #'  \item{predict}{function for making predictions from fitted model}
     #'  \item{predict.args}{arguments to predict function}
     #'  \item{specials}{provided special terms}
-    #'  \item{response.args}{name of response argument in estimate function}
     #'  \item{intercept}{include intercept in design matrix}
-    #'  \item{x.arg}{name of design matrix argument in estimate function}
     #' }
     #' @examples
     #' lr <- learner_glm(y ~ x, family = "nb")
