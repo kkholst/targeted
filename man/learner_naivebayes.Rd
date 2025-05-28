@@ -2,7 +2,7 @@
 % Please edit documentation in R/learner_naivebayes.R
 \name{learner_naivebayes}
 \alias{learner_naivebayes}
-\title{Instantiate a learner}
+\title{Construct a learner}
 \usage{
 learner_naivebayes(
   formula,
@@ -33,11 +33,12 @@ learner_naivebayes(
 \link{learner} object.
 }
 \description{
-\link{learner} object constructor for \link{naivebayes}. As shown in
-the examples, the constructed learner returns predicted class probabilities
-of class 2 in case of binary classification. A \verb{n times p} matrix, with \code{n}
-being the number of observations and \code{p} the number of classes, is returned
-for multi-class classification.
+Constructs a \link{learner} class object for fitting a naive bayes
+classifier with \link{naivebayes}. As shown in the examples, the constructed
+learner returns predicted class probabilities of class 2 in case of binary
+classification. A \verb{n times p} matrix, with \code{n} being the number of
+observations and \code{p} the number of classes, is returned for multi-class
+classification.
 }
 \examples{
 n <- 5e2

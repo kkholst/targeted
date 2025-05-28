@@ -2,7 +2,7 @@
 % Please edit documentation in R/learner_glmnet.R
 \name{learner_glmnet_cv}
 \alias{learner_glmnet_cv}
-\title{Instantiate a learner}
+\title{Construct a learner}
 \usage{
 learner_glmnet_cv(
   formula,
@@ -52,9 +52,11 @@ large datasets. Smallest value allowable is \code{nfolds=3}}
 \link{learner} object.
 }
 \description{
-\link{learner} generator function for \link[glmnet:cv.glmnet]{glmnet::cv.glmnet}.
-Predictions are returned for the value of \code{lambda} that gives minimum \code{cvm}.
-That is, \link[glmnet:predict.cv.glmnet]{glmnet::predict.cv.glmnet} is called with \code{s = "lambda.min"}.
+Constructs a \link{learner} class object for fitting entire lasso or
+elastic-net regularization paths for various linear and non-linear regression
+models with \link[glmnet:cv.glmnet]{glmnet::cv.glmnet}. Predictions are returned for the value of
+\code{lambda} that gives minimum \code{cvm}. That is, \link[glmnet:predict.cv.glmnet]{glmnet::predict.cv.glmnet} is
+called with \code{s = "lambda.min"}.
 }
 \examples{
 # continuous outcome

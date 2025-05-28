@@ -1,13 +1,15 @@
-#' @description [learner] object constructor for generalized random forest.  As
-#' shown in the examples, the constructed learner returns predicted class
-#' probabilities of class 2 in case of binary classification. A `n times p`
-#' matrix, with `n` being the number of observations and `p` the number of
-#' classes, is returned for multi-class classification.
+#' @description Constructs a [learner] class object for fitting generalized
+#' random forest models with [grf::regression_forest] or
+#' [grf::probability_forest]. As shown in the examples, the constructed learner
+#' returns predicted class probabilities of class 2 in case of binary
+#' classification. A `n times p` matrix, with `n` being the number of
+#' observations and `p` the number of classes, is returned for multi-class
+#' classification.
 #' @export
-#' @param model (character) grf model to estimate. Can be
-#' [grf::regression_forest] or [grf::probability_forest].
+#' @param model (character) grf model to estimate. Usually regression_forest
+#' ([grf::regression_forest]) or probability_forest ([grf::probability_forest]).
 #' @param ... Additional arguments to `model`
-#' @inherit learner_shared
+#' @inherit constructor_shared
 #' @inheritParams grf::regression_forest
 #' @examples
 #' n <- 5e2

@@ -2,7 +2,7 @@
 % Please edit documentation in R/learner_glm.R
 \name{learner_glm}
 \alias{learner_glm}
-\title{Instantiate a learner}
+\title{Construct a learner}
 \usage{
 learner_glm(
   formula,
@@ -34,9 +34,9 @@ learner_glm(
 \link{learner} object.
 }
 \description{
-\link{learner} generator function for generalized linear models with
-\link[stats:glm]{stats::glm} and \link[MASS:glm.nb]{MASS::glm.nb}. Negative binomial regression is supported
-with \code{family = "nb"} (or alternatively \code{family = "negbin"}).
+Constructs a \link{learner} class object for fitting generalized
+linear models with \link[stats:glm]{stats::glm} and \link[MASS:glm.nb]{MASS::glm.nb}. Negative binomial
+regression is supported with \code{family = "nb"} (or alternatively \code{family = "negbin"}).
 }
 \examples{
 n <- 5e2

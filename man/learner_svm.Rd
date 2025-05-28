@@ -2,7 +2,7 @@
 % Please edit documentation in R/learner_svm.R
 \name{learner_svm}
 \alias{learner_svm}
-\title{Instantiate a learner}
+\title{Construct a learner}
 \usage{
 learner_svm(
   formula,
@@ -45,11 +45,12 @@ learner_svm(
 \link{learner} object.
 }
 \description{
-\link{learner} generator function for \link[e1071:svm]{e1071::svm}. As shown in the
-examples, the constructed learner returns predicted class probabilities of
-class 2 in case of binary classification. A \verb{n times p} matrix, with \code{n}
-being the number of observations and \code{p} the number of classes, is returned
-for multi-class classification.
+Constructs a \link{learner} class object for fitting support vector
+machines with \link[e1071:svm]{e1071::svm}. As shown in the examples, the constructed learner
+returns predicted class probabilities of class 2 in case of binary
+classification. A \verb{n times p} matrix, with \code{n} being the number of
+observations and \code{p} the number of classes, is returned for multi-class
+classification.
 }
 \examples{
 n <- 5e2

@@ -1,7 +1,8 @@
-#' @description [learner] object constructor for [targeted::isoregw].
+#' @description Constructs a [learner] class object for isotonic regression with
+#' [targeted::isoregw].
 #' @export
 #' @param ... Additional arguments to [targeted::isoregw].
-#' @inherit learner_shared
+#' @inherit constructor_shared
 #' @inheritParams targeted::isoregw
 #' @examples
 #' x <- runif(5e3, -5, 5)

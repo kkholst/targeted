@@ -2,7 +2,7 @@
 % Please edit documentation in R/learner_grf.R
 \name{learner_grf}
 \alias{learner_grf}
-\title{Instantiate a learner}
+\title{Construct a learner}
 \usage{
 learner_grf(
   formula,
@@ -37,8 +37,8 @@ further be cut by a factor of honesty.fraction. Default is 0.5.}
 \item{num.threads}{Number of threads used in training. By default, the number of threads is set
 to the maximum hardware concurrency.}
 
-\item{model}{(character) grf model to estimate. Can be
-\link[grf:regression_forest]{grf::regression_forest} or \link[grf:probability_forest]{grf::probability_forest}.}
+\item{model}{(character) grf model to estimate. Usually regression_forest
+(\link[grf:regression_forest]{grf::regression_forest}) or probability_forest (\link[grf:probability_forest]{grf::probability_forest}).}
 
 \item{info}{(character) Optional information to describe the instantiated
 \link{learner} object.}
@@ -52,11 +52,13 @@ to the maximum hardware concurrency.}
 \link{learner} object.
 }
 \description{
-\link{learner} object constructor for generalized random forest.  As
-shown in the examples, the constructed learner returns predicted class
-probabilities of class 2 in case of binary classification. A \verb{n times p}
-matrix, with \code{n} being the number of observations and \code{p} the number of
-classes, is returned for multi-class classification.
+Constructs a \link{learner} class object for fitting generalized
+random forest models with \link[grf:regression_forest]{grf::regression_forest} or
+\link[grf:probability_forest]{grf::probability_forest}. As shown in the examples, the constructed learner
+returns predicted class probabilities of class 2 in case of binary
+classification. A \verb{n times p} matrix, with \code{n} being the number of
+observations and \code{p} the number of classes, is returned for multi-class
+classification.
 }
 \examples{
 n <- 5e2

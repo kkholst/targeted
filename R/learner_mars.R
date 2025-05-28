@@ -1,6 +1,7 @@
-#' @description [learner] generator function for [earth::earth].
+#' @description Constructs a [learner] class object for fitting multivariate
+#' adaptive regression splines with [earth::earth].
 #' @param ... Additional arguments to [earth::earth].
-#' @inherit learner_shared
+#' @inherit constructor_shared
 #' @inheritParams earth::earth
 #' @export
 #' @examples
