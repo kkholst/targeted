@@ -2,8 +2,6 @@
 % Please edit documentation in R/learner.R
 \name{learner}
 \alias{learner}
-\alias{predictor_nb}
-\alias{predictor_svm}
 \title{R6 class for prediction models}
 \description{
 Interface for standardized estimation and prediction The
