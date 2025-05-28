@@ -179,11 +179,26 @@ summary.design <- function(object, ...) {
 }
 
 #' @export
-print.design <- function(x, ...) {
+print.design <- function(x, n=2, ...) {
   cat_ruler(" design object ", 10)
+  cat(sprintf("\nresponse (length: %s)", length(x$y)))
+  lava::Print(x$y, n = n, ...)
+  specials <- c()
+  for (nam in x$specials) {
+    if (!is.null(x[[nam]])) {
+      specials <- c(specials, nam)
+    }
+  }
+  if (length(specials) > 0) {
+    cat("\nspecials")
+    for (nam in specials) {
+        cat(paste0("\n - ", nam, " [", class(x[[nam]]), "]"))
+    }
+    cat("\n")
+  }
   cat(sprintf("\ndesign matrix (dim: %s)\n", paste0(dim(x$x), collapse = ", ")))
-  print(head(x$x, 5))
-  return(invisible())
+  lava::Print(x$x, n = n, ...)
+  return(invisible(x))
 }
 
 get_response <- function(formula, ...) {
