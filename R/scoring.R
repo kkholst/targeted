@@ -121,7 +121,7 @@ scoring <- function(response, ...,
                     newdata=NULL,
                     messages=1) {
   val <- list(...)
-  if (missing(response) && inherits(object, "ml_model")) {
+if (missing(response) && inherits(object, "learner")) {
     if (is.null(newdata)) stop("`newdata` data.frame needed")
     response <- object$response(newdata)
     if (length(val) == 0) {
