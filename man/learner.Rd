@@ -38,12 +38,23 @@ a <- targeted::cv(models, data = iris)
 cbind(coef(a), attr(args, "table"))
 }
 
-ff <- learner$new(
+# defining learner via function with arguments y (response)
+# and x (design matrix)
+f1 <- learner$new(
   estimate = function(y, x) lm.fit(x = x, y = y),
   predict = function(object, newdata) newdata \%*\% object$coefficients
 )
-## tmp <- ff$estimate(y, x=x)
-## ff$predict(x)
+# defining the learner via arguments formula and data
+f2 <- learner$new(
+  estimate = function(formula, data, ...) glm(formula, data, ...)
+)
+# generic learner defined from function (predict method derived per default
+# from stats::predict
+f3 <- learner$new(
+  estimate = function(dt, ...) {
+    lm(y ~ x, data = dt)
+  }
+)
 
 ## ------------------------------------------------
 ## Method `learner$summary`
@@ -116,10 +127,9 @@ Create a new prediction model object
 \describe{
 \item{\code{formula}}{formula specifying outcome and design matrix}
 
-\item{\code{estimate}}{function for fitting the model (must be a function
+\item{\code{estimate}}{function for fitting the model. This must be a function
 with response, 'y', and design matrix, 'x'. Alternatively, a function
-with a single 'formula' argument) # TODO: needs fixing + maybe we
-can point to the predictionclass vignette for more information}
+with a formula and data argument. See the examples section.}
 
 \item{\code{predict}}{prediction function (must be a function of model
 object, 'object', and new design matrix, 'newdata')}
