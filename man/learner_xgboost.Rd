@@ -2,7 +2,7 @@
 % Please edit documentation in R/learner_xgboost.R
 \name{learner_xgboost}
 \alias{learner_xgboost}
-\title{Instantiate a learner}
+\title{Construct a learner}
 \usage{
 learner_xgboost(
   formula,
@@ -51,7 +51,7 @@ learning objective. See \link[xgboost:xgb.train]{xgboost::xgboost} for all avail
 \link{learner} object.
 }
 \description{
-\link{learner} model constructor for \link[xgboost:xgb.train]{xgboost::xgboost}.
+Constructs a \link{learner} class object for \link[xgboost:xgb.train]{xgboost::xgboost}.
 }
 \examples{
 n  <- 1e3

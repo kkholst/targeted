@@ -1,11 +1,12 @@
-#' @description [learner] generator function for [e1071::svm]. As shown in the
-#' examples, the constructed learner returns predicted class probabilities of
-#' class 2 in case of binary classification. A `n times p` matrix, with `n`
-#' being the number of observations and `p` the number of classes, is returned
-#' for multi-class classification.
+#' @description Constructs a [learner] class object for fitting support vector
+#' machines with [e1071::svm]. As shown in the examples, the constructed learner
+#' returns predicted class probabilities of class 2 in case of binary
+#' classification. A `n times p` matrix, with `n` being the number of
+#' observations and `p` the number of classes, is returned for multi-class
+#' classification.
 #' @export
 #' @param ... Additional arguments to [e1071::svm].
-#' @inherit learner_shared
+#' @inherit constructor_shared
 #' @inheritParams e1071::svm
 #' @examples
 #' n <- 5e2

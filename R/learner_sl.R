@@ -1,6 +1,7 @@
-#' @description [learner] generator function for [superlearner]
+#' @description Constructs a [learner] class object for fitting a
+#' [superlearner].
 #' @export
-#' @inherit learner_shared
+#' @inherit constructor_shared
 #' @inheritParams superlearner
 #' @seealso [cv.learner_sl]
 #' @param ... Additional arguments to [superlearner]

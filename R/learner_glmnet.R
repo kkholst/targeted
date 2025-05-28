@@ -1,8 +1,10 @@
 #' @export
-#' @description [learner] generator function for [glmnet::cv.glmnet].
-#' Predictions are returned for the value of `lambda` that gives minimum `cvm`.
-#' That is, [glmnet::predict.cv.glmnet] is called with `s = "lambda.min"`.
-#' @inherit learner_shared
+#' @description Constructs a [learner] class object for fitting entire lasso or
+#' elastic-net regularization paths for various linear and non-linear regression
+#' models with [glmnet::cv.glmnet]. Predictions are returned for the value of
+#' `lambda` that gives minimum `cvm`. That is, [glmnet::predict.cv.glmnet] is
+#' called with `s = "lambda.min"`.
+#' @inherit constructor_shared
 #' @inheritParams glmnet::cv.glmnet
 #' @inheritParams glmnet::glmnet # required to document family and alpha args
 #' @examples

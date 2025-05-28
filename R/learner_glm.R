@@ -1,17 +1,18 @@
-#' @title Instantiate a learner
+#' @title Construct a learner
 #' @param info (character) Optional information to describe the instantiated
 #' [learner] object.
 #' @param formula (formula) Formula specifying response and design matrix.
 #' @param learner.args (list) Additional arguments to
 #' [learner$new()][learner].
 #' @return [learner] object.
-#' @name learner_shared
+#' @name constructor_shared
 NULL
 
 
-#' @description [learner] generator function for generalized linear models with
-#' [stats::glm] and [MASS::glm.nb]. Negative binomial regression is supported
-#' with `family = "nb"` (or alternatively `family = "negbin"`).
+#' @description Constructs a [learner] class object for fitting generalized
+#' linear models with [stats::glm] and [MASS::glm.nb]. Negative binomial
+#' regression is supported with `family = "nb"` (or alternatively `family =
+#' "negbin"`).
 #' @param ... Additional arguments to [stats::glm] or [MASS::glm.nb].
 #' @export
 #' @examples
@@ -31,7 +32,7 @@ NULL
 #' coef(lr$fit)
 #' lr$predict(data.frame(x = 1, w = c(1, 5))) # response scale
 #' lr$predict(data.frame(x = 1, w = c(1, 5)), type = "link") # link scale
-#' @inherit learner_shared
+#' @inherit constructor_shared
 #' @inheritParams stats::glm
 learner_glm <- function(formula, info = "glm", family = gaussian(),
   learner.args = NULL, ...) {

@@ -2,7 +2,7 @@
 % Please edit documentation in R/learner_mars.R
 \name{learner_mars}
 \alias{learner_mars}
-\title{Instantiate a learner}
+\title{Construct a learner}
 \usage{
 learner_mars(
   formula,
@@ -54,7 +54,8 @@ learner_mars(
 \link{learner} object.
 }
 \description{
-\link{learner} generator function for \link[earth:earth]{earth::earth}.
+Constructs a \link{learner} class object for fitting multivariate
+adaptive regression splines with \link[earth:earth]{earth::earth}.
 }
 \examples{
 # poisson regression

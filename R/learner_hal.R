@@ -1,7 +1,8 @@
-#' @description [learner] generator function for [hal9001::fit_hal].
+#' @description Constructs a [learner] class object for fitting a highly
+#' adaptive lasso model with [hal9001::fit_hal].
 #' @export
 #' @param ... Additional arguments to [hal9001::fit_hal].
-#' @inherit learner_shared
+#' @inherit constructor_shared
 #' @inheritParams hal9001::fit_hal
 #' @examples
 #' \dontrun{
