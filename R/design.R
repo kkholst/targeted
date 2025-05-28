@@ -178,6 +178,14 @@ summary.design <- function(object, ...) {
   return(object)
 }
 
+#' @export
+print.design <- function(x, ...) {
+  cat_ruler(" design object ", 10)
+  cat(sprintf("\ndesign matrix (dim: %s)\n", paste0(dim(x$x), collapse = ", ")))
+  print(head(x$x, 5))
+  return(invisible())
+}
+
 get_response <- function(formula, ...) {
   if (!is.null(attr(formula, "response"))) {
     y <- get(attr(formula, "response"), envir=environment(formula))

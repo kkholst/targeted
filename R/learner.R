@@ -359,13 +359,9 @@ format_fit_predict_args <- function(args) {
   return(paste0(names(args), "=", args, collapse =", "))
 }
 
-learner_print <- function(self, private) {
-  .ruler <- function(x, n, unicode = "\u2500") {
-    rule <- paste0(rep(unicode, n), collapse = "")
-    cat(paste0(rule, x, rule, "\n"))
-  }
 
-  .ruler(" learner object ", 10)
+learner_print <- function(self, private) {
+  cat_ruler(" learner object ", 10)
 
   if (!is.null(self$info)) {
     cat(self$info, "\n\n")
@@ -382,7 +378,7 @@ learner_print <- function(self, private) {
   )
 
   if (!is.null(private$fitted)) {
-    .ruler("\u2500", 18)
+    cat_ruler("\u2500", 18)
     fit <- self$fit
     if (!is.null(fit$call)) fit$call <- substitute()
     cat(capture.output(print(fit)), sep ="\n")
@@ -393,12 +389,7 @@ learner_print <- function(self, private) {
 
 #' @export
 print.summarized_learner <- function(x, ...) {
-    .ruler <- function(x, n, unicode = "\u2500") {
-    rule <- paste0(rep(unicode, n), collapse = "")
-    cat(paste0(rule, x, rule, "\n"))
-  }
-
-  .ruler(" learner object ", 10)
+  cat_ruler(" learner object ", 10)
 
   if (!is.null(x$info)) {
     cat(x$info, "\n\n")
