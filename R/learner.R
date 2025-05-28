@@ -86,36 +86,15 @@ learner <- R6::R6Class("learner", # nolint
     #' @param specials optional specials terms (weights, offset,
     #'  id, subset, ...) passed on to [targeted::design]
     #' @param intercept (logical) include intercept in design matrix
-<<<<<<< HEAD
-    #' @param stratify optional formula speciying variables to stratify model
-    #' estimation and prediictions on
-    #' @param response.arg name of response argument
-    #' @param x.arg name of design matrix argument
-||||||| de2ec2b
-    #' @param x.arg name of design matrix argument
-=======
->>>>>>> dev
     initialize = function(formula = NULL,
                           estimate,
                           predict = stats::predict,
                           predict.args = NULL,
                           estimate.args = NULL,
                           info = NULL,
-<<<<<<< HEAD
-                          specials = c("strata"),
-                          intercept = FALSE,
-                          response.arg = "y",
-                          x.arg = "x") {
-||||||| de2ec2b
-                          specials = c(),
-                          response.arg = "y",
-                          intercept = FALSE,
-                          x.arg = "x") {
-=======
                           specials = c(),
                           intercept = FALSE
                          ) {
->>>>>>> dev
       estimate <- add_dots(estimate)
 
       private$des.args <- list(specials = specials, intercept = intercept)
