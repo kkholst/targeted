@@ -4,8 +4,18 @@
 \alias{learner}
 \title{R6 class for prediction models}
 \description{
-Interface for standardized estimation and prediction The
-following built-in learners are provided: \link{learner_glm}, \link{learner_gam}
+Interface for statistical and machine learning models to be used
+for nuisance model estimation in targeted learning.
+
+The following list provides an overview of constructors for many commonly
+used models.
+
+Regression and classification: \link{learner_glm}, \link{learner_gam}, \link{learner_grf},
+\link{learner_hal}, \link{learner_glmnet_cv}, \link{learner_svm}, \link{learner_xgboost},
+\link{learner_mars} \cr
+Regression: \link{learner_isoreg} \cr
+Classification: \link{learner_naivebayes} \cr
+Ensemble (super learner): \link{learner_sl}
 }
 \examples{
 data(iris)

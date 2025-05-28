@@ -1,6 +1,16 @@
 #' @title R6 class for prediction models
-#' @description Interface for standardized estimation and prediction The
-#' following built-in learners are provided: [learner_glm], [learner_gam]
+#' @description Interface for statistical and machine learning models to be used
+#' for nuisance model estimation in targeted learning.
+#'
+#' The following list provides an overview of constructors for many commonly
+#' used models.
+#'
+#' Regression and classification: [learner_glm], [learner_gam], [learner_grf],
+#' [learner_hal], [learner_glmnet_cv], [learner_svm], [learner_xgboost],
+#' [learner_mars] \cr
+#' Regression: [learner_isoreg] \cr
+#' Classification: [learner_naivebayes] \cr
+#' Ensemble (super learner): [learner_sl]
 #' @param data data.frame
 #' @author Klaus Kähler Holst, Benedikt Sommer
 #' @examples
