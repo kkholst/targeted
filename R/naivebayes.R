@@ -22,7 +22,7 @@
 naivebayes <- NB <-
   function(formula, data, weights = NULL,
                kernel = FALSE, laplace.smooth = 0, prior = NULL, ...) {
-  
+
   if (missing(data)) stop("Need data as data.frame or data.table")
   if (!data.table::is.data.table(data)) data <- data.table::data.table(data)
   des <- design(formula, data = as.data.frame(data), specials = "weights")
