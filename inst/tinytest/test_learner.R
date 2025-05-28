@@ -270,3 +270,15 @@ test_summary <- function() {
     ))
 }
 test_summary()
+
+test_ml_model <- function() {
+  lr <- learner$new(formula = y ~ -1 + x1 + x2, estimate = glm)
+  expect_warning(
+    ml <- ml_model$new(formula = y ~ -1 + x1 + x2, estimate = glm),
+    pattern = "targeted::ml_model is deprecated"
+  )
+  lr$estimate(ddata)
+  ml$estimate(ddata)
+  expect_equal(coef(lr$fit), coef(ml$fit))
+}
+test_ml_model()
