@@ -86,9 +86,6 @@ Klaus Kähler Holst, Benedikt Sommer
 \item{\code{info}}{Optional information/name of the model}
 
 \item{\code{formula}}{Formula specifying response and design matrix}
-
-\item{\code{estimate.args}}{optional arguments to fitting function specified
-during initialization}
 }
 \if{html}{\out{</div>}}
 }

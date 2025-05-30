@@ -68,9 +68,6 @@ learner <- R6::R6Class("learner", # nolint
     info = NULL,
     #' @field formula Formula specifying response and design matrix
     formula = NULL,
-    #' @field estimate.args optional arguments to fitting function specified
-    #' during initialization
-    estimate.args = NULL,
 
     #' @description
     #' Create a new prediction model object
@@ -103,14 +100,14 @@ learner <- R6::R6Class("learner", # nolint
       private$init.estimate <- estimate
       private$init.predict <- predict
 
-      self$estimate.args <- estimate.args
+      private$estimate.args <- estimate.args
       no_formula <- is.null(formula)
       if (!no_formula && is.character(formula) || is.function(formula)) {
         no_formula <- TRUE
       }
       if (no_formula) {
         private$fitfun <- function(...) {
-          args <- private$update_args(self$estimate.args, ...)
+          args <- private$update_args(private$estimate.args, ...)
           return(do.call(private$init.estimate, args))
         }
         private$predfun <- function(...) {
@@ -120,7 +117,7 @@ learner <- R6::R6Class("learner", # nolint
       } else {
         if (fit_formula) { # Formula in arguments of estimation procedure
           private$fitfun <- function(data, ...) {
-            args <- private$update_args(self$estimate.args, ...)
+            args <- private$update_args(private$estimate.args, ...)
             args <- c(
               args, list(formula = self$formula, data = data)
             )
@@ -133,7 +130,7 @@ learner <- R6::R6Class("learner", # nolint
               targeted::design,
               c(list(formula = self$formula, data = data), private$des.args)
             )
-            args <- private$update_args(self$estimate.args, ...)
+            args <- private$update_args(private$estimate.args, ...)
             args <- c(list(x = xx$x, y = xx$y), args)
 
             if (length(xx$specials) > 0) {
@@ -280,7 +277,7 @@ learner <- R6::R6Class("learner", # nolint
     #' Get options
     #' @param arg name of option to get value of
     opt = function(arg) {
-      return(self$estimate.args[[arg]])
+      return(private$estimate.args[[arg]])
     }
   ),
   active = list(
@@ -290,6 +287,8 @@ learner <- R6::R6Class("learner", # nolint
   private = list(
     # @field des.args Arguments for targeted::design
     des.args = NULL,
+    # @field estimate.args Arguments for estimate method
+    estimate.args = NULL,
     # @field init.estimate Original estimate method supplied at initialization
     init.estimate = NULL,
     # @field init.predict Original predict method supplied at initialization
