@@ -84,9 +84,6 @@ Klaus Kähler Holst, Benedikt Sommer
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
 \item{\code{info}}{Optional information/name of the model}
-
-\item{\code{estimate.args}}{optional arguments to fitting function specified
-during initialization}
 }
 \if{html}{\out{</div>}}
 }
