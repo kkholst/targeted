@@ -9,9 +9,8 @@ learner_expand_grid(fun, args, names = TRUE, params = FALSE)
 \arguments{
 \item{fun}{(function) A function that returns a \link{learner}.}
 
-\item{args}{(list) Parameters that generate a grid of arguments with
-\link{expand.list}, where each element of the grid are then used to construct a
-learner with \code{fun}.}
+\item{args}{(list) Parameters that generate a grid of parameters with
+\link{expand.list}, where the set of parameters are then passed on to \code{fun}.}
 
 \item{names}{(logical or character) If FALSE, then return a list without
 names. If TRUE, a named list is returned (see details).}

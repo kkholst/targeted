@@ -1,8 +1,7 @@
 #' Construct learners from a grid of parameters
 #' @param fun (function) A function that returns a [learner].
-#' @param args (list) Parameters that generate a grid of arguments with
-#' [expand.list], where each element of the grid are then used to construct a
-#' learner with `fun`.
+#' @param args (list) Parameters that generate a grid of parameters with
+#' [expand.list], where the set of parameters are then passed on to `fun`.
 #' @param names (logical or character) If FALSE, then return a list without
 #' names. If TRUE, a named list is returned (see details).
 #' @param params (logical) If FALSE, then no information about the parameters
