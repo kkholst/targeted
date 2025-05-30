@@ -282,9 +282,10 @@ learner <- R6::R6Class("learner", # nolint
     }
   ),
   active = list(
-    #' @field fit Active binding returning estimated model object
+    #' @field fit Return estimated model object.
     fit = function() private$fitted,
-    #' @field formula Active binding returning the model formula
+    #' @field formula Return model formula. Use [learner$update()][learner] to
+    #' update the formula.
     formula = function() private$.formula
   ),
   private = list(

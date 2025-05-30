@@ -93,9 +93,10 @@ during initialization}
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{fit}}{Active binding returning estimated model object}
+\item{\code{fit}}{Return estimated model object.}
 
-\item{\code{formula}}{Active binding returning the model formula}
+\item{\code{formula}}{Return model formula. Use \link[=learner]{learner$update()} to
+update the formula.}
 }
 \if{html}{\out{</div>}}
 }
