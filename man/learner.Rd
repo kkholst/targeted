@@ -84,15 +84,16 @@ Klaus Kähler Holst, Benedikt Sommer
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
 \item{\code{info}}{Optional information/name of the model}
-
-\item{\code{formula}}{Formula specifying response and design matrix}
 }
 \if{html}{\out{</div>}}
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{fit}}{Active binding returning estimated model object}
+\item{\code{fit}}{Return estimated model object.}
+
+\item{\code{formula}}{Return model formula. Use \link[=learner]{learner$update()} to
+update the formula.}
 }
 \if{html}{\out{</div>}}
 }
