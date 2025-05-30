@@ -197,6 +197,11 @@ test_update <- function() {
   lr$update(y ~ x1)
   lr$estimate(ddata)
 
+  # formula can be accessed via active binding
+  expect_equal(lr$formula, y ~ x1)
+  # error occurs when trying to assign value to active binding
+  expect_error(lr$formula <- NULL, pattern = "unused argument")
+
   fit_ref <- glm(y ~ x1, data = ddata)
   expect_equal(coef(lr$fit), coef(fit_ref))
 
@@ -205,6 +210,7 @@ test_update <- function() {
   lr$estimate(ddata)
   fit_ref <- glm(y ~ x1 + x2, data = ddata)
   expect_equal(coef(lr$fit), coef(fit_ref))
+
 }
 test_update()
 
