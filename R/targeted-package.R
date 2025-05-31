@@ -93,3 +93,19 @@ NULL
 #' @examples
 #' data(truncatedscore)
 NULL
+
+
+##' @export
+lava::IC
+
+##' @export
+lava::sim
+
+##' @export
+lava::estimate
+
+##' @export
+survival::strata
+
+##' @export
+survival::Surv
