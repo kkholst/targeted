@@ -388,7 +388,8 @@ learner_print <- function(self, private) {
   if (!is.null(private$fitted)) {
     cat_ruler("\u2500", 18)
     fit <- self$fit
-    if (!is.null(fit$call)) fit$call <- substitute()
+    attr(fit, "design") <- NULL
+    if (!is.atomic(fit) && !is.null(fit$call)) fit$call <- substitute()
     cat(capture.output(print(fit)), sep ="\n")
   }
 
