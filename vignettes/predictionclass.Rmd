@@ -111,8 +111,15 @@ most relevant parameters of the underlying fit function (`mgcv::gam` in case of
 can be used to pass additional arguments to the fit function. However, in most
 situations this is rarely required.
 
-TODO: here it would be nice to have a utility function to generate a list of
-learners from a parameter grid
+It is often necessary to consider a range of models with different
+hyper-parmeters and to faciliate this we can use the `learner_expand_grid` function
+```{r learner_expand_grid}
+lrs <- learner_expand_grid(
+  learner_xgboost,
+  list(formula = Sepal.Length ~ ., eta = c(0.2, 0.5, 0.3))
+)
+lrs
+```
 
 # Usage
 
@@ -196,6 +203,7 @@ cv(lrs, data = pbc, rep = 2, nfolds = 5)
 ```
 
 ## Specials (advanced topic)
+
 
 TODO: example with offset
 
