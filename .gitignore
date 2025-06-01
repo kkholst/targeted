@@ -1,6 +1,13 @@
 .RDataTmp
 pkgdown
 .vscode
+inst/README.md
+inst/README.html
+inst/NB.R
+inst/man
+ex.R
+inst/procform.R
+inst/subjumps.R
 man/figures/logo.*
 docs
 inst/doc
