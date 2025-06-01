@@ -58,9 +58,9 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #' E_{P}[\{\Psi_{1}(P)(V)-\Psi_{0}(P)(V)\} - m(V; \beta)]^{2}}
 #' @inheritParams deprecated_argument_names
 #' @title Conditional Average Treatment Effect estimation
-#' @param response.model formula or ml_model object (formula => glm)
+#' @param response.model formula or learner object (formula => learner_glm)
 #' @param ... additional arguments to future.apply::future_mapply
-#' @param propensity.model formula or ml_model object (formula => glm)
+#' @param propensity.model formula or learner object (formula => learner_glm)
 #' @param cate.model formula specifying regression design for conditional
 #'   average treatment effects
 #' @param contrast treatment contrast (default 1 vs 0)

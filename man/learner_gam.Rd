@@ -2,7 +2,7 @@
 % Please edit documentation in R/learner_gam.R
 \name{learner_gam}
 \alias{learner_gam}
-\title{Instantiate a learner}
+\title{Construct a learner}
 \usage{
 learner_gam(
   formula,
@@ -45,7 +45,8 @@ smoothing parameter is estimated as zero then the extra penalty has no effect. U
 \link{learner} object.
 }
 \description{
-\link{learner} generator function for \link[mgcv:gam]{mgcv::gam}.
+Constructs \link{learner} class object for fitting generalized
+additive models with \link[mgcv:gam]{mgcv::gam}.
 }
 \examples{
 n <- 5e2

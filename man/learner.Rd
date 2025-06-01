@@ -2,12 +2,20 @@
 % Please edit documentation in R/learner.R
 \name{learner}
 \alias{learner}
-\alias{predictor_nb}
-\alias{predictor_svm}
 \title{R6 class for prediction models}
 \description{
-Interface for standardized estimation and prediction The
-following built-in learners are provided: \link{learner_glm}, \link{learner_gam}
+Interface for statistical and machine learning models to be used
+for nuisance model estimation in targeted learning.
+
+The following list provides an overview of constructors for many commonly
+used models.
+
+Regression and classification: \link{learner_glm}, \link{learner_gam}, \link{learner_grf},
+\link{learner_hal}, \link{learner_glmnet_cv}, \link{learner_svm}, \link{learner_xgboost},
+\link{learner_mars} \cr
+Regression: \link{learner_isoreg} \cr
+Classification: \link{learner_naivebayes} \cr
+Ensemble (super learner): \link{learner_sl}
 }
 \examples{
 data(iris)
@@ -40,12 +48,23 @@ a <- targeted::cv(models, data = iris)
 cbind(coef(a), attr(args, "table"))
 }
 
-ff <- learner$new(
+# defining learner via function with arguments y (response)
+# and x (design matrix)
+f1 <- learner$new(
   estimate = function(y, x) lm.fit(x = x, y = y),
   predict = function(object, newdata) newdata \%*\% object$coefficients
 )
-## tmp <- ff$estimate(y, x=x)
-## ff$predict(x)
+# defining the learner via arguments formula and data
+f2 <- learner$new(
+  estimate = function(formula, data, ...) glm(formula, data, ...)
+)
+# generic learner defined from function (predict method derived per default
+# from stats::predict
+f3 <- learner$new(
+  estimate = function(dt, ...) {
+    lm(y ~ x, data = dt)
+  }
+)
 
 ## ------------------------------------------------
 ## Method `learner$summary`
@@ -65,18 +84,16 @@ Klaus Kähler Holst, Benedikt Sommer
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
 \item{\code{info}}{Optional information/name of the model}
-
-\item{\code{formula}}{Formula specifying response and design matrix}
-
-\item{\code{estimate.args}}{optional arguments to fitting function specified
-during initialization}
 }
 \if{html}{\out{</div>}}
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{fit}}{Active binding returning estimated model object}
+\item{\code{fit}}{Return estimated model object.}
+
+\item{\code{formula}}{Return model formula. Use \link[=learner]{learner$update()} to
+update the formula.}
 }
 \if{html}{\out{</div>}}
 }
@@ -109,9 +126,7 @@ Create a new prediction model object
   estimate.args = NULL,
   info = NULL,
   specials = c(),
-  response.arg = "y",
-  intercept = FALSE,
-  x.arg = "x"
+  intercept = FALSE
 )}\if{html}{\out{</div>}}
 }
 
@@ -120,9 +135,9 @@ Create a new prediction model object
 \describe{
 \item{\code{formula}}{formula specifying outcome and design matrix}
 
-\item{\code{estimate}}{function for fitting the model (must be a function
+\item{\code{estimate}}{function for fitting the model. This must be a function
 with response, 'y', and design matrix, 'x'. Alternatively, a function
-with a single 'formula' argument)}
+with a formula and data argument. See the examples section.}
 
 \item{\code{predict}}{prediction function (must be a function of model
 object, 'object', and new design matrix, 'newdata')}
@@ -136,11 +151,7 @@ object, 'object', and new design matrix, 'newdata')}
 \item{\code{specials}}{optional specials terms (weights, offset,
 id, subset, ...) passed on to \link{design}}
 
-\item{\code{response.arg}}{name of response argument}
-
 \item{\code{intercept}}{(logical) include intercept in design matrix}
-
-\item{\code{x.arg}}{name of design matrix argument}
 }
 \if{html}{\out{</div>}}
 }
@@ -236,9 +247,7 @@ elements:
 \item{predict}{function for making predictions from fitted model}
 \item{predict.args}{arguments to predict function}
 \item{specials}{provided special terms}
-\item{response.args}{name of response argument in estimate function}
 \item{intercept}{include intercept in design matrix}
-\item{x.arg}{name of design matrix argument in estimate function}
 }
 }
 \subsection{Examples}{

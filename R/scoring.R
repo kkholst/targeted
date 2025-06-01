@@ -102,8 +102,8 @@ multiclass_scoring1 <- # nolint
 #' data(iris)
 #' set.seed(1)
 #' dat <- csplit(iris,2)
-#' g1 <- NB(Species ~ Sepal.Width + Petal.Length, data=dat[[1]])
-#' g2 <- NB(Species ~ Sepal.Width, data=dat[[1]])
+#' g1 <- naivebayes(Species ~ Sepal.Width + Petal.Length, data=dat[[1]])
+#' g2 <- naivebayes(Species ~ Sepal.Width, data=dat[[1]])
 #' pr1 <- predict(g1, newdata=dat[[2]], wide=TRUE)
 #' pr2 <- predict(g2, newdata=dat[[2]], wide=TRUE)
 #' table(colnames(pr1)[apply(pr1,1,which.max)], dat[[2]]$Species)
@@ -121,7 +121,7 @@ scoring <- function(response, ...,
                     newdata=NULL,
                     messages=1) {
   val <- list(...)
-  if (missing(response) && inherits(object, "ml_model")) {
+if (missing(response) && inherits(object, "learner")) {
     if (is.null(newdata)) stop("`newdata` data.frame needed")
     response <- object$response(newdata)
     if (length(val) == 0) {

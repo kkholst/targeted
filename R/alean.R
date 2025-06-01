@@ -10,7 +10,7 @@
 #' \code{link} specifies \eqn{g}.
 #'
 #' @title Assumption Lean inference for generalized linear model parameters
-#' @param response_model formula or ml_model object (formula => glm)
+#' @param response_model formula or [learner] object (formula => glm)
 #' @param exposure_model  model for the exposure
 #' @param data data.frame
 #' @param link Link function (g)

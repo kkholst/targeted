@@ -2,7 +2,7 @@
 % Please edit documentation in R/learner_isoreg.R
 \name{learner_isoreg}
 \alias{learner_isoreg}
-\title{Instantiate a learner}
+\title{Construct a learner}
 \usage{
 learner_isoreg(formula, info = "targeted::isoregw", learner.args = NULL, ...)
 }
@@ -21,7 +21,8 @@ learner_isoreg(formula, info = "targeted::isoregw", learner.args = NULL, ...)
 \link{learner} object.
 }
 \description{
-\link{learner} object constructor for \link{isoregw}.
+Constructs a \link{learner} class object for isotonic regression with
+\link{isoregw}.
 }
 \examples{
 x <- runif(5e3, -5, 5)

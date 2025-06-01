@@ -1,9 +1,18 @@
 #' @title R6 class for prediction models
-#' @description Interface for standardized estimation and prediction The
-#' following built-in learners are provided: [learner_glm], [learner_gam]
+#' @description Interface for statistical and machine learning models to be used
+#' for nuisance model estimation in targeted learning.
+#'
+#' The following list provides an overview of constructors for many commonly
+#' used models.
+#'
+#' Regression and classification: [learner_glm], [learner_gam], [learner_grf],
+#' [learner_hal], [learner_glmnet_cv], [learner_svm], [learner_xgboost],
+#' [learner_mars] \cr
+#' Regression: [learner_isoreg] \cr
+#' Classification: [learner_naivebayes] \cr
+#' Ensemble (super learner): [learner_sl]
 #' @param data data.frame
 #' @author Klaus Kähler Holst, Benedikt Sommer
-#' @aliases predictor_nb predictor_svm
 #' @examples
 #' data(iris)
 #' rf <- function(formula, ...) {
@@ -35,29 +44,35 @@
 #' cbind(coef(a), attr(args, "table"))
 #' }
 #'
-#' ff <- learner$new(
+#' # defining learner via function with arguments y (response)
+#' # and x (design matrix)
+#' f1 <- learner$new(
 #'   estimate = function(y, x) lm.fit(x = x, y = y),
 #'   predict = function(object, newdata) newdata %*% object$coefficients
 #' )
-#' ## tmp <- ff$estimate(y, x=x)
-#' ## ff$predict(x)
+#' # defining the learner via arguments formula and data
+#' f2 <- learner$new(
+#'   estimate = function(formula, data, ...) glm(formula, data, ...)
+#' )
+#' # generic learner defined from function (predict method derived per default
+#' # from stats::predict
+#' f3 <- learner$new(
+#'   estimate = function(dt, ...) {
+#'     lm(y ~ x, data = dt)
+#'   }
+#' )
 #' @export
 learner <- R6::R6Class("learner", # nolint
   public = list(
     #' @field info Optional information/name of the model
     info = NULL,
-    #' @field formula Formula specifying response and design matrix
-    formula = NULL,
-    #' @field estimate.args optional arguments to fitting function specified
-    #' during initialization
-    estimate.args = NULL,
 
     #' @description
     #' Create a new prediction model object
     #' @param formula formula specifying outcome and design matrix
-    #' @param estimate function for fitting the model (must be a function
+    #' @param estimate function for fitting the model. This must be a function
     #'  with response, 'y', and design matrix, 'x'. Alternatively, a function
-    #'  with a single 'formula' argument)
+    #'  with a formula and data argument. See the examples section.
     #' @param predict prediction function (must be a function of model
     #' object, 'object', and new design matrix, 'newdata')
     #' @param info optional description of the model
@@ -65,9 +80,7 @@ learner <- R6::R6Class("learner", # nolint
     #' @param estimate.args optional arguments to estimate function
     #' @param specials optional specials terms (weights, offset,
     #'  id, subset, ...) passed on to [targeted::design]
-    #' @param response.arg name of response argument
     #' @param intercept (logical) include intercept in design matrix
-    #' @param x.arg name of design matrix argument
     initialize = function(formula = NULL,
                           estimate,
                           predict = stats::predict,
@@ -75,27 +88,24 @@ learner <- R6::R6Class("learner", # nolint
                           estimate.args = NULL,
                           info = NULL,
                           specials = c(),
-                          response.arg = "y",
-                          intercept = FALSE,
-                          x.arg = "x") {
+                          intercept = FALSE
+                         ) {
       estimate <- add_dots(estimate)
 
       private$des.args <- list(specials = specials, intercept = intercept)
       fit_formula <- "formula" %in% formalArgs(estimate)
-      fit_response_arg <- response.arg %in% formalArgs(estimate)
-      fit_x_arg <- x.arg %in% formalArgs(estimate)
       fit_data_arg <- "data" %in% formalArgs(estimate)
       private$init.estimate <- estimate
       private$init.predict <- predict
 
-      self$estimate.args <- estimate.args
+      private$estimate.args <- estimate.args
       no_formula <- is.null(formula)
       if (!no_formula && is.character(formula) || is.function(formula)) {
         no_formula <- TRUE
       }
       if (no_formula) {
         private$fitfun <- function(...) {
-          args <- private$update_args(self$estimate.args, ...)
+          args <- private$update_args(private$estimate.args, ...)
           return(do.call(private$init.estimate, args))
         }
         private$predfun <- function(...) {
@@ -105,9 +115,9 @@ learner <- R6::R6Class("learner", # nolint
       } else {
         if (fit_formula) { # Formula in arguments of estimation procedure
           private$fitfun <- function(data, ...) {
-            args <- private$update_args(self$estimate.args, ...)
+            args <- private$update_args(private$estimate.args, ...)
             args <- c(
-              args, list(formula = self$formula, data = data)
+              args, list(formula = private$.formula, data = data)
             )
             return(do.call(private$init.estimate, args))
           }
@@ -116,18 +126,11 @@ learner <- R6::R6Class("learner", # nolint
           private$fitfun <- function(data, ...) {
             xx <- do.call(
               targeted::design,
-              c(list(formula = self$formula, data = data), private$des.args)
+              c(list(formula = private$.formula, data = data), private$des.args)
             )
-            args <- private$update_args(self$estimate.args, ...)
-            args <- c(list(xx$x), args)
-            if (fit_x_arg) {
-              names(args)[1] <- x.arg
-            } else {
-              if (fit_data_arg) names(args)[1] <- "data"
-            }
-            if (fit_response_arg) {
-              args[response.arg] <- list(xx$y)
-            }
+            args <- private$update_args(private$estimate.args, ...)
+            args <- c(list(x = xx$x, y = xx$y), args)
+
             if (length(xx$specials) > 0) {
               args <- c(args, xx[xx$specials])
             }
@@ -156,7 +159,7 @@ learner <- R6::R6Class("learner", # nolint
           return(do.call(private$init.predict, args))
         }
       }
-      self$formula <- formula
+      private$.formula <- formula
       self$info <- info
       private$init <- list(
         estimate.args = estimate.args,
@@ -164,9 +167,7 @@ learner <- R6::R6Class("learner", # nolint
         estimate = estimate,
         predict = predict,
         specials = specials,
-        response.arg = response.arg,
-        intercept = intercept,
-        x.arg = x.arg
+        intercept = intercept
       )
     },
 
@@ -200,10 +201,10 @@ learner <- R6::R6Class("learner", # nolint
         if (grepl("~", formula)) {
           formula <- as.formula(formula)
         } else {
-          formula <- reformulate(as.character(self$formula)[3], formula)
+          formula <- reformulate(as.character(private$.formula)[3], formula)
         }
       }
-      self$formula <- formula
+      private$.formula <- formula
       environment(private$fitfun)$formula <- formula
       environment(private$fitfun)$self <- self
       return(invisible(formula))
@@ -229,9 +230,7 @@ learner <- R6::R6Class("learner", # nolint
     #'  \item{predict}{function for making predictions from fitted model}
     #'  \item{predict.args}{arguments to predict function}
     #'  \item{specials}{provided special terms}
-    #'  \item{response.args}{name of response argument in estimate function}
     #'  \item{intercept}{include intercept in design matrix}
-    #'  \item{x.arg}{name of design matrix argument in estimate function}
     #' }
     #' @examples
     #' lr <- learner_glm(y ~ x, family = "nb")
@@ -242,7 +241,7 @@ learner <- R6::R6Class("learner", # nolint
     #' print(lr_sum)
     summary = function() {
       obj <- structure(
-        c(list(formula = self$formula, info = self$info), private$init),
+        c(list(formula = private$.formula, info = self$info), private$init),
         class = "summarized_learner"
       )
       return(obj)
@@ -258,8 +257,8 @@ learner <- R6::R6Class("learner", # nolint
       if (eval) {
         return(self$design(data = data, ...)$y)
       }
-      if (is.null(self$formula)) return(NULL)
-      newf <- update(self$formula, ~1)
+      if (is.null(private$.formula)) return(NULL)
+      newf <- update(private$.formula, ~1)
       return(data[, all.vars(newf), drop = TRUE])
     },
 
@@ -269,23 +268,28 @@ learner <- R6::R6Class("learner", # nolint
     design = function(data, ...) {
       args <- c(private$des.args, list(data = data))
       args[...names()] <- list(...)
-      return(do.call(design, c(list(self$formula), args)))
+      return(do.call(design, c(list(private$.formula), args)))
     },
 
     #' @description
     #' Get options
     #' @param arg name of option to get value of
     opt = function(arg) {
-      return(self$estimate.args[[arg]])
+      return(private$estimate.args[[arg]])
     }
   ),
   active = list(
-    #' @field fit Active binding returning estimated model object
-    fit = function() private$fitted
+    #' @field fit Return estimated model object.
+    fit = function() private$fitted,
+    #' @field formula Return model formula. Use [learner$update()][learner] to
+    #' update the formula.
+    formula = function() private$.formula
   ),
   private = list(
     # @field des.args Arguments for targeted::design
     des.args = NULL,
+    # @field estimate.args Arguments for estimate method
+    estimate.args = NULL,
     # @field init.estimate Original estimate method supplied at initialization
     init.estimate = NULL,
     # @field init.predict Original predict method supplied at initialization
@@ -296,6 +300,9 @@ learner <- R6::R6Class("learner", # nolint
     fitfun = NULL,
     # @field fitted Fitted model object
     fitted = NULL,
+    # @field .formula Model formula object // uses dot as a pre-fix to allow
+    # using formula as an active binding
+    .formula = NULL,
     # @field init Information on the initialized model
     init = NULL,
     # When x$clone(deep=TRUE) is called, the deep_clone gets invoked once for
@@ -360,13 +367,9 @@ format_fit_predict_args <- function(args) {
   return(paste0(names(args), "=", args, collapse =", "))
 }
 
-learner_print <- function(self, private) {
-  .ruler <- function(x, n, unicode = "\u2500") {
-    rule <- paste0(rep(unicode, n), collapse = "")
-    cat(paste0(rule, x, rule, "\n"))
-  }
 
-  .ruler(" learner object ", 10)
+learner_print <- function(self, private) {
+  cat_ruler(" learner object ", 10)
 
   if (!is.null(self$info)) {
     cat(self$info, "\n\n")
@@ -378,13 +381,15 @@ learner_print <- function(self, private) {
     "\nPredict arguments:",
     format_fit_predict_args(private$init$predict.args),
     "\nFormula:",
-    capture.output(print(self$formula)),
+    capture.output(print(private$.formula)),
     "\n"
   )
 
   if (!is.null(private$fitted)) {
-    .ruler("\u2500", 18)
-    cat(capture.output(print(self$fit)), sep ="\n")
+    cat_ruler("\u2500", 18)
+    fit <- self$fit
+    if (!is.null(fit$call)) fit$call <- substitute()
+    cat(capture.output(print(fit)), sep ="\n")
   }
 
   return(invisible())
@@ -392,12 +397,7 @@ learner_print <- function(self, private) {
 
 #' @export
 print.summarized_learner <- function(x, ...) {
-    .ruler <- function(x, n, unicode = "\u2500") {
-    rule <- paste0(rep(unicode, n), collapse = "")
-    cat(paste0(rule, x, rule, "\n"))
-  }
-
-  .ruler(" learner object ", 10)
+  cat_ruler(" learner object ", 10)
 
   if (!is.null(x$info)) {
     cat(x$info, "\n\n")
@@ -420,19 +420,35 @@ print.summarized_learner <- function(x, ...) {
 #' @description Replaced by [learner]
 #' @export
 ml_model <- R6Class("ml_model",
-  inherit = learner
-  # TODO: deprecating warning in initializer
+  inherit = learner,
+  public = list(
+    #' @description Create a new prediction model object
+    #' @param ... deprecated
+    initialize = function(...) {
+      rlang::warn(paste0(
+        "targeted::ml_model is deprecated and will ",
+        "be removed in targeted v0.7.0. Use targeted::learner instead.")
+      )
+      super$initialize(...)
+    }
+  )
 )
 
 #' @export
 estimate.ml_model <- function(x, ...) {
-  # TODO: deprecate
+  rlang::warn(paste0(
+        "targeted::ml_model is deprecated and will ",
+        "be removed in targeted v0.7.0. Use targeted::learner instead.")
+  )
   return(x$estimate(...))
 }
 
 #' @export
 predict.ml_model <- function(object, ...) {
-  # TODO: deprecate
+  rlang::warn(paste0(
+        "targeted::ml_model is deprecated and will ",
+        "be removed in targeted v0.7.0. Use targeted::learner instead.")
+  )
   return(object$predict(...))
 }
 

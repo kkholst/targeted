@@ -1,4 +1,4 @@
-#' @description [learner] model constructor for [xgboost::xgboost].
+#' @description Constructs a [learner] class object for [xgboost::xgboost].
 #' @param ... Additional arguments to [xgboost::xgboost].
 #' @param max_depth (integer) Maximum depth of a tree.
 #' @param eta (numeric) Learning rate.
@@ -6,7 +6,7 @@
 #' @param lambda (numeric) L2 regularization term on weights.
 #' @param objective (character) Specify the learning task and the corresponding
 #' learning objective. See [xgboost::xgboost] for all available options.
-#' @inherit learner_shared
+#' @inherit constructor_shared
 #' @inheritParams xgboost::xgboost
 #' @export
 #' @examples

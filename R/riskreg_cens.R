@@ -2,8 +2,8 @@
 #' @param response Response formula (e.g., Surv(time, event) ~ D + W).
 #' @param censoring Censoring formula (e.g., Surv(time, event == 0) ~ D + A +
 #'   W)).
-#' @param treatment Optional treatment model (ml_model)
-#' @param prediction Optional prediction model (ml_model)
+#' @param treatment Optional treatment model ([learner])
+#' @param prediction Optional prediction model ([learner])
 #' @param data data.frame.
 #' @param newdata Optional data.frame. In this case the uncentered influence
 #'   function evaluated in 'newdata' is returned with nuisance parameters
@@ -180,7 +180,7 @@ riskreg_cens <- function(response,
 
     # prediction model / brier
     if (!is.null(prediction)) {
-      if (inherits(prediction, "ml_model")) {
+      if (inherits(prediction, "learner")) {
         prediction$estimate(train_data)
         valid_data[, "_pred"] <- prediction$predict(valid_data)
       }

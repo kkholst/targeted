@@ -27,7 +27,7 @@
 #' @author Klaus K. Holst (Maintainer) <klaus@@holst.it>
 #' @keywords package
 #' @examples
-#' \dontrun{x
+#' \dontrun{
 #' example(riskreg)
 #' example(cate)
 #' example(ate)
