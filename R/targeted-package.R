@@ -28,7 +28,7 @@
 #' @importFrom optimx optimx
 #' @importFrom data.table data.table is.data.table dcast :=
 #' @importFrom R6 R6Class
-#' @importFrom survival survfit
+#' @importFrom survival survfit Surv strata
 #' @importFrom utils tail head capture.output getFromNamespace
 #' @references
 #' Bang & Robins (2005) Doubly Robust Estimation in Missing Data and
@@ -100,6 +100,12 @@ lava::IC
 
 ##' @export
 lava::sim
+
+##' @export
+lava::score
+
+##' @export
+lava::parameter
 
 ##' @export
 lava::estimate

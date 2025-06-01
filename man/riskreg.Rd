@@ -95,12 +95,12 @@ The \code{riskreg_fit} function can be used with matrix inputs rather than
 formulas.
 }
 \examples{
-m <- lvm(a[-2] ~ x,
+m <- lava::lvm(a[-2] ~ x,
          z ~ 1,
          lp.target[1] ~ 1,
-         lp.nuisance[-1] ~ 2*x)
-distribution(m,~a) <- binomial.lvm("logit")
-m <- binomial.rr(m, "y","a","lp.target","lp.nuisance")
+         lp.nuisance[-1] ~ 2*x) |>
+     lava::distribution(~a, value=lava::binomial.lvm("logit")) |>
+     lava::binomial.rr("y","a","lp.target","lp.nuisance")
 d <- sim(m,5e2,seed=1)
 
 I <- model.matrix(~1, d)

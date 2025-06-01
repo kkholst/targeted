@@ -81,7 +81,7 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #' sim1 <- function(n=1000, ...) {
 #'   w1 <- rnorm(n)
 #'   w2 <- rnorm(n)
-#'   a <- rbinom(n, 1, expit(-1 + w1))
+#'   a <- rbinom(n, 1, plogis(-1 + w1))
 #'   y <- cos(w1) + w2*a + 0.2*w2^2 + a + rnorm(n)
 #'   data.frame(y, a, w1, w2)
 #' }

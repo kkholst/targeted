@@ -25,13 +25,13 @@
 #' @examples
 #'
 #' sim1 <- function(n, family=gaussian(), ...) {
-#'    m <- lvm() |>
-#'      distribution(~ y, binomial.lvm()) |>
-#'      regression('a', value=function(l) l) |>
-#'      regression('y', value=function(a,l) a + l)
+#'    m <- lava::lvm() |>
+#'      lava::distribution(~y, value=lava::binomial.lvm()) |>
+#'      lava::regression('a', value=function(l) l) |>
+#'      lava::regression('y', value=function(a,l) a + l)
 #'      if (family$family=="binomial")
-#'         distribution(m, ~a) <- binomial.lvm()
-#'    sim(m, n)
+#'         lava::distribution(m, ~a) <- lava::binomial.lvm()
+#'    lava::sim(m, n)
 #' }
 #'
 #' library(splines)
