@@ -9,7 +9,7 @@
 [![cran](https://www.r-pkg.org/badges/version-last-release/targeted)](https://cranlogs.r-pkg.org/downloads/total/last-month/targeted)
 <!-- badges: end -->
 
-# Targeted Learning in R (`targeted`) <a href="https://kkholst.github.io/targeted"><img src="man/figures/logohex.svg" align="right" height="150" /></a>
+# Targeted Learning in R (`targeted`) <a href="https://kkholst.github.io/targeted"><img src="man/figures/logohex.png" align="right" height="150" /></a>
 
 Various methods for targeted learning and semiparametric inference
 including augmented inverse probability weighted (AIPW) estimators for
@@ -52,11 +52,11 @@ progressr::handlers(global=TRUE)
 To illustrate some of the functionality of the `targeted` package we
 simulate some data from the following model
 $$Y = \exp\{-(W_1 - 1)^2 - (W_2 - 1)^2)\} -
-\exp\{-(W_1+1)^2 - (W_2+1)^2\}A +
+2\exp\{-(W_1+1)^2 - (W_2+1)^2\}A +
 \epsilon$$ with independent measurement error
 $\epsilon\sim\mathcal{N}(0,1)$, and with treatment variable
-$A \sim Bernoulli(\operatorname{expit}\{-1+W_1\})$ and independent
-covariates $W_1, W_2\sim\mathcal{N}(0,1/2)$.
+$A \sim Bernoulli(\text{expit}\{-1+W_1\})$ and independent covariates
+$W_1, W_2\sim\mathcal{N}(0,1/2)$.
 
 ``` r
 library("targeted")
@@ -121,7 +121,7 @@ lr
 #> 
 #> Estimate arguments: family=<function> 
 #> Predict arguments:   
-#> Formula: y ~ (w1 + w2) * a <environment: 0x15cf956c8>
+#> Formula: y ~ (w1 + w2) * a <environment: 0x1106170c8>
 ```
 
 To fit the model to the data we use the `estimate` method
@@ -279,8 +279,9 @@ the difference of those, the average treatment effect, given as the term
 
 Here we use the `nfolds=5` argument to use 5-fold *cross-fitting* to
 guarantee that the estimates converges weakly to a Gaussian distribution
-irrespecitively that the influence function with the plugin Random
-Forest does not lie in a $P$-Donsker class.
+even though that the estimated influence function based on plugin
+estimates from the Random Forest does not ncessarily lie in a
+$P$-Donsker class.
 
 # Project organization
 
