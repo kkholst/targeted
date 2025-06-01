@@ -1,10 +1,10 @@
 ---
-title: "`targeted`: Targeted Learning in R"
 output:
-  html_document:
-    toc: true
-    toc_depth: 2
+  github_document:
+  toc: true
+  toc_depth: 2
 ---
+
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 ```{r  include=FALSE }
@@ -26,7 +26,7 @@ knitr::opts_chunk$set(
 <!-- badges: end -->
 
 
-# Targeted Learning in R: `targeted` <a href="https://kkholst.github.io/targeted"><img src="man/figures/logohex.svg" align="right" height="150" /></a>
+# Targeted Learning in R (`targeted`) <a href="https://kkholst.github.io/targeted"><img src="man/figures/logohex.svg" align="right" height="150" /></a>
 
 Various methods for targeted learning and semiparametric inference including
 augmented inverse probability weighted (AIPW) estimators for missing data and
@@ -61,13 +61,13 @@ future::plan("multisession")
 progressr::handlers(global=TRUE)
 ```
 
-
-
 # Examples
 
 To illustrate some of the functionality of the `targeted` package we simulate
 some data from the following model
-$$Y = \cos(W_1) + A + W_2 A + 0.2 W_2^2 + \epsilon$$
+$$Y = \exp\{-(W_1 - 1)^2 - (W_2 - 1)^2)\} -
+\exp\{-(W_1+1)^2 - (W_2+1)^2\}A +
+\epsilon$$
 with independent measurement error $\epsilon\sim\mathcal{N}(0,1)$, and
 with treatment variable $A \sim Bernoulli(\operatorname{expit}\{-1+W_1\})$ and
 independent covariates $W_1, W_2\sim\mathcal{N}(0,1/2)$.
@@ -76,17 +76,33 @@ library("targeted")
 
 simdata <- function(n, ...) {
    w1 <- rnorm(n) # covariates
-   w2 <- rnorm(n)
-   a <- rbinom(n, 1, plogis(-1 + w1)) # treatment
-   y <-  3 * exp(- (w1-1)**2 - (w2+1)**2) + # continuous
-     - 3 * exp(- w1**2 - w2**2) * a +
-     rnorm(n, sd=0.5**2)
+   w2 <- rnorm(n) # ...
+   a <- rbinom(n, 1, plogis(-1 + w1)) # treatment indicator
+   y <-  exp(- (w1 - 1)**2 - (w2 - 1)**2) - # continuous response
+     2 * exp(- (w1 + 1)**2 - (w2 + 1)**2) * a + # additional effect in treated
+     rnorm(n, sd=0.5**.5)
    data.frame(y, a, w1, w2)
 }
+set.seed(1)
 d <- simdata(5e3)
 
 head(d)
 ```
+
+```{r simplot}
+wnew <- seq(-3,3, length.out=200)
+dnew <- expand.grid(w1 = wnew, w2 = wnew, a = 1)
+y <- with(dnew,
+          exp(- (w1 - 1)**2 - (w2 - 1)**2) -
+          2 * exp(- (w1 + 1)**2 - (w2 + 1)**2)*a
+          )
+image(wnew, wnew, matrix(y, ncol=length(wnew)),
+      col=viridisLite::viridis(64),
+      main=expression(paste("E(Y|",W[1],",",W[2],")")),
+      xlab=expression(W[1]), ylab=expression(W[2]))
+```
+
+
 
 ## Nuisance (prediction) models
 
@@ -99,10 +115,10 @@ usage as nuisance models across the various implemented estimators, such as the
 class objects through the `learner_*` functions.
 
 
-As an example, we can specify a linear regression model with main effects of
-$W_1$ and $W_2$
+As an example, we can specify a linear regression model with an interaction term
+between treatment and the two covariates $W_1$ and $W_2$
 ```{r learner1}
-lr <- learner_glm(y ~ w1 + w2, family = gaussian)
+lr <- learner_glm(y ~ (w1 + w2)*a, family = gaussian)
 lr
 ```
 
@@ -117,25 +133,27 @@ Predictions, $E(Y\mid W_1, W_2)$, can be performed with the `predict` method
 head(d) |> lr$predict()
 ```
 
-Similarly, a flexible gradient boosting model can be specified with
-```{r lrxgb}
-lr2 <- learner_xgboost(
-  y ~ w1 + w2,
-  early_stopping_rounds = 5,
-  eta = 0.2,
-  nrounds = 100
-)
+```{r lrplot}
+pr <- matrix(lr$predict(dnew), ncol=length(wnew))
+image(wnew, wnew, pr, col=viridisLite::viridis(64),
+      main=expression(paste("E(Y|",W[1],",",W[2],")")),
+      xlab=expression(W[1]), ylab=expression(W[2]))
 ```
 
-Lists of models can also be constructed for different hyperparameters with the
+
+Similarly, a Random Forest can be specified with
+```{r lrrf}
+lr_rf <- learner_grf(y ~ w1 + w2 + a, num.trees = 500)
+```
+
+Lists of models can also be constructed for different hyper-parameters with the
 `learner_expand_grid` function.
 
 ### Cross-validation
 
 To assess the model generalization error we can perform $k$-fold cross-validation with the `cv` method
-  method
-```{r lrcv}
-mod <- list(glm = lr, xgb = lr2)
+```{r lrcv, cache=TRUE}
+mod <- list(glm = lr, rf = lr_rf)
 cv(mod, data = d, rep = 2, nfolds = 5) |> summary()
 ```
 
@@ -143,16 +161,14 @@ cv(mod, data = d, rep = 2, nfolds = 5) |> summary()
 ### Ensembles (Super-Learner)
 
 An ensemble learner (super-learner) can easily be constructed from lists of `learner` objects
-```{r lrsl}
+```{r lrsl, cache=TRUE}
 sl <- learner_sl(mod, nfolds = 10)
 sl$estimate(d)
 sl
 ```
 
 
-```{r lrsl_plot}
-wnew <- seq(-3,3, length.out=200)
-dnew <- expand.grid(w1 = wnew, w2 = wnew, a = 1)
+```{r lrsl_plot, cache=TRUE}
 pr <- matrix(sl$predict(dnew), ncol=length(wnew))
 image(wnew, wnew, pr, col=viridisLite::viridis(64),
       main=expression(paste("E(Y|",W[1],",",W[2],")")),
@@ -160,92 +176,56 @@ image(wnew, wnew, pr, col=viridisLite::viridis(64),
 ```
 
 
-
 ## Average Treatment Effects
 
+In the following we are interested in estimating the target parameter $\psi_a(P)
+= E_P[Y(a)]$, where $Y(a)$ is the *potential outcome* we would have observed if
+treatment $a$ had been administered, possibly contrary to the actual treatment
+that was observed, i.e., $Y = Y(A)$.
+To assess the treatment effect we can then the consider the *average treatment
+effect* (ATE)
+$$E_P[Y(1)]-E_P[Y(0)],$$
+or some other contrast of interest $g(\psi_1(P), \psi_0(P))$.
+Under the following assumptions
 
+1) Stable Unit Treatment Values Assumption (the treatment of a specific subject is not affecting the potential outcome of other subjects)
+2) Positivity, $P(A\mid W)>\epsilon$ for some $\epsilon>0$ and baseline covariates $W$
+3) No unmeasured confounders, $Y(a)\perp \!\!\! \perp A|W$
 
+then the target parameter can be identified from the observed data distribution as
+$$E(E[Y|W,A=a]) = E(E[Y(a)|W]) = E[Y(a)]$$
+or
+$$E[Y I(A=a)/P(A=a|W)] = E[Y(a)].$$
 
-```{r ate}
+This suggests estimators based on outcome regression ($g$-computation) or
+inverse probability weighting. More generally, under the above assumption we can
+constructor a *one-step* estimator from the *Efficient Influence Function*
+combining these two
+$$
+E\left[\frac{I(A=a)}{\Pi_a(W)}(Y-Q(W,A)) + Q(W,a)\right].
+$$
+In practice, this requires plugin estimates of both the outcome model, $Q(W,A) :=
+E(Y\mid A, W)$, and of the treatment propensity model $\Pi_a(W) := P(A=a\mid
+W)$. The corresponding estimator is consistent even if just one of the two
+nuisance models is correctly specified.
 
+First we specify the propensity model
+```{r propensity}
+prmod <- learner_glm(a ~ w1 + w2, family=binomial)
 ```
 
-
-
-
-
-
-## Risk regression with binary exposure and nuisance model for the odds-product regression
-Estimating a relative risk or risk difference with a binary exposure
-
-
-```{r  results='hide' }
-library(targeted)
+We will reuse one of the outcome models from the previous Section, and can now
+use the `cate` function to estimate the treatment effect
+```{r ate, cache=TRUE}
+a <- cate(response.model = lr_rf, propensity.model = prmod, data = d, nfolds = 5)
+a
 ```
+In the output we get estimates of both the mean potential outcomes and the
+difference of those, the average treatment effect, given as the term `(Intercept)`.
 
-Simulate some data:
-
-```{r   }
-m <- lava::lvm() |>
-    lava::regression(a ~ x+z) |>
-    lava::regression(lp.target ~ 1) |>
-    lava::regression(lp.nuisance ~ x + z) |>
-    lava::distribution('a', binomial.lvm("logit")) |>
-    lava::binomial.rr('y', 'a', 'lp.target', 'lp.nuisance')
-
-par <- c('a'=-2, 'lp.target'=1, 'lp.nuisance'=-1, 'lp.nuisance~x'=2)
-d <- lava::sim(m, n=2e4, seed=1, p=par) |>
-    subset(select=c('y', 'a','x','z'))
-
-head(d)
-```
-
-```{r   }
-fit <- riskreg(y ~ a, nuisance=~x+z, data=d, type="rr")
-fit
-```
-
-Here the same design matrix is used for both the propensity model and
-the nuisance parameter (odds-product) model
-
-```{r   }
-summary(fit)
-```
-
-Double-robustness illustrated by using a wrong propensity
-model but a correct nuisance paramter (odds-product) model:
-
-```{r   }
-riskreg(y ~ a, nuisance=~x+z, propensity=~z, data=d, type="rr")
-```
-
-Or vice-versa
-
-```{r   }
-riskreg(y ~ a, nuisance=~z, propensity=~x+z, data=d, type="rr")
-```
-
-Whereas the MLE yields a biased estimate of the relative risk:
-
-```{r   }
-fit_mle <- with(d, riskreg_mle(y, a, x1=model.matrix(~1,d), x2=model.matrix(~z, d)))
-estimate(fit_mle, 1)
-```
-
-To obtain an estimate of the risk-difference (here wrong model) we simply chance the `type` argument
-
-```{r   }
-riskreg(y ~ a, nuisance=~x+z, data=d, type="rd")
-```
-
-
-Interactions with the exposure can be examined with the `target` argument
-
-```{r   }
-riskreg(y ~ a, target=a~x, nuisance=~x+z, data=d, type="rr")
-```
-
-
+Here we use the `nfolds=5` argument to use 5-fold *cross-fitting* to guarantee
+that the estimates converges weakly to a Gaussian distribution irrespecitively
+that the influence function with the plugin Random Forest does not lie in a $P$-Donsker class.
 
 # Project organization
 
