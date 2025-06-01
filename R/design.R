@@ -172,7 +172,7 @@ terms.design <- function(x, specials, ...) {
 
 #' @export
 summary.design <- function(object, ...) {
-  object$x <- object$x[0, ]
+  object$x <- object$x[0, , drop=FALSE]
   object$y <- NULL
   for (i in object$specials) object[[i]] <- NULL
   return(object)
@@ -182,7 +182,9 @@ summary.design <- function(object, ...) {
 print.design <- function(x, n=2, ...) {
   cat_ruler(" design object ", 10)
   cat(sprintf("\nresponse (length: %s)", length(x$y)))
-  lava::Print(x$y, n = n, ...)
+  if (length(x$y) > 0) {
+    lava::Print(x$y, n = n, ...)
+  } else cat("\n")
   specials <- c()
   for (nam in x$specials) {
     if (!is.null(x[[nam]])) {
@@ -197,7 +199,9 @@ print.design <- function(x, n=2, ...) {
     cat("\n")
   }
   cat(sprintf("\ndesign matrix (dim: %s)\n", paste0(dim(x$x), collapse = ", ")))
-  lava::Print(x$x, n = n, ...)
+  if (NROW(x$x) > 0) {
+    lava::Print(x$x, n = n, ...)
+  } else print(x$x)
   return(invisible(x))
 }
 
