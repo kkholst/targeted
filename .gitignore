@@ -3,8 +3,10 @@ pkgdown
 .vscode
 inst/README.md
 inst/README.html
+inst/README.rmarkdown
 inst/NB.R
 inst/man
+inst/*.yaml
 ex.R
 inst/procform.R
 inst/subjumps.R
