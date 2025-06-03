@@ -36,7 +36,6 @@ learner_mars <- function(formula,
     ),
     list(...)
   )
-  args$specials <- union(args$specials, c("offset"))
 
   args$estimate <- function(formula, data, ...) earth::earth(formula, data, ...)
   args$predict <- function(object, newdata, ...) {

@@ -75,7 +75,7 @@ test_design_ellipsis()
 test_design_specials <- function() {
   # offset is correctly identified as a special variable and not added as a
   # covariate
-  dd <- design(y ~ offset(x1), ddata)
+  dd <- design(y ~ offset(x1), ddata, specials="offset")
 
   expect_equal(ncol(dd$x), 0)
   offset_expect <- ddata$x1
@@ -89,7 +89,7 @@ test_design_specials <- function() {
   # an offset variable is not changed
   ddata1 <- ddata
   ddata1$offset <- 1
-  dd <- design(y ~ offset + x1, ddata1)
+  dd <- design(y ~ offset + x1, ddata1, specials="offset")
   expect_equivalent(
     as.matrix(ddata1[, c("offset", "x1")]),
     dd$x
@@ -114,8 +114,7 @@ test_design_specials <- function() {
   expect_equal(ddata$x1, unname(dd$offset))
 
   # test default weight special
-  weights <- identity
-  dd <- design(y ~ weights(x1), ddata)
+  dd <- design(y ~ weights(x1), ddata, specials="weights")
   expect_equal(unname(dd$weights), ddata$x1)
 }
 test_design_specials()

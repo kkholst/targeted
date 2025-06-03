@@ -126,6 +126,7 @@ Create a new prediction model object
   estimate.args = NULL,
   info = NULL,
   specials = c(),
+  formula.keep.specials = FALSE,
   intercept = FALSE
 )}\if{html}{\out{</div>}}
 }
@@ -150,6 +151,10 @@ object, 'object', and new design matrix, 'newdata')}
 
 \item{\code{specials}}{optional specials terms (weights, offset,
 id, subset, ...) passed on to \link{design}}
+
+\item{\code{formula.keep.specials}}{if TRUE then special terms defined by
+\code{specials} will be removed from the formula before it is being passed to
+the estimate print.function()}
 
 \item{\code{intercept}}{(logical) include intercept in design matrix}
 }
