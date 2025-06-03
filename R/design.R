@@ -112,14 +112,14 @@ design <- function(formula, data, ..., # nolint
     }
     names(specials.list) <- specials
     if (length(sterm.list) > 0) {
-      if ((nrow(attr(tt, "factors"))-attr(tt, "response")) ==
+      if ((nrow(attr(tt, "factors")) - attr(tt, "response")) ==
           length(sterm.list)) {
         # only specials on the rhs, remove everything
         formula <- update(formula, ~1)
       } else {
         # remove specials from formula
         formula <- drop.terms(tt,
-                              unlist(attr(tt, "specials"))-
+                              unlist(attr(tt, "specials")) -
                                      attr(tt, "response"),
                               keep.response = TRUE)
       }
@@ -171,6 +171,7 @@ design <- function(formula, data, ..., # nolint
       term.labels = term.labels,
       xlevels = xlev,
       x = x, y = y,
+      design.matrix = design.matrix,
       intercept = has_intercept,
       data = data[0, ], ## Empty data.frame to capture structure of data
       specials = specials,
@@ -187,6 +188,7 @@ update.design <- function(object, data = NULL, ...) {
   return(
     design(object$terms,
       data = data,
+      design.matrix = object$design.matrix,
       xlev = object$xlevels,
       intercept = object$intercept,
       specials = object$specials,

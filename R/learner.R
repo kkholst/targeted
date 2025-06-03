@@ -277,7 +277,7 @@ learner <- R6::R6Class("learner", # nolint
     #' @param ... additional arguments to [targeted::design]
     response = function(data, eval = TRUE, ...) {
       if (eval) {
-        return(self$design(data = data, ...)$y)
+        return(self$design(data = data, ..., design.matrix = FALSE)$y)
       }
       if (is.null(private$.formula)) return(NULL)
       newf <- update(private$.formula, ~1)
