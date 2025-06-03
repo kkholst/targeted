@@ -80,6 +80,9 @@ learner <- R6::R6Class("learner", # nolint
     #' @param estimate.args optional arguments to estimate function
     #' @param specials optional specials terms (weights, offset,
     #'  id, subset, ...) passed on to [targeted::design]
+    #' @param formula.keep.specials if TRUE then special terms defined by
+    #' `specials` will be removed from the formula before it is being passed to
+    #' the estimate print.function()
     #' @param intercept (logical) include intercept in design matrix
     initialize = function(formula = NULL,
                           estimate,
@@ -88,6 +91,7 @@ learner <- R6::R6Class("learner", # nolint
                           estimate.args = NULL,
                           info = NULL,
                           specials = c(),
+                          formula.keep.specials = FALSE,
                           intercept = FALSE
                          ) {
       estimate <- add_dots(estimate)
@@ -115,11 +119,26 @@ learner <- R6::R6Class("learner", # nolint
       } else {
         if (fit_formula) { # Formula in arguments of estimation procedure
           private$fitfun <- function(data, ...) {
-            args <- private$update_args(private$estimate.args, ...)
-            args <- c(
-              args, list(formula = private$.formula, data = data)
+            des <- do.call(
+              targeted::design,
+              c(list(formula = private$.formula,
+                     data = data,
+                     design.matrix = FALSE),
+                private$des.args
+                )
             )
-            return(do.call(private$init.estimate, args))
+            args <- private$update_args(private$estimate.args, ...) #
+            form <- private$.formula
+            if (!private$formula.keep.specials) form <- des$formula
+            args <- c(
+              args, list(formula = form, data = data)
+            )
+            if (length(des$specials) > 0) {
+              args <- c(args, des[des$specials])
+            }
+            return(structure(do.call(private$init.estimate, args),
+                             design = summary(des)
+                             ))
           }
         } else {
           #  Formula automatically processed into design matrix & response
@@ -140,7 +159,7 @@ learner <- R6::R6Class("learner", # nolint
           }
         }
         private$predfun <- function(object, data, ...) {
-          if (fit_formula || no_formula) {
+          if (no_formula) {
             predict_args_call <- private$update_args(predict.args, ...)
             args <- c(list(object, newdata = data), predict_args_call)
           } else {
@@ -151,15 +170,19 @@ learner <- R6::R6Class("learner", # nolint
             }
             predict_args_call <- predict.args
             predict_args_call[names(args)] <- args
-
+            newdata <- data
+            if (!fit_formula) {
+              newdata <- model.matrix(des)
+            }
             args <- c(list(object,
-              newdata = model.matrix(des)
+              newdata = newdata
             ), predict_args_call)
           }
           return(do.call(private$init.predict, args))
         }
       }
       private$.formula <- formula
+      private$formula.keep.specials <- formula.keep.specials
       self$info <- info
       private$init <- list(
         estimate.args = estimate.args,
@@ -247,7 +270,6 @@ learner <- R6::R6Class("learner", # nolint
       return(obj)
     },
 
-
     #' @description
     #' Extract response from data
     #' @param eval when FALSE return the untransformed outcome
@@ -303,6 +325,10 @@ learner <- R6::R6Class("learner", # nolint
     # @field .formula Model formula object // uses dot as a pre-fix to allow
     # using formula as an active binding
     .formula = NULL,
+    # @field formula.keep.specials if TRUE then special terms defined by
+    # `specials` will be removed from the formula before it is being passed to
+    # the estimate print.function()
+    formula.keep.specials = NULL,
     # @field init Information on the initialized model
     init = NULL,
     # When x$clone(deep=TRUE) is called, the deep_clone gets invoked once for
