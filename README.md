@@ -51,12 +51,10 @@ progressr::handlers(global=TRUE)
 
 To illustrate some of the functionality of the `targeted` package we
 simulate some data from the following model
-$$Y = \exp\{-(W_1 - 1)^2 - (W_2 - 1)^2)\} -
-2\exp\{-(W_1+1)^2 - (W_2+1)^2\}A +
-\epsilon$$ with independent measurement error
-$\epsilon\sim\mathcal{N}(0,1)$, and with treatment variable
-$A \sim Bernoulli(\text{expit}\{-1+W_1\})$ and independent covariates
-$W_1, W_2\sim\mathcal{N}(0,1/2)$.
+$$Y = \exp\{-(W_1 - 1)^2 - (W_2 - 1)^2)\} - 2\exp\{-(W_1+1)^2 - (W_2+1)^2\}A + \epsilon$$
+with independent measurement error $\epsilon\sim\mathcal{N}(0,1)$,
+treatment variable $A \sim Bernoulli(\text{expit}\{-1+W_1\})$ and
+independent covariates $W_1, W_2\sim\mathcal{N}(0,1/2)$.
 
 ``` r
 library("targeted")
@@ -121,7 +119,7 @@ lr
 #> 
 #> Estimate arguments: family=<function> 
 #> Predict arguments:   
-#> Formula: y ~ (w1 + w2) * a <environment: 0x1106170c8>
+#> Formula: y ~ (w1 + w2) * a <environment: 0x117fa6260>
 ```
 
 To fit the model to the data we use the `estimate` method
@@ -205,7 +203,7 @@ sl
 #> 
 #> Estimate arguments: learners=<list>, nfolds=10, meta.learner=<function>, model.score=<function> 
 #> Predict arguments:   
-#> Formula: y ~ (w1 + w2) * a <environment: 0x15cf956c8> 
+#> Formula: y ~ (w1 + w2) * a <environment: 0x10417ce60> 
 #> ─────────────────────────────────────
 #>         score     weight
 #> glm 0.5499084 0.03290729
@@ -245,14 +243,12 @@ $$E[Y I(A=a)/P(A=a|W)] = E[Y(a)].$$
 This suggests estimators based on outcome regression ($g$-computation)
 or inverse probability weighting. More generally, under the above
 assumption we can constructor a *one-step* estimator from the *Efficient
-Influence Function* combining these two $$
-E\left[\frac{I(A=a)}{\Pi_a(W)}(Y-Q(W,A)) + Q(W,a)\right].
-$$ In practice, this requires plugin estimates of both the outcome
-model, $Q(W,A) :=
-E(Y\mid A, W)$, and of the treatment propensity model
-$\Pi_a(W) := P(A=a\mid
-W)$. The corresponding estimator is consistent even if just one of the
-two nuisance models is correctly specified.
+Influence Function* combining these two
+$$ E\left[\frac{I(A=a)}{\Pi_a(W)}(Y-Q(W,A)) + Q(W,a)\right].$$  
+In practice, this requires plugin estimates of both the outcome model,
+$Q(W,A) := E(Y\mid A, W)$, and of the treatment propensity model
+$\Pi_a(W) := P(A=a\mid W)$. The corresponding estimator is consistent
+even if just one of the two nuisance models is correctly specified.
 
 First we specify the propensity model
 
@@ -260,8 +256,8 @@ First we specify the propensity model
 prmod <- learner_glm(a ~ w1 + w2, family=binomial)
 ```
 
-We will reuse one of the outcome models from the previous Section, and
-can now use the `cate` function to estimate the treatment effect
+We will reuse one of the outcome models from the previous section, and
+use the `cate` function to estimate the treatment effect
 
 ``` r
 a <- cate(response.model = lr_rf, propensity.model = prmod, data = d, nfolds = 5)
@@ -280,14 +276,14 @@ the difference of those, the average treatment effect, given as the term
 Here we use the `nfolds=5` argument to use 5-fold *cross-fitting* to
 guarantee that the estimates converges weakly to a Gaussian distribution
 even though that the estimated influence function based on plugin
-estimates from the Random Forest does not ncessarily lie in a
+estimates from the Random Forest does not necessarily lie in a
 $P$-Donsker class.
 
 # Project organization
 
 We use the `dev` branch for development and the `main` branch for stable
-releases, which currently follow a frequency of about 4 weeks. All
-releases follow [semantic versioning](https://semver.org/), are
+releases. All releases follow [semantic
+versioning](https://semver.org/), are
 [tagged](https://github.com/kkholst/targeted/tags) and notable changes
 are reported in
 [NEWS.md](https://github.com/kkholst/targeted/blob/main/NEWS.md).
