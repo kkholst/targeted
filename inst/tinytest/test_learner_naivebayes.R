@@ -52,6 +52,6 @@ d$x <- factor(d$x1>0)
 lr <- learner_naivebayes(yb ~ x)
 lr$estimate(d)
 dd <- data.table(d)[,.(.N),by=.(yb,x)]
-lr2 <- learner_naivebayes(yb ~ x + weights(N))
+lr2 <- learner_naivebayes(yb ~ x + weights(N), learner.args=list(specials="weights"))
 lr2$estimate(dd)
 expect_equal(lr$predict(dd), lr2$predict(dd))
