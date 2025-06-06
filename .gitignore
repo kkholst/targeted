@@ -4,6 +4,10 @@ pkgdown
 man/figures/logo.*
 docs
 inst/doc
+inst/man
+inst/README.md
+inst/README.rmarkdown
+inst/README.html
 *_files
 *_cache
 vignettes/*.html
