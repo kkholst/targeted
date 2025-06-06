@@ -114,13 +114,15 @@ situations this is rarely required.
 It is often necessary to consider a range of models with different
 hyper-parameters and to facilitate this we can use the `learner_expand_grid`
 function
-```{r learner_expand_grid} lrs <- learner_expand_grid( learner_xgboost,
-list(formula = Sepal.Length ~ ., eta = c(0.2, 0.5, 0.3)) ) lrs
+```{r learner_expand_grid}
+lrs <- learner_expand_grid( learner_xgboost,
+                            list(formula = Sepal.Length ~ .,
+                                eta = c(0.2, 0.5, 0.3)) )
+lrs
 ```
 
-The list of
-models can then serve as inputs for `predictor_sl` or for assessing the
-generalization error of the model across different hyper-parameters with the
+The list of models can then serve as inputs for `predictor_sl` or for assessing
+the generalization error of the model across different hyper-parameters with the
 `cv` method.
 
 # Usage
@@ -325,18 +327,17 @@ the specified `estimate.args` and passed on to the defined estimate function (i.
 
 ## Specials in formula
 
-Certain learner functions allow for specifying special terms in the formula. As
-an example we consider the aggregated data-set where we consider only the
-response variable, treatment, and sex.
-
+Certain learner functions allow for specifying special terms in the formula. For
+example, let’s consider an aggregated dataset that includes only the response
+variable, treatment, and sex:
 ```{r naivebayes_aggregate_data}
 library("data.table")
 dd <- data.table(pbc)[!is.na(trt), .(.N), by=.(y,trt,sex)]
 print(dd)
 ```
 
-Here we fit a Naive Bayes classifier using the `weights` special term to specify
-the frequency weights to be used in the estimation
+Next, we fit a Naive Bayes classifier using the `weights` special term to specify
+the frequency weights for the estimation
 ```{r naivevbayes}
 lr <- learner_naivebayes(y ~ trt + sex + weights(N))
 lr$estimate(dd)
@@ -348,9 +349,11 @@ Here `weights.numeric` is simply the identity function
 targeted:::weights.numeric
 ```
 
-To illustrate how to define a custom learner with
-
-```{r defineg}
+To illustrate how to define a custom learner that utilizes special
+terms, consider the following example where we introduce a `strata` term. In
+this case, we introduce an estimation method that fits a linear regression model for each
+value of the strata variable, as well as a corresponding prediction method
+```{r eststrata}
 est <- function(formula, data, strata, ...)
   lapply(levels(strata), \(s) lm(formula, data[which(strata==s),]))
 
@@ -362,8 +365,21 @@ pred <- function(object, newdata, strata, ...) {
   }
   return(res)
 }
+```
 
-lr <- learner$new(y ~  + strata(a),
-            estimate=est, predict=pred, specials = "strata")
-lr$estimate(d)
+The new learner is now defined by including the argument `specials
+= "strata", which ensures that the strata variable is correctly passed to both
+the estimate and predict functions
+```{r lr_strata}
+lr <- learner$new(y ~ sex + strata(trt),
+                  estimate=est, predict=pred, specials = "strata")
+des <- lr$design(head(pbc))
+des
+des$strata
+```
+
+```{r lr_strata_est}
+lr$estimate(pbc)
+lr
+lr$predict(head(pbc))
 ```
