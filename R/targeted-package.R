@@ -11,7 +11,7 @@
 #' and relative risks (Richardson et al. (2017)
 #' <doi:10.1080/01621459.2016.1192546>), assumption lean inference for
 #' generalized linear model parameters (Vansteelandt et al. (2022)
-#' <doi:10.1111/rssb.12504>). Methods for targeted and semiparametric inference.
+#' <doi:10.1111/rssb.12504>).
 #'
 #' @name targeted-package
 #' @import Rcpp methods
