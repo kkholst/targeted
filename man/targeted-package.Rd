@@ -7,16 +7,6 @@
 \title{targeted: Targeted Inference}
 \description{
 Various methods for targeted and semiparametric inference including augmented inverse probability weighted (AIPW) estimators for missing data and causal inference (Bang and Robins (2005) \doi{10.1111/j.1541-0420.2005.00377.x}), variable importance and conditional average treatment effects (CATE) (van der Laan (2006) \doi{10.2202/1557-4679.1008}), estimators for risk differences and relative risks (Richardson et al. (2017) \doi{10.1080/01621459.2016.1192546}), assumption lean inference for generalized linear model parameters (Vansteelandt et al. (2022) \doi{10.1111/rssb.12504}).
-
-Various methods for targeted and semiparametric inference including augmented
-inverse probability weighted (AIPW) estimators for missing data and causal
-inference (Bang and Robins (2005) \url{doi:10.1111/j.1541-0420.2005.00377.x}),
-variable importance and conditional average treatment effects (CATE) (van der
-Laan (2006) \url{doi:10.2202/1557-4679.1008}), estimators for risk differences
-and relative risks (Richardson et al. (2017)
-\url{doi:10.1080/01621459.2016.1192546}), assumption lean inference for
-generalized linear model parameters (Vansteelandt et al. (2022)
-\url{doi:10.1111/rssb.12504}). Methods for targeted and semiparametric inference.
 }
 \examples{
 \dontrun{
