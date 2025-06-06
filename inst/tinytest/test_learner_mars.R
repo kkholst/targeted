@@ -18,7 +18,6 @@ simcount <- function(n = 5e2) {
 }
 dcount <- simcount()
 
-
 test_learner_mars <- function() {
   fit_ref <- earth::earth(y ~ x1 + x2, degree = 2, data = d, nfold = 3)
   lr <- learner_mars(y ~ x1 + x2, degree = 2, nfold = 3)

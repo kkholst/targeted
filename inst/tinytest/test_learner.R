@@ -112,9 +112,11 @@ test_estimate <- function() {
   # argument is passed correctly on to fitfun upon initialization + offset
   # during method call
   m4 <- learner$new(
-    estimate = glm.fit, estimate.args = list(family = poisson())
+                  estimate = glm.fit, estimate.args = list(family = poisson()),
+                  specials = "offset"
   )
-  .design <- design(y ~ x + offset(log(w)), ddata_count, intercept = TRUE)
+  .design <- design(y ~ x + offset(log(w)), ddata_count,
+                    intercept = TRUE, specials = "offset")
   m4$estimate(.design$x, .design$y, offset = .design$offset)
   expect_equal(coef(fit), coef(m4$fit))
 }
@@ -197,6 +199,11 @@ test_update <- function() {
   lr$update(y ~ x1)
   lr$estimate(ddata)
 
+  # formula can be accessed via active binding
+  expect_equal(lr$formula, y ~ x1)
+  # error occurs when trying to assign value to active binding
+  expect_error(lr$formula <- NULL, pattern = "unused argument")
+
   fit_ref <- glm(y ~ x1, data = ddata)
   expect_equal(coef(lr$fit), coef(fit_ref))
 
@@ -205,6 +212,7 @@ test_update <- function() {
   lr$estimate(ddata)
   fit_ref <- glm(y ~ x1 + x2, data = ddata)
   expect_equal(coef(lr$fit), coef(fit_ref))
+
 }
 test_update()
 
@@ -269,3 +277,57 @@ test_ml_model <- function() {
   expect_equal(coef(lr$fit), coef(ml$fit))
 }
 test_ml_model()
+
+test_specials <- function() {
+  ## Here we test 'specials'
+  n <- 200
+  x <- rnorm(n)
+  a <- rbinom(n, 1, 0.5)
+  z <- rbinom(n, 1, 0.5)
+  y <- x*a - (1-a)*x + rnorm(n)
+  d <- data.frame(y,a,z,x)
+
+  est <- function(x, y, strata=factor(1), ...) {
+    res <- c()
+    for (i in levels(strata)) {
+      idx <- which(strata == i)
+      beta <- lm.fit(x=x[idx, , drop=FALSE],
+                     y=y[idx])$coefficient
+      res <- rbind(res, beta)
+    }
+    return(res)
+  }
+  lr <- learner$new(info="strata-learner",
+                  y ~ x*z + strata(a),
+                  intercept = TRUE,
+                  specials = "strata",
+                  estimate=est)
+  lr$estimate(d)
+  lr$fit
+  expect_equivalent(dim(lr$fit), c(2,4))
+
+  ## Check that the formula.keep.specials argument work as expected
+  est <- function(formula, data, strata, ...) {
+    res <- c()
+    for (i in levels(strata)) {
+      idx <- which(strata == i)
+      res <- c(res, list(lm(formula, data=data[idx,])))
+    }
+    names(res) <- levels(strata)
+    return(res)
+  }
+  lr <- learner$new(y ~ x*z + strata(a),
+                    specials = "strata",
+                    formula.keep.specials = FALSE,
+                    estimate=est)
+  lr$estimate(d)
+  expect_true(length(lr$fit) == 2L)
+  expect_true(inherits(lr$fit[[1]], "lm"))
+  expect_true(inherits(lr$fit[[2]], "lm"))
+  f <- formula(lr$fit[[1]])
+  # strata in original formula
+  expect_true(grepl("strata", as.character(lr$formula)[3]))
+  # but not in fitted model formula
+  expect_true(!grepl("strata", as.character(f)[3]))
+}
+test_specials()

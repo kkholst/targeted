@@ -66,11 +66,6 @@ learner <- R6::R6Class("learner", # nolint
   public = list(
     #' @field info Optional information/name of the model
     info = NULL,
-    #' @field formula Formula specifying response and design matrix
-    formula = NULL,
-    #' @field estimate.args optional arguments to fitting function specified
-    #' during initialization
-    estimate.args = NULL,
 
     #' @description
     #' Create a new prediction model object
@@ -85,6 +80,9 @@ learner <- R6::R6Class("learner", # nolint
     #' @param estimate.args optional arguments to estimate function
     #' @param specials optional specials terms (weights, offset,
     #'  id, subset, ...) passed on to [targeted::design]
+    #' @param formula.keep.specials if TRUE then special terms defined by
+    #' `specials` will be removed from the formula before it is being passed to
+    #' the estimate print.function()
     #' @param intercept (logical) include intercept in design matrix
     initialize = function(formula = NULL,
                           estimate,
@@ -93,6 +91,7 @@ learner <- R6::R6Class("learner", # nolint
                           estimate.args = NULL,
                           info = NULL,
                           specials = c(),
+                          formula.keep.specials = FALSE,
                           intercept = FALSE
                          ) {
       estimate <- add_dots(estimate)
@@ -103,14 +102,14 @@ learner <- R6::R6Class("learner", # nolint
       private$init.estimate <- estimate
       private$init.predict <- predict
 
-      self$estimate.args <- estimate.args
+      private$estimate.args <- estimate.args
       no_formula <- is.null(formula)
       if (!no_formula && is.character(formula) || is.function(formula)) {
         no_formula <- TRUE
       }
       if (no_formula) {
         private$fitfun <- function(...) {
-          args <- private$update_args(self$estimate.args, ...)
+          args <- private$update_args(private$estimate.args, ...)
           return(do.call(private$init.estimate, args))
         }
         private$predfun <- function(...) {
@@ -120,20 +119,35 @@ learner <- R6::R6Class("learner", # nolint
       } else {
         if (fit_formula) { # Formula in arguments of estimation procedure
           private$fitfun <- function(data, ...) {
-            args <- private$update_args(self$estimate.args, ...)
-            args <- c(
-              args, list(formula = self$formula, data = data)
+            des <- do.call(
+              targeted::design,
+              c(list(formula = private$.formula,
+                     data = data,
+                     design.matrix = FALSE),
+                private$des.args
+                )
             )
-            return(do.call(private$init.estimate, args))
+            args <- private$update_args(private$estimate.args, ...) #
+            form <- private$.formula
+            if (!private$formula.keep.specials) form <- des$formula
+            args <- c(
+              args, list(formula = form, data = data)
+            )
+            if (length(des$specials) > 0) {
+              args <- c(args, des[des$specials])
+            }
+            return(structure(do.call(private$init.estimate, args),
+                             design = summary(des)
+                             ))
           }
         } else {
           #  Formula automatically processed into design matrix & response
           private$fitfun <- function(data, ...) {
             xx <- do.call(
               targeted::design,
-              c(list(formula = self$formula, data = data), private$des.args)
+              c(list(formula = private$.formula, data = data), private$des.args)
             )
-            args <- private$update_args(self$estimate.args, ...)
+            args <- private$update_args(private$estimate.args, ...)
             args <- c(list(x = xx$x, y = xx$y), args)
 
             if (length(xx$specials) > 0) {
@@ -145,7 +159,7 @@ learner <- R6::R6Class("learner", # nolint
           }
         }
         private$predfun <- function(object, data, ...) {
-          if (fit_formula || no_formula) {
+          if (no_formula) {
             predict_args_call <- private$update_args(predict.args, ...)
             args <- c(list(object, newdata = data), predict_args_call)
           } else {
@@ -156,15 +170,19 @@ learner <- R6::R6Class("learner", # nolint
             }
             predict_args_call <- predict.args
             predict_args_call[names(args)] <- args
-
+            newdata <- data
+            if (!fit_formula) {
+              newdata <- model.matrix(des)
+            }
             args <- c(list(object,
-              newdata = model.matrix(des)
+              newdata = newdata
             ), predict_args_call)
           }
           return(do.call(private$init.predict, args))
         }
       }
-      self$formula <- formula
+      private$.formula <- formula
+      private$formula.keep.specials <- formula.keep.specials
       self$info <- info
       private$init <- list(
         estimate.args = estimate.args,
@@ -206,10 +224,10 @@ learner <- R6::R6Class("learner", # nolint
         if (grepl("~", formula)) {
           formula <- as.formula(formula)
         } else {
-          formula <- reformulate(as.character(self$formula)[3], formula)
+          formula <- reformulate(as.character(private$.formula)[3], formula)
         }
       }
-      self$formula <- formula
+      private$.formula <- formula
       environment(private$fitfun)$formula <- formula
       environment(private$fitfun)$self <- self
       return(invisible(formula))
@@ -246,12 +264,11 @@ learner <- R6::R6Class("learner", # nolint
     #' print(lr_sum)
     summary = function() {
       obj <- structure(
-        c(list(formula = self$formula, info = self$info), private$init),
+        c(list(formula = private$.formula, info = self$info), private$init),
         class = "summarized_learner"
       )
       return(obj)
     },
-
 
     #' @description
     #' Extract response from data
@@ -260,10 +277,10 @@ learner <- R6::R6Class("learner", # nolint
     #' @param ... additional arguments to [targeted::design]
     response = function(data, eval = TRUE, ...) {
       if (eval) {
-        return(self$design(data = data, ...)$y)
+        return(self$design(data = data, ..., design.matrix = FALSE)$y)
       }
-      if (is.null(self$formula)) return(NULL)
-      newf <- update(self$formula, ~1)
+      if (is.null(private$.formula)) return(NULL)
+      newf <- update(private$.formula, ~1)
       return(data[, all.vars(newf), drop = TRUE])
     },
 
@@ -273,23 +290,28 @@ learner <- R6::R6Class("learner", # nolint
     design = function(data, ...) {
       args <- c(private$des.args, list(data = data))
       args[...names()] <- list(...)
-      return(do.call(design, c(list(self$formula), args)))
+      return(do.call(design, c(list(private$.formula), args)))
     },
 
     #' @description
     #' Get options
     #' @param arg name of option to get value of
     opt = function(arg) {
-      return(self$estimate.args[[arg]])
+      return(private$estimate.args[[arg]])
     }
   ),
   active = list(
-    #' @field fit Active binding returning estimated model object
-    fit = function() private$fitted
+    #' @field fit Return estimated model object.
+    fit = function() private$fitted,
+    #' @field formula Return model formula. Use [learner$update()][learner] to
+    #' update the formula.
+    formula = function() private$.formula
   ),
   private = list(
     # @field des.args Arguments for targeted::design
     des.args = NULL,
+    # @field estimate.args Arguments for estimate method
+    estimate.args = NULL,
     # @field init.estimate Original estimate method supplied at initialization
     init.estimate = NULL,
     # @field init.predict Original predict method supplied at initialization
@@ -300,6 +322,13 @@ learner <- R6::R6Class("learner", # nolint
     fitfun = NULL,
     # @field fitted Fitted model object
     fitted = NULL,
+    # @field .formula Model formula object // uses dot as a pre-fix to allow
+    # using formula as an active binding
+    .formula = NULL,
+    # @field formula.keep.specials if TRUE then special terms defined by
+    # `specials` will be removed from the formula before it is being passed to
+    # the estimate print.function()
+    formula.keep.specials = NULL,
     # @field init Information on the initialized model
     init = NULL,
     # When x$clone(deep=TRUE) is called, the deep_clone gets invoked once for
@@ -364,13 +393,9 @@ format_fit_predict_args <- function(args) {
   return(paste0(names(args), "=", args, collapse =", "))
 }
 
-learner_print <- function(self, private) {
-  .ruler <- function(x, n, unicode = "\u2500") {
-    rule <- paste0(rep(unicode, n), collapse = "")
-    cat(paste0(rule, x, rule, "\n"))
-  }
 
-  .ruler(" learner object ", 10)
+learner_print <- function(self, private) {
+  cat_ruler(" learner object ", 10)
 
   if (!is.null(self$info)) {
     cat(self$info, "\n\n")
@@ -382,14 +407,15 @@ learner_print <- function(self, private) {
     "\nPredict arguments:",
     format_fit_predict_args(private$init$predict.args),
     "\nFormula:",
-    capture.output(print(self$formula)),
+    capture.output(print(private$.formula)),
     "\n"
   )
 
   if (!is.null(private$fitted)) {
-    .ruler("\u2500", 18)
+    cat_ruler("\u2500", 18)
     fit <- self$fit
-    if (!is.null(fit$call)) fit$call <- substitute()
+    attr(fit, "design") <- NULL
+    if (!is.atomic(fit) && !is.null(fit$call)) fit$call <- substitute()
     cat(capture.output(print(fit)), sep ="\n")
   }
 
@@ -398,12 +424,7 @@ learner_print <- function(self, private) {
 
 #' @export
 print.summarized_learner <- function(x, ...) {
-    .ruler <- function(x, n, unicode = "\u2500") {
-    rule <- paste0(rep(unicode, n), collapse = "")
-    cat(paste0(rule, x, rule, "\n"))
-  }
-
-  .ruler(" learner object ", 10)
+  cat_ruler(" learner object ", 10)
 
   if (!is.null(x$info)) {
     cat(x$info, "\n\n")

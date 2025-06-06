@@ -67,3 +67,8 @@ list2str <- function(x) {
 
 #' @export
 weights.numeric <- function(object, ...) object
+
+cat_ruler <- function(x, n, unicode = "\u2500") {
+  rule <- paste0(rep(unicode, n), collapse = "")
+  cat(paste0(rule, x, rule, "\n"))
+}
