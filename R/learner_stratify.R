@@ -11,6 +11,8 @@ print.learner.list <- function(x, ...) {
 }
 
 #' @export
+#' @inherit survival::strata
+#' @seealso [survival::strata]
 stratify <- survival::strata
 
 #' @title Construct stratified learner
