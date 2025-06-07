@@ -1,5 +1,5 @@
 Identical <- function(x, y = 1, tolerance = .Machine$double.eps^0.5) {
-  Mod(x - y) < tolerance
+  return(Mod(x - y) < tolerance)
 }
 
 rd2pr <- function(rd, op) {
@@ -13,7 +13,7 @@ rd2pr <- function(rd, op) {
     p0[op1] <- 0.5 * (1 - rd[op1])
   }
   p1 <- p0 + rd
-  cbind(p0, p1)
+  return(cbind(p0, p1))
 }
 
 rr2pr <- function(rr, op) {
@@ -27,7 +27,7 @@ rr2pr <- function(rr, op) {
     p0[op1] <- 1 / (1 + rr[op1])
   }
   p1 <- p0 * rr
-  cbind(p0, p1)
+  return(cbind(p0, p1))
 }
 
 add_offset <- function(formula, offset) {
@@ -63,4 +63,12 @@ list2str <- function(x) {
     if (i<n) res <- paste0(res, ", ")
   }
   return(res)
+}
+
+#' @export
+weights.numeric <- function(object, ...) object
+
+cat_ruler <- function(x, n, unicode = "\u2500") {
+  rule <- paste0(rep(unicode, n), collapse = "")
+  cat(paste0(rule, x, rule, "\n"))
 }

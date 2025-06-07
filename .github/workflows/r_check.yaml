@@ -3,8 +3,10 @@ name: r-cmd-check
 
 on:
   pull_request:
-    branches: [dev]
-    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main, dev]
+    # types: [opened, synchronize, reopened, ready_for_review]
+
+name: r-cmd-check
 
 jobs:
   r-cmd-check:
@@ -50,6 +52,12 @@ jobs:
           upload-snapshots: true
           # args: 'c("--ignore-vignettes")'
           # build_args: 'c("--no-build-vignettes")'
+
+      - name: slow tests
+        if: success() && contains('refs/heads/main', github.ref)
+        run: |
+          Rscript -e 'remotes::install_github("kkholst/targeted")'
+          make slowtest
 
       - name: Webpage deployment
         if: success() && contains('refs/heads/main', github.ref)

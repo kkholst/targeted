@@ -17,7 +17,7 @@ alean(
 )
 }
 \arguments{
-\item{response_model}{formula or ml_model object (formula => glm)}
+\item{response_model}{formula or \link{learner} object (formula => glm)}
 
 \item{exposure_model}{model for the exposure}
 
@@ -31,7 +31,8 @@ alean(
 
 \item{silent}{supress all messages and progressbars}
 
-\item{mc.cores}{mc.cores Optional number of cores. parallel::mcmapply used instead of future}
+\item{mc.cores}{mc.cores Optional number of cores.
+parallel::mcmapply used instead of future}
 
 \item{...}{additional arguments to future.apply::future_mapply}
 }
@@ -54,26 +55,28 @@ The \code{response_model} is the model for \eqn{E(Y|A,W)}, and
 \examples{
 
 sim1 <- function(n, family=gaussian(), ...) {
-   m <- lvm() |>
-     distribution(~ y, binomial.lvm()) |>
-     regression('a', value=function(l) l) |>
-     regression('y', value=function(a,l) a + l)
+   m <- lava::lvm() |>
+     lava::distribution(~y, value=lava::binomial.lvm()) |>
+     lava::regression('a', value=function(l) l) |>
+     lava::regression('y', value=function(a,l) a + l)
      if (family$family=="binomial")
-        distribution(m, ~a) <- binomial.lvm()
-   sim(m, n)
+        lava::distribution(m, ~a) <- lava::binomial.lvm()
+   lava::sim(m, n)
 }
 
 library(splines)
 f <- binomial()
 d <- sim1(1e4, family=f)
-e <- alean(response_model=ML(y ~ a + bs(l, df=3), family=binomial),
-           exposure_model=ML(a ~ bs(l, df=3), family=f),
-           data=d,
-           link = "logit", mc.cores=1, nfolds=1)
+e <- alean(
+ response_model=learner_glm(y ~ a + bs(l, df=3), family=binomial),
+ exposure_model=learner_glm(a ~ bs(l, df=3), family=f),
+ data=d,
+ link = "logit", mc.cores=1, nfolds=1
+)
 e
 
-e <- alean(response_model=ML(y ~ a + l, family=binomial),
-           exposure_model=ML(a ~ l),
+e <- alean(response_model=learner_glm(y ~ a + l, family=binomial),
+           exposure_model=learner_glm(a ~ l),
            data=d,
            link = "logit", mc.cores=1, nfolds=1)
 e

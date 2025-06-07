@@ -21,7 +21,8 @@ Define compiled code for ordinary differential equation.
 }
 \details{
 The model (\code{code}) should be specified as the body of of C++ function.
-The following variables are defined bye default (see the argument \code{pname})
+The following variables are defined bye default
+(see the argument \code{pname})
 \describe{
 \item{dy}{Vector with derivatives, i.e. the rhs of the ODE (the result).}
 \item{x}{Vector with the first element being the time, and the following
@@ -30,7 +31,8 @@ elements additional exogenous input variables,}
 \item{p}{Parameter vector}
 }
 \eqn{y'(t) = f_{p}(x(t), y(t))}
-All variables are treated as Armadillo (http://arma.sourceforge.net/) vectors/matrices.
+All variables are treated as Armadillo (http://arma.sourceforge.net/)
+vectors/matrices.
 
 As an example consider the \emph{Lorenz Equations}
 \eqn{\frac{dx_{t}}{dt} = \sigma(y_{t}-x_{t})}
@@ -44,11 +46,12 @@ We can specify this model as
 \code{dy <- specify_ode(ode)}
 
 As an example of model with exogenous inputs consider the following ODE:
-\eqn{y'(t) = \beta_{0} + \beta_{1}y(t) + \beta_{2}y(t)x(t) + \beta_{3}x(t)\cdot t}
+\eqn{y'(t) = \beta_{0} + \beta_{1}y(t) +
+\beta_{2}y(t)x(t) + \beta_{3}x(t)\cdot t}
 This could be specified as
 \code{mod <- 'double t = x(0);
               dy = p(0) + p(1)*y + p(2)*x(1)*y + p(3)*x(1)*t;'}
-\code{dy <- specify_ode(mod)}##'
+\code{dy <- specify_ode(mod)}#'
 }
 \seealso{
 solve_ode

@@ -2,11 +2,9 @@ name: target library (cpp) tests
 
 on:
   pull_request:
-    branches: [dev]
-    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main, dev]
 
 jobs:
-
   cpp_library:
     runs-on: ubuntu-latest
     steps:

@@ -13,7 +13,7 @@ ate_if_fold <- function(fold, data,
   X <- deval
   if (stratify) {
     idx <- which(dtrain[, treatment]==level)
-    tmp <- response.model$estimate(dtrain[idx, , drop=FALSE])
+    tmp <- response.model$estimate(dtrain[idx, , drop=FALSE]) # nolint
   } else {
     tmp <- response.model$estimate(dtrain)
     X[, treatment] <- level
@@ -30,7 +30,7 @@ ate_if_fold <- function(fold, data,
   if (inherits(pmod, "glm")) {
     ## Term from estimating propensity model / treatment probabilities that does
     ## not go to zero in probability unless Q-model is correct
-    pX <- propensity.model$design(deval, intercept = TRUE)
+    pX <- propensity.model$design(deval, intercept = TRUE)$x
     dlinkinv <- pmod$family$mu.eta
     adj <- -part1 / pr * dlinkinv(pmod$family$linkfun(pr))
     for (i in seq_len(ncol(pX))) {
@@ -44,7 +44,7 @@ ate_if_fold <- function(fold, data,
 cate_fold1 <- function(fold, data, score, cate_des) {
   y <- score[fold]
   x <- update(cate_des, data[fold, , drop = FALSE])$x
-  lm.fit(y = y, x = x)$coef
+  return(lm.fit(y = y, x = x)$coef)
 }
 
 #' Conditional Average Treatment Effect estimation with cross-fitting.
@@ -56,20 +56,23 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #' \beta)} denote a parametric working model, then the target parameter is the
 #' mean-squared error \deqn{\beta(P) = \operatorname{argmin}_{\beta}
 #' E_{P}[\{\Psi_{1}(P)(V)-\Psi_{0}(P)(V)\} - m(V; \beta)]^{2}}
+#' @inheritParams deprecated_argument_names
 #' @title Conditional Average Treatment Effect estimation
-#' @param response.model formula or ml_model object (formula => glm)
-#' @param propensity.model formula or ml_model object (formula => glm)
+#' @param response.model formula or learner object (formula => learner_glm)
+#' @param ... additional arguments to future.apply::future_mapply
+#' @param propensity.model formula or learner object (formula => learner_glm)
 #' @param cate.model formula specifying regression design for conditional
 #'   average treatment effects
 #' @param contrast treatment contrast (default 1 vs 0)
 #' @param data data.frame
 #' @param nfolds Number of folds
 #' @param rep Number of replications of cross-fitting procedure
-#' @param silent supress all messages and progressbars
+#' @param silent suppress all messages and progressbars
 #' @param stratify If TRUE the response.model will be stratified by treatment
 #' @param mc.cores mc.cores Optional number of cores. parallel::mcmapply used
 #'   instead of future
-#' @param ... additional arguments to future.apply::future_mapply
+#' @param second.order Add seconder order term to IF to handle misspecification
+#'   of outcome models
 #' @return cate.targeted object
 #' @author Klaus Kähler Holst, Andreas Nordland
 #' @references Mark J. van der Laan (2006) Statistical Inference for Variable
@@ -78,7 +81,7 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #' sim1 <- function(n=1000, ...) {
 #'   w1 <- rnorm(n)
 #'   w2 <- rnorm(n)
-#'   a <- rbinom(n, 1, expit(-1 + w1))
+#'   a <- rbinom(n, 1, plogis(-1 + w1))
 #'   y <- cos(w1) + w2*a + 0.2*w2^2 + a + rnorm(n)
 #'   data.frame(y, a, w1, w2)
 #' }
@@ -97,19 +100,19 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #'
 #' \dontrun{ ## superlearner example
 #' mod1 <- list(
-#'    glm=predictor_glm(y~w1+w2),
-#'    gam=predictor_gam(y~s(w1) + s(w2))
+#'    glm = learner_glm(y~w1+w2),
+#'    gam = learner_gam(y~s(w1) + s(w2))
 #' )
-#' s1 <- predictor_sl(mod1, nfolds=5)
+#' s1 <- learner_sl(mod1, nfolds=5)
 #' cate(cate.model=~1,
 #'      response.model=s1,
-#'      propensity.model=predictor_glm(a~w1+w2, family=binomial),
+#'      propensity.model=learner_glm(a~w1+w2, family=binomial),
 #'      data=d,
 #'      stratify=TRUE)
 #' }
 #'
 #' @export
-cate <- function(response.model,
+cate <- function(response.model, # nolint
                  propensity.model,
                  cate.model = ~1,
                  contrast = c(1, 0),
@@ -119,23 +122,50 @@ cate <- function(response.model,
                  silent = FALSE,
                  stratify = FALSE,
                  mc.cores = NULL,
+                 second.order = TRUE,
+                 response_model = deprecated,
+                 cate_model = deprecated,
+                 propensity_model = deprecated,
+                 treatment = deprecated,
                  ...) {
 
   cl <- match.call()
-  dots <- list(...)
   n <- nrow(data)
 
-  if ("treatment" %in% names(dots)) { ## Backward compatibility
-    if (!is.null(cate.model)) {
+  dvers <- "1.0.0"
+  if (!missing(response_model)) {
+    deprecate_arg_warn("response_model", "response.model", "cate", dvers)
+    response.model <- response_model
+  }
+
+  if (!missing(propensity_model)) {
+    deprecate_arg_warn("propensity_model", "propensity.model", "cate", dvers)
+    propensity.model <- propensity_model
+  }
+
+  if (!missing(cate_model)) {
+    deprecate_arg_warn("cate_model", "cate.model", "cate", dvers)
+    cate.model <- cate_model
+  }
+
+  if (!missing(treatment)) { ## Backward compatibility
+    # ~1 is current default value of cate.model
+    if (!isTRUE(all.equal(cate.model, ~1))) {
       stop(
         "Calling `cate` with both the obsolete 'treatment'",
         " and the new 'cate.model' argument"
       )
     }
-    cate.model <- dots$treatment
-    if (missing(propensity.model)) {
-      propensity.model <- lava::getoutcome(cate.model)
-    }
+    # only used to inform user that treatment argument is deprecated
+    deprecate_arg_warn("treatment", "cate.model", "cate", dvers)
+    cate.model <- treatment
+  }
+
+  if (missing(propensity.model)) {
+    propensity.model <- lava::getoutcome(cate.model)
+  }
+  if (length(propensity.model) == 0) {
+    stop("Empty `propensity.model`")
   }
 
   if (is.character(propensity.model)) {
@@ -144,14 +174,14 @@ cate <- function(response.model,
 
   desA <- design(cate.model, data, intercept=TRUE, rm_envir=FALSE)
   if (inherits(response.model, "formula")) {
-    response.model <- ML(response.model)
+    response.model <- learner_glm(response.model)
   }
 
   if (length(contrast) > 2) {
     stop("Expected contrast vector of length 1 or 2.")
   }
   propensity_outcome <- function(treatment_level) {
-    paste0("I(", treatment_var, "==", treatment_level, ")")
+    return(paste0("I(", treatment_var, "==", treatment_level, ")"))
   }
   if (missing(propensity.model)) {
     response_var <- lava::getoutcome(response.model$formula, data=data)
@@ -159,10 +189,10 @@ cate <- function(response.model,
       paste0(" . - ", response_var),
       response=propensity_outcome(contrast[1])
     )
-    propensity.model <- ML(newf, family=binomial)
+    propensity.model <- learner_glm(newf, family=binomial)
   }
   if (inherits(propensity.model, "formula")) {
-    propensity.model <- ML(propensity.model, family = binomial)
+    propensity.model <- learner_glm(propensity.model, family = binomial)
   }
   treatment_var <- lava::getoutcome(propensity.model$formula)
 
@@ -213,8 +243,7 @@ cate <- function(response.model,
         treatment_var = treatment_var,
         data = data, folds = folds,
         stratify = stratify
-      ),
-      ...
+      ), ...
     )
     if (!is.null(mc.cores)) {
       myargs$mc.cores <- ifelse(rep == 1, mc.cores, 1)
@@ -250,9 +279,7 @@ cate <- function(response.model,
         list(unlist(lapply(ii, function(x) val[[x]]$pmod))[idx])
       )
       if (!is.null(val[[1]]$adj)) {
-        A <- lapply(ii, function(x) {
-          val[[x]]$adj
-        })
+        A <- lapply(ii, function(x) val[[x]]$adj)
         adj <- c(adj, list(Reduce(rbind, A)[idx, , drop = FALSE]))
       }
     }
@@ -260,7 +287,7 @@ cate <- function(response.model,
     names(qval) <- contrast
     names(pval) <- contrast
     if (length(adj) > 0) names(adj) <- contrast
-    list(scores = scores, adj = adj, qval = qval, pval = pval)
+    return(list(scores = scores, adj = adj, qval = qval, pval = pval))
   }
 
   if (rep > 1) {
@@ -272,7 +299,7 @@ cate <- function(response.model,
     }
     if (!is.null(mc.cores)) {
       val <- parallel::mclapply(1:rep, f,
-        mc.cores = mc.cores, ...
+        mc.cores = mc.cores
       )
     } else {
       myargs <- list(X=1:rep, FUN=f, ...)
@@ -337,7 +364,7 @@ cate <- function(response.model,
   IF0 <- c()
   for (i in seq_along(est0)) {
     newIF <- scores[[i]] - est0[i]
-    if (length(adj) > 0) {
+    if (length(adj) > 0 && second.order) {
       pmod <- propensity.model$clone(deep = TRUE)
       newf <- reformulate(
         as.character(pmod$formula)[[3]],
@@ -372,4 +399,3 @@ cate <- function(response.model,
   class(res) <- c("cate.targeted", "targeted")
   return(res)
 }
-

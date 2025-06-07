@@ -11,23 +11,24 @@ estimate_truncatedscore(
   mod.a,
   mod.event,
   time,
-  cause = 1,
+  cause = NULL,
   cens.code = 0,
   naive = FALSE,
+  control = list(),
   ...
 )
 }
 \arguments{
 \item{data}{(data.frame)}
 
-\item{mod.y}{(formula or ml_model) Model for clinical outcome given T>time.
+\item{mod.y}{(formula or learner) Model for clinical outcome given T>time.
 Using a formula specifies a glm with an identity link (see example).}
 
-\item{mod.r}{(formula or ml_model) Model for missing data mechanism for
+\item{mod.r}{(formula or learner) Model for missing data mechanism for
 clinical outcome at T=time. Using a formula specifies a glm with a log
 link.}
 
-\item{mod.a}{(formula or ml_model) Treatment model (in RCT should just be 'a
+\item{mod.a}{(formula or learner) Treatment model (in RCT should just be 'a
 ~ 1'). Using a formula specifies a glm with a log link.}
 
 \item{mod.event}{(formula) Model for time-to-event process
@@ -43,6 +44,8 @@ statement).}
 \item{naive}{(logical) If TRUE, the unadjusted estimates ignoring baseline
 covariates is returned as the attribute 'naive'.}
 
+\item{control}{(list) optimization routine parameters.}
+
 \item{...}{Additional arguments passed to \link[mets:binregATE]{mets::binregATE}.}
 }
 \value{
@@ -57,15 +60,15 @@ The following are our two target parameters
 \deqn{P(T<t,\epsilon=1|A=1)- P(T<t,\epsilon=1|A=0)}
 }
 \examples{
-\dontrun{
-mod1 <- predictor_glm(y ~ a * (x1 + x2))
-mod2 <- predictor_glm(r ~ a * (x1 + x2), family = binomial)
+data(truncatedscore)
+mod1 <- learner_glm(y ~ a * (x1 + x2))
+mod2 <- learner_glm(r ~ a * (x1 + x2), family = binomial)
 a <- estimate_truncatedscore(
-  data = dat,
+  data = truncatedscore,
   mod.y = mod1,
   mod.r = mod2,
   mod.a = a ~ 1,
-  mod.event = mets::Event(time, status) ~ a * (x1+x2),
+  mod.event = mets::Event(time, status) ~ x1+x2,
   time = 2
 )
 s <- summary(a, noninf.t = -0.1)
@@ -73,15 +76,14 @@ print(s)
 parameter(s)
 
 # the above is equivalent to
-a <- estimate_truncatedscore(
-  data = dat,
-  mod.y = y ~ a * (x1 + x2),
-  mod.r = r ~ a * (x1 + x2),
-  mod.a = a ~ 1,
-  mod.event = mets::Event(time, status) ~ a * (x1+x2),
-  time = 2
-)
-}
+# a <- estimate_truncatedscore(
+#   data = truncatedscore,
+#   mod.y = y ~ a * (x1 + x2),
+#   mod.r = r ~ a * (x1 + x2),
+#   mod.a = a ~ 1,
+#   mod.event = mets::Event(time, status) ~ x1+x2,
+#   time = 2
+# )
 }
 \author{
 Klaus Kähler Holst

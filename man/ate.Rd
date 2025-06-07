@@ -2,7 +2,7 @@
 % Please edit documentation in R/ate.R
 \name{ate}
 \alias{ate}
-\title{AIPW (doubly-robust) estimator for Average Treatement Effect}
+\title{AIPW (doubly-robust) estimator for Average Treatment Effect}
 \usage{
 ate(
   formula,
@@ -50,7 +50,7 @@ Augmented Inverse Probability Weighting estimator for the Average (Causal)
 Treatment Effect. All nuisance models are here parametric (glm). For a more
 general approach see the \code{cate} implementation. In this implementation
 the standard errors are correct even when the nuisance models are
-misspecified (the influence curve is calculated including the term coming
+mis-specified (the influence curve is calculated including the term coming
 from the parametric nuisance models). The estimate is consistent if either
 the propensity model or the outcome model / Q-model is correctly specified.
 }
@@ -66,17 +66,17 @@ Or using the nuisance (and propensity argument):
 \code{ate(y~a, nuisance=~x+z, ...)}
 }
 \examples{
-m <- lvm(y ~ a+x, a~x)
-distribution(m, ~y) <- binomial.lvm()
-m <- ordinal(m, K=4, ~a)
-transform(m, ~a) <- factor
-d <- sim(m, 1e3, seed=1)
-(a <- ate(y~a|a*x|x, data=d))
-## ate(y~a, nuisance=~a*x, propensity=~x, ...)
+m <- lava::lvm(y ~ a+x, a~x) |>
+     lava::distribution(~y, value = lava::binomial.lvm()) |>
+     lava::ordinal(K=4, ~a) |>
+     transform(~a, value = factor)
+d <- lava::sim(m, 1e3, seed=1)
+# (a <- ate(y~a|a*x|x, data=d))
+(a <- ate(y~a, nuisance=~a*x, propensity=~x, data = d))
 
 # Comparison with randomized experiment
-m0 <- cancel(m, a~x)
-lm(y~a-1, sim(m0,2e4))
+m0 <- lava::cancel(m, a~x)
+lm(y~a-1, lava::sim(m0,2e4))
 
 # Choosing a different contrast for the association measures
 summary(a, contrast=c(2,4))

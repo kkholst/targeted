@@ -7,10 +7,14 @@
 design(
   formula,
   data,
-  intercept = FALSE,
-  rm_envir = FALSE,
   ...,
-  specials = c("weights", "offset")
+  intercept = FALSE,
+  response = FALSE,
+  rm_envir = FALSE,
+  specials = NULL,
+  specials.call = NULL,
+  xlev = NULL,
+  design.matrix = TRUE
 )
 }
 \arguments{
@@ -18,15 +22,26 @@ design(
 
 \item{data}{data.frame}
 
-\item{intercept}{If FALSE (default) an intercept is not included}
+\item{...}{additional arguments (e.g, specials such weights, offsets, ...)}
+
+\item{intercept}{(logical) If FALSE an intercept is not included in the
+design matrix}
+
+\item{response}{(logical) if FALSE the response variable is dropped}
 
 \item{rm_envir}{Remove environment}
 
-\item{...}{additional arguments (e.g, specials such weights, offsets,
-subset)}
-
 \item{specials}{character vector specifying functions in the formula that
 should be marked as special in the \link{terms} object}
+
+\item{specials.call}{(call) specials optionally defined as a call-type}
+
+\item{xlev}{a named list of character vectors giving the full set of levels
+to be assumed for each factor}
+
+\item{design.matrix}{(logical) if FALSE then only response and specials are
+returned. Otherwise, the design.matrix \code{x} is als part of the returned
+object.}
 }
 \value{
 An object of class 'design'
