@@ -29,9 +29,8 @@ a new factor, whose levels are all possible combinations of the factors
 supplied as arguments.
 }
 \description{
-This is a special function used in the context of the Cox survival model. 
-It identifies stratification variables when they appear on the right hand 
-side of a formula.
+This is a special function that identifies stratification
+variables when they appear on the right hand side of a formula.
 }
 \details{
 When used outside of a \code{coxph} formula the result of the function
@@ -39,13 +38,11 @@ is essentially identical to the \code{interaction} function,
 though the labels from \code{strata} are often more verbose.
 }
 \examples{
-a <- factor(rep(1:3,4), labels=c("low", "medium", "high"))
-b <- factor(rep(1:4,3))
-levels(strata(b))
-levels(strata(a,b,shortlabel=TRUE))
-
-coxph(Surv(futime, fustat) ~ age + strata(rx), data=ovarian)
+a <- factor(rep(1:3, 4), labels=c("low", "medium", "high"))
+b <- factor(rep(1:4, 3))
+levels(stratify(b))
+levels(stratify(a, b, shortlabel=TRUE))
 }
 \seealso{
-\link[survival:strata]{survival::strata}
+\link[survival:strata]{survival::strata}, \link{learner_stratify}, \link{interaction}
 }

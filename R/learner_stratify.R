@@ -1,7 +1,7 @@
 #' @export
 print.learner.list <- function(x, ...) {
   for (i in seq_len(length(x))) {
-    fit <- x[[i]]$fit
+         fit <- x[[i]]$fit
     attr(fit, c("design")) <- NULL
     if (!is.atomic(fit) && !is.null(fit$call)) fit$call <- substitute()
     cat("\u2500\u2500\u2500 ", names(x)[[i]], "\n", sep="")
@@ -12,7 +12,14 @@ print.learner.list <- function(x, ...) {
 
 #' @export
 #' @inherit survival::strata
-#' @seealso [survival::strata]
+#' @seealso [survival::strata], [learner_stratify], [interaction]
+#' @examples
+#' a <- factor(rep(1:3, 4), labels=c("low", "medium", "high"))
+#' b <- factor(rep(1:4, 3))
+#' levels(stratify(b))
+#' levels(stratify(a, b, shortlabel=TRUE))
+#' @description This is a special function that identifies stratification
+#'   variables when they appear on the right hand side of a formula.
 stratify <- survival::strata
 
 #' @title Construct stratified learner
