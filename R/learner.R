@@ -301,8 +301,12 @@ learner <- R6::R6Class("learner", # nolint
     }
   ),
   active = list(
+    clear = function() invisible(private$fitted <- NULL),
     #' @field fit Return estimated model object.
-    fit = function() private$fitted,
+    fit = function(value) {
+      if (missing(value)) return(private$fitted)
+      else private$fitted <- NULL
+    },
     #' @field formula Return model formula. Use [learner$update()][learner] to
     #' update the formula.
     formula = function() private$.formula

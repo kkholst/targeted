@@ -1,8 +1,11 @@
-metalearner_nnls <- function(y, pred, method = "nnls") {
+metalearner_nnls <- function(y, pred, method = "nnls", ...) {
   if (NCOL(pred)==1) return(1.0)
+  idx  <- which(apply(pred, 2, \(x) !any(is.na(x))))
+  coefs <- rep(0, ncol(pred))
+  pred <- pred[, idx, drop = FALSE]
   if (method == "nnls") {
     res <- nnls::nnls(A = pred, b = y)
-    coefs <- res$x
+    coefs[idx] <- res$x
   } else {
     res <- glmnet::glmnet(
       y = y, x = pred,
@@ -10,12 +13,20 @@ metalearner_nnls <- function(y, pred, method = "nnls") {
       lambda = 0,
       lower.limits = rep(0, ncol(pred))
     )
-    coefs <- as.vector(coef(res))[-1]
+    coefs[idx] <- as.vector(coef(res))[-1]
   }
   if (any(is.na(coefs))) coefs[is.na(coefs)] <- 0
   if (all(coefs == 0)) coefs[1] <- 1
   return(coefs / sum(coefs))
 }
+
+metalearner_discrete <- function(y, pred, risk, ...) {
+  weights <- rep(0, NCOL(pred))
+  risk[is.na] <- Inf
+  weights[which.min(risk)[1]] <- 1
+  return(weights)
+}
+
 
 get_learner_names <- function(model.list, name.prefix) {
   .names <- names(model.list)
@@ -93,9 +104,26 @@ superlearner <- function(learners,
                          name.prefix = NULL,
                          ...) {
   pred_mod <- function(models, data) {
-    res <- lapply(models, \(x) x$predict(data))
-    return(Reduce(cbind, res))
+    n <- nrow(data)
+    res <- matrix(NA, nrow=n, ncol=length(models))
+    for (i in seq_along(models)) {
+      if (!is.null(models[[i]]$fit)) {
+        res[, i] <- tryCatch(
+          models[[i]]$predict(data), error=function(x) rep(NA, n)
+        )
+      }
+    }
+    return(res)
   }
+  est_mod <- function(models, data) {
+    for (i in seq_along(models)) {
+      v <- tryCatch(models[[i]]$estimate(data), error=function(x) NULL)
+      if (is.null(v)) {
+        models[[i]]$fit <- NULL
+      }
+    }
+  }
+
   if (is.character(model.score)) {
     model.score <- get(model.score)
   }
@@ -120,7 +148,7 @@ superlearner <- function(learners,
     test <- data[fold, , drop = FALSE]
     train <- data[setdiff(1:n, fold), , drop = FALSE]
     mod <- lapply(learners, \(x) x$clone(deep = TRUE))
-    lapply(mod, \(x) x$estimate(train))
+    est_mod(mod, train)
     pred.test <- pred_mod(mod, test)
     if (!silent) pb()
     return(list(pred = pred.test, fold = fold))
@@ -156,14 +184,24 @@ superlearner <- function(learners,
   }
   mod <- lapply(learners, \(x) x$clone())
   names(mod) <- model.names
-  ## Meta-learner
+  # Meta-learner
   y <- learners[[1]]$response(data)
   risk <- apply(pred, 2, \(x) model.score(y, x))
+  # Learners with failed predictions
+  idx  <- which(apply(pred, 2, \(x) any(is.na(x) | is.nan(x))))
+  if (length(risk) > 0) risk[idx] <- Inf
   names(risk) <- model.names
-  w <- meta.learner(y = y, pred = pred)
+  if (is.character(meta.learner)) {
+    if (tolower(meta.learner[1]) == "discrete") {
+      meta.learner <- metalearner_discrete
+    } else {
+      stop("unrecognized meta-learner")
+    }
+  }
+  w <- meta.learner(y = y, pred = pred, risk = risk)
   names(w) <- model.names
   ## Full predictions
-  lapply(mod, \(x) x$estimate(data))
+  est_mod(mod, data)
   res <- list(
     model.score = risk,
     weights = w,
@@ -185,7 +223,6 @@ print.superlearner <- function(x, ...) {
   return(print(res))
 }
 
-
 #' @title Extract ensemble weights
 #' @param object (superlearner) Fitted model.
 #' @param ... Not used.
@@ -201,7 +238,6 @@ weights.superlearner <- function(object, ...) {
 score.superlearner <- function(x, ...) {
   return(x$model.score)
 }
-
 
 #' @title Predict Method for superlearner Fits
 #' @description Obtains predictions for ensemble model or individual learners.
