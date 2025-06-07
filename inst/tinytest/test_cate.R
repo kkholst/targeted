@@ -2,7 +2,7 @@ library("tinytest")
 
 n <- 1000
 x <- rnorm(n)
-a <- rbinom(n, 1, expit(1 + x))
+a <- rbinom(n, 1, lava::expit(1 + x))
 y <- 1 + a + x - a * x + rnorm(n)
 d <- data.frame(y = y, a = a, x = x)
 
@@ -14,7 +14,7 @@ true_estimate1 <- function(q1) {
   ic0 <- ic0 - est
   dlinkinv <- g$family$mu.eta
   b <- a / pi^2 * (q1 - y)
-  D <- dlinkinv(logit(pi)) * b
+  D <- dlinkinv(lava::logit(pi)) * b
   E1 <- colMeans(cbind(D, D * x))
   ic1 <- IC(g) %*% E1
   ic <- ic0 + ic1

@@ -36,17 +36,17 @@
 #' @author Klaus K. Holst
 #' @aliases ate
 #' @examples
-#' m <- lvm(y ~ a+x, a~x)
-#' distribution(m, ~y) <- binomial.lvm()
-#' m <- ordinal(m, K=4, ~a)
-#' transform(m, ~a) <- factor
-#' d <- sim(m, 1e3, seed=1)
-#' (a <- ate(y~a|a*x|x, data=d))
-#' ## ate(y~a, nuisance=~a*x, propensity=~x, ...)
+#' m <- lava::lvm(y ~ a+x, a~x) |>
+#'      lava::distribution(~y, value = lava::binomial.lvm()) |>
+#'      lava::ordinal(K=4, ~a) |>
+#'      transform(~a, value = factor)
+#' d <- lava::sim(m, 1e3, seed=1)
+#' # (a <- ate(y~a|a*x|x, data=d))
+#' (a <- ate(y~a, nuisance=~a*x, propensity=~x, data = d))
 #'
 #' # Comparison with randomized experiment
-#' m0 <- cancel(m, a~x)
-#' lm(y~a-1, sim(m0,2e4))
+#' m0 <- lava::cancel(m, a~x)
+#' lm(y~a-1, lava::sim(m0,2e4))
 #'
 #' # Choosing a different contrast for the association measures
 #' summary(a, contrast=c(2,4))

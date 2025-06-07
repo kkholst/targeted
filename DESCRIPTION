@@ -26,9 +26,7 @@ Description: Various methods for targeted and semiparametric inference including
 	     <doi:10.1080/01621459.2016.1192546>), assumption lean inference for generalized
          linear model parameters (Vansteelandt et al. (2022) <doi:10.1111/rssb.12504>).
 Depends:
-    R (>= 4.1),
-    lava (>= 1.8.0),
-    survival
+    R (>= 4.1)
 Imports:
     R6,
     Rcpp (>= 1.0.0),
@@ -36,12 +34,14 @@ Imports:
     cli,
     data.table,
     future.apply,
+    lava (>= 1.8.0),
     methods,
     mets,
     nnls,
     optimx,
     progressr,
-    rlang
+    rlang,
+    survival
 Suggests:
     SuperLearner (>= 2.0-28),
     cmprsk,
