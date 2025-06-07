@@ -46,7 +46,7 @@ large datasets. Smallest value allowable is \code{nfolds=3}}
 \item{learner.args}{(list) Additional arguments to
 \link[=learner]{learner$new()}.}
 
-\item{...}{Other arguments that can be passed to \code{glmnet}}
+\item{...}{Other arguments that can be passed to glmnet, for example \code{alpha}, \code{nlambda}, etc. See \code{glmnet} for details.}
 }
 \value{
 \link{learner} object.
