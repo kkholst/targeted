@@ -1,10 +1,6 @@
 #' @keywords internal
 "_PACKAGE"
 
-#' Targeted inference
-#'
-#' Methods for targeted and semiparametric inference.
-#'
 #' @name targeted-package
 #' @import Rcpp methods
 #' @importFrom graphics plot points abline lines
@@ -20,8 +16,23 @@
 #' @importFrom optimx optimx
 #' @importFrom data.table data.table is.data.table dcast :=
 #' @importFrom R6 R6Class
-#' @importFrom survival survfit
+#' @importFrom survival survfit Surv strata
 #' @importFrom utils tail head capture.output getFromNamespace
+#' @references
+#' Bang & Robins (2005) Doubly Robust Estimation in Missing Data and
+#' Causal Inference Models, Biometrics.
+#'
+#' Vansteelandt & Dukes (2022) Assumption-lean inference for
+#' generalised linear model parameters, Journal of the Royal Statistical
+#' Society: Series B (Statistical Methodology).
+#'
+#' Thomas S. Richardson, James M. Robins & Linbo Wang (2017) On Modeling and
+#' Estimation for the Relative Risk and Risk Difference, Journal of the American
+#' Statistical Association.
+#'
+#' Mark J. van der Laan (2006) Statistical Inference for Variable Importance,
+#' The International Journal of Biostatistics.
+#'
 #' @useDynLib targeted, .registration=TRUE
 #' @aliases targeted-package targeted
 #' @author Klaus K. Holst (Maintainer) <klaus@@holst.it>
@@ -70,3 +81,25 @@ NULL
 #' @examples
 #' data(truncatedscore)
 NULL
+
+
+##' @export
+lava::IC
+
+##' @export
+lava::sim
+
+##' @export
+lava::score
+
+##' @export
+lava::parameter
+
+##' @export
+lava::estimate
+
+##' @export
+survival::strata
+
+##' @export
+survival::Surv

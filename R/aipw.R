@@ -12,10 +12,10 @@
 #' @param formula design specifying the OLS estimator with outcome given by the
 #'   EIF
 #' @examples
-#' m <- lvm(y ~ x+z, r ~ x)
-#' distribution(m,~ r) <- binomial.lvm()
-#' transform(m, y0~r+y) <- function(x) { x[x[,1]==0,2] <- NA; x[,2] }
-#' d <- sim(m,1e3,seed=1)
+#' m <- lava::lvm(y ~ x+z, r ~ x) |>
+#'      lava::distribution(~ r, value = lava::binomial.lvm()) |>
+#'      transform(y0~r+y, value = \(x) { x[x[,1]==0,2] <- NA; x[,2] })
+#' d <- lava::sim(m,1e3,seed=1)
 #'
 #' aipw(y0 ~ x, data=d)
 aipw <- function(response_model,

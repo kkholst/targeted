@@ -78,7 +78,7 @@ E_{P}[\{\Psi_{1}(P)(V)-\Psi_{0}(P)(V)\} - m(V; \beta)]^{2}}
 sim1 <- function(n=1000, ...) {
   w1 <- rnorm(n)
   w2 <- rnorm(n)
-  a <- rbinom(n, 1, expit(-1 + w1))
+  a <- rbinom(n, 1, plogis(-1 + w1))
   y <- cos(w1) + w2*a + 0.2*w2^2 + a + rnorm(n)
   data.frame(y, a, w1, w2)
 }

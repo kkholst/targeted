@@ -1,4 +1,4 @@
-# Contributing to target
+# Contributing to targeted
 
 First off, thanks for taking the time to contribute! ❤️
 
@@ -99,7 +99,7 @@ Longer documentation are located in the `vignettes` directory in R-markdown form
 
 ## C++ development
 
-The **target** library follows the (Google's C++ style guide)[http://google.github.io/styleguide/cppguide.html>].
+The **targeted** library follows the (Google's C++ style guide)[http://google.github.io/styleguide/cppguide.html>].
 
 The code should be checked using the ``cppcheck`` static code
 analyzer and ``cclint`` (which may installed from PyPi using ``pip3
@@ -112,7 +112,7 @@ The C++ code is documented using (Doxygen)
 
 ### Unit tests
 
-C++ tests are located in the subdirectory `./src/target/tests`
+C++ tests are located in the sub-directory `./src/target/tests`
 using [doctest](https://github.com/doctest/doctest), and can be executed with
 `make test` from the `src/targeto` directory.
 

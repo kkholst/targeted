@@ -5,7 +5,7 @@ test_softmax <- function() {
   expect_equivalent(softmax(X, ref = FALSE), cbind(.5, .5))
 
   X <- rnorm(10)
-  expect_equivalent(softmax(X), expit(X))
+  expect_equivalent(softmax(X), lava::expit(X))
 
   X <- cbind(1, 2, 3)
   expect_equivalent(softmax(X), exp(cbind(0, X)) / sum(exp(c(0, X))))

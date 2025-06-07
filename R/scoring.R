@@ -101,7 +101,7 @@ multiclass_scoring1 <- # nolint
 #' @examples
 #' data(iris)
 #' set.seed(1)
-#' dat <- csplit(iris,2)
+#' dat <- lava::csplit(iris,2)
 #' g1 <- naivebayes(Species ~ Sepal.Width + Petal.Length, data=dat[[1]])
 #' g2 <- naivebayes(Species ~ Sepal.Width, data=dat[[1]])
 #' pr1 <- predict(g1, newdata=dat[[2]], wide=TRUE)
