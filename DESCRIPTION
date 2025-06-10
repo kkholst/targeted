@@ -53,6 +53,7 @@ Suggests:
     hal9001,
     knitr,
     mgcv,
+    polle,
     randomForestSRC,
     ranger,
     riskRegression,
