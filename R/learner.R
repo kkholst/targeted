@@ -354,8 +354,8 @@ learner <- R6::R6Class("learner", # nolint
         return(value)
       }
     },
-    #' Utility to update list of arguments with ellipsis
-    #' @param args list or NULL
+    # Utility to update list of arguments with ellipsis
+    # @param args list or NULL
     update_args = function(args, ...) {
       if (is.null(args)) args <- list() # because predict.args = NULL by default
       dots <- list(...)

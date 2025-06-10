@@ -117,7 +117,7 @@ test_cate_polle <- function() {
   a <- cate(response.model = learner_glm(y ~ a*x),
             propensity.model = a ~ 1, data=d, mc.cores=1)
 
-  pd <- polle::policy_data(data = data.table(d),
+  pd <- polle::policy_data(data = data.table::data.table(d),
                            action = "a",
                            covariates = c("x"),
                            utility = "y")
