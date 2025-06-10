@@ -191,7 +191,7 @@ test_cate_polle <- function() {
 test_cate_polle()
 
 
-test_cate_ate() {
+test_cate_ate <- function() {
   set.seed(1)
   n <- 1000
   x <- rnorm(n)
