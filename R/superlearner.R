@@ -47,34 +47,36 @@ get_learner_names <- function(model.list, name.prefix) {
 
 #' @export
 #' @title Superlearner (stacked/ensemble learner)
-#' @description This function creates a predictor object (class [learner])
-#'   from a list of existing [learner] objects. When estimating this model a
-#'   stacked prediction will be created by weighting together the predictions
-#'   of each of the initial learners The weights are learned using
-#'   cross-validation.
+#' @description This function creates a predictor object (class [learner]) from
+#'   a list of existing [learner] objects. When estimating this model a stacked
+#'   prediction will be created by weighting together the predictions of each of
+#'   the initial learners The weights are learned using cross-validation.
 #' @param data (data.frame) Data containing the response variable and
-#' covariates.
+#'   covariates.
 #' @param learners (list) List of [learner] objects (i.e. [learner_glm])
 #' @param nfolds (integer) Number of folds to use in cross-validation to
-#' estimate the ensemble weights.
-#' @param meta.learner (function) Algorithm to learn the ensemble
-#' weights (default non-negative least squares). Must be a function of the
-#' response (nx1 vector), `y`, and the predictions (nxp matrix), `pred`, with
-#' p being the number of learners.
+#'   estimate the ensemble weights.
+#' @param meta.learner (function) Algorithm to learn the ensemble weights
+#'   (default non-negative least squares). Must be a function of the response
+#'   (nx1 vector), `y`, and the predictions (nxp matrix), `pred`, with p being
+#'   the number of learners. Alternatively, this can be set to the character
+#'   value "discrete", in which case the Discrete Super-Learner is applied where
+#'   the model with the lowest risk (model-score) is given weight 1 and all
+#'   other learners weight 0.
 #' @param model.score (function) Model scoring method (see [learner])
 #' @param name.prefix (character) Prefix used to name learner objects in
-#' `learners` without names. If NULL, then obtain the name from the info field
-#' of a learner.
+#'   `learners` without names. If NULL, then obtain the name from the info field
+#'   of a learner.
 #' @param mc.cores (integer) If not NULL, then [parallel::mcmapply] is used with
-#' `mc.cores` number of cores for parallelization instead of the
-#' [future.apply::future_lapply] package. Parallelization is disabled with
-#' `mc.cores = 1`.
+#'   `mc.cores` number of cores for parallelization instead of the
+#'   [future.apply::future_lapply] package. Parallelization is disabled with
+#'   `mc.cores = 1`.
 #' @param silent (logical) Suppress all messages and progressbars
 #' @param future.seed (logical or integer) Argument passed on to
-#' [future.apply::future_lapply]. If TRUE, then [.Random.seed] is used if it
-#' holds a L'Ecuyer-CMRG RNG seed, otherwise one is created randomly.
+#'   [future.apply::future_lapply]. If TRUE, then [.Random.seed] is used if it
+#'   holds a L'Ecuyer-CMRG RNG seed, otherwise one is created randomly.
 #' @param ... Additional arguments to [parallel::mclapply] or
-#' [future.apply::future_lapply].
+#'   [future.apply::future_lapply].
 #' @references Luedtke & van der Laan (2016) Super-Learning of an Optimal
 #'   Dynamic Treatment Rule, The International Journal of Biostatistics.
 #' @seealso [predict.superlearner] [weights.superlearner] [score.superlearner]

@@ -26,10 +26,13 @@ covariates.}
 \item{nfolds}{(integer) Number of folds to use in cross-validation to
 estimate the ensemble weights.}
 
-\item{meta.learner}{(function) Algorithm to learn the ensemble
-weights (default non-negative least squares). Must be a function of the
-response (nx1 vector), \code{y}, and the predictions (nxp matrix), \code{pred}, with
-p being the number of learners.}
+\item{meta.learner}{(function) Algorithm to learn the ensemble weights
+(default non-negative least squares). Must be a function of the response
+(nx1 vector), \code{y}, and the predictions (nxp matrix), \code{pred}, with p being
+the number of learners. Alternatively, this can be set to the character
+value "discrete", in which case the Discrete Super-Learner is applied where
+the model with the lowest risk (model-score) is given weight 1 and all
+other learners weight 0.}
 
 \item{model.score}{(function) Model scoring method (see \link{learner})}
 
@@ -52,11 +55,10 @@ of a learner.}
 \link[future.apply:future_lapply]{future.apply::future_lapply}.}
 }
 \description{
-This function creates a predictor object (class \link{learner})
-from a list of existing \link{learner} objects. When estimating this model a
-stacked prediction will be created by weighting together the predictions
-of each of the initial learners The weights are learned using
-cross-validation.
+This function creates a predictor object (class \link{learner}) from
+a list of existing \link{learner} objects. When estimating this model a stacked
+prediction will be created by weighting together the predictions of each of
+the initial learners The weights are learned using cross-validation.
 }
 \examples{
 sim1 <- function(n = 5e2) {
