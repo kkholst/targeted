@@ -144,7 +144,7 @@ test_cate_polle <- function() {
   a <- cate(response.model = learner_glm(yb ~ a*x, family=binomial),
             propensity.model = a ~ 1, data=d, mc.cores=1)
 
-  pd <- polle::policy_data(data = data.table(d),
+  pd <- polle::policy_data(data = data.table::data.table(d),
                            action = "a",
                            covariates = c("x"),
                            utility = "yb")
@@ -171,7 +171,7 @@ test_cate_polle <- function() {
             propensity.model = learner_glm(a ~ x, family=binomial),
             data=d, mc.cores=1)
 
-  pd <- polle::policy_data(data = data.table(d),
+  pd <- polle::policy_data(data = data.table::data.table(d),
                            action = "a",
                            covariates = c("x"),
                            utility = "yb")
