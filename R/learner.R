@@ -443,7 +443,8 @@ print.summarized_learner <- function(x, ...) {
     "\npredict:", paste0(names(formals(x$predict)), collapse = ", "),
     "\npredict.args:",
     format_fit_predict_args(x$predict.args),
-    "\nspecials:", paste(x$specials, collapse = ", ")
+    "\nspecials:", paste(x$specials, collapse = ", "),
+    "\n"
   )
 }
 
