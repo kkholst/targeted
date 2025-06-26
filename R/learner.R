@@ -301,10 +301,11 @@ learner <- R6::R6Class("learner", # nolint
     }
   ),
   active = list(
+    clear = function() invisible(private$fitted <- NULL),
     #' @field fit Return estimated model object.
     fit = function(value) {
       if (missing(value)) return(private$fitted)
-      else private$fitted <- value
+      else private$fitted <- NULL
     },
     #' @field formula Return model formula. Use [learner$update()][learner] to
     #' update the formula.
@@ -444,7 +445,8 @@ print.summarized_learner <- function(x, ...) {
     "\npredict:", paste0(names(formals(x$predict)), collapse = ", "),
     "\npredict.args:",
     format_fit_predict_args(x$predict.args),
-    "\nspecials:", paste(x$specials, collapse = ", ")
+    "\nspecials:", paste(x$specials, collapse = ", "),
+    "\n"
   )
 }
 
