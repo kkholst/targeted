@@ -3,10 +3,11 @@ set.seed(42)
 sim1 <- function(n = 5e2) {
    x1 <- rnorm(n, sd = 2)
    x2 <- rnorm(n)
+   a <- rbinom(n, 1, 0.5)
    lp <- x2*x1 + cos(x1)
    yb <- rbinom(n, 1, lava::expit(lp))
    y <-  lp + rnorm(n, sd = 0.5**.5)
-   return(data.frame(y, yb, x1, x2))
+   return(data.frame(y, yb, x1, x2, a))
 }
 d <- sim1()
 
@@ -54,3 +55,8 @@ lr <- learner_grf(Species ~ ., model = "probability_forest")
 lr$estimate(iris)
 pr <- lr$predict(head(iris))
 expect_equal(dim(pr), c(6, 3))
+
+# outcome with attributes set
+attributes(d$y)$label <- "y"
+lr <- learner_grf(y ~ a)
+lr$estimate(d)

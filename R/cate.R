@@ -7,7 +7,7 @@ ate_if_fold <- function(fold, data,
   } else {
     dtrain <- data[-fold, ]
     deval <- data[fold, ]
- }
+  }
 
   pmod <- propensity.model$estimate(dtrain)
   X <- deval
