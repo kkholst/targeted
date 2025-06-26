@@ -61,7 +61,8 @@ learner_grf <- function(formula,
 
   est <- getFromNamespace(gsub("^grf::", "", model), "grf")
   args$estimate <- function(y, x, ...) {
-    attributes(y) <- NULL
+    atr <- setdiff(names(attributes(y)), "class")
+    if (is.numeric(y) && length(atr) > 0) attributes(y)[atr] <- NULL
     est(X = x, Y = y, ...)
   }
   args$predict <- function(object, newdata, ...) {
