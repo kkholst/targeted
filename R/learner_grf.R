@@ -60,7 +60,10 @@ learner_grf <- function(formula,
   )
 
   est <- getFromNamespace(gsub("^grf::", "", model), "grf")
-  args$estimate <- function(y, x, ...) est(X = x, Y = y, ...)
+  args$estimate <- function(y, x, ...) {
+    attributes(y) <- NULL
+    est(X = x, Y = y, ...)
+  }
   args$predict <- function(object, newdata, ...) {
     pr <- predict(object, newdata, ...)$predictions
     if (class(object)[[1]] == "probability_forest" && NCOL(pr) == 2) {
