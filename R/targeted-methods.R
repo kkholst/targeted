@@ -61,6 +61,26 @@ IC.targeted <- function(x, ...) {
 }
 
 #' @export
+transform.targeted <- function(`_data`, ...) {
+  transform(`_data`$estimate, ...)
+}
+
+##' @export
+labels.targeted <- function(object, str, ...) {
+  labels(object$estimate, labels=str, ...)
+}
+
+##' @export
+parameter.targeted <- function(x, ...) {
+  parameter(x$estimate, ...)
+}
+
+##' @export
+subset.estimate <- function(x, keep, ...) {
+  subset(x$estimate, keep = keep, ...)
+}
+
+#' @export
 logLik.targeted <- function(object, ...) {
   val <- object$logLik
   if (is.null(val)) {
