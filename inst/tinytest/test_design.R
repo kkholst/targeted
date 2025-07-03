@@ -135,10 +135,10 @@ test_design_specials()
 etest_design_specials_factor <- function() {
   strata <- survival::strata
   dat <- transform(ddata, a=rbinom(nrow(ddata), 1, 0.5))
-  dd <- design(y ~ strata(a) + x1, data=dat, specials="strata")
+  des <- design(y ~ strata(a) + x1*x2, data=dat, specials="strata")
 
-  expect_equivalent(des$x, cbind(dd$x1))
-  expect_equivalent(des$strata, ddata$a)
+  expect_equivalent(des$x, cbind(dat$x1))
+  expect_equivalent(as.numeric(des$strata)-1, dat$a)
 
 }
 
