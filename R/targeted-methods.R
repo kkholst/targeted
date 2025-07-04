@@ -76,7 +76,7 @@ parameter.targeted <- function(x, ...) {
 }
 
 ##' @export
-subset.estimate <- function(x, keep, ...) {
+subset.targeted <- function(x, keep, ...) {
   subset(x$estimate, keep = keep, ...)
 }
 

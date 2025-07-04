@@ -11,7 +11,7 @@
 #'   lm.wfit lm.fit glm lm coef vcov model.frame model.matrix na.pass nlminb
 #'   predict dnorm quantile terms weighted.mean runif .getXlevels
 #'   delete.response model.response gaussian formula model.offset reformulate
-#'   drop.terms weights model.extract cov2cor pchisq uniroot sd na.omit
+#'   drop.terms weights model.extract cov2cor pchisq uniroot sd na.omit offset
 #' @importFrom rlang hash call_match
 #' @importFrom optimx optimx
 #' @importFrom data.table data.table is.data.table dcast :=
