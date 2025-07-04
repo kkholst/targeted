@@ -36,3 +36,21 @@ test_learner_stratify <- function() {
   expect_equal(is.na(pr), d$a==1)
 }
 test_learner_stratify()
+
+# test that learner_stratify works with specials in formulas
+test_learner_stratify_specials <- function() {
+  m <- learner_expand_grid(
+    learner_glm,
+    list(
+      formula = y ~ offset(x) + a:x,
+      family=c("gaussian", "gaussian")
+    ),
+    names = "GLM"
+  )
+
+  lapply(m, \(x) x$estimate(d))
+  g <- glm(y ~ offset(x) + a:x, data=d)
+  expect_equal(coef(g), coef(m[[1]]$fit))
+  expect_equal(coef(g), coef(m[[2]]$fit))
+}
+test_learner_stratify_specials()

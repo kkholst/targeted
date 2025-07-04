@@ -1,8 +1,10 @@
 library("data.table")
-library("survival")
 library("mets")
 int_surv <- targeted:::int_surv
 set.seed(42)
+
+Surv <- survival::Surv
+survfit <- survival::survfit
 
 sim_surv_unif <- function(n) {
   id <- 1:n

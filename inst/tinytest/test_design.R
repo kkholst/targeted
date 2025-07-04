@@ -116,8 +116,32 @@ test_design_specials <- function() {
   # test default weight special
   dd <- design(y ~ weights(x1), ddata, specials="weights")
   expect_equal(unname(dd$weights), ddata$x1)
+
+  # specials and additional predictor
+  des <- design(y ~ offset(x1) + x2, specials="offset", data=ddata)
+  expect_equivalent(des$x, cbind(ddata$x2))
+  expect_equivalent(des$offset, ddata$x1)
+  expect_equivalent(des$y, ddata$y)
+  expect_equivalent(update(des, head(ddata))$offset, head(ddata)$x1)
+
+  # irespective of order in formula
+  des <- design(y ~ x2 + offset(x1), specials="offset", data=ddata)
+  expect_equivalent(des$x, cbind(ddata$x2))
+  expect_equivalent(des$offset, ddata$x1)
 }
 test_design_specials()
+
+# specials returning factor
+etest_design_specials_factor <- function() {
+  strata <- survival::strata
+  dat <- transform(ddata, a=rbinom(nrow(ddata), 1, 0.5))
+  des <- design(y ~ strata(a) + x1*x2, data=dat, specials="strata")
+
+  expect_equivalent(des$x, cbind(dat$x1))
+  expect_equivalent(as.numeric(des$strata)-1, dat$a)
+
+}
+
 
 # test behavior of design when formula specifies transformations
 test_design_transformations <- function() {

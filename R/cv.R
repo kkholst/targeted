@@ -296,6 +296,10 @@ cv.default <- function(object,
   return(obj)
 }
 
+
+#' @export
+cv.learner <- function(object, ...) cv(list(object), ...)
+
 summary_cv <- function(x) {
   x0 <- na.omit(x)
   res <- rep(NA, 4)

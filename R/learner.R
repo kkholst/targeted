@@ -301,6 +301,7 @@ learner <- R6::R6Class("learner", # nolint
     }
   ),
   active = list(
+    #' @field clear Remove fitted model from the learner object
     clear = function() invisible(private$fitted <- NULL),
     #' @field fit Return estimated model object.
     fit = function(value) {

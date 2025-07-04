@@ -31,7 +31,7 @@
 #' This could be specified as
 #' \code{mod <- 'double t = x(0);
 #'               dy = p(0) + p(1)*y + p(2)*x(1)*y + p(3)*x(1)*t;'}
-#' \code{dy <- specify_ode(mod)}#'
+#' \code{dy <- specify_ode(mod)}
 #' @title Specify Ordinary Differential Equation (ODE)
 #' @param code string with the body of the function definition (see details)
 #' @param fname Optional name of the exported C++ function
@@ -40,13 +40,15 @@
 #' @author Klaus Kähler Holst
 #' @seealso solve_ode
 #' @examples
-#' ode <- 'dy(0) = p(0)*(y(1)-y(0));
-#'         dy(1) = y(0)*(p(1)-y(2));
-#'         dy(2) = y(0)*y(1)-p(2)*y(2);'
-#' \donttest{  # Reduce test time
-#' dy <- specify_ode(ode)}
+#' ode <- paste0(
+#'   "dy(0) = p(0)*(y(1)-y(0));",
+#'   "dy(1) = y(0)*(p(1)-y(2));",
+#'   "dy(2) = y(0)*y(1)-p(2)*y(2);", collapse="\n"
+#' )
+#' \donttest{ # Reduce test time
+#' dy <- specify_ode(ode)
 #' tt <- seq(0, 100, length.out=2e4)
-#' yy <- solve_ode(f, input=tt, init=c(1, 1, 1), par=c(10, 28, 8/3))
+#' yy <- solve_ode(dy, input=tt, init=c(1, 1, 1), par=c(10, 28, 8/3))
 #' }
 #' @export
 specify_ode <- function(code, fname=NULL, pname=c("dy", "x", "y", "p")) {
