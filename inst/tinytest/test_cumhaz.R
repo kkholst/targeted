@@ -1,5 +1,4 @@
 library("tinytest")
-library("survival")
 library("data.table")
 library("ranger")
 suppressPackageStartupMessages({
@@ -7,6 +6,10 @@ suppressPackageStartupMessages({
   library("randomForestSRC")
 })
 set.seed(42)
+
+Surv <- survival::Surv
+survfit <- survival::survfit
+coxph <- survival::coxph
 
 sim_surv <- function(n, beta, zeta) {
   # covariate W and D
