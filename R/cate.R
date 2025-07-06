@@ -66,10 +66,7 @@ cate_est <- function(y, # response vector
     if (NCOL(scores) > 1) {
       Yhat <- Yhat - scores[, 2]
     }
-    # if (type=="dml1") {
-    #   est1 <- lapply(folds, function(x) cate_fold1(x, data, Y, desA))
-    #   est <- colMeans(Reduce(rbind, est1))
-    # } else
+
     est <- coef(lm(Yhat ~ -1 + X.cate))
     names(est) <- colnames(X.cate)
     V <- X.cate
@@ -114,6 +111,18 @@ cate_est <- function(y, # response vector
     }
     nam <- paste0("E[", colnames(y), "(", colnames(a), ")]")
     names(est0) <- nam
+    if (NCOL(X.cate)==1 && all(X.cate==1)) {
+      # construct IF directly from potential outcomes rather than the
+      # least squares projection above. Thereby we can use the
+      # second order remainder term correction derived above.
+      est <- mean(Yhat)
+      names(est) <- colnames(X.cate)
+      IF <- IF0[, 1]
+      if (NCOL(scores) > 1) {
+        IF <- IF - IF0[, 2]
+      }
+    }
+
     est <- c(est0, est)
     IF <- cbind(IF0, IF)
     return(list(coef = est, IC = IF, scores = scores))
