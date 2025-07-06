@@ -45,13 +45,19 @@ print.summary.targeted <- function(x, ...) {
   print(x$call)
   cat("\n")
   print(x$estimate, ...)
+  cat("\nAverage Treatment Effect:\n")
+  print(x$ate)
 }
 
 #' @export
 summary.targeted <- function(object, ...) {
-  obj <- structure(list(estimate = object$estimate, call = object$call),
-    class = "summary.targeted"
-  )
+  B <- rbind(rep(0, length(coef(object))))
+  B[1:2] <- c(1, -1)
+  obj <- structure(list(
+    estimate = object$estimate,
+    call = object$call,
+    ate = lava::estimate(object$estimate, B)
+  ), class = "summary.targeted")
   return(obj)
 }
 
