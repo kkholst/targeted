@@ -40,8 +40,11 @@ exposure only has two levels)}
 
 \item{labels}{optional treatment labels}
 
-\item{adjust.nuisance}{adjust for uncertainty due to estimation of propensity
+\item{adjust.nuisance}{adjust for uncertainty due to estimation of outcome
 regression model parameters}
+
+\item{adjust.propensity}{adjust for uncertainty due to estimation of
+propensity regression model parameters}
 
 \item{...}{additional arguments to lower level functions}
 }

@@ -20,8 +20,8 @@
 #' @param labels optional treatment labels
 #' @param adjust.nuisance adjust for uncertainty due to estimation of outcome
 #'   regression model parameters
-#' @param adjust.nuisance adjust for uncertainty due to estimation of propensity
-#'   regression model parameters
+#' @param adjust.propensity adjust for uncertainty due to estimation of
+#'   propensity regression model parameters
 #' @param ... additional arguments to lower level functions
 #' @return An object of class '\code{ate.targeted}' is returned. See
 #'   \code{\link{targeted-class}} for more details about this class and its
