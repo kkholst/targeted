@@ -12,6 +12,7 @@ cate(
   data,
   nfolds = 1,
   rep = 1,
+  rep.type = c("nuisance", "average"),
   silent = FALSE,
   stratify = FALSE,
   mc.cores = NULL,
@@ -35,18 +36,22 @@ average treatment effects}
 
 \item{data}{data.frame}
 
-\item{nfolds}{Number of folds}
+\item{nfolds}{number of folds}
 
-\item{rep}{Number of replications of cross-fitting procedure}
+\item{rep}{number of replications of cross-fitting procedure}
+
+\item{rep.type}{repeated cross-fitting applied by averaging nuisance models
+(\code{rep.type="nuisance"}) or by average estimates from each replication
+(\code{rep.type="average"}).}
 
 \item{silent}{suppress all messages and progressbars}
 
-\item{stratify}{If TRUE the response.model will be stratified by treatment}
+\item{stratify}{if TRUE the response.model will be stratified by treatment}
 
-\item{mc.cores}{mc.cores Optional number of cores. parallel::mcmapply used
-instead of future}
+\item{mc.cores}{(optional) number of cores. parallel::mcmapply used instead
+of future}
 
-\item{second.order}{Add seconder order term to IF to handle misspecification
+\item{second.order}{add seconder order term to IF to handle misspecification
 of outcome models}
 
 \item{response_model}{Deprecated. Use response.model instead.}

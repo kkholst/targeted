@@ -44,5 +44,8 @@ aipw <- function(response_model,
       data = data, contrast = 1, stratify = TRUE,
       ...
   )
+  res$coef <- res$coef[-1]
+  est <- estimate(coef=res$coef, IC=IC(res)[, -1, drop=FALSE])
+  res$estimate <- est
   return(res)
 }
