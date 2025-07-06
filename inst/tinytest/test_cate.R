@@ -1,5 +1,6 @@
 library("tinytest")
 
+set.seed(42)
 n <- 1000
 x <- rnorm(n)
 a <- rbinom(n, 1, lava::expit(1 + x))
@@ -223,3 +224,63 @@ test_cate_ate <- function() {
                     vcov(at)["a=0","a=0"], tolerance=1e-2)
 }
 test_cate_ate()
+
+
+tet_cate_crossfit <- function() {
+
+  # repeated cross-fitting TODO
+  ## a <- cate(y ~ a + x,
+  ##           learner_glm(a ~ x, family=binomial),
+  ##           second.order = TRUE,
+  ##           nfolds = 2,
+  ##           rep = 3,
+  ##           rep.type = "average",
+  ##           mc.cores=1,
+  ##           data = d)
+  a <- cate(y ~ a + x,
+             learner_glm(a ~ x, family=binomial),
+             second.order = TRUE,
+             nfolds = 5,
+             rep = 3,
+             data = d)
+}
+
+test_cate_remainder <- function() {
+  # Test seconder order remainder term
+
+  # wrong outcome model
+  b <- ate(
+    y ~ a,
+    nuisance = y ~ a + x,
+    propensity = a ~ x,
+    adjust.nuisance = FALSE,
+    adjust.propensity = TRUE,
+    data = d)
+
+  a <- cate(y ~ a + x,
+            learner_glm(a ~ x, family=binomial),
+            second.order = TRUE,
+            data = d)
+
+  expect_equivalent(coef(b), coef(a)[2:1], tolerance=1e-6)
+  expect_equivalent(vcov(b), vcov(a)[2:1,2:1], tolerance=1e-5)
+
+  # without second order remainder term correction
+  b1 <- ate(
+    y ~ a,
+    nuisance = y ~ a + x,
+    propensity = a ~ x,
+    adjust.nuisance = FALSE,
+    adjust.propensity = FALSE,
+    data = d)
+
+  a1 <- cate(y ~ a + x,
+            learner_glm(a ~ x, family=binomial),
+            second.order = FALSE,
+            data = d)
+
+  expect_equivalent(coef(b1), coef(a1)[2:1], tolerance=1e-6)
+  expect_equivalent(vcov(b1), vcov(a1)[2:1,2:1], tolerance=1e-5)
+
+}
+test_cate_remainder()

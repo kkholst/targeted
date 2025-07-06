@@ -61,6 +61,6 @@ learner_glm <- function(formula, info = "glm", family = gaussian(),
     do.call(stats::predict, args)
   }
   mod <- do.call(learner$new, args)
-
+  class(mod) <- c("learner_glm", class(mod))
   return(mod)
 }

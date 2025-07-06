@@ -63,20 +63,44 @@ design <- function(formula, data, ..., # nolint
     "subset is not an allowed specials argument for targeted::design"
   )
   tt <- terms(formula, data = data, specials = specials)
+  term.labels <- attr(tt, "term.labels") # predictors
 
-  if (!design.matrix) { # only extract specials, response
+  sterm.list <- c()
+  if (length(specials) > 0) {
     des <- attr(tt, "factors")
-    sterm.list <- c()
     for (s in specials) {
       sterm <- rownames(des)[attr(tt, "specials")[[s]]]
       sterm.list <- c(sterm.list, sterm)
     }
+    if (length(sterm.list) > 0) {
+      # create formula without specials
+      if ((nrow(attr(tt, "factors")) - attr(tt, "response")) ==
+          length(sterm.list)) {
+        # only specials on the rhs, remove everything
+        formula <- update(formula, ~1)
+      } else {
+        # remove specials from formula
+        ## sterm.idx <- unlist(attr(tt, "specials")) - attr(tt, "response")
+        # predictors without the specials
+        term.labels <- setdiff(term.labels,
+                               unlist(sterm.list))
+        ## xx <- attr(tt, "term.labels")[-sterm.idx]
+        ## formula <- update(tt, reformulate(xx))
+        formula <- update(tt, reformulate(term.labels))
+      }
+
+      upd <- paste(" ~ . - ", paste(sterm.list, collapse = " - "))
+      formula <- update(formula, upd)
+    }
+  }
+
+  if (!design.matrix) { # only extract specials, response
+    des <- attr(tt, "factors")
     fs <- update(formula, ~1)
     if (length(sterm.list) > 0) {
-      upd <- paste(" ~ . - ", paste(sterm.list, collapse = " - "))
+      # formula with only special-terms
       fs <- reformulate(paste(sterm.list, collapse = " + "))
       fs <- update(formula, fs)
-      formula <- update(formula, upd)
     }
     mf <- model.frame(fs, data=data, ...)
   } else { # also extract design matrix
@@ -98,31 +122,14 @@ design <- function(formula, data, ..., # nolint
     names(dots)[-1] # removing "" at first position when calling dots, which
   ) # is a call object
 
-  term.labels <- attr(tt, "term.labels") # predictors
   specials.list <- c()
   if (length(specials) > 0) {
-    des <- attr(tt, "factors")
-    sterm.list <- c()
-
     for (s in specials) {
       w <- eval(substitute(model.extract2(mf, s), list(s = s)))
       specials.list <- c(specials.list, list(w))
-      sterm <- rownames(des)[attr(tt, "specials")[[s]]]
-      sterm.list <- c(sterm.list, sterm)
     }
     names(specials.list) <- specials
     if (length(sterm.list) > 0) {
-      if ((nrow(attr(tt, "factors")) - attr(tt, "response")) ==
-          length(sterm.list)) {
-        # only specials on the rhs, remove everything
-        formula <- update(formula, ~1)
-      } else {
-        # remove specials from formula
-        formula <- drop.terms(tt,
-                              unlist(attr(tt, "specials")) -
-                                     attr(tt, "response"),
-                              keep.response = TRUE)
-      }
       if (design.matrix) {
         xlev0[sterm.list] <- NULL
         mf <- model.frame(formula,
@@ -130,10 +137,6 @@ design <- function(formula, data, ..., # nolint
                           xlev = xlev0,
                           drop.unused.levels = FALSE
                           )
-        # predictors without the specials
-        term.labels <- setdiff(term.labels,
-                               unlist(sterm.list))
-
       }
     }
   }
