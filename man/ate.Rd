@@ -14,18 +14,20 @@ ate(
   propensity = nuisance,
   all,
   labels = NULL,
+  adjust.nuisance = TRUE,
+  adjust.propensity = TRUE,
   ...
 )
 }
 \arguments{
-\item{formula}{Formula (see details below)}
+\item{formula}{formula (see details below)}
 
 \item{data}{data.frame}
 
 \item{weights}{optional frequency weights}
 
-\item{offset}{optional offset (character or vector). can also be specified
-in the formula.}
+\item{offset}{optional offset (character or vector). can also be specified in
+the formula.}
 
 \item{family}{Exponential family argument for outcome model}
 
@@ -33,12 +35,18 @@ in the formula.}
 
 \item{propensity}{propensity model formula}
 
-\item{all}{If TRUE all standard errors are calculated (default TRUE when
+\item{all}{when TRUE all standard errors are calculated (default TRUE when
 exposure only has two levels)}
 
-\item{labels}{Optional treatment labels}
+\item{labels}{optional treatment labels}
 
-\item{...}{Additional arguments to lower level functions}
+\item{adjust.nuisance}{adjust for uncertainty due to estimation of outcome
+regression model parameters}
+
+\item{adjust.propensity}{adjust for uncertainty due to estimation of
+propensity regression model parameters}
+
+\item{...}{additional arguments to lower level functions}
 }
 \value{
 An object of class '\code{ate.targeted}' is returned. See

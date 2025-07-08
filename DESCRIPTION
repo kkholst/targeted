@@ -2,7 +2,7 @@ Package: targeted
 Type: Package
 Title: Targeted Inference
 Version: 0.6
-Date: 2025-04-29
+Date: 2025-07-08
 Authors@R: c(person(given = "Klaus K.",
                     family = "Holst",
                     role = c("aut", "cre"),
@@ -63,7 +63,7 @@ Suggests:
     viridisLite,
     xgboost
 BugReports: https://github.com/kkholst/targeted/issues
-SystemRequirements: C++11, GNU make
+SystemRequirements: GNU make
 URL: https://kkholst.github.io/targeted/
 License: Apache License (== 2.0)
 LinkingTo: Rcpp, RcppArmadillo

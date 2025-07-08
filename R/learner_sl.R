@@ -44,6 +44,7 @@ learner_sl <- function(learners,
                        model.score = mse,
                        learner.args = NULL,
                        ...) {
+  if (inherits(learners, "learner")) return(learners)
   if (is.null(info)) {
     info <- "superlearner\n"
     nn <- names(learners)

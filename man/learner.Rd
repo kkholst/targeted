@@ -90,6 +90,8 @@ Klaus Kähler Holst, Benedikt Sommer
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
+\item{\code{clear}}{Remove fitted model from the learner object}
+
 \item{\code{fit}}{Return estimated model object.}
 
 \item{\code{formula}}{Return model formula. Use \link[=learner]{learner$update()} to
