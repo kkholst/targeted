@@ -4,12 +4,12 @@
 <!-- badges: start -->
 
 [![r-cmd-check](https://github.com/kkholst/targeted/actions/workflows/r_check.yaml/badge.svg?branch=main)](https://github.com/kkholst/targeted/actions/workflows/r_check.yaml)
-[![codecov](https://codecov.io/github/kkholst/targeted/graph/badge.svg?token=MMSEDLWIZd)](https://codecov.io/github/kkholst/targeted)
+[![codecov](https://app.codecov.io/github/kkholst/targeted/graph/badge.svg?token=MMSEDLWIZd)](https://app.codecov.io/github/kkholst/targeted)
 [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/license/apache-2-0)
 [![cran](https://www.r-pkg.org/badges/version-last-release/targeted)](https://cranlogs.r-pkg.org/downloads/total/last-month/targeted)
 <!-- badges: end -->
 
-# Targeted Learning in R (`targeted`) <a href="https://kkholst.github.io/targeted"><img src="man/figures/logohex.png" align="right" height="150" /></a>
+# Targeted Learning in R (`targeted`) <a href="https://kkholst.github.io/targeted/"><img src="man/figures/logohex.png" align="right" height="150" /></a>
 
 Various methods for targeted learning and semiparametric inference
 including augmented inverse probability weighted (AIPW) estimators for
