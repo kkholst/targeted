@@ -3,7 +3,7 @@
 ^.gitignore$
 ^.editorconfig$
 ^.lintr$
-^CPPLINT.cfg$
+^src/CPPLINT.cfg$
 ^Dockerfile$
 ^CONTRIBUTING.md$
 ^Makefile$
