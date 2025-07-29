@@ -1,9 +1,22 @@
 ## -*- Makefile -*-
 
 # CXX_STD = CXX14
-
 PKGROOT=target
-SOURCES = $(wildcard ./*.cpp) $(wildcard $(PKGROOT)/src/*.cpp)
+# SOURCES = $(wildcard ./*.cpp) $(wildcard $(PKGROOT)/src/*.cpp)
+SOURCES = RcppExports.cpp \
+	nb_interface.cpp \
+	ode_interface.cpp \
+	RcppExports.cpp \
+	riskreg_interface.cpp \
+	utils_interface.cpp \
+	target/src/glm.cpp \
+	target/src/mlogit.cpp \
+	target/src/nb.cpp \
+	target/src/nondom.cpp \
+	target/src/odesolver.cpp \
+	target/src/pava.cpp \
+	target/src/target.cpp \
+	target/src/utils.cpp
 OBJECTS =  $(SOURCES:.cpp=.o)
 
 PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) -DARMA_R -I. -I$(PKGROOT)/include -I../inst/include

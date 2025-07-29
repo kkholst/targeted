@@ -63,7 +63,6 @@ Suggests:
     viridisLite,
     xgboost
 BugReports: https://github.com/kkholst/targeted/issues
-SystemRequirements: GNU make
 URL: https://kkholst.github.io/targeted/
 License: Apache License (== 2.0)
 LinkingTo: Rcpp, RcppArmadillo

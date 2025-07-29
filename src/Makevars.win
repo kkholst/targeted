@@ -1,17 +1,21 @@
 ## -*- Makefile -*-
 
-# CXX_STD = CXX14
-
 PKGROOT=target
-# SOURCES = $(wildcard ./*.cpp) $(wildcard $(PKGROOT)/src/*.cpp)
-OBJECTS =  target/src/glm.dll \
-	target/src/nb.dll \
-	target/src/nondom.dll \
-	target/src/odesolver.dll \
-	target/src/pava.dll \
-	target/src/target.dll \
-	target/src/utils.dll
-
+SOURCES = RcppExports.cpp \
+	nb_interface.cpp \
+	ode_interface.cpp \
+	RcppExports.cpp \
+	riskreg_interface.cpp \
+	utils_interface.cpp \
+	target/src/glm.cpp \
+	target/src/mlogit.cpp \
+	target/src/nb.cpp \
+	target/src/nondom.cpp \
+	target/src/odesolver.cpp \
+	target/src/pava.cpp \
+	target/src/target.cpp \
+	target/src/utils.cpp
+OBJECTS =  $(SOURCES:.cpp=.dll)
 
 PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) -DARMA_R -I. -I$(PKGROOT)/include -I../inst/include
 PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
