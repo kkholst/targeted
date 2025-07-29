@@ -12,6 +12,7 @@
 ^.vscode$
 ^Makefile$
 ^src/target/src/.*\.o$
+^src/target/src/.*\.so$
 ^src/target/Makefile$
 ^src/target/lib$
 ^src/target/build$

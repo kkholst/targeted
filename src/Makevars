@@ -3,9 +3,9 @@
 # CXX_STD = CXX14
 PKGROOT=target
 # SOURCES = $(wildcard ./*.cpp) $(wildcard $(PKGROOT)/src/*.cpp)
-SOURCES = nb_interface.cpp \
+SOURCES = RcppExports.cpp \
+	nb_interface.cpp \
 	ode_interface.cpp \
-	RcppExports.cpp \
 	riskreg_interface.cpp \
 	utils_interface.cpp \
 	target/src/glm.cpp \
@@ -16,7 +16,7 @@ SOURCES = nb_interface.cpp \
 	target/src/pava.cpp \
 	target/src/target.cpp \
 	target/src/utils.cpp
-OBJECTS =  $(SOURCES:.cpp=.o)
+OBJECTS = $(SOURCES:.cpp=.o)
 
 PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) -DARMA_R -I. -I$(PKGROOT)/include -I../inst/include
 PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
