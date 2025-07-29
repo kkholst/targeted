@@ -32,10 +32,7 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/ate.html">Average Treatment Effects</a>
-    </li>
-    <li>
-      <a href="../articles/ode.html">targeted::ode_solve: Solving Ordinary Differential Equations</a>
+      <a href="../articles/predictionclass.html">Prediction model class (`learner`)</a>
     </li>
     <li>
       <a href="../articles/riskregression.html">Estimating a relative risk or risk difference with a binary exposure</a>
@@ -71,14 +68,6 @@
         </td>
         <td><p>ML model</p></td>
       </tr><tr><td>
-          <p><code><a href="NB-class.html">NB-class</a></code> </p>
-        </td>
-        <td><p>NB class object</p></td>
-      </tr><tr><td>
-          <p><code><a href="NB.html">NB()</a></code> </p>
-        </td>
-        <td><p>Naive Bayes</p></td>
-      </tr><tr><td>
           <p><code><a href="RATE.html">RATE()</a></code> </p>
         </td>
         <td><p>Responder Average Treatment Effect</p></td>
@@ -89,11 +78,7 @@
       </tr><tr><td>
           <p><code><a href="SL.html">SL()</a></code> </p>
         </td>
-        <td><p>SuperLearner wrapper for ml_model</p></td>
-      </tr><tr><td>
-          <p><code><a href="Scoring.html">scoring()</a></code> </p>
-        </td>
-        <td><p>Predictive model scoring</p></td>
+        <td><p>SuperLearner wrapper for learner</p></td>
       </tr><tr><td>
           <p><code><a href="aipw.html">aipw()</a></code> </p>
         </td>
@@ -105,7 +90,7 @@
       </tr><tr><td>
           <p><code><a href="ate.html">ate()</a></code> </p>
         </td>
-        <td><p>AIPW (doubly-robust) estimator for Average Treatement Effect</p></td>
+        <td><p>AIPW (doubly-robust) estimator for Average Treatment Effect</p></td>
       </tr><tr><td>
           <p><code><a href="calibration-class.html">calibration-class</a></code> </p>
         </td>
@@ -123,6 +108,10 @@
         </td>
         <td><p>Conditional Relative Risk estimation</p></td>
       </tr><tr><td>
+          <p><code><a href="constructor_shared.html">constructor_shared</a></code> </p>
+        </td>
+        <td><p>Construct a learner</p></td>
+      </tr><tr><td>
           <p><code><a href="cross_validated-class.html">cross_validated-class</a></code> <code><a href="cross_validated-class.html">cross_validated</a></code> </p>
         </td>
         <td><p>cross_validated class object</p></td>
@@ -131,21 +120,109 @@
         </td>
         <td><p>Conditional Relative Risk estimation</p></td>
       </tr><tr><td>
-          <p><code><a href="cv.html">cv()</a></code> </p>
+          <p><code><a href="cumhaz.html">cumhaz()</a></code> </p>
+        </td>
+        <td><p>Predict the cumulative hazard/survival function for a survival model</p></td>
+      </tr><tr><td>
+          <p><code><a href="cv.default.html">cv(<i>&lt;default&gt;</i>)</a></code> </p>
         </td>
         <td><p>Cross-validation</p></td>
+      </tr><tr><td>
+          <p><code><a href="cv.learner_sl.html">cv(<i>&lt;learner_sl&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Cross-validation for learner_sl</p></td>
+      </tr><tr><td>
+          <p><code><a href="deprecate_arg_warn.html">deprecate_arg_warn()</a></code> </p>
+        </td>
+        <td><p>Cast warning for deprecated function argument names</p></td>
+      </tr><tr><td>
+          <p><code><a href="deprecated_argument_names.html">deprecated_argument_names</a></code> </p>
+        </td>
+        <td><p>Deprecated argument names</p></td>
       </tr><tr><td>
           <p><code><a href="design.html">design()</a></code> </p>
         </td>
         <td><p>Extract design matrix</p></td>
       </tr><tr><td>
+          <p><code><a href="estimate_truncatedscore.html">estimate_truncatedscore()</a></code> </p>
+        </td>
+        <td><p>Estimation of mean clinical outcome truncated by event process</p></td>
+      </tr><tr><td>
           <p><code><a href="expand.list.html">expand.list()</a></code> </p>
         </td>
         <td><p>Create a list from all combination of input variables</p></td>
       </tr><tr><td>
-          <p><code><a href="ml_model.html">ml_model</a></code> <code><a href="ml_model.html">predictor</a></code> <code><a href="ml_model.html">predictor_glm</a></code> <code><a href="ml_model.html">predictor_gam</a></code> <code><a href="ml_model.html">predictor_glmnet</a></code> <code><a href="ml_model.html">predictor_grf</a></code> <code><a href="ml_model.html">predictor_grf_binary</a></code> <code><a href="ml_model.html">predictor_xgboost</a></code> <code><a href="ml_model.html">predictor_xgboost_multiclass</a></code> <code><a href="ml_model.html">predictor_xgboost_count</a></code> <code><a href="ml_model.html">predictor_xgboost_cox</a></code> <code><a href="ml_model.html">predictor_xgboost_binary</a></code> <code><a href="ml_model.html">predictor_hal</a></code> <code><a href="ml_model.html">predictor_isoreg</a></code> </p>
+          <p><code><a href="int_surv.html">int_surv()</a></code> </p>
+        </td>
+        <td><p>Integral approximation of a time dependent function. Computes an approximation of \(\int_start^stop S(t) dt\), where \(S(t)\) is a survival function, for a selection of start and stop time points.</p></td>
+      </tr><tr><td>
+          <p><code><a href="learner.html">learner</a></code> </p>
         </td>
         <td><p>R6 class for prediction models</p></td>
+      </tr><tr><td>
+          <p><code><a href="learner_expand_grid.html">learner_expand_grid()</a></code> </p>
+        </td>
+        <td><p>Construct learners from a grid of parameters</p></td>
+      </tr><tr><td>
+          <p><code><a href="learner_gam.html">learner_gam()</a></code> </p>
+        </td>
+        <td><p>Construct a learner</p></td>
+      </tr><tr><td>
+          <p><code><a href="learner_glm.html">learner_glm()</a></code> </p>
+        </td>
+        <td><p>Construct a learner</p></td>
+      </tr><tr><td>
+          <p><code><a href="learner_glmnet_cv.html">learner_glmnet_cv()</a></code> </p>
+        </td>
+        <td><p>Construct a learner</p></td>
+      </tr><tr><td>
+          <p><code><a href="learner_grf.html">learner_grf()</a></code> </p>
+        </td>
+        <td><p>Construct a learner</p></td>
+      </tr><tr><td>
+          <p><code><a href="learner_hal.html">learner_hal()</a></code> </p>
+        </td>
+        <td><p>Construct a learner</p></td>
+      </tr><tr><td>
+          <p><code><a href="learner_isoreg.html">learner_isoreg()</a></code> </p>
+        </td>
+        <td><p>Construct a learner</p></td>
+      </tr><tr><td>
+          <p><code><a href="learner_mars.html">learner_mars()</a></code> </p>
+        </td>
+        <td><p>Construct a learner</p></td>
+      </tr><tr><td>
+          <p><code><a href="learner_naivebayes.html">learner_naivebayes()</a></code> </p>
+        </td>
+        <td><p>Construct a learner</p></td>
+      </tr><tr><td>
+          <p><code><a href="learner_sl.html">learner_sl()</a></code> </p>
+        </td>
+        <td><p>Construct a learner</p></td>
+      </tr><tr><td>
+          <p><code><a href="learner_stratify.html">learner_stratify()</a></code> </p>
+        </td>
+        <td><p>Construct stratified learner</p></td>
+      </tr><tr><td>
+          <p><code><a href="learner_svm.html">learner_svm()</a></code> </p>
+        </td>
+        <td><p>Construct a learner</p></td>
+      </tr><tr><td>
+          <p><code><a href="learner_xgboost.html">learner_xgboost()</a></code> </p>
+        </td>
+        <td><p>Construct a learner</p></td>
+      </tr><tr><td>
+          <p><code><a href="ml_model.html">ml_model</a></code> </p>
+        </td>
+        <td><p>R6 class for prediction models</p></td>
+      </tr><tr><td>
+          <p><code><a href="naivebayes-class.html">naivebayes-class</a></code> </p>
+        </td>
+        <td><p>naivebayes class object</p></td>
+      </tr><tr><td>
+          <p><code><a href="naivebayes.html">naivebayes()</a></code> </p>
+        </td>
+        <td><p>Naive Bayes classifier</p></td>
       </tr><tr><td>
           <p><code><a href="nondom.html">nondom()</a></code> </p>
         </td>
@@ -155,17 +232,17 @@
         </td>
         <td><p>Pooled Adjacent Violators Algorithm</p></td>
       </tr><tr><td>
-          <p><code><a href="predict.NB.html">predict(<i>&lt;NB&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Predictions for Naive Bayes Classifier</p></td>
-      </tr><tr><td>
           <p><code><a href="predict.density.html">predict(<i>&lt;density&gt;</i>)</a></code> </p>
         </td>
         <td><p>Prediction for kernel density estimates</p></td>
       </tr><tr><td>
-          <p><code><a href="predictor_sl.html">predictor_sl()</a></code> </p>
+          <p><code><a href="predict.naivebayes.html">predict(<i>&lt;naivebayes&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Superlearner (stacked/ensemble learner)</p></td>
+        <td><p>Predictions for Naive Bayes Classifier</p></td>
+      </tr><tr><td>
+          <p><code><a href="predict.superlearner.html">predict(<i>&lt;superlearner&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Predict Method for superlearner Fits</p></td>
       </tr><tr><td>
           <p><code><a href="riskreg.html">riskreg()</a></code> </p>
         </td>
@@ -175,6 +252,14 @@
         </td>
         <td><p>Binary regression models with right censored outcomes</p></td>
       </tr><tr><td>
+          <p><code><a href="score.superlearner.html">score(<i>&lt;superlearner&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extract average cross-validated score of individual learners</p></td>
+      </tr><tr><td>
+          <p><code><a href="scoring.html">scoring()</a></code> </p>
+        </td>
+        <td><p>Predictive model scoring</p></td>
+      </tr><tr><td>
           <p><code><a href="softmax.html">softmax()</a></code> </p>
         </td>
         <td><p>Softmax transformation</p></td>
@@ -183,17 +268,37 @@
         </td>
         <td><p>Solve ODE</p></td>
       </tr><tr><td>
-          <p><code><a href="specials.design.html">specials(<i>&lt;design&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Extract model component from design object</p></td>
-      </tr><tr><td>
           <p><code><a href="specify_ode.html">specify_ode()</a></code> </p>
         </td>
         <td><p>Specify Ordinary Differential Equation (ODE)</p></td>
       </tr><tr><td>
+          <p><code><a href="stratify.html">stratify()</a></code> </p>
+        </td>
+        <td><p>Identify Stratification Variables</p></td>
+      </tr><tr><td>
+          <p><code><a href="superlearner.html">superlearner()</a></code> </p>
+        </td>
+        <td><p>Superlearner (stacked/ensemble learner)</p></td>
+      </tr><tr><td>
           <p><code><a href="targeted-class.html">targeted-class</a></code> <code><a href="targeted-class.html">riskreg.targeted</a></code> <code><a href="targeted-class.html">ate.targeted</a></code> </p>
         </td>
         <td><p>targeted class object</p></td>
+      </tr><tr><td>
+          <p><code><a href="terms.design.html">terms(<i>&lt;design&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extract model component from design object</p></td>
+      </tr><tr><td>
+          <p><code><a href="test_intersectsignedwald.html">test_intersectsignedwald()</a></code> </p>
+        </td>
+        <td><p>Signed intersection Wald test</p></td>
+      </tr><tr><td>
+          <p><code><a href="truncatedscore.html">truncatedscore</a></code> </p>
+        </td>
+        <td><p>Scores truncated by death</p></td>
+      </tr><tr><td>
+          <p><code><a href="weights.superlearner.html">weights(<i>&lt;superlearner&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extract ensemble weights</p></td>
       </tr></tbody></table></div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -203,11 +308,11 @@
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Klaus K. Holst, Andreas Nordland.</p>
+  <p></p><p>Developed by Klaus K. Holst, Benedikt Sommer, Andreas Nordland.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer></div>

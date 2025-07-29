@@ -32,10 +32,7 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/ate.html">Average Treatment Effects</a>
-    </li>
-    <li>
-      <a href="../articles/ode.html">targeted::ode_solve: Solving Ordinary Differential Equations</a>
+      <a href="../articles/predictionclass.html">Prediction model class (`learner`)</a>
     </li>
     <li>
       <a href="../articles/riskregression.html">Estimating a relative risk or risk difference with a binary exposure</a>
@@ -65,12 +62,82 @@
 
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.6" id="targeted-06">targeted 0.6<a class="anchor" aria-label="anchor" href="#targeted-06"></a></h2>
-<ul><li>Development version</li>
-<li>repeated cross-fitting in <code>cate</code> function via the new ‘rep’ argument</li>
-<li>First argument to <code>ml_model</code> can be a character defining the response-variable (optional)</li>
+<p>This release introduces a new <code>learner</code> class replacing the previous <code>ML</code> constructor.</p>
+<ul><li>constructors for commonly used regression and classification models are also implemented: <code>learner_glm</code>, <code>learner_gam</code>, <code>learner_grf</code>, <code>learner_hal</code>, <code>learner_glmnet_cv</code>, <code>learner_svm</code>, <code>learner_xgboost</code>, <code>learner_mars</code>, <code>learner_isoreg</code>, <code>learner_naivebayes</code>
+</li>
+<li>new ensemble models (super-learners) available with <code>superlearner</code> and <code>learner_sl</code>
+</li>
 <li>
-<code>predictor</code> wrapper, and <code>predictor_sl</code>, <code>predictor_glm</code>, …</li>
+<code>learner_stratify</code>: implementation of learner that can stratifies base-learner on categorical predictor</li>
+<li>
+<code>learner_expand_grid</code>: utility function to construct learners</li>
+</ul><p>Improved implementation of <code>cate</code> with repeated cross-fitting via the new ‘rep’ argument.</p>
+<p>Implementation of estimators for joint modelling of time-to-event (CIF) and clinical outcome truncated by competing risk <a href="https://doi.org/10.48550/arXiv.2502.03942" class="external-link">(arXiv.2502.03942)</a>: <code>estimate_truncatedscore</code>.</p>
+<div class="section level3">
+<h3 id="features-0-6">Features<a class="anchor" aria-label="anchor" href="#features-0-6"></a></h3>
+<ul><li>
+<em>(cv)</em> cross-validation <code>cv</code> method for superlearner objects (<a href="https://github.com/kkholst/targeted/issues/64" class="external-link">#64</a>) - (<a href="https://github.com/kkholst/targeted/commit/1d58b26190b979176c25be09c31e6ca1a892073b" class="external-link">1d58b26</a>)</li>
+<li>
+<em>(design)</em> Fixing how specials is handled and passed to learner functions - (<a href="https://github.com/kkholst/targeted/commit/ab46749cc2af1b593982f226aedbeb43a920520b" class="external-link">ab46749</a>)</li>
+<li>
+<em>(design)</em> Adding <code>print.design</code> (<a href="https://github.com/kkholst/targeted/issues/94" class="external-link">#94</a>) - (<a href="https://github.com/kkholst/targeted/commit/20eb1704f6238cfeeceec1bd295fe5172d590e03" class="external-link">20eb170</a>)</li>
+<li>
+<em>(learner)</em> <code>learner_stratify</code> implementation of learner that can stratifies base-learner on categorical predictor (<a href="https://github.com/kkholst/targeted/commit/d561ea1b70f77b7db1d9bfcca2937c0a210c1468" class="external-link">d561ea1</a>)</li>
+<li>
+<em>(learner)</em> [<strong>breaking</strong>] changing <code>formula</code> public field to active binding (<a href="https://github.com/kkholst/targeted/issues/98" class="external-link">#98</a>) - (<a href="https://github.com/kkholst/targeted/commit/1505453c700fe0db921955336382f0b3b76489e8" class="external-link">1505453</a>)</li>
+<li>
+<em>(learner)</em> [<strong>breaking</strong>] removing <code>response.arg</code> and <code>x.arg</code> arguments from <code>learner$new()</code> (<a href="https://github.com/kkholst/targeted/issues/92" class="external-link">#92</a>) - (<a href="https://github.com/kkholst/targeted/commit/4043dd743e90d8b79dda32f098528ed35f041d3b" class="external-link">4043dd7</a>)</li>
+<li>
+<em>(learner)</em> adding new <code>summary</code> method to provide more details than <code>print</code> method (<a href="https://github.com/kkholst/targeted/issues/87" class="external-link">#87</a>) - (<a href="https://github.com/kkholst/targeted/commit/d12a581246844e6f8ffe99a4beadcf20b52187b4" class="external-link">d12a581</a>)</li>
+<li>
+<em>(learner)</em> changed behaviour of <code>learner$design</code> to return not only ‘x’ matrix but everything including ‘specials’ (<a href="https://github.com/kkholst/targeted/issues/76" class="external-link">#76</a>) - (<a href="https://github.com/kkholst/targeted/commit/ca74abb876828f465bbd4e6613eb40ba5d754fa8" class="external-link">ca74abb</a>)</li>
+<li>
+<em>(superlearner)</em> new ensemble models (super-learners) (<a href="https://github.com/kkholst/targeted/issues/104" class="external-link">#104</a>)</li>
+<li>
+<em>(learner)</em> <code>learner_expand_grid</code> utility function to construct learners (<a href="https://github.com/kkholst/targeted/issues/96" class="external-link">#96</a>) - (<a href="https://github.com/kkholst/targeted/commit/3ae461a657f78f2e1c79697113c3a9a5e21f7aa5" class="external-link">3ae461a</a>)</li>
+<li>Generalized Additive Models <code>learner_gam</code> (<a href="https://github.com/kkholst/targeted/issues/77" class="external-link">#77</a>) - (<a href="https://github.com/kkholst/targeted/commit/de2ec2b82c64f320601516591bddbf223de91e9a" class="external-link">de2ec2b</a>)</li>
+<li>Highly Adaptive Lasso <code>learner_hal</code> (<a href="https://github.com/kkholst/targeted/issues/75" class="external-link">#75</a>) - (<a href="https://github.com/kkholst/targeted/commit/62c4941e808571d6574a8726ff335fe61c518490" class="external-link">62c4941</a>)</li>
+<li>Elastic net <code>learner_glmnet_cv</code> (<a href="https://github.com/kkholst/targeted/issues/74" class="external-link">#74</a>) - (<a href="https://github.com/kkholst/targeted/commit/67ba2417ecaffa2371f075fa7da8e1e6dc531385" class="external-link">67ba241</a>)</li>
+<li>Generalized Linear Models <code>learner_glm</code> (<a href="https://github.com/kkholst/targeted/issues/63" class="external-link">#63</a>) - (<a href="https://github.com/kkholst/targeted/commit/0d2663acfa24eca38a90d2eff2769f0d1fb802d0" class="external-link">0d2663a</a>)</li>
+<li>Naive Bayes classifier <code>learner_naivebayes</code> (<a href="https://github.com/kkholst/targeted/issues/88" class="external-link">#88</a>) - (<a href="https://github.com/kkholst/targeted/commit/2cbe979533bbb4d0722b303726db9f455dab2151" class="external-link">2cbe979</a>)</li>
+<li>Generalized Random Forest <code>learner_grf</code> (<a href="https://github.com/kkholst/targeted/issues/84" class="external-link">#84</a>) - (<a href="https://github.com/kkholst/targeted/commit/82f76c86f21cba08053e75163b9fc7cc4e8f6ec0" class="external-link">82f76c8</a>)</li>
+<li>Support Vector Regression <code>learner_svm</code> (<a href="https://github.com/kkholst/targeted/issues/83" class="external-link">#83</a>) - (<a href="https://github.com/kkholst/targeted/commit/4b28b30acf0e17888f7eb17447c0651ed82106f3" class="external-link">4b28b30</a>)</li>
+<li>Isotonic regression <code>learner_isoreg</code> (<a href="https://github.com/kkholst/targeted/issues/82" class="external-link">#82</a>) - (<a href="https://github.com/kkholst/targeted/commit/e409b58bd529a401e661c41902c150648b8265fe" class="external-link">e409b58</a>)</li>
+<li>XGBoost <code>learner_xgboost</code> (<a href="https://github.com/kkholst/targeted/issues/80" class="external-link">#80</a>) - (<a href="https://github.com/kkholst/targeted/commit/72ee4148102f545f7a90747139d4a56e7a057913" class="external-link">72ee414</a>)</li>
+<li>Multivariate Adaptive Regression Splines <code>learner_mars</code> (<a href="https://github.com/kkholst/targeted/issues/79" class="external-link">#79</a>) - (<a href="https://github.com/kkholst/targeted/commit/0019060500ea7e1267edc7aaf41b73979383b7a0" class="external-link">0019060</a>)</li>
+<li>Super-Learner <code>learner_sl</code> (<a href="https://github.com/kkholst/targeted/issues/78" class="external-link">#78</a>) - (<a href="https://github.com/kkholst/targeted/commit/03a81d2976a22d37eb0f559915fa09e716c4ad81" class="external-link">03a81d2</a>)</li>
+<li>Adding new <code>learner</code> R6 class to replace <code>ml_model</code> (<a href="https://github.com/kkholst/targeted/issues/68" class="external-link">#68</a>) - (<a href="https://github.com/kkholst/targeted/commit/86c44fd6134ca785f84ebe4df62f175668db12e5" class="external-link">86c44fd</a>)</li>
+<li>Improved <code>riskreg_cens</code> estimator (<a href="https://github.com/kkholst/targeted/issues/62" class="external-link">#62</a>) - (<a href="https://github.com/kkholst/targeted/commit/7aef75ff94946466212de3c88effdf204305f3ec" class="external-link">7aef75f</a>)</li>
+<li>truncatedscore default is now to estimate P(T&gt;=t) instead of CIF (<a href="https://github.com/kkholst/targeted/issues/46" class="external-link">#46</a>) (<a href="https://github.com/kkholst/targeted/commit/b315645c4f4f0b8f29cebb6d777cadfde0b15222" class="external-link">b315645</a>)</li>
+<li>
+<em>(cv)</em> silent arg (<a href="https://github.com/kkholst/targeted/issues/34" class="external-link">#34</a>) - (<a href="https://github.com/kkholst/targeted/commit/bb3d782107025699c0a7f08101f07c9118cddd2a" class="external-link">bb3d782</a>)</li>
+<li>Feature/truncatedscore Implementation of estimators for joint modelling of time-to-event (CIF) and clinical outcome truncated by competing risk. (<a href="https://github.com/kkholst/targeted/issues/13" class="external-link">#13</a>)</li>
 </ul></div>
+<div class="section level3">
+<h3 id="documentation-0-6">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-6"></a></h3>
+<ul><li>
+<em>(learner)</em> Harmonize documentation of all learner constructors (<a href="https://github.com/kkholst/targeted/issues/93" class="external-link">#93</a>) - (<a href="https://github.com/kkholst/targeted/commit/1d370757b094c9f1931b55a2cbc9985986a517fd" class="external-link">1d37075</a>)</li>
+<li>
+<em>(learner)</em> New vignette on prediction model class (<a href="https://github.com/kkholst/targeted/issues/4" class="external-link">#4</a>) - (<a href="https://github.com/kkholst/targeted/commit/08bedd4f99bbc6c92baf369d024743aaab80592e" class="external-link">08bedd4</a>)</li>
+<li>
+<em>(RATE)</em> Fix linter and re-use roxygen documentation (<a href="https://github.com/kkholst/targeted/issues/45" class="external-link">#45</a>) - (<a href="https://github.com/kkholst/targeted/commit/a31a37c30f8925e28bd3b5e776552da2dc596b9c" class="external-link">a31a37c</a>)</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-0-6">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-6"></a></h3>
+<ul><li>
+<em>(cate)</em> Now sets correct mc.cores argument in mclapply (<a href="https://github.com/kkholst/targeted/issues/24" class="external-link">#24</a>) - (<a href="https://github.com/kkholst/targeted/commit/260ded89cecb19f9e99f21f3124dc38e7be629aa" class="external-link">260ded8</a>)</li>
+</ul></div>
+<div class="section level3">
+<h3 id="developer-0-6">Developer<a class="anchor" aria-label="anchor" href="#developer-0-6"></a></h3>
+<ul><li>Adding <code>add_dots</code> utility function (<a href="https://github.com/kkholst/targeted/issues/2" class="external-link">#2</a>) - (<a href="https://github.com/kkholst/targeted/commit/bb21da4c66fb3c8e9a3ce58677110b36976fb328" class="external-link">bb21da4</a>)</li>
+<li>Adding .cliff.toml (<a href="https://github.com/kkholst/targeted/issues/47" class="external-link">#47</a>) - (<a href="https://github.com/kkholst/targeted/commit/47d703874ea25ee152b4eaf90871301ceb1d2c30" class="external-link">47d7038</a>)</li>
+<li>Github workflows (<a href="https://github.com/kkholst/targeted/issues/33" class="external-link">#33</a>) - (<a href="https://github.com/kkholst/targeted/commit/bcd50bdbbc3b2ffb047efc4de77bc0a9dfcd2cd4" class="external-link">bcd50bd</a>)</li>
+<li>Adding custom function to inform users about deprecated function arguments (<a href="https://github.com/kkholst/targeted/issues/32" class="external-link">#32</a>) - (<a href="https://github.com/kkholst/targeted/commit/d0865a266c5e03659784cc7b5392b2b5dbccff09" class="external-link">d0865a2</a>)</li>
+<li>Makefile + repository cleaning (<a href="https://github.com/kkholst/targeted/issues/23" class="external-link">#23</a>) - (<a href="https://github.com/kkholst/targeted/commit/fa398273e10671c7c281479dafaf4b396e68d88c" class="external-link">fa39827</a>)</li>
+<li>Switch from <code>testthat</code> to <code>tinytest</code> for unit testing of R package (<a href="https://github.com/kkholst/targeted/issues/6" class="external-link">#6</a>) - (<a href="https://github.com/kkholst/targeted/commit/be860727c8e53d5603fb5d7dced7b81b1af44bad" class="external-link">be86072</a>)</li>
+<li>Adding <code>.lintr</code> config for R code linter - (<a href="https://github.com/kkholst/targeted/commit/7fe7b566eb77b80aed38e256b0d1f917a834020b" class="external-link">7fe7b56</a>)</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.5" id="targeted-05">targeted 0.5<small>2024-02-22</small><a class="anchor" aria-label="anchor" href="#targeted-05"></a></h2>
 <ul><li>
@@ -106,7 +173,7 @@
 </li>
 </ul></div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.2.0" id="targeted-020">targeted 0.2.0<small>2021-10-26</small><a class="anchor" aria-label="anchor" href="#targeted-020"></a></h2>
+<h2 class="page-header" data-toc-text="0.2" id="targeted-02">targeted 0.2<a class="anchor" aria-label="anchor" href="#targeted-02"></a></h2>
 <ul><li>Weighted Naive Bayes classifer with <code>NB</code>
 </li>
 <li>Pooled adjacent violator algorithm <code>pava</code>
@@ -123,10 +190,12 @@
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.1.1" id="targeted-011">targeted 0.1.1<small>2020-05-15</small><a class="anchor" aria-label="anchor" href="#targeted-011"></a></h2>
-<ul><li>Maintenance release.</li></ul></div>
+<ul><li>Maintenance release.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.1" id="targeted-01">targeted 0.1<small>2020-05-08</small><a class="anchor" aria-label="anchor" href="#targeted-01"></a></h2>
-<ul><li>Initialization of the new package <code>targeted</code> with implementation of augmented inverse probability weighting methods for estimation with missing data and causal inference (<code>aipw</code>, <code>ace</code>), and double robust methods for risk regression with binary exposure variables (<code>riskreg</code>).</li></ul></div>
+<ul><li>Initialization of the new package <code>targeted</code> with implementation of augmented inverse probability weighting methods for estimation with missing data and causal inference (<code>aipw</code>, <code>ace</code>), and double robust methods for risk regression with binary exposure variables (<code>riskreg</code>).</li>
+</ul></div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -137,11 +206,11 @@
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Klaus K. Holst, Andreas Nordland.</p>
+  <p></p><p>Developed by Klaus K. Holst, Benedikt Sommer, Andreas Nordland.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer></div>

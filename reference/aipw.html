@@ -33,10 +33,7 @@ observations"><meta property="og:image" content="/logo.svg"><!-- mathjax --><scr
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/ate.html">Average Treatment Effects</a>
-    </li>
-    <li>
-      <a href="../articles/ode.html">targeted::ode_solve: Solving Ordinary Differential Equations</a>
+      <a href="../articles/predictionclass.html">Prediction model class (`learner`)</a>
     </li>
     <li>
       <a href="../articles/riskregression.html">Estimating a relative risk or risk difference with a binary exposure</a>
@@ -79,13 +76,13 @@ observations</p>
 
 
 <dl><dt id="arg-response-model">response_model<a class="anchor" aria-label="anchor" href="#arg-response-model"></a></dt>
-<dd><p>Model for the response given covariates (ml_model or
+<dd><p>Model for the response given covariates (learner or
 formula)</p></dd>
 
 
 <dt id="arg-propensity-model">propensity_model<a class="anchor" aria-label="anchor" href="#arg-propensity-model"></a></dt>
 <dd><p>Optional missing data mechanism model (propensity
-model) (ml_model or formula)</p></dd>
+model) (learner or formula)</p></dd>
 
 
 <dt id="arg-formula">formula<a class="anchor" aria-label="anchor" href="#arg-formula"></a></dt>
@@ -104,16 +101,14 @@ EIF</p></dd>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/lvm.html" class="external-link">lvm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span><span class="op">+</span><span class="va">z</span>, <span class="va">r</span> <span class="op">~</span> <span class="va">x</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">distribution</a></span><span class="op">(</span><span class="va">m</span>,<span class="op">~</span> <span class="va">r</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">binomial.lvm</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span><span class="va">m</span>, <span class="va">y0</span><span class="op">~</span><span class="va">r</span><span class="op">+</span><span class="va">y</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span> <span class="va">x</span><span class="op">[</span><span class="va">x</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">==</span><span class="fl">0</span>,<span class="fl">2</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA</span>; <span class="va">x</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span> <span class="op">}</span></span></span>
-<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="va">m</span>,<span class="fl">1e3</span>,seed<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/lvm.html" class="external-link">lvm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span><span class="op">+</span><span class="va">z</span>, <span class="va">r</span> <span class="op">~</span> <span class="va">x</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>     <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">distribution</a></span><span class="op">(</span><span class="op">~</span> <span class="va">r</span>, value <span class="op">=</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">binomial.lvm</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>     <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span><span class="va">y0</span><span class="op">~</span><span class="va">r</span><span class="op">+</span><span class="va">y</span>, value <span class="op">=</span> \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span> <span class="va">x</span><span class="op">[</span><span class="va">x</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">==</span><span class="fl">0</span>,<span class="fl">2</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA</span>; <span class="va">x</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span> <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="va">m</span>,<span class="fl">1e3</span>,seed<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">aipw</span><span class="op">(</span><span class="va">y0</span> <span class="op">~</span> <span class="va">x</span>, data<span class="op">=</span><span class="va">d</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err    2.5%  97.5% P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> E[y0(1)]     0.05148 0.08338 -0.1119 0.2149   0.537</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ───────────                                        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)  0.05148 0.08380 -0.1128 0.2157   0.539</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)  0.05148 0.08338 -0.1119 0.2149   0.537</span>
 </code></pre></div>
     </div>
   </div>
@@ -124,11 +119,11 @@ EIF</p></dd>
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Klaus K. Holst, Andreas Nordland.</p>
+  <p></p><p>Developed by Klaus K. Holst, Benedikt Sommer, Andreas Nordland.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer></div>

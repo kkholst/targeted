@@ -32,10 +32,7 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/ate.html">Average Treatment Effects</a>
-    </li>
-    <li>
-      <a href="../articles/ode.html">targeted::ode_solve: Solving Ordinary Differential Equations</a>
+      <a href="../articles/predictionclass.html">Prediction model class (`learner`)</a>
     </li>
     <li>
       <a href="../articles/riskregression.html">Estimating a relative risk or risk difference with a binary exposure</a>
@@ -70,16 +67,22 @@
 
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">cate</span><span class="op">(</span></span>
-<span>  <span class="va">response_model</span>,</span>
-<span>  <span class="va">propensity_model</span>,</span>
-<span>  cate_model <span class="op">=</span> <span class="op">~</span><span class="fl">1</span>,</span>
+<span>  <span class="va">response.model</span>,</span>
+<span>  <span class="va">propensity.model</span>,</span>
+<span>  cate.model <span class="op">=</span> <span class="op">~</span><span class="fl">1</span>,</span>
 <span>  contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span>,</span>
 <span>  <span class="va">data</span>,</span>
 <span>  nfolds <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  rep <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  rep.type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"nuisance"</span>, <span class="st">"average"</span><span class="op">)</span>,</span>
 <span>  silent <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  stratify <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  <span class="va">mc.cores</span>,</span>
+<span>  mc.cores <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  second.order <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  response_model <span class="op">=</span> <span class="va">deprecated</span>,</span>
+<span>  cate_model <span class="op">=</span> <span class="va">deprecated</span>,</span>
+<span>  propensity_model <span class="op">=</span> <span class="va">deprecated</span>,</span>
+<span>  treatment <span class="op">=</span> <span class="va">deprecated</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -88,15 +91,15 @@
     <h2>Arguments</h2>
 
 
-<dl><dt id="arg-response-model">response_model<a class="anchor" aria-label="anchor" href="#arg-response-model"></a></dt>
-<dd><p>formula or ml_model object (formula =&gt; glm)</p></dd>
+<dl><dt id="arg-response-model">response.model<a class="anchor" aria-label="anchor" href="#arg-response-model"></a></dt>
+<dd><p>formula or learner object (formula =&gt; learner_glm)</p></dd>
 
 
-<dt id="arg-propensity-model">propensity_model<a class="anchor" aria-label="anchor" href="#arg-propensity-model"></a></dt>
-<dd><p>formula or ml_model object (formula =&gt; glm)</p></dd>
+<dt id="arg-propensity-model">propensity.model<a class="anchor" aria-label="anchor" href="#arg-propensity-model"></a></dt>
+<dd><p>formula or learner object (formula =&gt; learner_glm)</p></dd>
 
 
-<dt id="arg-cate-model">cate_model<a class="anchor" aria-label="anchor" href="#arg-cate-model"></a></dt>
+<dt id="arg-cate-model">cate.model<a class="anchor" aria-label="anchor" href="#arg-cate-model"></a></dt>
 <dd><p>formula specifying regression design for conditional
 average treatment effects</p></dd>
 
@@ -110,24 +113,51 @@ average treatment effects</p></dd>
 
 
 <dt id="arg-nfolds">nfolds<a class="anchor" aria-label="anchor" href="#arg-nfolds"></a></dt>
-<dd><p>Number of folds</p></dd>
+<dd><p>number of folds</p></dd>
 
 
 <dt id="arg-rep">rep<a class="anchor" aria-label="anchor" href="#arg-rep"></a></dt>
-<dd><p>Number of replications of cross-fitting procedure</p></dd>
+<dd><p>number of replications of cross-fitting procedure</p></dd>
+
+
+<dt id="arg-rep-type">rep.type<a class="anchor" aria-label="anchor" href="#arg-rep-type"></a></dt>
+<dd><p>repeated cross-fitting applied by averaging nuisance models
+(<code>rep.type="nuisance"</code>) or by average estimates from each replication
+(<code>rep.type="average"</code>).</p></dd>
 
 
 <dt id="arg-silent">silent<a class="anchor" aria-label="anchor" href="#arg-silent"></a></dt>
-<dd><p>supress all messages and progressbars</p></dd>
+<dd><p>suppress all messages and progressbars</p></dd>
 
 
 <dt id="arg-stratify">stratify<a class="anchor" aria-label="anchor" href="#arg-stratify"></a></dt>
-<dd><p>If TRUE the response_model will be stratified by treatment</p></dd>
+<dd><p>if TRUE the response.model will be stratified by treatment</p></dd>
 
 
 <dt id="arg-mc-cores">mc.cores<a class="anchor" aria-label="anchor" href="#arg-mc-cores"></a></dt>
-<dd><p>mc.cores Optional number of cores. parallel::mcmapply used
-instead of future</p></dd>
+<dd><p>(optional) number of cores. parallel::mcmapply used instead
+of future</p></dd>
+
+
+<dt id="arg-second-order">second.order<a class="anchor" aria-label="anchor" href="#arg-second-order"></a></dt>
+<dd><p>add seconder order term to IF to handle misspecification
+of outcome models</p></dd>
+
+
+<dt id="arg-response-model">response_model<a class="anchor" aria-label="anchor" href="#arg-response-model"></a></dt>
+<dd><p>Deprecated. Use response.model instead.</p></dd>
+
+
+<dt id="arg-cate-model">cate_model<a class="anchor" aria-label="anchor" href="#arg-cate-model"></a></dt>
+<dd><p>Deprecated. Use cate.model instead.</p></dd>
+
+
+<dt id="arg-propensity-model">propensity_model<a class="anchor" aria-label="anchor" href="#arg-propensity-model"></a></dt>
+<dd><p>Deprecated. Use propensity.model instead.</p></dd>
+
+
+<dt id="arg-treatment">treatment<a class="anchor" aria-label="anchor" href="#arg-treatment"></a></dt>
+<dd><p>Deprecated. Use cate.model instead.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -163,44 +193,44 @@ Importance, The International Journal of Biostatistics.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">sim1</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span><span class="op">=</span><span class="fl">1000</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="va">w1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">w2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">1</span>, <span class="fu"><a href="https://kkholst.github.io/lava/reference/internal.html" class="external-link">expit</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span> <span class="op">+</span> <span class="va">w1</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Logistic.html" class="external-link">plogis</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span> <span class="op">+</span> <span class="va">w1</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="va">w1</span><span class="op">)</span> <span class="op">+</span> <span class="va">w2</span><span class="op">*</span><span class="va">a</span> <span class="op">+</span> <span class="fl">0.2</span><span class="op">*</span><span class="va">w2</span><span class="op">^</span><span class="fl">2</span> <span class="op">+</span> <span class="va">a</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">a</span>, <span class="va">w1</span>, <span class="va">w2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">sim1</span><span class="op">(</span><span class="fl">5000</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co">## ATE</span></span></span>
-<span class="r-in"><span><span class="fu">cate</span><span class="op">(</span>cate_model<span class="op">=</span><span class="op">~</span><span class="fl">1</span>,</span></span>
-<span class="r-in"><span>     response_model<span class="op">=</span><span class="va">y</span><span class="op">~</span><span class="va">a</span><span class="op">*</span><span class="op">(</span><span class="va">w1</span><span class="op">+</span><span class="va">w2</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>     propensity_model<span class="op">=</span><span class="va">a</span><span class="op">~</span><span class="va">w1</span><span class="op">+</span><span class="va">w2</span>,</span></span>
+<span class="r-in"><span><span class="fu">cate</span><span class="op">(</span>cate.model<span class="op">=</span><span class="op">~</span><span class="fl">1</span>,</span></span>
+<span class="r-in"><span>     response.model<span class="op">=</span><span class="va">y</span><span class="op">~</span><span class="va">a</span><span class="op">*</span><span class="op">(</span><span class="va">w1</span><span class="op">+</span><span class="va">w2</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>     propensity.model<span class="op">=</span><span class="va">a</span><span class="op">~</span><span class="va">w1</span><span class="op">+</span><span class="va">w2</span>,</span></span>
 <span class="r-in"><span>     data<span class="op">=</span><span class="va">d</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err   2.5%  97.5%    P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> E[y(1)]       1.8047 0.04831 1.7100 1.8994 2.099e-305</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> E[y(0)]       0.8308 0.01984 0.7919 0.8697  0.000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> E[y(1)]       1.8508 0.04186 1.7687 1.9328  0.000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> E[y(0)]       0.8279 0.02054 0.7876 0.8681  0.000e+00</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ───────────                                          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.9740 0.05491 0.8664 1.0816  2.175e-70</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   1.0229 0.04768 0.9295 1.1164 4.287e-102</span>
 <span class="r-in"><span><span class="co">## CATE</span></span></span>
-<span class="r-in"><span><span class="fu">cate</span><span class="op">(</span>cate_model<span class="op">=</span><span class="op">~</span><span class="fl">1</span><span class="op">+</span><span class="va">w2</span>,</span></span>
-<span class="r-in"><span>     response_model<span class="op">=</span><span class="va">y</span><span class="op">~</span><span class="va">a</span><span class="op">*</span><span class="op">(</span><span class="va">w1</span><span class="op">+</span><span class="va">w2</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>     propensity_model<span class="op">=</span><span class="va">a</span><span class="op">~</span><span class="va">w1</span><span class="op">+</span><span class="va">w2</span>,</span></span>
+<span class="r-in"><span><span class="fu">cate</span><span class="op">(</span>cate.model<span class="op">=</span><span class="op">~</span><span class="fl">1</span><span class="op">+</span><span class="va">w2</span>,</span></span>
+<span class="r-in"><span>     response.model<span class="op">=</span><span class="va">y</span><span class="op">~</span><span class="va">a</span><span class="op">*</span><span class="op">(</span><span class="va">w1</span><span class="op">+</span><span class="va">w2</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>     propensity.model<span class="op">=</span><span class="va">a</span><span class="op">~</span><span class="va">w1</span><span class="op">+</span><span class="va">w2</span>,</span></span>
 <span class="r-in"><span>     data<span class="op">=</span><span class="va">d</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err   2.5%  97.5%    P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> E[y(1)]       1.8047 0.04831 1.7100 1.8994 2.099e-305</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> E[y(0)]       0.8308 0.01984 0.7919 0.8697  0.000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> E[y(1)]       1.8508 0.04186 1.7687 1.9328  0.000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> E[y(0)]       0.8279 0.02054 0.7876 0.8681  0.000e+00</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ───────────                                          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.9502 0.05280 0.8467 1.0536  2.093e-72</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> w2            1.0377 0.04756 0.9445 1.1309 1.586e-105</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.9999 0.04654 0.9087 1.0911 2.146e-102</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> w2            0.9879 0.04304 0.9035 1.0723 1.451e-116</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span>  <span class="co">## superlearner example</span></span></span>
 <span class="r-in"><span><span class="va">mod1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>   glm<span class="op">=</span><span class="fu"><a href="ml_model.html">predictor_glm</a></span><span class="op">(</span><span class="va">y</span><span class="op">~</span><span class="va">w1</span><span class="op">+</span><span class="va">w2</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>   gam<span class="op">=</span><span class="fu"><a href="ml_model.html">predictor_gam</a></span><span class="op">(</span><span class="va">y</span><span class="op">~</span><span class="fu">s</span><span class="op">(</span><span class="va">w1</span><span class="op">)</span> <span class="op">+</span> <span class="fu">s</span><span class="op">(</span><span class="va">w2</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>   glm <span class="op">=</span> <span class="fu"><a href="learner_glm.html">learner_glm</a></span><span class="op">(</span><span class="va">y</span><span class="op">~</span><span class="va">w1</span><span class="op">+</span><span class="va">w2</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>   gam <span class="op">=</span> <span class="fu"><a href="learner_gam.html">learner_gam</a></span><span class="op">(</span><span class="va">y</span><span class="op">~</span><span class="fu">s</span><span class="op">(</span><span class="va">w1</span><span class="op">)</span> <span class="op">+</span> <span class="fu">s</span><span class="op">(</span><span class="va">w2</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">s1</span> <span class="op">&lt;-</span> <span class="fu"><a href="predictor_sl.html">predictor_sl</a></span><span class="op">(</span><span class="va">mod1</span>, nfolds<span class="op">=</span><span class="fl">5</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">s1</span> <span class="op">&lt;-</span> <span class="fu"><a href="learner_sl.html">learner_sl</a></span><span class="op">(</span><span class="va">mod1</span>, nfolds<span class="op">=</span><span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mod1' not found</span>
-<span class="r-in"><span><span class="fu">cate</span><span class="op">(</span>cate_model<span class="op">=</span><span class="op">~</span><span class="fl">1</span>,</span></span>
-<span class="r-in"><span>     response_model<span class="op">=</span><span class="va">s1</span>,</span></span>
-<span class="r-in"><span>     propensity_model<span class="op">=</span><span class="fu"><a href="ml_model.html">predictor_glm</a></span><span class="op">(</span><span class="va">a</span><span class="op">~</span><span class="va">w1</span><span class="op">+</span><span class="va">w2</span>, family<span class="op">=</span><span class="va">binomial</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span><span class="fu">cate</span><span class="op">(</span>cate.model<span class="op">=</span><span class="op">~</span><span class="fl">1</span>,</span></span>
+<span class="r-in"><span>     response.model<span class="op">=</span><span class="va">s1</span>,</span></span>
+<span class="r-in"><span>     propensity.model<span class="op">=</span><span class="fu"><a href="learner_glm.html">learner_glm</a></span><span class="op">(</span><span class="va">a</span><span class="op">~</span><span class="va">w1</span><span class="op">+</span><span class="va">w2</span>, family<span class="op">=</span><span class="va">binomial</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>     data<span class="op">=</span><span class="va">d</span>,</span></span>
 <span class="r-in"><span>     stratify<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 's1' not found</span>
@@ -216,11 +246,11 @@ Importance, The International Journal of Biostatistics.</p>
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Klaus K. Holst, Andreas Nordland.</p>
+  <p></p><p>Developed by Klaus K. Holst, Benedikt Sommer, Andreas Nordland.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer></div>

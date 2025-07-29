@@ -32,10 +32,7 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/ate.html">Average Treatment Effects</a>
-    </li>
-    <li>
-      <a href="../articles/ode.html">targeted::ode_solve: Solving Ordinary Differential Equations</a>
+      <a href="../articles/predictionclass.html">Prediction model class (`learner`)</a>
     </li>
     <li>
       <a href="../articles/riskregression.html">Estimating a relative risk or risk difference with a binary exposure</a>
@@ -72,10 +69,14 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">design</span><span class="op">(</span></span>
 <span>  <span class="va">formula</span>,</span>
 <span>  <span class="va">data</span>,</span>
-<span>  intercept <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  rm_envir <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span>,</span>
-<span>  specials <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"weights"</span>, <span class="st">"offset"</span><span class="op">)</span></span>
+<span>  intercept <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  response <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  rm_envir <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  specials <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  specials.call <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  xlev <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  design.matrix <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -91,22 +92,41 @@
 <dd><p>data.frame</p></dd>
 
 
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>additional arguments (e.g, specials such weights, offsets, ...)</p></dd>
+
+
 <dt id="arg-intercept">intercept<a class="anchor" aria-label="anchor" href="#arg-intercept"></a></dt>
-<dd><p>If FALSE (default) an intercept is not included</p></dd>
+<dd><p>(logical) If FALSE an intercept is not included in the
+design matrix</p></dd>
+
+
+<dt id="arg-response">response<a class="anchor" aria-label="anchor" href="#arg-response"></a></dt>
+<dd><p>(logical) if FALSE the response variable is dropped</p></dd>
 
 
 <dt id="arg-rm-envir">rm_envir<a class="anchor" aria-label="anchor" href="#arg-rm-envir"></a></dt>
 <dd><p>Remove environment</p></dd>
 
 
-<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>additional arguments (e.g, specials such weights, offsets,
-subset)</p></dd>
-
-
 <dt id="arg-specials">specials<a class="anchor" aria-label="anchor" href="#arg-specials"></a></dt>
 <dd><p>character vector specifying functions in the formula that
 should be marked as special in the <a href="https://rdrr.io/r/stats/terms.html" class="external-link">terms</a> object</p></dd>
+
+
+<dt id="arg-specials-call">specials.call<a class="anchor" aria-label="anchor" href="#arg-specials-call"></a></dt>
+<dd><p>(call) specials optionally defined as a call-type</p></dd>
+
+
+<dt id="arg-xlev">xlev<a class="anchor" aria-label="anchor" href="#arg-xlev"></a></dt>
+<dd><p>a named list of character vectors giving the full set of levels
+to be assumed for each factor</p></dd>
+
+
+<dt id="arg-design-matrix">design.matrix<a class="anchor" aria-label="anchor" href="#arg-design-matrix"></a></dt>
+<dd><p>(logical) if FALSE then only response and specials are
+returned. Otherwise, the design.matrix <code>x</code> is als part of the returned
+object.</p></dd>
 
 </dl></div>
     <div id="value">
@@ -126,11 +146,11 @@ should be marked as special in the <a href="https://rdrr.io/r/stats/terms.html" 
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Klaus K. Holst, Andreas Nordland.</p>
+  <p></p><p>Developed by Klaus K. Holst, Benedikt Sommer, Andreas Nordland.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer></div>

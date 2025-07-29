@@ -33,10 +33,7 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/ate.html">Average Treatment Effects</a>
-    </li>
-    <li>
-      <a href="../articles/ode.html">targeted::ode_solve: Solving Ordinary Differential Equations</a>
+      <a href="../articles/predictionclass.html">Prediction model class (`learner`)</a>
     </li>
     <li>
       <a href="../articles/riskregression.html">Estimating a relative risk or risk difference with a binary exposure</a>
@@ -89,7 +86,7 @@
 
 
 <dl><dt id="arg-response-model">response_model<a class="anchor" aria-label="anchor" href="#arg-response-model"></a></dt>
-<dd><p>formula or ml_model object (formula =&gt; glm)</p></dd>
+<dd><p>formula or <a href="learner.html">learner</a> object (formula =&gt; glm)</p></dd>
 
 
 <dt id="arg-exposure-model">exposure_model<a class="anchor" aria-label="anchor" href="#arg-exposure-model"></a></dt>
@@ -117,7 +114,8 @@
 
 
 <dt id="arg-mc-cores">mc.cores<a class="anchor" aria-label="anchor" href="#arg-mc-cores"></a></dt>
-<dd><p>mc.cores Optional number of cores. parallel::mcmapply used instead of future</p></dd>
+<dd><p>mc.cores Optional number of cores.
+parallel::mcmapply used instead of future</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -146,33 +144,35 @@ g\{E(Y|A,W)\}\mid W])} {E\{Var(A\mid W)\}} $$</p>
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">sim1</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span>, <span class="va">family</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>   <span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/lvm.html" class="external-link">lvm</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>     <span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">distribution</a></span><span class="op">(</span><span class="op">~</span> <span class="va">y</span>, <span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">binomial.lvm</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>     <span class="fu"><a href="https://kkholst.github.io/lava/reference/regression-set.html" class="external-link">regression</a></span><span class="op">(</span><span class="st">'a'</span>, value<span class="op">=</span><span class="kw">function</span><span class="op">(</span><span class="va">l</span><span class="op">)</span> <span class="va">l</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>     <span class="fu"><a href="https://kkholst.github.io/lava/reference/regression-set.html" class="external-link">regression</a></span><span class="op">(</span><span class="st">'y'</span>, value<span class="op">=</span><span class="kw">function</span><span class="op">(</span><span class="va">a</span>,<span class="va">l</span><span class="op">)</span> <span class="va">a</span> <span class="op">+</span> <span class="va">l</span><span class="op">)</span></span></span>
+<span class="r-in"><span>   <span class="va">m</span> <span class="op">&lt;-</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/lvm.html" class="external-link">lvm</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>     <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">distribution</a></span><span class="op">(</span><span class="op">~</span><span class="va">y</span>, value<span class="op">=</span><span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">binomial.lvm</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>     <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/regression-set.html" class="external-link">regression</a></span><span class="op">(</span><span class="st">'a'</span>, value<span class="op">=</span><span class="kw">function</span><span class="op">(</span><span class="va">l</span><span class="op">)</span> <span class="va">l</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>     <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/regression-set.html" class="external-link">regression</a></span><span class="op">(</span><span class="st">'y'</span>, value<span class="op">=</span><span class="kw">function</span><span class="op">(</span><span class="va">a</span>,<span class="va">l</span><span class="op">)</span> <span class="va">a</span> <span class="op">+</span> <span class="va">l</span><span class="op">)</span></span></span>
 <span class="r-in"><span>     <span class="kw">if</span> <span class="op">(</span><span class="va">family</span><span class="op">$</span><span class="va">family</span><span class="op">==</span><span class="st">"binomial"</span><span class="op">)</span></span></span>
-<span class="r-in"><span>        <span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">distribution</a></span><span class="op">(</span><span class="va">m</span>, <span class="op">~</span><span class="va">a</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">binomial.lvm</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-in"><span>   <span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="va">m</span>, <span class="va">n</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">distribution</a></span><span class="op">(</span><span class="va">m</span>, <span class="op">~</span><span class="va">a</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">binomial.lvm</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>   <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="va">m</span>, <span class="va">n</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">splines</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">sim1</span><span class="op">(</span><span class="fl">1e4</span>, family<span class="op">=</span><span class="va">f</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">e</span> <span class="op">&lt;-</span> <span class="fu">alean</span><span class="op">(</span>response_model<span class="op">=</span><span class="fu"><a href="ML.html">ML</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">a</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/splines/bs.html" class="external-link">bs</a></span><span class="op">(</span><span class="va">l</span>, df<span class="op">=</span><span class="fl">3</span><span class="op">)</span>, family<span class="op">=</span><span class="va">binomial</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>           exposure_model<span class="op">=</span><span class="fu"><a href="ML.html">ML</a></span><span class="op">(</span><span class="va">a</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/splines/bs.html" class="external-link">bs</a></span><span class="op">(</span><span class="va">l</span>, df<span class="op">=</span><span class="fl">3</span><span class="op">)</span>, family<span class="op">=</span><span class="va">f</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span><span class="va">e</span> <span class="op">&lt;-</span> <span class="fu">alean</span><span class="op">(</span></span></span>
+<span class="r-in"><span> response_model<span class="op">=</span><span class="fu"><a href="learner_glm.html">learner_glm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">a</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/splines/bs.html" class="external-link">bs</a></span><span class="op">(</span><span class="va">l</span>, df<span class="op">=</span><span class="fl">3</span><span class="op">)</span>, family<span class="op">=</span><span class="va">binomial</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span> exposure_model<span class="op">=</span><span class="fu"><a href="learner_glm.html">learner_glm</a></span><span class="op">(</span><span class="va">a</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/splines/bs.html" class="external-link">bs</a></span><span class="op">(</span><span class="va">l</span>, df<span class="op">=</span><span class="fl">3</span><span class="op">)</span>, family<span class="op">=</span><span class="va">f</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span> data<span class="op">=</span><span class="va">d</span>,</span></span>
+<span class="r-in"><span> link <span class="op">=</span> <span class="st">"logit"</span>, mc.cores<span class="op">=</span><span class="fl">1</span>, nfolds<span class="op">=</span><span class="fl">1</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">e</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Estimate Std.Err   2.5% 97.5%   P-value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> a   0.9716 0.05424 0.8653 1.078 9.237e-72</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">e</span> <span class="op">&lt;-</span> <span class="fu">alean</span><span class="op">(</span>response_model<span class="op">=</span><span class="fu"><a href="learner_glm.html">learner_glm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">a</span> <span class="op">+</span> <span class="va">l</span>, family<span class="op">=</span><span class="va">binomial</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>           exposure_model<span class="op">=</span><span class="fu"><a href="learner_glm.html">learner_glm</a></span><span class="op">(</span><span class="va">a</span> <span class="op">~</span> <span class="va">l</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>           data<span class="op">=</span><span class="va">d</span>,</span></span>
 <span class="r-in"><span>           link <span class="op">=</span> <span class="st">"logit"</span>, mc.cores<span class="op">=</span><span class="fl">1</span>, nfolds<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">e</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Estimate Std.Err   2.5% 97.5%   P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> a    1.027 0.05293 0.9237 1.131 6.133e-84</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">e</span> <span class="op">&lt;-</span> <span class="fu">alean</span><span class="op">(</span>response_model<span class="op">=</span><span class="fu"><a href="ML.html">ML</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">a</span> <span class="op">+</span> <span class="va">l</span>, family<span class="op">=</span><span class="va">binomial</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>           exposure_model<span class="op">=</span><span class="fu"><a href="ML.html">ML</a></span><span class="op">(</span><span class="va">a</span> <span class="op">~</span> <span class="va">l</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>           data<span class="op">=</span><span class="va">d</span>,</span></span>
-<span class="r-in"><span>           link <span class="op">=</span> <span class="st">"logit"</span>, mc.cores<span class="op">=</span><span class="fl">1</span>, nfolds<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">e</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Estimate Std.Err   2.5% 97.5% P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> a    1.027 0.05315 0.9226 1.131 3.8e-83</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> a   0.9629 0.05411 0.8568 1.069 7.718e-71</span>
 </code></pre></div>
     </div>
   </div>
@@ -183,11 +183,11 @@ g\{E(Y|A,W)\}\mid W])} {E\{Var(A\mid W)\}} $$</p>
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Klaus K. Holst, Andreas Nordland.</p>
+  <p></p><p>Developed by Klaus K. Holst, Benedikt Sommer, Andreas Nordland.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer></div>

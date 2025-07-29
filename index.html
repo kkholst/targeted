@@ -51,10 +51,7 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="articles/ate.html">Average Treatment Effects</a>
-    </li>
-    <li>
-      <a href="articles/ode.html">targeted::ode_solve: Solving Ordinary Differential Equations</a>
+      <a href="articles/predictionclass.html">Prediction model class (`learner`)</a>
     </li>
     <li>
       <a href="articles/riskregression.html">Estimating a relative risk or risk difference with a binary exposure</a>
@@ -87,109 +84,206 @@
 
 
 <div class="section level1">
-<div class="page-header"><h1 id="targeted-inference-in-r-targeted-">Targeted Inference in R: targeted <a href="https://kkholst.github.io/targeted/" class="external-link"><img src="reference/figures/logo.svg" align="right" height="75"></a>
-<a class="anchor" aria-label="anchor" href="#targeted-inference-in-r-targeted-"></a>
+<div class="page-header"><h1 id="targeted-learning-in-r-targeted-">Targeted Learning in R (<code>targeted</code>) <a href="https://kkholst.github.io/targeted/" class="external-link"><img src="reference/figures/logohex.png" align="right" height="150"></a>
+<a class="anchor" aria-label="anchor" href="#targeted-learning-in-r-targeted-"></a>
 </h1></div>
-<p>Various methods for targeted and semiparametric inference including augmented inverse probability weighted estimators for missing data and causal inference (Bang and Robins (2005) &lt;10.1111/j.1541-0420.2005.00377.x&gt;) and estimators for risk differences and relative risks (Richardson et al. (2017) &lt;10.1080/01621459.2016.1192546&gt;).</p>
-<div class="section level2">
-<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
-</h2>
+<p>Various methods for targeted learning and semiparametric inference including augmented inverse probability weighted (AIPW) estimators for missing data and causal inference (Bang and Robins (2005) <a href="doi:10.1111/j.1541-0420.2005.00377.x" class="uri">doi:10.1111/j.1541-0420.2005.00377.x</a>), variable importance and conditional average treatment effects (CATE) (van der Laan (2006) <a href="doi:10.2202/1557-4679.1008" class="uri">doi:10.2202/1557-4679.1008</a>), estimators for risk differences and relative risks (Richardson et al. (2017) <a href="doi:10.1080/01621459.2016.1192546" class="uri">doi:10.1080/01621459.2016.1192546</a>), assumption lean inference for generalized linear model parameters (Vansteelandt et al. (2022) <a href="doi:10.1111/rssb.12504" class="uri">doi:10.1111/rssb.12504</a>).</p>
+</div>
+<div class="section level1">
+<h1 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h1>
 <p>You can install the released version of targeted from <a href="https://CRAN.R-project.org" class="external-link">CRAN</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"targeted"</span><span class="op">)</span></span></code></pre></div>
-<p>And the development version from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
+<p>And the development version from <a href="https://github.com/kkholst/targeted" class="external-link">GitHub</a> with:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"kkholst/targeted"</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="examples">Examples<a class="anchor" aria-label="anchor" href="#examples"></a>
-</h2>
-<div class="section level3">
-<h3 id="targeted-risk-regression">Targeted risk regression<a class="anchor" aria-label="anchor" href="#targeted-risk-regression"></a>
-</h3>
+<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"kkholst/targeted"</span>, ref<span class="op">=</span><span class="st">"dev"</span><span class="op">)</span></span></code></pre></div>
+<p>Computations such as cross-validation are parallelized via the <a href="https://future.futureverse.org" class="external-link">future</a> package. To enable parallel computations and progress-bars the following code can be executed</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://kkholst.github.io/targeted/" class="external-link">targeted</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; Loading required package: lava</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span></code></pre></div>
-<p>Simulate some data:</p>
+<code class="sourceCode R"><span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="st">"multisession"</span><span class="op">)</span></span>
+<span><span class="fu">progressr</span><span class="fu">::</span><span class="fu"><a href="https://progressr.futureverse.org/reference/handlers.html" class="external-link">handlers</a></span><span class="op">(</span>global<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level1">
+<h1 id="examples">Examples<a class="anchor" aria-label="anchor" href="#examples"></a>
+</h1>
+<p>To illustrate some of the functionality of the <code>targeted</code> package we simulate some data from the following model <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mo>=</mo><mo>exp</mo><mo stretchy="false" form="prefix">{</mo><mo>−</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>W</mi><mn>1</mn></msub><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup><mo>−</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>W</mi><mn>2</mn></msub><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">}</mo><mo>−</mo><mn>2</mn><mo>exp</mo><mo stretchy="false" form="prefix">{</mo><mo>−</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>W</mi><mn>1</mn></msub><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup><mo>−</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>W</mi><mn>2</mn></msub><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup><mo stretchy="false" form="postfix">}</mo><mi>A</mi><mo>+</mo><mi>ϵ</mi></mrow><annotation encoding="application/x-tex">Y = \exp\{-(W_1 - 1)^2 - (W_2 - 1)^2)\} - 2\exp\{-(W_1+1)^2 - (W_2+1)^2\}A + \epsilon</annotation></semantics></math> with independent measurement error <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϵ</mi><mo>∼</mo><mi>𝒩</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\epsilon\sim\mathcal{N}(0,1)</annotation></semantics></math>, treatment variable <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mo>∼</mo><mi>B</mi><mi>e</mi><mi>r</mi><mi>n</mi><mi>o</mi><mi>u</mi><mi>l</mi><mi>l</mi><mi>i</mi><mrow><mo stretchy="true" form="prefix">(</mo><mtext mathvariant="normal">expit</mtext><mo stretchy="false" form="prefix">{</mo><mo>−</mo><mn>1</mn><mo>+</mo><msub><mi>W</mi><mn>1</mn></msub><mo stretchy="false" form="postfix">}</mo><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">A \sim Bernoulli(\text{expit}\{-1+W_1\})</annotation></semantics></math> and independent covariates <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>W</mi><mn>1</mn></msub><mo>,</mo><msub><mi>W</mi><mn>2</mn></msub><mo>∼</mo><mi>𝒩</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mi>/</mi><mn>2</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">W_1, W_2\sim\mathcal{N}(0,1/2)</annotation></semantics></math>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/lvm.html" class="external-link">lvm</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://kkholst.github.io/lava/reference/regression-set.html" class="external-link">regression</a></span><span class="op">(</span><span class="va">a</span> <span class="op">~</span> <span class="va">x</span><span class="op">+</span><span class="va">z</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://kkholst.github.io/lava/reference/regression-set.html" class="external-link">regression</a></span><span class="op">(</span><span class="va">lp.target</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://kkholst.github.io/lava/reference/regression-set.html" class="external-link">regression</a></span><span class="op">(</span><span class="va">lp.nuisance</span> <span class="op">~</span> <span class="va">x</span> <span class="op">+</span> <span class="va">z</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">distribution</a></span><span class="op">(</span><span class="st">'a'</span>, <span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">binomial.lvm</a></span><span class="op">(</span><span class="st">"logit"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://kkholst.github.io/lava/reference/binomial.rd.html" class="external-link">binomial.rr</a></span><span class="op">(</span><span class="st">'y'</span>, <span class="st">'a'</span>, <span class="st">'lp.target'</span>, <span class="st">'lp.nuisance'</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://kkholst.github.io/targeted/" class="external-link">"targeted"</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">par</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'a'</span><span class="op">=</span><span class="op">-</span><span class="fl">2</span>, <span class="st">'lp.target'</span><span class="op">=</span><span class="fl">1</span>, <span class="st">'lp.nuisance'</span><span class="op">=</span><span class="op">-</span><span class="fl">1</span>, <span class="st">'lp.nuisance~x'</span><span class="op">=</span><span class="fl">2</span><span class="op">)</span></span>
-<span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="va">m</span>, n<span class="op">=</span><span class="fl">1e4</span>, seed<span class="op">=</span><span class="fl">1</span>, p<span class="op">=</span><span class="va">par</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span>select<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'y'</span>, <span class="st">'a'</span>,<span class="st">'x'</span>,<span class="st">'z'</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">simdata</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>   <span class="va">w1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="co"># covariates</span></span>
+<span>   <span class="va">w2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="co"># ...</span></span>
+<span>   <span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Logistic.html" class="external-link">plogis</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span> <span class="op">+</span> <span class="va">w1</span><span class="op">)</span><span class="op">)</span> <span class="co"># treatment indicator</span></span>
+<span>   <span class="va">y</span> <span class="op">&lt;-</span>  <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span> <span class="op">(</span><span class="va">w1</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span><span class="op">**</span><span class="fl">2</span> <span class="op">-</span> <span class="op">(</span><span class="va">w2</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span><span class="op">**</span><span class="fl">2</span><span class="op">)</span> <span class="op">-</span> <span class="co"># continuous response</span></span>
+<span>     <span class="fl">2</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span> <span class="op">(</span><span class="va">w1</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span><span class="op">**</span><span class="fl">2</span> <span class="op">-</span> <span class="op">(</span><span class="va">w2</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span><span class="op">**</span><span class="fl">2</span><span class="op">)</span> <span class="op">*</span> <span class="va">a</span> <span class="op">+</span> <span class="co"># additional effect in treated</span></span>
+<span>     <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, sd<span class="op">=</span><span class="fl">0.5</span><span class="op">**</span><span class="fl">.5</span><span class="op">)</span></span>
+<span>   <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">a</span>, <span class="va">w1</span>, <span class="va">w2</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">simdata</span><span class="op">(</span><span class="fl">5e3</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   y a          x          z</span></span>
-<span><span class="co">#&gt; 1 0 0 -0.6264538 -0.8043316</span></span>
-<span><span class="co">#&gt; 2 0 0  0.1836433 -1.0565257</span></span>
-<span><span class="co">#&gt; 3 0 0 -0.8356286 -1.0353958</span></span>
-<span><span class="co">#&gt; 4 0 0  1.5952808 -1.1855604</span></span>
-<span><span class="co">#&gt; 5 1 0  0.3295078 -0.5004395</span></span>
-<span><span class="co">#&gt; 6 0 0 -0.8204684 -0.5249887</span></span></code></pre></div>
+<span><span class="co">#&gt;             y a         w1         w2</span></span>
+<span><span class="co">#&gt; 1 -0.59239667 0 -0.6264538 -1.5163733</span></span>
+<span><span class="co">#&gt; 2  0.01794935 0  0.1836433  0.6291412</span></span>
+<span><span class="co">#&gt; 3  0.24968229 0 -0.8356286 -1.6781940</span></span>
+<span><span class="co">#&gt; 4  1.34434300 1  1.5952808  1.1797811</span></span>
+<span><span class="co">#&gt; 5  1.16367655 0  0.3295078  1.1176545</span></span>
+<span><span class="co">#&gt; 6 -0.94757031 0 -0.8204684 -1.2377359</span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/riskreg.html">riskreg</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">a</span>, nuisance<span class="op">=</span><span class="op">~</span><span class="va">x</span><span class="op">+</span><span class="va">z</span>, data<span class="op">=</span><span class="va">d</span>, type<span class="op">=</span><span class="st">"rr"</span><span class="op">)</span></span>
-<span><span class="va">fit</span></span>
-<span><span class="co">#&gt;             Estimate Std.Err   2.5% 97.5%    P-value</span></span>
-<span><span class="co">#&gt; (Intercept)   0.9722 0.02896 0.9155 1.029 4.281e-247</span></span></code></pre></div>
-<p>Here the same design matrix is used for both the propensity model and the nuisance parameter (odds-product) model</p>
+<code class="sourceCode R"><span><span class="va">wnew</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">3</span>,<span class="fl">3</span>, length.out<span class="op">=</span><span class="fl">200</span><span class="op">)</span></span>
+<span><span class="va">dnew</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>w1 <span class="op">=</span> <span class="va">wnew</span>, w2 <span class="op">=</span> <span class="va">wnew</span>, a <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">dnew</span>,</span>
+<span>          <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span> <span class="op">(</span><span class="va">w1</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span><span class="op">**</span><span class="fl">2</span> <span class="op">-</span> <span class="op">(</span><span class="va">w2</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span><span class="op">**</span><span class="fl">2</span><span class="op">)</span> <span class="op">-</span></span>
+<span>          <span class="fl">2</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span> <span class="op">(</span><span class="va">w1</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span><span class="op">**</span><span class="fl">2</span> <span class="op">-</span> <span class="op">(</span><span class="va">w2</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span><span class="op">**</span><span class="fl">2</span><span class="op">)</span><span class="op">*</span><span class="va">a</span></span>
+<span>          <span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/image.html" class="external-link">image</a></span><span class="op">(</span><span class="va">wnew</span>, <span class="va">wnew</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="va">y</span>, ncol<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">wnew</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>      col<span class="op">=</span><span class="fu">viridisLite</span><span class="fu">::</span><span class="fu"><a href="https://sjmgarnier.github.io/viridisLite/reference/viridis.html" class="external-link">viridis</a></span><span class="op">(</span><span class="fl">64</span><span class="op">)</span>,</span>
+<span>      main<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"E(Y|"</span>,<span class="va">W</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,<span class="st">","</span>,<span class="va">W</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>,<span class="st">")"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>      xlab<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">W</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, ylab<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">W</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-simplot-1.png" width="50%"></p>
+<div class="section level2">
+<h2 id="nuisance-prediction-models">Nuisance (prediction) models<a class="anchor" aria-label="anchor" href="#nuisance-prediction-models"></a>
+</h2>
+<p>Methods for targeted and semiparametric inference rely on fitting nuisance models to observed data when estimating the target parameter of interest. The <a href="https://kkholst.github.io/targeted/" class="external-link">targeted</a> package implements the <a href="https://r6.r-lib.org/" class="external-link">R6 reference class</a> <code>learner</code> to harmonize common statistical and machine learning models for the usage as nuisance models across the various implemented estimators, such as the <code>targeted:cate</code> function. Commonly used models are constructed as <code>learner</code> class objects through the <code>learner_*</code> functions.</p>
+<p>As an example, we can specify a linear regression model with an interaction term between treatment and the two covariates <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>W</mi><mn>1</mn></msub><annotation encoding="application/x-tex">W_1</annotation></semantics></math> and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>W</mi><mn>2</mn></msub><annotation encoding="application/x-tex">W_2</annotation></semantics></math></p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
-<span><span class="co">#&gt; riskreg(formula = y ~ a, nuisance = ~x + z, data = d, type = "rr")</span></span>
+<code class="sourceCode R"><span><span class="va">lr</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/learner_glm.html">learner_glm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="op">(</span><span class="va">w1</span> <span class="op">+</span> <span class="va">w2</span><span class="op">)</span><span class="op">*</span><span class="va">a</span>, family <span class="op">=</span> <span class="va">gaussian</span><span class="op">)</span></span>
+<span><span class="va">lr</span></span>
+<span><span class="co">#&gt; ────────── learner object ──────────</span></span>
+<span><span class="co">#&gt; glm </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Relative risk model</span></span>
-<span><span class="co">#&gt;   Response:  y </span></span>
-<span><span class="co">#&gt;   Exposure:  a </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;              Estimate Std.Err    2.5%   97.5%    P-value</span></span>
-<span><span class="co">#&gt; log(RR):                                                </span></span>
-<span><span class="co">#&gt;  (Intercept)   0.9722 0.02896  0.9155  1.0290 4.281e-247</span></span>
-<span><span class="co">#&gt; log(OP):                                                </span></span>
-<span><span class="co">#&gt;  (Intercept)  -0.9636 0.06603 -1.0930 -0.8342  3.072e-48</span></span>
-<span><span class="co">#&gt;  x             2.0549 0.07901  1.9000  2.2098 4.182e-149</span></span>
-<span><span class="co">#&gt;  z             1.0329 0.06728  0.9010  1.1648  3.468e-53</span></span>
-<span><span class="co">#&gt; logit(Pr):                                              </span></span>
-<span><span class="co">#&gt;  (Intercept)  -1.9753 0.05631 -2.0856 -1.8649 1.284e-269</span></span>
-<span><span class="co">#&gt;  x             0.9484 0.04186  0.8664  1.0305 1.235e-113</span></span>
-<span><span class="co">#&gt;  z             1.0336 0.04878  0.9380  1.1292  1.187e-99</span></span></code></pre></div>
-<p>Double-robustness illustrated by using a wrong propensity model but a correct nuisance paramter (odds-product) model:</p>
+<span><span class="co">#&gt; Estimate arguments: family=&lt;function&gt; </span></span>
+<span><span class="co">#&gt; Predict arguments:   </span></span>
+<span><span class="co">#&gt; Formula: y ~ (w1 + w2) * a &lt;environment: 0x13ae694c8&gt;</span></span></code></pre></div>
+<p>To fit the model to the data we use the <code>estimate</code> method</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/riskreg.html">riskreg</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">a</span>, nuisance<span class="op">=</span><span class="op">~</span><span class="va">x</span><span class="op">+</span><span class="va">z</span>, propensity<span class="op">=</span><span class="op">~</span><span class="va">z</span>, data<span class="op">=</span><span class="va">d</span>, type<span class="op">=</span><span class="st">"rr"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;             Estimate Std.Err   2.5% 97.5%    P-value</span></span>
-<span><span class="co">#&gt; (Intercept)   0.9709 0.02893 0.9142 1.028 7.053e-247</span></span></code></pre></div>
-<p>Or vice-versa</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/riskreg.html">riskreg</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">a</span>, nuisance<span class="op">=</span><span class="op">~</span><span class="va">z</span>, propensity<span class="op">=</span><span class="op">~</span><span class="va">x</span><span class="op">+</span><span class="va">z</span>, data<span class="op">=</span><span class="va">d</span>, type<span class="op">=</span><span class="st">"rr"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;             Estimate Std.Err   2.5% 97.5%    P-value</span></span>
-<span><span class="co">#&gt; (Intercept)   0.9931 0.03597 0.9226 1.064 8.286e-168</span></span></code></pre></div>
-<p>Whereas the MLE yields a biased estimate of the relative risk:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fit_mle</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">d</span>, <span class="fu"><a href="reference/riskreg.html">riskreg_mle</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">a</span>, x1<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span><span class="fl">1</span>,<span class="va">d</span><span class="op">)</span>, x2<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span><span class="va">z</span>, <span class="va">d</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://kkholst.github.io/lava/reference/estimate.default.html" class="external-link">estimate</a></span><span class="op">(</span><span class="va">fit_mle</span>, <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="co">#&gt;      Estimate Std.Err  2.5% 97.5% P-value</span></span>
-<span><span class="co">#&gt; [p1]    1.289 0.02855 1.233 1.345       0</span></span>
+<code class="sourceCode R"><span><span class="va">lr</span><span class="op">$</span><span class="fu">estimate</span><span class="op">(</span><span class="va">d</span><span class="op">)</span></span>
+<span><span class="va">lr</span><span class="op">$</span><span class="va">fit</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Null Hypothesis: </span></span>
-<span><span class="co">#&gt;   [p1] = 0</span></span></code></pre></div>
-<p>To obtain an estimate of the risk-difference (here wrong model) we simply chance the <code>type</code> argument</p>
+<span><span class="co">#&gt; Call:  stats::glm(formula = formula, family = family, data = data)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Coefficients:</span></span>
+<span><span class="co">#&gt; (Intercept)           w1           w2            a         w1:a         w2:a  </span></span>
+<span><span class="co">#&gt;     0.18808      0.13044      0.08253     -0.33517      0.15330      0.24068  </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Degrees of Freedom: 4999 Total (i.e. Null);  4994 Residual</span></span>
+<span><span class="co">#&gt; Null Deviance:       3098 </span></span>
+<span><span class="co">#&gt; Residual Deviance: 2741  AIC: 11200</span></span></code></pre></div>
+<p>Predictions, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>Y</mi><mo>∣</mo><msub><mi>W</mi><mn>1</mn></msub><mo>,</mo><msub><mi>W</mi><mn>2</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">E(Y\mid W_1, W_2)</annotation></semantics></math>, can be performed with the <code>predict</code> method</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="va">lr</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt;           1           2           3           4           5           6 </span></span>
+<span><span class="co">#&gt; -0.01878799  0.26395942 -0.05942914  0.68687155  0.32330487 -0.02109944</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">pr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="va">lr</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">dnew</span><span class="op">)</span>, ncol<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">wnew</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/image.html" class="external-link">image</a></span><span class="op">(</span><span class="va">wnew</span>, <span class="va">wnew</span>, <span class="va">pr</span>, col<span class="op">=</span><span class="fu">viridisLite</span><span class="fu">::</span><span class="fu"><a href="https://sjmgarnier.github.io/viridisLite/reference/viridis.html" class="external-link">viridis</a></span><span class="op">(</span><span class="fl">64</span><span class="op">)</span>,</span>
+<span>      main<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"E(Y|"</span>,<span class="va">W</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,<span class="st">","</span>,<span class="va">W</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>,<span class="st">")"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>      xlab<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">W</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, ylab<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">W</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-lrplot-1.png" width="50%"></p>
+<p>Similarly, a Random Forest can be specified with</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/riskreg.html">riskreg</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">a</span>, nuisance<span class="op">=</span><span class="op">~</span><span class="va">x</span><span class="op">+</span><span class="va">z</span>, data<span class="op">=</span><span class="va">d</span>, type<span class="op">=</span><span class="st">"rd"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;             Estimate Std.Err   2.5%  97.5%    P-value</span></span>
-<span><span class="co">#&gt; (Intercept)   0.5102 0.01613 0.4786 0.5418 1.135e-219</span></span></code></pre></div>
-<p>Interactions with the exposure can be examined with the <code>target</code> argument</p>
+<code class="sourceCode R"><span><span class="va">lr_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/learner_grf.html">learner_grf</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">w1</span> <span class="op">+</span> <span class="va">w2</span> <span class="op">+</span> <span class="va">a</span>, num.trees <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></code></pre></div>
+<p>Lists of models can also be constructed for different hyper-parameters with the <code>learner_expand_grid</code> function.</p>
+<div class="section level3">
+<h3 id="cross-validation">Cross-validation<a class="anchor" aria-label="anchor" href="#cross-validation"></a>
+</h3>
+<p>To assess the model generalization error we can perform <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>-fold cross-validation with the <code>cv</code> method</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/riskreg.html">riskreg</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">a</span>, target<span class="op">=</span><span class="va">a</span><span class="op">~</span><span class="va">x</span>, nuisance<span class="op">=</span><span class="op">~</span><span class="va">x</span><span class="op">+</span><span class="va">z</span>, data<span class="op">=</span><span class="va">d</span>, type<span class="op">=</span><span class="st">"rr"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;             Estimate Std.Err    2.5%    97.5%    P-value</span></span>
-<span><span class="co">#&gt; (Intercept)   1.0241 0.03659  0.9524  1.09584 1.986e-172</span></span>
-<span><span class="co">#&gt; x            -0.0825 0.03469 -0.1505 -0.01451  1.739e-02</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>glm <span class="op">=</span> <span class="va">lr</span>, rf <span class="op">=</span> <span class="va">lr_rf</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/cv.default.html">cv</a></span><span class="op">(</span><span class="va">mod</span>, data <span class="op">=</span> <span class="va">d</span>, rep <span class="op">=</span> <span class="fl">2</span>, nfolds <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; , , mse</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;          mean         sd       min       max</span></span>
+<span><span class="co">#&gt; glm 0.5498117 0.02987117 0.5085057 0.5969734</span></span>
+<span><span class="co">#&gt; rf  0.5070569 0.03177828 0.4597520 0.5534290</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; , , mae</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;          mean         sd       min       max</span></span>
+<span><span class="co">#&gt; glm 0.5907746 0.01516298 0.5686472 0.6148165</span></span>
+<span><span class="co">#&gt; rf  0.5684956 0.01659710 0.5453521 0.5953637</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="ensembles-super-learner">Ensembles (Super-Learner)<a class="anchor" aria-label="anchor" href="#ensembles-super-learner"></a>
+</h3>
+<p>An ensemble learner (super-learner) can easily be constructed from lists of <code>learner</code> objects</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sl</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/learner_sl.html">learner_sl</a></span><span class="op">(</span><span class="va">mod</span>, nfolds <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
+<span><span class="va">sl</span><span class="op">$</span><span class="fu">estimate</span><span class="op">(</span><span class="va">d</span><span class="op">)</span></span>
+<span><span class="va">sl</span></span>
+<span><span class="co">#&gt; ────────── learner object ──────────</span></span>
+<span><span class="co">#&gt; superlearner</span></span>
+<span><span class="co">#&gt;  glm</span></span>
+<span><span class="co">#&gt;  rf </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Estimate arguments: learners=&lt;list&gt;, nfolds=10, meta.learner=&lt;function&gt;, model.score=&lt;function&gt; </span></span>
+<span><span class="co">#&gt; Predict arguments:   </span></span>
+<span><span class="co">#&gt; Formula: y ~ (w1 + w2) * a &lt;environment: 0x15cf956c8&gt; </span></span>
+<span><span class="co">#&gt; ─────────────────────────────────────</span></span>
+<span><span class="co">#&gt;         score     weight</span></span>
+<span><span class="co">#&gt; glm 0.5499084 0.03290729</span></span>
+<span><span class="co">#&gt; rf  0.5070931 0.96709271</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">pr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="va">sl</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">dnew</span><span class="op">)</span>, ncol<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">wnew</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/image.html" class="external-link">image</a></span><span class="op">(</span><span class="va">wnew</span>, <span class="va">wnew</span>, <span class="va">pr</span>, col<span class="op">=</span><span class="fu">viridisLite</span><span class="fu">::</span><span class="fu"><a href="https://sjmgarnier.github.io/viridisLite/reference/viridis.html" class="external-link">viridis</a></span><span class="op">(</span><span class="fl">64</span><span class="op">)</span>,</span>
+<span>      main<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"E(Y|"</span>,<span class="va">W</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,<span class="st">","</span>,<span class="va">W</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>,<span class="st">")"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>      xlab<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">W</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, ylab<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">W</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-lrsl_plot-1.png" width="50%"></p>
 </div>
 </div>
+<div class="section level2">
+<h2 id="average-treatment-effects">Average Treatment Effects<a class="anchor" aria-label="anchor" href="#average-treatment-effects"></a>
+</h2>
+<p>In the following we are interested in estimating the target parameter <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ψ</mi><mi>a</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>P</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mi>E</mi><mi>P</mi></msub><mrow><mo stretchy="true" form="prefix">[</mo><mi>Y</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>a</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">\psi_a(P)
+= E_P[Y(a)]</annotation></semantics></math>, where <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>a</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">Y(a)</annotation></semantics></math> is the <em>potential outcome</em> we would have observed if treatment <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math> had been administered, possibly contrary to the actual treatment that was observed, i.e., <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mo>=</mo><mi>Y</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>A</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">Y = Y(A)</annotation></semantics></math>. To assess the treatment effect we can then the consider the <em>average treatment effect</em> (ATE) <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>E</mi><mi>P</mi></msub><mrow><mo stretchy="true" form="prefix">[</mo><mi>Y</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mo>−</mo><msub><mi>E</mi><mi>P</mi></msub><mrow><mo stretchy="true" form="prefix">[</mo><mi>Y</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">E_P[Y(1)]-E_P[Y(0)],</annotation></semantics></math> or some other contrast of interest <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>ψ</mi><mn>1</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>P</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo><msub><mi>ψ</mi><mn>0</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>P</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">g(\psi_1(P), \psi_0(P))</annotation></semantics></math>. Under the following assumptions</p>
+<ol style="list-style-type: decimal">
+<li>Stable Unit Treatment Values Assumption (the treatment of a specific subject is not affecting the potential outcome of other subjects)</li>
+<li>Positivity, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>A</mi><mo>∣</mo><mi>W</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>&gt;</mo><mi>ϵ</mi></mrow><annotation encoding="application/x-tex">P(A\mid W)&gt;\epsilon</annotation></semantics></math> for some <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϵ</mi><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\epsilon&gt;0</annotation></semantics></math> and baseline covariates <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>W</mi><annotation encoding="application/x-tex">W</annotation></semantics></math>
+</li>
+<li>No unmeasured confounders, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>a</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>⊥</mo><mspace width="-0.167em"></mspace><mspace width="-0.167em"></mspace><mspace width="-0.167em"></mspace><mo>⊥</mo><mi>A</mi><mo stretchy="false" form="prefix">|</mo><mi>W</mi></mrow><annotation encoding="application/x-tex">Y(a)\perp \!\!\! \perp A|W</annotation></semantics></math>
+</li>
+</ol>
+<p>then the target parameter can be identified from the observed data distribution as <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>E</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>Y</mi><mo stretchy="false" form="prefix">|</mo><mi>W</mi><mo>,</mo><mi>A</mi><mo>=</mo><mi>a</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>E</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>E</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>Y</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>a</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="false" form="prefix">|</mo><mi>W</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>E</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>Y</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>a</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">E(E[Y|W,A=a]) = E(E[Y(a)|W]) = E[Y(a)]</annotation></semantics></math> or <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>Y</mi><mi>I</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>A</mi><mo>=</mo><mi>a</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>A</mi><mo>=</mo><mi>a</mi><mo stretchy="false" form="prefix">|</mo><mi>W</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mo>=</mo><mi>E</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>Y</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>a</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">E[Y I(A=a)/P(A=a|W)] = E[Y(a)].</annotation></semantics></math></p>
+<p>This suggests estimators based on outcome regression (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>g</mi><annotation encoding="application/x-tex">g</annotation></semantics></math>-computation) or inverse probability weighting. More generally, under the above assumption we can constructor a <em>one-step</em> estimator from the <em>Efficient Influence Function</em> combining these two <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mrow><mo stretchy="true" form="prefix">[</mo><mfrac><mrow><mi>I</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>A</mi><mo>=</mo><mi>a</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><msub><mi>Π</mi><mi>a</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>W</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac><mrow><mo stretchy="true" form="prefix">(</mo><mi>Y</mi><mo>−</mo><mi>Q</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>W</mi><mo>,</mo><mi>A</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mi>Q</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>W</mi><mo>,</mo><mi>a</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex"> E\left[\frac{I(A=a)}{\Pi_a(W)}(Y-Q(W,A)) + Q(W,a)\right].</annotation></semantics></math><br>
+In practice, this requires plugin estimates of both the outcome model, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>W</mi><mo>,</mo><mi>A</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>:=</mo><mi>E</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>Y</mi><mo>∣</mo><mi>A</mi><mo>,</mo><mi>W</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">Q(W,A) := E(Y\mid A, W)</annotation></semantics></math>, and of the treatment propensity model <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Π</mi><mi>a</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>W</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>:=</mo><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>A</mi><mo>=</mo><mi>a</mi><mo>∣</mo><mi>W</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\Pi_a(W) := P(A=a\mid W)</annotation></semantics></math>. The corresponding estimator is consistent even if just one of the two nuisance models is correctly specified.</p>
+<p>First we specify the propensity model</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">prmod</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/learner_glm.html">learner_glm</a></span><span class="op">(</span><span class="va">a</span> <span class="op">~</span> <span class="va">w1</span> <span class="op">+</span> <span class="va">w2</span>, family<span class="op">=</span><span class="va">binomial</span><span class="op">)</span></span></code></pre></div>
+<p>We will reuse one of the outcome models from the previous section, and use the <code>cate</code> function to estimate the treatment effect</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cate.html">cate</a></span><span class="op">(</span>response.model <span class="op">=</span> <span class="va">lr_rf</span>, propensity.model <span class="op">=</span> <span class="va">prmod</span>, data <span class="op">=</span> <span class="va">d</span>, nfolds <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="va">a</span></span>
+<span><span class="co">#&gt;             Estimate Std.Err       2.5%   97.5%   P-value</span></span>
+<span><span class="co">#&gt; E[y(1)]      -0.1700 0.02628 -0.2214840 -0.1185 9.939e-11</span></span>
+<span><span class="co">#&gt; E[y(0)]       0.1483 0.07595 -0.0005763  0.2971 5.089e-02</span></span>
+<span><span class="co">#&gt; ───────────                                              </span></span>
+<span><span class="co">#&gt; (Intercept)  -0.3183 0.07996 -0.4749849 -0.1615 6.892e-05</span></span></code></pre></div>
+<p>In the output we get estimates of both the mean potential outcomes and the difference of those, the average treatment effect, given as the term <code>(Intercept)</code>.</p>
+<p>Here we use the <code>nfolds=5</code> argument to use 5-fold <em>cross-fitting</em> to guarantee that the estimates converges weakly to a Gaussian distribution even though that the estimated influence function based on plugin estimates from the Random Forest does not necessarily lie in a <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>P</mi><annotation encoding="application/x-tex">P</annotation></semantics></math>-Donsker class.</p>
+</div>
+</div>
+<div class="section level1">
+<h1 id="project-organization">Project organization<a class="anchor" aria-label="anchor" href="#project-organization"></a>
+</h1>
+<p>We use the <code>dev</code> branch for development and the <code>main</code> branch for stable releases. All releases follow <a href="https://semver.org/" class="external-link">semantic versioning</a>, are <a href="https://github.com/kkholst/targeted/tags" class="external-link">tagged</a> and notable changes are reported in <a href="https://github.com/kkholst/targeted/blob/main/NEWS.md" class="external-link">NEWS.md</a>.</p>
+</div>
+<div class="section level1">
+<h1 id="i-have-a-question--i-want-to-report-a-bug">I Have a Question / I Want to Report a Bug<a class="anchor" aria-label="anchor" href="#i-have-a-question--i-want-to-report-a-bug"></a>
+</h1>
+<p>If you want to ask questions, require help or clarification, or report a bug, we recommend to either contact a maintainer directly or the following:</p>
+<ul>
+<li>Open an <a href="https://github.com/kkholst/targeted/issues" class="external-link">Issue</a>.</li>
+<li>Provide as much context as you can about what you’re running into.</li>
+<li>Provide project and platform versions, depending on what seems relevant.</li>
+</ul>
+<p>We will then take care of the issue as soon as possible.</p>
+</div>
+<div class="section level1">
+<h1 id="contributing-to-targeted">Contributing to <code>targeted</code>
+<a class="anchor" aria-label="anchor" href="#contributing-to-targeted"></a>
+</h1>
+<p>All types of contributions are encouraged and valued. See the <a href="https://github.com/kkholst/targeted/blob/main/CONTRIBUTING.md" class="external-link">CONTRIBUTING.md</a> for details about how to contribute code to this project.</p>
 </div>
 
   </div>
@@ -211,6 +305,12 @@
 </ul>
 </div>
 
+<div class="community">
+<h2 data-toc-skip>Community</h2>
+<ul class="list-unstyled">
+<li><a href="CONTRIBUTING.html">Contributing guide</a></li>
+</ul>
+</div>
 
 <div class="citation">
 <h2 data-toc-skip>Citation</h2>
@@ -222,16 +322,17 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Klaus K. Holst <br><small class="roles"> Author, maintainer </small>  </li>
-<li>Andreas Nordland <br><small class="roles"> Author </small>  </li>
+<li>Klaus K. Holst <br><small class="roles"> Author, maintainer </small>   </li>
+<li>Benedikt Sommer <br><small class="roles"> Author </small>   </li>
+<li>Andreas Nordland <br><small class="roles"> Author </small>   </li>
 </ul>
 </div>
 
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
-<li><a href="https://github.com/kkholst/targeted/actions" class="external-link"><img src="https://github.com/kkholst/targeted/workflows/R-CMD-check/badge.svg?branch=master" alt="R-CMD-check"></a></li>
-<li><a href="https://app.codecov.io/github/kkholst/targeted?branch=main" class="external-link"><img src="https://app.codecov.io/github/kkholst/targeted/coverage.svg?branch=main" alt="coverage"></a></li>
+<li><a href="https://github.com/kkholst/targeted/actions/workflows/r_check.yaml" class="external-link"><img src="https://github.com/kkholst/targeted/actions/workflows/r_check.yaml/badge.svg?branch=main" alt="r-cmd-check"></a></li>
+<li><a href="https://app.codecov.io/github/kkholst/targeted" class="external-link"><img src="https://app.codecov.io/github/kkholst/targeted/graph/badge.svg?token=MMSEDLWIZd" alt="codecov"></a></li>
 <li><a href="https://opensource.org/license/apache-2-0" class="external-link"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="license"></a></li>
 <li><a href="https://cranlogs.r-pkg.org/downloads/total/last-month/targeted" class="external-link"><img src="https://www.r-pkg.org/badges/version-last-release/targeted" alt="cran"></a></li>
 </ul>
@@ -243,12 +344,12 @@
 
       <footer><div class="copyright">
   <p></p>
-<p>Developed by Klaus K. Holst, Andreas Nordland.</p>
+<p>Developed by Klaus K. Holst, Benedikt Sommer, Andreas Nordland.</p>
 </div>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer>

@@ -32,10 +32,7 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/ate.html">Average Treatment Effects</a>
-    </li>
-    <li>
-      <a href="../articles/ode.html">targeted::ode_solve: Solving Ordinary Differential Equations</a>
+      <a href="../articles/predictionclass.html">Prediction model class (`learner`)</a>
     </li>
     <li>
       <a href="../articles/riskregression.html">Estimating a relative risk or risk difference with a binary exposure</a>
@@ -98,7 +95,8 @@
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p>The external point should be created with the function <code><a href="specify_ode.html">targeted::specify_ode</a></code>.</p>
+    <p>The external point should be created with the function
+<code><a href="specify_ode.html">targeted::specify_ode</a></code>.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -112,7 +110,22 @@
     <div id="ref-examples">
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/example.html" class="external-link">example</a></span><span class="op">(</span><span class="va">specify_ode</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>‘specify_ode’ has a help file but no examples</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> spcfy_&gt; ode &lt;- paste0(</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> spcfy_+   "dy(0) = p(0)*(y(1)-y(0));",</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> spcfy_+   "dy(1) = y(0)*(p(1)-y(2));",</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> spcfy_+   "dy(2) = y(0)*y(1)-p(2)*y(2);", collapse="\n"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> spcfy_+ )</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> spcfy_&gt; ## No test: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> spcfy_&gt; ##D  # Reduce test time</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> spcfy_&gt; ##D dy &lt;- specify_ode(ode)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> spcfy_&gt; ##D tt &lt;- seq(0, 100, length.out=2e4)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> spcfy_&gt; ##D yy &lt;- solve_ode(dy, input=tt, init=c(1, 1, 1), par=c(10, 28, 8/3))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> spcfy_&gt; ## End(No test)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> spcfy_&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> spcfy_&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> spcfy_&gt; </span>
 </code></pre></div>
     </div>
   </div>
@@ -123,11 +136,11 @@
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Klaus K. Holst, Andreas Nordland.</p>
+  <p></p><p>Developed by Klaus K. Holst, Benedikt Sommer, Andreas Nordland.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer></div>

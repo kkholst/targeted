@@ -49,10 +49,7 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/ate.html">Average Treatment Effects</a>
-    </li>
-    <li>
-      <a href="../articles/ode.html">targeted::ode_solve: Solving Ordinary Differential Equations</a>
+      <a href="../articles/predictionclass.html">Prediction model class (`learner`)</a>
     </li>
     <li>
       <a href="../articles/riskregression.html">Estimating a relative risk or risk difference with a binary exposure</a>
@@ -80,13 +77,15 @@
 
 
 
-      </header><script src="riskregression_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>Estimating a relative risk or risk difference with a binary exposure</h1>
-                        <h4 data-toc-skip class="author">Klaus Kähler Holst</h4>
+      <h1 data-toc-skip>Estimating a relative risk or risk difference
+with a binary exposure</h1>
+                        <h4 data-toc-skip class="author">Klaus Kähler
+Holst</h4>
             
-            <h4 data-toc-skip class="date">2024-11-25</h4>
+            <h4 data-toc-skip class="date">2025-07-29</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/kkholst/targeted/blob/main/vignettes/riskregression.Rmd" class="external-link"><code>vignettes/riskregression.Rmd</code></a></small>
       <div class="hidden name"><code>riskregression.Rmd</code></div>
@@ -98,29 +97,73 @@
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>Let <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Y</mi><annotation encoding="application/x-tex">Y</annotation></semantics></math> be a <em>binary response</em>, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>A</mi><annotation encoding="application/x-tex">A</annotation></semantics></math> a <em>binary exposure</em>, and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>V</mi><annotation encoding="application/x-tex">V</annotation></semantics></math> a <em>vector of covariates</em>.</p>
-<div class="figure">
-<img src="dag1.svg" alt=""><p class="caption">DAG for the statistical model with the dashed edge representing a potential interaction between exposure <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>A</mi><annotation encoding="application/x-tex">A</annotation></semantics></math> and covariates <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>V</mi><annotation encoding="application/x-tex">V</annotation></semantics></math>.</p>
+<p>Let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Y</mi><annotation encoding="application/x-tex">Y</annotation></semantics></math>
+be a <em>binary response</em>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>A</mi><annotation encoding="application/x-tex">A</annotation></semantics></math>
+a <em>binary exposure</em>, and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>V</mi><annotation encoding="application/x-tex">V</annotation></semantics></math>
+a <em>vector of covariates</em>.</p>
+<div class="float">
+<img src="dag1.svg" alt="DAG for the statistical model with the dashed edge representing a potential interaction between exposure A and covariates V."><div class="figcaption">DAG for the statistical model with the dashed
+edge representing a potential interaction between exposure
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>A</mi><annotation encoding="application/x-tex">A</annotation></semantics></math>
+and covariates
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>V</mi><annotation encoding="application/x-tex">V</annotation></semantics></math>.</div>
 </div>
-<p>In a common setting, the main interest lies in quantifying the treatment effect, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ν</mi><annotation encoding="application/x-tex">\nu</annotation></semantics></math>, of <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>A</mi><annotation encoding="application/x-tex">A</annotation></semantics></math> on <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Y</mi><annotation encoding="application/x-tex">Y</annotation></semantics></math> adjusting for the set of covariates, and often a standard approach is to use a Generalized Linear Model (GLM):</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mo stretchy="false" form="prefix">{</mo><mi>E</mi><mo stretchy="false" form="prefix">(</mo><mi>Y</mi><mo>∣</mo><mi>A</mi><mo>,</mo><mi>V</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">}</mo><mo>=</mo><mi>A</mi><msup><mi>ν</mi><mi>t</mi></msup><mi>W</mi><mo>+</mo><munder><mrow><msup><mi>μ</mi><mi>t</mi></msup><mi>Z</mi></mrow><mstyle mathvariant="normal"><mi>n</mi><mi>u</mi><mi>i</mi><mi>s</mi><mi>a</mi><mi>n</mi><mi>c</mi><mi>e</mi></mstyle></munder></mrow><annotation encoding="application/x-tex">g\{ E(Y\mid A,V) \} = A\nu^tW +
+<p>In a common setting, the main interest lies in quantifying the
+treatment effect,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ν</mi><annotation encoding="application/x-tex">\nu</annotation></semantics></math>,
+of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>A</mi><annotation encoding="application/x-tex">A</annotation></semantics></math>
+on
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Y</mi><annotation encoding="application/x-tex">Y</annotation></semantics></math>
+adjusting for the set of covariates, and often a standard approach is to
+use a Generalized Linear Model (GLM):</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mo stretchy="false" form="prefix">{</mo><mi>E</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>Y</mi><mo>∣</mo><mi>A</mi><mo>,</mo><mi>V</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="false" form="postfix">}</mo><mo>=</mo><mi>A</mi><msup><mi>ν</mi><mi>t</mi></msup><mi>W</mi><mo>+</mo><munder><mrow><msup><mi>μ</mi><mi>t</mi></msup><mi>Z</mi></mrow><mrow><mi mathvariant="normal">n</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">e</mi></mrow></munder></mrow><annotation encoding="application/x-tex">g\{ E(Y\mid A,V) \} = A\nu^tW +
 \underset{\mathrm{nuisance}}{\mu^tZ}</annotation></semantics></math></p>
-<p>with link function <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>g</mi><annotation encoding="application/x-tex">g</annotation></semantics></math>, and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>W</mi><mo>=</mo><mi>w</mi><mo stretchy="false" form="prefix">(</mo><mi>V</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">W = w(V)</annotation></semantics></math>, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Z</mi><mo>=</mo><mi>v</mi><mo stretchy="false" form="prefix">(</mo><mi>V</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">Z= v(V)</annotation></semantics></math> known vector functions of <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>V</mi><annotation encoding="application/x-tex">V</annotation></semantics></math>.</p>
-<p>The canonical link (logit) leads to nice computational properties (logistic regression) and parameters with an odds-ratio interpretation. But ORs are not <em>collapsible</em> even under randomization. For example</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mo stretchy="false" form="prefix">(</mo><mi>Y</mi><mo>∣</mo><mi>X</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>E</mi><mo stretchy="false" form="prefix">[</mo><mi>E</mi><mo stretchy="false" form="prefix">(</mo><mi>Y</mi><mo>∣</mo><mi>X</mi><mo>,</mo><mi>Z</mi><mo stretchy="false" form="postfix">)</mo><mo>∣</mo><mi>X</mi><mo stretchy="false" form="postfix">]</mo><mo>=</mo><mi>E</mi><mo stretchy="false" form="prefix">[</mo><mo>expit</mo><mo stretchy="false" form="prefix">(</mo><mi>μ</mi><mo>+</mo><mi>α</mi><mi>X</mi><mo>+</mo><mi>β</mi><mi>Z</mi><mo stretchy="false" form="postfix">)</mo><mo>∣</mo><mi>X</mi><mo stretchy="false" form="postfix">]</mo><mo>≠</mo><mo>expit</mo><mo stretchy="false" form="prefix">[</mo><mi>μ</mi><mo>+</mo><mi>α</mi><mi>X</mi><mo>+</mo><mi>β</mi><mi>E</mi><mo stretchy="false" form="prefix">(</mo><mi>Z</mi><mo>∣</mo><mi>X</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">]</mo><mo>,</mo></mrow><annotation encoding="application/x-tex">
+<p>with link function
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>g</mi><annotation encoding="application/x-tex">g</annotation></semantics></math>,
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>W</mi><mo>=</mo><mi>w</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>V</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">W = w(V)</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Z</mi><mo>=</mo><mi>v</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>V</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">Z= v(V)</annotation></semantics></math>
+known vector functions of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>V</mi><annotation encoding="application/x-tex">V</annotation></semantics></math>.</p>
+<p>The canonical link (logit) leads to nice computational properties
+(logistic regression) and parameters with an odds-ratio interpretation.
+But ORs are not <em>collapsible</em> even under randomization. For
+example</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>Y</mi><mo>∣</mo><mi>X</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>E</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>E</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>Y</mi><mo>∣</mo><mi>X</mi><mo>,</mo><mi>Z</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>∣</mo><mi>X</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo>=</mo><mi>E</mi><mrow><mo stretchy="true" form="prefix">[</mo><mo>expit</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>μ</mi><mo>+</mo><mi>α</mi><mi>X</mi><mo>+</mo><mi>β</mi><mi>Z</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>∣</mo><mi>X</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo>≠</mo><mo>expit</mo><mrow><mo stretchy="true" form="prefix">[</mo><mi>μ</mi><mo>+</mo><mi>α</mi><mi>X</mi><mo>+</mo><mi>β</mi><mi>E</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>Z</mi><mo>∣</mo><mi>X</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">
 E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 \alpha X + \beta Z ) \mid X]
 \neq \operatorname{expit}[\mu + \alpha X + \beta E(Z\mid X)],
 </annotation></semantics></math></p>
-<p>When marginalizing we leave the class of logistic regression. This non-collapsibility makes it hard to interpret odds-ratios and to compare results from <em>different studies</em></p>
-<p><strong>Relative risks</strong> (and risk differences) are collapsible and generally considered easier to interpret than odds-ratios. <a href="https://doi.org/10.1080/01621459.2016.1192546" class="external-link">Richardson et al</a> (JASA, 2017) proposed a regression model for a binary exposures which solves the computational problems and need for parameter contraints that are associated with using for example binomial regression with a log-link function (or identify link for the risk difference) to obtain such parameter estimates. In the following we consider the relative risk as the <strong>target parameter</strong></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathvariant="normal"><mi>R</mi><mi>R</mi></mstyle><mo stretchy="false" form="prefix">(</mo><mi>v</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>Y</mi><mo>=</mo><mn>1</mn><mo>∣</mo><mi>A</mi><mo>=</mo><mn>1</mn><mo>,</mo><mi>V</mi><mo>=</mo><mi>v</mi><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>Y</mi><mo>=</mo><mn>1</mn><mo>∣</mo><mi>A</mi><mo>=</mo><mn>0</mn><mo>,</mo><mi>V</mi><mo>=</mo><mi>v</mi><mo stretchy="false" form="postfix">)</mo></mrow></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">
+<p>When marginalizing we leave the class of logistic regression. This
+non-collapsibility makes it hard to interpret odds-ratios and to compare
+results from <em>different studies</em></p>
+<p><strong>Relative risks</strong> (and risk differences) are
+collapsible and generally considered easier to interpret than
+odds-ratios. <a href="https://doi.org/10.1080/01621459.2016.1192546" class="external-link">Richardson et
+al</a> (JASA, 2017) proposed a regression model for a binary exposures
+which solves the computational problems and need for parameter
+contraints that are associated with using for example binomial
+regression with a log-link function (or identify link for the risk
+difference) to obtain such parameter estimates. In the following we
+consider the relative risk as the <strong>target parameter</strong></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">R</mi><mi mathvariant="normal">R</mi></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>Y</mi><mo>=</mo><mn>1</mn><mo>∣</mo><mi>A</mi><mo>=</mo><mn>1</mn><mo>,</mo><mi>V</mi><mo>=</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>Y</mi><mo>=</mo><mn>1</mn><mo>∣</mo><mi>A</mi><mo>=</mo><mn>0</mn><mo>,</mo><mi>V</mi><mo>=</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">
 \mathrm{RR}(v) = \frac{P(Y=1\mid A=1, V=v)}{P(Y=1\mid A=0, V=v)}.
 </annotation></semantics></math></p>
-<p>Let <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>p</mi><mi>a</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>V</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>Y</mi><mo>∣</mo><mi>A</mi><mo>=</mo><mi>a</mi><mo>,</mo><mi>V</mi><mo stretchy="false" form="postfix">)</mo><mo>,</mo><mi>a</mi><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">p_a(V) = P(Y \mid A=a, V), a\in\{0,1\}</annotation></semantics></math>, the idea is then to posit a linear model for <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi><mo stretchy="false" form="prefix">(</mo><mi>v</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo>log</mo><mo minsize="1.2" maxsize="1.2" stretchy="false" form="prefix">(</mo><mi>R</mi><mi>R</mi><mo stretchy="false" form="prefix">(</mo><mi>v</mi><mo stretchy="false" form="postfix">)</mo><mo minsize="1.2" maxsize="1.2" stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex"> \theta(v) = \log \big(RR(v)\big) </annotation></semantics></math>, i.e., <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><mo minsize="1.2" maxsize="1.2" stretchy="false" form="prefix">(</mo><mi>R</mi><mi>R</mi><mo stretchy="false" form="prefix">(</mo><mi>v</mi><mo stretchy="false" form="postfix">)</mo><mo minsize="1.2" maxsize="1.2" stretchy="false" form="postfix">)</mo><mo>=</mo><msup><mi>α</mi><mi>T</mi></msup><mi>v</mi><mo>,</mo></mrow><annotation encoding="application/x-tex">\log \big(RR(v)\big) = \alpha^Tv,</annotation></semantics></math></p>
-<p>and a <strong>nuisance model</strong> for the <em>odds-product</em> <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϕ</mi><mo stretchy="false" form="prefix">(</mo><mi>v</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mrow><msub><mi>p</mi><mn>0</mn></msub><mo stretchy="false" form="prefix">(</mo><mi>v</mi><mo stretchy="false" form="postfix">)</mo><msub><mi>p</mi><mn>1</mn></msub><mo stretchy="false" form="prefix">(</mo><mi>v</mi><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>p</mi><mn>0</mn></msub><mo stretchy="false" form="prefix">(</mo><mi>v</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>p</mi><mn>1</mn></msub><mo stretchy="false" form="prefix">(</mo><mi>v</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo></mrow></mfrac><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex"> \phi(v) =
+<p>Let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>p</mi><mi>a</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>V</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>Y</mi><mo>∣</mo><mi>A</mi><mo>=</mo><mi>a</mi><mo>,</mo><mi>V</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo><mi>a</mi><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">p_a(V) = P(Y \mid A=a, V), a\in\{0,1\}</annotation></semantics></math>,
+the idea is then to posit a linear model for
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mo>log</mo><mo minsize="1.2" maxsize="1.2" stretchy="false" form="prefix">(</mo><mi>R</mi><mi>R</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo minsize="1.2" maxsize="1.2" stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex"> \theta(v) = \log \big(RR(v)\big) </annotation></semantics></math>,
+i.e.,
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><mo minsize="1.2" maxsize="1.2" stretchy="false" form="prefix">(</mo><mi>R</mi><mi>R</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo minsize="1.2" maxsize="1.2" stretchy="false" form="postfix">)</mo><mo>=</mo><msup><mi>α</mi><mi>T</mi></msup><mi>v</mi><mo>,</mo></mrow><annotation encoding="application/x-tex">\log \big(RR(v)\big) = \alpha^Tv,</annotation></semantics></math></p>
+<p>and a <strong>nuisance model</strong> for the <em>odds-product</em>
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϕ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mrow><msub><mi>p</mi><mn>0</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><msub><mi>p</mi><mn>1</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>p</mi><mn>0</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>p</mi><mn>1</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex"> \phi(v) =
 \log\left(\frac{p_{0}(v)p_{1}(v)}{(1-p_{0}(v))(1-p_{1}(v))}\right) </annotation></semantics></math></p>
-<p>noting that these two parameters are <em>variation independent</em> as illustrated by the below L’Abbé plot.</p>
+<p>noting that these two parameters are <em>variation independent</em>
+as illustrated by the below L’Abbé plot.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>  <span class="va">p0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,length.out<span class="op">=</span><span class="fl">100</span><span class="op">)</span></span>
 <span>  <span class="va">p1</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">p0</span>,<span class="va">op</span><span class="op">)</span> <span class="fl">1</span><span class="op">/</span><span class="op">(</span><span class="fl">1</span><span class="op">+</span><span class="op">(</span><span class="va">op</span><span class="op">*</span><span class="op">(</span><span class="fl">1</span><span class="op">-</span><span class="va">p0</span><span class="op">)</span><span class="op">/</span><span class="va">p0</span><span class="op">)</span><span class="op">^</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span></span>
@@ -135,8 +178,9 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 <span>     xlab<span class="op">=</span><span class="st">"P(Y=1|A=0)"</span>, ylab<span class="op">=</span><span class="st">"P(Y=1|A=1)"</span>, main<span class="op">=</span><span class="st">"Constant relative risk"</span><span class="op">)</span></span>
 <span>  <span class="kw">for</span> <span class="op">(</span><span class="va">rr</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">3</span>,<span class="fl">3</span>,by<span class="op">=</span><span class="fl">.25</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">p0</span>,<span class="fu">p1</span><span class="op">(</span><span class="va">p0</span>,<span class="va">rr</span><span class="op">)</span>, col<span class="op">=</span><span class="st">"lightblue"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="riskregression_files/figure-html/unnamed-chunk-3-1.png" width="480"></p>
-<p>Similarly, a model can be constructed for the risk-difference on the following scale</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi><mo stretchy="false" form="prefix">(</mo><mi>v</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo>arctanh</mo><mo minsize="1.2" maxsize="1.2" stretchy="false" form="prefix">(</mo><mi>R</mi><mi>D</mi><mo stretchy="false" form="prefix">(</mo><mi>v</mi><mo stretchy="false" form="postfix">)</mo><mo minsize="1.2" maxsize="1.2" stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">\theta(v) = \operatorname{arctanh} \big(RD(v)\big).</annotation></semantics></math></p>
+<p>Similarly, a model can be constructed for the risk-difference on the
+following scale</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mo>arctanh</mo><mo minsize="1.2" maxsize="1.2" stretchy="false" form="prefix">(</mo><mi>R</mi><mi>D</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo minsize="1.2" maxsize="1.2" stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">\theta(v) = \operatorname{arctanh} \big(RD(v)\big).</annotation></semantics></math></p>
 </div>
 <div class="section level2">
 <h2 id="simulation">Simulation<a class="anchor" aria-label="anchor" href="#simulation"></a>
@@ -144,33 +188,44 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 <p>First the <code>targeted</code> package is loaded</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://kkholst.github.io/targeted/" class="external-link">targeted</a></span><span class="op">)</span></span></code></pre></div>
-<p>This automatically imports <a href="https://arxiv.org/abs/1206.3421" class="external-link">lava</a> <a href="https://CRAN.R-project.org/package=lava" class="external-link">(CRAN)</a> which we can use to simulate from the Relative-Risk Odds-Product (RR-OP) model.</p>
+<p>This automatically imports <a href="https://arxiv.org/abs/1206.3421" class="external-link">lava</a> <a href="https://CRAN.R-project.org/package=lava" class="external-link">(CRAN)</a> which we can
+use to simulate from the Relative-Risk Odds-Product (RR-OP) model.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/lvm.html" class="external-link">lvm</a></span><span class="op">(</span><span class="va">a</span> <span class="op">~</span> <span class="va">x</span>,</span>
+<code class="sourceCode R"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/lvm.html" class="external-link">lvm</a></span><span class="op">(</span><span class="va">a</span> <span class="op">~</span> <span class="va">x</span>,</span>
 <span>         <span class="va">lp.target</span> <span class="op">~</span> <span class="fl">1</span>,</span>
 <span>         <span class="va">lp.nuisance</span> <span class="op">~</span> <span class="va">x</span><span class="op">+</span><span class="va">z</span><span class="op">)</span></span>
-<span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/binomial.rd.html" class="external-link">binomial.rr</a></span><span class="op">(</span><span class="va">m</span>, response<span class="op">=</span><span class="st">"y"</span>, exposure<span class="op">=</span><span class="st">"a"</span>, target.model<span class="op">=</span><span class="st">"lp.target"</span>, nuisance.model<span class="op">=</span><span class="st">"lp.nuisance"</span><span class="op">)</span></span></code></pre></div>
-<p>The <code>lvm</code> call first defines the linear predictor for the exposure to be of the form</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mstyle mathvariant="normal"><mi>L</mi><mi>P</mi></mstyle><mi>A</mi></msub><mo>:=</mo><msub><mi>μ</mi><mi>A</mi></msub><mo>+</mo><mi>α</mi><mi>X</mi></mrow><annotation encoding="application/x-tex">\mathrm{LP}_A := \mu_A + \alpha X</annotation></semantics></math></p>
-<p>and the linear predictors for the /target parameter/ (relative risk) and the /nuisance parameter/ (odds product) to be of the form</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mstyle mathvariant="normal"><mi>L</mi><mi>P</mi></mstyle><mrow><mi>R</mi><mi>R</mi></mrow></msub><mo>:=</mo><msub><mi>μ</mi><mrow><mi>R</mi><mi>R</mi></mrow></msub><mo>,</mo></mrow><annotation encoding="application/x-tex">\mathrm{LP}_{RR} := \mu_{RR},</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mstyle mathvariant="normal"><mi>L</mi><mi>P</mi></mstyle><mrow><mi>O</mi><mi>P</mi></mrow></msub><mo>:=</mo><msub><mi>μ</mi><mrow><mi>O</mi><mi>P</mi></mrow></msub><mo>+</mo><msub><mi>β</mi><mi>x</mi></msub><mi>X</mi><mo>+</mo><msub><mi>β</mi><mi>z</mi></msub><mi>Z</mi><mi>.</mi></mrow><annotation encoding="application/x-tex">\mathrm{LP}_{OP} := \mu_{OP} + \beta_x X + \beta_z Z.</annotation></semantics></math></p>
-<p>The covariates are by default assumed to be independent and standard normal <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo>,</mo><mi>Z</mi><mo>∼</mo><mstyle mathvariant="script"><mi>𝒩</mi></mstyle><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">X, Z\sim\mathcal{N}(0,1)</annotation></semantics></math>, but their distribution can easily be altered using the <code><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">lava::distribution</a></code> method.</p>
+<span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/binomial.rd.html" class="external-link">binomial.rr</a></span><span class="op">(</span><span class="va">m</span>, response<span class="op">=</span><span class="st">"y"</span>, exposure<span class="op">=</span><span class="st">"a"</span>, target.model<span class="op">=</span><span class="st">"lp.target"</span>, nuisance.model<span class="op">=</span><span class="st">"lp.nuisance"</span><span class="op">)</span></span></code></pre></div>
+<p>The <code>lvm</code> call first defines the linear predictor for the
+exposure to be of the form</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow><mi mathvariant="normal">L</mi><mi mathvariant="normal">P</mi></mrow><mi>A</mi></msub><mo>:=</mo><msub><mi>μ</mi><mi>A</mi></msub><mo>+</mo><mi>α</mi><mi>X</mi></mrow><annotation encoding="application/x-tex">\mathrm{LP}_A := \mu_A + \alpha X</annotation></semantics></math></p>
+<p>and the linear predictors for the /target parameter/ (relative risk)
+and the /nuisance parameter/ (odds product) to be of the form</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow><mi mathvariant="normal">L</mi><mi mathvariant="normal">P</mi></mrow><mrow><mi>R</mi><mi>R</mi></mrow></msub><mo>:=</mo><msub><mi>μ</mi><mrow><mi>R</mi><mi>R</mi></mrow></msub><mo>,</mo></mrow><annotation encoding="application/x-tex">\mathrm{LP}_{RR} := \mu_{RR},</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow><mi mathvariant="normal">L</mi><mi mathvariant="normal">P</mi></mrow><mrow><mi>O</mi><mi>P</mi></mrow></msub><mo>:=</mo><msub><mi>μ</mi><mrow><mi>O</mi><mi>P</mi></mrow></msub><mo>+</mo><msub><mi>β</mi><mi>x</mi></msub><mi>X</mi><mo>+</mo><msub><mi>β</mi><mi>z</mi></msub><mi>Z</mi><mi>.</mi></mrow><annotation encoding="application/x-tex">\mathrm{LP}_{OP} := \mu_{OP} + \beta_x X + \beta_z Z.</annotation></semantics></math></p>
+<p>The covariates are by default assumed to be independent and standard
+normal
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo>,</mo><mi>Z</mi><mo>∼</mo><mi>𝒩</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">X, Z\sim\mathcal{N}(0,1)</annotation></semantics></math>,
+but their distribution can easily be altered using the
+<code><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">lava::distribution</a></code> method.</p>
 <p>The <code>binomial.rr</code> function</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/args.html" class="external-link">args</a></span><span class="op">(</span><span class="va">binomial.rr</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/args.html" class="external-link">args</a></span><span class="op">(</span><span class="fu">lava</span><span class="fu">::</span><span class="va"><a href="https://kkholst.github.io/lava/reference/binomial.rd.html" class="external-link">binomial.rr</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; function (x, response, exposure, target.model, nuisance.model, </span></span>
 <span><span class="co">#&gt;     exposure.model = binomial.lvm(), ...) </span></span>
 <span><span class="co">#&gt; NULL</span></span></code></pre></div>
 <p>then defines the link functions, i.e.,</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>logit</mo><mo stretchy="false" form="prefix">(</mo><mi>E</mi><mo stretchy="false" form="prefix">[</mo><mi>A</mi><mo>∣</mo><mi>X</mi><mo>,</mo><mi>Z</mi><mo stretchy="false" form="postfix">]</mo><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>μ</mi><mi>A</mi></msub><mo>+</mo><mi>α</mi><mi>X</mi><mo>,</mo></mrow><annotation encoding="application/x-tex">\operatorname{logit}(E[A\mid X,Z]) = \mu_A + \alpha X,</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><mo stretchy="false" form="prefix">(</mo><mi>E</mi><mo stretchy="false" form="prefix">[</mo><mi>Y</mi><mo>∣</mo><mi>X</mi><mo>,</mo><mi>Z</mi><mo>,</mo><mi>A</mi><mo>=</mo><mn>1</mn><mo stretchy="false" form="postfix">]</mo><mi>/</mi><mi>E</mi><mo stretchy="false" form="prefix">[</mo><mi>Y</mi><mo>∣</mo><mi>X</mi><mo>,</mo><mi>A</mi><mo>=</mo><mn>0</mn><mo stretchy="false" form="postfix">]</mo><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>μ</mi><mrow><mi>R</mi><mi>R</mi></mrow></msub><mo>,</mo></mrow><annotation encoding="application/x-tex">\operatorname{log}(E[Y\mid X,Z, A=1]/E[Y\mid X, A=0]) = \mu_{RR},</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><mo stretchy="false" form="prefix">{</mo><msub><mi>p</mi><mn>1</mn></msub><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>,</mo><mi>Z</mi><mo stretchy="false" form="postfix">)</mo><msub><mi>p</mi><mn>0</mn></msub><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>,</mo><mi>Z</mi><mo stretchy="false" form="postfix">)</mo><mi>/</mi><mo stretchy="false" form="prefix">[</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>p</mi><mn>1</mn></msub><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>,</mo><mi>Z</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>p</mi><mn>0</mn></msub><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>,</mo><mi>Z</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">]</mo><mo stretchy="false" form="postfix">}</mo><mo>=</mo><msub><mi>μ</mi><mrow><mi>O</mi><mi>P</mi></mrow></msub><mo>+</mo><msub><mi>β</mi><mi>x</mi></msub><mi>X</mi><mo>+</mo><msub><mi>β</mi><mi>z</mi></msub><mi>Z</mi></mrow><annotation encoding="application/x-tex">\operatorname{log}\{p_1(X,Z)p_0(X,Z)/[(1-p_1(X,Z))(1-p_0(X,Z))]\} =
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>logit</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>E</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>A</mi><mo>∣</mo><mi>X</mi><mo>,</mo><mi>Z</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mi>μ</mi><mi>A</mi></msub><mo>+</mo><mi>α</mi><mi>X</mi><mo>,</mo></mrow><annotation encoding="application/x-tex">\operatorname{logit}(E[A\mid X,Z]) = \mu_A + \alpha X,</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>E</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>Y</mi><mo>∣</mo><mi>X</mi><mo>,</mo><mi>Z</mi><mo>,</mo><mi>A</mi><mo>=</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow><mi>/</mi><mi>E</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>Y</mi><mo>∣</mo><mi>X</mi><mo>,</mo><mi>A</mi><mo>=</mo><mn>0</mn><mo stretchy="true" form="postfix">]</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mi>μ</mi><mrow><mi>R</mi><mi>R</mi></mrow></msub><mo>,</mo></mrow><annotation encoding="application/x-tex">\operatorname{log}(E[Y\mid X,Z, A=1]/E[Y\mid X, A=0]) = \mu_{RR},</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><mo stretchy="false" form="prefix">{</mo><msub><mi>p</mi><mn>1</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mo>,</mo><mi>Z</mi><mo stretchy="true" form="postfix">)</mo></mrow><msub><mi>p</mi><mn>0</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mo>,</mo><mi>Z</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><mrow><mo stretchy="true" form="prefix">[</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>p</mi><mn>1</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mo>,</mo><mi>Z</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>p</mi><mn>0</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mo>,</mo><mi>Z</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mo stretchy="false" form="postfix">}</mo><mo>=</mo><msub><mi>μ</mi><mrow><mi>O</mi><mi>P</mi></mrow></msub><mo>+</mo><msub><mi>β</mi><mi>x</mi></msub><mi>X</mi><mo>+</mo><msub><mi>β</mi><mi>z</mi></msub><mi>Z</mi></mrow><annotation encoding="application/x-tex">\operatorname{log}\{p_1(X,Z)p_0(X,Z)/[(1-p_1(X,Z))(1-p_0(X,Z))]\} =
 \mu_{OP}+\beta_x X + \beta_z Z</annotation></semantics></math></p>
-<p>with <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>p</mi><mi>a</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>,</mo><mi>Z</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>E</mi><mo stretchy="false" form="prefix">(</mo><mi>Y</mi><mo>∣</mo><mi>A</mi><mo>=</mo><mi>a</mi><mo>,</mo><mi>X</mi><mo>,</mo><mi>Z</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">p_a(X,Z)=E(Y\mid A=a,X,Z)</annotation></semantics></math>.</p>
-<p>The risk-difference model with the RD parameter modeled on the <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>arctanh</mo><annotation encoding="application/x-tex">\operatorname{arctanh}</annotation></semantics></math> scale can be defined similarly using the <code>binomial.rd</code> method</p>
+<p>with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>p</mi><mi>a</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mo>,</mo><mi>Z</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>E</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>Y</mi><mo>∣</mo><mi>A</mi><mo>=</mo><mi>a</mi><mo>,</mo><mi>X</mi><mo>,</mo><mi>Z</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">p_a(X,Z)=E(Y\mid A=a,X,Z)</annotation></semantics></math>.</p>
+<p>The risk-difference model with the RD parameter modeled on the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>arctanh</mo><annotation encoding="application/x-tex">\operatorname{arctanh}</annotation></semantics></math>
+scale can be defined similarly using the <code>binomial.rd</code>
+method</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/args.html" class="external-link">args</a></span><span class="op">(</span><span class="va">binomial.rd</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/args.html" class="external-link">args</a></span><span class="op">(</span><span class="fu">lava</span><span class="fu">::</span><span class="va"><a href="https://kkholst.github.io/lava/reference/binomial.rd.html" class="external-link">binomial.rd</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; function (x, response, exposure, target.model, nuisance.model, </span></span>
 <span><span class="co">#&gt;     exposure.model = binomial.lvm(), ...) </span></span>
 <span><span class="co">#&gt; NULL</span></span></code></pre></div>
@@ -181,13 +236,24 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 <span><span class="co">#&gt;             "a"     "lp.target"   "lp.nuisance"           "a~x" "lp.nuisance~x" </span></span>
 <span><span class="co">#&gt;              p3              p4 </span></span>
 <span><span class="co">#&gt; "lp.nuisance~z"          "a~~a"</span></span></code></pre></div>
-<p>Here the intercepts of the model are simply given the same name as the variables, such that <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>A</mi></msub><annotation encoding="application/x-tex">\mu_A</annotation></semantics></math> becomes <code>a</code>, and the other regression coefficients are labeled using the “~”-formula notation, e.g., <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math> becomes <code>a~x</code>.</p>
-<p>Intercepts are by default set to zero and regression parameters set to one in the simulation. Hence to simulate from the model with <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>m</mi><msub><mi>u</mi><mi>A</mi></msub><mo>,</mo><msub><mi>μ</mi><mrow><mi>R</mi><mi>R</mi></mrow></msub><mo>,</mo><msub><mi>μ</mi><mrow><mi>O</mi><mi>P</mi></mrow></msub><mo>,</mo><mi>α</mi><mo>,</mo><msub><mi>β</mi><mi>x</mi></msub><mo>,</mo><msub><mi>β</mi><mi>z</mi></msub><msup><mo stretchy="false" form="postfix">)</mo><mi>T</mi></msup><mo>=</mo><mo stretchy="false" form="prefix">(</mo><mo>−</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><mo>−</mo><mn>2</mn><mo>,</mo><mn>2</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>1</mn><msup><mo stretchy="false" form="postfix">)</mo><mi>T</mi></msup></mrow><annotation encoding="application/x-tex">(mu_A, \mu_{RR}, \mu_{OP}, \alpha, \beta_x, \beta_z)^T = (-1,1,-2,2,1,1)^T</annotation></semantics></math>, we define the parameter vector <code>p</code> given by</p>
+<p>Here the intercepts of the model are simply given the same name as
+the variables, such that
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>A</mi></msub><annotation encoding="application/x-tex">\mu_A</annotation></semantics></math>
+becomes <code>a</code>, and the other regression coefficients are
+labeled using the “~”-formula notation, e.g.,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math>
+becomes <code>a~x</code>.</p>
+<p>Intercepts are by default set to zero and regression parameters set
+to one in the simulation. Hence to simulate from the model with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>m</mi><msub><mi>u</mi><mi>A</mi></msub><mo>,</mo><msub><mi>μ</mi><mrow><mi>R</mi><mi>R</mi></mrow></msub><mo>,</mo><msub><mi>μ</mi><mrow><mi>O</mi><mi>P</mi></mrow></msub><mo>,</mo><mi>α</mi><mo>,</mo><msub><mi>β</mi><mi>x</mi></msub><mo>,</mo><msub><mi>β</mi><mi>z</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mi>T</mi></msup><mo>=</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><mo>−</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><mo>−</mo><mn>2</mn><mo>,</mo><mn>2</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mi>T</mi></msup></mrow><annotation encoding="application/x-tex">(mu_A, \mu_{RR}, \mu_{OP}, \alpha, \beta_x, \beta_z)^T =
+(-1,1,-2,2,1,1)^T</annotation></semantics></math>, we define the
+parameter vector <code>p</code> given by</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'a'</span><span class="op">=</span><span class="op">-</span><span class="fl">1</span>, <span class="st">'lp.target'</span><span class="op">=</span><span class="fl">1</span>, <span class="st">'lp.nuisance'</span><span class="op">=</span><span class="op">-</span><span class="fl">1</span>, <span class="st">'a~x'</span><span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div>
-<p>and then simulate from the model using the <code>sim</code> method</p>
+<p>and then simulate from the model using the <code>sim</code>
+method</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="va">m</span>, <span class="fl">1e4</span>, p<span class="op">=</span><span class="va">p</span>, seed<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="va">m</span>, <span class="fl">1e4</span>, p<span class="op">=</span><span class="va">p</span>, seed<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   a          x lp.target lp.nuisance          z y</span></span>
@@ -197,7 +263,10 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 <span><span class="co">#&gt; 4 1  1.5952808         1  -0.5902796 -1.1855604 1</span></span>
 <span><span class="co">#&gt; 5 0  0.3295078         1  -1.1709317 -0.5004395 1</span></span>
 <span><span class="co">#&gt; 6 0 -0.8204684         1  -2.3454571 -0.5249887 0</span></span></code></pre></div>
-<p>Notice, that in this simulated data the <strong>target parameter</strong> <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mrow><mi>R</mi><mi>R</mi></mrow></msub><annotation encoding="application/x-tex">\mu_{RR}</annotation></semantics></math> has been set to <code>lp.target =</code> 1.</p>
+<p>Notice, that in this simulated data the <strong>target
+parameter</strong>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mrow><mi>R</mi><mi>R</mi></mrow></msub><annotation encoding="application/x-tex">\mu_{RR}</annotation></semantics></math>
+has been set to <code>lp.target =</code> 1.</p>
 </div>
 <div class="section level2">
 <h2 id="estimation">Estimation<a class="anchor" aria-label="anchor" href="#estimation"></a>
@@ -205,14 +274,26 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 <div class="section level3">
 <h3 id="mle">MLE<a class="anchor" aria-label="anchor" href="#mle"></a>
 </h3>
-<p>We start by fitting the model using the maximum likelihood estimator.</p>
+<p>We start by fitting the model using the maximum likelihood
+estimator.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/args.html" class="external-link">args</a></span><span class="op">(</span><span class="va">riskreg_mle</span><span class="op">)</span></span>
 <span><span class="co">#&gt; function (y, a, x1, x2 = x1, weights = rep(1, length(y)), std.err = TRUE, </span></span>
 <span><span class="co">#&gt;     type = "rr", start = NULL, control = list(), ...) </span></span>
 <span><span class="co">#&gt; NULL</span></span></code></pre></div>
-<p>The <code>riskreg_mle</code> function takes vectors/matrices as input arguments with the response <code>y</code>, exposure <code>a</code>, target parameter design matrix <code>x1</code> (i.e., the matrix <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>W</mi><annotation encoding="application/x-tex">W</annotation></semantics></math> at the start of this text), and the nuisance model design matrix <code>x2</code> (odds product).</p>
-<p>We first consider the case of a correctly specified model, hence we do not consider any interactions with the exposure for the odds product and simply let <code>x1</code> be a vector of ones, whereas the design matrix for the log-odds-product depends on both <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>X</mi><annotation encoding="application/x-tex">X</annotation></semantics></math> and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Z</mi><annotation encoding="application/x-tex">Z</annotation></semantics></math></p>
+<p>The <code>riskreg_mle</code> function takes vectors/matrices as input
+arguments with the response <code>y</code>, exposure <code>a</code>,
+target parameter design matrix <code>x1</code> (i.e., the matrix
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>W</mi><annotation encoding="application/x-tex">W</annotation></semantics></math>
+at the start of this text), and the nuisance model design matrix
+<code>x2</code> (odds product).</p>
+<p>We first consider the case of a correctly specified model, hence we
+do not consider any interactions with the exposure for the odds product
+and simply let <code>x1</code> be a vector of ones, whereas the design
+matrix for the log-odds-product depends on both
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>X</mi><annotation encoding="application/x-tex">X</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Z</mi><annotation encoding="application/x-tex">Z</annotation></semantics></math></p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span><span class="fl">1</span>, <span class="va">d</span><span class="op">)</span></span>
 <span><span class="va">x2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span><span class="va">x</span><span class="op">+</span><span class="va">z</span>, <span class="va">d</span><span class="op">)</span></span>
@@ -224,7 +305,9 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 <span><span class="co">#&gt; odds-product:(Intercept)  -1.0610 0.05199 -1.1629 -0.9591  1.377e-92</span></span>
 <span><span class="co">#&gt; odds-product:x             1.0330 0.05944  0.9165  1.1495  1.230e-67</span></span>
 <span><span class="co">#&gt; odds-product:z             1.0421 0.05285  0.9386  1.1457  1.523e-86</span></span></code></pre></div>
-<p>The parameters are presented in the same order as the columns of <code>x1</code>and <code>x2</code>, hence the target parameter estimate is in the first row</p>
+<p>The parameters are presented in the same order as the columns of
+<code>x1</code>and <code>x2</code>, hence the target parameter estimate
+is in the first row</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://kkholst.github.io/lava/reference/estimate.default.html" class="external-link">estimate</a></span><span class="op">(</span><span class="va">fit1</span>, keep<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="co">#&gt;             Estimate Std.Err   2.5% 97.5%    P-value</span></span>
@@ -233,12 +316,21 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 <div class="section level3">
 <h3 id="dre">DRE<a class="anchor" aria-label="anchor" href="#dre"></a>
 </h3>
-<p>We next fit the model using a double robust estimator (DRE) which introduces a model for the exposure <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mo stretchy="false" form="prefix">(</mo><mi>A</mi><mo>=</mo><mn>1</mn><mo>∣</mo><mi>V</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">E(A=1\mid V)</annotation></semantics></math> (propensity model). The double-robustness stems from the fact that the this estimator remains consistent in the union model where either the odds-product model or the propensity model is correctly specified. With both models correctly specified the estimator is efficient.</p>
+<p>We next fit the model using a double robust estimator (DRE) which
+introduces a model for the exposure
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>A</mi><mo>=</mo><mn>1</mn><mo>∣</mo><mi>V</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">E(A=1\mid V)</annotation></semantics></math>
+(propensity model). The double-robustness stems from the fact that the
+this estimator remains consistent in the union model where either the
+odds-product model or the propensity model is correctly specified. With
+both models correctly specified the estimator is efficient.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">d</span>, <span class="fu"><a href="../reference/riskreg.html">riskreg_fit</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">a</span>, target<span class="op">=</span><span class="va">x1</span>, nuisance<span class="op">=</span><span class="va">x2</span>, propensity<span class="op">=</span><span class="va">x2</span>, type<span class="op">=</span><span class="st">"rr"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;             Estimate Std.Err   2.5% 97.5%    P-value</span></span>
 <span><span class="co">#&gt; (Intercept)   0.9372  0.0339 0.8708 1.004 3.004e-168</span></span></code></pre></div>
-<p>The usual /formula/-syntax can be applied using the <code>riskreg</code> function. Here we illustrate the double-robustness by using a <em>wrong propensity model</em> but a correct nuisance paramter (odds-product) model:</p>
+<p>The usual /formula/-syntax can be applied using the
+<code>riskreg</code> function. Here we illustrate the double-robustness
+by using a <em>wrong propensity model</em> but a correct nuisance
+paramter (odds-product) model:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>  <span class="fu"><a href="../reference/riskreg.html">riskreg</a></span><span class="op">(</span><span class="va">y</span><span class="op">~</span><span class="va">a</span>, nuisance<span class="op">=</span><span class="op">~</span><span class="va">x</span><span class="op">+</span><span class="va">z</span>, propensity<span class="op">=</span><span class="op">~</span><span class="va">z</span>, data<span class="op">=</span><span class="va">d</span>, type<span class="op">=</span><span class="st">"rr"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;             Estimate Std.Err   2.5% 97.5%    P-value</span></span>
@@ -248,7 +340,8 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 <code class="sourceCode R"><span>  <span class="fu"><a href="../reference/riskreg.html">riskreg</a></span><span class="op">(</span><span class="va">y</span><span class="op">~</span><span class="va">a</span>, nuisance<span class="op">=</span><span class="op">~</span><span class="va">z</span>, propensity<span class="op">=</span><span class="op">~</span><span class="va">x</span><span class="op">+</span><span class="va">z</span>, data<span class="op">=</span><span class="va">d</span>, type<span class="op">=</span><span class="st">"rr"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;             Estimate Std.Err   2.5% 97.5%    P-value</span></span>
 <span><span class="co">#&gt; (Intercept)   0.9404 0.03727 0.8673 1.013 1.736e-140</span></span></code></pre></div>
-<p>whereas the MLE in this case yields a biased estimate of the relative risk:</p>
+<p>whereas the MLE in this case yields a biased estimate of the relative
+risk:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>  <span class="va">fit2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">d</span>, <span class="fu"><a href="../reference/riskreg.html">riskreg_mle</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">a</span>, x1<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span><span class="fl">1</span>,<span class="va">d</span><span class="op">)</span>, x2<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span><span class="va">z</span>, <span class="va">d</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://kkholst.github.io/lava/reference/estimate.default.html" class="external-link">estimate</a></span><span class="op">(</span><span class="va">fit2</span>, keep<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
@@ -258,23 +351,34 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 <div class="section level3">
 <h3 id="interactions">Interactions<a class="anchor" aria-label="anchor" href="#interactions"></a>
 </h3>
-<p>The more general model where <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><mi>R</mi><mi>R</mi><mo stretchy="false" form="prefix">(</mo><mi>V</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>A</mi><msup><mi>α</mi><mi>T</mi></msup><mi>V</mi></mrow><annotation encoding="application/x-tex">\log RR(V) = A \alpha^TV</annotation></semantics></math> for a subset <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>V</mi><annotation encoding="application/x-tex">V</annotation></semantics></math> of the covariates can be estimated using the <code>target</code> argument:</p>
+<p>The more general model where
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><mi>R</mi><mi>R</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>V</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>A</mi><msup><mi>α</mi><mi>T</mi></msup><mi>V</mi></mrow><annotation encoding="application/x-tex">\log RR(V) = A \alpha^TV</annotation></semantics></math>
+for a subset
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>V</mi><annotation encoding="application/x-tex">V</annotation></semantics></math>
+of the covariates can be estimated using the <code>target</code>
+argument:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/riskreg.html">riskreg</a></span><span class="op">(</span><span class="va">y</span><span class="op">~</span><span class="va">a</span>, target<span class="op">=</span><span class="op">~</span><span class="va">x</span>, nuisance<span class="op">=</span><span class="op">~</span><span class="va">x</span><span class="op">+</span><span class="va">z</span>, data<span class="op">=</span><span class="va">d</span><span class="op">)</span></span>
 <span><span class="va">fit</span></span>
 <span><span class="co">#&gt;             Estimate Std.Err     2.5%   97.5%    P-value</span></span>
 <span><span class="co">#&gt; (Intercept)  0.95267 0.03365  0.88673 1.01862 2.361e-176</span></span>
 <span><span class="co">#&gt; x           -0.01078 0.03804 -0.08534 0.06378  7.769e-01</span></span></code></pre></div>
-<p>As expected we do not see any evidence of an effect of <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>X</mi><annotation encoding="application/x-tex">X</annotation></semantics></math> on the relative risk with the 95% confidence limits clearly overlapping zero.</p>
-<p>Note, that when the <code>propensity</code> argument is omitted as above, the same design matrix is used for both the odds-product model and the propensity model.</p>
+<p>As expected we do not see any evidence of an effect of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>X</mi><annotation encoding="application/x-tex">X</annotation></semantics></math>
+on the relative risk with the 95% confidence limits clearly overlapping
+zero.</p>
+<p>Note, that when the <code>propensity</code> argument is omitted as
+above, the same design matrix is used for both the odds-product model
+and the propensity model.</p>
 </div>
 <div class="section level3">
 <h3 id="risk-difference">Risk-difference<a class="anchor" aria-label="anchor" href="#risk-difference"></a>
 </h3>
-<p>The syntax for fitting the risk-difference model is similar. To illustrate this we simulate some new data from this model</p>
+<p>The syntax for fitting the risk-difference model is similar. To
+illustrate this we simulate some new data from this model</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">m2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/binomial.rd.html" class="external-link">binomial.rd</a></span><span class="op">(</span><span class="va">m</span>, response<span class="op">=</span><span class="st">"y"</span>, exposure<span class="op">=</span><span class="st">"a"</span>, target.model<span class="op">=</span><span class="st">"lp.target"</span>, nuisance.model<span class="op">=</span><span class="st">"lp.nuisance"</span><span class="op">)</span></span>
-<span><span class="va">d2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="va">m2</span>, <span class="fl">1e4</span>, p<span class="op">=</span><span class="va">p</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">m2</span> <span class="op">&lt;-</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/binomial.rd.html" class="external-link">binomial.rd</a></span><span class="op">(</span><span class="va">m</span>, response<span class="op">=</span><span class="st">"y"</span>, exposure<span class="op">=</span><span class="st">"a"</span>, target.model<span class="op">=</span><span class="st">"lp.target"</span>, nuisance.model<span class="op">=</span><span class="st">"lp.nuisance"</span><span class="op">)</span></span>
+<span><span class="va">d2</span> <span class="op">&lt;-</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.html" class="external-link">sim</a></span><span class="op">(</span><span class="va">m2</span>, <span class="fl">1e4</span>, p<span class="op">=</span><span class="va">p</span><span class="op">)</span></span></code></pre></div>
 <p>And we can then fit the DRE with the syntax</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/riskreg.html">riskreg</a></span><span class="op">(</span><span class="va">y</span><span class="op">~</span><span class="va">a</span>, nuisance<span class="op">=</span><span class="op">~</span><span class="va">x</span><span class="op">+</span><span class="va">z</span>, data<span class="op">=</span><span class="va">d2</span>, type<span class="op">=</span><span class="st">"rd"</span><span class="op">)</span></span>
@@ -284,8 +388,16 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 <div class="section level3">
 <h3 id="influence-function">Influence-function<a class="anchor" aria-label="anchor" href="#influence-function"></a>
 </h3>
-<p>The DRE is a <em>regular and asymptotic linear</em> (RAL) estimator, hence <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msqrt><mi>n</mi></msqrt><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>α</mi><mo accent="true">̂</mo></mover><mstyle mathvariant="normal"><mi>D</mi><mi>R</mi><mi>E</mi></mstyle></msub><mo>−</mo><mi>α</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mn>1</mn><msqrt><mi>n</mi></msqrt></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msub><mi>ϕ</mi><mstyle mathvariant="normal"><mi>e</mi><mi>f</mi><mi>f</mi></mstyle></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>Z</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>+</mo><msub><mi>o</mi><mi>p</mi></msub><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\sqrt{n}(\widehat{\alpha}_{\mathrm{DRE}} - \alpha) = \frac{1}{\sqrt{n}}\sum_{i=1}^{n} \phi_{\mathrm{eff}}(Z_{i}) + o_{p}(1)</annotation></semantics></math> where <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Z</mi><mi>i</mi></msub><mo>=</mo><mo stretchy="false" form="prefix">(</mo><msub><mi>Y</mi><mi>i</mi></msub><mo>,</mo><msub><mi>A</mi><mi>i</mi></msub><mo>,</mo><msub><mi>V</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>,</mo><mi>i</mi><mo>=</mo><mn>1</mn><mo>,</mo><mi>…</mi><mo>,</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">Z_i = (Y_i, A_i, V_i), i=1,\ldots,n</annotation></semantics></math> are the i.i.d. observations and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ϕ</mi><mstyle mathvariant="normal"><mi>e</mi><mi>f</mi><mi>f</mi></mstyle></msub><annotation encoding="application/x-tex">\phi_{\mathrm{eff}}</annotation></semantics></math> is the <em>influence function</em>.</p>
-<p>The influence function can be extracted using the <code>IC</code> method</p>
+<p>The DRE is a <em>regular and asymptotic linear</em> (RAL) estimator,
+hence
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msqrt><mi>n</mi></msqrt><mrow><mo stretchy="true" form="prefix">(</mo><msub><mover><mi>α</mi><mo accent="true">̂</mo></mover><mrow><mi mathvariant="normal">D</mi><mi mathvariant="normal">R</mi><mi mathvariant="normal">E</mi></mrow></msub><mo>−</mo><mi>α</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mn>1</mn><msqrt><mi>n</mi></msqrt></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msub><mi>ϕ</mi><mrow><mi mathvariant="normal">e</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>Z</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><msub><mi>o</mi><mi>p</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\sqrt{n}(\widehat{\alpha}_{\mathrm{DRE}} - \alpha) = \frac{1}{\sqrt{n}}\sum_{i=1}^{n} \phi_{\mathrm{eff}}(Z_{i}) + o_{p}(1)</annotation></semantics></math>
+where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Z</mi><mi>i</mi></msub><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>Y</mi><mi>i</mi></msub><mo>,</mo><msub><mi>A</mi><mi>i</mi></msub><mo>,</mo><msub><mi>V</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo><mi>i</mi><mo>=</mo><mn>1</mn><mo>,</mo><mi>…</mi><mo>,</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">Z_i = (Y_i, A_i, V_i), i=1,\ldots,n</annotation></semantics></math>
+are the i.i.d. observations and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ϕ</mi><mrow><mi mathvariant="normal">e</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi></mrow></msub><annotation encoding="application/x-tex">\phi_{\mathrm{eff}}</annotation></semantics></math>
+is the <em>influence function</em>.</p>
+<p>The influence function can be extracted using the <code>IC</code>
+method</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/IC.html" class="external-link">IC</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   (Intercept)          x</span></span>
@@ -302,13 +414,13 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 </h2>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; R version 4.4.2 (2024-10-31)</span></span>
+<span><span class="co">#&gt; R version 4.5.1 (2025-06-13)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu</span></span>
-<span><span class="co">#&gt; Running under: Ubuntu 22.04.5 LTS</span></span>
+<span><span class="co">#&gt; Running under: Ubuntu 24.04.2 LTS</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Matrix products: default</span></span>
 <span><span class="co">#&gt; BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 </span></span>
-<span><span class="co">#&gt; LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.20.so;  LAPACK version 3.10.0</span></span>
+<span><span class="co">#&gt; LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so;  LAPACK version 3.12.0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; locale:</span></span>
 <span><span class="co">#&gt;  [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       </span></span>
@@ -323,25 +435,25 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 <span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] targeted_0.6 lava_1.8.0  </span></span>
+<span><span class="co">#&gt; [1] targeted_0.6 lava_1.8.1  </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span><span class="co">#&gt;  [1] Matrix_1.7-1        future.apply_1.11.3 jsonlite_1.8.9     </span></span>
-<span><span class="co">#&gt;  [4] compiler_4.4.2      Rcpp_1.0.13-1       parallel_4.4.2     </span></span>
-<span><span class="co">#&gt;  [7] jquerylib_0.1.4     globals_0.16.3      splines_4.4.2      </span></span>
-<span><span class="co">#&gt; [10] systemfonts_1.1.0   textshaping_0.4.0   yaml_2.3.10        </span></span>
-<span><span class="co">#&gt; [13] fastmap_1.2.0       lattice_0.22-6      R6_2.5.1           </span></span>
-<span><span class="co">#&gt; [16] knitr_1.49          future_1.34.0       nloptr_2.1.1       </span></span>
-<span><span class="co">#&gt; [19] desc_1.4.3          bslib_0.8.0         rlang_1.1.4        </span></span>
-<span><span class="co">#&gt; [22] cachem_1.1.0        xfun_0.49           fs_1.6.5           </span></span>
-<span><span class="co">#&gt; [25] sass_0.4.9          cli_3.6.3           pkgdown_2.1.1      </span></span>
-<span><span class="co">#&gt; [28] digest_0.6.37       grid_4.4.2          mvtnorm_1.3-2      </span></span>
-<span><span class="co">#&gt; [31] lifecycle_1.0.4     timereg_2.0.6       evaluate_1.0.1     </span></span>
-<span><span class="co">#&gt; [34] pracma_2.4.4        data.table_1.16.2   numDeriv_2016.8-1.1</span></span>
-<span><span class="co">#&gt; [37] listenv_0.9.1       codetools_0.2-20    ragg_1.3.3         </span></span>
-<span><span class="co">#&gt; [40] survival_3.7-0      optimx_2023-10.21   parallelly_1.39.0  </span></span>
-<span><span class="co">#&gt; [43] rmarkdown_2.29      mets_1.3.4          tools_4.4.2        </span></span>
-<span><span class="co">#&gt; [46] htmltools_0.5.8.1</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1] Matrix_1.7-3        future.apply_1.20.0 jsonlite_2.0.0     </span></span>
+<span><span class="co">#&gt;  [4] compiler_4.5.1      Rcpp_1.1.0          parallel_4.5.1     </span></span>
+<span><span class="co">#&gt;  [7] jquerylib_0.1.4     globals_0.18.0      splines_4.5.1      </span></span>
+<span><span class="co">#&gt; [10] systemfonts_1.2.3   textshaping_1.0.1   yaml_2.3.10        </span></span>
+<span><span class="co">#&gt; [13] fastmap_1.2.0       lattice_0.22-7      R6_2.6.1           </span></span>
+<span><span class="co">#&gt; [16] knitr_1.50          htmlwidgets_1.6.4   future_1.67.0      </span></span>
+<span><span class="co">#&gt; [19] nloptr_2.2.1        desc_1.4.3          bslib_0.9.0        </span></span>
+<span><span class="co">#&gt; [22] rlang_1.1.6         cachem_1.1.0        xfun_0.52          </span></span>
+<span><span class="co">#&gt; [25] fs_1.6.6            sass_0.4.10         cli_3.6.5          </span></span>
+<span><span class="co">#&gt; [28] pkgdown_2.1.3       digest_0.6.37       grid_4.5.1         </span></span>
+<span><span class="co">#&gt; [31] mvtnorm_1.3-3       lifecycle_1.0.4     timereg_2.0.6      </span></span>
+<span><span class="co">#&gt; [34] pracma_2.4.4        evaluate_1.0.4      data.table_1.17.8  </span></span>
+<span><span class="co">#&gt; [37] numDeriv_2016.8-1.1 listenv_0.9.1       codetools_0.2-20   </span></span>
+<span><span class="co">#&gt; [40] ragg_1.4.0          survival_3.8-3      optimx_2025-4.9    </span></span>
+<span><span class="co">#&gt; [43] parallelly_1.45.1   rmarkdown_2.29      mets_1.3.6         </span></span>
+<span><span class="co">#&gt; [46] tools_4.5.1         htmltools_0.5.8.1</span></span></code></pre></div>
 </div>
   </div>
 
@@ -355,12 +467,12 @@ E(Y\mid X) = E[ E(Y\mid X,Z) \mid X ] = E[\operatorname{expit}( \mu +
 
       <footer><div class="copyright">
   <p></p>
-<p>Developed by Klaus K. Holst, Andreas Nordland.</p>
+<p>Developed by Klaus K. Holst, Benedikt Sommer, Andreas Nordland.</p>
 </div>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer>
