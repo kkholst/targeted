@@ -1,0 +1,17 @@
+## -*- Makefile -*-
+
+# CXX_STD = CXX14
+
+PKGROOT=target
+# SOURCES = $(wildcard ./*.cpp) $(wildcard $(PKGROOT)/src/*.cpp)
+OBJECTS =  target/src/glm.o \
+	target/src/nb.o \
+	target/src/nondom.o \
+	target/src/odesolver.o \
+	target/src/pava.o \
+	target/src/target.o \
+	target/src/utils.o
+
+
+PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) -DARMA_R -I. -I$(PKGROOT)/include -I../inst/include
+PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
