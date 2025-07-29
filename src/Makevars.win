@@ -4,13 +4,13 @@
 
 PKGROOT=target
 # SOURCES = $(wildcard ./*.cpp) $(wildcard $(PKGROOT)/src/*.cpp)
-OBJECTS =  target/src/glm.o \
-	target/src/nb.o \
-	target/src/nondom.o \
-	target/src/odesolver.o \
-	target/src/pava.o \
-	target/src/target.o \
-	target/src/utils.o
+OBJECTS =  target/src/glm.dll \
+	target/src/nb.dll \
+	target/src/nondom.dll \
+	target/src/odesolver.dll \
+	target/src/pava.dll \
+	target/src/target.dll \
+	target/src/utils.dll
 
 
 PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) -DARMA_R -I. -I$(PKGROOT)/include -I../inst/include
