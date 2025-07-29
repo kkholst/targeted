@@ -57,7 +57,7 @@ jobs:
         if: success() && contains('refs/heads/main', github.ref)
         run: |
           Rscript -e 'remotes::install_github("kkholst/targeted")'
-          make slowtest
+          make test-slow
 
       - name: Webpage deployment
         if: success() && contains('refs/heads/main', github.ref)
