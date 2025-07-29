@@ -65,7 +65,7 @@ test-loadall:
 
 slowtest: test-slow
 test-slow:
-	@echo 'future::plan("multicore"); library("targeted"); res <- tinytest::run_test_dir("inst/slowtest"); if (summary(res)["Total", "fails"] > 0) {print(res); quit(status = 2)}' | $(R)
+	@$(R) -f tests/slowtest.R
 
 test-all: test test-slow
 
