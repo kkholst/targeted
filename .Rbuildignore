@@ -1,4 +1,5 @@
 ^.github$
+^.cache$
 ^\.git$
 ^.gitignore$
 ^.editorconfig$
