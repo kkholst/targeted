@@ -65,7 +65,7 @@ test-loadall:
 
 slowtest: test-slow
 test-slow:
-	@$(R) -f tests/slowtest.R
+	@$(R) -f inst/slowtest.R
 
 test-all: test test-slow
 
