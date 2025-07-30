@@ -1,3 +1,6 @@
+codecov:
+  branch: main # set default branch
+
 ignore:
   - "tests"
   - "data"
