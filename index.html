@@ -155,7 +155,7 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Estimate arguments: family=&lt;function&gt; </span></span>
 <span><span class="co">#&gt; Predict arguments:   </span></span>
-<span><span class="co">#&gt; Formula: y ~ (w1 + w2) * a &lt;environment: 0x13ae694c8&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt; Formula: y ~ (w1 + w2) * a &lt;environment: 0x135f0b7a0&gt;</span></span></code></pre></div>
 <p>To fit the model to the data we use the <code>estimate</code> method</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lr</span><span class="op">$</span><span class="fu">estimate</span><span class="op">(</span><span class="va">d</span><span class="op">)</span></span>
@@ -260,6 +260,23 @@ In practice, this requires plugin estimates of both the outcome model, <math dis
 <span><span class="co">#&gt; ───────────                                              </span></span>
 <span><span class="co">#&gt; (Intercept)  -0.3183 0.07996 -0.4749849 -0.1615 6.892e-05</span></span></code></pre></div>
 <p>In the output we get estimates of both the mean potential outcomes and the difference of those, the average treatment effect, given as the term <code>(Intercept)</code>.</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">a</span><span class="op">)</span></span>
+<span><span class="co">#&gt; cate(response.model = lr_rf, propensity.model = prmod, data = d, </span></span>
+<span><span class="co">#&gt;     nfolds = 5)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;             Estimate Std.Err       2.5%   97.5%   P-value</span></span>
+<span><span class="co">#&gt; E[y(1)]      -0.1700 0.02628 -0.2214840 -0.1185 9.939e-11</span></span>
+<span><span class="co">#&gt; E[y(0)]       0.1483 0.07595 -0.0005763  0.2971 5.089e-02</span></span>
+<span><span class="co">#&gt; ───────────                                              </span></span>
+<span><span class="co">#&gt; (Intercept)  -0.3183 0.07996 -0.4749849 -0.1615 6.892e-05</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Average Treatment Effect:</span></span>
+<span><span class="co">#&gt;                       Estimate Std.Err    2.5%   97.5%   P-value</span></span>
+<span><span class="co">#&gt; [E[y(1)]] - [E[y(0)]]  -0.3183 0.08008 -0.4752 -0.1613 7.055e-05</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Null Hypothesis: </span></span>
+<span><span class="co">#&gt;   [E[y(1)]] - [E[y(0)]] = 0</span></span></code></pre></div>
 <p>Here we use the <code>nfolds=5</code> argument to use 5-fold <em>cross-fitting</em> to guarantee that the estimates converges weakly to a Gaussian distribution even though that the estimated influence function based on plugin estimates from the Random Forest does not necessarily lie in a <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>P</mi><annotation encoding="application/x-tex">P</annotation></semantics></math>-Donsker class.</p>
 </div>
 </div>
