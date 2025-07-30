@@ -3,10 +3,10 @@ name: r-cmd-check
 
 on:
   pull_request:
-    branches: [main, dev]
+    branches: [main, dev, deploy]
     # types: [opened, synchronize, reopened, ready_for_review]
   push:
-    branches: [main]
+    branches: [main, deploy]
 
 jobs:
   r-cmd-check:
@@ -54,13 +54,13 @@ jobs:
           # build_args: 'c("--no-build-vignettes")'
 
       - name: slow tests
-        if: success() && contains('refs/heads/main', github.ref)
+        if: success() && (contains('refs/heads/main', github.ref) || contains('refs/heads/deploy', github.ref))
         run: |
           Rscript -e 'remotes::install_github("kkholst/targeted")'
           make test-slow
 
       - name: Webpage deployment
-        if: success() && contains('refs/heads/main', github.ref)
+        if: success() && (contains('refs/heads/main', github.ref) || contains('refs/heads/deploy', github.ref))
         run: |
           Rscript -e 'remotes::install_github("kkholst/targeted")'
           git config --local user.name "$GITHUB_ACTOR"
