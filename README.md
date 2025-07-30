@@ -119,7 +119,7 @@ lr
 #> 
 #> Estimate arguments: family=<function> 
 #> Predict arguments:   
-#> Formula: y ~ (w1 + w2) * a <environment: 0x13ae694c8>
+#> Formula: y ~ (w1 + w2) * a <environment: 0x135f0b7a0>
 ```
 
 To fit the model to the data we use the `estimate` method
@@ -272,6 +272,25 @@ a
 In the output we get estimates of both the mean potential outcomes and
 the difference of those, the average treatment effect, given as the term
 `(Intercept)`.
+
+``` r
+summary(a)
+#> cate(response.model = lr_rf, propensity.model = prmod, data = d, 
+#>     nfolds = 5)
+#> 
+#>             Estimate Std.Err       2.5%   97.5%   P-value
+#> E[y(1)]      -0.1700 0.02628 -0.2214840 -0.1185 9.939e-11
+#> E[y(0)]       0.1483 0.07595 -0.0005763  0.2971 5.089e-02
+#> ───────────                                              
+#> (Intercept)  -0.3183 0.07996 -0.4749849 -0.1615 6.892e-05
+#> 
+#> Average Treatment Effect:
+#>                       Estimate Std.Err    2.5%   97.5%   P-value
+#> [E[y(1)]] - [E[y(0)]]  -0.3183 0.08008 -0.4752 -0.1613 7.055e-05
+#> 
+#>  Null Hypothesis: 
+#>   [E[y(1)]] - [E[y(0)]] = 0
+```
 
 Here we use the `nfolds=5` argument to use 5-fold *cross-fitting* to
 guarantee that the estimates converges weakly to a Gaussian distribution

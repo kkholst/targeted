@@ -216,6 +216,10 @@ a
 In the output we get estimates of both the mean potential outcomes and the
 difference of those, the average treatment effect, given as the term `(Intercept)`.
 
+```{r}
+summary(a)
+```
+
 Here we use the `nfolds=5` argument to use 5-fold *cross-fitting* to guarantee
 that the estimates converges weakly to a Gaussian distribution even though
 that the estimated influence function based on plugin estimates from the Random
