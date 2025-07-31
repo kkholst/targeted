@@ -154,6 +154,8 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #' @param propensity.model formula or learner object (formula => learner_glm)
 #' @param cate.model formula specifying regression design for conditional
 #'   average treatment effects
+#' @param calibration.model linear calibration model. Specify covariates in
+#'   addition to predicted potential outcomes to include in the calibration.
 #' @param contrast treatment contrast (default 1 vs 0)
 #' @param data data.frame
 #' @param nfolds number of folds
