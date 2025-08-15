@@ -37,7 +37,7 @@
 #' )
 #' names(lrs) # unnamed list since names = FALSE
 learner_expand_grid <- function(fun, args, names = TRUE, params = FALSE) {
-  args <- do.call(expand.list, args)
+  args <- expand.list(INPUT = args)
   lrs <- lapply(args, function(par) do.call(fun, par))
 
   if (!is.character(names) && names) {
@@ -50,7 +50,9 @@ learner_expand_grid <- function(fun, args, names = TRUE, params = FALSE) {
   if (params) {
     .names <- c()
     for (i in seq_along(lrs)) {
-      param <- paste0(attr(args, "table")[i, ], collapse = ":")
+      ## param <- paste0(attr(args, "table")[i, ], collapse = ":")
+      param <- lapply(args[[i]], function(x) deparse(x)) |>
+        unlist() |> paste0(collapse = ":")
       .names <- c(.names, paste0(.name, ":", param))
     }
   } else {
@@ -63,3 +65,4 @@ learner_expand_grid <- function(fun, args, names = TRUE, params = FALSE) {
 
   return(lrs)
 }
+
