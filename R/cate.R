@@ -52,82 +52,6 @@ est_nuisance_fold <- function(fold,
   return(list(pmod = pr, qmod = eY))
 }
 
-cate_est <- function(y, # response vector
-                     a, # matrix with treatment indicators a=1, a=0
-                     p, # matrix with treatment probabilities a=1, a=0
-                     q, # matrix with outcome predictions E(Y|A=1,X), E(Y|A=0,X)
-                     data, # data.frame
-                     propensity.model = NULL, # propensity model
-                     X.cate
-                     ) {
-    K <- a / p * (y %x% rbind(rep(1, NCOL(a))) - q)
-    scores <- K + q
-    Yhat <- scores[, 1]
-    if (NCOL(scores) > 1) {
-      Yhat <- Yhat - scores[, 2]
-    }
-
-    est <- coef(lm(Yhat ~ -1 + X.cate))
-    names(est) <- colnames(X.cate)
-    V <- X.cate
-    h0 <- V%*%est
-    h1 <- V
-    r <- (Yhat-h0)
-    IF <- apply(h1, 2, function(x) x*r)
-    n <- nrow(data)
-    B <- solve(crossprod(V))*n
-    IF <- IF %*% B
-    rownames(IF) <- rownames(X.cate)
-
-    ## Expected potential outcomes
-    est0 <- apply(scores, 2, mean)
-    IF0 <- c()
-    contrast <- colnames(a)
-    if (!is.null(propensity.model)) {
-      treatment_var <- lava::getoutcome(propensity.model$formula)
-    }
-    for (i in seq_along(est0)) {
-      newIF <- scores[, i] - est0[i]
-      if (!is.null(propensity.model) &&
-          inherits(propensity.model, "learner_glm")) {
-        pmod <- propensity.model$clone(deep = TRUE)
-        newf <- reformulate(
-          as.character(pmod$formula)[[3]],
-          outcome_level(treatment_var, contrast[i])
-        )
-        pmod$update(newf)
-        fit <- pmod$estimate(data)
-        dlinkinv <- fit$family$mu.eta
-        adj <- - K[, i] / p[, i] * dlinkinv(fit$family$linkfun(p[, i]))
-        X.prop <- pmod$design(data, intercept = TRUE)$x
-        for (i in seq_len(ncol(X.prop))) {
-          X.prop[, i] <- X.prop[, i] * adj
-        }
-        adj <- X.prop
-        icprop <- IC(pmod$estimate(data))
-        newIF <- newIF + icprop %*% colMeans(adj)
-      }
-      IF0 <- cbind(IF0,  newIF)
-    }
-    nam <- paste0("E[", colnames(y), "(", colnames(a), ")]")
-    names(est0) <- nam
-    if (NCOL(X.cate)==1 && all(X.cate==1)) {
-      # construct IF directly from potential outcomes rather than the
-      # least squares projection above. Thereby we can use the
-      # second order remainder term correction derived above.
-      est <- mean(Yhat)
-      names(est) <- colnames(X.cate)
-      IF <- IF0[, 1]
-      if (NCOL(scores) > 1) {
-        IF <- IF - IF0[, 2]
-      }
-    }
-
-    est <- c(est0, est)
-    IF <- cbind(IF0, IF)
-    return(list(coef = est, IC = IF, scores = scores))
-  }
-
 outcome_level <- function(variable, level) {
     return(paste0("I(", variable, "=='", level, "')"))
 }
@@ -430,8 +354,110 @@ cate <- function(response.model, # nolint
   )
   class(res) <- c("cate.targeted", "targeted")
 
-  res <- update(res, cate.model = cate.model, data = data)
+  res <- update(res,
+                cate.model = cate.model, data = data,
+                second.order = second.order
+  )
   return(res)
+}
+
+
+
+cate_est <- function(y, # response vector
+                     a, # matrix with treatment indicators a=1, a=0
+                     p, # matrix with treatment probabilities a=1, a=0
+                     q, # matrix with outcome predictions E(Y|A=1,X), E(Y|A=0,X)
+                     data, # data.frame
+                     propensity.model = NULL, # propensity model
+                     X.cate
+                     ) {
+
+  K <- a / p * (y %x% rbind(rep(1, NCOL(a))) - q)
+  scores <- K + q
+
+   ## Expected potential outcomes
+  est0 <- apply(scores, 2, mean)
+  IF0 <- c()
+  contrast <- colnames(a)
+  if (!is.null(propensity.model)) {
+    treatment_var <- lava::getoutcome(propensity.model$formula)
+  }
+  for (i in seq_along(est0)) {
+    newIF <- scores[, i] - est0[i]
+    if (!is.null(propensity.model) &&
+        inherits(propensity.model, "learner_glm")) {
+      pmod <- propensity.model$clone(deep = TRUE)
+      newf <- reformulate(
+        as.character(pmod$formula)[[3]],
+        outcome_level(treatment_var, contrast[i])
+      )
+      pmod$update(newf)
+      fit <- pmod$estimate(data)
+      dlinkinv <- fit$family$mu.eta
+      adj <- - K[, i] / p[, i] * dlinkinv(fit$family$linkfun(p[, i]))
+      X.prop <- pmod$design(data, intercept = TRUE)$x
+      for (i in seq_len(ncol(X.prop))) {
+        X.prop[, i] <- X.prop[, i] * adj
+      }
+      adj <- X.prop
+      icprop <- IC(pmod$estimate(data))
+      newIF <- newIF + icprop %*% colMeans(adj)
+    }
+    IF0 <- cbind(IF0,  newIF)
+  }
+  nam <- paste0("E[", colnames(y), "(", colnames(a), ")]")
+  names(est0) <- nam
+
+  res <- c()
+  pairs <- utils::combn(1:3, 2) ## all pairs
+  for (i in seq_len(ncol(pairs))) {
+    cc <- pairs[, i]
+
+    Yhat <- scores[, cc[1]]
+    if (NCOL(scores) > 1) {
+      Yhat <- Yhat - scores[, cc[2]]
+    }
+
+    est <- coef(lm(Yhat ~ -1 + X.cate))
+    names(est) <- colnames(X.cate)
+    V <- X.cate
+    h0 <- V %*% est
+    h1 <- V
+    r <- (Yhat - h0)
+    IF <- apply(h1, 2, function(x) x * r)
+    n <- nrow(data)
+    B <- solve(crossprod(V)) * n
+    IF <- IF %*% B
+    rownames(IF) <- rownames(X.cate)
+
+    if (NCOL(X.cate) == 1 && all(X.cate == 1)) {
+      # construct IF directly from potential outcomes rather than the
+      # least squares projection above. Thereby we can use the
+      # second order remainder term correction derived above.
+      est <- mean(Yhat)
+      names(est) <- colnames(X.cate)
+      IF <- IF0[, cc[1]]
+      if (NCOL(scores) > 1) {
+        IF <- IF - IF0[, cc[2]]
+      }
+    }
+    res <- c(res, list(list(est = est, IF = IF)))
+  }
+  if (length(res) > 1) { # more than one contrast
+    for (i in seq_len(ncol(pairs))) {
+      names(res[[i]]$est) <- paste0(
+        names(res[[i]]$est),
+        "[",
+        contrast[pairs[1, i]], "-",
+        contrast[pairs[2, i]],
+        "]"
+      )
+    }
+  }
+  est <- c(est0, unlist(lapply(res, \(x) x$est)))
+  IF <- cbind(IF0, Reduce(cbind, lapply(res, \(x) x$IF)))
+
+  return(list(coef = est, IC = IF, scores = scores))
 }
 
 
@@ -468,12 +494,38 @@ update.cate.targeted <- function(object,
   scores <- ests[[1]]$scores
   estimate <- lava::estimate(coef = est, IC = IC)
   n <- ncol(object$data$p[[1]])
+  nc <- length(est) - n
   estimate$model.index <- list(
     seq(n),
-    seq(length(est) - n) + n
+    seq(nc) + n
   )
   object$scores <- scores
   object$estimate <- estimate
   object$cate.model <- cate.model
+  object$levels <- colnames(object$data$a)
   return(object)
+}
+
+
+#' @export
+summary.cate.targeted <- function(object, ...) {
+  B <- rbind(rep(0, length(coef(object))))
+  B[1:2] <- c(1, -1)
+  obj <- structure(list(
+    estimate = object$estimate,
+    call = object$call,
+    ate = lava::estimate(object$estimate, B)
+  ), class = "summary.cate.targeted")
+  return(obj)
+}
+
+#' @export
+print.summary.cate.targeted <- function(x, ...) {
+  print(x$call)
+  cat("\n")
+  print(x$estimate, ...)
+  cat("\nAverage Treatment Effect:\n")
+  print(x$ate)
+
+
 }
