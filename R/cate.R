@@ -408,8 +408,12 @@ cate_est <- function(y, # response vector
   nam <- paste0("E[", colnames(y), "(", colnames(a), ")]")
   names(est0) <- nam
 
+  if (length(contrast) > 1) {
+    pairs <- utils::combn(seq_along(contrast), 2) ## all pairs
+  } else {
+    pairs <- cbind(1)
+  }
   res <- c()
-  pairs <- utils::combn(seq_along(contrast), 2) ## all pairs
   for (i in seq_len(ncol(pairs))) {
     cc <- pairs[, i]
 
@@ -454,10 +458,10 @@ cate_est <- function(y, # response vector
       )
     }
   }
-  est <- c(est0, unlist(lapply(res, \(x) x$est)))
-  IF <- cbind(IF0, Reduce(cbind, lapply(res, \(x) x$IF)))
+  est0 <- c(est0, unlist(lapply(res, \(x) x$est)))
+  IF0 <- cbind(IF0, Reduce(cbind, lapply(res, \(x) x$IF)))
 
-  return(list(coef = est, IC = IF, scores = scores))
+  return(list(coef = est0, IC = IF0, scores = scores))
 }
 
 
