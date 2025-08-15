@@ -8,8 +8,8 @@ cate(
   response.model,
   propensity.model,
   cate.model = ~1,
-  contrast = c(1, 0),
   data,
+  contrast,
   nfolds = 1,
   rep = 1,
   rep.type = c("nuisance", "average"),
@@ -32,9 +32,9 @@ cate(
 \item{cate.model}{formula specifying regression design for conditional
 average treatment effects}
 
-\item{contrast}{treatment contrast (default 1 vs 0)}
-
 \item{data}{data.frame}
+
+\item{contrast}{treatment contrast (default 1 vs 0)}
 
 \item{nfolds}{number of folds}
 
@@ -63,6 +63,9 @@ of outcome models}
 \item{treatment}{Deprecated. Use cate.model instead.}
 
 \item{...}{additional arguments to future.apply::future_mapply}
+
+\item{calibration.model}{linear calibration model. Specify covariates in
+addition to predicted potential outcomes to include in the calibration.}
 }
 \value{
 cate.targeted object

@@ -129,7 +129,7 @@ cate_est <- function(y, # response vector
   }
 
 outcome_level <- function(variable, level) {
-    return(paste0("I(", variable, "==", level, ")"))
+    return(paste0("I(", variable, "=='", level, "')"))
 }
 
 cate_fold1 <- function(fold, data, score, cate_des) {
@@ -211,8 +211,8 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 cate <- function(response.model, # nolint
                  propensity.model,
                  cate.model = ~1,
-                 contrast = c(1, 0),
                  data,
+                 contrast,
                  nfolds = 1,
                  rep = 1,
                  rep.type = c("nuisance", "average"),
@@ -269,26 +269,33 @@ cate <- function(response.model, # nolint
     propensity.model <- stats::reformulate("1", propensity.model)
   }
 
-  desA <- design(cate.model, data, intercept=TRUE, rm_envir=FALSE)
   if (inherits(response.model, "formula")) {
     response.model <- learner_glm(response.model)
   }
 
-  if (length(contrast) > 2) {
-    stop("Expected contrast vector of length 1 or 2.")
-  }
-  if (missing(propensity.model)) {
-    response_var <- lava::getoutcome(response.model$formula, data=data)
-    newf <- reformulate(
-      paste0(" . - ", response_var),
-      response = outcome_level(treatment_var, contrast[1])
-    )
-    propensity.model <- learner_glm(newf, family=binomial)
-  }
   if (inherits(propensity.model, "formula")) {
     propensity.model <- learner_glm(propensity.model, family = binomial)
   }
+  # treatment reponse variable
+  # treatment_response <- all.vars(update(propensity.model$formula, ~1))
   treatment_var <- lava::getoutcome(propensity.model$formula)
+  # variable in data.frame, in case propensity-model is of the form `I(a>0) ~ 1`
+  # check that treatment variable is part of the response model
+  preds <- union(rownames(attr(
+    terms(response.model$formula,
+      data = data,
+      specials = c("strata", "stratify")
+    ),
+    "factors"
+  )), all.vars(response.model$formula))
+  if (!stratify && !(treatment_var %in% preds)) {
+    warning("treatment variable not present in `response.model`",
+            " and stratify=FALSE")
+  }
+
+  if (missing(contrast)) {
+    contrast <- rev(sort(unique(data[, treatment_var])))
+  }
 
   estimate_nuisance_models <- function(args) {
     ## Create random folds
@@ -415,37 +422,58 @@ cate <- function(response.model, # nolint
   }
   val$nuisance <- NULL
 
-  pmod <- propensity.model
-  if (!second.order) pmod <- NULL
-  ests <- lapply(seq_along(val$p),
-                 \(x) {
-                   with(val,
-                        cate_est(
-                          y = y,
-                          a = cbind(a),
-                          p = cbind(p[[x]]),
-                          q = cbind(q[[x]]),
-                          propensity.model = pmod,
-                          data = data,
-                          X.cat = desA$x))
-                 })
+  res <- list(
+    call = cl,
+    propensity.model = propensity.model,
+    # (outcome, trt, propensity-pred, outcome-pred)
+    data = val # (y, a, p, q)
+  )
+  class(res) <- c("cate.targeted", "targeted")
 
+  res <- update(res, cate.model = cate.model, data = data)
+  return(res)
+}
+
+
+#' @export
+update.cate.targeted <- function(object,
+                                 cate.model, data,
+                                 second.order = TRUE, ...) {
+
+  desA <- design(cate.model, data, intercept = TRUE, rm_envir = FALSE)
+  if (length(object$data$y) != nrow(desA$x)) {
+    stop("Not same data as the `cate` object")
+  }
+  pmod <- object$propensity.model # nolint
+  if (!second.order) pmod <- NULL
+  ests <- lapply(
+    seq_along(object$data$p),
+    \(x) {
+      with(
+        object$data,
+        cate_est(
+          y = y,
+          a = cbind(a),
+          p = cbind(p[[x]]),
+          q = cbind(q[[x]]),
+          propensity.model = pmod,
+          data = data,
+          X.cat = desA$x
+        )
+      )
+    }
+  )
   est <- ests[[1]]$coef
   IC <- ests[[1]]$IC
   scores <- ests[[1]]$scores
-  estimate <- lava::estimate(coef=est, IC=IC)
+  estimate <- lava::estimate(coef = est, IC = IC)
+  n <- ncol(object$data$p[[1]])
   estimate$model.index <- list(
-    seq_along(contrast),
-    seq_along(length(est)-length(contrast)) + length(contrast)
+    seq(n),
+    seq(length(est) - n) + n
   )
-
-  res <- list(scores = scores,
-              cate_des = desA,
-              coef = est,
-              response.model = response.model,
-              propensity.model = propensity.model,
-              call=cl,
-              estimate=estimate)
-  class(res) <- c("cate.targeted", "targeted")
-  return(res)
+  object$scores <- scores
+  object$estimate <- estimate
+  object$cate.model <- cate.model
+  return(object)
 }
