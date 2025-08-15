@@ -409,7 +409,7 @@ cate_est <- function(y, # response vector
   names(est0) <- nam
 
   res <- c()
-  pairs <- utils::combn(1:3, 2) ## all pairs
+  pairs <- utils::combn(seq_along(contrast), 2) ## all pairs
   for (i in seq_len(ncol(pairs))) {
     cc <- pairs[, i]
 
