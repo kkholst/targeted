@@ -38,14 +38,15 @@ aipw <- function(response_model,
   if (inherits(propensity_model, "formula")) {
     propensity_model <- learner_glm(propensity_model, family = binomial)
   }
-  res <- cate(response.model = response_model,
-       propensity.model = propensity_model,
-       cate.model = formula,
-      data = data, contrast = 1, stratify = TRUE,
-      ...
+  res <- cate(
+    response.model = response_model,
+    propensity.model = propensity_model,
+    cate.model = formula,
+    data = data, contrast = TRUE, stratify = TRUE,
+    ...
   )
-  res$coef <- res$coef[-1]
-  est <- estimate(coef=res$coef, IC=IC(res)[, -1, drop=FALSE])
+
+  est <- estimate(coef = coef(res)[-1], IC = IC(res)[, -1, drop = FALSE])
   res$estimate <- est
   return(res)
 }
