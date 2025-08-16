@@ -2,24 +2,20 @@
 #' @param object Survival model object: phreg, coxph, rfsrc, ranger
 #' @param newdata data.frame
 #' @param times numeric vector: Time points at which the survival model is
-#' evaluated. Must be a sorted vector with unique elements. If NULL, the time
-#' points associated with the survival model is used.
+#'   evaluated. If NULL, the time points associated with the survival model is
+#'   used.
 #' @param individual.time logical: If TRUE the survival object is evaluated at
-#' different time points for each row in newdata. The number of rows in newdata
-#' and the length of times must be the same.
-#' @param extend if TRUE, prints information for all specified
-#'  'times’, even if there are no subjects left at the end of the
-#'  specified ‘times’ (see [survival::summary.survfit]).
+#'   different time points for each row in newdata. The number of rows in
+#'   newdata and the length of times must be the same.
+#' @param extend if TRUE, prints information for all specified 'times’, even if
+#'   there are no subjects left at the end of the specified ‘times’ (see
+#'   [survival::summary.survfit]).
 #' @param ... Additional arguments.
-#' @return List with elements:
-#' \itemize{
-#'   \item time: numeric vector
-#'   \item chf: cumulative hazard function. If individual.time = FALSE, matrix
-#'   with dimension (nrow(newdata), length(times)). If individual.time = TRUE,
-#'   vector of length length(times).
-#'   \item surv: survival function, exp(-chf).
-#'   \item dchf: t(diff(rbind(0, t(chf))))
-#' }
+#' @return List with elements: \itemize{ \item time: numeric vector \item chf:
+#'   cumulative hazard function. If individual.time = FALSE, matrix with
+#'   dimension (nrow(newdata), length(times)). If individual.time = TRUE, vector
+#'   of length length(times). \item surv: survival function, exp(-chf). \item
+#'   dchf: t(diff(rbind(0, t(chf)))) }
 #' @author Klaus K. Holst, Andreas Nordland
 #' @export
 cumhaz <- function(object, newdata, times = NULL, individual.time = FALSE,
@@ -30,10 +26,9 @@ cumhaz <- function(object, newdata, times = NULL, individual.time = FALSE,
     stopifnot(
       is.numeric(times),
       length(times) > 0,
-      !anyNA(times),
-      !is.unsorted(times)
+      !anyNA(times)
     )
-    if (individual.time == TRUE) {
+    if (individual.time) {
       stopifnot(
         !is.null(times),
         n == length(times)
@@ -49,7 +44,7 @@ cumhaz <- function(object, newdata, times = NULL, individual.time = FALSE,
       individual.time = individual.time, ...
     )
     chf <- pp$cumhaz
-    if (individual.time == TRUE) {
+    if (individual.time) {
       chf <- as.vector(chf)
     }
     tt <- pp$times
@@ -94,7 +89,7 @@ cumhaz <- function(object, newdata, times = NULL, individual.time = FALSE,
       ssf_df <- data.table(
         strata = ssf$strata, time = ssf$time, chf = ssf$cumhaz
       )
-      if (individual.time == FALSE) {
+      if (!individual.time) {
         ssf_df_wide <- data.table::dcast(
           ssf_df, strata ~ time, value.var = "chf"
         )
@@ -105,6 +100,7 @@ cumhaz <- function(object, newdata, times = NULL, individual.time = FALSE,
         )
         chf[, ("strata") := NULL]
         chf <- as.matrix(chf)
+
       } else {
         tt <- times
         strata[, ("time") := times]
@@ -123,9 +119,9 @@ cumhaz <- function(object, newdata, times = NULL, individual.time = FALSE,
       pp <- survfit(object, newdata = newdata)
       pp <- summary(pp, time = times)
 
-      chf <- t(rbind(pp$cumhaz))
+      chf <- t(cbind(pp$cumhaz))
       tt <- pp$time
-      if (individual.time == TRUE) {
+      if (individual.time) {
         chf <- diag(chf)
       }
     }
@@ -144,7 +140,7 @@ cumhaz <- function(object, newdata, times = NULL, individual.time = FALSE,
       tt <- ssf$time
       chf <- ssf$cumhaz
 
-      if (individual.time == FALSE) {
+      if (!individual.time) {
         chf <- matrix(rep(chf, times = n), ncol = length(tt), byrow = TRUE)
         colnames(chf) <- tt
       }
@@ -155,7 +151,7 @@ cumhaz <- function(object, newdata, times = NULL, individual.time = FALSE,
       mf <- model.frame(formula, data = newdata)[, -1, drop = FALSE]
       strata <- data.table(strata = strata(mf))
 
-      if (individual.time == FALSE) {
+      if (!individual.time) {
         ssf_df_wide <- data.table::dcast(
           ssf_df, strata ~ time, value.var = "chf"
         )
@@ -187,10 +183,10 @@ cumhaz <- function(object, newdata, times = NULL, individual.time = FALSE,
     is.vector(tt),
     length(tt) > 0,
     is.numeric(tt),
-    !anyNA(tt),
-    !is.unsorted(tt)
+    !anyNA(tt)
+##    !is.unsorted(tt)
   )
-  if (individual.time == TRUE) {
+  if (individual.time) {
     stopifnot(is.vector(chf))
   } else {
     stopifnot(is.matrix(chf))

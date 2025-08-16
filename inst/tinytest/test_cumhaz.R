@@ -60,7 +60,7 @@ test_cumhaz_function <- function(object) {
     newdata = test_data[idx_add, ]
   )
 
-  expect_true(any(!is.na(test_cumhaz$chf)))
+  expect_true(all(!is.na(test_cumhaz$chf)))
 
   expect_equal(
     dim(test_cumhaz$chf),
@@ -229,3 +229,52 @@ test_cumhaz <- cumhaz(test_rfsrc, newdata = test_data, times = c(0.4, 0.5))
 test_ranger <- ranger(Surv(time, event) ~ W, data = test_data, num.trees = 10)
 test_cumhaz_function(test_ranger)
 test_cumhaz <- cumhaz(test_ranger, newdata = test_data, times = c(0.4, 0.5))
+
+
+
+test_cumhaz <- cumhaz(test_rfsrc, newdata = test_data, times = c(0.4, 0.5))
+
+
+times <- seq(0.1, 1, by = 0.1)
+c1 <- cumhaz(test_rfsrc, newdata = test_data, times = times)
+rtimes <- rev(times)
+c2 <- cumhaz(test_rfsrc, newdata = test_data, times = rtimes)
+
+plot(times, c1$chf[2, ])
+points(rtimes, c2$chf[2, ], col="red")
+
+
+
+
+library("randomForestSRC")
+library("ranger")
+library("mets")
+library("survival")
+n <- 1e2
+time <- rexp(n)
+status <- rep(TRUE, n)
+x <- rnorm(n)
+z <- rbinom(n, 1, 0.5)
+d <- data.frame(time, status, x, z)
+
+test_cumhaz_order_invariant <- function(m) {
+  a1 <- cumhaz(m, newdata = data.frame(x = c(1,1)), times = c(0.5, 1), individual.time = TRUE)
+  a2 <- cumhaz(m, newdata = data.frame(x = c(1, 1)), times = c(1, 0.5), individual.time = TRUE)
+  expect_equal(a1$time, rev(a2$time))
+  expect_equal(a1$chf, rev(a2$chf))
+  expect_true(a1$chf[1] <  a1$chf[2])
+
+  a3 <- cumhaz(m, newdata = data.frame(x = 1), times = c(0.5, 1))
+  a4 <- cumhaz(m, newdata = data.frame(x = 1), times = c(1, 0.5))
+  expect_equal(a3$time, rev(a4$time))
+  expect_equal(a3$chf[1,], rev(a4$chf))
+  expect_true(a3$chf[1] <  a3$chf[2])
+  expect_equal(a1$chf, a3$chf[1, ])
+}
+
+m <- coxph(Surv(time, status) ~ x, data = d)
+test_cumhaz_order_invariant(m)
+m <- phreg(Surv(time, status) ~ x, data = d)
+test_cumhaz_order_invariant(m)
+m <- rfsrc(Surv(time, status) ~ x, data = d, ntree = 10)
+test_cumhaz_order_invariant(m)
