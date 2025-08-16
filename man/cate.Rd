@@ -8,6 +8,7 @@ cate(
   response.model,
   propensity.model,
   cate.model = ~1,
+  calibration.model = NULL,
   data,
   contrast,
   nfolds = 1,
@@ -31,6 +32,9 @@ cate(
 
 \item{cate.model}{formula specifying regression design for conditional
 average treatment effects}
+
+\item{calibration.model}{linear calibration model. Specify covariates in
+addition to predicted potential outcomes to include in the calibration.}
 
 \item{data}{data.frame}
 
@@ -63,9 +67,6 @@ of outcome models}
 \item{treatment}{Deprecated. Use cate.model instead.}
 
 \item{...}{additional arguments to future.apply::future_mapply}
-
-\item{calibration.model}{linear calibration model. Specify covariates in
-addition to predicted potential outcomes to include in the calibration.}
 }
 \value{
 cate.targeted object

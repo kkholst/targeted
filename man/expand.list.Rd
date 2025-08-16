@@ -21,7 +21,7 @@ Similar to \code{expand.grid} function, this function creates all combinations
 of the input arguments but returns the result as a list.
 }
 \examples{
-expand.list(x=2:4, z=c("a","b"))
+expand.list(x = 2:4, z = c("a", "b"))
 }
 \author{
 Klaus Kähler Holst
