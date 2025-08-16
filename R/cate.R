@@ -84,13 +84,17 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #' @param data data.frame
 #' @param nfolds number of folds
 #' @param rep number of replications of cross-fitting procedure
-#' @param rep.type repeated cross-fitting applied by averaging nuisance models
-#'   (`rep.type="nuisance"`) or by average estimates from each replication
-#'   (`rep.type="average"`).
 #' @param silent suppress all messages and progressbars
 #' @param stratify if TRUE the response.model will be stratified by treatment
 #' @param mc.cores (optional) number of cores. parallel::mcmapply used instead
 #'   of future
+#' @param rep.type repeated cross-fitting applied by averaging nuisance models
+#'   (`rep.type="nuisance"`) or by average estimates from each replication
+#'   (`rep.type="average"`).
+#' @param var.type when equal to "IC" the asymptotic variance is derived from
+#'   the influence function. Otherwise, based on expressions in Bannick et al.
+#'   (2025) valid under different covariate-adaptive randomization schemes (only
+#'   available for ATE and when `calibration.model` is also specified)
 #' @param second.order add seconder order term to IF to handle misspecification
 #'   of outcome models
 #' @return cate.targeted object
@@ -135,14 +139,16 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 cate <- function(response.model, # nolint
                  propensity.model,
                  cate.model = ~1,
+                 calibration.model = NULL,
                  data,
                  contrast,
                  nfolds = 1,
                  rep = 1,
-                 rep.type = c("nuisance", "average"),
                  silent = FALSE,
                  stratify = FALSE,
                  mc.cores = NULL,
+                 rep.type = c("nuisance", "average"),
+                 var.type = "IC",
                  second.order = TRUE,
                  response_model = deprecated,
                  cate_model = deprecated,
@@ -355,13 +361,14 @@ cate <- function(response.model, # nolint
   class(res) <- c("cate.targeted", "targeted")
 
   res <- update(res,
-                cate.model = cate.model, data = data,
+                cate.model = cate.model,
+                data = data,
+                calibration.model = calibration.model,
+                var.type = var.type,
                 second.order = second.order
   )
   return(res)
 }
-
-
 
 cate_est <- function(y, # response vector
                      a, # matrix with treatment indicators a=1, a=0
@@ -464,16 +471,46 @@ cate_est <- function(y, # response vector
   return(list(coef = est0, IC = IF0, scores = scores))
 }
 
-
 #' @export
 update.cate.targeted <- function(object,
-                                 cate.model, data,
+                                 cate.model = ~1,
+                                 data,
+                                 calibration.model = NULL,
+                                 var.type = "IC",
                                  second.order = TRUE, ...) {
 
   desA <- design(cate.model, data, intercept = TRUE, rm_envir = FALSE)
   if (length(object$data$y) != nrow(desA$x)) {
     stop("Not same data as the `cate` object")
   }
+  vcov <- NULL
+  if (!is.null(calibration.model)) {
+    des_cal <- design(calibration.model, data, intercept = TRUE)
+    object$data$q0 <- object$data$q
+    q <- object$data$q[[1]]
+    a <- object$data$a
+    y <- object$data$y
+    Z <- cbind(des_cal$x, q)
+    rs <- c() # residuals
+    ps <- c() # treatment assignment prob.
+    bs <- c() # linear regr. coef.
+    for (i in seq_len(ncol(a))) {
+      idx <- which(a[, i])
+      b <- lm.fit(Z[idx, , drop = FALSE], y[idx])$coefficients
+      b[is.na(b)] <- 0
+      bs <- cbind(bs, cbind(b))
+      q[, i] <- Z %*% b
+      rs <- c(rs, list(y[idx] - Z[idx, , drop = FALSE] %*% b))
+      ps <- c(ps, mean(a[, i]))
+    }
+    var <- function(x) stats::var(x) * (NROW(x) - 1) / NROW(x)
+    v1 <- diag(unlist(lapply(rs, var)) / ps)
+    v2 <- t(bs) %*% var(Z) %*% bs
+    vcov <- (v1 + v2)/n
+    object$data$q[[1]] <- q
+  }
+
+
   pmod <- object$propensity.model # nolint
   if (!second.order) pmod <- NULL
   ests <- lapply(
@@ -496,20 +533,31 @@ update.cate.targeted <- function(object,
   est <- ests[[1]]$coef
   IC <- ests[[1]]$IC
   scores <- ests[[1]]$scores
-  estimate <- lava::estimate(coef = est, IC = IC)
+  if (tolower(var.type) == "ic" || is.null(vcov) || ncol(desA$x)>1) {
+    estimate <- lava::estimate(coef = est, IC = IC)
+  } else {
+    e <- lava::estimate(coef = est[seq_len(ncol(vcov))], vcov = vcov)
+    pairs <- utils::combn(seq_along(coef(e)), 2)
+    B <- matrix(0, length(coef(e)), length(coef(e)))
+    for (i in seq_len(ncol(pairs))) {
+      B[i, pairs[, i]] <- c(1, -1)
+    }
+    estimate <- estimate(e, rbind(diag(nrow = nrow(B)), B)) |>
+                         labels(names(est))
+  }
   n <- ncol(object$data$p[[1]])
   nc <- length(est) - n
   estimate$model.index <- list(
     seq(n),
     seq(nc) + n
   )
+  object$vcov.cal <- vcov
   object$scores <- scores
   object$estimate <- estimate
   object$cate.model <- cate.model
   object$levels <- colnames(object$data$a)
   return(object)
 }
-
 
 #' @export
 summary.cate.targeted <- function(object, ...) {
