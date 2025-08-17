@@ -19,29 +19,25 @@ cumhaz(
 \item{newdata}{data.frame}
 
 \item{times}{numeric vector: Time points at which the survival model is
-evaluated. Must be a sorted vector with unique elements. If NULL, the time
-points associated with the survival model is used.}
+evaluated. If NULL, the time points associated with the survival model is
+used.}
 
 \item{individual.time}{logical: If TRUE the survival object is evaluated at
-different time points for each row in newdata. The number of rows in newdata
-and the length of times must be the same.}
+different time points for each row in newdata. The number of rows in
+newdata and the length of times must be the same.}
 
-\item{extend}{if TRUE, prints information for all specified
-'times’, even if there are no subjects left at the end of the
-specified ‘times’ (see \link[survival:summary.survfit]{survival::summary.survfit}).}
+\item{extend}{if TRUE, prints information for all specified 'times’, even if
+there are no subjects left at the end of the specified ‘times’ (see
+\link[survival:summary.survfit]{survival::summary.survfit}).}
 
 \item{...}{Additional arguments.}
 }
 \value{
-List with elements:
-\itemize{
-\item time: numeric vector
-\item chf: cumulative hazard function. If individual.time = FALSE, matrix
-with dimension (nrow(newdata), length(times)). If individual.time = TRUE,
-vector of length length(times).
-\item surv: survival function, exp(-chf).
-\item dchf: t(diff(rbind(0, t(chf))))
-}
+List with elements: \itemize{ \item time: numeric vector \item chf:
+cumulative hazard function. If individual.time = FALSE, matrix with
+dimension (nrow(newdata), length(times)). If individual.time = TRUE, vector
+of length length(times). \item surv: survival function, exp(-chf). \item
+dchf: t(diff(rbind(0, t(chf)))) }
 }
 \description{
 Predict the cumulative hazard/survival function for a survival model
