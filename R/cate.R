@@ -538,12 +538,12 @@ update.cate.targeted <- function(object,
   } else {
     e <- lava::estimate(coef = est[seq_len(ncol(vcov))], vcov = vcov)
     pairs <- utils::combn(seq_along(coef(e)), 2)
-    B <- matrix(0, length(coef(e)), length(coef(e)))
+    B <- matrix(0, ncol(pairs), length(coef(e)))
     for (i in seq_len(ncol(pairs))) {
       B[i, pairs[, i]] <- c(1, -1)
     }
-    estimate <- estimate(e, rbind(diag(nrow = nrow(B)), B)) |>
-                         labels(names(est))
+    estimate <- estimate(e, rbind(diag(nrow = length(coef(e))), B)) |>
+      labels(names(est))
   }
   n <- ncol(object$data$p[[1]])
   nc <- length(est) - n
