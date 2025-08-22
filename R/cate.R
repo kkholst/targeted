@@ -158,6 +158,9 @@ cate <- function(response.model, # nolint
 
   cl <- match.call()
   n <- nrow(data)
+  if (inherits(data, "data.table")) {
+    data <- as.data.frame(data)
+  }
 
   dvers <- "1.0.0"
   if (!missing(response_model)) {
