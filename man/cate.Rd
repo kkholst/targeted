@@ -8,14 +8,16 @@ cate(
   response.model,
   propensity.model,
   cate.model = ~1,
-  contrast = c(1, 0),
+  calibration.model = NULL,
   data,
+  contrast,
   nfolds = 1,
   rep = 1,
-  rep.type = c("nuisance", "average"),
   silent = FALSE,
   stratify = FALSE,
   mc.cores = NULL,
+  rep.type = c("nuisance", "average"),
+  var.type = "IC",
   second.order = TRUE,
   response_model = deprecated,
   cate_model = deprecated,
@@ -32,17 +34,16 @@ cate(
 \item{cate.model}{formula specifying regression design for conditional
 average treatment effects}
 
-\item{contrast}{treatment contrast (default 1 vs 0)}
+\item{calibration.model}{linear calibration model. Specify covariates in
+addition to predicted potential outcomes to include in the calibration.}
 
 \item{data}{data.frame}
+
+\item{contrast}{treatment contrast (default 1 vs 0)}
 
 \item{nfolds}{number of folds}
 
 \item{rep}{number of replications of cross-fitting procedure}
-
-\item{rep.type}{repeated cross-fitting applied by averaging nuisance models
-(\code{rep.type="nuisance"}) or by average estimates from each replication
-(\code{rep.type="average"}).}
 
 \item{silent}{suppress all messages and progressbars}
 
@@ -50,6 +51,15 @@ average treatment effects}
 
 \item{mc.cores}{(optional) number of cores. parallel::mcmapply used instead
 of future}
+
+\item{rep.type}{repeated cross-fitting applied by averaging nuisance models
+(\code{rep.type="nuisance"}) or by average estimates from each replication
+(\code{rep.type="average"}).}
+
+\item{var.type}{when equal to "IC" the asymptotic variance is derived from
+the influence function. Otherwise, based on expressions in Bannick et al.
+(2025) valid under different covariate-adaptive randomization schemes (only
+available for ATE and when \code{calibration.model} is also specified)}
 
 \item{second.order}{add seconder order term to IF to handle misspecification
 of outcome models}

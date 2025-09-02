@@ -52,84 +52,8 @@ est_nuisance_fold <- function(fold,
   return(list(pmod = pr, qmod = eY))
 }
 
-cate_est <- function(y, # response vector
-                     a, # matrix with treatment indicators a=1, a=0
-                     p, # matrix with treatment probabilities a=1, a=0
-                     q, # matrix with outcome predictions E(Y|A=1,X), E(Y|A=0,X)
-                     data, # data.frame
-                     propensity.model = NULL, # propensity model
-                     X.cate
-                     ) {
-    K <- a / p * (y %x% rbind(rep(1, NCOL(a))) - q)
-    scores <- K + q
-    Yhat <- scores[, 1]
-    if (NCOL(scores) > 1) {
-      Yhat <- Yhat - scores[, 2]
-    }
-
-    est <- coef(lm(Yhat ~ -1 + X.cate))
-    names(est) <- colnames(X.cate)
-    V <- X.cate
-    h0 <- V%*%est
-    h1 <- V
-    r <- (Yhat-h0)
-    IF <- apply(h1, 2, function(x) x*r)
-    n <- nrow(data)
-    B <- solve(crossprod(V))*n
-    IF <- IF %*% B
-    rownames(IF) <- rownames(X.cate)
-
-    ## Expected potential outcomes
-    est0 <- apply(scores, 2, mean)
-    IF0 <- c()
-    contrast <- colnames(a)
-    if (!is.null(propensity.model)) {
-      treatment_var <- lava::getoutcome(propensity.model$formula)
-    }
-    for (i in seq_along(est0)) {
-      newIF <- scores[, i] - est0[i]
-      if (!is.null(propensity.model) &&
-          inherits(propensity.model, "learner_glm")) {
-        pmod <- propensity.model$clone(deep = TRUE)
-        newf <- reformulate(
-          as.character(pmod$formula)[[3]],
-          outcome_level(treatment_var, contrast[i])
-        )
-        pmod$update(newf)
-        fit <- pmod$estimate(data)
-        dlinkinv <- fit$family$mu.eta
-        adj <- - K[, i] / p[, i] * dlinkinv(fit$family$linkfun(p[, i]))
-        X.prop <- pmod$design(data, intercept = TRUE)$x
-        for (i in seq_len(ncol(X.prop))) {
-          X.prop[, i] <- X.prop[, i] * adj
-        }
-        adj <- X.prop
-        icprop <- IC(pmod$estimate(data))
-        newIF <- newIF + icprop %*% colMeans(adj)
-      }
-      IF0 <- cbind(IF0,  newIF)
-    }
-    nam <- paste0("E[", colnames(y), "(", colnames(a), ")]")
-    names(est0) <- nam
-    if (NCOL(X.cate)==1 && all(X.cate==1)) {
-      # construct IF directly from potential outcomes rather than the
-      # least squares projection above. Thereby we can use the
-      # second order remainder term correction derived above.
-      est <- mean(Yhat)
-      names(est) <- colnames(X.cate)
-      IF <- IF0[, 1]
-      if (NCOL(scores) > 1) {
-        IF <- IF - IF0[, 2]
-      }
-    }
-
-    est <- c(est0, est)
-    IF <- cbind(IF0, IF)
-    return(list(coef = est, IC = IF, scores = scores))
-  }
-
 outcome_level <- function(variable, level) {
-    return(paste0("I(", variable, "==", level, ")"))
+    return(paste0("I(", variable, "=='", level, "')"))
 }
 
 cate_fold1 <- function(fold, data, score, cate_des) {
@@ -154,17 +78,23 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #' @param propensity.model formula or learner object (formula => learner_glm)
 #' @param cate.model formula specifying regression design for conditional
 #'   average treatment effects
+#' @param calibration.model linear calibration model. Specify covariates in
+#'   addition to predicted potential outcomes to include in the calibration.
 #' @param contrast treatment contrast (default 1 vs 0)
 #' @param data data.frame
 #' @param nfolds number of folds
 #' @param rep number of replications of cross-fitting procedure
-#' @param rep.type repeated cross-fitting applied by averaging nuisance models
-#'   (`rep.type="nuisance"`) or by average estimates from each replication
-#'   (`rep.type="average"`).
 #' @param silent suppress all messages and progressbars
 #' @param stratify if TRUE the response.model will be stratified by treatment
 #' @param mc.cores (optional) number of cores. parallel::mcmapply used instead
 #'   of future
+#' @param rep.type repeated cross-fitting applied by averaging nuisance models
+#'   (`rep.type="nuisance"`) or by average estimates from each replication
+#'   (`rep.type="average"`).
+#' @param var.type when equal to "IC" the asymptotic variance is derived from
+#'   the influence function. Otherwise, based on expressions in Bannick et al.
+#'   (2025) valid under different covariate-adaptive randomization schemes (only
+#'   available for ATE and when `calibration.model` is also specified)
 #' @param second.order add seconder order term to IF to handle misspecification
 #'   of outcome models
 #' @return cate.targeted object
@@ -209,14 +139,16 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 cate <- function(response.model, # nolint
                  propensity.model,
                  cate.model = ~1,
-                 contrast = c(1, 0),
+                 calibration.model = NULL,
                  data,
+                 contrast,
                  nfolds = 1,
                  rep = 1,
-                 rep.type = c("nuisance", "average"),
                  silent = FALSE,
                  stratify = FALSE,
                  mc.cores = NULL,
+                 rep.type = c("nuisance", "average"),
+                 var.type = "IC",
                  second.order = TRUE,
                  response_model = deprecated,
                  cate_model = deprecated,
@@ -226,6 +158,9 @@ cate <- function(response.model, # nolint
 
   cl <- match.call()
   n <- nrow(data)
+  if (inherits(data, "data.table")) {
+    data <- as.data.frame(data)
+  }
 
   dvers <- "1.0.0"
   if (!missing(response_model)) {
@@ -267,26 +202,33 @@ cate <- function(response.model, # nolint
     propensity.model <- stats::reformulate("1", propensity.model)
   }
 
-  desA <- design(cate.model, data, intercept=TRUE, rm_envir=FALSE)
   if (inherits(response.model, "formula")) {
     response.model <- learner_glm(response.model)
   }
 
-  if (length(contrast) > 2) {
-    stop("Expected contrast vector of length 1 or 2.")
-  }
-  if (missing(propensity.model)) {
-    response_var <- lava::getoutcome(response.model$formula, data=data)
-    newf <- reformulate(
-      paste0(" . - ", response_var),
-      response = outcome_level(treatment_var, contrast[1])
-    )
-    propensity.model <- learner_glm(newf, family=binomial)
-  }
   if (inherits(propensity.model, "formula")) {
     propensity.model <- learner_glm(propensity.model, family = binomial)
   }
+  # treatment reponse variable
+  # treatment_response <- all.vars(update(propensity.model$formula, ~1))
   treatment_var <- lava::getoutcome(propensity.model$formula)
+  # variable in data.frame, in case propensity-model is of the form `I(a>0) ~ 1`
+  # check that treatment variable is part of the response model
+  preds <- union(rownames(attr(
+    terms(response.model$formula,
+      data = data,
+      specials = c("strata", "stratify")
+    ),
+    "factors"
+  )), all.vars(response.model$formula))
+  if (!stratify && !(treatment_var %in% preds)) {
+    warning("treatment variable not present in `response.model`",
+            " and stratify=FALSE")
+  }
+
+  if (missing(contrast)) {
+    contrast <- rev(sort(unique(data[, treatment_var])))
+  }
 
   estimate_nuisance_models <- function(args) {
     ## Create random folds
@@ -413,37 +355,232 @@ cate <- function(response.model, # nolint
   }
   val$nuisance <- NULL
 
-  pmod <- propensity.model
-  if (!second.order) pmod <- NULL
-  ests <- lapply(seq_along(val$p),
-                 \(x) {
-                   with(val,
-                        cate_est(
-                          y = y,
-                          a = cbind(a),
-                          p = cbind(p[[x]]),
-                          q = cbind(q[[x]]),
-                          propensity.model = pmod,
-                          data = data,
-                          X.cat = desA$x))
-                 })
+  res <- list(
+    call = cl,
+    propensity.model = propensity.model,
+    # (outcome, trt, propensity-pred, outcome-pred)
+    data = val # (y, a, p, q)
+  )
+  class(res) <- c("cate.targeted", "targeted")
 
+  res <- update(res,
+                cate.model = cate.model,
+                data = data,
+                calibration.model = calibration.model,
+                var.type = var.type,
+                second.order = second.order
+  )
+  return(res)
+}
+
+cate_est <- function(y, # response vector
+                     a, # matrix with treatment indicators a=1, a=0
+                     p, # matrix with treatment probabilities a=1, a=0
+                     q, # matrix with outcome predictions E(Y|A=1,X), E(Y|A=0,X)
+                     data, # data.frame
+                     propensity.model = NULL, # propensity model
+                     X.cate
+                     ) {
+
+  K <- a / p * (y %x% rbind(rep(1, NCOL(a))) - q)
+  scores <- K + q
+
+   ## Expected potential outcomes
+  est0 <- apply(scores, 2, mean)
+  IF0 <- c()
+  contrast <- colnames(a)
+  if (!is.null(propensity.model)) {
+    treatment_var <- lava::getoutcome(propensity.model$formula)
+  }
+  for (i in seq_along(est0)) {
+    newIF <- scores[, i] - est0[i]
+    if (!is.null(propensity.model) &&
+        inherits(propensity.model, "learner_glm")) {
+      pmod <- propensity.model$clone(deep = TRUE)
+      newf <- reformulate(
+        as.character(pmod$formula)[[3]],
+        outcome_level(treatment_var, contrast[i])
+      )
+      pmod$update(newf)
+      fit <- pmod$estimate(data)
+      dlinkinv <- fit$family$mu.eta
+      adj <- - K[, i] / p[, i] * dlinkinv(fit$family$linkfun(p[, i]))
+      X.prop <- pmod$design(data, intercept = TRUE)$x
+      for (i in seq_len(ncol(X.prop))) {
+        X.prop[, i] <- X.prop[, i] * adj
+      }
+      adj <- X.prop
+      icprop <- IC(pmod$estimate(data))
+      newIF <- newIF + icprop %*% colMeans(adj)
+    }
+    IF0 <- cbind(IF0,  newIF)
+  }
+  nam <- paste0("E[", colnames(y), "(", colnames(a), ")]")
+  names(est0) <- nam
+
+  if (length(contrast) > 1) {
+    pairs <- utils::combn(seq_along(contrast), 2) ## all pairs
+  } else {
+    pairs <- cbind(1)
+  }
+  res <- c()
+  for (i in seq_len(ncol(pairs))) {
+    cc <- pairs[, i]
+
+    Yhat <- scores[, cc[1]]
+    if (NCOL(scores) > 1) {
+      Yhat <- Yhat - scores[, cc[2]]
+    }
+
+    est <- coef(lm(Yhat ~ -1 + X.cate))
+    names(est) <- colnames(X.cate)
+    V <- X.cate
+    h0 <- V %*% est
+    h1 <- V
+    r <- (Yhat - h0)
+    IF <- apply(h1, 2, function(x) x * r)
+    n <- nrow(data)
+    B <- solve(crossprod(V)) * n
+    IF <- IF %*% B
+    rownames(IF) <- rownames(X.cate)
+
+    if (NCOL(X.cate) == 1 && all(X.cate == 1)) {
+      # construct IF directly from potential outcomes rather than the
+      # least squares projection above. Thereby we can use the
+      # second order remainder term correction derived above.
+      est <- mean(Yhat)
+      names(est) <- colnames(X.cate)
+      IF <- IF0[, cc[1]]
+      if (NCOL(scores) > 1) {
+        IF <- IF - IF0[, cc[2]]
+      }
+    }
+    res <- c(res, list(list(est = est, IF = IF)))
+  }
+  if (length(res) > 1) { # more than one contrast
+    for (i in seq_len(ncol(pairs))) {
+      names(res[[i]]$est) <- paste0(
+        names(res[[i]]$est),
+        "[",
+        contrast[pairs[1, i]], "-",
+        contrast[pairs[2, i]],
+        "]"
+      )
+    }
+  }
+  est0 <- c(est0, unlist(lapply(res, \(x) x$est)))
+  IF0 <- cbind(IF0, Reduce(cbind, lapply(res, \(x) x$IF)))
+
+  return(list(coef = est0, IC = IF0, scores = scores))
+}
+
+#' @export
+update.cate.targeted <- function(object,
+                                 cate.model = ~1,
+                                 data,
+                                 calibration.model = NULL,
+                                 var.type = "IC",
+                                 second.order = TRUE, ...) {
+
+  desA <- design(cate.model, data, intercept = TRUE, rm_envir = FALSE)
+  if (length(object$data$y) != nrow(desA$x)) {
+    stop("Not same data as the `cate` object")
+  }
+  vcov <- NULL
+  if (!is.null(calibration.model)) {
+    des_cal <- design(calibration.model, data, intercept = TRUE)
+    object$data$q0 <- object$data$q
+    q <- object$data$q[[1]]
+    a <- object$data$a
+    y <- object$data$y
+    Z <- cbind(des_cal$x, q)
+    rs <- c() # residuals
+    ps <- c() # treatment assignment prob.
+    bs <- c() # linear regr. coef.
+    for (i in seq_len(ncol(a))) {
+      idx <- which(a[, i])
+      b <- lm.fit(Z[idx, , drop = FALSE], y[idx])$coefficients
+      b[is.na(b)] <- 0
+      bs <- cbind(bs, cbind(b))
+      q[, i] <- Z %*% b
+      rs <- c(rs, list(y[idx] - Z[idx, , drop = FALSE] %*% b))
+      ps <- c(ps, mean(a[, i]))
+    }
+    var <- function(x) stats::var(x) * (NROW(x) - 1) / NROW(x)
+    v1 <- diag(unlist(lapply(rs, var)) / ps)
+    v2 <- t(bs) %*% var(Z) %*% bs
+    vcov <- (v1 + v2)/n
+    object$data$q[[1]] <- q
+  }
+
+
+  pmod <- object$propensity.model # nolint
+  if (!second.order) pmod <- NULL
+  ests <- lapply(
+    seq_along(object$data$p),
+    \(x) {
+      with(
+        object$data,
+        cate_est(
+          y = y,
+          a = cbind(a),
+          p = cbind(p[[x]]),
+          q = cbind(q[[x]]),
+          propensity.model = pmod,
+          data = data,
+          X.cat = desA$x
+        )
+      )
+    }
+  )
   est <- ests[[1]]$coef
   IC <- ests[[1]]$IC
   scores <- ests[[1]]$scores
-  estimate <- lava::estimate(coef=est, IC=IC)
+  if (tolower(var.type) == "ic" || is.null(vcov) || ncol(desA$x)>1) {
+    estimate <- lava::estimate(coef = est, IC = IC)
+  } else {
+    e <- lava::estimate(coef = est[seq_len(ncol(vcov))], vcov = vcov)
+    pairs <- utils::combn(seq_along(coef(e)), 2)
+    B <- matrix(0, ncol(pairs), length(coef(e)))
+    for (i in seq_len(ncol(pairs))) {
+      B[i, pairs[, i]] <- c(1, -1)
+    }
+    estimate <- estimate(e, rbind(diag(nrow = length(coef(e))), B)) |>
+      labels(names(est))
+  }
+  n <- ncol(object$data$p[[1]])
+  nc <- length(est) - n
   estimate$model.index <- list(
-    seq_along(contrast),
-    seq_along(length(est)-length(contrast)) + length(contrast)
+    seq(n),
+    seq(nc) + n
   )
+  object$vcov.cal <- vcov
+  object$scores <- scores
+  object$estimate <- estimate
+  object$cate.model <- cate.model
+  object$levels <- colnames(object$data$a)
+  return(object)
+}
 
-  res <- list(scores = scores,
-              cate_des = desA,
-              coef = est,
-              response.model = response.model,
-              propensity.model = propensity.model,
-              call=cl,
-              estimate=estimate)
-  class(res) <- c("cate.targeted", "targeted")
-  return(res)
+#' @export
+summary.cate.targeted <- function(object, ...) {
+  B <- rbind(rep(0, length(coef(object))))
+  B[1:2] <- c(1, -1)
+  obj <- structure(list(
+    estimate = object$estimate,
+    call = object$call,
+    ate = lava::estimate(object$estimate, B)
+  ), class = "summary.cate.targeted")
+  return(obj)
+}
+
+#' @export
+print.summary.cate.targeted <- function(x, ...) {
+  print(x$call)
+  cat("\n")
+  print(x$estimate, ...)
+  cat("\nAverage Treatment Effect:\n")
+  print(x$ate)
+
+
 }

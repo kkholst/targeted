@@ -38,16 +38,17 @@ lrs <- learner_expand_grid(
 )
 expect_null(names(lrs))
 
-
 # verify that learner.args can be passed on
+args <- list(
+  formula = Sepal.Length ~ .,
+  learner.args = list(
+    list(predict.args = list(a = 1, b = 2)),
+    list(predict.args = list(c = 3))
+  )
+)
 lrs <- learner_expand_grid(
   learner_xgboost,
-  list(formula = Sepal.Length ~ .,
-    learner.args = c(
-      list(predict.args = list(a = 1, b = 2)),
-      list(predict.args = list(c = 3))
-    )
-  )
+  args
 )
 expect_equal(lrs[[1]]$summary()$predict.args, list(a = 1, b = 2))
 expect_equal(lrs[[2]]$summary()$predict.args, list(c = 3))

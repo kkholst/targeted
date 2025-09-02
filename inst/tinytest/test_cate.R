@@ -226,7 +226,7 @@ test_cate_ate <- function() {
 test_cate_ate()
 
 
-tet_cate_crossfit <- function() {
+test_cate_crossfit <- function() {
 
   # repeated cross-fitting TODO
   ## a <- cate(y ~ a + x,
@@ -284,3 +284,44 @@ test_cate_remainder <- function() {
 
 }
 test_cate_remainder()
+
+
+## multiple treatments
+n <- 1e3
+a <- rbinom(n, 1, 0.5)
+a <- factor(sample(c("a", "b", "c"), n, replace = TRUE))
+z <- rbinom(n, 1, 0.5)
+x <- rnorm(n)
+y <- 1*(a==a[1]) + x*(a==a[1]) + rnorm(n, sd=1 + 2*(a==a[1]))
+d <- data.frame(a, x, y, z, A = (a == "a") * 1)
+
+test_cate_multiple_treatment <- function() {
+  a0 <- cate(y ~ A * x, A ~ 1, data = d)
+
+  a <- cate(y ~ a * x, a ~ 1, data = d)
+  expect_true(length(coef(a)) == 6) # 3 exp. potential outcomes, and 3 contrasts
+
+  a2 <- update(a, ~z, data = d)
+  expect_true(length(coef(a2)) == 9)
+
+  # check we get same expected potential outcome as with binary treatment
+  expect_equivalent(
+    coef(a0)["E[y(1)]"],
+    coef(a)["E[y(a)]"]
+  )
+  expect_equivalent(
+    vcov(a0)["E[y(1)]","E[y(1)]"],
+    vcov(a)["E[y(a)]","E[y(a)]"]
+  )
+}
+test_cate_multiple_treatment()
+
+test_cate_warning <- function() {
+  # check we get a warning if the treatment from the propensity.model
+  # is not part of the response.model
+  expect_warning(
+    cate(y ~ a * x, A ~ 1, data = d),
+    "treatment variable not present"
+  )
+}
+test_cate_warning()

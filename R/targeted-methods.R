@@ -45,8 +45,6 @@ print.summary.targeted <- function(x, ...) {
   print(x$call)
   cat("\n")
   print(x$estimate, ...)
-  cat("\nAverage Treatment Effect:\n")
-  print(x$ate)
 }
 
 #' @export
