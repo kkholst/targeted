@@ -21,6 +21,9 @@
 
 
 namespace target {
+
+  using raggedArray = std::vector<arma::vec>;
+
   using cx_dbl  = std::complex<double>;
   using cx_func = std::function<arma::cx_mat(arma::cx_vec theta)>;
 
