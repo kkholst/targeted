@@ -668,6 +668,79 @@ RcppExport SEXP _targeted_nondom(SEXP xSEXP) {
     UNPROTECT(1);
     return rcpp_result_gen;
 }
+// dykstra
+List dykstra(const arma::vec& x, const arma::mat& A);
+static SEXP _targeted_dykstra_try(SEXP xSEXP, SEXP ASEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type A(ASEXP);
+    rcpp_result_gen = Rcpp::wrap(dykstra(x, A));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _targeted_dykstra(SEXP xSEXP, SEXP ASEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_targeted_dykstra_try(xSEXP, ASEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error("%s", CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
+// signedwald
+List signedwald(const arma::vec& par, const arma::mat& vcov, const arma::vec& noninf, const arma::vec& weights, unsigned nsim_null);
+static SEXP _targeted_signedwald_try(SEXP parSEXP, SEXP vcovSEXP, SEXP noninfSEXP, SEXP weightsSEXP, SEXP nsim_nullSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type par(parSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type vcov(vcovSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type noninf(noninfSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< unsigned >::type nsim_null(nsim_nullSEXP);
+    rcpp_result_gen = Rcpp::wrap(signedwald(par, vcov, noninf, weights, nsim_null));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _targeted_signedwald(SEXP parSEXP, SEXP vcovSEXP, SEXP noninfSEXP, SEXP weightsSEXP, SEXP nsim_nullSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_targeted_signedwald_try(parSEXP, vcovSEXP, noninfSEXP, weightsSEXP, nsim_nullSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error("%s", CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
 
 // validate (ensure exported C++ functions exist before calling them)
 static int _targeted_RcppExport_validate(const char* sig) { 
@@ -690,6 +763,8 @@ static int _targeted_RcppExport_validate(const char* sig) {
         signatures.insert("arma::mat(*.softmax)(arma::mat&,bool,bool)");
         signatures.insert("List(*.pava)(const arma::vec&,const NumericVector&,const NumericVector&)");
         signatures.insert("arma::mat(*.nondom)(const arma::mat&)");
+        signatures.insert("List(*.dykstra)(const arma::vec&,const arma::mat&)");
+        signatures.insert("List(*.signedwald)(const arma::vec&,const arma::mat&,const arma::vec&,const arma::vec&,unsigned)");
     }
     return signatures.find(sig) != signatures.end();
 }
@@ -713,6 +788,8 @@ RcppExport SEXP _targeted_RcppExport_registerCCallable() {
     R_RegisterCCallable("targeted", "_targeted_.softmax", (DL_FUNC)_targeted_softmax_try);
     R_RegisterCCallable("targeted", "_targeted_.pava", (DL_FUNC)_targeted_pava_try);
     R_RegisterCCallable("targeted", "_targeted_.nondom", (DL_FUNC)_targeted_nondom_try);
+    R_RegisterCCallable("targeted", "_targeted_.dykstra", (DL_FUNC)_targeted_dykstra_try);
+    R_RegisterCCallable("targeted", "_targeted_.signedwald", (DL_FUNC)_targeted_signedwald_try);
     R_RegisterCCallable("targeted", "_targeted_RcppExport_validate", (DL_FUNC)_targeted_RcppExport_validate);
     return R_NilValue;
 }
@@ -737,6 +814,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_targeted_softmax", (DL_FUNC) &_targeted_softmax, 3},
     {"_targeted_pava", (DL_FUNC) &_targeted_pava, 3},
     {"_targeted_nondom", (DL_FUNC) &_targeted_nondom, 1},
+    {"_targeted_dykstra", (DL_FUNC) &_targeted_dykstra, 2},
+    {"_targeted_signedwald", (DL_FUNC) &_targeted_signedwald, 5},
     {"_rcpp_module_boot_riskregmodel", (DL_FUNC) &_rcpp_module_boot_riskregmodel, 0},
     {"_targeted_RcppExport_registerCCallable", (DL_FUNC) &_targeted_RcppExport_registerCCallable, 0},
     {NULL, NULL, 0}

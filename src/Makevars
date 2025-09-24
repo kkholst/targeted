@@ -8,6 +8,7 @@ SOURCES = RcppExports.cpp \
 	ode_interface.cpp \
 	riskreg_interface.cpp \
 	utils_interface.cpp \
+	target/src/dykstra.cpp \
 	target/src/glm.cpp \
 	target/src/mlogit.cpp \
 	target/src/nb.cpp \
