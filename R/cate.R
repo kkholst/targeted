@@ -509,7 +509,7 @@ update.cate.targeted <- function(object,
     var <- function(x) stats::var(x) * (NROW(x) - 1) / NROW(x)
     v1 <- diag(unlist(lapply(rs, var)) / ps)
     v2 <- t(bs) %*% var(Z) %*% bs
-    vcov <- (v1 + v2)/n
+    vcov <- (v1 + v2)/NROW(Z)
     object$data$q[[1]] <- q
   }
 
