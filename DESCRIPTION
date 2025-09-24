@@ -2,7 +2,7 @@ Package: targeted
 Type: Package
 Title: Targeted Inference
 Version: 0.6
-Date: 2025-07-29
+Date: 2025-09-25
 Authors@R: c(person(given = "Klaus K.",
                     family = "Holst",
                     role = c("aut", "cre"),
@@ -37,8 +37,8 @@ Imports:
     lava (>= 1.8.0),
     methods,
     mets,
-    nnls,
     optimx,
+    quadprog,
     progressr,
     rlang,
     survival
@@ -53,6 +53,7 @@ Suggests:
     hal9001,
     knitr,
     mgcv,
+    nnls,
     polle,
     randomForestSRC,
     ranger,

@@ -69,6 +69,14 @@ fast_iid <- function(y, p, x1, weights, logistic = TRUE) {
     .Call(`_targeted_nondom`, x)
 }
 
+.dykstra <- function(x, A) {
+    .Call(`_targeted_dykstra`, x, A)
+}
+
+.signedwald <- function(par, vcov, noninf, weights, nsim_null = 1e4L) {
+    .Call(`_targeted_signedwald`, par, vcov, noninf, weights, nsim_null)
+}
+
 # Register entry points for exported C++ functions
 methods::setLoadAction(function(ns) {
     .Call(`_targeted_RcppExport_registerCCallable`)

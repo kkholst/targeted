@@ -1,112 +1,3 @@
-qprob <- function(corr) {
-  return(0.5 - mets::pmvn(upper = cbind(0, 0), sigma = corr, cor = TRUE))
-}
-
-prob_fct <- function(x, alpha, corr) {
-  q <- qprob(corr)
-  res <- 0.5 * pchisq(x, 1, lower.tail = FALSE) +
-    q * pchisq(x, 2, lower.tail = FALSE) - alpha
-  return(res)
-}
-
-q_fct <- function(alpha, corr) {
-  root <- uniroot(prob_fct,
-          alpha = alpha,
-          corr = corr,
-          interval = c(0, 10)
-  )$root
-  return(root)
-}
-
-###############################################################
-# Calculating test statistics
-# Calculating p-values
-###############################################################
-#' @title Signed intersection Wald test
-#' @param thetahat1 (numeric) parameter estimate 1
-#' @param se1 (numeric) standard error of parameter estimate 1
-#' @param thetahat2 (numeric) parameter estimate 2
-#' @param se2 (numeric) standard error of parameter estimate 2
-#' @param noninf1 (numeric) non-inferiority margin for parameter 1
-#' @param noninf2 (numeric) non-inferiority margin for parameter 2
-#' @param corr (numeric) correlation between parameter 1 and 2
-#' @param alpha (numeric) nominal level
-#' @author
-#' Christian Bressen Pipper,
-#' Klaus Kähler Holst
-#' @return list with Wald
-test_intersectsignedwald <- function(thetahat1,
-                                     se1,
-                                     thetahat2,
-                                     se2,
-                                     noninf1,
-                                     noninf2,
-                                     corr,
-                                     alpha) {
-  z1 <- (thetahat1 - noninf1) / se1
-  z2 <- (thetahat2 - noninf2) / se2
-  zmin <- min(z1, z2)
-  zmax <- max(z1, z2)
-  SignWald.intersect <- ifelse(zmax >= 0 & zmin <= (corr * zmax), 1, 0) *
-    zmax * zmax + ifelse(zmax >= 0 & zmin > (corr * zmax),
-      (zmax * zmax + zmin * zmin - 2 * corr * zmax * zmin) / (1 - corr * corr),
-      0
-    )
-  SignWald1 <- ifelse(z1 >= 0, 1, 0) * z1^2
-  SignWald2 <- ifelse(z2 >= 0, 1, 0) * z2^2
-  critval.intersect <- q_fct(alpha, corr)
-  pval.intersect <- ifelse(SignWald.intersect > 0,
-    # prob_fct(SignWald.intersect, alpha, corr) + alpha, 1
-    prob_fct(SignWald.intersect, 0, corr), 1
-    )
-  pval1 <- ifelse(SignWald1 > 0,
-    0.5 * pchisq(SignWald1, 1, lower.tail = FALSE), 1
-  )
-  pval2 <- ifelse(SignWald2 > 0,
-    0.5 * pchisq(SignWald2, 1, lower.tail = FALSE), 1
-  )
-  test.int <- structure(list(
-    data.name = "H1 ^ H2",
-    statistic = c("Q" = unname(SignWald.intersect)),
-    parameter = NULL,
-    method = "Signed Wald Intersection Test",
-    # null.value = "one",
-    # alternative = "one.sided",
-    p.value = pval.intersect
-    # estimate = 1
-  ), class = "htest")
-  test.1 <- structure(list(
-    data.name = sprintf("H1: b1 <= %g", noninf1),
-    statistic = c("Q" = unname(SignWald1)),
-    estimate = c("b1" = unname(thetahat1)),
-    parameter = NULL,
-    method = "Signed Wald Test",
-    # null.value = noninf1,
-    alternative = sprintf("HA1: b1 > %g", noninf1),
-    p.value = pval1
-  ), class = "htest")
-  test.2 <- structure(list(
-    data.name = sprintf("H2: b2 <= %g", noninf2),
-    statistic = c("Q" = unname(SignWald2)),
-    estimate = c("b2" = unname(thetahat2)),
-    parameter = NULL,
-    method = "Signed Wald Test",
-    alternative = sprintf("HA2: b2 > %g", noninf2),
-    p.value = pval2
-    # estimate = 1
-  ), class = "htest")
-
-  res <- list(
-    critval.intersect = critval.intersect,
-    test.intersect = test.int,
-    test.1 = test.1,
-    test.2 = test.2
-  )
-  return(res)
-
-}
-
-
 #' Estimation of mean clinical outcome truncated by event process
 #' @description
 #' Let \eqn{Y} denote the clinical outcome, \eqn{A} the binary treatment
@@ -311,6 +202,7 @@ summary.truncatedscore <- function(object,
                                    noninf.y = 0,
                                    noninf.t = 0,
                                    alpha = 0.05,
+                                   weights = NULL,
                                    parameter.sign = c(y = 1L, t = 1L),
                                    ...) {
 
@@ -324,22 +216,41 @@ summary.truncatedscore <- function(object,
   B[1, idx[1:2]] <- c(1, -1)
   B[2, idx[3:4]] <- c(1, -1)
   est <- estimate(object, B)
-  args <- list(
-    thetahat1 = coef(est)[1],
-    se1 = vcov(est)[1, 1]**.5,
-    thetahat2 = coef(est)[2],
-    se2 = vcov(est)[2, 2]**.5,
-    corr = cov2cor(vcov(est))[1, 2],
-    noninf1 = noninf.y,
-    noninf2 = noninf.t,
-    alpha = alpha
+  args <- c(
+    list(
+      par = coef(est)[1:2],
+      vcov = vcov(est)[1:2, 1:2],
+      noninf = c(noninf.y, noninf.t),
+      alpha = alpha,
+      weights = weights
+    ),
+    list(...)
   )
-  pval <- do.call(test_intersectsignedwald, args)
-  res1 <- with(pval$test.1, cbind(estimate, statistic, p.value))
-  rownames(res1) <- names(pval$test.1$estimate)
-  res2 <- with(pval$test.2, cbind(estimate, statistic, p.value))
-  rownames(res2) <- names(pval$test.2$estimate)
-  res12 <- with(pval$test.intersect, cbind(NA, statistic, p.value))
+  intersection_test <- do.call(test_sw, args)
+  marg_test <- c()
+  for (i in 1:2) {
+    args1 <- args
+    args1$par <- args$par[i]
+    args1$vcov <- args$vcov[i, i]
+    args1$noninf <- args$noninf[i]
+    args1$weights <- NULL
+    marg_test <- c(marg_test, list(do.call(test_sw, args1)))
+  }
+  res1 <- with(
+    marg_test[[1]],
+    cbind(estimate, statistic, p.value)
+  )
+  rownames(res1) <- names(marg_test[[1]]$estimate)
+  res2 <- with(
+    marg_test[[2]],
+    cbind(estimate, statistic, p.value)
+  )
+  swtests <- list(
+    "intersection" = intersection_test,
+    "marginal" = marg_test
+  )
+  rownames(res2) <- names(marg_test[[2]]$estimate)
+  res12 <- with(intersection_test, cbind(NA, statistic, p.value))
   rownames(res12) <- "intersection"
   tests <- rbind(res1, res2, res12)
   res <- c(list(
@@ -350,7 +261,7 @@ summary.truncatedscore <- function(object,
     noninf.t = noninf.t,
     labels = lab,
     tests = tests
-  ), pval)
+  ), swtests)
   class(res) <- "summary.truncatedscore"
   return(res)
 }
@@ -363,17 +274,18 @@ print.summary.truncatedscore <- function(x, ...) {
   cat("\n")
   cli::cli_h2("One-sided tests")
   cat("\nb1 = ", x$labels[1], "\n", sep = "")
-  print(x$test.1)
+  print(x$marginal[[1]])
   cat("\nb2 = ", x$labels[2], "\n", sep = "")
-  print(x$test.2)
+  print(x$marginal[[2]])
   cli::cli_h2("Intersection test")
-  print(x$test.intersect)
+  print(x$intersection)
 }
 
 #' @export
 parameter.summary.truncatedscore <- function(x, ...) {
   return(x$tests)
 }
+
 #' @export
 coef.summary.truncatedscore <- function(object, ...) {
   return(object$tests)
@@ -478,7 +390,6 @@ ate_phreg <- function(mod.marg, data, time, cens.code = 0) {
   res <- res + estimate(res, diff)
   return(estimate(res, labels = c("p0", "p1", "riskdiff")))
 }
-
 
 ate_mets <- function(mod.marg, mod.covar = ~1, data, time, cens.code = 0,
   cause = NULL) {
