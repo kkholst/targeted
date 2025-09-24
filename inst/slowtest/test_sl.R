@@ -15,6 +15,7 @@ sim1 <- function(n = 5e3) {
 set.seed(1)
 d <- sim1(1e3)
 
+# comparison with the SuperLearner pacakge
 test_sl <- function() {
   m <- list(
     "mean" = learner_glm(y ~ 1),
@@ -53,3 +54,25 @@ test_sl <- function() {
   expect_true(sm[1]>ci2[1] & sm[1]<ci2[2])
 }
 test_sl()
+
+
+test_metalearners <- function() {
+  m <- list(
+    "mean" = learner_glm(y ~ 1),
+    "glm" = learner_glm(y ~ x1 + x2),
+    "glm2" = learner_glm(y ~ x2)
+  )
+
+  s1 <- learner_sl(m, nfolds = 10)
+  s2 <- learner_sl(m, nfolds = 10, meta.learner = metalearner_nnls2)
+  s3 <- learner_sl(m, nfolds = 10, meta.learner = metalearner_convexcomb)
+
+  b1 <- cv(s1, nfolds = 10, rep = 2, data = d)
+  b2 <- cv(s2, nfolds = 10, rep = 2, data = d)
+  b3 <- cv(s3, nfolds = 10, rep = 2, data = d)
+
+  expect_equivalent(summary(b1)[, , "weight"], summary(b2)[, , "weight"], tolerance = 0.05)
+  expect_equivalent(summary(b2)[, , "weight"], summary(b3)[, , "weight"], tolerance = 0.05)
+  expect_equivalent(summary(b1)[, , "weight"], summary(b3)[, , "weight"], tolerance = 0.05)
+}
+test_metalearners()

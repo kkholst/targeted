@@ -1,24 +1,68 @@
-metalearner_nnls <- function(y, pred, method = "nnls", ...) {
-  if (NCOL(pred)==1) return(1.0)
-  idx  <- which(apply(pred, 2, \(x) !any(is.na(x))))
+metalearner_nnls <- function(y, pred, method = "quadprog", ...) {
+  if (NCOL(pred) == 1) {
+    return(1.0)
+  }
+  idx <- which(apply(pred, 2, \(x) !any(is.na(x))))
   coefs <- rep(0, ncol(pred))
   pred <- pred[, idx, drop = FALSE]
   if (method == "nnls") {
     res <- nnls::nnls(A = pred, b = y)
     coefs[idx] <- res$x
   } else {
-    res <- glmnet::glmnet(
-      y = y, x = pred,
-      intercept = FALSE,
-      lambda = 0,
-      lower.limits = rep(0, ncol(pred))
+    opt <- quadprog::solve.QP(
+      Dmat = t(pred) %*% pred,
+      Amat = diag(nrow = ncol(pred)),
+      dvec = t(pred) %*% y
     )
-    coefs[idx] <- as.vector(coef(res))[-1]
+    coefs[idx] <- opt$solution
   }
   if (any(is.na(coefs))) coefs[is.na(coefs)] <- 0
   if (all(coefs == 0)) coefs[1] <- 1
   return(coefs / sum(coefs))
 }
+
+metalearner_nnls2 <- function(y, pred, ...) {
+  metalearner_nnls(y, pred, method = "nnls", ...)
+}
+
+metalearner_convexcomb <- function(y, pred, ...) {
+  if (NCOL(pred)==1) return(1.0)
+  idx  <- which(apply(pred, 2, \(x) !any(is.na(x))))
+  coefs <- rep(0, ncol(pred))
+  pred <- pred[, idx, drop = FALSE]
+  A <- diag(nrow = ncol(pred))
+  A <- cbind(1, A)
+  b <- c(1, rep(0, ncol(pred)))
+  opt <- quadprog::solve.QP(
+    Dmat = t(pred) %*% pred,
+    Amat = A,
+    dvec = t(pred) %*% y,
+    bvec = b,
+    meq = 1
+    )
+  coefs[idx] <- opt$solution
+  if (any(is.na(coefs))) coefs[is.na(coefs)] <- 0
+  if (all(coefs == 0)) coefs[1] <- 1
+  return(coefs)
+}
+
+## metalearner_glmnet <- function(y, pred, ...) {
+##   if (NCOL(pred)==1) return(1.0)
+##   idx  <- which(apply(pred, 2, \(x) !any(is.na(x))))
+##   coefs <- rep(0, ncol(pred))
+##   pred <- pred[, idx, drop = FALSE]
+##   res <- glmnet::glmnet(
+##      y = y, x = pred,
+##      intercept = FALSE,
+##      lambda = 0,
+##      lower.limits = rep(0, ncol(pred))
+##      )
+##   coefs[idx] <- opt$solution
+##   if (any(is.na(coefs))) coefs[is.na(coefs)] <- 0
+##   if (all(coefs == 0)) coefs[1] <- 1
+##   return(coefs / sum(coefs))
+## }
+
 
 metalearner_discrete <- function(y, pred, risk, ...) {
   weights <- rep(0, NCOL(pred))
@@ -26,7 +70,6 @@ metalearner_discrete <- function(y, pred, risk, ...) {
   weights[which.min(risk)[1]] <- 1
   return(weights)
 }
-
 
 get_learner_names <- function(model.list, name.prefix) {
   .names <- names(model.list)
@@ -87,7 +130,6 @@ get_learner_names <- function(model.list, name.prefix) {
 #'    y <- x1 + cos(x1) + rnorm(n, sd = 0.5**.5)
 #'    data.frame(y, x1, x2)
 #' }
-
 #' m <- list(
 #'   "mean" = learner_glm(y ~ 1),
 #'   "glm" = learner_glm(y ~ x1 + x2)
