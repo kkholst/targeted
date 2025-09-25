@@ -33,14 +33,16 @@ namespace target {
     arma::mat iD = arma::diagmat(1 / e);
     arma::mat sqrt_sigma = P * D * P.t();
     arma::mat sqrt_sigma_inv = P * iD * P.t();
-    arma::vec uhat = sqrt_sigma_inv * (weights % (par - noninf));
+    arma::mat sW = sqrt_sigma_inv * diagmat(weights);
+    arma::vec uhat = sW * (par - noninf);
     // ||uhat-u||^2 = (uhat-u)^T(uhat -h) s.t. sqrt_sigma * u <= 0
     raggedArray opt = lsdykstra(uhat, sqrt_sigma);
     arma::vec u0 = opt[0];
-    double sw = sum(arma::square(uhat-u0));
+    double sw = sum(arma::square(uhat - u0));
+    arma::mat B = sW * sqrt_sigma;
     arma::vec sw_sim(nsim_null);
     for (unsigned i = 0; i < nsim_null; i++) {
-      arma::vec usim = arma::randn(p) % weights;
+      arma::vec usim = B * arma::randn(p);
       raggedArray opt = lsdykstra(usim, sqrt_sigma);
       sw_sim[i] = sum(arma::square(usim - opt[0]));
     }
