@@ -21,8 +21,11 @@ clinical outcome truncated by competing risk
 [(arXiv.2502.03942)](https://doi.org/10.48550/arXiv.2502.03942):
 `estimate_truncatedscore`.
 
+`test_sw` Constrained least squares via Dykstra's algorithm, and fast signed wald test evaluation.
+
 ## Features
 
+- *(test_sw)* signed wald intersection test
 - *(cate)* linear calibration
 - *(superlearner)*: standard meta-learner based on `quadprog::solve.QP`
 - *(cv)* cross-validation `cv` method for superlearner objects ([#64](https://github.com/kkholst/targeted/issues/64)) - ([1d58b26](https://github.com/kkholst/targeted/commit/1d58b26190b979176c25be09c31e6ca1a892073b))
