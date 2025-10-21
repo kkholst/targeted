@@ -2,7 +2,7 @@
 % Please edit documentation in R/multipletest.R
 \name{test_sw}
 \alias{test_sw}
-\title{Signed intersection Wald test}
+\title{Signed Wald intersection test}
 \usage{
 test_sw(
   par,
@@ -23,17 +23,19 @@ test_sw(
 \item{weights}{(numeric) optional weights}
 
 \item{alpha}{(numeric) nominal level}
+
+\item{nsim.null}{number of sample used in Monte-Carlo simulation}
 }
 \value{
 list with Wald
 }
 \description{
 Calculating test statistics and p-values for the signed Wald
-test given by \deqn{SW = \inf_{\theta \in \cap_{i=1}^n H_i}
+intersection test given by \deqn{SW = \inf_{\theta \in \cap_{i=1}^n H_i}
   \{(\widehat{\theta}-\theta)^\top W\widehat{\Sigma}W
   (\widehat{\theta}-\theta)\} } with individual hypotheses for each
-coordinate of \eqn{\theta} given by \eqn{H_i: \theta_j < \delta_j}
-for some non-inferiority margin \eqn{\delta_j}, \eqn{j=1,\ldots,n}.
+coordinate of \eqn{\theta} given by \eqn{H_i: \theta_j < \delta_j} for some
+non-inferiority margin \eqn{\delta_j}, \eqn{j=1,\ldots,n}.
 }
 \examples{
 S <- matrix(c(1, 0.5, 0.5, 2), 2, 2)
@@ -42,5 +44,5 @@ test_sw(thetahat, S, nsim.null = 1e5)
 test_sw(thetahat, S, weights=NULL)
 }
 \author{
-Klaus Kähler Holst Christian Bressen Pipper,
+Klaus Kähler Holst, Christian Bressen Pipper
 }
