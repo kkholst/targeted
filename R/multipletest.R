@@ -18,21 +18,22 @@ q_fct <- function(alpha, corr) {
   return(root)
 }
 
-#' @title Signed intersection Wald test
+#' @title Signed Wald intersection test
 #' @description Calculating test statistics and p-values for the signed Wald
-#'   test given by \deqn{SW = \inf_{\theta \in \cap_{i=1}^n H_i}
+#'   intersection test given by \deqn{SW = \inf_{\theta \in \cap_{i=1}^n H_i}
 #'   \{(\widehat{\theta}-\theta)^\top W\widehat{\Sigma}W
 #'   (\widehat{\theta}-\theta)\} } with individual hypotheses for each
-#'   coordinate of \eqn{\theta} given by \eqn{H_i: \theta_j < \delta_j}
-#' for some non-inferiority margin \eqn{\delta_j}, \eqn{j=1,\ldots,n}.
+#'   coordinate of \eqn{\theta} given by \eqn{H_i: \theta_j < \delta_j} for some
+#'   non-inferiority margin \eqn{\delta_j}, \eqn{j=1,\ldots,n}.
 #'
 #' @param par (numeric) parameter estimates
 #' @param vcov (matrix) asymptotic variance estimate
 #' @param noninf (numeric) non-inferiority margins
 #' @param weights (numeric) optional weights
 #' @param alpha (numeric) nominal level
+#' @param nsim.null number of sample used in Monte-Carlo simulation
 #' @export
-#' @author Klaus Kähler Holst Christian Bressen Pipper,
+#' @author Klaus Kähler Holst, Christian Bressen Pipper
 #' @return list with Wald
 #' @examples
 #' S <- matrix(c(1, 0.5, 0.5, 2), 2, 2)
@@ -99,5 +100,3 @@ test_sw <- function(par,
   ), class = "htest")
   return(structure(test.int, critval.intersect=critval.intersect))
 }
-
-
