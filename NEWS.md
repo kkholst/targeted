@@ -13,7 +13,8 @@ constructor.
   on categorical predictor
 - `learner_expand_grid`: utility function to construct learners
 
-Improved implementation of `cate` with repeated cross-fitting via the new 'rep' argument.
+Improved implementation of `cate` with repeated cross-fitting via the new 'rep'
+argument. Linear calibration via the `calibration.model` argument [doi:10.1093/biomet/asaf029](https://doi.org/10.1093/biomet/asaf029).
 
 Implementation of estimators for joint modelling of time-to-event (CIF) and
 clinical outcome truncated by competing risk
@@ -22,6 +23,8 @@ clinical outcome truncated by competing risk
 
 ## Features
 
+- *(cate)* linear calibration
+- *(superlearner)*: standard meta-learner based on `quadprog::solve.QP`
 - *(cv)* cross-validation `cv` method for superlearner objects ([#64](https://github.com/kkholst/targeted/issues/64)) - ([1d58b26](https://github.com/kkholst/targeted/commit/1d58b26190b979176c25be09c31e6ca1a892073b))
 - *(design)* Fixing how specials is handled and passed to learner functions  - ([ab46749](https://github.com/kkholst/targeted/commit/ab46749cc2af1b593982f226aedbeb43a920520b))
 - *(design)* Adding `print.design` ([#94](https://github.com/kkholst/targeted/issues/94)) - ([20eb170](https://github.com/kkholst/targeted/commit/20eb1704f6238cfeeceec1bd295fe5172d590e03))
