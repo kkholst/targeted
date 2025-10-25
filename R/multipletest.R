@@ -83,14 +83,21 @@ test_sw <- function(par,
     sw <- .signedwald(par, vcov,
       noninf = noninf,
       weights = weights, nsim_null = nsim.null
-      )
+    )
     critval.intersect <- NULL
     SignWald.intersect <- sw$test.statistic
     pval.intersect <- sw$pval
   }
+  w <- paste0(format(weights, digits = 2), collapse = ", ")
   test.int <- structure(list(
-    data.name = sprintf("Non-inferiority hypotheses, b <= [%s]",
-                        paste(noninf, collapse=", ")),
+    data.name = sprintf(
+      "\n%s: b <= [%s], w = [%s]",
+      ifelse(any(noninf != 0L),
+        "Non-inferiority hypothesis",
+        "Null hypothesis"
+      ),
+      paste(noninf, collapse = ", "), w
+    ),
     statistic = c("Q" = unname(SignWald.intersect)),
     parameter = NULL,
     method = "Signed Wald Intersection Test",

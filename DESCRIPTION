@@ -55,6 +55,7 @@ Suggests:
     mgcv,
     nnls,
     polle (>= 1.5),
+    pracma,
     randomForestSRC,
     ranger,
     riskRegression,
