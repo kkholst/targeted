@@ -7,7 +7,7 @@
   least squares problems with inequality constraints
 */
 #include <target/dykstra.hpp>
-
+#include <target/utils.hpp>
 
 //  projection  min ||u-|^2 s.t. one-dimensional constraint Aj x <= 0
 arma::vec proj1(arma::vec u, arma::vec Aj, arma::vec w) {
@@ -42,7 +42,7 @@ namespace target {
     arma::mat B = sW * sqrt_sigma;
     arma::vec sw_sim(nsim_null);
     for (unsigned i = 0; i < nsim_null; i++) {
-      arma::vec usim = B * arma::randn(p);
+      arma::vec usim = B * rnorm(p);
       raggedArray opt = lsdykstra(usim, sqrt_sigma);
       sw_sim[i] = sum(arma::square(usim - opt[0]));
     }

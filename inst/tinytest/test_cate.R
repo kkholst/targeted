@@ -195,6 +195,7 @@ test_cate_polle <- function() {
                     vcov(a0)[1], tolerance=1e-3)
 
 }
+if (lava:::versioncheck("polle", c(1, 6)))
 test_cate_polle()
 
 
