@@ -9,7 +9,7 @@
 [![cran](https://www.r-pkg.org/badges/version-last-release/targeted)](https://cranlogs.r-pkg.org/downloads/total/last-month/targeted)
 <!-- badges: end -->
 
-# Targeted Learning in R (`targeted`) <a href="https://kkholst.github.io/targeted/"><img src="man/figures/logohex.png" align="right" height="150" /></a>
+# Targeted Learning in R (`targeted`) <a href="https://kkholst.github.io/targeted/"><img src="man/figures/logohex.png" align="right" height="200" /></a>
 
 Various methods for targeted learning and semiparametric inference
 including augmented inverse probability weighted (AIPW) estimators for
