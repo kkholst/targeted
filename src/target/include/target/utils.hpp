@@ -30,6 +30,8 @@ namespace target {
   arma::mat deriv(cx_func f,
                   arma::vec theta);
 
+  arma::vec rnorm(unsigned n);
+
   arma::umat clusterid(const arma::uvec &id);
 
   arma::mat groupsum(const arma::mat &x,

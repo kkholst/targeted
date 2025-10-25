@@ -2,7 +2,7 @@ Package: targeted
 Type: Package
 Title: Targeted Inference
 Version: 0.6
-Date: 2025-1022
+Date: 2025-10-24
 Authors@R: c(person(given = "Klaus K.",
                     family = "Holst",
                     role = c("aut", "cre"),
@@ -54,7 +54,8 @@ Suggests:
     knitr,
     mgcv,
     nnls,
-    polle,
+    polle (>= 1.5),
+    pracma,
     randomForestSRC,
     ranger,
     riskRegression,

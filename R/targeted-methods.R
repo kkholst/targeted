@@ -69,17 +69,17 @@ transform.targeted <- function(`_data`, ...) {
   transform(`_data`$estimate, ...)
 }
 
-##' @export
+#' @export
 labels.targeted <- function(object, str, ...) {
   labels(object$estimate, labels=str, ...)
 }
 
-##' @export
+#' @export
 parameter.targeted <- function(x, ...) {
   parameter(x$estimate, ...)
 }
 
-##' @export
+#' @export
 subset.targeted <- function(x, keep, ...) {
   subset(x$estimate, keep = keep, ...)
 }
