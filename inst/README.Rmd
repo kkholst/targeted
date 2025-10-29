@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.path = "man/figures/README-",
   cache = FALSE,
-  out.width = "50%"
+  out.width = "70%"
 )
 ```
 
@@ -25,7 +25,7 @@ knitr::opts_chunk$set(
 <!-- badges: end -->
 
 
-# Targeted Learning in R (`targeted`) <a href="https://kkholst.github.io/targeted/"><img src="man/figures/logohex.png" align="right" height="150" /></a>
+# Targeted Learning in R (`targeted`) <a href="https://kkholst.github.io/targeted/"><img src="man/figures/logo.png" align="right" height="250" style="float:right; height:250px;"  alt="targeted website" /></a>
 
 Various methods for targeted learning and semiparametric inference including
 augmented inverse probability weighted (AIPW) estimators for missing data and

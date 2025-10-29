@@ -28,6 +28,7 @@
 ^doc$
 ^www$
 ^Meta$
+^pkgdown$
 ^_pkgdown\.yml$
 ^.codecov.yml
 ^.*\.Rproj$
