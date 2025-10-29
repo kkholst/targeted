@@ -47,9 +47,11 @@ pval.marg <- function(thetahat, sigmahat, noninf = 0) {
 #' test_intersection_sw(thetahat, S, nsim.null = 1e5)
 #' test_intersection_sw(thetahat, S, weights = NULL)
 #'
+#' \dontrun{ # only on 'lava' >= 1.8.2
 #' e <- estimate(coef = thetahat, vcov = S, labels = c("p1", "p2"))
-#' closed_testing(e, test_intersection_sw, noninf = c(-0.1, -0.1)) |>
+#' lava::closed_testing(e, test_intersection_sw, noninf = c(-0.1, -0.1)) |>
 #'   summary()
+#' }
 test_intersection_sw <- function(par,
                                  vcov,
                                  noninf = NULL,
