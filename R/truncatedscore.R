@@ -226,7 +226,7 @@ summary.truncatedscore <- function(object,
     ),
     list(...)
   )
-  intersection_test <- do.call(test_sw, args)
+  intersection_test <- do.call(test_intersection_sw, args)
   marg_test <- c()
   for (i in 1:2) {
     args1 <- args
@@ -234,7 +234,7 @@ summary.truncatedscore <- function(object,
     args1$vcov <- args$vcov[i, i]
     args1$noninf <- args$noninf[i]
     args1$weights <- NULL
-    marg_test <- c(marg_test, list(do.call(test_sw, args1)))
+    marg_test <- c(marg_test, list(do.call(test_intersection_sw, args1)))
   }
   res1 <- with(
     marg_test[[1]],
