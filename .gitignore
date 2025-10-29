@@ -12,8 +12,8 @@ inst/*.yaml
 ex.R
 inst/procform.R
 inst/subjumps.R
-man/figures/logo.*
 docs
+inst/misc/logo.*
 inst/doc
 inst/man
 inst/README.md

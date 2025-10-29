@@ -9,7 +9,7 @@
 [![cran](https://www.r-pkg.org/badges/version-last-release/targeted)](https://cranlogs.r-pkg.org/downloads/total/last-month/targeted)
 <!-- badges: end -->
 
-# Targeted Learning in R (`targeted`) <a href="https://kkholst.github.io/targeted/"><img src="man/figures/logohex.png" align="right" height="150" /></a>
+# Targeted Learning in R (`targeted`) <a href="https://kkholst.github.io/targeted/"><img src="man/figures/logo.png" align="right" height="250" style="float:right; height:250px;"  alt="targeted website" /></a>
 
 Various methods for targeted learning and semiparametric inference
 including augmented inverse probability weighted (AIPW) estimators for
@@ -119,7 +119,7 @@ lr
 #> 
 #> Estimate arguments: family=<function> 
 #> Predict arguments:   
-#> Formula: y ~ (w1 + w2) * a <environment: 0x135f0b7a0>
+#> Formula: y ~ (w1 + w2) * a <environment: 0xaee788b30>
 ```
 
 To fit the model to the data we use the `estimate` method

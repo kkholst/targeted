@@ -21,7 +21,7 @@ clinical outcome truncated by competing risk
 [(arXiv.2502.03942)](https://doi.org/10.48550/arXiv.2502.03942):
 `estimate_truncatedscore`.
 
-`test_sw` Constrained least squares via Dykstra's algorithm, and fast signed wald test evaluation.
+`test_intersection_sw` Constrained least squares via Dykstra's algorithm, and fast signed wald test evaluation.
 
 ## Features
 
