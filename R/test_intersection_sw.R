@@ -124,10 +124,6 @@ test_intersection_sw <- function(par,
     data.name = sprintf(
       "\n%s: theta =< [%s]\nw = [%s]",
       "Intersection null hypothesis",
-      ## ifelse(any(noninf != 0L),
-        ## "Null hypothesis",
-        ## "Null hypothesis"
-      ## ),
       paste(noninf, collapse = ", "),  w
     ),
     statistic = c("Q" = unname(signwald.intersect)),
