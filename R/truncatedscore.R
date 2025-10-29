@@ -201,7 +201,6 @@ estimate_truncatedscore <- function(
 summary.truncatedscore <- function(object,
                                    noninf.y = 0,
                                    noninf.t = 0,
-                                   alpha = 0.05,
                                    weights = NULL,
                                    parameter.sign = c(y = 1L, t = 1L),
                                    ...) {
@@ -221,7 +220,6 @@ summary.truncatedscore <- function(object,
       par = coef(est)[1:2],
       vcov = vcov(est)[1:2, 1:2],
       noninf = c(noninf.y, noninf.t),
-      alpha = alpha,
       weights = weights
     ),
     list(...)
@@ -255,7 +253,6 @@ summary.truncatedscore <- function(object,
   tests <- rbind(res1, res2, res12)
   res <- c(list(
     object = object,
-    alpha = alpha,
     estimate = est,
     nonfinf.y = noninf.y,
     noninf.t = noninf.t,

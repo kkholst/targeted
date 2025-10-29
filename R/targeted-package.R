@@ -11,16 +11,16 @@
 #'   lm.wfit lm.fit glm lm coef vcov model.frame model.matrix na.pass nlminb
 #'   predict dnorm quantile terms weighted.mean runif .getXlevels
 #'   delete.response model.response gaussian formula model.offset reformulate
-#'   drop.terms weights model.extract cov2cor pchisq uniroot sd na.omit offset
+#'   drop.terms weights model.extract cov2cor pnorm pchisq uniroot sd na.omit
+#'   offset
 #' @importFrom rlang hash call_match
 #' @importFrom optimx optimx
 #' @importFrom data.table data.table is.data.table dcast :=
 #' @importFrom R6 R6Class
 #' @importFrom survival survfit Surv strata
 #' @importFrom utils tail head capture.output getFromNamespace
-#' @references
-#' Bang & Robins (2005) Doubly Robust Estimation in Missing Data and
-#' Causal Inference Models, Biometrics.
+#' @references Bang & Robins (2005) Doubly Robust Estimation in Missing Data and
+#'   Causal Inference Models, Biometrics.
 #'
 #' Vansteelandt & Dukes (2022) Assumption-lean inference for
 #' generalised linear model parameters, Journal of the Royal Statistical

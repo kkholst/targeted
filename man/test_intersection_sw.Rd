@@ -23,6 +23,8 @@ test_intersection_sw(
 \item{weights}{(numeric) optional weights}
 
 \item{nsim.null}{number of sample used in Monte-Carlo simulation}
+
+\item{index}{subset of parameters to test}
 }
 \value{
 list with Wald
@@ -40,6 +42,10 @@ S <- matrix(c(1, 0.5, 0.5, 2), 2, 2)
 thetahat <- c(0.5, -0.2)
 test_intersection_sw(thetahat, S, nsim.null = 1e5)
 test_intersection_sw(thetahat, S, weights = NULL)
+
+e <- estimate(coef = thetahat, vcov = S, labels = c("p1", "p2"))
+closed_testing(e, test_intersection_sw, noninf = c(-0.1, -0.1)) |>
+  summary()
 }
 \author{
 Klaus Kähler Holst, Christian Bressen Pipper

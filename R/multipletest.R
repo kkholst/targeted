@@ -18,10 +18,10 @@ q_fct <- function(alpha, corr) {
   return(root)
 }
 
-pval.marg<-function(thetahat,sigmahat,noninf=0){
-  se<-sqrt(diag(sigmahat))
-  z<-(thetahat-noninf)/se
-  1-pnorm(z,sd=1)
+pval.marg <- function(thetahat, sigmahat, noninf = 0) {
+  se <- sqrt(diag(sigmahat))
+  z <- (thetahat - noninf) / se
+  1 - pnorm(z, sd = 1)
 }
 
 #' @title Signed Wald intersection test
@@ -37,6 +37,7 @@ pval.marg<-function(thetahat,sigmahat,noninf=0){
 #' @param noninf (numeric) non-inferiority margins
 #' @param weights (numeric) optional weights
 #' @param nsim.null number of sample used in Monte-Carlo simulation
+#' @param index subset of parameters to test
 #' @export
 #' @author Klaus Kähler Holst, Christian Bressen Pipper
 #' @return list with Wald
@@ -45,6 +46,10 @@ pval.marg<-function(thetahat,sigmahat,noninf=0){
 #' thetahat <- c(0.5, -0.2)
 #' test_intersection_sw(thetahat, S, nsim.null = 1e5)
 #' test_intersection_sw(thetahat, S, weights = NULL)
+#'
+#' e <- estimate(coef = thetahat, vcov = S, labels = c("p1", "p2"))
+#' closed_testing(e, test_intersection_sw, noninf = c(-0.1, -0.1)) |>
+#'   summary()
 test_intersection_sw <- function(par,
                                  vcov,
                                  noninf = NULL,
