@@ -1,8 +1,8 @@
 Package: targeted
 Type: Package
 Title: Targeted Inference
-Version: 0.6
-Date: 2025-10-29
+Version: 0.7
+Date: 2025-11-01
 Authors@R: c(person(given = "Klaus K.",
                     family = "Holst",
                     role = c("aut", "cre"),
@@ -34,7 +34,7 @@ Imports:
     cli,
     data.table,
     future.apply,
-    lava (>= 1.8.0),
+    lava (>= 1.8.2),
     methods,
     mets,
     optimx,
