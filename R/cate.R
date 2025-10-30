@@ -528,7 +528,7 @@ update.cate.targeted <- function(object,
           q = cbind(q[[x]]),
           propensity.model = pmod,
           data = data,
-          X.cat = desA$x
+          X.cate = desA$x
         )
       )
     }
