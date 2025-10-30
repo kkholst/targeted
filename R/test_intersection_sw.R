@@ -133,4 +133,3 @@ test_intersection_sw <- function(par,
   ), class = "htest")
   return(test.int)
 }
-
