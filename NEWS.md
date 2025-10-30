@@ -1,3 +1,7 @@
+# targeted 0.7
+
+    Development version
+
 # targeted 0.6
 
 This release introduces a new `learner` class replacing the previous `ML`
