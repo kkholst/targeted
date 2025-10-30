@@ -30,13 +30,18 @@ est <- function(data){
 }
 
 ## signed wald intersection test
-test_intersection_sw2 <- function(thetahat, sigmahat, weights, Nsim.null = 10000, noninf = rep(0, length(thetahat))) {
+test_intersection_sw2 <- function(thetahat,
+                                  sigmahat,
+                                  weights,
+                                  Nsim.null = 10000L,
+                                  noninf = rep(0, length(thetahat))) {
   W <- diag(weights)
   p <- length(thetahat)
   ## sqrtS <- pracma::sqrtm(sigmahat)
   sqrt.sigma <- expm::sqrtm(sigmahat)
   sqrt.sigma.inv <- expm::sqrtm(solve(sigmahat))
-  uhat <- (sqrt.sigma.inv %*% W %*% matrix(thetahat - noninf, length(thetahat), 1))
+  uhat <- (sqrt.sigma.inv %*% W %*%
+           matrix(thetahat - noninf, length(thetahat), 1))
   ## ||uhat-u||^2 = (uhat-u)^T(uhat -h) =>xo
   ## u^T I u - 2 * uhat^T u + K  s.t. Au =< b
   ## QP: min_u -d' u + 1/2 u' D u, s.t. Au >= b
@@ -59,7 +64,6 @@ test_intersection_sw2 <- function(thetahat, sigmahat, weights, Nsim.null = 10000
   pval <- length(genSW.sim[genSW.sim >= genSWobs]) / Nsim.null
   return(list(statistic = genSWobs, p.value = pval))
 }
-
 
 
 # simulate data and estimate parameters
