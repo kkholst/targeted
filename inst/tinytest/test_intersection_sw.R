@@ -30,7 +30,11 @@ est <- function(data){
 }
 
 ## signed wald intersection test
-test_intersection_sw2 <- function(thetahat, sigmahat, weights, Nsim.null = 10000, noninf = rep(0, length(thetahat))) {
+test_intersection_sw2 <- function(thetahat,
+                                  sigmahat,
+                                  weights, Nsim.
+                                  null = 10000,
+                                  noninf = rep(0, length(thetahat))) {
   W <- diag(weights)
   p <- length(thetahat)
   ## sqrtS <- pracma::sqrtm(sigmahat)
