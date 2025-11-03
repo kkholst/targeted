@@ -30,8 +30,9 @@ Given parameter estimates \eqn{(\widehat{\theta}_1, \ldots,
 test statistic is then \eqn{Z_{max} = \max \{Z_1,\ldots,Z_p\}}, and the
 null-hypothesis is \eqn{H_0: \theta_i \leq \delta_i, i=1,\ldots,p} with
 non-inferiority margin \eqn{\delta_i, i=1,\ldots,p}, for which the p-value
-is calculated as \eqn{ 1 - \Phi_R(Z_{max}) } with correlation matrix \eqn{R
- = \operatorname{diag}(S_{11}^{-0.5}, \ldots,
+is calculated as \eqn{ 1 - \Phi_R(Z_{max}) } where \eqn{\phi_R} is the CDF
+of the multivariate normal distribution with mean zero and correlation
+matrix \eqn{R = \operatorname{diag}(S_{11}^{-0.5}, \ldots,
  S_{pp}^{-0.5})S\operatorname{diag}(S_{11}^{-0.5}, \ldots, S_{pp}^{-0.5})}.
 }
 \author{
