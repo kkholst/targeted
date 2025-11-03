@@ -1,6 +1,8 @@
 # targeted 0.7
 
-    Development version
+Development version
+
+- `test_zmax_onesided`: one-sided Zmax / minP test
 
 # targeted 0.6
 
