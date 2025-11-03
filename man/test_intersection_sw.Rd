@@ -7,8 +7,8 @@
 test_intersection_sw(
   par,
   vcov,
-  noninf = NULL,
-  weights = NULL,
+  noninf = 0,
+  weights = 1,
   nsim.null = 10000,
   index = NULL
 )
@@ -27,7 +27,7 @@ test_intersection_sw(
 \item{index}{subset of parameters to test}
 }
 \value{
-list with Wald
+\code{htest} object
 }
 \description{
 Calculating test statistics and p-values for the signed Wald
@@ -43,7 +43,8 @@ thetahat <- c(0.5, -0.2)
 test_intersection_sw(thetahat, S, nsim.null = 1e5)
 test_intersection_sw(thetahat, S, weights = NULL)
 
-\dontrun{ # only on 'lava' >= 1.8.2
+\dontrun{
+# only on 'lava' >= 1.8.2
 e <- estimate(coef = thetahat, vcov = S, labels = c("p1", "p2"))
 lava::closed_testing(e, test_intersection_sw, noninf = c(-0.1, -0.1)) |>
   summary()

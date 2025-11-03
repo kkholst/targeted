@@ -37,9 +37,9 @@ test_intersection_sw2 <- function(thetahat,
                                   noninf = rep(0, length(thetahat))) {
   W <- diag(weights)
   p <- length(thetahat)
-  ## sqrtS <- pracma::sqrtm(sigmahat)
-  sqrt.sigma <- expm::sqrtm(sigmahat)
-  sqrt.sigma.inv <- expm::sqrtm(solve(sigmahat))
+  sqrtS <- pracma::sqrtm(sigmahat)
+  sqrt.sigma <- sqrtS$B #expm::sqrtm(sigmahat)
+  sqrt.sigma.inv <- sqrtS$Binv #expm::sqrtm(solve(sigmahat))
   uhat <- (sqrt.sigma.inv %*% W %*%
            matrix(thetahat - noninf, length(thetahat), 1))
   ## ||uhat-u||^2 = (uhat-u)^T(uhat -h) =>xo
@@ -81,8 +81,7 @@ set.seed(1)
 dat <- do.call(simdata, sim_args)
 e <- est(dat)
 
-
-test_intersection_test_sw <- function() {
+test_test_intersection_sw <- function() {
   # check random seed works
   set.seed(1)
   e1 <- test_intersection_sw(coef(e), vcov(e))
@@ -128,3 +127,22 @@ test_intersection_test_sw <- function() {
   e0 <- test_intersection_sw(-0.2, v)
   expect_equivalent(1, e0$p.value)
 }
+test_test_intersection_sw()
+
+test_test_zmax_onesided <- function() {
+  z <- coef(e) / diag(vcov(e))**.5
+  t1 <- test_zmax_onesided(e, index = 2)
+  expect_equivalent(z[2], t1$statistic)
+  expect_equivalent(1 - pnorm(z[2]), t1$p.value)
+  t1 <- test_zmax_onesided(e, index = 3)
+  expect_equivalent(z[3], t1$statistic)
+  expect_equivalent(1 - pnorm(z[3]), t1$p.value)
+
+  idx <- 2:3
+  zmax <- max(z[idx])
+  e2 <- subset(e, idx)
+  t2 <- test_zmax_onesided(e, index = idx)
+  p2 <- 1 - mets::pmvn(upper=c(zmax, zmax), sigma=cov2cor(vcov(e2)))
+  expect_equivalent(p2, t2$p.value)
+}
+test_test_zmax_onesided()
