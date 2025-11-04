@@ -4,7 +4,7 @@
 \alias{test_zmax_onesided}
 \title{One-sided Zmax test}
 \usage{
-test_zmax_onesided(par, vcov, noninf = 0, index = NULL)
+test_zmax_onesided(par, vcov, noninf = 0, index = NULL, par.name = "theta")
 }
 \arguments{
 \item{par}{(numeric) parameter estimates or \code{estimate} object}
@@ -13,7 +13,9 @@ test_zmax_onesided(par, vcov, noninf = 0, index = NULL)
 
 \item{noninf}{(numeric) non-inferiority margins}
 
-\item{index}{subset of parameters to test}
+\item{index}{(integer) subset of parameters to test}
+
+\item{par.name}{(character) parameter names in output}
 }
 \value{
 \code{htest} object

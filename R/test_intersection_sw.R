@@ -30,7 +30,9 @@ test_proc_arg <- function(par, vcov, index = NULL, ...) {
     par <- stats::coef(par)
   }
   args <- list(...) |>
-    lapply(function(x) { rep(x, length.out=length(par))})
+    lapply(function(x) {
+      rep(x, length.out = length(par))
+    })
   argnames <- names(args)
   if (!is.null(index)) {}
   res <- c(list(par = par, vcov = vcov), args)
@@ -57,8 +59,9 @@ test_proc_arg <- function(par, vcov, index = NULL, ...) {
 #' @param vcov (matrix) asymptotic variance estimate
 #' @param noninf (numeric) non-inferiority margins
 #' @param weights (numeric) optional weights
-#' @param nsim.null number of sample used in Monte-Carlo simulation
-#' @param index subset of parameters to test
+#' @param nsim.null (integer) number of sample used in Monte-Carlo simulation
+#' @param index (integer) subset of parameters to test
+#' @param par.name (character) parameter names in output
 #' @export
 #' @author Klaus Kähler Holst, Christian Bressen Pipper
 #' @return `htest` object
@@ -79,7 +82,10 @@ test_intersection_sw <- function(par,
                                  noninf = 0,
                                  weights = 1,
                                  nsim.null = 1e4,
-                                 index = NULL) {
+                                 index = NULL,
+                                 par.name = "theta") {
+  if (is.null(noninf)) noninf <- 0
+  if (is.null(weights)) weights <- 1
   obj <- test_proc_arg(
     par = par, vcov = vcov,
     noninf = noninf,
@@ -99,12 +105,12 @@ test_intersection_sw <- function(par,
     )
     return(
       structure(list(
-        data.name = sprintf("H0: b <= %g", noninf[1]),
+        data.name = sprintf("H0: %s =< %g", par.name, noninf[1]),
         statistic = c("Q" = unname(signwald)),
-        estimate = c("b" = unname(par)),
+        estimate = structure(unname(par), names=par.name),
         parameter = NULL,
         method = "Signed Wald Test",
-        alternative = sprintf("HA: b > %g", noninf[1]),
+        alternative = sprintf("HA: %s > %g", par.name, noninf[1]),
         p.value = pval
       ), class = "htest")
     )
@@ -134,8 +140,8 @@ test_intersection_sw <- function(par,
   w <- paste0(format(weights, digits = 2), collapse = ", ")
   test.int <- structure(list(
     data.name = sprintf(
-      "\n%s: theta =< [%s]\nw = [%s]",
-      "Intersection null hypothesis",
+      "\n%s: %s =< [%s]\nw = [%s]",
+      "Intersection null hypothesis", par.name,
       paste(noninf, collapse = ", "), w
     ),
     statistic = c("Q" = unname(signwald.intersect)),
@@ -165,14 +171,16 @@ test_intersection_sw <- function(par,
 #' @param par (numeric) parameter estimates or `estimate` object
 #' @param vcov (matrix) asymptotic variance estimate
 #' @param noninf (numeric) non-inferiority margins
-#' @param index subset of parameters to test
+#' @param index (integer) subset of parameters to test
+#' @param par.name (character) parameter names in output
 #' @return `htest` object
 #' @export
 #' @author Christian Bressen Pipper, Klaus Kähler Holst
 test_zmax_onesided <- function(par,
                                vcov,
                                noninf = 0,
-                               index = NULL) {
+                               index = NULL,
+                               par.name = "theta") {
   obj <- test_proc_arg(
     par = par,
     vcov = vcov,
@@ -181,6 +189,7 @@ test_zmax_onesided <- function(par,
   )
   par <- obj$par
   vcov <- obj$vcov
+  if (is.null(noninf)) noninf <- 0
   noninf <- obj$noninf
   z <- (par - noninf) / diag(vcov)^0.5
   zmax <- max(z)
@@ -190,8 +199,8 @@ test_zmax_onesided <- function(par,
   test.int <- structure(
     list(
       data.name = sprintf(
-        "\n%s: theta =< [%s]",
-        "Intersection null hypothesis",
+        "\n%s: %s =< [%s]",
+        "Intersection null hypothesis", par.name,
         paste(noninf, collapse = ", ")
       ), statistic = c(Q = unname(zmax)), parameter = NULL,
       method = "Zmax/minP test", p.value = pval.zmax

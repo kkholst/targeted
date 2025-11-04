@@ -10,7 +10,8 @@ test_intersection_sw(
   noninf = 0,
   weights = 1,
   nsim.null = 10000,
-  index = NULL
+  index = NULL,
+  par.name = "theta"
 )
 }
 \arguments{
@@ -22,9 +23,11 @@ test_intersection_sw(
 
 \item{weights}{(numeric) optional weights}
 
-\item{nsim.null}{number of sample used in Monte-Carlo simulation}
+\item{nsim.null}{(integer) number of sample used in Monte-Carlo simulation}
 
-\item{index}{subset of parameters to test}
+\item{index}{(integer) subset of parameters to test}
+
+\item{par.name}{(character) parameter names in output}
 }
 \value{
 \code{htest} object
