@@ -39,13 +39,13 @@ build:
 	@echo 'pkgbuild::build(path=".", dest_path="$(BUILD_DIR)", args="--compact-vignettes=qpdf --resave-data=best")' | $(R)
 
 install:
-	@echo 'devtools::install(".", upgrade = "never")' | $(R)
+	@echo 'remotes::install_local(".", upgrade = "never")' | $(R)
 
 dependencies-install:
-	@echo 'devtools::install_deps(".", dependencies = TRUE)' | $(R)
+	@echo 'remotes::install_deps(".", dependencies = TRUE)' | $(R)
 
 dependencies-upgrade:
-	@echo 'devtools::install(".", upgrade = "always")' | $(R)
+	@echo 'remotes::install_local(".", upgrade = "always")' | $(R)
 
 check-cran: build
 	@$(R) CMD check $(BUILD_DIR)/$(PKG)_$(GETVER).tar.gz --timings --as-cran --no-multiarch --run-donttest
