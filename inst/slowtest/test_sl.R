@@ -64,8 +64,8 @@ test_metalearners <- function() {
   )
 
   s1 <- learner_sl(m, nfolds = 10)
-  s2 <- learner_sl(m, nfolds = 10, meta.learner = metalearner_nnls2)
-  s3 <- learner_sl(m, nfolds = 10, meta.learner = metalearner_convexcomb)
+  s2 <- learner_sl(m, nfolds = 10, meta.learner = targeted:::metalearner_nnls2)
+  s3 <- learner_sl(m, nfolds = 10, meta.learner = targeted:::metalearner_convexcomb)
 
   b1 <- cv(s1, nfolds = 10, rep = 2, data = d)
   b2 <- cv(s2, nfolds = 10, rep = 2, data = d)
