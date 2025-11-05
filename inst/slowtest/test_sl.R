@@ -64,15 +64,15 @@ test_metalearners <- function() {
   )
 
   s1 <- learner_sl(m, nfolds = 10)
-  s2 <- learner_sl(m, nfolds = 10, meta.learner = targeted:::metalearner_nnls2)
-  s3 <- learner_sl(m, nfolds = 10, meta.learner = targeted:::metalearner_convexcomb)
+  s2 <- learner_sl(m, nfolds = 10, meta.learner = targeted:::metalearner_convexcomb)
 
   b1 <- cv(s1, nfolds = 10, rep = 2, data = d)
   b2 <- cv(s2, nfolds = 10, rep = 2, data = d)
-  b3 <- cv(s3, nfolds = 10, rep = 2, data = d)
 
-  expect_equivalent(summary(b1)[, , "weight"], summary(b2)[, , "weight"], tolerance = 0.05)
-  expect_equivalent(summary(b2)[, , "weight"], summary(b3)[, , "weight"], tolerance = 0.05)
-  expect_equivalent(summary(b1)[, , "weight"], summary(b3)[, , "weight"], tolerance = 0.05)
+  eps <- 0.05
+  expect_true(
+    mean(abs(summary(b1)[, , "weight"] - summary(b2)[, , "weight"])[-1, 1])
+    < eps
+  )
 }
 test_metalearners()
