@@ -404,17 +404,17 @@ namespace targeted {
         return Rcpp::as<List >(rcpp_result_gen);
     }
 
-    inline List _signedwald(const arma::vec& par, const arma::mat& vcov, const arma::vec& noninf, const arma::vec& weights, unsigned nsim_null = 1e4) {
-        typedef SEXP(*Ptr__signedwald)(SEXP,SEXP,SEXP,SEXP,SEXP);
+    inline List _signedwald(const arma::vec& par, const arma::mat& vcov, const arma::vec& noninf, const arma::vec& weights, unsigned nsim_null = 1e4, double dykstra_tol = 1e-7, unsigned dykstra_niter = 500, double pinv_tol = 1e-16) {
+        typedef SEXP(*Ptr__signedwald)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
         static Ptr__signedwald p__signedwald = NULL;
         if (p__signedwald == NULL) {
-            validateSignature("List(*_signedwald)(const arma::vec&,const arma::mat&,const arma::vec&,const arma::vec&,unsigned)");
+            validateSignature("List(*_signedwald)(const arma::vec&,const arma::mat&,const arma::vec&,const arma::vec&,unsigned,double,unsigned,double)");
             p__signedwald = (Ptr__signedwald)R_GetCCallable("targeted", "_targeted__signedwald");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p__signedwald(Shield<SEXP>(Rcpp::wrap(par)), Shield<SEXP>(Rcpp::wrap(vcov)), Shield<SEXP>(Rcpp::wrap(noninf)), Shield<SEXP>(Rcpp::wrap(weights)), Shield<SEXP>(Rcpp::wrap(nsim_null)));
+            rcpp_result_gen = p__signedwald(Shield<SEXP>(Rcpp::wrap(par)), Shield<SEXP>(Rcpp::wrap(vcov)), Shield<SEXP>(Rcpp::wrap(noninf)), Shield<SEXP>(Rcpp::wrap(weights)), Shield<SEXP>(Rcpp::wrap(nsim_null)), Shield<SEXP>(Rcpp::wrap(dykstra_tol)), Shield<SEXP>(Rcpp::wrap(dykstra_niter)), Shield<SEXP>(Rcpp::wrap(pinv_tol)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();

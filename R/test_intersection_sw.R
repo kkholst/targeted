@@ -61,11 +61,23 @@ test_proc_arg <- function(par, vcov, index = NULL, ...) {
 #' @param nsim.null (integer) number of sample used in Monte-Carlo simulation
 #' @param index (integer) subset of parameters to test
 #' @param par.name (character) parameter names in output
+#' @param control (list) arguments to alternating projection algorithm. See
+#'   details section.
+#' @details The constrained least squares problem is solved using Dykstra's
+#'   algorithm. The following parameters for the optimization can be controlled
+#'   via the `control` list argument: `dykstra_niter` sets the maximum number of
+#'   iterations (default 500), `dykstra_tol` convergence tolerance of the
+#'   alternating projection algorithm (default 1e-7), `pinv_tol` tolerance for
+#'   calculating the pseudo-inverse matrix (default
+#'   nrow(vcov)*.Machine$double.eps*max(eigenvalue)).
 #' @export
+#' @references Christian Bressen Pipper, Andreas Nordland & Klaus Kähler Holst
+#'   (2025) A general approach to construct powerful tests for intersections of
+#'   one-sided null-hypotheses based on influence functions. arXiv:
+#'   https://arxiv.org/abs/2511.07096.
 #' @author Klaus Kähler Holst, Christian Bressen Pipper
 #' @return `htest` object
-#' @seealso [test_zmax_onesided] [lava::test_wald]
-#'    [lava::closed_testing]
+#' @seealso [test_zmax_onesided] [lava::test_wald] [lava::closed_testing]
 #' @examples
 #' S <- matrix(c(1, 0.5, 0.5, 2), 2, 2)
 #' thetahat <- c(0.5, -0.2)
@@ -84,6 +96,7 @@ test_intersection_sw <- function(par,
                                  weights = 1,
                                  nsim.null = 1e4,
                                  index = NULL,
+                                 control = list(),
                                  par.name = "theta") {
   if (is.null(noninf)) noninf <- 0
   if (is.null(weights)) weights <- 1
@@ -131,9 +144,23 @@ test_intersection_sw <- function(par,
       prob_fct(signwald.intersect, 0, corr), 1
     )
   } else { # simulation-based inference
-    sw <- .signedwald(par, vcov,
+    if (is.null(control$dykstra.tol)) {
+      control$dykstra.tol <- 1e-7
+    }
+    if (is.null(control$dykstra.niter)) {
+      control$dykstra.niter <- 500
+    }
+    if (is.null(control$pinv.tol)) {
+      sv <- svd(vcov)$d
+      control$pinv.tol <- max(sv) * ncol(vcov) * .Machine$double.eps
+    }
+    sw <- .signedwald(
+      par, vcov,
       noninf = noninf,
-      weights = weights, nsim_null = nsim.null
+      weights = weights, nsim_null = nsim.null,
+      dykstra_tol = control$dykstra.tol,
+      dykstra_niter = control$dykstra.niter,
+      pinv_tol = control$pinv.tol
     )
     signwald.intersect <- sw$test.statistic
     pval.intersect <- sw$pval
