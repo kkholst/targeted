@@ -38,7 +38,7 @@ intersection test given by \deqn{SW = \inf_{\theta \in \cap_{i=1}^n H_i}
   \{(\widehat{\theta}-\theta)^\top W\widehat{\Sigma}W
   (\widehat{\theta}-\theta)\} } with individual hypotheses for each
 coordinate of \eqn{\theta} given by \eqn{H_i: \theta_j < \delta_j} for some
-non-inferiority margin \eqn{\delta_j}, \eqn{j=1,\ldots,n}.
+non-inferiority margin \eqn{\delta_j}, \eqn{j=1,\ldots,n}. #
 }
 \examples{
 S <- matrix(c(1, 0.5, 0.5, 2), 2, 2)
@@ -52,6 +52,10 @@ e <- estimate(coef = thetahat, vcov = S, labels = c("p1", "p2"))
 lava::closed_testing(e, test_intersection_sw, noninf = c(-0.1, -0.1)) |>
   summary()
 }
+}
+\seealso{
+\link{test_zmax_onesided} \link[lava:compare]{lava::test_wald}
+\link[lava:closed_testing]{lava::closed_testing}
 }
 \author{
 Klaus Kähler Holst, Christian Bressen Pipper

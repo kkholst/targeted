@@ -53,8 +53,7 @@ test_proc_arg <- function(par, vcov, index = NULL, ...) {
 #'   \{(\widehat{\theta}-\theta)^\top W\widehat{\Sigma}W
 #'   (\widehat{\theta}-\theta)\} } with individual hypotheses for each
 #'   coordinate of \eqn{\theta} given by \eqn{H_i: \theta_j < \delta_j} for some
-#'   non-inferiority margin \eqn{\delta_j}, \eqn{j=1,\ldots,n}.
-#
+#'   non-inferiority margin \eqn{\delta_j}, \eqn{j=1,\ldots,n}. #
 #' @param par (numeric) parameter estimates or `estimate` object
 #' @param vcov (matrix) asymptotic variance estimate
 #' @param noninf (numeric) non-inferiority margins
@@ -65,6 +64,8 @@ test_proc_arg <- function(par, vcov, index = NULL, ...) {
 #' @export
 #' @author Klaus Kähler Holst, Christian Bressen Pipper
 #' @return `htest` object
+#' @seealso [test_zmax_onesided] [lava::test_wald]
+#'    [lava::closed_testing]
 #' @examples
 #' S <- matrix(c(1, 0.5, 0.5, 2), 2, 2)
 #' thetahat <- c(0.5, -0.2)
@@ -107,7 +108,7 @@ test_intersection_sw <- function(par,
       structure(list(
         data.name = sprintf("H0: %s =< %g", par.name, noninf[1]),
         statistic = c("Q" = unname(signwald)),
-        estimate = structure(unname(par), names=par.name),
+        estimate = structure(unname(par), names = par.name),
         parameter = NULL,
         method = "Signed Wald Test",
         alternative = sprintf("HA: %s > %g", par.name, noninf[1]),
@@ -175,6 +176,8 @@ test_intersection_sw <- function(par,
 #' @param par.name (character) parameter names in output
 #' @return `htest` object
 #' @export
+#' @seealso [test_intersection_sw()] [lava::test_wald()]
+#'   [lava::closed_testing()]
 #' @author Christian Bressen Pipper, Klaus Kähler Holst
 test_zmax_onesided <- function(par,
                                vcov,
