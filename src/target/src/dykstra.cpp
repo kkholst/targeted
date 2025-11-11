@@ -29,13 +29,9 @@ SignedWald signedwald_sim(const arma::vec &par, const arma::mat &vcov,
     arma::vec e;
     arma::mat P;
     arma::eig_sym(e, P, vcov);
-    arma::vec ie = e;
+    e = arma::sqrt(e);
+    arma::vec ie = 1 / e;
     for (unsigned i = 0; i < e.n_elem; i++) {
-      if (e[i] < 0) {
-        e[i] = 0;
-      } else {
-        e[i] = sqrt(e[i]);
-      }
       if (e[i] < pinv_tol) {
         ie[i] = 0;
       }
