@@ -51,7 +51,7 @@ via the \code{control} list argument: \code{dykstra_niter} sets the maximum numb
 iterations (default 500), \code{dykstra_tol} convergence tolerance of the
 alternating projection algorithm (default 1e-7), \code{pinv_tol} tolerance for
 calculating the pseudo-inverse matrix (default
-nrow(vcov)\emph{.Machine$double.eps}max(eigenvalue)).
+length(par)\emph{.Machine$double.eps}max(eigenvalue)).
 }
 \examples{
 S <- matrix(c(1, 0.5, 0.5, 2), 2, 2)
