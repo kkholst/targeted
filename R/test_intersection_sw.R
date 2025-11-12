@@ -53,8 +53,7 @@ test_proc_arg <- function(par, vcov, index = NULL, ...) {
 #'   \{(\widehat{\theta}-\theta)^\top W\widehat{\Sigma}W
 #'   (\widehat{\theta}-\theta)\} } with individual hypotheses for each
 #'   coordinate of \eqn{\theta} given by \eqn{H_i: \theta_j < \delta_j} for some
-#'   non-inferiority margin \eqn{\delta_j}, \eqn{j=1,\ldots,n}.
-#
+#'   non-inferiority margin \eqn{\delta_j}, \eqn{j=1,\ldots,n}. #
 #' @param par (numeric) parameter estimates or `estimate` object
 #' @param vcov (matrix) asymptotic variance estimate
 #' @param noninf (numeric) non-inferiority margins
@@ -62,9 +61,23 @@ test_proc_arg <- function(par, vcov, index = NULL, ...) {
 #' @param nsim.null (integer) number of sample used in Monte-Carlo simulation
 #' @param index (integer) subset of parameters to test
 #' @param par.name (character) parameter names in output
+#' @param control (list) arguments to alternating projection algorithm. See
+#'   details section.
+#' @details The constrained least squares problem is solved using Dykstra's
+#'   algorithm. The following parameters for the optimization can be controlled
+#'   via the `control` list argument: `dykstra_niter` sets the maximum number of
+#'   iterations (default 500), `dykstra_tol` convergence tolerance of the
+#'   alternating projection algorithm (default 1e-7), `pinv_tol` tolerance for
+#'   calculating the pseudo-inverse matrix (default
+#'   length(par)*.Machine$double.eps*max(eigenvalue)).
 #' @export
+#' @references Christian Bressen Pipper, Andreas Nordland & Klaus Kähler Holst
+#'   (2025) A general approach to construct powerful tests for intersections of
+#'   one-sided null-hypotheses based on influence functions. arXiv:
+#'   https://arxiv.org/abs/2511.07096.
 #' @author Klaus Kähler Holst, Christian Bressen Pipper
 #' @return `htest` object
+#' @seealso [test_zmax_onesided] [lava::test_wald] [lava::closed_testing]
 #' @examples
 #' S <- matrix(c(1, 0.5, 0.5, 2), 2, 2)
 #' thetahat <- c(0.5, -0.2)
@@ -83,6 +96,7 @@ test_intersection_sw <- function(par,
                                  weights = 1,
                                  nsim.null = 1e4,
                                  index = NULL,
+                                 control = list(),
                                  par.name = "theta") {
   if (is.null(noninf)) noninf <- 0
   if (is.null(weights)) weights <- 1
@@ -97,7 +111,8 @@ test_intersection_sw <- function(par,
   noninf <- obj$noninf
   weights <- with(obj, weights / sum(weights))
   z <- (par - noninf) / diag(matrix(vcov))**.5
-  if (length(z) == 1) {
+  np <- length(z)
+  if (np == 1L) {
     signwald <- (z**2) * (z >= 0)
     # 1-pnorm(z)
     pval <- ifelse(z >= 0,
@@ -107,7 +122,7 @@ test_intersection_sw <- function(par,
       structure(list(
         data.name = sprintf("H0: %s =< %g", par.name, noninf[1]),
         statistic = c("Q" = unname(signwald)),
-        estimate = structure(unname(par), names=par.name),
+        estimate = structure(unname(par), names = par.name),
         parameter = NULL,
         method = "Signed Wald Test",
         alternative = sprintf("HA: %s > %g", par.name, noninf[1]),
@@ -115,7 +130,7 @@ test_intersection_sw <- function(par,
       ), class = "htest")
     )
   }
-  if (length(z) == 2L && is.null(weights)) { # exact calculations
+  if (np == 2L && is.null(weights)) { # exact calculations
     corr <- cov2cor(vcov)[1, 2]
     zmin <- min(z[1], z[2])
     zmax <- max(z[1], z[2])
@@ -130,9 +145,32 @@ test_intersection_sw <- function(par,
       prob_fct(signwald.intersect, 0, corr), 1
     )
   } else { # simulation-based inference
-    sw <- .signedwald(par, vcov,
+    if (is.null(control$dykstra.tol)) {
+      control$dykstra.tol <- 1e-7
+    }
+    if (is.null(control$dykstra.niter)) {
+      control$dykstra.niter <- 500
+    }
+    sv <- svd(vcov)
+    lambda <- sv$d
+    np <- nrow(vcov)
+    if (any(lambda < 0)) {
+      cli::cli_warn("`vcov` is not positive definite.")
+      cli::cli_warn(sprintf("Smallest singular value: %f", min(sv)))
+      cli::cli_warn("Setting negative singular values to zero.")
+      lambda[which(lambda < 0)] <- 0
+      vcov <- sv$u %*% diag(lambda, nrow = np) %*% t(sv$v)
+    }
+    if (is.null(control$pinv.tol)) {
+      control$pinv.tol <- max(lambda) * np * .Machine$double.eps
+    }
+    sw <- .signedwald(
+      par, vcov,
       noninf = noninf,
-      weights = weights, nsim_null = nsim.null
+      weights = weights, nsim_null = nsim.null,
+      dykstra_tol = control$dykstra.tol,
+      dykstra_niter = control$dykstra.niter,
+      pinv_tol = control$pinv.tol
     )
     signwald.intersect <- sw$test.statistic
     pval.intersect <- sw$pval
@@ -175,6 +213,8 @@ test_intersection_sw <- function(par,
 #' @param par.name (character) parameter names in output
 #' @return `htest` object
 #' @export
+#' @seealso [test_intersection_sw()] [lava::test_wald()]
+#'   [lava::closed_testing()]
 #' @author Christian Bressen Pipper, Klaus Kähler Holst
 test_zmax_onesided <- function(par,
                                vcov,
@@ -192,9 +232,10 @@ test_zmax_onesided <- function(par,
   if (is.null(noninf)) noninf <- 0
   noninf <- obj$noninf
   z <- (par - noninf) / diag(vcov)^0.5
+  np <- length(z)
   zmax <- max(z)
   pval.zmax <- 1 -
-    mets::pmvn(upper = rep(zmax, length(z)),
+    mets::pmvn(upper = rep(zmax, np),
                sigma = cov2cor(vcov))[1]
   test.int <- structure(
     list(

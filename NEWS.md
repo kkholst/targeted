@@ -3,6 +3,15 @@
 Development version
 
 - `test_zmax_onesided`: one-sided Zmax / minP test
+- `test_intersection_sw`: the following parameters for the optimization can be
+  controlled via the control list argument: dykstra_niter sets the maximum
+  number of iterations (default 500), dykstra_tol convergence tolerance of the
+  alternating projection algorithm (default 1e-7), pinv_tol tolerance for
+  calculating the pseudo-inverse matrix (default value:
+  nrow(vcov).Machine$double.epsmax(eigenvalue)).
+- `test_intersection_sw` handle edge-case where vcov is not positive-definite.
+  Throw warning and project onto nearest PD matrix in Frobenius norm.
+
 
 # targeted 0.6
 

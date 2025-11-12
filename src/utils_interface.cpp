@@ -75,11 +75,15 @@ List dykstra(const arma::vec &x, const arma::mat &A) {
 
 // [[Rcpp::export(name = ".signedwald")]]
 List signedwald(const arma::vec &par, const arma::mat &vcov,
-             const arma::vec &noninf, const arma::vec &weights,
-             unsigned nsim_null=1e4) {
+                const arma::vec &noninf, const arma::vec &weights,
+                unsigned nsim_null = 1e4, double dykstra_tol = 1e-7,
+                unsigned dykstra_niter = 500,
+                double pinv_tol = 1e-16
+                ) {
 
   target::SignedWald res =
-    target::signedwald_sim(par, vcov, noninf, weights, nsim_null);
+      target::signedwald_sim(par, vcov, noninf, weights, nsim_null,
+                             dykstra_tol, dykstra_niter, pinv_tol);
 
   return Rcpp::List::create(Rcpp::Named("solution") = res.sol,
                             Rcpp::Named("test.statistic") = res.sw,

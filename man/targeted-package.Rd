@@ -50,6 +50,11 @@ Authors:
   \item Andreas Nordland \email{andreasnordland@gmail.com}
 }
 
+Other contributors:
+\itemize{
+  \item Christian B. Pipper \email{cbpipper@gmail.com} [contributor]
+}
+
 
 Klaus K. Holst (Maintainer) \href{mailto:klaus@holst.it}{klaus@holst.it}
 }

@@ -14,7 +14,11 @@ Authors@R: c(person(given = "Klaus K.",
              person(given = "Andreas",
                     family = "Nordland",
                     role = c("aut"),
-                    email = "andreasnordland@gmail.com"))
+                    email = "andreasnordland@gmail.com"),
+             person(given = "Christian B.",
+                    family = "Pipper",
+                    role = c("ctb"),
+                    email = "cbpipper@gmail.com"))
 Author: Klaus K. Holst [aut, cre], Benedikt Sommer [aut], Andreas Nordland [aut]
 Maintainer: Klaus K. Holst <klaus@holst.it>
 Description: Various methods for targeted and semiparametric inference including
