@@ -151,11 +151,11 @@ test_intersection_sw <- function(par,
       control$dykstra.niter <- 500
     }
     sv <- svd(vcov)
-    if (any(sv$d) < 0) {
+    if (any(sv$d < 0)) {
       cli::cli_warn("`vcov` is not positive definite.")
       cli::cli_warn(sprintf("Smallest singular value: %f", min(sv)))
       cli::cli_warn("Setting negative singular values to zero.")
-      sv$d[which(sv$d) < 0] <- 0
+      sv$d[which(sv$d < 0))] <- 0
       vcov <- with(sv, u %*% diag(d) %*% t(v))
     }
     if (is.null(control$pinv.tol)) {
