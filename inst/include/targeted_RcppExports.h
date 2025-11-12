@@ -383,6 +383,48 @@ namespace targeted {
         return Rcpp::as<arma::mat >(rcpp_result_gen);
     }
 
+    inline List _dykstra(const arma::vec& x, const arma::mat& A) {
+        typedef SEXP(*Ptr__dykstra)(SEXP,SEXP);
+        static Ptr__dykstra p__dykstra = NULL;
+        if (p__dykstra == NULL) {
+            validateSignature("List(*_dykstra)(const arma::vec&,const arma::mat&)");
+            p__dykstra = (Ptr__dykstra)R_GetCCallable("targeted", "_targeted__dykstra");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p__dykstra(Shield<SEXP>(Rcpp::wrap(x)), Shield<SEXP>(Rcpp::wrap(A)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<List >(rcpp_result_gen);
+    }
+
+    inline List _signedwald(const arma::vec& par, const arma::mat& vcov, const arma::vec& noninf, const arma::vec& weights, unsigned nsim_null = 1e4) {
+        typedef SEXP(*Ptr__signedwald)(SEXP,SEXP,SEXP,SEXP,SEXP);
+        static Ptr__signedwald p__signedwald = NULL;
+        if (p__signedwald == NULL) {
+            validateSignature("List(*_signedwald)(const arma::vec&,const arma::mat&,const arma::vec&,const arma::vec&,unsigned)");
+            p__signedwald = (Ptr__signedwald)R_GetCCallable("targeted", "_targeted__signedwald");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p__signedwald(Shield<SEXP>(Rcpp::wrap(par)), Shield<SEXP>(Rcpp::wrap(vcov)), Shield<SEXP>(Rcpp::wrap(noninf)), Shield<SEXP>(Rcpp::wrap(weights)), Shield<SEXP>(Rcpp::wrap(nsim_null)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<List >(rcpp_result_gen);
+    }
+
 }
 
 #endif // RCPP_targeted_RCPPEXPORTS_H_GEN_

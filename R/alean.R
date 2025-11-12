@@ -10,7 +10,7 @@
 #' \code{link} specifies \eqn{g}.
 #'
 #' @title Assumption Lean inference for generalized linear model parameters
-#' @param response_model formula or ml_model object (formula => glm)
+#' @param response_model formula or [learner] object (formula => glm)
 #' @param exposure_model  model for the exposure
 #' @param data data.frame
 #' @param link Link function (g)
@@ -25,26 +25,28 @@
 #' @examples
 #'
 #' sim1 <- function(n, family=gaussian(), ...) {
-#'    m <- lvm() |>
-#'      distribution(~ y, binomial.lvm()) |>
-#'      regression('a', value=function(l) l) |>
-#'      regression('y', value=function(a,l) a + l)
+#'    m <- lava::lvm() |>
+#'      lava::distribution(~y, value=lava::binomial.lvm()) |>
+#'      lava::regression('a', value=function(l) l) |>
+#'      lava::regression('y', value=function(a,l) a + l)
 #'      if (family$family=="binomial")
-#'         distribution(m, ~a) <- binomial.lvm()
-#'    sim(m, n)
+#'         lava::distribution(m, ~a) <- lava::binomial.lvm()
+#'    lava::sim(m, n)
 #' }
 #'
 #' library(splines)
 #' f <- binomial()
 #' d <- sim1(1e4, family=f)
-#' e <- alean(response_model=ML(y ~ a + bs(l, df=3), family=binomial),
-#'            exposure_model=ML(a ~ bs(l, df=3), family=f),
-#'            data=d,
-#'            link = "logit", mc.cores=1, nfolds=1)
+#' e <- alean(
+#'  response_model=learner_glm(y ~ a + bs(l, df=3), family=binomial),
+#'  exposure_model=learner_glm(a ~ bs(l, df=3), family=f),
+#'  data=d,
+#'  link = "logit", mc.cores=1, nfolds=1
+#' )
 #' e
 #'
-#' e <- alean(response_model=ML(y ~ a + l, family=binomial),
-#'            exposure_model=ML(a ~ l),
+#' e <- alean(response_model=learner_glm(y ~ a + l, family=binomial),
+#'            exposure_model=learner_glm(a ~ l),
 #'            data=d,
 #'            link = "logit", mc.cores=1, nfolds=1)
 #' e
@@ -61,7 +63,7 @@ alean <- function(response_model,
 
   cl <- match.call()
   if (inherits(response_model, "formula")) {
-    response_model <- ML(response_model)
+    response_model <- learner_glm(response_model)
   }
   if (inherits(exposure_model, "formula")) {
     A_var <- lava::getoutcome(exposure_model)
@@ -69,7 +71,7 @@ alean <- function(response_model,
     if (!is.numeric(data[, A_var])) {
       family <- stats::binomial()
     }
-    exposure_model <- ML(exposure_model, family = family)
+    exposure_model <- learner_glm(exposure_model, family = family)
   }
   A_var <- lava::getoutcome(exposure_model$formula)
   A <- exposure_model$response(data)
@@ -78,7 +80,7 @@ alean <- function(response_model,
   if (missing(g_model)) {
     tf <- terms(response_model$formula)
     tf <- drop.terms(tf, which(attr(tf, "factors")[A_var, ] == 1))
-    g_model <- ML(formula(tf))
+    g_model <- learner_glm(formula(tf))
   }
   g_model$update(update(
     g_model$formula,

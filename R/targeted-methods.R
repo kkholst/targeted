@@ -49,15 +49,39 @@ print.summary.targeted <- function(x, ...) {
 
 #' @export
 summary.targeted <- function(object, ...) {
-  obj <- structure(list(estimate = object$estimate, call = object$call),
-    class = "summary.targeted"
-  )
+  B <- rbind(rep(0, length(coef(object))))
+  B[1:2] <- c(1, -1)
+  obj <- structure(list(
+    estimate = object$estimate,
+    call = object$call,
+    ate = lava::estimate(object$estimate, B)
+  ), class = "summary.targeted")
   return(obj)
 }
 
 #' @export
 IC.targeted <- function(x, ...) {
   return(lava::IC(x$estimate, ...))
+}
+
+#' @export
+transform.targeted <- function(`_data`, ...) {
+  transform(`_data`$estimate, ...)
+}
+
+#' @export
+labels.targeted <- function(object, str, ...) {
+  labels(object$estimate, labels=str, ...)
+}
+
+#' @export
+parameter.targeted <- function(x, ...) {
+  parameter(x$estimate, ...)
+}
+
+#' @export
+subset.targeted <- function(x, keep, ...) {
+  subset(x$estimate, keep = keep, ...)
 }
 
 #' @export

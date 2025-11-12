@@ -13,8 +13,6 @@
 
 namespace target {
 
-  using raggedArray = std::vector<arma::vec>;
-
   raggedArray pcond(const arma::uvec   &idx,
 		    const arma::mat    &x,
 		    const arma::uvec   &xlev,

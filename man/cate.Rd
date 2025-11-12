@@ -8,13 +8,17 @@ cate(
   response.model,
   propensity.model,
   cate.model = ~1,
-  contrast = c(1, 0),
+  calibration.model = NULL,
   data,
+  contrast,
   nfolds = 1,
   rep = 1,
   silent = FALSE,
   stratify = FALSE,
   mc.cores = NULL,
+  rep.type = c("nuisance", "average"),
+  var.type = "IC",
+  second.order = TRUE,
   response_model = deprecated,
   cate_model = deprecated,
   propensity_model = deprecated,
@@ -23,27 +27,42 @@ cate(
 )
 }
 \arguments{
-\item{response.model}{formula or ml_model object (formula => glm)}
+\item{response.model}{formula or learner object (formula => learner_glm)}
 
-\item{propensity.model}{formula or ml_model object (formula => glm)}
+\item{propensity.model}{formula or learner object (formula => learner_glm)}
 
 \item{cate.model}{formula specifying regression design for conditional
 average treatment effects}
 
-\item{contrast}{treatment contrast (default 1 vs 0)}
+\item{calibration.model}{linear calibration model. Specify covariates in
+addition to predicted potential outcomes to include in the calibration.}
 
 \item{data}{data.frame}
 
-\item{nfolds}{Number of folds}
+\item{contrast}{treatment contrast (default 1 vs 0)}
 
-\item{rep}{Number of replications of cross-fitting procedure}
+\item{nfolds}{number of folds}
+
+\item{rep}{number of replications of cross-fitting procedure}
 
 \item{silent}{suppress all messages and progressbars}
 
-\item{stratify}{If TRUE the response.model will be stratified by treatment}
+\item{stratify}{if TRUE the response.model will be stratified by treatment}
 
-\item{mc.cores}{mc.cores Optional number of cores. parallel::mcmapply used
-instead of future}
+\item{mc.cores}{(optional) number of cores. parallel::mcmapply used instead
+of future}
+
+\item{rep.type}{repeated cross-fitting applied by averaging nuisance models
+(\code{rep.type="nuisance"}) or by average estimates from each replication
+(\code{rep.type="average"}).}
+
+\item{var.type}{when equal to "IC" the asymptotic variance is derived from
+the influence function. Otherwise, based on expressions in Bannick et al.
+(2025) valid under different covariate-adaptive randomization schemes (only
+available for ATE and when \code{calibration.model} is also specified)}
+
+\item{second.order}{add seconder order term to IF to handle misspecification
+of outcome models}
 
 \item{response_model}{Deprecated. Use response.model instead.}
 
@@ -74,7 +93,7 @@ E_{P}[\{\Psi_{1}(P)(V)-\Psi_{0}(P)(V)\} - m(V; \beta)]^{2}}
 sim1 <- function(n=1000, ...) {
   w1 <- rnorm(n)
   w2 <- rnorm(n)
-  a <- rbinom(n, 1, expit(-1 + w1))
+  a <- rbinom(n, 1, plogis(-1 + w1))
   y <- cos(w1) + w2*a + 0.2*w2^2 + a + rnorm(n)
   data.frame(y, a, w1, w2)
 }
@@ -93,13 +112,13 @@ cate(cate.model=~1+w2,
 
 \dontrun{ ## superlearner example
 mod1 <- list(
-   glm=predictor_glm(y~w1+w2),
-   gam=predictor_gam(y~s(w1) + s(w2))
+   glm = learner_glm(y~w1+w2),
+   gam = learner_gam(y~s(w1) + s(w2))
 )
-s1 <- predictor_sl(mod1, nfolds=5)
+s1 <- learner_sl(mod1, nfolds=5)
 cate(cate.model=~1,
      response.model=s1,
-     propensity.model=predictor_glm(a~w1+w2, family=binomial),
+     propensity.model=learner_glm(a~w1+w2, family=binomial),
      data=d,
      stratify=TRUE)
 }

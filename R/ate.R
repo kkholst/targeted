@@ -7,18 +7,22 @@
 #' the propensity model or the outcome model / Q-model is correctly specified.
 #'
 #' @title AIPW (doubly-robust) estimator for Average Treatment Effect
-#' @param formula Formula (see details below)
+#' @param formula formula (see details below)
 #' @param data data.frame
 #' @param weights optional frequency weights
-#' @param offset optional offset (character or vector). can also be specified
-#'   in the formula.
+#' @param offset optional offset (character or vector). can also be specified in
+#'   the formula.
 #' @param family Exponential family argument for outcome model
 #' @param nuisance outcome regression formula (Q-model)
 #' @param propensity propensity model formula
-#' @param all If TRUE all standard errors are calculated (default TRUE when
+#' @param all when TRUE all standard errors are calculated (default TRUE when
 #'   exposure only has two levels)
-#' @param labels Optional treatment labels
-#' @param ... Additional arguments to lower level functions
+#' @param labels optional treatment labels
+#' @param adjust.nuisance adjust for uncertainty due to estimation of outcome
+#'   regression model parameters
+#' @param adjust.propensity adjust for uncertainty due to estimation of
+#'   propensity regression model parameters
+#' @param ... additional arguments to lower level functions
 #' @return An object of class '\code{ate.targeted}' is returned. See
 #'   \code{\link{targeted-class}} for more details about this class and its
 #'   generic functions.
@@ -36,17 +40,17 @@
 #' @author Klaus K. Holst
 #' @aliases ate
 #' @examples
-#' m <- lvm(y ~ a+x, a~x)
-#' distribution(m, ~y) <- binomial.lvm()
-#' m <- ordinal(m, K=4, ~a)
-#' transform(m, ~a) <- factor
-#' d <- sim(m, 1e3, seed=1)
-#' (a <- ate(y~a|a*x|x, data=d))
-#' ## ate(y~a, nuisance=~a*x, propensity=~x, ...)
+#' m <- lava::lvm(y ~ a+x, a~x) |>
+#'      lava::distribution(~y, value = lava::binomial.lvm()) |>
+#'      lava::ordinal(K=4, ~a) |>
+#'      transform(~a, value = factor)
+#' d <- lava::sim(m, 1e3, seed=1)
+#' # (a <- ate(y~a|a*x|x, data=d))
+#' (a <- ate(y~a, nuisance=~a*x, propensity=~x, data = d))
 #'
 #' # Comparison with randomized experiment
-#' m0 <- cancel(m, a~x)
-#' lm(y~a-1, sim(m0,2e4))
+#' m0 <- lava::cancel(m, a~x)
+#' lm(y~a-1, lava::sim(m0,2e4))
 #'
 #' # Choosing a different contrast for the association measures
 #' summary(a, contrast=c(2,4))
@@ -55,7 +59,11 @@ ate <- function(formula, # nolint
                 family=stats::gaussian(identity),
                 nuisance=NULL,
                 propensity=nuisance,
-                all, labels=NULL, ...) {
+                all,
+                labels=NULL,
+                adjust.nuisance = TRUE,
+                adjust.propensity = TRUE,
+                ...) {
   cl <- match.call()
   if (!is.null(nuisance) && inherits(nuisance, "formula")) {
     exposure <- attr(lava::getoutcome(formula), "x")
@@ -166,9 +174,19 @@ ate <- function(formula, # nolint
       bprop[gpos] <- gamma
       Vprop[gpos, gpos] <- crossprod(iid.gamma)
     }
-    iid.alpha <- (U0 + iid.beta %*% t(DU[, beta.index, drop=FALSE]) +
-                  iid.gamma %*% t(DU[, gamma.index, drop=FALSE])) %*%
-      t(-Inverse(DU[, alpha.index, drop=FALSE]))
+
+    iid.alpha <- U0
+    if (adjust.nuisance) {
+      iid.alpha <- iid.alpha + iid.beta %*% t(DU[, beta.index, drop=FALSE])
+    }
+    if (adjust.propensity) {
+      iid.alpha <- iid.alpha + iid.gamma %*% t(DU[, gamma.index, drop=FALSE])
+    }
+    iid.alpha <- iid.alpha %*% t(-Inverse(DU[, alpha.index, drop=FALSE]))
+    ## iid.alpha <- (U0 + iid.beta %*% t(DU[, beta.index, drop=FALSE]) +
+    ##               iid.gamma %*% t(DU[, gamma.index, drop=FALSE])) %*%
+    ##   t(-Inverse(DU[, alpha.index, drop=FALSE]))
+
     iids[, count] <- iid.alpha
     coefs[count] <- val$alpha
     if (is.null(labels)) nlabels <- c(nlabels, paste0(exposure, "=", trt))

@@ -14,18 +14,20 @@ ate(
   propensity = nuisance,
   all,
   labels = NULL,
+  adjust.nuisance = TRUE,
+  adjust.propensity = TRUE,
   ...
 )
 }
 \arguments{
-\item{formula}{Formula (see details below)}
+\item{formula}{formula (see details below)}
 
 \item{data}{data.frame}
 
 \item{weights}{optional frequency weights}
 
-\item{offset}{optional offset (character or vector). can also be specified
-in the formula.}
+\item{offset}{optional offset (character or vector). can also be specified in
+the formula.}
 
 \item{family}{Exponential family argument for outcome model}
 
@@ -33,12 +35,18 @@ in the formula.}
 
 \item{propensity}{propensity model formula}
 
-\item{all}{If TRUE all standard errors are calculated (default TRUE when
+\item{all}{when TRUE all standard errors are calculated (default TRUE when
 exposure only has two levels)}
 
-\item{labels}{Optional treatment labels}
+\item{labels}{optional treatment labels}
 
-\item{...}{Additional arguments to lower level functions}
+\item{adjust.nuisance}{adjust for uncertainty due to estimation of outcome
+regression model parameters}
+
+\item{adjust.propensity}{adjust for uncertainty due to estimation of
+propensity regression model parameters}
+
+\item{...}{additional arguments to lower level functions}
 }
 \value{
 An object of class '\code{ate.targeted}' is returned. See
@@ -66,17 +74,17 @@ Or using the nuisance (and propensity argument):
 \code{ate(y~a, nuisance=~x+z, ...)}
 }
 \examples{
-m <- lvm(y ~ a+x, a~x)
-distribution(m, ~y) <- binomial.lvm()
-m <- ordinal(m, K=4, ~a)
-transform(m, ~a) <- factor
-d <- sim(m, 1e3, seed=1)
-(a <- ate(y~a|a*x|x, data=d))
-## ate(y~a, nuisance=~a*x, propensity=~x, ...)
+m <- lava::lvm(y ~ a+x, a~x) |>
+     lava::distribution(~y, value = lava::binomial.lvm()) |>
+     lava::ordinal(K=4, ~a) |>
+     transform(~a, value = factor)
+d <- lava::sim(m, 1e3, seed=1)
+# (a <- ate(y~a|a*x|x, data=d))
+(a <- ate(y~a, nuisance=~a*x, propensity=~x, data = d))
 
 # Comparison with randomized experiment
-m0 <- cancel(m, a~x)
-lm(y~a-1, sim(m0,2e4))
+m0 <- lava::cancel(m, a~x)
+lm(y~a-1, lava::sim(m0,2e4))
 
 # Choosing a different contrast for the association measures
 summary(a, contrast=c(2,4))

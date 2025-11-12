@@ -120,10 +120,10 @@ This automatically imports [lava](https://arxiv.org/abs/1206.3421)
 which we can use to simulate from the Relative-Risk Odds-Product (RR-OP) model.
 
 ```{r}
-m <- lvm(a ~ x,
+m <- lava::lvm(a ~ x,
          lp.target ~ 1,
          lp.nuisance ~ x+z)
-m <- binomial.rr(m, response="y", exposure="a", target.model="lp.target", nuisance.model="lp.nuisance")
+m <- lava::binomial.rr(m, response="y", exposure="a", target.model="lp.target", nuisance.model="lp.nuisance")
 ```
 
 The `lvm` call first defines the linear predictor for the exposure to
@@ -144,7 +144,7 @@ be altered using the `lava::distribution` method.
 
 The `binomial.rr` function
 ```{r}
-args(binomial.rr)
+args(lava::binomial.rr)
 ```
 
 then defines the link functions, i.e.,
@@ -162,7 +162,7 @@ The risk-difference model with the RD parameter modeled on the
 \(\operatorname{arctanh}\) scale can be defined similarly using the `binomial.rd`
 method
 ```{r}
-args(binomial.rd)
+args(lava::binomial.rd)
 ```
 
 We can inspect the parameter names of the modeled
@@ -187,7 +187,7 @@ p <- c('a'=-1, 'lp.target'=1, 'lp.nuisance'=-1, 'a~x'=2)
 and then simulate from the model using the ``sim`` method
 
 ```{r}
-d <- sim(m, 1e4, p=p, seed=1)
+d <- lava::sim(m, 1e4, p=p, seed=1)
 
 head(d)
 ```
@@ -289,8 +289,8 @@ The syntax for fitting the risk-difference model is similar.
 To illustrate this we simulate some new data from this model
 
 ```{r}
-m2 <- binomial.rd(m, response="y", exposure="a", target.model="lp.target", nuisance.model="lp.nuisance")
-d2 <- sim(m2, 1e4, p=p)
+m2 <- lava::binomial.rd(m, response="y", exposure="a", target.model="lp.target", nuisance.model="lp.nuisance")
+d2 <- lava::sim(m2, 1e4, p=p)
 ```
 
 And we can then fit the DRE with the syntax

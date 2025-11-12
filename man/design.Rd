@@ -11,9 +11,10 @@ design(
   intercept = FALSE,
   response = FALSE,
   rm_envir = FALSE,
-  specials = c("weights", "offset"),
+  specials = NULL,
   specials.call = NULL,
-  xlev = NULL
+  xlev = NULL,
+  design.matrix = TRUE
 )
 }
 \arguments{
@@ -37,6 +38,10 @@ should be marked as special in the \link{terms} object}
 
 \item{xlev}{a named list of character vectors giving the full set of levels
 to be assumed for each factor}
+
+\item{design.matrix}{(logical) if FALSE then only response and specials are
+returned. Otherwise, the design.matrix \code{x} is als part of the returned
+object.}
 }
 \value{
 An object of class 'design'

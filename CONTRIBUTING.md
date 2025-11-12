@@ -1,4 +1,4 @@
-# Contributing to target
+# Contributing to targeted
 
 First off, thanks for taking the time to contribute! ❤️
 
@@ -30,7 +30,8 @@ prefix and hyphens (-) are used for separation. For example,
 *feature/*: Branches for developing new features.\
 *bugfix/*: Branches for fixing non-critical bugs.\
 *hotfix/*: Branches for fixing critical bugs.\
-*docs/*: Branches for writing, updating, or fixing documentation.
+*docs/*: Branches for writing, updating, or fixing documentation.\
+*develop/*: Branches for anything else.
 
 ### Pull requests
 
@@ -59,7 +60,12 @@ largest extent the
 checked via the code linter. A notable difference is that we use dots for long
 argument names of functions. For example, instead of `predict_args` we use
 `predict.args`. We remain using snake case for names of functions and R6 class
-methods.
+methods. We declare argument types of parameters in the roxygen documentation by following
+
+```{r}
+#' @param n (integer) Number of observations (sample size)
+#' @param estimators (list or function) List of estimators or a single unnamed estimator
+```
 
 ### Unit testing
 
@@ -91,10 +97,9 @@ The R code is documented using
 
 Longer documentation are located in the `vignettes` directory in R-markdown format.
 
-
 ## C++ development
 
-The **target** library follows the (Google's C++ style guide)[http://google.github.io/styleguide/cppguide.html>].
+The **targeted** library follows the (Google's C++ style guide)[http://google.github.io/styleguide/cppguide.html>].
 
 The code should be checked using the ``cppcheck`` static code
 analyzer and ``cclint`` (which may installed from PyPi using ``pip3
@@ -106,13 +111,13 @@ The C++ code is documented using (Doxygen)
 [http://www.doxygen.nl/manual/] ([ref](http://www.doxygen.nl/manual/commands.html)).
 
 ### Unit tests
-C++ tests are located in the subdirectory `./src/target/tests`
+
+C++ tests are located in the sub-directory `./src/target/tests`
 using [doctest](https://github.com/doctest/doctest), and can be executed with
 `make test` from the `src/targeto` directory.
 
 The Undefined Behaviour Sanitizer via ``clang++`` can be executed with `make sanitizer`
 which runs the unit-tests and examples from the directory ``misc``.
-
 
 ## Attribution
 

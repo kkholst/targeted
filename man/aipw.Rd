@@ -7,11 +7,11 @@
 aipw(response_model, propensity_model, formula = ~1, data, ...)
 }
 \arguments{
-\item{response_model}{Model for the response given covariates (ml_model or
+\item{response_model}{Model for the response given covariates (learner or
 formula)}
 
 \item{propensity_model}{Optional missing data mechanism model (propensity
-model) (ml_model or formula)}
+model) (learner or formula)}
 
 \item{formula}{design specifying the OLS estimator with outcome given by the
 EIF}
@@ -25,10 +25,10 @@ AIPW for the mean (and linear projections of the EIF) with missing
 observations
 }
 \examples{
-m <- lvm(y ~ x+z, r ~ x)
-distribution(m,~ r) <- binomial.lvm()
-transform(m, y0~r+y) <- function(x) { x[x[,1]==0,2] <- NA; x[,2] }
-d <- sim(m,1e3,seed=1)
+m <- lava::lvm(y ~ x+z, r ~ x) |>
+     lava::distribution(~ r, value = lava::binomial.lvm()) |>
+     transform(y0~r+y, value = \(x) { x[x[,1]==0,2] <- NA; x[,2] })
+d <- lava::sim(m,1e3,seed=1)
 
 aipw(y0 ~ x, data=d)
 }

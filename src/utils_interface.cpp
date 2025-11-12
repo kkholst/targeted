@@ -19,6 +19,7 @@
 #include <target/glm.hpp>
 #include <target/pava.hpp>
 #include <target/nondom.hpp>
+#include <target/dykstra.hpp>
 
 using namespace Rcpp;
 
@@ -57,4 +58,31 @@ List pava(const arma::vec &y, const NumericVector &x, const NumericVector &weigh
 // [[Rcpp::export(name = ".nondom")]]
 arma::mat nondom(const arma::mat &x) {
   return target::nondominated(x);
+}
+
+// [[Rcpp::export(name = ".dykstra")]]
+List dykstra(const arma::vec &x, const arma::mat &A) {
+
+  arma::vec w = arma::ones(x.n_elem);
+
+  target::raggedArray res = target::lsdykstra(x, A);
+
+
+  return Rcpp::List::create(Rcpp::Named("solution") = res[0],
+                            Rcpp::Named("iter") = res[1]
+                            );
+}
+
+// [[Rcpp::export(name = ".signedwald")]]
+List signedwald(const arma::vec &par, const arma::mat &vcov,
+             const arma::vec &noninf, const arma::vec &weights,
+             unsigned nsim_null=1e4) {
+
+  target::SignedWald res =
+    target::signedwald_sim(par, vcov, noninf, weights, nsim_null);
+
+  return Rcpp::List::create(Rcpp::Named("solution") = res.sol,
+                            Rcpp::Named("test.statistic") = res.sw,
+                            Rcpp::Named("pval") = res.pval
+                            );
 }

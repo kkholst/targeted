@@ -1,0 +1,46 @@
+# Check if documentation is up to date using roxygen2
+on:
+  pull_request:
+    branches: [main, dev]
+
+name: check-roxygen
+
+jobs:
+  check-roxygen:
+    runs-on: ${{ matrix.config.os }}
+    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+    strategy:
+      matrix:
+        config:
+          - {os: ubuntu-latest,   r: 'release'}
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.config.r }}
+          http-user-agent: ${{ matrix.config.http-user-agent }}
+          use-public-rspm: true
+
+      - name: Install libpoppler-cpp-dev
+        run: sudo apt-get install libpoppler-cpp-dev
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::devtools
+
+      - name: roxygen
+        run: |
+          cp -r man .man
+          cp -r NAMESPACE .NAMESPACE
+          make roxygen
+
+      - name: Check man pages
+        run: diff -r man .man
+
+      - name: Check NAMESPACE
+        run: diff -r NAMESPACE .NAMESPACE
