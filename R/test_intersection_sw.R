@@ -69,7 +69,7 @@ test_proc_arg <- function(par, vcov, index = NULL, ...) {
 #'   iterations (default 500), `dykstra_tol` convergence tolerance of the
 #'   alternating projection algorithm (default 1e-7), `pinv_tol` tolerance for
 #'   calculating the pseudo-inverse matrix (default
-#'   nrow(vcov)*.Machine$double.eps*max(eigenvalue)).
+#'   length(par)*.Machine$double.eps*max(eigenvalue)).
 #' @export
 #' @references Christian Bressen Pipper, Andreas Nordland & Klaus Kähler Holst
 #'   (2025) A general approach to construct powerful tests for intersections of
@@ -111,7 +111,8 @@ test_intersection_sw <- function(par,
   noninf <- obj$noninf
   weights <- with(obj, weights / sum(weights))
   z <- (par - noninf) / diag(matrix(vcov))**.5
-  if (length(z) == 1) {
+  np <- length(z)
+  if (np == 1L) {
     signwald <- (z**2) * (z >= 0)
     # 1-pnorm(z)
     pval <- ifelse(z >= 0,
@@ -129,7 +130,7 @@ test_intersection_sw <- function(par,
       ), class = "htest")
     )
   }
-  if (length(z) == 2L && is.null(weights)) { # exact calculations
+  if (np == 2L && is.null(weights)) { # exact calculations
     corr <- cov2cor(vcov)[1, 2]
     zmin <- min(z[1], z[2])
     zmax <- max(z[1], z[2])
@@ -151,15 +152,17 @@ test_intersection_sw <- function(par,
       control$dykstra.niter <- 500
     }
     sv <- svd(vcov)
-    if (any(sv$d < 0)) {
+    lambda <- sv$d
+    np <- nrow(vcov)
+    if (any(lambda < 0)) {
       cli::cli_warn("`vcov` is not positive definite.")
       cli::cli_warn(sprintf("Smallest singular value: %f", min(sv)))
       cli::cli_warn("Setting negative singular values to zero.")
-      sv$d[which(sv$d < 0)] <- 0
-      vcov <- with(sv, u %*% diag(d) %*% t(v))
+      lambda[which(lambda < 0)] <- 0
+      vcov <- sv$u %*% diag(lambda, nrow = np) %*% t(sv$v)
     }
     if (is.null(control$pinv.tol)) {
-      control$pinv.tol <- max(sv) * ncol(vcov) * .Machine$double.eps
+      control$pinv.tol <- max(lambda) * np * .Machine$double.eps
     }
     sw <- .signedwald(
       par, vcov,
@@ -229,9 +232,10 @@ test_zmax_onesided <- function(par,
   if (is.null(noninf)) noninf <- 0
   noninf <- obj$noninf
   z <- (par - noninf) / diag(vcov)^0.5
+  np <- length(z)
   zmax <- max(z)
   pval.zmax <- 1 -
-    mets::pmvn(upper = rep(zmax, length(z)),
+    mets::pmvn(upper = rep(zmax, np),
                sigma = cov2cor(vcov))[1]
   test.int <- structure(
     list(
