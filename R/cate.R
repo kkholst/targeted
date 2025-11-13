@@ -158,7 +158,7 @@ cate <- function(response.model, # nolint
 
   cl <- match.call()
   n <- nrow(data)
-  if (inherits(data, c("data.table", "tbl_df")) {
+  if (inherits(data, c("data.table", "tbl_df"))) {
     data <- as.data.frame(data)
   }
 

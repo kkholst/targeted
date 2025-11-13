@@ -74,7 +74,7 @@ estimate_truncatedscore <- function(
   if (inherits(mod.a, "formula")) {
     mod.a <- learner_glm(mod.a, family = binomial)
   }
-  if (inherits(data, c("data.table", "tbl_df")) {
+  if (inherits(data, c("data.table", "tbl_df"))) {
     data <- as.data.frame(data)
   }
   # Missing data model
