@@ -135,11 +135,12 @@ test_design_specials()
 test_design_specials_factor <- function() {
   strata <- survival::strata
   dat <- transform(ddata, a=rbinom(nrow(ddata), 1, 0.5))
-  des <- design(y ~ strata(a) + x1*x2, data=dat, specials="strata")
+  des <- design(y ~ strata(a) + x1 * x2, data = dat, specials = "strata")
 
-  expect_equivalent(des$x, cbind(dat$x1))
+  expect_equivalent(des$strata, with(dat, strata(a)))
+
+  expect_equivalent(des$x, model.matrix(~-1+x1*x2, data=dat))
   expect_equivalent(as.numeric(des$strata)-1, dat$a)
-
 }
 test_design_specials_factor()
 
@@ -328,12 +329,12 @@ test_update.design.response <- function() {
   # check update works with response as well
   dnew <- data.frame(a = c(1, 0), y=c(1, 1))
   desnew <- update(des, dnew)
-  expect_equivalent(dnew$y, desnew$y)
-  expect_equivalent(desnew$x[, 1, drop = TRUE], dnew$a)
+  expect_equivalent(dnew$y, desnew$y)  
+  expect_equivalent(desnew$x[, 1, drop = TRUE], dnew$a) 
   # and it ignores the response if it is not available in the data
   dnew <- data.frame(a = c(1, 0))
   desnew <- update(des, dnew)
   expect_true(is.null(desnew$y))
-  expect_equivalent(desnew$x[, 1, drop = TRUE], dnew$a)
+  expect_equivalent(desnew$x[, 1, drop = TRUE], dnew$a) 
 }
 test_update.design()

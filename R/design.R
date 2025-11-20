@@ -95,7 +95,10 @@ design <- function(formula, data, ..., # nolint
     response <- FALSE
   }
   # delete response to generate design matrix when making predictions
-  if (!response) tt <- delete.response(tt)
+  if (!response) {
+    tt <- delete.response(tt)
+  }
+
 
   sterm.list <- c()
   if (length(specials) > 0) {
@@ -107,33 +110,41 @@ design <- function(formula, data, ..., # nolint
     if (length(sterm.list) > 0) {
       # create formula without specials
       if ((nrow(attr(tt, "factors")) - attr(tt, "response")) ==
-          length(sterm.list)) {
+        length(sterm.list)) {
         # only specials on the rhs, remove everything
         formula <- update(formula, ~1)
       } else {
         # predictors without the specials
-        term.labels <- setdiff(term.labels,
-                               unlist(sterm.list))
+        term.labels <- setdiff(
+          term.labels,
+          unlist(sterm.list)
+        )
+        # formula <- update(tt, reformulate(term.labels))
       }
       # remove specials from formula
-      upd <- paste(" ~ . - ", paste(sterm.list, collapse = " - "))
-      formula <- update(formula, upd)
+      fst <- lava::trim(deparse(formula), all = TRUE)
+      for (s in sterm.list) fst <- gsub(s, "", fst, fixed = TRUE)
+      fst <- gsub("\\+$", "", fst) # remove potential trailing '+'
+      formula <- as.formula(fst)
+      # upd <- paste(" ~ . - ", paste(sterm.list, collapse = " - "))
+      # formula <- update(formula, upd)
     }
   }
 
+  formula0 <- formula
+  if (!response) formula0 <- formula(delete.response(terms(formula)))
   xlev <- levels
   xlev[["response_"]] <- NULL
   if (!design.matrix) { # only extract specials, response
     des <- attr(tt, "factors")
-    fs <- update(formula, ~1)
+    fs <- update(formula0, ~1)
     if (length(sterm.list) > 0) {
       # formula with only special-terms
       fs <- reformulate(paste(sterm.list, collapse = " + "))
-      fs <- update(formula, fs)
+      fs <- update(formula0, fs)
     }
     mf <- model.frame(fs, data=data, ...)
   } else { # also extract design matrix
-    ## browser()
     mf <- model.frame(tt,
                       data = data, ...,
                       xlev = xlev,
@@ -165,7 +176,6 @@ design <- function(formula, data, ..., # nolint
       }
     }
   }
-  # no longer need the response in the formula
 
   has_intercept <- attr(tt, "intercept") == 1L
   specials <- union(
@@ -189,7 +199,7 @@ design <- function(formula, data, ..., # nolint
     if (length(sterm.list) > 0) {
       if (design.matrix) {
         xlev0[sterm.list] <- NULL
-        mf <- model.frame(formula(delete.response(terms(formula))),
+        mf <- model.frame(formula0,
                           data = data, ...,
                           xlev = xlev0,
                           drop.unused.levels = FALSE
@@ -242,7 +252,7 @@ design <- function(formula, data, ..., # nolint
 }
 
 #' @export
-update.design <- function(object, data = NULL, ...) {
+update.design <- function(object, data = NULL, response = FALSE, ...) {
   if (is.null(data)) data <- object$data
   return(
     design(object$terms,
@@ -251,7 +261,8 @@ update.design <- function(object, data = NULL, ...) {
       levels = object$levels,
       intercept = object$intercept,
       specials = object$specials,
-      specials.call = object$specials.call
+      specials.call = object$specials.call,
+      response = response
     )
   )
 }
