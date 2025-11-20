@@ -99,7 +99,6 @@ design <- function(formula, data, ..., # nolint
     tt <- delete.response(tt)
   }
 
-
   sterm.list <- c()
   if (length(specials) > 0) {
     des <- attr(tt, "factors")
