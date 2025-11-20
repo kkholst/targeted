@@ -128,6 +128,16 @@ test_design_specials <- function() {
   des <- design(y ~ x2 + offset(x1), specials="offset", data=ddata)
   expect_equivalent(des$x, cbind(ddata$x2))
   expect_equivalent(des$offset, ddata$x1)
+
+  # check specials works with multiple arguments and Surv response
+  d <- ddata
+  d$a <- rbinom(nrow(d), 1, 0.5)
+  d$z <- rbinom(nrow(d), 1, 0.5)
+  des <- design(Surv(x1, a) ~ stratify(a, z) + x1, data = d, specials = "stratify")
+  expect_equivalent(des$x, cbind(d$x1))
+  expect_equivalent(des$stratify, with(d, stratify(a, z)))
+  expect_true(inherits(des$y, "Surv"))
+
 }
 test_design_specials()
 

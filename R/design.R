@@ -122,7 +122,13 @@ design <- function(formula, data, ..., # nolint
       }
       # remove specials from formula
       fst <- lava::trim(deparse(formula), all = TRUE)
-      for (s in sterm.list) fst <- gsub(s, "", fst, fixed = TRUE)
+      for (s in sterm.list) {
+        fst <- gsub(
+          lava::trim(s, all = TRUE),
+          "", fst,
+          fixed = TRUE
+        )
+      }
       fst <- gsub("[\\+]*$", "", fst) # remove potential any trailing '+'
       formula <- as.formula(fst)
     }
