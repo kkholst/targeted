@@ -132,7 +132,7 @@ test_design_specials <- function() {
 test_design_specials()
 
 # specials returning factor
-etest_design_specials_factor <- function() {
+test_design_specials_factor <- function() {
   strata <- survival::strata
   dat <- transform(ddata, a=rbinom(nrow(ddata), 1, 0.5))
   des <- design(y ~ strata(a) + x1*x2, data=dat, specials="strata")
@@ -141,7 +141,7 @@ etest_design_specials_factor <- function() {
   expect_equivalent(as.numeric(des$strata)-1, dat$a)
 
 }
-
+test_design_specials_factor()
 
 # test behavior of design when formula specifies transformations
 test_design_transformations <- function() {
@@ -197,8 +197,8 @@ test_design_factor <- function() {
   # covariates
   dd <- design(y ~ -1 + x3, ddata_fact, intercept = TRUE)
 
-  # factors levels are collected in xlevels attribute
-  expect_equal(dd$xlevels, list(x3 = c("a", "b")))
+  # factors levels are collected in levels attribute
+  expect_equal(dd$levels, list(x3 = c("a", "b")))
   # factors are one-hot encoded
   dd_expect <- cbind(
     rep(c(1, 0), length.out = n),
@@ -231,8 +231,8 @@ test_design_factor <- function() {
   expect_equal(unname(dd$x[, 1]), rep(c(0, 1), length.out = nrow(dd$x)))
   expect_equal(colnames(dd$x), "x3b")
 
-  # order of levels can be controlled with xlev argument
-  dd <- design(y ~ x3, ddata_fact, xlev = list(x3 = c("b", "a")))
+  # order of levels can be controlled with levels argument
+  dd <- design(y ~ x3, ddata_fact, levels = list(x3 = c("b", "a")))
   expect_equal(colnames(dd$x), "x3a")
 }
 test_design_factor()
@@ -319,3 +319,21 @@ test_model.matrix.design <- function() {
   expect_equal(model.matrix(dd), dd$x)
 }
 test_model.matrix.design()
+
+test_update.design.response <- function() {
+  d <- data.frame(a = c(1, 1, 0, 0), y = c(1, 0, 1, 0))
+  des <- design(y ~ a, data = d, intercept = FALSE)
+  expect_equivalent(d$y, des$y)
+  expect_equivalent(d$a, des$x[, 1, drop = TRUE])
+  # check update works with response as well
+  dnew <- data.frame(a = c(1, 0), y=c(1, 1))
+  desnew <- update(des, dnew)
+  expect_equivalent(dnew$y, desnew$y)
+  expect_equivalent(desnew$x[, 1, drop = TRUE], dnew$a)
+  # and it ignores the response if it is not available in the data
+  dnew <- data.frame(a = c(1, 0))
+  desnew <- update(des, dnew)
+  expect_true(is.null(desnew$y))
+  expect_equivalent(desnew$x[, 1, drop = TRUE], dnew$a)
+}
+test_update.design()
