@@ -121,7 +121,7 @@ design <- function(formula, data, ..., # nolint
         # formula <- update(tt, reformulate(term.labels))
       }
       # remove specials from formula
-      fst <- lava::trim(deparse(formula), all = TRUE)
+      fst <- lava::trim(paste(deparse(formula), collapse = ""), all = TRUE)
       for (s in sterm.list) {
         fst <- gsub(
           lava::trim(s, all = TRUE),
