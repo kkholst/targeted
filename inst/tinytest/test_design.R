@@ -142,7 +142,6 @@ etest_design_specials_factor <- function() {
 
 }
 
-
 # test behavior of design when formula specifies transformations
 test_design_transformations <- function() {
     # interactions work as expected
@@ -319,3 +318,32 @@ test_model.matrix.design <- function() {
   expect_equal(model.matrix(dd), dd$x)
 }
 test_model.matrix.design()
+
+
+test_print.design <- function() {
+  dat <- data.frame(
+    s = survival::Surv(runif(10), rbinom(10, 1, 0.5)),
+    y = runif(10),
+    z = letters[1:10]
+  )
+
+  ## character
+  des <- design(z ~ 1, data = dat)
+  expect_stdout(print(des), "response \\(length: 10\\)")
+  expect_stdout(print(des), "1   a\n2   b")
+
+  ## factor
+  des <- design(factor(z) ~ 1, data = dat)
+  expect_stdout(print(des), "response \\(length: 10\\)")
+  expect_stdout(print(des), "time   status")
+
+  ## Surv
+  des <- design(s ~ 1, data = dat)
+  expect_stdout(print(des), "response \\(length: 10\\)")
+  expect_stdout(print(des), "1   a\n2   b")
+
+  ## numeric
+  des <- design(y ~ 1, data = dat)
+  expect_stdout(print(des), "response \\(length: 10\\)")
+}
+test_print.design()
