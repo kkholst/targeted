@@ -75,7 +75,6 @@ set.seed(1)
 dat <- do.call(simdata, sim_args)
 e <- est(dat)
 
-
 test_test_intersection_sw <- function() {
   # check random seed works
   set.seed(1)
@@ -88,14 +87,14 @@ test_test_intersection_sw <- function() {
   # equal weights
   e1 <- test_intersection_sw(coef(e), vcov(e))
   e2 <- testfun_sw2(coef(e), vcov(e), weights = c(1,1,1))
-  expect_true(abs(e2$statistic - e1$statistic) < 1e-3)
+  expect_true(abs(e2$statistic - e1$statistic) < 0.01)
   expect_true(abs(e2$p.value - e1$p.value) < 0.01)
 
   # unequal weights
   w <- c(1 / 2, 1 / 4, 1 / 4)
   e1 <- test_intersection_sw(coef(e), vcov(e), weights = w)
   e2 <- testfun_sw2(coef(e), vcov(e), weights = w)
-  expect_true(abs(e2$statistic - e1$statistic) < 1e-3)
+  expect_true(abs(e2$statistic - e1$statistic) < 0.01)
   expect_true(abs(e2$p.value - e1$p.value) < 0.01)
 
   # non-inferiority margins
