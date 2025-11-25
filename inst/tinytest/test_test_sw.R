@@ -30,12 +30,12 @@ est <- function(data){
 }
 
 ## signed wald intersection test
-test_sw2 <- function(thetahat, sigmahat, weights, Nsim.null = 10000, noninf = rep(0, length(thetahat))) {
+testfun_sw2 <- function(thetahat, sigmahat, weights, Nsim.null = 10000, noninf = rep(0, length(thetahat))) {
   W <- diag(weights)
   p <- length(thetahat)
-  ## sqrtS <- pracma::sqrtm(sigmahat)
-  sqrt.sigma <- expm::sqrtm(sigmahat)
-  sqrt.sigma.inv <- expm::sqrtm(solve(sigmahat))
+  sqrtS <- pracma::sqrtm(sigmahat)
+  sqrt.sigma <- sqrtS$B
+  sqrt.sigma.inv <- sqrtS$Binv
   uhat <- (sqrt.sigma.inv %*% W %*% matrix(thetahat - noninf, length(thetahat), 1))
   ## ||uhat-u||^2 = (uhat-u)^T(uhat -h) =>xo
   ## u^T I u - 2 * uhat^T u + K  s.t. Au =< b
@@ -60,8 +60,6 @@ test_sw2 <- function(thetahat, sigmahat, weights, Nsim.null = 10000, noninf = re
   return(list(statistic = genSWobs, p.value = pval))
 }
 
-
-
 # simulate data and estimate parameters
 sim_args <- list(
   n = 500,
@@ -78,49 +76,50 @@ dat <- do.call(simdata, sim_args)
 e <- est(dat)
 
 
-test_test_sw <- function() {
+test_test_intersection_sw <- function() {
   # check random seed works
   set.seed(1)
-  e1 <- test_sw(coef(e), vcov(e))
+  e1 <- test_intersection_sw(coef(e), vcov(e))
   set.seed(1)
-  e2 <- test_sw(coef(e), vcov(e))
+  e2 <- test_intersection_sw(coef(e), vcov(e))
   expect_equal(e1$p.value, e2$p.value)
   expect_equivalent(e1, e2)
 
   # equal weights
-  e1 <- test_sw(coef(e), vcov(e))
-  e2 <- test_sw2(coef(e), vcov(e), weights = c(1,1,1))
+  e1 <- test_intersection_sw(coef(e), vcov(e))
+  e2 <- testfun_sw2(coef(e), vcov(e), weights = c(1,1,1))
   expect_true(abs(e2$statistic - e1$statistic) < 1e-3)
   expect_true(abs(e2$p.value - e1$p.value) < 0.01)
 
   # unequal weights
   w <- c(1 / 2, 1 / 4, 1 / 4)
-  e1 <- test_sw(coef(e), vcov(e), weights = w)
-  e2 <- test_sw2(coef(e), vcov(e), weights = w)
+  e1 <- test_intersection_sw(coef(e), vcov(e), weights = w)
+  e2 <- testfun_sw2(coef(e), vcov(e), weights = w)
   expect_true(abs(e2$statistic - e1$statistic) < 1e-3)
   expect_true(abs(e2$p.value - e1$p.value) < 0.01)
 
   # non-inferiority margins
   noninf <- c(-0.05, 0, -0.05)
-  e1 <- test_sw(coef(e), vcov(e), weights = w, noninf=noninf)
-  e2 <- test_sw2(coef(e), vcov(e), weights = w, noninf=noninf)
+  e1 <- test_intersection_sw(coef(e), vcov(e), weights = w, noninf=noninf)
+  e2 <- testfun_sw2(coef(e), vcov(e), weights = w, noninf=noninf)
   expect_true(abs(e2$statistic - e1$statistic) < 1e-3)
   expect_true(abs(e2$p.value - e1$p.value) < 0.01)
 
   # 2d par.
   w <- c(1 / 4, 3 / 4)
-  e1 <- test_sw(coef(e)[1:2], vcov(e)[1:2, 1:2], weights = w)
-  e2 <- test_sw2(coef(e)[1:2], vcov(e)[1:2,1:2], weights = w)
+  e1 <- test_intersection_sw(coef(e)[1:2], vcov(e)[1:2, 1:2], weights = w)
+  e2 <- testfun_sw2(coef(e)[1:2], vcov(e)[1:2,1:2], weights = w)
   expect_true(abs(e2$statistic - e1$statistic) < 1e-3)
   expect_true(abs(e2$p.value - e1$p.value) < 0.01)
 
   # 1d par.
   b <- abs(coef(e)[1])
   v <- vcov(e)[1]
-  e0 <- test_sw(b, v)
+  e0 <- test_intersection_sw(b, v)
   z <- b / v**.5
   expect_equivalent(pnorm(z, lower.tail = FALSE), e0$p.value)
 
-  e0 <- test_sw(-0.2, v)
+  e0 <- test_intersection_sw(-0.2, v)
   expect_equivalent(1, e0$p.value)
 }
+test_test_intersection_sw()
