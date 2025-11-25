@@ -136,6 +136,7 @@ design <- function(formula, data, ..., # nolint
 
   formula0 <- formula
   if (!response) formula0 <- formula(delete.response(terms(formula)))
+
   xlev <- levels
   xlev[["response_"]] <- NULL
   if (!design.matrix) { # only extract specials, response
@@ -146,7 +147,7 @@ design <- function(formula, data, ..., # nolint
       fs <- reformulate(paste(sterm.list, collapse = " + "))
       fs <- update(formula0, fs)
     }
-    mf <- model.frame(fs, data=data, ...)
+    mf <- model.frame(fs, data = data, ...)
   } else { # also extract design matrix
     mf <- model.frame(tt,
                       data = data, ...,
@@ -168,14 +169,14 @@ design <- function(formula, data, ..., # nolint
     if (is.factor(y) || is.character(y)) {
       ylev <- levels[["response_"]]
       if (!is.null(ylev)) {
-        factor(y, levels = ylev)
+        y <- factor(y, levels = ylev)
       } else {
-        ylev <- if (is.factor(y)) {
-          levels(y)
-        } else if (is.character(y)) {
-          levels(as.factor(y))
+        if (is.factor(y)) {
+          ylev <- levels(y)
         }
-        levels[["response_"]] <- ylev
+        if (is.null(levels[["response_"]])) {
+          levels[["response_"]] <- ylev
+        }
       }
     }
   }
@@ -255,13 +256,14 @@ design <- function(formula, data, ..., # nolint
 }
 
 #' @export
-update.design <- function(object, data = NULL, response = FALSE, ...) {
+update.design <- function(object, data = NULL, response = FALSE, levels, ...) {
   if (is.null(data)) data <- object$data
+  if (missing(levels)) levels <- object$levels
   return(
     design(object$terms,
       data = data,
       design.matrix = object$design.matrix,
-      levels = object$levels,
+      levels = levels,
       intercept = object$intercept,
       specials = object$specials,
       specials.call = object$specials.call,

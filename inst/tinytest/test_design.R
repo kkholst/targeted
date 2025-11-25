@@ -51,6 +51,106 @@ test_design <- function() {
 }
 test_design()
 
+# tests when response variable is a factor
+test_design_response_factor <- function() {
+  data <- data.frame(x1 = rnorm(n), x2 = rnorm(n), y = c("a", "b"))
+
+  # response variable of type character is not cast to factor
+  dd <- design(y ~ x1, data)
+  expect_equivalent(data$y, dd$y)
+  # updating design object won't convert to factor either
+  expect_equivalent(update(dd, head(data, 1), response = TRUE)$y, c("a"))
+  # providing new data with factor works - which should be fine
+  expect_equivalent(
+    update(dd, data.frame(y = factor("a"), x1 = 1, x2=2), response = TRUE)$y[[1]],
+    factor("a")
+  )
+
+  # levels attribute is empty because y is not converted to a factor
+  expect_equal(length(dd$levels), 0)
+
+  # providing levels argument will convert response variable
+  dd1 <- update(
+    dd, head(data, 1), response = TRUE, levels = list(y = c("a", "b"))
+  )
+  expect_equal(dd1$y[[1]], factor(c("a"), levels = c("a", "b")))
+
+  # response variable is converted inside formula argument to factor
+  dd <- design(factor(y) ~ x1, data)
+  res_factor <- factor(data$y)
+  names(res_factor) <- 1:nrow(data)
+  expect_equal(dd$y, res_factor)
+  # levels of response variable are added to levels attribute
+  expect_equal(dd$levels, list("response_" = c("a", 'b')))
+  # factor levels are preserved when updating design object
+  dd1 <- update(dd, head(data, 1), response = TRUE)
+  expect_equal(dd1$y, res_factor[1])
+
+  expect_warning(
+    # doesn't work because y is not an element in levels attributes
+    dd2 <- update(dd, head(data, 1), response = TRUE,
+    levels = list(y = c("a", "b", "c"))
+  ))
+  expect_equal(levels(dd2$y), "a")
+
+  # it may be confusing for users that the above doesn't work but the following
+  # works. this test also verifies that providing levels will always convert
+  # the response vector
+  dd_works <- design(y ~ x1, data, levels = list(y = c("a", "b", "c")))
+  expect_equal(levels(dd_works$y), c("a", "b", "c"))
+
+  # both work because y and response_ are both elements in levels attribute
+  dd2 <- update(dd_works, head(data, 1), response = TRUE,
+    levels = list("response_" = c("a", "b", "c", "d"))
+  )
+  dd22 <- update(dd_works, head(data, 1), response = TRUE,
+    levels = list("y" = c("a", "b", "c", "d"))
+  )
+  expect_equal(dd2$y, dd22$y)
+
+  # however, the following works again because the "response_" element in levels
+  # is used when updating dd
+  dd2 <- update(dd, head(data, 1), response = TRUE,
+    levels = list("response_" = c("a", "b", "c"))
+  )
+  expect_equal(levels(dd2$y), c("a", "b", "c"))
+
+  # similar "issues" during call to design
+  expect_warning(
+    # doesn't work
+    dd2 <- design(factor(y) ~ x1, data, levels = list(y = c("a", "b", "c")))
+  )
+  expect_equal(levels(dd2$y), c("a", "b"))
+
+  # works, which is a bit annoying because users need to remember to use
+  # "response_"
+  dd2 <- design(factor(y) ~ x1, data,
+    levels = list("response_" = c("a", "b", "c"))
+  )
+  expect_equal(levels(dd2$y), c("a", "b", "c"))
+
+  # works as well
+  dd2 <- design(factor(y, levels = c("a", "b", "c")) ~ x1, data)
+  expect_equal(levels(dd2$y), c("a", "b", "c"))
+
+
+  data <- data.frame(x1 = rnorm(n), x2 = rnorm(n), y = as.factor(c("a", "b")))
+  dd <- design(y ~ x1, data)
+  expect_equal(res_factor, dd$y)
+
+  dd2 <- update(dd, head(data, 1), response = TRUE)
+  expect_equal(levels(dd2$y), c("a","b"))
+
+  # also works when new data is a character
+  dd2 <- update(dd, data.frame(y = "a", x1 = 1, x2=2), response = TRUE)
+  expect_equal(levels(dd2$y), c("a","b"))
+
+  # adding an extra level works by using the "correct" levels element
+  dd <- design(y ~ x1, data, levels = list("response_" = c("a", "b", "c")))
+  expect_equal(levels(dd$y), c("a","b", "c"))
+}
+test_design_response_factor()
+
 # test that ellipsis are passed on to model.frame
 test_design_ellipsis <- function() {
   expect_error(
@@ -339,12 +439,12 @@ test_update.design.response <- function() {
   # check update works with response as well
   dnew <- data.frame(a = c(1, 0), y=c(1, 1))
   desnew <- update(des, dnew)
-  expect_equivalent(dnew$y, desnew$y)  
-  expect_equivalent(desnew$x[, 1, drop = TRUE], dnew$a) 
+  expect_equivalent(dnew$y, desnew$y)
+  expect_equivalent(desnew$x[, 1, drop = TRUE], dnew$a)
   # and it ignores the response if it is not available in the data
   dnew <- data.frame(a = c(1, 0))
   desnew <- update(des, dnew)
   expect_true(is.null(desnew$y))
-  expect_equivalent(desnew$x[, 1, drop = TRUE], dnew$a) 
+  expect_equivalent(desnew$x[, 1, drop = TRUE], dnew$a)
 }
 test_update.design()
