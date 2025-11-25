@@ -86,9 +86,9 @@ test_test_intersection_sw <- function() {
 
   # equal weights
   e1 <- test_intersection_sw(coef(e), vcov(e))
-  e2 <- testfun_sw2(coef(e), vcov(e), weights = c(1,1,1))
-  expect_true(abs(e2$statistic - e1$statistic) < 0.01)
-  expect_true(abs(e2$p.value - e1$p.value) < 0.01)
+  e2 <- testfun_sw2(coef(e), vcov(e), weights = c(1/3,1/3,1/3))
+  expect_true(abs(e2$statistic - e1$statistic) < 1e-3)
+  expect_true(abs(e2$p.value - e1$p.value) < 1e-3)
 
   # unequal weights
   w <- c(1 / 2, 1 / 4, 1 / 4)
