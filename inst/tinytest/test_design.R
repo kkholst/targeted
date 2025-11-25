@@ -148,6 +148,20 @@ test_design_response_factor <- function() {
   # adding an extra level works by using the "correct" levels element
   dd <- design(y ~ x1, data, levels = list("response_" = c("a", "b", "c")))
   expect_equal(levels(dd$y), c("a","b", "c"))
+
+  data <- data.frame(x = c("x", "y"), y = c("a", "b"))
+  dd <- design(as.factor(y) ~ x, data)
+  # list with levels for all factors need to be provided even though we only
+  # want to update the levels of one variable
+  expect_error(
+    update(dd, head(data, 1), response = TRUE,
+    levels = list("response_" = c("a", "b", "c"))
+  )
+  )
+  dd_upd <- update(dd, head(data, 1), response = TRUE,
+    levels = list("response_" = c("a", "b", "c"), x = c("x", "y"))
+  )
+  expect_equal(levels(dd_upd$y), c("a", "b", "c"))
 }
 test_design_response_factor()
 
@@ -345,6 +359,10 @@ test_design_factor <- function() {
   # order of levels can be controlled with levels argument
   dd <- design(y ~ x3, ddata_fact, levels = list(x3 = c("b", "a")))
   expect_equal(colnames(dd$x), "x3a")
+
+  # additional factor levels can also be added
+  dd <- design(y ~ x3, ddata_fact, levels = list(x3 = c("a", "b", "c")))
+  expect_equal(unname(dd$x[, "x3c"]), rep(0, length.out = n))
 }
 test_design_factor()
 
@@ -407,6 +425,12 @@ test_update.design.factors <- function() {
     update(dd, newdata),
     pattern = "factor x3 has new levels c"
   )
+  # works when providing levels argument to update method
+  dd_upd <- update(dd, newdata, levels = list(x3 = c("a", "c")))
+  expect_equal(unname(dd_upd$x[, "x3c"]), rep(c(0, 1), length.out = n))
+  # order is changed correctly
+  dd_upd <- update(dd, newdata, levels = list(x3 = c("c", "a")))
+  expect_equal(unname(dd_upd$x[, "x3a"]), rep(c(1, 0), length.out = n))
 
   # intercept is handled correctly for factors
   dd <- design(y ~ -1 + x3, ddata_fact, intercept = TRUE)
