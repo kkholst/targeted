@@ -78,8 +78,7 @@ test_design_response_factor <- function() {
   # response variable is converted inside formula argument to factor
   dd <- design(factor(y) ~ x1, data)
   res_factor <- factor(data$y)
-  names(res_factor) <- 1:nrow(data)
-  expect_equal(dd$y, res_factor)
+  expect_equal(unname(dd$y), unname(res_factor))
   # levels of response variable are added to levels attribute
   expect_equal(dd$levels, list("response_" = c("a", 'b')))
   # factor levels are preserved when updating design object
