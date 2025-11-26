@@ -462,13 +462,40 @@ test_update.design.response <- function() {
   expect_equivalent(d$a, des$x[, 1, drop = TRUE])
   # check update works with response as well
   dnew <- data.frame(a = c(1, 0), y=c(1, 1))
-  desnew <- update(des, dnew)
+  desnew <- update(des, dnew, response=TRUE)
   expect_equivalent(dnew$y, desnew$y)
   expect_equivalent(desnew$x[, 1, drop = TRUE], dnew$a)
   # and it ignores the response if it is not available in the data
   dnew <- data.frame(a = c(1, 0))
-  desnew <- update(des, dnew)
+  desnew <- update(des, dnew, response=TRUE)
   expect_true(is.null(desnew$y))
   expect_equivalent(desnew$x[, 1, drop = TRUE], dnew$a)
 }
-test_update.design()
+test_update.design.response()
+
+test_print.design <- function() {
+  dat <- data.frame(
+    s = survival::Surv(runif(10), rbinom(10, 1, 0.5)),
+    y = runif(10),
+    z = letters[1:10]
+  )
+
+  ## character
+  des <- design(z ~ 1, data = dat)
+  expect_stdout(print(des), "response \\(length: 10\\)")
+  expect_stdout(print(des), "1[ ]*a\n2[ ]*b\n")
+
+  ## factor
+  des <- design(factor(z) ~ 1, data = dat)
+  expect_stdout(print(des), "response \\(length: 10\\)")
+  expect_stdout(print(des), "1[ ]*a\n2[ ]*b\n")
+
+  ## Surv
+  des <- design(s ~ 1, data = dat)
+  expect_stdout(print(des), "response \\(length: 10\\)")
+
+  ## numeric
+  des <- design(y ~ 1, data = dat)
+  expect_stdout(print(des), "response \\(length: 10\\)")
+}
+test_print.design()
