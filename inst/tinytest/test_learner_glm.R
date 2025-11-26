@@ -1,3 +1,5 @@
+library("tinytest")
+
 set.seed(42)
 
 sim1 <- function(n = 5e2) {

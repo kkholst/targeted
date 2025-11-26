@@ -12,6 +12,10 @@ Development version
 - `test_intersection_sw` handle edge-case where vcov is not positive-definite.
   Throw warning and project onto nearest PD matrix in Frobenius norm.
 
+- breaking changes: `design` refactored. Better handling
+  of response variables (factors) `xlev` argument changed to `levels`.
+
+
 
 # targeted 0.6
 

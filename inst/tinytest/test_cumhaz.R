@@ -4,12 +4,12 @@ library("ranger")
 suppressPackageStartupMessages({
   library("mets")
   library("randomForestSRC")
+  Surv <- survival::Surv
+  survfit <- survival::survfit
+  coxph <- survival::coxph
 })
 set.seed(42)
 
-Surv <- survival::Surv
-survfit <- survival::survfit
-coxph <- survival::coxph
 
 sim_surv <- function(n, beta, zeta) {
   # covariate W and D
@@ -244,12 +244,6 @@ plot(times, c1$chf[2, ])
 points(rtimes, c2$chf[2, ], col="red")
 
 
-
-
-library("randomForestSRC")
-library("ranger")
-library("mets")
-library("survival")
 n <- 1e2
 time <- rexp(n)
 status <- rep(TRUE, n)
