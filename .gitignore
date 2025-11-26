@@ -143,3 +143,5 @@ __pycache__
 # output from test coverage
 tests/lib/
 tests/coverage-report.html
+/doc/
+/Meta/

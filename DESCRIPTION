@@ -33,7 +33,7 @@ Depends:
     R (>= 4.1)
 Imports:
     R6,
-    Rcpp (>= 1.0.0),
+        Rcpp (>= 1.0.0),
     abind,
     cli,
     data.table,
@@ -55,15 +55,14 @@ Suggests:
     glmnet,
     grf,
     hal9001,
-    knitr,
     mgcv,
     nnls,
     polle (>= 1.5),
     pracma,
+    quarto,
     randomForestSRC,
     ranger,
     riskRegression,
-    rmarkdown,
     scatterplot3d,
     tinytest,
     viridisLite,
@@ -79,4 +78,7 @@ RcppModules: riskregmodel
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
-VignetteBuilder: knitr
+VignetteBuilder:
+    quarto
+SystemRequirements: Quarto command line tools
+    (https://github.com/quarto-dev/quarto-cli).
