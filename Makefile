@@ -56,6 +56,9 @@ check:
 lint:
 	@echo 'lintr::lint_package(show_progress = TRUE)' | $(R)
 
+vignette:
+	@$(R) -q -e "devtools::build_vignettes(clean=FALSE, install=FALSE, quiet=FALSE)"
+
 test: test-installed
 test-installed: # tests locally installed version package
 	@echo 'tinytest::test_package("$(PKG)")' | $(R)
