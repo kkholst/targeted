@@ -6,6 +6,11 @@ format:
   html:
     toc: true
     html-math-method: mathjax
+execute:
+  echo: true
+  warning: false
+  collapse: true
+  comment: "#>"
 vignette: >
   %\VignetteIndexEntry{Prediction models}
   %\VignetteEngine{quarto::html}
@@ -13,11 +18,6 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-knitr::opts_chunk$set(
- collapse = TRUE,
- #dev="png",
- comment = "#>"
-)
 library("targeted")
 ```
 

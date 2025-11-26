@@ -10,14 +10,14 @@ vignette: >
   %\VignetteIndexEntry{Estimating a relative risk or risk difference with a binary exposure}
   %\VignetteEngine{quarto::html}
   %\VignetteEncoding{UTF-8}
+execute:
+  echo: true
+  warning: false
+  collapse: true
+  comment: "#>"
 ---
 
 ```{r, include = FALSE}
-knitr::opts_chunk$set(
- collapse = TRUE,
- #dev="png",
- comment = "#>"
-)
 library(targeted)
 ```
 
