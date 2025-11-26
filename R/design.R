@@ -229,7 +229,15 @@ print.design <- function(x, n=2, ...) {
   cat_ruler(" design object ", 10)
   cat(sprintf("\nresponse (length: %s)", length(x$y)))
   if (length(x$y) > 0) {
-    lava::Print(x$y, n = n, ...)
+    y <- x$y
+    ## colnames(y) <- ""
+    if (is.factor(y)) y <- as.character(y)
+    if (inherits(y, c("Surv", "Event"))) {
+      cat("\n")
+      y <- cbind(y)
+    }
+    cat("\n")
+    lava::Print(y, n = n, ...)
   } else {
     cat("\n")
   }
