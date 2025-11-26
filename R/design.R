@@ -237,7 +237,7 @@ print.design <- function(x, n=2, ...) {
       y <- cbind(y)
     }
     cat("\n")
-    lava::Print(cbind(y), n = n, ...)
+    lava::Print(y, n = n, ...)
   } else {
     cat("\n")
   }
