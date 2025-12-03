@@ -14,8 +14,6 @@
 #'   drop.terms weights model.extract cov2cor pnorm pchisq uniroot sd na.omit
 #'   offset
 #' @importFrom rlang hash call_match
-#' @importFrom optimx optimx
-#' @importFrom data.table data.table is.data.table dcast :=
 #' @importFrom R6 R6Class
 #' @importFrom survival survfit Surv strata
 #' @importFrom utils tail head capture.output getFromNamespace

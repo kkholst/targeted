@@ -300,7 +300,9 @@ print.calibration <- function(x, ...) {
 
 #' @export
 predict.calibration <- function(object, newdata, ...) {
-  if (data.table::is.data.table(newdata)) newdata <- as.data.frame(newdata)
+  if (inherits(newdata, c("tbl.df", "data.table"))) {
+    newdata <- as.data.frame(newdata)
+  }
   if (NCOL(newdata) == 1) {
     pr <- cbind(1 - newdata, newdata)
     res <- calibrate(object, pr, ...)[, 2]

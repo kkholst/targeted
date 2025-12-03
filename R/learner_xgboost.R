@@ -1,9 +1,9 @@
 #' @description Constructs a [learner] class object for [xgboost::xgboost].
 #' @param ... Additional arguments to [xgboost::xgboost].
 #' @param max_depth (integer) Maximum depth of a tree.
-#' @param eta (numeric) Learning rate.
+#' @param learning_rate (numeric) Learning rate.
 #' @param subsample (numeric) Subsample ratio of the training instance.
-#' @param lambda (numeric) L2 regularization term on weights.
+#' @param reg_lambda (numeric) L2 regularization term on weights.
 #' @param objective (character) Specify the learning task and the corresponding
 #' learning objective. See [xgboost::xgboost] for all available options.
 #' @inherit constructor_shared
@@ -39,10 +39,10 @@
 #' lr$predict(head(d0))
 learner_xgboost <- function(formula,
                             max_depth = 2L,
-                            eta = 1.0,
+                            learning_rate = 1.0,
                             nrounds = 2L,
                             subsample = 1.0,
-                            lambda = 1,
+                            reg_lambda = 1,
                             verbose = 0,
                             objective = "reg:squarederror",
                             info = paste("xgboost", objective),
@@ -51,10 +51,10 @@ learner_xgboost <- function(formula,
     args <- c(learner.args, list(formula = formula, info = info))
     estimate.args <- list(
       max_depth = max_depth,
-      eta = eta,
+      learning_rate = learning_rate,
       nrounds = nrounds,
       subsample = subsample,
-      lambda = lambda,
+      reg_lambda = reg_lambda,
       verbose = verbose,
       objective = objective
     )
