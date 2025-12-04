@@ -147,7 +147,6 @@ predict.naivebayes <- function(object, newdata, # nolint
                        expectation = NULL,
                        threshold = c(1e-3, 1e-3), ...) {
   if (missing(newdata)) stop("Need new data to make predictions")
-  if (!is.data.table(newdata)) newdata <- data.table::data.table(newdata)
   ## Likelihood P(class|x) = P(class)P(x|class)/P(x)
   if (!is.null(expectation)) {
     if (inherits(expectation, "formula")) {
@@ -164,10 +163,18 @@ predict.naivebayes <- function(object, newdata, # nolint
     lposterior <- matrix(nrow = nrow(newdata), ncol = length(object$classes))
   }
   predictor <- object$design$term.labels
-  X <- newdata[, predictor, with = FALSE, drop = FALSE]
+  if (inherits(newdata, "data.table")) {
+    X <- newdata[, predictor, with = FALSE, drop = FALSE]
+  } else {
+    X <- newdata[, predictor, drop = FALSE]
+  }
   charvar <- names(Filter(is.character, X))
   if (length(charvar) > 0) {
-    for (col in charvar) data.table::set(X, j = col, value = factor(X[[col]]))
+    if (inherits(newdata, "data.table")) {
+      for (col in charvar) data.table::set(X, j = col, value = factor(X[[col]]))
+    } else {
+      for (col in charvar) X[, col] <- factor(X[, col])
+    }
   }
   px <- rep(0, nrow(newdata))
   for (i in seq_along(object$classes)) {
@@ -176,7 +183,11 @@ predict.naivebayes <- function(object, newdata, # nolint
     for (j in seq_along(predictor)) {
       x0 <- object$conditional[[i]]
       nam <- object$xvar[j]
-      x <- as.matrix(X[, nam, with = FALSE, drop = FALSE])[, 1]
+      if (inherits(newdata, "data.table")) {
+        x <- as.matrix(X[, nam, with = FALSE, drop = FALSE])[, 1]
+      } else {
+        x <- as.matrix(X[, nam, drop = FALSE])[, 1]
+      }
       estx <- x0[[j]]
       if (is.list(estx)) {
         estx <- estx$estimate
@@ -222,7 +233,6 @@ predict.naivebayes <- function(object, newdata, # nolint
   colnames(lposterior) <- object$classes
   return(exp(lposterior))
 }
-
 
 #' @title naivebayes class object
 #'

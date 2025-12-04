@@ -35,6 +35,13 @@ cumhaz <- function(object, newdata, times = NULL, individual.time = FALSE,
       )
     }
   }
+  if (!requireNamespace("data.table", quiet = TRUE)) {
+    stop("data.table required")
+  }
+  if (!inherits(newdata, "data.table")) {
+    newdata <- data.table::as.data.table(newdata)
+  }
+  `:=` <- data.table::`:=`
 
   if (inherits(object, "phreg")) {
     if (is.null(times)) times <- object$times
@@ -82,11 +89,11 @@ cumhaz <- function(object, newdata, times = NULL, individual.time = FALSE,
 
       mf <- model.frame(formula, data = newdata)
       strata <- mf[, 2]
-      strata <- data.table(strata = strata)
+      strata <- data.table::data.table(strata = strata)
 
       sf <- survfit(object)
       ssf <- summary(sf, time = times, extend = extend)
-      ssf_df <- data.table(
+      ssf_df <- data.table::data.table(
         strata = ssf$strata, time = ssf$time, chf = ssf$cumhaz
       )
       if (!individual.time) {
@@ -134,7 +141,7 @@ cumhaz <- function(object, newdata, times = NULL, individual.time = FALSE,
     formula <- call$formula
     strata_indicator <- !is.null(object$strata)
     ssf <- summary(object, time = times, extend = extend)
-    ssf_df <- data.table(strata = ssf$strata, time = ssf$time, chf = ssf$cumhaz)
+    ssf_df <- data.table::data.table(strata = ssf$strata, time = ssf$time, chf = ssf$cumhaz)
 
     if (strata_indicator == FALSE) {
       tt <- ssf$time
@@ -149,7 +156,7 @@ cumhaz <- function(object, newdata, times = NULL, individual.time = FALSE,
         stop("formula not available for the survfit object.")
       }
       mf <- model.frame(formula, data = newdata)[, -1, drop = FALSE]
-      strata <- data.table(strata = strata(mf))
+      strata <- data.table::data.table(strata = strata(mf))
 
       if (!individual.time) {
         ssf_df_wide <- data.table::dcast(

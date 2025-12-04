@@ -2,7 +2,7 @@ Package: targeted
 Type: Package
 Title: Targeted Inference
 Version: 0.7
-Date: 2025-11-01
+Date: 2025-12-04
 Authors@R: c(person(given = "Klaus K.",
                     family = "Holst",
                     role = c("aut", "cre"),
@@ -36,19 +36,19 @@ Imports:
     Rcpp (>= 1.0.0),
     abind,
     cli,
-    data.table,
     future.apply,
     lava (>= 1.8.2),
     methods,
-    mets,
+    mets (>= 1.3.8),
     quadprog,
     progressr,
     rlang,
     survival
 Suggests:
     SuperLearner (>= 2.0-28),
-    cmprsk,
     MASS,
+    cmprsk,
+    data.table,
     e1071,
     earth,
     glmnet,
