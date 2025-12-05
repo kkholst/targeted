@@ -11,7 +11,6 @@ learner_xgboost(
   nrounds = 2L,
   subsample = 1,
   reg_lambda = 1,
-  verbose = 0,
   objective = "reg:squarederror",
   info = paste("xgboost", objective),
   learner.args = NULL,

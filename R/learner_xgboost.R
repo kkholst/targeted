@@ -43,7 +43,6 @@ learner_xgboost <- function(formula,
                             nrounds = 2L,
                             subsample = 1.0,
                             reg_lambda = 1,
-                            verbose = 0,
                             objective = "reg:squarederror",
                             info = paste("xgboost", objective),
                             learner.args = NULL,
@@ -55,7 +54,6 @@ learner_xgboost <- function(formula,
       nrounds = nrounds,
       subsample = subsample,
       reg_lambda = reg_lambda,
-      verbose = verbose,
       objective = objective
     )
     args$estimate.args <- c(estimate.args, list(...))
@@ -68,7 +66,7 @@ learner_xgboost <- function(formula,
       d <- xgboost::xgb.DMatrix(newdata)
       pr <- predict(object, d, ...)
       ## if (attributes(object)$call$params$objective == "multi:softprob") {
-        ## pr <- matrix(pr, nrow = NROW(newdata), byrow = TRUE)
+      ## pr <- matrix(pr, nrow = NROW(newdata), byrow = TRUE)
       ## }
       return(pr)
     }
