@@ -67,21 +67,23 @@ learner_xgboost <- function(formula,
     args$predict <- function(object, newdata, ...) {
       d <- xgboost::xgb.DMatrix(newdata)
       pr <- predict(object, d, ...)
-
-      if (object$call$objective == "multi:softprob") {
-        pr <- matrix(pr, nrow = NROW(d), byrow = TRUE)
-      }
-
+      ## if (attributes(object)$call$params$objective == "multi:softprob") {
+        ## pr <- matrix(pr, nrow = NROW(newdata), byrow = TRUE)
+      ## }
       return(pr)
     }
     args$estimate <- function(x, y, ...) {
+      params <- list(...)
+      par1 <- intersect(formalArgs(xgboost::xgb.params), names(params))
+      xgb_params <- params[par1]
+      xgb_train_args <- params
+      xgb_train_args[par1] <- NULL
       d <- xgboost::xgb.DMatrix(x, label = y)
       res <- do.call(
-        xgboost::xgboost,
-        c(list(data = d), list(...)),
-      )
+        xgboost::xgb.train,
+        c(list(data = d), xgb_train_args, list(params = xgb_params)),
+        )
       return(res)
     }
-
     return(do.call(learner$new, args))
 }

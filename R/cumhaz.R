@@ -1,3 +1,5 @@
+.datatable.aware <- TRUE
+
 #' @title Predict the cumulative hazard/survival function for a survival model
 #' @param object Survival model object: phreg, coxph, rfsrc, ranger
 #' @param newdata data.frame
@@ -102,9 +104,10 @@ cumhaz <- function(object, newdata, times = NULL, individual.time = FALSE,
         )
         tt <- colnames(ssf_df_wide)[-1] |> as.numeric()
 
-        chf <- merge(strata, ssf_df_wide, by = "strata", all.x = TRUE,
+        chf <- merge(strata, ssf_df_wide,
+          by = "strata", all.x = TRUE,
           sort = FALSE
-        )
+          )
         chf[, ("strata") := NULL]
         chf <- as.matrix(chf)
 
@@ -164,8 +167,10 @@ cumhaz <- function(object, newdata, times = NULL, individual.time = FALSE,
         )
         tt <- colnames(ssf_df_wide)[-1] |> as.numeric()
 
-        chf <- merge(strata, ssf_df_wide, by = "strata", all.x = TRUE,
-          sort = FALSE)
+        chf <- merge(strata, ssf_df_wide,
+          by = "strata", all.x = TRUE,
+          sort = FALSE
+          )
         chf[, ("strata") := NULL]
         chf <- as.matrix(chf)
       } else {
