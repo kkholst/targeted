@@ -24,36 +24,38 @@ test_sl <- function() {
     "mars" = learner_mars(y ~ x1 + x2, degree = 2)
   )
   c1 <- cv(m, data = d, rep = 2)
-  learners_mse <- summary(c1)[,,"mse"][,"mean"]
+  learners_mse <- summary(c1)[, , "mse"][, "mean"]
 
   s <- learner_sl(m, nfolds = 10)
   b <- cv(s, nfolds = 10, rep = 2, data = d)
   # sm <- cv(list(s), d, rep=1, model.score=mse) |> summary()
-  sm <- summary(b)["sl",,"mse"]
-  learners_mse_sl <- summary(b)[-1,,"mse"][,"mean"]
+  sm <- summary(b)["sl", , "mse"]
+  learners_mse_sl <- summary(b)[-1, , "mse"][, "mean"]
   # rough comparison of mse calculated from sl with cv of individual learners
-  expect_true(mean((learners_mse - learners_mse_sl)**2)<0.25)
+  expect_true(mean((learners_mse - learners_mse_sl)**2) < 0.25)
 
   # comparison with SuperLearner library
-  slib <- c("SL.mean",
-            "SL.glm",
-            "SL.xgboost",
-            "SL.earth"
+  slib <- c(
+    "SL.mean",
+    "SL.glm",
+    "SL.xgboost",
+    "SL.earth"
   )
   s1 <- with(d, SuperLearner(cbind(y),
-                             data.frame(x1, x2),
-                             SL.library = slib))
+    data.frame(x1, x2),
+    SL.library = slib
+  ))
 
   s2 <- with(d, CV.SuperLearner(cbind(y),
-                                data.frame(x1, x2),
-                                SL.library = slib
-                                ))
-  sm2 <- as.numeric(summary(s2)$Table[1,-1])
+    data.frame(x1, x2),
+    SL.library = slib
+  ))
+  sm2 <- as.numeric(summary(s2)$Table[1, -1])
 
-  ci2 <- c(sm2[1]-3*sm2[2], sm2[1]+3*sm2[2])
-  expect_true(sm[1]>ci2[1] & sm[1]<ci2[2])
+  ci2 <- c(sm2[1] - 3 * sm2[2], sm2[1] + 3 * sm2[2])
+  expect_true(sm[1] > ci2[1] & sm[1] < ci2[2])
 }
-test_sl()
+if (lava:::versioncheck("SuperLearner", geq=c(2,0,30))) test_sl()
 
 
 test_metalearners <- function() {
