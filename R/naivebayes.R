@@ -126,7 +126,7 @@ function(x, ...) {
     print(x$call)
     cat("\n")
     val <- x$prior
-    names(val) <- paste0(seq_len(length(val)), ": ", names(val))
+    names(val) <- paste0(seq_along(val), ": ", names(val))
     print(data.table::data.table(Prior=val))
     cat("\n")
 }

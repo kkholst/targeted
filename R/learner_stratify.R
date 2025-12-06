@@ -1,6 +1,6 @@
 #' @export
 print.learner.list <- function(x, ...) {
-  for (i in seq_len(length(x))) {
+  for (i in seq_along(x)) {
          fit <- x[[i]]$fit
     attr(fit, c("design")) <- NULL
     if (!is.atomic(fit) && !is.null(fit$call)) fit$call <- substitute()

@@ -17,7 +17,6 @@ Development version
   of response variables (factors) `xlev` argument changed to `levels`.
 
 
-
 # targeted 0.6
 
 This release introduces a new `learner` class replacing the previous `ML`

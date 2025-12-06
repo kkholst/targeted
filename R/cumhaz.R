@@ -144,7 +144,9 @@ cumhaz <- function(object, newdata, times = NULL, individual.time = FALSE,
     formula <- call$formula
     strata_indicator <- !is.null(object$strata)
     ssf <- summary(object, time = times, extend = extend)
-    ssf_df <- data.table::data.table(strata = ssf$strata, time = ssf$time, chf = ssf$cumhaz)
+    ssf_df <- data.table::data.table(
+      strata = ssf$strata, time = ssf$time, chf = ssf$cumhaz
+      )
 
     if (strata_indicator == FALSE) {
       tt <- ssf$time
