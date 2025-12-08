@@ -1,21 +1,51 @@
 # targeted 0.7
 
-Development version
+This release improves the multiple testing procedures
 
 - `test_zmax_onesided`: one-sided Zmax / minP test
 - `test_intersection_sw`: the following parameters for the optimization can be
-  controlled via the control list argument: dykstra_niter sets the maximum
-  number of iterations (default 500), dykstra_tol convergence tolerance of the
-  alternating projection algorithm (default 1e-7), pinv_tol tolerance for
+  controlled via the control list argument: `dykstra_niter` sets the maximum
+  number of iterations (default 500), `dykstra_tol` convergence tolerance of the
+  alternating projection algorithm (default 1e-7), `pinv_tol` tolerance for
   calculating the pseudo-inverse matrix (default value:
-  nrow(vcov).Machine$double.epsmax(eigenvalue)).
+  `nrow(vcov).Machine$double.epsmax(eigenvalue))`.
 - `test_intersection_sw` handle edge-case where vcov is not positive-definite.
   Throw warning and project onto nearest PD matrix in Frobenius norm.
-- `learner_xgboost` updated to reflect changes in xgboost  3.1.2.1
 
-- breaking changes: `design` refactored. Better handling
-  of response variables (factors) `xlev` argument changed to `levels`.
+Breaking changes:
 
+- `design` refactored. Better handling of response variables (factors) `xlev`
+  argument changed to `levels`.
+- `learner_xgboost` updated to reflect changes in xgboost 3.1.2.1. Note, the
+  arguments names have changed accordingly and introduces thus possible breaking
+  changes.
+
+## Features
+
+- *(cate)* tibble df and data.table are converted to data.frame ([#135](https://github.com/kkholst/targeted/issues/135)) - ([905bcf1](https://github.com/kkholst/targeted/commit/905bcf1375e3f67511fe633d4e808e3a73a8a89f))
+- *(design)* refactoring and better handling of formulas and response variables ([#136](https://github.com/kkholst/targeted/issues/136)) - ([044e817](https://github.com/kkholst/targeted/commit/044e8173b180aa0cf330f077150c6cbdc4dd6f3e))
+- *(superlearner)* standard meta-learner based on `quadprog::solve.QP` - ([4c830b7](https://github.com/kkholst/targeted/commit/4c830b7293683257ed10056e0b26202e13b6dd9c))
+- *(test_intersection_sw)* unit tests ([#137](https://github.com/kkholst/targeted/issues/137)) - ([10a793b](https://github.com/kkholst/targeted/commit/10a793b5c1b1b3ce5ef38fc1fe37ffa61a00f805))
+- *(test_intersection_sw)* add user-exposed optimization arguments and improve documentation ([#134](https://github.com/kkholst/targeted/issues/134)) - ([4c406df](https://github.com/kkholst/targeted/commit/4c406df895cb5aa02be109707fc818ea990a15dc))
+- *(test_intersection_sw)* constrained least squares via Dykstra's algorithm, and fast signed Wald test evaluation - ([2feaa87](https://github.com/kkholst/targeted/commit/2feaa871fb12d6b426981ec1d0ead9f5589402fd))
+- Feature/zmax ([#129](https://github.com/kkholst/targeted/issues/129)): onesided Zmax / minP test and clean-up of test_* + summary methods ([#130](https://github.com/kkholst/targeted/issues/130)) - ([85cd87e](https://github.com/kkholst/targeted/commit/85cd87ed8856373eafa3ff8963d2a7c9290a6b6d))
+
+## Bug Fixes
+
+- *(cate)* Linear calibration ([8dd4ca2](https://github.com/kkholst/targeted/commit/8dd4ca270f1c7b1ea190258cef5a52f31f435473))
+- *(design)* Print method handling Surv + factor objects ([#138](https://github.com/kkholst/targeted/issues/138)) - ([6ce8c8a](https://github.com/kkholst/targeted/commit/6ce8c8a7928316eb5de3845bd834e177800fec4d))
+- *(makefile)* Using remotes instead of devtools, to prevent workflows from breaking ([#131](https://github.com/kkholst/targeted/issues/131)) - ([32d6b59](https://github.com/kkholst/targeted/commit/32d6b599b752cf981adc2802520739f14335eec4))
+- *(makefile)* Using remotes instead of devtools, to prevent workflows from breaking - ([bc4c6a6](https://github.com/kkholst/targeted/commit/bc4c6a6aafc7b0734a912612a3e9e782bedb0084))
+- *(slowtest)* Metalearners needs to be referenced with `:::` (not exported yet) ([#132](https://github.com/kkholst/targeted/issues/132)) - ([e2324bb](https://github.com/kkholst/targeted/commit/e2324bbfcd969b63ed5f90f4089c60d82853e8fa))
+- *(slowtest)* Metalearners not exported - ([147740a](https://github.com/kkholst/targeted/commit/147740a808b9b0cf673daaaf2ba1b6bf82816568))
+- *(learner)* Fix data.table and xgboost issues - ([6bd9949](https://github.com/kkholst/targeted/commit/6bd994957a9f761598932d21da725a77ed9f419e))
+- *(cate)* Fix bug in cate: combn - ([8a1dff9](https://github.com/kkholst/targeted/commit/8a1dff963e8250a5df0e774ce07fe4ba5b420a74))
+- *(aipw)* Fixes issues with new `cate` - ([82ac974](https://github.com/kkholst/targeted/commit/82ac974d0a9765ab68a5fc32c7d0149f07fb8101))
+
+## Developer
+
+- *(`cate`)* Fix partial argument matching in `cate_est` call ([#126](https://github.com/kkholst/targeted/issues/126)) - ([e12efe9](https://github.com/kkholst/targeted/commit/e12efe9995618f00c23717778c6b454cbd376d9b))
+- *(unscoped)*  docs(vignettes): moving to quarto documentation  ([#140](https://github.com/kkholst/targeted/issues/140)) - ([b896eba](https://github.com/kkholst/targeted/commit/b896eba96e621c99c7f57a7a5359f7da6923e5cb))
 
 # targeted 0.6
 
@@ -44,9 +74,8 @@ clinical outcome truncated by competing risk
 
 ## Features
 
-- *(test_sw)* signed wald intersection test
-- *(cate)* linear calibration
-- *(superlearner)*: standard meta-learner based on `quadprog::solve.QP`
+- *(test_sw)* signed wald intersection test - ([ba58a2d](https://github.com/kkholst/targeted/commit/ba58a2d))
+- *(cate)* linear calibration ([#119](https://github.com/kkholst/targeted/issues/119)) - ([05a299f](https://github.com/kkholst/targeted/commit/05a299f))
 - *(cv)* cross-validation `cv` method for superlearner objects ([#64](https://github.com/kkholst/targeted/issues/64)) - ([1d58b26](https://github.com/kkholst/targeted/commit/1d58b26190b979176c25be09c31e6ca1a892073b))
 - *(design)* Fixing how specials is handled and passed to learner functions  - ([ab46749](https://github.com/kkholst/targeted/commit/ab46749cc2af1b593982f226aedbeb43a920520b))
 - *(design)* Adding `print.design` ([#94](https://github.com/kkholst/targeted/issues/94)) - ([20eb170](https://github.com/kkholst/targeted/commit/20eb1704f6238cfeeceec1bd295fe5172d590e03))
