@@ -423,6 +423,9 @@ learner_print <- function(self, private) {
     fit <- self$fit
     attr(fit, "design") <- NULL
     if (!is.atomic(fit) && !is.null(fit$call)) fit$call <- substitute()
+    if (!is.atomic(fit) && !is.null(attributes(fit)$call)) {
+      attributes(fit$call) <- substitute()
+    }
     cat(capture.output(print(fit)), sep ="\n")
   }
 

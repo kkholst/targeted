@@ -44,7 +44,7 @@
 #' if (interactive()) {
 #'   plot(c1)
 #'   plot(c2,col="red",add=TRUE)
-#'   abline(a=0,b=1)#'
+#'   abline(a=0,b=1)
 #'   with(c1$xy[[1]], points(pred,freq,type="b", col="red"))
 #' }
 #'
@@ -197,8 +197,6 @@ calibration <- function(pr, cl, #nolint
         class="calibration"))
 }
 
-
-
 #' @title calibration class object
 #'
 #' @description The functions \code{\link{calibration}} returns an object
@@ -256,8 +254,6 @@ calibrate <- function(object, pr, normalize = TRUE, ...) {
   }
   return(pr)
 }
-
-
 
 #' @export
 plot.calibration <- function(x, cl = 2,

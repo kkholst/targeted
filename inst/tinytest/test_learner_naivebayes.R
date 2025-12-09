@@ -51,7 +51,9 @@ expect_equal(dim(lr$predict(head(iris))), c(6, 3))
 d$x <- factor(d$x1>0)
 lr <- learner_naivebayes(yb ~ x)
 lr$estimate(d)
-dd <- data.table(d)[,.(.N),by=.(yb,x)]
+dd <- data.table::data.table(d)[,.(.N),by=.(yb,x)]
 lr2 <- learner_naivebayes(yb ~ x + weights(N), learner.args=list(specials="weights"))
-lr2$estimate(dd)
+lr2$estimate(data.frame(dd))
+expect_equal(lr$predict(data.frame(dd)), lr2$predict(as.data.frame(dd)))
+# check data.table functionality
 expect_equal(lr$predict(dd), lr2$predict(dd))

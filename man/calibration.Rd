@@ -72,7 +72,7 @@ c1 <- calibration(p1, d0$y, breaks=100)
 if (interactive()) {
   plot(c1)
   plot(c2,col="red",add=TRUE)
-  abline(a=0,b=1)#'
+  abline(a=0,b=1)
   with(c1$xy[[1]], points(pred,freq,type="b", col="red"))
 }
 

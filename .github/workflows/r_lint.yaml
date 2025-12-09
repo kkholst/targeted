@@ -38,7 +38,7 @@ jobs:
           needs: lint
 
       - name: Installing package
-        run: make install
+        run: R CMD INSTALL .
 
       - name: Lint
         run: lintr::lint_package()

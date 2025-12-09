@@ -13,9 +13,9 @@ d <- sim1(1e4)
 test_learner_xgboost <- function() {
   params <- list(
     max_depth = 3,
-    eta = 0.5,
+    learning_rate = 0.5,
     subsample = 1.0,
-    lambda = 1.0,
+    reg_lambda = 1.0,
     objective = "reg:squarederror"
   )
   args <- c(
@@ -27,11 +27,11 @@ test_learner_xgboost <- function() {
   lr$estimate(d)
 
   # all parameters are passed on correctly
-  expect_equal(lr$fit$params[1:length(params)], params)
+  expect_equal(attributes(lr$fit)$params[names(params)], params)
 
   # parameters can be overwritten in method call
-  lr$estimate(d, eta = 1)
-  expect_equal(lr$fit$params$eta, 1)
+  lr$estimate(d, learning_rate = 1)
+  expect_equal(attributes(lr$fit)$params$learning_rate, 1)
 
   # arguments can be passed on to predict s3 function
   pr1 <- lr$predict(head(d)) # use trees from all rounds for predictions
