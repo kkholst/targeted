@@ -19,7 +19,7 @@ Authors@R: c(person(given = "Klaus K.",
                     family = "Pipper",
                     role = c("ctb"),
                     email = "cbpipper@gmail.com"))
-Author: Klaus K. Holst [aut, cre], Benedikt Sommer [aut], Andreas Nordland [aut]
+Author: Klaus K. Holst [aut, cre], Benedikt Sommer [aut], Andreas Nordland [aut], Christian B. Pipper [ctb]
 Maintainer: Klaus K. Holst <klaus@holst.it>
 Description: Various methods for targeted and semiparametric inference including
 	     augmented inverse probability weighted (AIPW) estimators for missing data and
