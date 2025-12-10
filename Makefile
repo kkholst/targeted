@@ -39,7 +39,7 @@ build:
 	@echo 'pkgbuild::build(path=".", dest_path="$(BUILD_DIR)", args="--compact-vignettes=qpdf --resave-data=best")' | $(R)
 
 install:
-	@echo 'remotes::install_local(".", upgrade = "never")' | $(R)
+	@echo 'remotes::install_local(".", upgrade = "never", force = TRUE)' | $(R)
 
 dependencies-install:
 	@echo 'remotes::install_deps(".", dependencies = TRUE)' | $(R)
@@ -55,6 +55,9 @@ check:
 
 lint:
 	@echo 'lintr::lint_package(show_progress = TRUE)' | $(R)
+
+vignette:
+	@$(R) -q -e "devtools::build_vignettes(clean=FALSE, install=FALSE, quiet=FALSE)"
 
 test: test-installed
 test-installed: # tests locally installed version package

@@ -9,11 +9,11 @@ design(
   data,
   ...,
   intercept = FALSE,
-  response = FALSE,
+  response = TRUE,
   rm_envir = FALSE,
   specials = NULL,
   specials.call = NULL,
-  xlev = NULL,
+  levels = NULL,
   design.matrix = TRUE
 )
 }
@@ -36,7 +36,7 @@ should be marked as special in the \link{terms} object}
 
 \item{specials.call}{(call) specials optionally defined as a call-type}
 
-\item{xlev}{a named list of character vectors giving the full set of levels
+\item{levels}{a named list of character vectors giving the full set of levels
 to be assumed for each factor}
 
 \item{design.matrix}{(logical) if FALSE then only response and specials are

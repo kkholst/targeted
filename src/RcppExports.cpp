@@ -704,8 +704,8 @@ RcppExport SEXP _targeted_dykstra(SEXP xSEXP, SEXP ASEXP) {
     return rcpp_result_gen;
 }
 // signedwald
-List signedwald(const arma::vec& par, const arma::mat& vcov, const arma::vec& noninf, const arma::vec& weights, unsigned nsim_null);
-static SEXP _targeted_signedwald_try(SEXP parSEXP, SEXP vcovSEXP, SEXP noninfSEXP, SEXP weightsSEXP, SEXP nsim_nullSEXP) {
+List signedwald(const arma::vec& par, const arma::mat& vcov, const arma::vec& noninf, const arma::vec& weights, unsigned nsim_null, double dykstra_tol, unsigned dykstra_niter, double pinv_tol);
+static SEXP _targeted_signedwald_try(SEXP parSEXP, SEXP vcovSEXP, SEXP noninfSEXP, SEXP weightsSEXP, SEXP nsim_nullSEXP, SEXP dykstra_tolSEXP, SEXP dykstra_niterSEXP, SEXP pinv_tolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const arma::vec& >::type par(parSEXP);
@@ -713,15 +713,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type noninf(noninfSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type weights(weightsSEXP);
     Rcpp::traits::input_parameter< unsigned >::type nsim_null(nsim_nullSEXP);
-    rcpp_result_gen = Rcpp::wrap(signedwald(par, vcov, noninf, weights, nsim_null));
+    Rcpp::traits::input_parameter< double >::type dykstra_tol(dykstra_tolSEXP);
+    Rcpp::traits::input_parameter< unsigned >::type dykstra_niter(dykstra_niterSEXP);
+    Rcpp::traits::input_parameter< double >::type pinv_tol(pinv_tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(signedwald(par, vcov, noninf, weights, nsim_null, dykstra_tol, dykstra_niter, pinv_tol));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP _targeted_signedwald(SEXP parSEXP, SEXP vcovSEXP, SEXP noninfSEXP, SEXP weightsSEXP, SEXP nsim_nullSEXP) {
+RcppExport SEXP _targeted_signedwald(SEXP parSEXP, SEXP vcovSEXP, SEXP noninfSEXP, SEXP weightsSEXP, SEXP nsim_nullSEXP, SEXP dykstra_tolSEXP, SEXP dykstra_niterSEXP, SEXP pinv_tolSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_targeted_signedwald_try(parSEXP, vcovSEXP, noninfSEXP, weightsSEXP, nsim_nullSEXP));
+        rcpp_result_gen = PROTECT(_targeted_signedwald_try(parSEXP, vcovSEXP, noninfSEXP, weightsSEXP, nsim_nullSEXP, dykstra_tolSEXP, dykstra_niterSEXP, pinv_tolSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -764,7 +767,7 @@ static int _targeted_RcppExport_validate(const char* sig) {
         signatures.insert("List(*.pava)(const arma::vec&,const NumericVector&,const NumericVector&)");
         signatures.insert("arma::mat(*.nondom)(const arma::mat&)");
         signatures.insert("List(*.dykstra)(const arma::vec&,const arma::mat&)");
-        signatures.insert("List(*.signedwald)(const arma::vec&,const arma::mat&,const arma::vec&,const arma::vec&,unsigned)");
+        signatures.insert("List(*.signedwald)(const arma::vec&,const arma::mat&,const arma::vec&,const arma::vec&,unsigned,double,unsigned,double)");
     }
     return signatures.find(sig) != signatures.end();
 }
@@ -815,7 +818,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_targeted_pava", (DL_FUNC) &_targeted_pava, 3},
     {"_targeted_nondom", (DL_FUNC) &_targeted_nondom, 1},
     {"_targeted_dykstra", (DL_FUNC) &_targeted_dykstra, 2},
-    {"_targeted_signedwald", (DL_FUNC) &_targeted_signedwald, 5},
+    {"_targeted_signedwald", (DL_FUNC) &_targeted_signedwald, 8},
     {"_rcpp_module_boot_riskregmodel", (DL_FUNC) &_rcpp_module_boot_riskregmodel, 0},
     {"_targeted_RcppExport_registerCCallable", (DL_FUNC) &_targeted_RcppExport_registerCCallable, 0},
     {NULL, NULL, 0}

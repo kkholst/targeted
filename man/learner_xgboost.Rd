@@ -7,11 +7,10 @@
 learner_xgboost(
   formula,
   max_depth = 2L,
-  eta = 1,
+  learning_rate = 1,
   nrounds = 2L,
   subsample = 1,
-  lambda = 1,
-  verbose = 0,
+  reg_lambda = 1,
   objective = "reg:squarederror",
   info = paste("xgboost", objective),
   learner.args = NULL,
@@ -23,21 +22,19 @@ learner_xgboost(
 
 \item{max_depth}{(integer) Maximum depth of a tree.}
 
-\item{eta}{(numeric) Learning rate.}
+\item{learning_rate}{(numeric) Learning rate.}
 
-\item{nrounds}{max number of boosting iterations.}
+\item{nrounds}{Number of boosting iterations / rounds.
+
+Note that the number of default boosting rounds here is not automatically tuned, and different
+problems will have vastly different optimal numbers of boosting rounds.}
 
 \item{subsample}{(numeric) Subsample ratio of the training instance.}
 
-\item{lambda}{(numeric) L2 regularization term on weights.}
-
-\item{verbose}{If 0, xgboost will stay silent. If 1, it will print information about performance.
-If 2, some additional information will be printed out.
-Note that setting \code{verbose > 0} automatically engages the
-\code{cb.print.evaluation(period=1)} callback function.}
+\item{reg_lambda}{(numeric) L2 regularization term on weights.}
 
 \item{objective}{(character) Specify the learning task and the corresponding
-learning objective. See \link[xgboost:xgb.train]{xgboost::xgboost} for all available options.}
+learning objective. See \link[xgboost:xgboost]{xgboost::xgboost} for all available options.}
 
 \item{info}{(character) Optional information to describe the instantiated
 \link{learner} object.}
@@ -45,13 +42,13 @@ learning objective. See \link[xgboost:xgb.train]{xgboost::xgboost} for all avail
 \item{learner.args}{(list) Additional arguments to
 \link[=learner]{learner$new()}.}
 
-\item{...}{Additional arguments to \link[xgboost:xgb.train]{xgboost::xgboost}.}
+\item{...}{Additional arguments to \link[xgboost:xgboost]{xgboost::xgboost}.}
 }
 \value{
 \link{learner} object.
 }
 \description{
-Constructs a \link{learner} class object for \link[xgboost:xgb.train]{xgboost::xgboost}.
+Constructs a \link{learner} class object for \link[xgboost:xgboost]{xgboost::xgboost}.
 }
 \examples{
 n  <- 1e3

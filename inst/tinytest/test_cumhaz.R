@@ -4,12 +4,12 @@ library("ranger")
 suppressPackageStartupMessages({
   library("mets")
   library("randomForestSRC")
+  Surv <- survival::Surv
+  survfit <- survival::survfit
+  coxph <- survival::coxph
 })
 set.seed(42)
 
-Surv <- survival::Surv
-survfit <- survival::survfit
-coxph <- survival::coxph
 
 sim_surv <- function(n, beta, zeta) {
   # covariate W and D
@@ -142,7 +142,7 @@ test_phreg <- phreg(Surv(time, event) ~ W, data = test_data)
 test_cumhaz_function(test_phreg)
 
 test_cumhaz <- cumhaz(test_phreg, newdata = test_data, times = c(0.4, 0.5))
-ref_cumhaz <- as.matrix(predict(test_phreg, times = c(0.4, 0.5))$cumhaz)
+ref_cumhaz <- as.matrix(predict(test_phreg, newdata = test_data, times = c(0.4, 0.5))$cumhaz)
 
 expect_equal(ref_cumhaz, as.matrix(test_cumhaz$chf))
 test_cumhaz <- cumhaz(test_phreg, newdata = test_data[c(100, 800), ],
@@ -244,12 +244,6 @@ plot(times, c1$chf[2, ])
 points(rtimes, c2$chf[2, ], col="red")
 
 
-
-
-library("randomForestSRC")
-library("ranger")
-library("mets")
-library("survival")
 n <- 1e2
 time <- rexp(n)
 status <- rep(TRUE, n)

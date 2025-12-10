@@ -145,7 +145,7 @@ cv.learner_sl <- function(object,
 
   idx <- 1:n
   cvs <- c()
-  for (i in seq_len(length(type))) {
+  for (i in seq_along(type)) {
     score <- res$cv[, , , idx + (i-1)*n, drop=FALSE]
     cvs <- abind::abind(cvs, score, along=3)
   }

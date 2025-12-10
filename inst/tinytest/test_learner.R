@@ -187,9 +187,9 @@ test_design <- function() {
   # raise error when covariate variable cannot be found
   m <- learner$new(formula = y ~ x1 + x2 + x3, estimate = glm.fit)
   expect_error(m$design(ddata), pattern = "object 'x3' not found")
-  # same for response
+  # returns NULL when response cannot be found
   m <- learner$new(formula = yy ~ x1 + x2, estimate = glm.fit)
-  expect_error(m$design(ddata), pattern = "object 'yy' not found")
+  expect_true(is.null(m$design(ddata)$y))
 
 }
 test_design()
@@ -226,9 +226,9 @@ test_response <- function() {
   lr <- learner$new(formula = x1 ~ -1 + y, estimate = glm)
   expect_equivalent(lr$response(ddata), ddata$x1)
 
-  # raise error when response variable cannot be found
+  # returns NULL when response variable cannot be found
   lr <- learner$new(formula = x3 ~ -1 + y, estimate = glm)
-  expect_error(lr$response(ddata), pattern = "object 'x3' not found")
+  expect_true(is.null(lr$response(ddata)))
 }
 test_response()
 

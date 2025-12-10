@@ -1,9 +1,9 @@
 #' @description Constructs a [learner] class object for [xgboost::xgboost].
 #' @param ... Additional arguments to [xgboost::xgboost].
 #' @param max_depth (integer) Maximum depth of a tree.
-#' @param eta (numeric) Learning rate.
+#' @param learning_rate (numeric) Learning rate.
 #' @param subsample (numeric) Subsample ratio of the training instance.
-#' @param lambda (numeric) L2 regularization term on weights.
+#' @param reg_lambda (numeric) L2 regularization term on weights.
 #' @param objective (character) Specify the learning task and the corresponding
 #' learning objective. See [xgboost::xgboost] for all available options.
 #' @inherit constructor_shared
@@ -39,11 +39,10 @@
 #' lr$predict(head(d0))
 learner_xgboost <- function(formula,
                             max_depth = 2L,
-                            eta = 1.0,
+                            learning_rate = 1.0,
                             nrounds = 2L,
                             subsample = 1.0,
-                            lambda = 1,
-                            verbose = 0,
+                            reg_lambda = 1,
                             objective = "reg:squarederror",
                             info = paste("xgboost", objective),
                             learner.args = NULL,
@@ -51,11 +50,10 @@ learner_xgboost <- function(formula,
     args <- c(learner.args, list(formula = formula, info = info))
     estimate.args <- list(
       max_depth = max_depth,
-      eta = eta,
+      learning_rate = learning_rate,
       nrounds = nrounds,
       subsample = subsample,
-      lambda = lambda,
-      verbose = verbose,
+      reg_lambda = reg_lambda,
       objective = objective
     )
     args$estimate.args <- c(estimate.args, list(...))
@@ -67,21 +65,23 @@ learner_xgboost <- function(formula,
     args$predict <- function(object, newdata, ...) {
       d <- xgboost::xgb.DMatrix(newdata)
       pr <- predict(object, d, ...)
-
-      if (object$call$objective == "multi:softprob") {
-        pr <- matrix(pr, nrow = NROW(d), byrow = TRUE)
-      }
-
+      ## if (attributes(object)$call$params$objective == "multi:softprob") {
+      ## pr <- matrix(pr, nrow = NROW(newdata), byrow = TRUE)
+      ## }
       return(pr)
     }
     args$estimate <- function(x, y, ...) {
+      params <- list(...)
+      par1 <- intersect(formalArgs(xgboost::xgb.params), names(params))
+      xgb_params <- params[par1]
+      xgb_train_args <- params
+      xgb_train_args[par1] <- NULL
       d <- xgboost::xgb.DMatrix(x, label = y)
       res <- do.call(
-        xgboost::xgboost,
-        c(list(data = d), list(...)),
-      )
+        xgboost::xgb.train,
+        c(list(data = d), xgb_train_args, list(params = xgb_params)),
+        )
       return(res)
     }
-
     return(do.call(learner$new, args))
 }

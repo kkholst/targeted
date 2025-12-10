@@ -21,22 +21,29 @@ arma::vec proj1(arma::vec u, arma::vec Aj, arma::vec w) {
 
 namespace target {
 
-  SignedWald signedwald_sim(const arma::vec &par, const arma::mat &vcov,
-                            const arma::vec &noninf, const arma::vec &weights,
-                            unsigned nsim_null) {
+SignedWald signedwald_sim(const arma::vec &par, const arma::mat &vcov,
+                          const arma::vec &noninf, const arma::vec &weights,
+                          unsigned nsim_null, double dykstra_tol,
+                          unsigned dykstra_niter, double pinv_tol) {
     unsigned p = par.n_elem;
     arma::vec e;
     arma::mat P;
     arma::eig_sym(e, P, vcov);
     e = arma::sqrt(e);
+    arma::vec ie = 1 / e;
+    for (unsigned i = 0; i < e.n_elem; i++) {
+      if (e[i] < pinv_tol) {
+        ie[i] = 0;
+      }
+    }
     arma::mat D = arma::diagmat(e);
-    arma::mat iD = arma::diagmat(1 / e);
+    arma::mat iD = arma::diagmat(ie);
     arma::mat sqrt_sigma = P * D * P.t();
     arma::mat sqrt_sigma_inv = P * iD * P.t();
     arma::mat sW = sqrt_sigma_inv * diagmat(weights);
     arma::vec uhat = sW * (par - noninf);
     // ||uhat-u||^2 = (uhat-u)^T(uhat -h) s.t. sqrt_sigma * u <= 0
-    raggedArray opt = lsdykstra(uhat, sqrt_sigma);
+    raggedArray opt = lsdykstra(uhat, sqrt_sigma, dykstra_tol, dykstra_niter);
     arma::vec u0 = opt[0];
     double sw = sum(arma::square(uhat - u0));
     arma::mat B = sW * sqrt_sigma;
