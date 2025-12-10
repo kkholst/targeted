@@ -9,13 +9,15 @@ sim1 <- function(n = 5e2) {
    return(data.frame(y, yb, x1, x2))
 }
 d <- sim1(1e4)
+nthreads = getOption("Ncpus", 1L)
 
 test_learner_xgboost <- function() {
   params <- list(
-    max_depth = 3,
+    max_depth =- 3,
     learning_rate = 0.5,
     subsample = 1.0,
     reg_lambda = 1.0,
+    nthreads = nthreads,
     objective = "reg:squarederror"
   )
   args <- c(
@@ -40,7 +42,7 @@ test_learner_xgboost <- function() {
   expect_false(all(pr1 == pr2))
 
   # verify that arguments can be passed on correctly to learner$new
-  lr <- learner_xgboost(y ~ ., nrounds = 3,
+  lr <- learner_xgboost(y ~ ., nrounds = 3, nthreads = nthreads,
     learner.args = list(predict.args = list(iterationrange = c(1, 2)))
   )
   lr$estimate(d)
@@ -55,20 +57,27 @@ test_learner_xgboost <- function() {
   # argument is handled correctly
   d0 <- iris
   d0$y <- as.numeric(d0$Species)- 1
-  lr <- learner_xgboost(y ~ ., objective = "multi:softprob", num_class = 3)
+  lr <- learner_xgboost(y ~ .,
+    objective = "multi:softprob", num_class = 3,
+    nthread = nthreads
+    )
   lr$estimate(d0)
   expect_equal(dim(lr$predict(d0)), c(nrow(d0), 3))
 
   # binary classification with binary:logistic
-  lr <- learner_xgboost(yb ~ x1 + x2, objective = "binary:logistic")
+  lr <- learner_xgboost(yb ~ x1 + x2,
+    objective = "binary:logistic",
+    nthreads = nthreads
+    )
   lr$estimate(d)
   pr <- lr$predict(head(d))
   expect_true(is.vector(pr))
 
   # binary classification with objective = "multi:softprob"
-  lr <- learner_xgboost(yb ~ x1 + x2, objective = "multi:softprob",
-    num_class = 2
-  )
+  lr <- learner_xgboost(yb ~ x1 + x2,
+    objective = "multi:softprob",
+    num_class = 2, nthreads = nthreads
+    )
   lr$estimate(d)
   # preserve output format of predict.xgb.Booster
   expect_equal(dim(lr$predict(head(d))), c(6, 2))
