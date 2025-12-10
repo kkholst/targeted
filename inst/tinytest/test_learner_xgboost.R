@@ -13,11 +13,11 @@ nthreads = getOption("Ncpus", 1L)
 
 test_learner_xgboost <- function() {
   params <- list(
-    max_depth =- 3,
+    max_depth = 3,
     learning_rate = 0.5,
     subsample = 1.0,
     reg_lambda = 1.0,
-    nthreads = nthreads,
+    nthread = nthreads,
     objective = "reg:squarederror"
   )
   args <- c(
@@ -42,7 +42,7 @@ test_learner_xgboost <- function() {
   expect_false(all(pr1 == pr2))
 
   # verify that arguments can be passed on correctly to learner$new
-  lr <- learner_xgboost(y ~ ., nrounds = 3, nthreads = nthreads,
+  lr <- learner_xgboost(y ~ ., nrounds = 3, nthread = nthreads,
     learner.args = list(predict.args = list(iterationrange = c(1, 2)))
   )
   lr$estimate(d)
@@ -67,7 +67,7 @@ test_learner_xgboost <- function() {
   # binary classification with binary:logistic
   lr <- learner_xgboost(yb ~ x1 + x2,
     objective = "binary:logistic",
-    nthreads = nthreads
+    nthread = nthreads
     )
   lr$estimate(d)
   pr <- lr$predict(head(d))
@@ -76,7 +76,8 @@ test_learner_xgboost <- function() {
   # binary classification with objective = "multi:softprob"
   lr <- learner_xgboost(yb ~ x1 + x2,
     objective = "multi:softprob",
-    num_class = 2, nthreads = nthreads
+    num_class = 2,
+    nthread = nthreads
     )
   lr$estimate(d)
   # preserve output format of predict.xgb.Booster
