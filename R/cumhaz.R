@@ -37,7 +37,7 @@ cumhaz <- function(object, newdata, times = NULL, individual.time = FALSE,
       )
     }
   }
-  if (!requireNamespace("data.table", quiet = TRUE)) {
+  if (!requireNamespace("data.table", quietly = TRUE)) {
     stop("data.table required")
   }
   if (!inherits(newdata, "data.table")) {
