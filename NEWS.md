@@ -1,3 +1,7 @@
+# targeted 0.7.1
+
+Maintenance release
+
 # targeted 0.7
 
 This release improves the multiple testing procedures
