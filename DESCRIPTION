@@ -2,7 +2,6 @@ Package: targeted
 Type: Package
 Title: Targeted Inference
 Version: 0.7.1
-Date: 2025-12-21
 Authors@R: c(person(given = "Klaus K.",
                     family = "Holst",
                     role = c("aut", "cre"),
