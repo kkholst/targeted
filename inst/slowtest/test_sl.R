@@ -55,8 +55,9 @@ test_sl <- function() {
   ci2 <- c(sm2[1] - 3 * sm2[2], sm2[1] + 3 * sm2[2])
   expect_true(sm[1] > ci2[1] & sm[1] < ci2[2])
 }
-if (lava:::versioncheck("SuperLearner", geq=c(2,0,30))) test_sl()
-
+if (lava:::versioncheck("SuperLearner", geq = c(2, 0, 30))) {
+  test_sl()
+}
 
 test_metalearners <- function() {
   m <- list(
@@ -70,6 +71,9 @@ test_metalearners <- function() {
 
   b1 <- cv(s1, nfolds = 10, rep = 2, data = d)
   b2 <- cv(s2, nfolds = 10, rep = 2, data = d)
+
+  print(b1)
+  print(b2)
 
   eps <- 0.05
   expect_true(
