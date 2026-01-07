@@ -4,12 +4,12 @@ intersection test given by $$SW = \inf_{\theta \in \cap_{i=1}^n H_i}
   \{(\widehat{\theta}-\theta)^\top W\widehat{\Sigma}W
   (\widehat{\theta}-\theta)\} $$ with individual hypotheses for each
 coordinate of \(\theta\) given by \(H_i: \theta_j &amp;lt; \delta_j\) for some
-non-inferiority margin \(\delta_j\), \(j=1,\ldots,n\)."><meta property="og:description" content="Calculating test statistics and p-values for the signed Wald
+non-inferiority margin \(\delta_j\), \(j=1,\ldots,n\). #"><meta property="og:description" content="Calculating test statistics and p-values for the signed Wald
 intersection test given by $$SW = \inf_{\theta \in \cap_{i=1}^n H_i}
   \{(\widehat{\theta}-\theta)^\top W\widehat{\Sigma}W
   (\widehat{\theta}-\theta)\} $$ with individual hypotheses for each
 coordinate of \(\theta\) given by \(H_i: \theta_j &amp;lt; \delta_j\) for some
-non-inferiority margin \(\delta_j\), \(j=1,\ldots,n\)."><meta property="og:image" content="/logo.png"></head><body>
+non-inferiority margin \(\delta_j\), \(j=1,\ldots,n\). #"><meta property="og:image" content="/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -17,7 +17,7 @@ non-inferiority margin \(\delta_j\), \(j=1,\ldots,n\)."><meta property="og:image
 
     <a class="navbar-brand me-2" href="../index.html">targeted</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,7 +53,7 @@ intersection test given by $$SW = \inf_{\theta \in \cap_{i=1}^n H_i}
   \{(\widehat{\theta}-\theta)^\top W\widehat{\Sigma}W
   (\widehat{\theta}-\theta)\} $$ with individual hypotheses for each
 coordinate of \(\theta\) given by \(H_i: \theta_j &lt; \delta_j\) for some
-non-inferiority margin \(\delta_j\), \(j=1,\ldots,n\).</p>
+non-inferiority margin \(\delta_j\), \(j=1,\ldots,n\). #</p>
     </div>
 
     <div class="section level2">
@@ -65,6 +65,7 @@ non-inferiority margin \(\delta_j\), \(j=1,\ldots,n\).</p>
 <span>  weights <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  nsim.null <span class="op">=</span> <span class="fl">10000</span>,</span>
 <span>  index <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  par.name <span class="op">=</span> <span class="st">"theta"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -97,6 +98,11 @@ non-inferiority margin \(\delta_j\), \(j=1,\ldots,n\).</p>
 <dd><p>(integer) subset of parameters to test</p></dd>
 
 
+<dt id="arg-control">control<a class="anchor" aria-label="anchor" href="#arg-control"></a></dt>
+<dd><p>(list) arguments to alternating projection algorithm. See
+details section.</p></dd>
+
+
 <dt id="arg-par-name">par.name<a class="anchor" aria-label="anchor" href="#arg-par-name"></a></dt>
 <dd><p>(character) parameter names in output</p></dd>
 
@@ -104,6 +110,27 @@ non-inferiority margin \(\delta_j\), \(j=1,\ldots,n\).</p>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p><code>htest</code> object</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>The constrained least squares problem is solved using Dykstra's
+algorithm. The following parameters for the optimization can be controlled
+via the <code>control</code> list argument: <code>dykstra_niter</code> sets the maximum number of
+iterations (default 500), <code>dykstra_tol</code> convergence tolerance of the
+alternating projection algorithm (default 1e-7), <code>pinv_tol</code> tolerance for
+calculating the pseudo-inverse matrix (default
+length(par)<em>.Machine$double.eps</em>max(eigenvalue)).</p>
+    </div>
+    <div class="section level2">
+    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
+    <p>Christian Bressen Pipper, Andreas Nordland &amp; Klaus Kähler Holst
+(2025) A general approach to construct powerful tests for intersections of
+one-sided null-hypotheses based on influence functions. arXiv:
+https://arxiv.org/abs/2511.07096.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p><a href="test_zmax_onesided.html">test_zmax_onesided</a> <a href="http://kkholst.github.io/lava/reference/compare.html" class="external-link">lava::test_wald</a> <a href="http://kkholst.github.io/lava/reference/closed_testing.html" class="external-link">lava::closed_testing</a></p></div>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
@@ -135,8 +162,8 @@ non-inferiority margin \(\delta_j\), \(j=1,\ldots,n\).</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="co"># only on 'lava' &gt;= 1.8.2</span></span></span>
-<span class="r-in"><span><span class="va">e</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/estimate.default.html" class="external-link">estimate</a></span><span class="op">(</span>coef <span class="op">=</span> <span class="va">thetahat</span>, vcov <span class="op">=</span> <span class="va">S</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"p1"</span>, <span class="st">"p2"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/closed_testing.html" class="external-link">closed_testing</a></span><span class="op">(</span><span class="va">e</span>, <span class="va">test_intersection_sw</span>, noninf <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.1</span>, <span class="op">-</span><span class="fl">0.1</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span><span class="va">e</span> <span class="op">&lt;-</span> <span class="fu"><a href="http://kkholst.github.io/lava/reference/estimate.default.html" class="external-link">estimate</a></span><span class="op">(</span>coef <span class="op">=</span> <span class="va">thetahat</span>, vcov <span class="op">=</span> <span class="va">S</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"p1"</span>, <span class="st">"p2"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="http://kkholst.github.io/lava/reference/closed_testing.html" class="external-link">closed_testing</a></span><span class="op">(</span><span class="va">e</span>, <span class="va">test_intersection_sw</span>, noninf <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.1</span>, <span class="op">-</span><span class="fl">0.1</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
@@ -150,7 +177,7 @@ non-inferiority margin \(\delta_j\), \(j=1,\ldots,n\).</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

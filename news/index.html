@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">targeted</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,11 +37,68 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.7" id="targeted-07">targeted 0.7<a class="anchor" aria-label="anchor" href="#targeted-07"></a></h2>
-<p>Development version</p>
+<h2 class="pkg-version" data-toc-text="0.7.1" id="targeted-071">targeted 0.7.1<a class="anchor" aria-label="anchor" href="#targeted-071"></a></h2>
+<p>Maintenance release</p>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.7" id="targeted-07">targeted 0.7<a class="anchor" aria-label="anchor" href="#targeted-07"></a></h2><p class="text-muted">CRAN release: 2025-12-10</p>
+<p>This release improves the multiple testing procedures</p>
 <ul><li>
 <code>test_zmax_onesided</code>: one-sided Zmax / minP test</li>
+<li>
+<code>test_intersection_sw</code>: the following parameters for the optimization can be controlled via the control list argument: <code>dykstra_niter</code> sets the maximum number of iterations (default 500), <code>dykstra_tol</code> convergence tolerance of the alternating projection algorithm (default 1e-7), <code>pinv_tol</code> tolerance for calculating the pseudo-inverse matrix (default value: <code>nrow(vcov).Machine$double.epsmax(eigenvalue))</code>.</li>
+<li>
+<code>test_intersection_sw</code> handle edge-case where vcov is not positive-definite. Throw warning and project onto nearest PD matrix in Frobenius norm.</li>
+</ul><p>Breaking changes:</p>
+<ul><li>
+<code>design</code> refactored. Better handling of response variables (factors) <code>xlev</code> argument changed to <code>levels</code>.</li>
+<li>
+<code>learner_xgboost</code> updated to reflect changes in xgboost 3.1.2.1. Note, the arguments names have changed accordingly and introduces thus possible breaking changes.</li>
+</ul><div class="section level3">
+<h3 id="features-0-7">Features<a class="anchor" aria-label="anchor" href="#features-0-7"></a></h3>
+<ul><li>
+<em>(cate)</em> tibble df and data.table are converted to data.frame (<a href="https://github.com/kkholst/targeted/issues/135" class="external-link">#135</a>) - (<a href="https://github.com/kkholst/targeted/commit/905bcf1375e3f67511fe633d4e808e3a73a8a89f" class="external-link">905bcf1</a>)</li>
+<li>
+<em>(design)</em> refactoring and better handling of formulas and response variables (<a href="https://github.com/kkholst/targeted/issues/136" class="external-link">#136</a>) - (<a href="https://github.com/kkholst/targeted/commit/044e8173b180aa0cf330f077150c6cbdc4dd6f3e" class="external-link">044e817</a>)</li>
+<li>
+<em>(superlearner)</em> standard meta-learner based on <code><a href="https://rdrr.io/pkg/quadprog/man/solve.QP.html" class="external-link">quadprog::solve.QP</a></code> - (<a href="https://github.com/kkholst/targeted/commit/4c830b7293683257ed10056e0b26202e13b6dd9c" class="external-link">4c830b7</a>)</li>
+<li>
+<em>(test_intersection_sw)</em> unit tests (<a href="https://github.com/kkholst/targeted/issues/137" class="external-link">#137</a>) - (<a href="https://github.com/kkholst/targeted/commit/10a793b5c1b1b3ce5ef38fc1fe37ffa61a00f805" class="external-link">10a793b</a>)</li>
+<li>
+<em>(test_intersection_sw)</em> add user-exposed optimization arguments and improve documentation (<a href="https://github.com/kkholst/targeted/issues/134" class="external-link">#134</a>) - (<a href="https://github.com/kkholst/targeted/commit/4c406df895cb5aa02be109707fc818ea990a15dc" class="external-link">4c406df</a>)</li>
+<li>
+<em>(test_intersection_sw)</em> constrained least squares via Dykstra’s algorithm, and fast signed Wald test evaluation - (<a href="https://github.com/kkholst/targeted/commit/2feaa871fb12d6b426981ec1d0ead9f5589402fd" class="external-link">2feaa87</a>)</li>
+<li>Feature/zmax (<a href="https://github.com/kkholst/targeted/issues/129" class="external-link">#129</a>): onesided Zmax / minP test and clean-up of test_* + summary methods (<a href="https://github.com/kkholst/targeted/issues/130" class="external-link">#130</a>) - (<a href="https://github.com/kkholst/targeted/commit/85cd87ed8856373eafa3ff8963d2a7c9290a6b6d" class="external-link">85cd87e</a>)</li>
 </ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-0-7">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-7"></a></h3>
+<ul><li>
+<em>(cate)</em> Linear calibration (<a href="https://github.com/kkholst/targeted/commit/8dd4ca270f1c7b1ea190258cef5a52f31f435473" class="external-link">8dd4ca2</a>)</li>
+<li>
+<em>(design)</em> Print method handling Surv + factor objects (<a href="https://github.com/kkholst/targeted/issues/138" class="external-link">#138</a>) - (<a href="https://github.com/kkholst/targeted/commit/6ce8c8a7928316eb5de3845bd834e177800fec4d" class="external-link">6ce8c8a</a>)</li>
+<li>
+<em>(makefile)</em> Using remotes instead of devtools, to prevent workflows from breaking (<a href="https://github.com/kkholst/targeted/issues/131" class="external-link">#131</a>) - (<a href="https://github.com/kkholst/targeted/commit/32d6b599b752cf981adc2802520739f14335eec4" class="external-link">32d6b59</a>)</li>
+<li>
+<em>(makefile)</em> Using remotes instead of devtools, to prevent workflows from breaking - (<a href="https://github.com/kkholst/targeted/commit/bc4c6a6aafc7b0734a912612a3e9e782bedb0084" class="external-link">bc4c6a6</a>)</li>
+<li>
+<em>(slowtest)</em> Metalearners needs to be referenced with <code>:::</code> (not exported yet) (<a href="https://github.com/kkholst/targeted/issues/132" class="external-link">#132</a>) - (<a href="https://github.com/kkholst/targeted/commit/e2324bbfcd969b63ed5f90f4089c60d82853e8fa" class="external-link">e2324bb</a>)</li>
+<li>
+<em>(slowtest)</em> Metalearners not exported - (<a href="https://github.com/kkholst/targeted/commit/147740a808b9b0cf673daaaf2ba1b6bf82816568" class="external-link">147740a</a>)</li>
+<li>
+<em>(learner)</em> Fix data.table and xgboost issues - (<a href="https://github.com/kkholst/targeted/commit/6bd994957a9f761598932d21da725a77ed9f419e" class="external-link">6bd9949</a>)</li>
+<li>
+<em>(cate)</em> Fix bug in cate: combn - (<a href="https://github.com/kkholst/targeted/commit/8a1dff963e8250a5df0e774ce07fe4ba5b420a74" class="external-link">8a1dff9</a>)</li>
+<li>
+<em>(aipw)</em> Fixes issues with new <code>cate</code> - (<a href="https://github.com/kkholst/targeted/commit/82ac974d0a9765ab68a5fc32c7d0149f07fb8101" class="external-link">82ac974</a>)</li>
+</ul></div>
+<div class="section level3">
+<h3 id="developer-0-7">Developer<a class="anchor" aria-label="anchor" href="#developer-0-7"></a></h3>
+<ul><li>
+<em>(<code>cate</code>)</em> Fix partial argument matching in <code>cate_est</code> call (<a href="https://github.com/kkholst/targeted/issues/126" class="external-link">#126</a>) - (<a href="https://github.com/kkholst/targeted/commit/e12efe9995618f00c23717778c6b454cbd376d9b" class="external-link">e12efe9</a>)</li>
+<li>
+<em>(unscoped)</em> docs(vignettes): moving to quarto documentation (<a href="https://github.com/kkholst/targeted/issues/140" class="external-link">#140</a>) - (<a href="https://github.com/kkholst/targeted/commit/b896eba96e621c99c7f57a7a5359f7da6923e5cb" class="external-link">b896eba</a>)</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.6" id="targeted-06">targeted 0.6<a class="anchor" aria-label="anchor" href="#targeted-06"></a></h2><p class="text-muted">CRAN release: 2025-10-30</p>
 <p>This release introduces a new <code>learner</code> class replacing the previous <code>ML</code> constructor.</p>
@@ -59,12 +116,9 @@
 <div class="section level3">
 <h3 id="features-0-6">Features<a class="anchor" aria-label="anchor" href="#features-0-6"></a></h3>
 <ul><li>
-<em>(test_sw)</em> signed wald intersection test</li>
+<em>(test_sw)</em> signed wald intersection test - (<a href="https://github.com/kkholst/targeted/commit/ba58a2d" class="external-link">ba58a2d</a>)</li>
 <li>
-<em>(cate)</em> linear calibration</li>
-<li>
-<em>(superlearner)</em>: standard meta-learner based on <code><a href="https://rdrr.io/pkg/quadprog/man/solve.QP.html" class="external-link">quadprog::solve.QP</a></code>
-</li>
+<em>(cate)</em> linear calibration (<a href="https://github.com/kkholst/targeted/issues/119" class="external-link">#119</a>) - (<a href="https://github.com/kkholst/targeted/commit/05a299f" class="external-link">05a299f</a>)</li>
 <li>
 <em>(cv)</em> cross-validation <code>cv</code> method for superlearner objects (<a href="https://github.com/kkholst/targeted/issues/64" class="external-link">#64</a>) - (<a href="https://github.com/kkholst/targeted/commit/1d58b26190b979176c25be09c31e6ca1a892073b" class="external-link">1d58b26</a>)</li>
 <li>
@@ -195,7 +249,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

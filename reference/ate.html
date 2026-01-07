@@ -19,7 +19,7 @@ the propensity model or the outcome model / Q-model is correctly specified."><me
 
     <a class="navbar-brand me-2" href="../index.html">targeted</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -159,11 +159,11 @@ nuisance-formula | propensity-formula</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/lvm.html" class="external-link">lvm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">a</span><span class="op">+</span><span class="va">x</span>, <span class="va">a</span><span class="op">~</span><span class="va">x</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>     <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.lvm.html" class="external-link">distribution</a></span><span class="op">(</span><span class="op">~</span><span class="va">y</span>, value <span class="op">=</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.lvm.html" class="external-link">binomial.lvm</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>     <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/ordinal-set.html" class="external-link">ordinal</a></span><span class="op">(</span>K<span class="op">=</span><span class="fl">4</span>, <span class="op">~</span><span class="va">a</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="http://kkholst.github.io/lava/reference/lvm.html" class="external-link">lvm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">a</span><span class="op">+</span><span class="va">x</span>, <span class="va">a</span><span class="op">~</span><span class="va">x</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>     <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="http://kkholst.github.io/lava/reference/sim.lvm.html" class="external-link">distribution</a></span><span class="op">(</span><span class="op">~</span><span class="va">y</span>, value <span class="op">=</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="http://kkholst.github.io/lava/reference/sim.lvm.html" class="external-link">binomial.lvm</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>     <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="http://kkholst.github.io/lava/reference/ordinal-set.html" class="external-link">ordinal</a></span><span class="op">(</span>K<span class="op">=</span><span class="fl">4</span>, <span class="op">~</span><span class="va">a</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>     <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span><span class="op">~</span><span class="va">a</span>, value <span class="op">=</span> <span class="va">factor</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.default.html" class="external-link">sim</a></span><span class="op">(</span><span class="va">m</span>, <span class="fl">1e3</span>, seed<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="http://kkholst.github.io/lava/reference/sim.default.html" class="external-link">sim</a></span><span class="op">(</span><span class="va">m</span>, <span class="fl">1e3</span>, seed<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># (a &lt;- ate(y~a|a*x|x, data=d))</span></span></span>
 <span class="r-in"><span><span class="op">(</span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu">ate</span><span class="op">(</span><span class="va">y</span><span class="op">~</span><span class="va">a</span>, nuisance<span class="op">=</span><span class="op">~</span><span class="va">a</span><span class="op">*</span><span class="va">x</span>, propensity<span class="op">=</span><span class="op">~</span><span class="va">x</span>, data <span class="op">=</span> <span class="va">d</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Estimate Std.Err   2.5%  97.5%    P-value</span>
@@ -173,8 +173,8 @@ nuisance-formula | propensity-formula</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> a=3   0.6348 0.02492 0.5860 0.6836 3.667e-143</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Comparison with randomized experiment</span></span></span>
-<span class="r-in"><span><span class="va">m0</span> <span class="op">&lt;-</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/cancel.html" class="external-link">cancel</a></span><span class="op">(</span><span class="va">m</span>, <span class="va">a</span><span class="op">~</span><span class="va">x</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">y</span><span class="op">~</span><span class="va">a</span><span class="op">-</span><span class="fl">1</span>, <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.default.html" class="external-link">sim</a></span><span class="op">(</span><span class="va">m0</span>,<span class="fl">2e4</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">m0</span> <span class="op">&lt;-</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="http://kkholst.github.io/lava/reference/cancel.html" class="external-link">cancel</a></span><span class="op">(</span><span class="va">m</span>, <span class="va">a</span><span class="op">~</span><span class="va">x</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">y</span><span class="op">~</span><span class="va">a</span><span class="op">-</span><span class="fl">1</span>, <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="http://kkholst.github.io/lava/reference/sim.default.html" class="external-link">sim</a></span><span class="op">(</span><span class="va">m0</span>,<span class="fl">2e4</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> lm(formula = y ~ a - 1, data = lava::sim(m0, 20000))</span>
@@ -215,7 +215,7 @@ nuisance-formula | propensity-formula</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

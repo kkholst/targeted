@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">targeted</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,7 +38,7 @@
     </div>
 
     <div class="ref-description section level2">
-    <p>Constructs a <a href="learner.html">learner</a> class object for <a href="https://rdrr.io/pkg/xgboost/man/xgb.train.html" class="external-link">xgboost::xgboost</a>.</p>
+    <p>Constructs a <a href="learner.html">learner</a> class object for <a href="https://rdrr.io/pkg/xgboost/man/xgboost.html" class="external-link">xgboost::xgboost</a>.</p>
     </div>
 
     <div class="section level2">
@@ -46,11 +46,10 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">learner_xgboost</span><span class="op">(</span></span>
 <span>  <span class="va">formula</span>,</span>
 <span>  max_depth <span class="op">=</span> <span class="fl">2L</span>,</span>
-<span>  eta <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  learning_rate <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  nrounds <span class="op">=</span> <span class="fl">2L</span>,</span>
 <span>  subsample <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  lambda <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  verbose <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  reg_lambda <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  objective <span class="op">=</span> <span class="st">"reg:squarederror"</span>,</span>
 <span>  info <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"xgboost"</span>, <span class="va">objective</span><span class="op">)</span>,</span>
 <span>  learner.args <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -70,32 +69,27 @@
 <dd><p>(integer) Maximum depth of a tree.</p></dd>
 
 
-<dt id="arg-eta">eta<a class="anchor" aria-label="anchor" href="#arg-eta"></a></dt>
+<dt id="arg-learning-rate">learning_rate<a class="anchor" aria-label="anchor" href="#arg-learning-rate"></a></dt>
 <dd><p>(numeric) Learning rate.</p></dd>
 
 
 <dt id="arg-nrounds">nrounds<a class="anchor" aria-label="anchor" href="#arg-nrounds"></a></dt>
-<dd><p>max number of boosting iterations.</p></dd>
+<dd><p>Number of boosting iterations / rounds.</p>
+<p>Note that the number of default boosting rounds here is not automatically tuned, and different
+problems will have vastly different optimal numbers of boosting rounds.</p></dd>
 
 
 <dt id="arg-subsample">subsample<a class="anchor" aria-label="anchor" href="#arg-subsample"></a></dt>
 <dd><p>(numeric) Subsample ratio of the training instance.</p></dd>
 
 
-<dt id="arg-lambda">lambda<a class="anchor" aria-label="anchor" href="#arg-lambda"></a></dt>
+<dt id="arg-reg-lambda">reg_lambda<a class="anchor" aria-label="anchor" href="#arg-reg-lambda"></a></dt>
 <dd><p>(numeric) L2 regularization term on weights.</p></dd>
-
-
-<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
-<dd><p>If 0, xgboost will stay silent. If 1, it will print information about performance.
-If 2, some additional information will be printed out.
-Note that setting <code>verbose &gt; 0</code> automatically engages the
-<code>cb.print.evaluation(period=1)</code> callback function.</p></dd>
 
 
 <dt id="arg-objective">objective<a class="anchor" aria-label="anchor" href="#arg-objective"></a></dt>
 <dd><p>(character) Specify the learning task and the corresponding
-learning objective. See <a href="https://rdrr.io/pkg/xgboost/man/xgb.train.html" class="external-link">xgboost::xgboost</a> for all available options.</p></dd>
+learning objective. See <a href="https://rdrr.io/pkg/xgboost/man/xgboost.html" class="external-link">xgboost::xgboost</a> for all available options.</p></dd>
 
 
 <dt id="arg-info">info<a class="anchor" aria-label="anchor" href="#arg-info"></a></dt>
@@ -109,7 +103,7 @@ learning objective. See <a href="https://rdrr.io/pkg/xgboost/man/xgb.train.html"
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional arguments to <a href="https://rdrr.io/pkg/xgboost/man/xgb.train.html" class="external-link">xgboost::xgboost</a>.</p></dd>
+<dd><p>Additional arguments to <a href="https://rdrr.io/pkg/xgboost/man/xgboost.html" class="external-link">xgboost::xgboost</a>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -123,7 +117,7 @@ learning objective. See <a href="https://rdrr.io/pkg/xgboost/man/xgb.train.html"
 <span class="r-in"><span><span class="va">x1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, sd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">x2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">lp</span> <span class="op">&lt;-</span> <span class="va">x2</span><span class="op">*</span><span class="va">x1</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="va">x1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">yb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">1</span>, <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/internal.html" class="external-link">expit</a></span><span class="op">(</span><span class="va">lp</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">yb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">1</span>, <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="http://kkholst.github.io/lava/reference/internal.html" class="external-link">expit</a></span><span class="op">(</span><span class="va">lp</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">y</span> <span class="op">&lt;-</span>  <span class="va">lp</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, sd <span class="op">=</span> <span class="fl">0.5</span><span class="op">**</span><span class="fl">.5</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">d0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">yb</span>, <span class="va">x1</span>, <span class="va">x2</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
@@ -131,7 +125,7 @@ learning objective. See <a href="https://rdrr.io/pkg/xgboost/man/xgb.train.html"
 <span class="r-in"><span><span class="va">lr</span> <span class="op">&lt;-</span> <span class="fu">learner_xgboost</span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span>, nrounds <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">lr</span><span class="op">$</span><span class="fu">estimate</span><span class="op">(</span><span class="va">d0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">lr</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">d0</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -1.9827677  2.0304260  2.0304260  0.1772428  1.5559609 -3.3161051</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -2.1982367  1.9023441  1.9023441 -1.1556151 -0.8474901 -1.5107955</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># binary classification</span></span></span>
 <span class="r-in"><span><span class="va">lr</span> <span class="op">&lt;-</span> <span class="fu">learner_xgboost</span><span class="op">(</span><span class="va">yb</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span>, nrounds <span class="op">=</span> <span class="fl">5</span>,</span></span>
@@ -139,7 +133,7 @@ learning objective. See <a href="https://rdrr.io/pkg/xgboost/man/xgb.train.html"
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">lr</span><span class="op">$</span><span class="fu">estimate</span><span class="op">(</span><span class="va">d0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">lr</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">d0</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.2974974 0.9214302 0.7824602 0.1971165 0.4704079 0.1971165</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.1874139 0.8569067 0.6753441 0.2279280 0.6552737 0.2279280</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># multi-class classification</span></span></span>
 <span class="r-in"><span><span class="va">d0</span> <span class="op">&lt;-</span> <span class="va">iris</span></span></span>
@@ -166,7 +160,7 @@ learning objective. See <a href="https://rdrr.io/pkg/xgboost/man/xgb.train.html"
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>
