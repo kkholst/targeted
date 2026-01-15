@@ -20,11 +20,10 @@ namespace target {
   };
 
   SignedWald signedwald_sim(const arma::vec &par, const arma::mat &vcov,
-                            const arma::vec &noninf,
-                            const arma::vec &weights,
-                            unsigned nsim_null = 1e4
-                            );
-
+                            const arma::vec &noninf, const arma::vec &weights,
+                            unsigned nsim_null = 1e4, double dykstra_tol = 1e-7,
+                            unsigned dykstra_niter = 500,
+                            double pinv_tol = 1e-16);
 
 // min ||x-u||^2 s.t. Au <= 0
   raggedArray lsdykstra(const arma::vec &x, const arma::mat &A,

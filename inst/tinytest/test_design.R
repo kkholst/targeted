@@ -51,6 +51,120 @@ test_design <- function() {
 }
 test_design()
 
+# tests when response variable is a factor
+test_design_response_factor <- function() {
+  data <- data.frame(x1 = rnorm(n), x2 = rnorm(n), y = c("a", "b"))
+
+  # response variable of type character is not cast to factor
+  dd <- design(y ~ x1, data)
+  expect_equivalent(data$y, dd$y)
+  # updating design object won't convert to factor either
+  expect_equivalent(update(dd, head(data, 1), response = TRUE)$y, c("a"))
+  # providing new data with factor works - which should be fine
+  expect_equivalent(
+    update(dd, data.frame(y = factor("a"), x1 = 1, x2=2), response = TRUE)$y[[1]],
+    factor("a")
+  )
+
+  # levels attribute is empty because y is not converted to a factor
+  expect_equal(length(dd$levels), 0)
+
+  # providing levels argument will convert response variable
+  dd1 <- update(
+    dd, head(data, 1), response = TRUE, levels = list(y = c("a", "b"))
+  )
+  expect_equal(dd1$y[[1]], factor(c("a"), levels = c("a", "b")))
+
+  # response variable is converted inside formula argument to factor
+  dd <- design(factor(y) ~ x1, data)
+  res_factor <- factor(data$y)
+  names(res_factor) <- 1:length(res_factor)
+  expect_equal(unname(dd$y), unname(res_factor))
+  # levels of response variable are added to levels attribute
+  expect_equal(dd$levels, list("response_" = c("a", 'b')))
+  # factor levels are preserved when updating design object
+  dd1 <- update(dd, head(data, 1), response = TRUE)
+  expect_equal(dd1$y, res_factor[1])
+
+  expect_warning(
+    # doesn't work because y is not an element in levels attributes
+    dd2 <- update(dd, head(data, 1), response = TRUE,
+    levels = list(y = c("a", "b", "c"))
+  ))
+  expect_equal(levels(dd2$y), "a")
+
+  # it may be confusing for users that the above doesn't work but the following
+  # works. this test also verifies that providing levels will always convert
+  # the response vector
+  dd_works <- design(y ~ x1, data, levels = list(y = c("a", "b", "c")))
+  expect_equal(levels(dd_works$y), c("a", "b", "c"))
+
+  # both work because y and response_ are both elements in levels attribute
+  dd2 <- update(dd_works, head(data, 1), response = TRUE,
+    levels = list("response_" = c("a", "b", "c", "d"))
+  )
+  dd22 <- update(dd_works, head(data, 1), response = TRUE,
+    levels = list("y" = c("a", "b", "c", "d"))
+  )
+  expect_equal(dd2$y, dd22$y)
+
+  # however, the following works again because the "response_" element in levels
+  # is used when updating dd
+  dd2 <- update(dd, head(data, 1), response = TRUE,
+    levels = list("response_" = c("a", "b", "c"))
+  )
+  expect_equal(levels(dd2$y), c("a", "b", "c"))
+
+  # similar "issues" during call to design
+  expect_warning(
+    # doesn't work
+    dd2 <- design(factor(y) ~ x1, data, levels = list(y = c("a", "b", "c")))
+  )
+  expect_equal(levels(dd2$y), c("a", "b"))
+
+  # works, which is a bit annoying because users need to remember to use
+  # "response_"
+  dd2 <- design(factor(y) ~ x1, data,
+    levels = list("response_" = c("a", "b", "c"))
+  )
+  expect_equal(levels(dd2$y), c("a", "b", "c"))
+
+  # works as well
+  dd2 <- design(factor(y, levels = c("a", "b", "c")) ~ x1, data)
+  expect_equal(levels(dd2$y), c("a", "b", "c"))
+
+
+  data <- data.frame(x1 = rnorm(n), x2 = rnorm(n), y = as.factor(c("a", "b")))
+  dd <- design(y ~ x1, data)
+  expect_equal(res_factor, dd$y)
+
+  dd2 <- update(dd, head(data, 1), response = TRUE)
+  expect_equal(levels(dd2$y), c("a","b"))
+
+  # also works when new data is a character
+  dd2 <- update(dd, data.frame(y = "a", x1 = 1, x2=2), response = TRUE)
+  expect_equal(levels(dd2$y), c("a","b"))
+
+  # adding an extra level works by using the "correct" levels element
+  dd <- design(y ~ x1, data, levels = list("response_" = c("a", "b", "c")))
+  expect_equal(levels(dd$y), c("a","b", "c"))
+
+  data <- data.frame(x = c("x", "y"), y = c("a", "b"))
+  dd <- design(as.factor(y) ~ x, data)
+  # list with levels for all factors need to be provided even though we only
+  # want to update the levels of one variable
+  expect_error(
+    update(dd, head(data, 1), response = TRUE,
+    levels = list("response_" = c("a", "b", "c"))
+  )
+  )
+  dd_upd <- update(dd, head(data, 1), response = TRUE,
+    levels = list("response_" = c("a", "b", "c"), x = c("x", "y"))
+  )
+  expect_equal(levels(dd_upd$y), c("a", "b", "c"))
+}
+test_design_response_factor()
+
 # test that ellipsis are passed on to model.frame
 test_design_ellipsis <- function() {
   expect_error(
@@ -128,20 +242,31 @@ test_design_specials <- function() {
   des <- design(y ~ x2 + offset(x1), specials="offset", data=ddata)
   expect_equivalent(des$x, cbind(ddata$x2))
   expect_equivalent(des$offset, ddata$x1)
+
+  # check specials works with multiple arguments and Surv response
+  d <- ddata
+  d$a <- rbinom(nrow(d), 1, 0.5)
+  d$z <- rbinom(nrow(d), 1, 0.5)
+  des <- design(Surv(x1, a) ~ stratify(a, z) + x1, data = d, specials = "stratify")
+  expect_equivalent(des$x, cbind(d$x1))
+  expect_equivalent(des$stratify, with(d, stratify(a, z)))
+  expect_true(inherits(des$y, "Surv"))
+
 }
 test_design_specials()
 
 # specials returning factor
-etest_design_specials_factor <- function() {
+test_design_specials_factor <- function() {
   strata <- survival::strata
   dat <- transform(ddata, a=rbinom(nrow(ddata), 1, 0.5))
-  des <- design(y ~ strata(a) + x1*x2, data=dat, specials="strata")
+  des <- design(y ~ strata(a) + x1 * x2, data = dat, specials = "strata")
 
-  expect_equivalent(des$x, cbind(dat$x1))
+  expect_equivalent(des$strata, with(dat, strata(a)))
+
+  expect_equivalent(des$x, model.matrix(~-1+x1*x2, data=dat))
   expect_equivalent(as.numeric(des$strata)-1, dat$a)
-
 }
-
+test_design_specials_factor()
 
 # test behavior of design when formula specifies transformations
 test_design_transformations <- function() {
@@ -197,8 +322,8 @@ test_design_factor <- function() {
   # covariates
   dd <- design(y ~ -1 + x3, ddata_fact, intercept = TRUE)
 
-  # factors levels are collected in xlevels attribute
-  expect_equal(dd$xlevels, list(x3 = c("a", "b")))
+  # factors levels are collected in levels attribute
+  expect_equal(dd$levels, list(x3 = c("a", "b")))
   # factors are one-hot encoded
   dd_expect <- cbind(
     rep(c(1, 0), length.out = n),
@@ -231,9 +356,13 @@ test_design_factor <- function() {
   expect_equal(unname(dd$x[, 1]), rep(c(0, 1), length.out = nrow(dd$x)))
   expect_equal(colnames(dd$x), "x3b")
 
-  # order of levels can be controlled with xlev argument
-  dd <- design(y ~ x3, ddata_fact, xlev = list(x3 = c("b", "a")))
+  # order of levels can be controlled with levels argument
+  dd <- design(y ~ x3, ddata_fact, levels = list(x3 = c("b", "a")))
   expect_equal(colnames(dd$x), "x3a")
+
+  # additional factor levels can also be added
+  dd <- design(y ~ x3, ddata_fact, levels = list(x3 = c("a", "b", "c")))
+  expect_equal(unname(dd$x[, "x3c"]), rep(0, length.out = n))
 }
 test_design_factor()
 
@@ -296,6 +425,12 @@ test_update.design.factors <- function() {
     update(dd, newdata),
     pattern = "factor x3 has new levels c"
   )
+  # works when providing levels argument to update method
+  dd_upd <- update(dd, newdata, levels = list(x3 = c("a", "c")))
+  expect_equal(unname(dd_upd$x[, "x3c"]), rep(c(0, 1), length.out = n))
+  # order is changed correctly
+  dd_upd <- update(dd, newdata, levels = list(x3 = c("c", "a")))
+  expect_equal(unname(dd_upd$x[, "x3a"]), rep(c(1, 0), length.out = n))
 
   # intercept is handled correctly for factors
   dd <- design(y ~ -1 + x3, ddata_fact, intercept = TRUE)
@@ -319,3 +454,48 @@ test_model.matrix.design <- function() {
   expect_equal(model.matrix(dd), dd$x)
 }
 test_model.matrix.design()
+
+test_update.design.response <- function() {
+  d <- data.frame(a = c(1, 1, 0, 0), y = c(1, 0, 1, 0))
+  des <- design(y ~ a, data = d, intercept = FALSE)
+  expect_equivalent(d$y, des$y)
+  expect_equivalent(d$a, des$x[, 1, drop = TRUE])
+  # check update works with response as well
+  dnew <- data.frame(a = c(1, 0), y=c(1, 1))
+  desnew <- update(des, dnew, response=TRUE)
+  expect_equivalent(dnew$y, desnew$y)
+  expect_equivalent(desnew$x[, 1, drop = TRUE], dnew$a)
+  # and it ignores the response if it is not available in the data
+  dnew <- data.frame(a = c(1, 0))
+  desnew <- update(des, dnew, response=TRUE)
+  expect_true(is.null(desnew$y))
+  expect_equivalent(desnew$x[, 1, drop = TRUE], dnew$a)
+}
+test_update.design.response()
+
+test_print.design <- function() {
+  dat <- data.frame(
+    s = survival::Surv(runif(10), rbinom(10, 1, 0.5)),
+    y = runif(10),
+    z = letters[1:10]
+  )
+
+  ## character
+  des <- design(z ~ 1, data = dat)
+  expect_stdout(print(des), "response \\(length: 10\\)")
+  expect_stdout(print(des), "1[ ]*a\n2[ ]*b\n")
+
+  ## factor
+  des <- design(factor(z) ~ 1, data = dat)
+  expect_stdout(print(des), "response \\(length: 10\\)")
+  expect_stdout(print(des), "1[ ]*a\n2[ ]*b\n")
+
+  ## Surv
+  des <- design(s ~ 1, data = dat)
+  expect_stdout(print(des), "response \\(length: 10\\)")
+
+  ## numeric
+  des <- design(y ~ 1, data = dat)
+  expect_stdout(print(des), "response \\(length: 10\\)")
+}
+test_print.design()

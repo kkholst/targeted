@@ -9,7 +9,7 @@
 #' @param laplace.smooth Laplace smoothing
 #' @param prior optional prior probabilities (default estimated from data)
 #' @param ... additional arguments to lower level functions
-#' @aliases naivebayes NB
+#' @aliases naivebayes
 #' @export
 #' @return An object of class '\code{naivebayes}' is returned. See
 #'   \code{\link{naivebayes-class}} for more details about this class and
@@ -32,12 +32,11 @@
 #' d2 <- data.table(d1)[, .(.N), by = .(y, x)]
 #' m2 <- naivebayes(y ~ x, data = d2, weights = d2$N)
 #' all(predict(m1, d1) == predict(m2, d1))
-naivebayes <- NB <-
-  function(formula, data, weights = NULL,
-               kernel = FALSE, laplace.smooth = 0, prior = NULL, ...) {
+naivebayes <- function(formula, data, weights = NULL,
+                       kernel = FALSE, laplace.smooth = 0,
+                       prior = NULL, ...) {
 
   if (missing(data)) stop("Need data as data.frame or data.table")
-  if (!data.table::is.data.table(data)) data <- data.table::data.table(data)
   des <- design(formula, data = as.data.frame(data), specials = "weights")
   y <- as.factor(des$y)
   if (is.null(weights)) {
@@ -45,12 +44,20 @@ naivebayes <- NB <-
     if (is.null(weights)) weights <- rep(1, length(y))
   }
   predictor <- des$term.labels
-  X <- data[, predictor, with = FALSE, drop = FALSE]
+  if (inherits(data, "data.table")) {
+    X <- data[, predictor, with = FALSE, drop = FALSE]
+  } else {
+    X <- data[, predictor, drop = FALSE]
+  }
   charvar <- names(Filter(is.character, X))
   ## Convert character vectors to factors to avoid loosing levels
   ## when calculating conditional probabilities
   if (length(charvar) > 0) {
-    for (col in charvar) data.table::set(X, j = col, value = factor(X[[col]]))
+    if (inherits(data, "data.table")) {
+      for (col in charvar) data.table::set(X, j = col, value = factor(X[[col]]))
+    } else {
+      for (col in charvar) X[, col] <- factor(X[, col])
+    }
   }
   xtabs0 <- function(counts, x, prop = FALSE, ...) {
     res <- stats::xtabs(counts ~ x)
@@ -65,7 +72,7 @@ naivebayes <- NB <-
     ## TODO: Assign new values and renormalize
   }
   estcond <- function(x, weights, ...) {
-    if (data.table::is.data.table(x)) x <- as.matrix(x[, 1])
+    if (inherits(x, "data.table")) x <- as.matrix(x[, 1])
     w <- weights / sum(weights)
     if (is.numeric(x)) {
       if (!kernel) {
@@ -91,7 +98,11 @@ naivebayes <- NB <-
   }
   pcond <- lapply(cls, function(i) {
     idx <- which(y == i)
-    m0 <- as.data.frame(X[idx, predictor, with = FALSE, drop = FALSE])
+    if (inherits(data, "data.table")) {
+      m0 <- as.data.frame(X[idx, predictor, with = FALSE, drop = FALSE])
+    } else {
+      m0 <- as.data.frame(X[idx, predictor, drop = FALSE])
+    }
     return(lapply(m0, estcond, weights = weights[idx]))
   })
   res <- structure(
@@ -115,7 +126,7 @@ function(x, ...) {
     print(x$call)
     cat("\n")
     val <- x$prior
-    names(val) <- paste0(seq_len(length(val)), ": ", names(val))
+    names(val) <- paste0(seq_along(val), ": ", names(val))
     print(data.table::data.table(Prior=val))
     cat("\n")
 }
@@ -136,7 +147,6 @@ predict.naivebayes <- function(object, newdata, # nolint
                        expectation = NULL,
                        threshold = c(1e-3, 1e-3), ...) {
   if (missing(newdata)) stop("Need new data to make predictions")
-  if (!is.data.table(newdata)) newdata <- data.table::data.table(newdata)
   ## Likelihood P(class|x) = P(class)P(x|class)/P(x)
   if (!is.null(expectation)) {
     if (inherits(expectation, "formula")) {
@@ -153,10 +163,18 @@ predict.naivebayes <- function(object, newdata, # nolint
     lposterior <- matrix(nrow = nrow(newdata), ncol = length(object$classes))
   }
   predictor <- object$design$term.labels
-  X <- newdata[, predictor, with = FALSE, drop = FALSE]
+  if (inherits(newdata, "data.table")) {
+    X <- newdata[, predictor, with = FALSE, drop = FALSE]
+  } else {
+    X <- newdata[, predictor, drop = FALSE]
+  }
   charvar <- names(Filter(is.character, X))
   if (length(charvar) > 0) {
-    for (col in charvar) data.table::set(X, j = col, value = factor(X[[col]]))
+    if (inherits(newdata, "data.table")) {
+      for (col in charvar) data.table::set(X, j = col, value = factor(X[[col]]))
+    } else {
+      for (col in charvar) X[, col] <- factor(X[, col])
+    }
   }
   px <- rep(0, nrow(newdata))
   for (i in seq_along(object$classes)) {
@@ -165,7 +183,11 @@ predict.naivebayes <- function(object, newdata, # nolint
     for (j in seq_along(predictor)) {
       x0 <- object$conditional[[i]]
       nam <- object$xvar[j]
-      x <- as.matrix(X[, nam, with = FALSE, drop = FALSE])[, 1]
+      if (inherits(newdata, "data.table")) {
+        x <- as.matrix(X[, nam, with = FALSE, drop = FALSE])[, 1]
+      } else {
+        x <- as.matrix(X[, nam, drop = FALSE])[, 1]
+      }
       estx <- x0[[j]]
       if (is.list(estx)) {
         estx <- estx$estimate
@@ -211,7 +233,6 @@ predict.naivebayes <- function(object, newdata, # nolint
   colnames(lposterior) <- object$classes
   return(exp(lposterior))
 }
-
 
 #' @title naivebayes class object
 #'

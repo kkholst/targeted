@@ -77,7 +77,7 @@ int_surv <- function(times, surv,
         diff_times_k <- diff(c(start_k, times[idx], stop_k))
         surv_k <- c(surv[idx[1] - 1], surv[idx])
       } else {
-        idx_last <- data.table::last(which(times <= stop_k))
+        idx_last <- tail(which(times <= stop_k), 1)
         diff_times_k <- diff(c(start_k, stop_k))
         surv_k <- surv[idx_last]
       }

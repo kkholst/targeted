@@ -2,7 +2,6 @@
 % Please edit documentation in R/naivebayes.R
 \name{naivebayes}
 \alias{naivebayes}
-\alias{NB}
 \title{Naive Bayes classifier}
 \usage{
 naivebayes(

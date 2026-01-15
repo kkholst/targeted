@@ -1,3 +1,4 @@
+.dir-locals.el
 .tool-versions
 NEWS.html
 README.html
@@ -138,3 +139,9 @@ __pycache__
 /R-package/targeted/_test.R
 /y.csv
 .Rproj.user
+
+# output from test coverage
+tests/lib/
+tests/coverage-report.html
+/doc/
+/Meta/

@@ -2,6 +2,7 @@
 % Please edit documentation in R/superlearner.R
 \name{superlearner}
 \alias{superlearner}
+\alias{metalearner_nnls}
 \title{Superlearner (stacked/ensemble learner)}
 \usage{
 superlearner(

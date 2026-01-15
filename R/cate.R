@@ -158,7 +158,7 @@ cate <- function(response.model, # nolint
 
   cl <- match.call()
   n <- nrow(data)
-  if (inherits(data, "data.table")) {
+  if (inherits(data, c("data.table", "tbl_df"))) {
     data <- as.data.frame(data)
   }
 
@@ -317,7 +317,7 @@ cate <- function(response.model, # nolint
   a <- c()
   pmod <- propensity.model$clone(deep = TRUE)
   for (i in seq_along(contrast)) {
-    newf <-reformulate(
+    newf <- reformulate(
       as.character(pmod$formula)[[3]],
       outcome_level(treatment_var, contrast[i])
     )

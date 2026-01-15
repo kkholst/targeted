@@ -73,8 +73,8 @@ fast_iid <- function(y, p, x1, weights, logistic = TRUE) {
     .Call(`_targeted_dykstra`, x, A)
 }
 
-.signedwald <- function(par, vcov, noninf, weights, nsim_null = 1e4L) {
-    .Call(`_targeted_signedwald`, par, vcov, noninf, weights, nsim_null)
+.signedwald <- function(par, vcov, noninf, weights, nsim_null = 1e4L, dykstra_tol = 1e-7, dykstra_niter = 500L, pinv_tol = 1e-16) {
+    .Call(`_targeted_signedwald`, par, vcov, noninf, weights, nsim_null, dykstra_tol, dykstra_niter, pinv_tol)
 }
 
 # Register entry points for exported C++ functions

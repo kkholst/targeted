@@ -1,4 +1,6 @@
+
 model.extract2 <- function(frame, component) {
+  # model.extract version that works with response,offset components
   component <- as.character(substitute(component))
   if (component %in% c("response", "offset")) {
     return(do.call(
@@ -30,6 +32,27 @@ model.extract2 <- function(frame, component) {
   return(rval)
 }
 
+# extract variables of special terms. Returns results in a named list
+Specials <- function(formula, spec, split1 = ",", split2 = NULL, ...) {
+  tt <- terms(formula, spec)
+  pos <- attributes(tt)$specials[[spec]]
+  if (is.null(pos)) return(NULL)
+  x <- rownames(attributes(tt)$factors)[pos]
+  st <- gsub(" ", "", x) ## trim
+  spec <- unlist(strsplit(st, "[()]"))[[1]]
+  res <- substr(st, nchar(spec) + 2, nchar(st) - 1)
+  if (!is.null(split1)) {
+    res <- unlist(strsplit(res, split1))
+  }
+  res <- as.list(res)
+  for (i in seq_along(res)) {
+    if (length(grep("~", res[[i]])) > 0) {
+      res[[i]] <- as.formula(res[[i]])
+    }
+  }
+  return(res)
+}
+
 #' Extract design matrix from data.frame and formula
 #' @title Extract design matrix
 #' @param formula formula
@@ -42,7 +65,7 @@ model.extract2 <- function(frame, component) {
 #' @param specials character vector specifying functions in the formula that
 #'   should be marked as special in the [terms] object
 #' @param specials.call (call) specials optionally defined as a call-type
-#' @param xlev a named list of character vectors giving the full set of levels
+#' @param levels a named list of character vectors giving the full set of levels
 #'   to be assumed for each factor
 #' @param design.matrix (logical) if FALSE then only response and specials are
 #'   returned. Otherwise, the design.matrix `x` is als part of the returned
@@ -52,11 +75,11 @@ model.extract2 <- function(frame, component) {
 #' @export
 design <- function(formula, data, ..., # nolint
                    intercept = FALSE,
-                   response = FALSE,
+                   response = TRUE,
                    rm_envir = FALSE,
                    specials = NULL,
                    specials.call = NULL,
-                   xlev = NULL,
+                   levels = NULL,
                    design.matrix = TRUE) {
   dots <- substitute(list(...))
   if ("subset" %in% names(dots)) stop(
@@ -64,6 +87,17 @@ design <- function(formula, data, ..., # nolint
   )
   tt <- terms(formula, data = data, specials = specials)
   term.labels <- attr(tt, "term.labels") # predictors
+
+  if (response && inherits(
+    try(model.frame(update(tt, ~1), data = data), silent = TRUE),
+    "try-error"
+  )) { # response appears not to be in `data`
+    response <- FALSE
+  }
+  # delete response to generate design matrix when making predictions
+  if (!response) {
+    tt <- delete.response(tt)
+  }
 
   sterm.list <- c()
   if (length(specials) > 0) {
@@ -75,34 +109,45 @@ design <- function(formula, data, ..., # nolint
     if (length(sterm.list) > 0) {
       # create formula without specials
       if ((nrow(attr(tt, "factors")) - attr(tt, "response")) ==
-          length(sterm.list)) {
+        length(sterm.list)) {
         # only specials on the rhs, remove everything
         formula <- update(formula, ~1)
       } else {
-        # remove specials from formula
-        ## sterm.idx <- unlist(attr(tt, "specials")) - attr(tt, "response")
         # predictors without the specials
-        term.labels <- setdiff(term.labels,
-                               unlist(sterm.list))
-        ## xx <- attr(tt, "term.labels")[-sterm.idx]
-        ## formula <- update(tt, reformulate(xx))
-        formula <- update(tt, reformulate(term.labels))
+        term.labels <- setdiff(
+          term.labels,
+          unlist(sterm.list)
+        )
+        # formula <- update(tt, reformulate(term.labels))
       }
-
-      upd <- paste(" ~ . - ", paste(sterm.list, collapse = " - "))
-      formula <- update(formula, upd)
+      # remove specials from formula
+      fst <- lava::trim(paste(deparse(formula), collapse = ""), all = TRUE)
+      for (s in sterm.list) {
+        fst <- gsub(
+          lava::trim(s, all = TRUE),
+          "", fst,
+          fixed = TRUE
+        )
+      }
+      fst <- gsub("[\\+]*$", "", fst) # remove potential any trailing '+'
+      formula <- as.formula(fst)
     }
   }
 
+  formula0 <- formula
+  if (!response) formula0 <- formula(delete.response(terms(formula)))
+
+  xlev <- levels
+  xlev[["response_"]] <- NULL
   if (!design.matrix) { # only extract specials, response
     des <- attr(tt, "factors")
-    fs <- update(formula, ~1)
+    fs <- update(formula0, ~1)
     if (length(sterm.list) > 0) {
       # formula with only special-terms
       fs <- reformulate(paste(sterm.list, collapse = " + "))
-      fs <- update(formula, fs)
+      fs <- update(formula0, fs)
     }
-    mf <- model.frame(fs, data=data, ...)
+    mf <- model.frame(fs, data = data, ...)
   } else { # also extract design matrix
     mf <- model.frame(tt,
                       data = data, ...,
@@ -115,7 +160,27 @@ design <- function(formula, data, ..., # nolint
     xlev0 <- xlev
   }
 
-  y <- model.response(mf, type = "any")
+  y <- NULL
+  if (response) {
+    y <- tryCatch(
+      model.response(mf, type = "any"),
+      error = function(...) NULL
+    )
+    if (is.factor(y) || is.character(y)) {
+      ylev <- levels[["response_"]]
+      if (!is.null(ylev)) {
+        y <- factor(y, levels = ylev)
+      } else {
+        if (is.factor(y)) {
+          ylev <- levels(y)
+        }
+        if (is.null(levels[["response_"]])) {
+          levels[["response_"]] <- ylev
+        }
+      }
+    }
+  }
+
   has_intercept <- attr(tt, "intercept") == 1L
   specials <- union(
     specials,
@@ -123,16 +188,22 @@ design <- function(formula, data, ..., # nolint
   ) # is a call object
 
   specials.list <- c()
+  specials.var <- c() # holds the variable-arguments of the specials functions
   if (length(specials) > 0) {
     for (s in specials) {
       w <- eval(substitute(model.extract2(mf, s), list(s = s)))
       specials.list <- c(specials.list, list(w))
+      specials.var <- c(
+        specials.var,
+        list(unlist(Specials(tt, spec = s)))
+      )
     }
+    names(specials.var) <- specials
     names(specials.list) <- specials
     if (length(sterm.list) > 0) {
       if (design.matrix) {
         xlev0[sterm.list] <- NULL
-        mf <- model.frame(formula,
+        mf <- model.frame(formula0,
                           data = data, ...,
                           xlev = xlev0,
                           drop.unused.levels = FALSE
@@ -161,23 +232,22 @@ design <- function(formula, data, ..., # nolint
     x <- NULL
   }
 
-  # delete response to generate design matrix when making predictions
-  if (!response) tt <- delete.response(tt)
-
   if (rm_envir) attr(tt, ".Environment") <- NULL
   if (is.null(specials.call)) specials.call <- dots
 
+  xlev[["response_"]] <- levels[["response_"]]
   res <- c(
     list(
       formula = formula, # formula without specials
       terms = tt,
       term.labels = term.labels,
-      xlevels = xlev,
+      levels = xlev,
       x = x, y = y,
       design.matrix = design.matrix,
       intercept = has_intercept,
       data = data[0, ], ## Empty data.frame to capture structure of data
       specials = specials,
+      specials.var = specials.var,
       specials.call = specials.call
     ),
     specials.list
@@ -186,16 +256,18 @@ design <- function(formula, data, ..., # nolint
 }
 
 #' @export
-update.design <- function(object, data = NULL, ...) {
+update.design <- function(object, data = NULL, response = FALSE, levels, ...) {
   if (is.null(data)) data <- object$data
+  if (missing(levels)) levels <- object$levels
   return(
     design(object$terms,
       data = data,
       design.matrix = object$design.matrix,
-      xlev = object$xlevels,
+      levels = levels,
       intercept = object$intercept,
       specials = object$specials,
-      specials.call = object$specials.call
+      specials.call = object$specials.call,
+      response = response
     )
   )
 }
@@ -229,7 +301,15 @@ print.design <- function(x, n=2, ...) {
   cat_ruler(" design object ", 10)
   cat(sprintf("\nresponse (length: %s)", length(x$y)))
   if (length(x$y) > 0) {
-    lava::Print(x$y, n = n, ...)
+    y <- x$y
+    ## colnames(y) <- ""
+    if (is.factor(y)) y <- as.character(y)
+    if (inherits(y, c("Surv", "Event"))) {
+      cat("\n")
+      y <- cbind(y)
+    }
+    cat("\n")
+    lava::Print(y, n = n, ...)
   } else {
     cat("\n")
   }

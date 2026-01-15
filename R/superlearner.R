@@ -1,3 +1,4 @@
+#' @export
 metalearner_nnls <- function(y, pred, method = "quadprog", ...) {
   if (NCOL(pred) == 1) {
     return(1.0)
@@ -9,10 +10,13 @@ metalearner_nnls <- function(y, pred, method = "quadprog", ...) {
     res <- nnls::nnls(A = pred, b = y)
     coefs[idx] <- res$x
   } else {
-    opt <- quadprog::solve.QP(
-      Dmat = t(pred) %*% pred,
-      Amat = diag(nrow = ncol(pred)),
-      dvec = t(pred) %*% y
+    opt <- tryCatch(
+      quadprog::solve.QP(
+        Dmat = t(pred) %*% pred,
+        Amat = diag(nrow = ncol(pred)),
+        dvec = t(pred) %*% y
+      ),
+      error = function(...) list(solution = rep(NA, NCOL(pred)))
     )
     coefs[idx] <- opt$solution
   }
@@ -122,6 +126,7 @@ get_learner_names <- function(model.list, name.prefix) {
 #'   [future.apply::future_lapply].
 #' @references Luedtke & van der Laan (2016) Super-Learning of an Optimal
 #'   Dynamic Treatment Rule, The International Journal of Biostatistics.
+#' @aliases superlearner metalearner_nnls
 #' @seealso [predict.superlearner] [weights.superlearner] [score.superlearner]
 #' @examples
 #' sim1 <- function(n = 5e2) {

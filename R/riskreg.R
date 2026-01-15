@@ -274,7 +274,7 @@ riskreg_fit <- function(y, a, # nolint
 
     f <- function(x) sqrt(sum(u(x))^2)
     opt <- nlminb(alpha0, f, control=control)
-    if (opt$objective>1e-3) {
+    if (opt$objective>1e-3 && requireNamespace("optimx", quietly = TRUE)) {
         suppressWarnings(
           op <- optimx::optimx(alpha0, f,
             method = c("Nelder-Mead", "BFGS", "nlminb", "Rcgmin"),

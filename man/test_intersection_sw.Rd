@@ -11,6 +11,7 @@ test_intersection_sw(
   weights = 1,
   nsim.null = 10000,
   index = NULL,
+  control = list(),
   par.name = "theta"
 )
 }
@@ -27,6 +28,9 @@ test_intersection_sw(
 
 \item{index}{(integer) subset of parameters to test}
 
+\item{control}{(list) arguments to alternating projection algorithm. See
+details section.}
+
 \item{par.name}{(character) parameter names in output}
 }
 \value{
@@ -38,7 +42,16 @@ intersection test given by \deqn{SW = \inf_{\theta \in \cap_{i=1}^n H_i}
   \{(\widehat{\theta}-\theta)^\top W\widehat{\Sigma}W
   (\widehat{\theta}-\theta)\} } with individual hypotheses for each
 coordinate of \eqn{\theta} given by \eqn{H_i: \theta_j < \delta_j} for some
-non-inferiority margin \eqn{\delta_j}, \eqn{j=1,\ldots,n}.
+non-inferiority margin \eqn{\delta_j}, \eqn{j=1,\ldots,n}. #
+}
+\details{
+The constrained least squares problem is solved using Dykstra's
+algorithm. The following parameters for the optimization can be controlled
+via the \code{control} list argument: \code{dykstra_niter} sets the maximum number of
+iterations (default 500), \code{dykstra_tol} convergence tolerance of the
+alternating projection algorithm (default 1e-7), \code{pinv_tol} tolerance for
+calculating the pseudo-inverse matrix (default
+length(par)\emph{.Machine$double.eps}max(eigenvalue)).
 }
 \examples{
 S <- matrix(c(1, 0.5, 0.5, 2), 2, 2)
@@ -52,6 +65,15 @@ e <- estimate(coef = thetahat, vcov = S, labels = c("p1", "p2"))
 lava::closed_testing(e, test_intersection_sw, noninf = c(-0.1, -0.1)) |>
   summary()
 }
+}
+\references{
+Christian Bressen Pipper, Andreas Nordland & Klaus Kähler Holst
+(2025) A general approach to construct powerful tests for intersections of
+one-sided null-hypotheses based on influence functions. arXiv:
+https://arxiv.org/abs/2511.07096.
+}
+\seealso{
+\link{test_zmax_onesided} \link[lava:compare]{lava::test_wald} \link[lava:closed_testing]{lava::closed_testing}
 }
 \author{
 Klaus Kähler Holst, Christian Bressen Pipper
