@@ -168,24 +168,26 @@ survival_treatment_level_estfun <- function(type = "risk",
 }
 
 ##' For a user defined function \eqn{H(u|X)}, computes the integral
-##' \eqn{\int_0^\tau \frac{H(u)|X}{S^c}} dM^c(u|X), where $S^c$ is the
-##' censoring time survival function and $M^c$ is the censoring
-##' is the right censoring martingale with the Doob-Meyer decomposition
-##' \eqn{M^c = N^c - L^c}, where \eqn{N^c} is the counting process
-##' \eqn{N^c(s) = I\{\tilde T \leq s \Delta = 0\}} and \eqn{L^c} is the
-##' compensator \eqn{L^c(s) = \int_0^s I \{\tilde T \geq u\} d\Lambda^c(u|X)}.
+##' \eqn{\int_0^\tau \frac{H(u)|X}{S^c}} dM^c(u|X), where $S^c$ is the censoring
+##' time survival function and $M^c$ is the censoring is the right censoring
+##' martingale with the Doob-Meyer decomposition \eqn{M^c = N^c - L^c}, where
+##' \eqn{N^c} is the counting process \eqn{N^c(s) = I\{\tilde T \leq s \Delta =
+##' 0\}} and \eqn{L^c} is the compensator \eqn{L^c(s) = \int_0^s I \{\tilde T
+##' \geq u\} d\Lambda^c(u|X)}.
 ##' @title Calculate the right censoring augmentation integral
-##' @param T_model
-##' @param C_model
-##' @param data
-##' @param time
-##' @param event
-##' @param tau
-##' @param construct_H
-##' @param sample
-##' @param blocksize
-##' @param ...
-##' @return
+##' @param T_model model for event time
+##' @param C_model model for censoring
+##' @param data data.frame
+##' @param time time variable
+##' @param event event variable
+##' @param tau stopping time
+##' @param H_constructor function H(u|X)
+##' @param sample approximate integral by subsampling jump-times
+##' @param blocksize evaluate cumhaz in chunks of size blocksize
+##' @param return_all if TRUE then bot counting process N and compensator term L
+##'   are returned
+##' @param ... additional arguments passed to lower level functions
+##' @return vector with integral from 0 to all jump-times
 ##' @author Andreas Nordland
 rcai <- function(T_model,
                  C_model,

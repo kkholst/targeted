@@ -71,7 +71,8 @@ intsurv <- function(time, surv, stop = max(time), jumps.only=FALSE) {
 ##'   points given by \code{times}.
 ##' @param start Numeric vector, start of the integral.
 ##' @param stop Numeric vector, end of the integral.
-##' @param extend
+##' @param extend should the integral be extended beyond the last observed time
+##'   point
 ##' @return Numeric vector, value of the integral.
 ##' @author Andreas Nordland
 int_surv <- function(times, surv,
