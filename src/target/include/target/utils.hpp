@@ -21,11 +21,16 @@
 
 
 namespace target {
+
+  using raggedArray = std::vector<arma::vec>;
+
   using cx_dbl  = std::complex<double>;
   using cx_func = std::function<arma::cx_mat(arma::cx_vec theta)>;
 
   arma::mat deriv(cx_func f,
                   arma::vec theta);
+
+  arma::vec rnorm(unsigned n);
 
   arma::umat clusterid(const arma::uvec &id);
 

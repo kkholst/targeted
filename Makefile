@@ -39,13 +39,13 @@ build:
 	@echo 'pkgbuild::build(path=".", dest_path="$(BUILD_DIR)", args="--compact-vignettes=qpdf --resave-data=best")' | $(R)
 
 install:
-	@echo 'devtools::install(".", upgrade = "never")' | $(R)
+	@echo 'remotes::install_local(".", upgrade = "never", force = TRUE)' | $(R)
 
 dependencies-install:
-	@echo 'devtools::install_deps(".", dependencies = TRUE)' | $(R)
+	@echo 'remotes::install_deps(".", dependencies = TRUE)' | $(R)
 
 dependencies-upgrade:
-	@echo 'devtools::install(".", upgrade = "always")' | $(R)
+	@echo 'remotes::install_local(".", upgrade = "always")' | $(R)
 
 check-cran: build
 	@$(R) CMD check $(BUILD_DIR)/$(PKG)_$(GETVER).tar.gz --timings --as-cran --no-multiarch --run-donttest
@@ -54,7 +54,10 @@ check:
 	@_R_CHECK_FORCE_SUGGESTS_=0 echo 'res <- rcmdcheck::rcmdcheck(".", build_args=c("--no-build-vignettes"), args=c("--ignore-vignettes"))' | $(R)
 
 lint:
-	@echo 'lintr::lint_package(show_progress = TRUE, exclusions = list("R/intsurv.R", "R/cumhaz.R"))' | $(R)
+	@echo 'lintr::lint_package(show_progress = TRUE)' | $(R)
+
+vignette:
+	@$(R) -q -e "devtools::build_vignettes(clean=FALSE, install=FALSE, quiet=FALSE)"
 
 test: test-installed
 test-installed: # tests locally installed version package
@@ -62,6 +65,12 @@ test-installed: # tests locally installed version package
 
 test-loadall:
 	@echo 'devtools::load_all("."); tinytest::test_all(".")' | $(R)
+
+slowtest: test-slow
+test-slow:
+	@$(R) -f inst/slowtest.R
+
+test-all: test test-slow
 
 coverage:
 	@echo 'covr::report(file="tests/coverage-report.html")' | $(R)

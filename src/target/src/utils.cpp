@@ -1,7 +1,7 @@
 /*!
   @file utils.cpp
   @author Klaus K. Holst
-  @copyright 2020-2022, Klaus Kähler Holst
+  @copyright 2020-2025, Klaus Kähler Holst
 
   @brief Various utility functions and constants
 
@@ -10,6 +10,15 @@
 #include <algorithm>
 
 namespace target {
+
+  arma::vec rnorm(unsigned n) {
+#ifdef ARMA_R
+    Rcpp::RNGScope scope;
+    return Rcpp::as<arma::vec>(Rcpp::rnorm(n));
+#else
+    return arma::randn<arma::vec>(n);
+#endif
+  }
 
   // Complex step derivative
   arma::mat deriv(cx_func f, arma::vec theta) {

@@ -4,10 +4,14 @@
 \alias{expand.list}
 \title{Create a list from all combination of input variables}
 \usage{
-expand.list(...)
+expand.list(..., INPUT = NULL, envir = NULL)
 }
 \arguments{
 \item{...}{input variables}
+
+\item{INPUT}{optional list of variables}
+
+\item{envir}{environment environment to evalute formulas in}
 }
 \value{
 list
@@ -17,7 +21,7 @@ Similar to \code{expand.grid} function, this function creates all combinations
 of the input arguments but returns the result as a list.
 }
 \examples{
-expand.list(x=2:4, z=c("a","b"))
+expand.list(x = 2:4, z = c("a", "b"))
 }
 \author{
 Klaus Kähler Holst

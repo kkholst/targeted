@@ -1,9 +1,12 @@
 # runs r cmd check + unit tests in inst/tinytest
+name: r-cmd-check
+
 on:
   pull_request:
-    branches: [main, dev]
-
-name: r-cmd-check
+    branches: [main, dev, deploy]
+    # types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main, deploy]
 
 jobs:
   r-cmd-check:
@@ -25,6 +28,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: r-lib/actions/setup-pandoc@v2
       - uses: r-lib/actions/setup-tinytex@v2
+      - uses: quarto-dev/quarto-actions/setup@v2
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: ${{ matrix.config.r }}
@@ -50,15 +54,20 @@ jobs:
           # args: 'c("--ignore-vignettes")'
           # build_args: 'c("--no-build-vignettes")'
 
-      - name: Webpage deployment
-        if: success() && contains('refs/heads/main', github.ref)
+      - name: slow tests
+        if: success() && (contains('refs/heads/main', github.ref) || contains('refs/heads/deploy', github.ref))
         run: |
-          Rscript -e 'remotes::install_github("kkholst/targeted")'
+          make install
+          make test-slow
+
+      - name: Webpage deployment
+        if: success() && (contains('refs/heads/main', github.ref) || contains('refs/heads/deploy', github.ref))
+        run: |
           git config --local user.name "$GITHUB_ACTOR"
           git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
           Rscript -e 'pkgdown::deploy_to_branch(new_process = FALSE)'
 
       - name: Code Coverage
-        if: success() && contains('refs/heads/main', github.ref)
+        if: success() && (contains('refs/heads/main', github.ref) || contains('refs/heads/deploy', github.ref))
         run: covr::codecov(type=c("tests", "examples"))
         shell: Rscript {0}

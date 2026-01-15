@@ -24,8 +24,7 @@ scoring(
 (matrices))}
 
 \item{type}{continuous or categorical response (the latter is automatically
-chosen if response is a factor, otherwise a continuous response is
-assumed)}
+chosen if response is a factor, otherwise a continuous response is assumed)}
 
 \item{levels}{(optional) unique levels in response variable}
 
@@ -33,12 +32,13 @@ assumed)}
 
 \item{weights}{optional frequency weights}
 
-\item{names}{optional names of models coments (given as ..., alternatively
-these can be named arguments)}
+\item{names}{(optional) character vector of the model names in the output. If
+omitted these will be taken from the names of the ellipsis argument (...)}
 
 \item{object}{optional model object}
 
-\item{newdata}{optional new data.frame}
+\item{newdata}{(optional) data.frame on which to evaluate the model
+performance}
 
 \item{messages}{controls amount of messages/warnings (0: none)}
 }
@@ -52,9 +52,9 @@ Predictive model scoring
 \examples{
 data(iris)
 set.seed(1)
-dat <- csplit(iris,2)
-g1 <- NB(Species ~ Sepal.Width + Petal.Length, data=dat[[1]])
-g2 <- NB(Species ~ Sepal.Width, data=dat[[1]])
+dat <- lava::csplit(iris,2)
+g1 <- naivebayes(Species ~ Sepal.Width + Petal.Length, data=dat[[1]])
+g2 <- naivebayes(Species ~ Sepal.Width, data=dat[[1]])
 pr1 <- predict(g1, newdata=dat[[2]], wide=TRUE)
 pr2 <- predict(g2, newdata=dat[[2]], wide=TRUE)
 table(colnames(pr1)[apply(pr1,1,which.max)], dat[[2]]$Species)

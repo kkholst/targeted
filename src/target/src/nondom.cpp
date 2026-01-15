@@ -1,7 +1,7 @@
 /*!
   @file nondom.cpp
   @author Klaus Kähler Holst
-  @copyright 2023, Klaus Kähler Holst
+  @copyright 2023-2025, Klaus Kähler Holst
 
   @brief Non-dominated sets (Kung et al. 1975)
 

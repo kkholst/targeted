@@ -88,22 +88,22 @@ multiclass_scoring1 <- # nolint
 #' @param ... model predictions (continuous predictions or class probabilities
 #'   (matrices))
 #' @param type continuous or categorical response (the latter is automatically
-#'   chosen if response is a factor, otherwise a continuous response is
-#'   assumed)
+#'   chosen if response is a factor, otherwise a continuous response is assumed)
 #' @param metrics which metrics to report
 #' @param weights optional frequency weights
-#' @param names optional names of models coments (given as ..., alternatively
-#'   these can be named arguments)
+#' @param names (optional) character vector of the model names in the output. If
+#'   omitted these will be taken from the names of the ellipsis argument (...)
 #' @param object optional model object
-#' @param newdata optional new data.frame
+#' @param newdata (optional) data.frame on which to evaluate the model
+#'   performance
 #' @param levels (optional) unique levels in response variable
 #' @param messages controls amount of messages/warnings (0: none)
 #' @examples
 #' data(iris)
 #' set.seed(1)
-#' dat <- csplit(iris,2)
-#' g1 <- NB(Species ~ Sepal.Width + Petal.Length, data=dat[[1]])
-#' g2 <- NB(Species ~ Sepal.Width, data=dat[[1]])
+#' dat <- lava::csplit(iris,2)
+#' g1 <- naivebayes(Species ~ Sepal.Width + Petal.Length, data=dat[[1]])
+#' g2 <- naivebayes(Species ~ Sepal.Width, data=dat[[1]])
 #' pr1 <- predict(g1, newdata=dat[[2]], wide=TRUE)
 #' pr2 <- predict(g2, newdata=dat[[2]], wide=TRUE)
 #' table(colnames(pr1)[apply(pr1,1,which.max)], dat[[2]]$Species)
@@ -117,31 +117,41 @@ multiclass_scoring1 <- # nolint
 scoring <- function(response, ...,
                     type="quantitative",
                     levels=NULL, metrics=NULL,
-                    weights=NULL, names=NULL, object=NULL, newdata=NULL,
+                    weights=NULL, names=NULL, object=NULL,
+                    newdata=NULL,
                     messages=1) {
+  val <- list(...)
+if (missing(response) && inherits(object, "learner")) {
+    if (is.null(newdata)) stop("`newdata` data.frame needed")
+    response <- object$response(newdata)
+    if (length(val) == 0) {
+      val <- list(object$predict(newdata))
+    }
+    if (is.null(names)) names <- object$info
+  }
   if (is.factor(response) || is.character(response)) {
     type <- "multiclass"
   }
   if (tolower(type) %in% c("quantitative", "cont", "continuous")) {
-    S <- suppressWarnings(lapply(list(...),
+    S <- lapply(val,
       quantitative_scoring1,
       response = response,
       weights = weights, messages = messages
-    ))
+    )
   } else {
-    S <- suppressWarnings(lapply(list(...),
+    S <- lapply(val,
       multiclass_scoring1,
       response = response,
       levels = levels, weights = weights, messages = messages
-    ))
+    )
   }
   if (is.null(names)) {
-    names <- base::names(list(...))
+    names <- base::names(val)
   }
-  res <- matrix(unlist(S), byrow=TRUE, ncol=length(S[[1]]))
+  res <- matrix(unlist(S), byrow = TRUE, ncol = length(S[[1]]))
   rownames(res) <- names
   colnames(res) <- names(S[[1]])
   if (!is.null(metrics))
-    res <- res[, metrics, drop=FALSE]
+    res <- res[, metrics, drop = FALSE]
   return(res)
 }

@@ -1,33 +1,42 @@
 #' @keywords internal
 "_PACKAGE"
 
-#' Targeted inference
-#'
-#' Methods for targeted and semiparametric inference.
-#'
 #' @name targeted-package
 #' @import Rcpp methods
 #' @importFrom graphics plot points abline lines
 #' @importFrom grDevices nclass.Sturges
 #' @importFrom lava IC getoutcome estimate Inverse na.pass0 score logit expit
-#'   parameter
+#'   parameter sim
 #' @importFrom stats approxfun as.formula update binomial deriv density glm.fit
 #'   lm.wfit lm.fit glm lm coef vcov model.frame model.matrix na.pass nlminb
 #'   predict dnorm quantile terms weighted.mean runif .getXlevels
 #'   delete.response model.response gaussian formula model.offset reformulate
-#'   drop.terms weights model.extract cov2cor pchisq uniroot
+#'   drop.terms weights model.extract cov2cor pnorm pchisq uniroot sd na.omit
+#'   offset
 #' @importFrom rlang hash call_match
-#' @importFrom optimx optimx
-#' @importFrom data.table data.table is.data.table :=
 #' @importFrom R6 R6Class
-#' @importFrom survival survfit
-#' @importFrom utils tail head capture.output
+#' @importFrom survival survfit Surv strata
+#' @importFrom utils tail head capture.output getFromNamespace
+#' @references Bang & Robins (2005) Doubly Robust Estimation in Missing Data and
+#'   Causal Inference Models, Biometrics.
+#'
+#' Vansteelandt & Dukes (2022) Assumption-lean inference for
+#' generalised linear model parameters, Journal of the Royal Statistical
+#' Society: Series B (Statistical Methodology).
+#'
+#' Thomas S. Richardson, James M. Robins & Linbo Wang (2017) On Modeling and
+#' Estimation for the Relative Risk and Risk Difference, Journal of the American
+#' Statistical Association.
+#'
+#' Mark J. van der Laan (2006) Statistical Inference for Variable Importance,
+#' The International Journal of Biostatistics.
+#'
 #' @useDynLib targeted, .registration=TRUE
 #' @aliases targeted-package targeted
 #' @author Klaus K. Holst (Maintainer) <klaus@@holst.it>
 #' @keywords package
 #' @examples
-#' \dontrun{x
+#' \dontrun{
 #' example(riskreg)
 #' example(cate)
 #' example(ate)
@@ -70,3 +79,25 @@ NULL
 #' @examples
 #' data(truncatedscore)
 NULL
+
+
+##' @export
+lava::IC
+
+##' @export
+lava::sim
+
+##' @export
+lava::score
+
+##' @export
+lava::parameter
+
+##' @export
+lava::estimate
+
+##' @export
+survival::strata
+
+##' @export
+survival::Surv

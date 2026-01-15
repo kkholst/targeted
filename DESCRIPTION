@@ -1,8 +1,7 @@
 Package: targeted
 Type: Package
 Title: Targeted Inference
-Version: 0.6
-Date: 2024-10-30
+Version: 0.7.1
 Authors@R: c(person(given = "Klaus K.",
                     family = "Holst",
                     role = c("aut", "cre"),
@@ -14,8 +13,12 @@ Authors@R: c(person(given = "Klaus K.",
              person(given = "Andreas",
                     family = "Nordland",
                     role = c("aut"),
-                    email = "andreasnordland@gmail.com"))
-Author: Klaus K. Holst [aut, cre], Benedikt Sommer [aut], Andreas Nordland [aut]
+                    email = "andreasnordland@gmail.com"),
+             person(given = "Christian B.",
+                    family = "Pipper",
+                    role = c("ctb"),
+                    email = "cbpipper@gmail.com"))
+Author: Klaus K. Holst [aut, cre], Benedikt Sommer [aut], Andreas Nordland [aut], Christian B. Pipper [ctb]
 Maintainer: Klaus K. Holst <klaus@holst.it>
 Description: Various methods for targeted and semiparametric inference including
 	     augmented inverse probability weighted (AIPW) estimators for missing data and
@@ -26,40 +29,44 @@ Description: Various methods for targeted and semiparametric inference including
 	     <doi:10.1080/01621459.2016.1192546>), assumption lean inference for generalized
          linear model parameters (Vansteelandt et al. (2022) <doi:10.1111/rssb.12504>).
 Depends:
-    R (>= 4.0),
-    lava (>= 1.8.0),
-    survival
+    R (>= 4.1)
 Imports:
-    cli,
-    data.table,
-    future.apply,
-    nnls,
-    optimx,
-	progressr,
-    methods,
-    mets,
     R6,
     Rcpp (>= 1.0.0),
-    rlang
+    abind,
+    cli,
+    future.apply,
+    lava (>= 1.8.2),
+    methods,
+    mets (>= 1.3.9),
+    quadprog,
+    progressr,
+    rlang,
+    survival
 Suggests:
+    SuperLearner (>= 2.0-28),
+    MASS,
     cmprsk,
+    data.table,
     e1071,
+    earth,
     glmnet,
     grf,
     hal9001,
     mgcv,
-    tinytest,
-    riskRegression,
-    rmarkdown,
-    scatterplot3d,
-    SuperLearner (>= 2.0-28),
-    knitr,
-    xgboost,
-    viridisLite,
+    nnls,
+    optimx,
+    polle (>= 1.5),
+    pracma,
+    quarto,
+    randomForestSRC,
     ranger,
-    randomForestSRC
+    riskRegression,
+    scatterplot3d,
+    tinytest,
+    viridisLite,
+    xgboost (>= 3.1.2.1),
 BugReports: https://github.com/kkholst/targeted/issues
-SystemRequirements: C++14
 URL: https://kkholst.github.io/targeted/
 License: Apache License (== 2.0)
 LinkingTo: Rcpp, RcppArmadillo
@@ -69,5 +76,8 @@ ByteCompile: yes
 RcppModules: riskregmodel
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
-VignetteBuilder: knitr
+RoxygenNote: 7.3.3
+VignetteBuilder:
+    quarto
+SystemRequirements: Quarto command line tools
+    (https://github.com/quarto-dev/quarto-cli).

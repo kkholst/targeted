@@ -58,7 +58,7 @@ sim1 <- function(n, beta=c(-3, rep(.5,10)), rho=.5) {
 set.seed(1)
 beta <- c(-2,rep(1,10))
 d <- sim1(1e4, beta=beta)
-a1 <- NB(y ~ ., data=d)
+a1 <- naivebayes(y ~ ., data=d)
 a2 <- glm(y ~ ., data=d, family=binomial)
 ## a3 <- randomForest(factor(y) ~ ., data=d, family=binomial)
 
@@ -72,14 +72,14 @@ c1 <- calibration(p1, d0$y, breaks=100)
 if (interactive()) {
   plot(c1)
   plot(c2,col="red",add=TRUE)
-  abline(a=0,b=1)#'
+  abline(a=0,b=1)
   with(c1$xy[[1]], points(pred,freq,type="b", col="red"))
 }
 
 set.seed(1)
 beta <- c(-2,rep(1,10))
 dd <- lava::csplit(sim1(1e4, beta=beta), k=3)
-mod <- NB(y ~ ., data=dd[[1]])
+mod <- naivebayes(y ~ ., data=dd[[1]])
 p1 <- predict(mod, newdata=dd[[2]])
 cal <- calibration(p1, dd[[2]]$y)
 p2 <- predict(mod, newdata=dd[[3]])

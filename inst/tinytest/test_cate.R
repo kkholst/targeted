@@ -1,8 +1,9 @@
 library("tinytest")
 
+set.seed(42)
 n <- 1000
 x <- rnorm(n)
-a <- rbinom(n, 1, expit(1 + x))
+a <- rbinom(n, 1, lava::expit(1 + x))
 y <- 1 + a + x - a * x + rnorm(n)
 d <- data.frame(y = y, a = a, x = x)
 
@@ -14,7 +15,7 @@ true_estimate1 <- function(q1) {
   ic0 <- ic0 - est
   dlinkinv <- g$family$mu.eta
   b <- a / pi^2 * (q1 - y)
-  D <- dlinkinv(logit(pi)) * b
+  D <- dlinkinv(lava::logit(pi)) * b
   E1 <- colMeans(cbind(D, D * x))
   ic1 <- IC(g) %*% E1
   ic <- ic0 + ic1
@@ -27,8 +28,8 @@ simcate <- function(qmod) {
   )
   e1 <- true_estimate1(q1)
   aa <- cate(
-    predictor_glm(qmod),
-    predictor_glm(a ~ x, family = binomial),
+    learner_glm(qmod),
+    learner_glm(a ~ x, family = binomial),
     data = d, nfolds = 1
   ) |> estimate()
 
@@ -49,8 +50,8 @@ test_cate_deprecated_arguments <- function() {
   # expected
   expect_warning(
     aa1 <- cate(
-      response_model = predictor_glm(qmod),
-      propensity.model = predictor_glm(a ~ x, family = binomial),
+      response_model = learner_glm(qmod),
+      propensity.model = learner_glm(a ~ x, family = binomial),
       data = d
     ) |> estimate(),
     pattern = "Please use the `response.model` argument instead"
@@ -59,8 +60,8 @@ test_cate_deprecated_arguments <- function() {
 
   expect_warning(
     aa2 <- cate(
-      response.model = predictor_glm(qmod),
-      propensity_model = predictor_glm(a ~ x, family = binomial),
+      response.model = learner_glm(qmod),
+      propensity_model = learner_glm(a ~ x, family = binomial),
       data = d
     ) |> estimate(),
     pattern = "Please use the `propensity.model` argument instead"
@@ -69,8 +70,8 @@ test_cate_deprecated_arguments <- function() {
 
   # user is informed when deprecated treatment argument is used
   expect_warning(aa4 <- cate(
-    response.model = predictor_glm(qmod),
-    propensity.model = predictor_glm(a ~ x, family = binomial),
+    response.model = learner_glm(qmod),
+    propensity.model = learner_glm(a ~ x, family = binomial),
     treatment = ~ 1,
     data = d) |> estimate(),
     pattern = "Please use the `cate.model` argument instead"
@@ -79,8 +80,8 @@ test_cate_deprecated_arguments <- function() {
 
   # same with cate_model argument
   expect_warning(aa4 <- cate(
-    response.model = predictor_glm(qmod),
-    propensity.model = predictor_glm(a ~ x, family = binomial),
+    response.model = learner_glm(qmod),
+    propensity.model = learner_glm(a ~ x, family = binomial),
     cate_model = ~ 1,
     data = d) |> estimate(),
     pattern = "Please use the `cate.model` argument instead"
@@ -91,8 +92,8 @@ test_cate_deprecated_arguments <- function() {
   # together
   expect_error(
     cate(
-      response.model = predictor_glm(qmod),
-      propensity.model = predictor_glm(a ~ x, family = binomial),
+      response.model = learner_glm(qmod),
+      propensity.model = learner_glm(a ~ x, family = binomial),
       cate.model = ~2,
       treatment = ~1,
       data = d
@@ -101,3 +102,131 @@ test_cate_deprecated_arguments <- function() {
   )
 }
 test_cate_deprecated_arguments()
+
+test_cate_ate <- function() {
+  set.seed(1)
+  n <- 1000
+  x <- rnorm(n)
+  a <- rbinom(n, 1, lava::expit(1 + x))
+  y <- 1 + a + x - a * x + rnorm(n)
+  yb <- rbinom(n, 1, plogis(1 + a + x - a * x))*1.0
+  d <- data.frame(yb = yb, y = y, a = a, x = x)
+
+  a <- cate(response.model = learner_glm(yb ~ a*x, family=binomial()),
+            propensity.model = learner_glm(a ~ x, family=binomial()),
+            data=d, mc.cores=1)
+
+  at <- ate(yb ~ a, nuisance = ~a*x, propensity = ~x, family=binomial(), data=d)
+
+  expect_equivalent(coef(a)["E[yb(1)]"], coef(at)["a=1"], tolerance=1e-3)
+  expect_equivalent(coef(a)["E[yb(0)]"], coef(at)["a=0"], tolerance=1e-3)
+
+  # not exactly the same standard errors, as the 'ate' function
+  # creates a correction for estimation of both nuisance models
+  expect_equivalent(vcov(a)["E[yb(1)]","E[yb(1)]"],
+                    vcov(at)["a=1","a=1"], tolerance=1e-2)
+  expect_equivalent(vcov(a)["E[yb(0)]","E[yb(0)]"],
+                    vcov(at)["a=0","a=0"], tolerance=1e-2)
+}
+test_cate_ate()
+
+
+test_cate_crossfit <- function() {
+
+  # repeated cross-fitting TODO
+  ## a <- cate(y ~ a + x,
+  ##           learner_glm(a ~ x, family=binomial),
+  ##           second.order = TRUE,
+  ##           nfolds = 2,
+  ##           rep = 3,
+  ##           rep.type = "average",
+  ##           mc.cores=1,
+  ##           data = d)
+  a <- cate(y ~ a + x,
+             learner_glm(a ~ x, family=binomial),
+             second.order = TRUE,
+             nfolds = 5,
+             rep = 3,
+             data = d)
+}
+
+test_cate_remainder <- function() {
+  # Test seconder order remainder term
+
+  # wrong outcome model
+  b <- ate(
+    y ~ a,
+    nuisance = y ~ a + x,
+    propensity = a ~ x,
+    adjust.nuisance = FALSE,
+    adjust.propensity = TRUE,
+    data = d)
+
+  a <- cate(y ~ a + x,
+            learner_glm(a ~ x, family=binomial),
+            second.order = TRUE,
+            data = d)
+
+  expect_equivalent(coef(b), coef(a)[2:1], tolerance=1e-6)
+  expect_equivalent(vcov(b), vcov(a)[2:1,2:1], tolerance=1e-5)
+
+  # without second order remainder term correction
+  b1 <- ate(
+    y ~ a,
+    nuisance = y ~ a + x,
+    propensity = a ~ x,
+    adjust.nuisance = FALSE,
+    adjust.propensity = FALSE,
+    data = d)
+
+  a1 <- cate(y ~ a + x,
+            learner_glm(a ~ x, family=binomial),
+            second.order = FALSE,
+            data = d)
+
+  expect_equivalent(coef(b1), coef(a1)[2:1], tolerance=1e-6)
+  expect_equivalent(vcov(b1), vcov(a1)[2:1,2:1], tolerance=1e-5)
+
+}
+test_cate_remainder()
+
+
+## multiple treatments
+n <- 1e3
+a <- rbinom(n, 1, 0.5)
+a <- factor(sample(c("a", "b", "c"), n, replace = TRUE))
+z <- rbinom(n, 1, 0.5)
+x <- rnorm(n)
+y <- 1*(a==a[1]) + x*(a==a[1]) + rnorm(n, sd=1 + 2*(a==a[1]))
+d <- data.frame(a, x, y, z, A = (a == "a") * 1)
+
+test_cate_multiple_treatment <- function() {
+  a0 <- cate(y ~ A * x, A ~ 1, data = d)
+
+  a <- cate(y ~ a * x, a ~ 1, data = d)
+  expect_true(length(coef(a)) == 6) # 3 exp. potential outcomes, and 3 contrasts
+
+  a2 <- update(a, ~z, data = d)
+  expect_true(length(coef(a2)) == 9)
+
+  # check we get same expected potential outcome as with binary treatment
+  expect_equivalent(
+    coef(a0)["E[y(1)]"],
+    coef(a)["E[y(a)]"]
+  )
+  expect_equivalent(
+    vcov(a0)["E[y(1)]","E[y(1)]"],
+    vcov(a)["E[y(a)]","E[y(a)]"]
+  )
+}
+test_cate_multiple_treatment()
+
+test_cate_warning <- function() {
+  # check we get a warning if the treatment from the propensity.model
+  # is not part of the response.model
+  expect_warning(
+    cate(y ~ a * x, A ~ 1, data = d),
+    "treatment variable not present"
+  )
+}
+test_cate_warning()

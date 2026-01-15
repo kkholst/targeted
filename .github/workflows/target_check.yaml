@@ -1,4 +1,4 @@
-name: target library tests
+name: target library (cpp) tests
 
 on:
   pull_request:

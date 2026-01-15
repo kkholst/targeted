@@ -65,7 +65,7 @@ scoring(dat[[2]]$Species, pr0=pr0, pr1=pr1, pr2=pr2)
 ```{r scoring3}
 
 rf_pred <- function(x, newdata, ...) predict(x, newdata)$prediction
-ml_grf <- ml_model$new(~., info="grf::regression_forest",
+ml_grf <- learner$new(~., info="grf::regression_forest",
                        fit=function(x,y) grf::regression_forest(X=x,Y=y,...),
                        pred=rf_pred)
 x <- ml_grf$clone()
@@ -74,7 +74,7 @@ x$estimate(iris)
 x$predict(droplevels(head(iris)))
 
 
-m <- ml_model$new(Species ~ ., info="grf::probability_forest",
+m <- learner$new(Species ~ ., info="grf::probability_forest",
                   fit=function(x,y) grf::probability_forest(X=x,Y=y,...),
                   pred=rf_pred)
 m$estimate(dat[[1]], num.trees=1000)
@@ -87,10 +87,10 @@ Cross validation - model comparison
 
 
 ```{r}
-rf_model <- ml_model$new(Sepal.Length ~ .,
+rf_model <- learner$new(Sepal.Length ~ .,
                   fit=function(x,y) grf::regression_forest(X=x,Y=y,...),
                   pred=function(...) predict(...)$predictions)
-lm_model <- ml_model$new(Sepal.Length ~ ., fit=lm)
+lm_model <- learner$new(Sepal.Length ~ ., fit=lm)
 
 a <- cv(list(lm=lm_model, rf=rf_model), data=iris, response="Sepal.Length")
 a
@@ -109,18 +109,19 @@ dd <- data.frame(y=rep(0:1,each=5), x=rep(1:5, 2),
                  w=c(counts[,1], counts[,2]))
 summary(g <- glm(y ~ x, family=binomial, data=dd, weights=w))
 
-m <- ml_model$new(y ~ x, function(formula, data) glm(formula, data=data, family=binomial))
+m <- learner_glm(y ~ x, family = binomial())
 m$estimate(d)
 
-m <- ml_model$new(fit=function(data) glm(y~x, data=data, weights=data$w, family=binomial))
+
+m <- learner$new(fit=function(data) glm(y~x, data=data, weights=data$w, family=binomial))
 m$estimate(dd)
 
-m <- ml_model$new(y~x, function(formula,data) {
+m <- learner$new(y~x, function(formula,data) {
   glm(formula, data=data, weights=w, family=binomial)
 })
 m$estimate(dd)
 
- m <- ml_model$new(y~x,
+ m <- learner$new(y~x,
                   fit=function(y,x,w,...) {
                     glm.fit(x=cbind(1,x), y=y, weights=w, family=binomial()) },
                   pred=function(fit, newdata,...) {
@@ -137,7 +138,7 @@ m$predict(dd)
 Categorical response
 ```{r tuning2}
 rf <- function(formula, ...)
-  ml_model$new(formula, info="grf::probability_forest",
+  learner$new(formula, info="grf::probability_forest",
                fit=function(x,y, ...) grf::probability_forest(X=x, Y=y, ...),
                pred=function(fit, newdata) predict(fit, newdata)$predictions, ...)
 models <- list(rf=rf(Species ~ .),
@@ -152,7 +153,7 @@ Model tuning
 ```{r modeltuning}
 
 rf <- function(formula, ...)
-  ml_model$new(formula, info="grf::probability_forest",
+  learner$new(formula, info="grf::probability_forest",
                fit=function(x,y, ...) grf::probability_forest(X=x, Y=y, ...),
                pred=function(fit, newdata) predict(fit, newdata)$predictions, ...)
 
@@ -167,7 +168,7 @@ x$estimate(iris)
 #x$.__enclos_env__$private$formula
 #rtarget
 
-x <- ml_model$new(Species ~ ., info="grf::probability_forest",
+x <- learner$new(Species ~ ., info="grf::probability_forest",
              fit=function(x,y, ...) grf::probability_forest(X=x, Y=y, ...),
              num.trees=100, mtry=1)
 x$estimate(iris)
@@ -187,14 +188,14 @@ cbind(coef(a), attr(args, "table")[,1:2])
 
 
 ```{r}
-a <- ml_model$new(fit=function(data,response="Species",...) {
+a <- learner$new(fit=function(data,response="Species",...) {
   y <- data[,response]
   x <- data[,-which(names(data)%in%response),drop=FALSE]
   NB2(x=x,y=y)
 }, pred=function(fit, newdata) predict(fit, newdata))
 a$estimate(iris)
 
-b <- ml_model$new(Species ~ ., fit=function(x,y,...) {
+b <- learner$new(Species ~ ., fit=function(x,y,...) {
   grf::probability_forest(Y=y,X=x,...)
 }, pred=function(fit,newdata) predict(fit,newdata)$predictions,
 num.trees=50)

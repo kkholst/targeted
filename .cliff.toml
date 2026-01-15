@@ -59,14 +59,14 @@ body = """
 # remove the leading and trailing whitespace from the templates
 trim = true
 postprocessors = [
-  { pattern = '<REPO>', replace = "https://github.com/kkholst/targeted/" }, # replace repository URL
+  { pattern = '<REPO>', replace = "https://github.com/kkholst/targeted" }, # replace repository URL
 ]
 
 [git]
 # parse the commits based on https://www.conventionalcommits.org
 conventional_commits = true
 # filter out the commits that are not conventional
-filter_unconventional = true
+filter_unconventional = false
 # process each line of a commit as an individual commit
 split_commits = false
 # regex for parsing and grouping commits
@@ -78,7 +78,7 @@ commit_preprocessors = [
 # the order of the groups is specified following the example on
 # https://git-cliff.org/docs/tips-and-tricks
 commit_parsers = [
-    { message = "^feat", group = "<!-- 0 -->Features" },
+    { message = "^[fF]eat", group = "<!-- 0 -->Features" },
     { message = "^develop", group = "<!-- 2 -->Developer" },
     { message = "^fix", group = "<!-- 1 -->Bug Fixes" },
     { message = "^doc", group = "<!-- 3 --> Documentation", default_scope = "unscoped" },
