@@ -32,6 +32,7 @@ clean:
 	@# remove output files of code coverage
 	@rm -rf tests/lib tests/coverage-report.html
 	@rm -rf build
+	@rm -rf src/*.o src/*.so src/target/src/*.o
 
 .PHONY: build
 build:
