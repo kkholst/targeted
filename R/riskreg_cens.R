@@ -119,8 +119,7 @@ riskreg_cens <- function(response,
     ##       as.vector(data[, "_pred"])*(1 - as.vector(data[, "_weight"]))
     ##     )
     ##   }
-    ## } else
-    {
+    ## } else  {
       type <- "treatment"
       m <- function(time, data) {
         return(
@@ -134,7 +133,6 @@ riskreg_cens <- function(response,
           as.vector(data[, "_pred"])*(1 - as.vector(data[, "_weight"]))
         )
       }
-    }
   }
   if (!is.null(prediction)) { ## Brier score
     type <- "brier"
@@ -206,13 +204,12 @@ riskreg_cens <- function(response,
       ##     blocksize = control$blocksize
       ##     )
       ##   valid_data[, "_pred"] <- rms
-      ## } else
-      {
-        Fhat <- 1 - as.vector(cumhaz(T.est,
-                                     newdata = valid_data.a,
-                                     times = tau)$surv)
-        valid_data[, "_pred"] <- Fhat
-      }
+      ## } else {
+      Fhat <- 1 - as.vector(cumhaz(T.est,
+                                   newdata = valid_data.a,
+                                   times = tau)$surv)
+      valid_data[, "_pred"] <- Fhat
+      # }
       rm(valid_data.a)
       valid_data[, "_weight"] <- A/pr.A
     }
