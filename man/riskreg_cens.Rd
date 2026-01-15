@@ -30,14 +30,14 @@ riskreg_cens(
 \item{censoring}{Censoring formula (e.g., Surv(time, event == 0) ~ D + A +
 W)).}
 
-\item{treatment}{Optional treatment model (\link{learner})}
+\item{treatment}{Optional treatment model (ml_model)}
 
-\item{prediction}{Optional prediction model (\link{learner})}
+\item{prediction}{Optional prediction model (ml_model)}
 
 \item{data}{data.frame.}
 
 \item{newdata}{Optional data.frame. In this case the uncentered influence
-function evaluated in 'newdata' is returned with nuisance parameters
+function evalued in 'newdata' is returned with nuisance parameters
 obtained from 'data'.}
 
 \item{tau}{Time-point of interest, see Details.}
