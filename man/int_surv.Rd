@@ -2,10 +2,7 @@
 % Please edit documentation in R/intsurv.R
 \name{int_surv}
 \alias{int_surv}
-\title{Integral approximation of a time dependent function.
-Computes an approximation of \eqn{\int_start^stop S(t) dt}, where
-\eqn{S(t)} is a survival function, for a selection of start and stop time
-points.}
+\title{Integral approximation of a time dependent function.}
 \usage{
 int_surv(times, surv, start = 0, stop = max(times), extend = FALSE)
 }
@@ -19,14 +16,13 @@ points given by \code{times}.}
 
 \item{stop}{Numeric vector, end of the integral.}
 
-\item{extend}{(logical) If TRUE, integral is extended beyond the last
-observed time point}
+\item{extend}{should the integral be extended beyond the last observed time
+point}
 }
 \value{
 Numeric vector, value of the integral.
 }
 \description{
-Integral approximation of a time dependent function.
 Computes an approximation of \eqn{\int_start^stop S(t) dt}, where
 \eqn{S(t)} is a survival function, for a selection of start and stop time
 points.

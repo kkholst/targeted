@@ -1,30 +1,86 @@
-subjumps <- function(jumptimes, tau, size = 100L) {
-  jt <- jumptimes[jumptimes <= tau]
-  tt <- seq(min(jt), min(max(jt), tau), length.out = size)
+
+subjumps <- function(jumptimes, tau, size=100L) {
+  jt <- jumptimes[jumptimes<=tau]
+  tt <- seq(min(jt), min(max(jt), tau), length.out=size)
   tt <- jt[unique(mets::fast.approx(jt, tt))]
   return(tt)
 }
 
-#' @title Integral approximation of a time dependent function.
-#' Computes an approximation of \eqn{\int_start^stop S(t) dt}, where
-#' \eqn{S(t)} is a survival function, for a selection of start and stop time
-#' points.
-#'
-#' @param times Numeric vector, sorted time points.
-#' @param surv Numeric vector, values of a survival function evaluated at time
-#'   points given by \code{times}.
-#' @param start Numeric vector, start of the integral.
-#' @param stop Numeric vector, end of the integral.
-#' @param extend (logical) If TRUE, integral is extended beyond the last
-#' observed time point
-#' @return Numeric vector, value of the integral.
-#' @author Andreas Nordland
+
+intsurv <- function(time, surv, stop = max(time), jumps.only=FALSE) {
+  stop <- min(max(as.vector(time)), stop)
+  n <- length(time)
+  idx <- which(as.vector(time) <= stop)
+  time <- as.vector(time)[idx]
+  surv <- as.vector(surv)[idx]
+  if (jumps.only) {
+    jumps <- which(diff(surv) < 0) + 1
+    time <- time[jumps]
+    surv <- surv[jumps]
+  }
+  tj <- c(0, time)
+  sj <- surv
+  dt <- diff(tj)
+  res <- numeric(n)
+  res[idx] <- rev(cumsum(rev(sj*dt)))
+
+  return(list(
+    t = tj,
+    s = sj,
+    dt = dt,
+    cint = res,
+    value = sum(sj * dt)
+  ))
+}
+
+
+## intsurv2 <- function(object, data, time, stop = max(time),
+##                      sample = 0, blocksize = 0) {
+##   tau <- min(max(as.vector(time)), stop)
+##   n <- NROW(data)
+##   Lc <- vector(mode = "numeric", length = n)
+##   tt <- time
+##   if (sample > 0) {
+##          tt <- subjumps(time, size = sample, tau = tau)
+##   }
+##   blocks <- list(1:n)
+##   if (blocksize > 0) {
+##          blocks <- lava::csplit(1:n, k = min(n, blocksize))
+##   }
+
+##   res <- numeric(n)
+##   for (b in blocks) {
+##          S <- cumhaz(object, newdata = data[b, ], times = tt)$surv
+##     i <- 0
+##     for (r in b) { ## Loop over each row in the data
+##          i <- i + 1
+##       int <- intsurv(tt, S[i, ], tau)
+##       res[r] <- 0
+##     }
+##   }
+##   return(res)
+## }
+
+##' Computes an approximation of \eqn{\int_start^stop S(t) dt}, where
+##' \eqn{S(t)} is a survival function, for a selection of start and stop time
+##' points.
+##'
+##' @title Integral approximation of a time dependent function.
+##' @param times Numeric vector, sorted time points.
+##' @param surv Numeric vector, values of a survival function evaluated at time
+##'   points given by \code{times}.
+##' @param start Numeric vector, start of the integral.
+##' @param stop Numeric vector, end of the integral.
+##' @param extend should the integral be extended beyond the last observed time
+##'   point
+##' @return Numeric vector, value of the integral.
+##' @author Andreas Nordland
 int_surv <- function(times, surv,
                      start = 0, stop = max(times), extend = FALSE) {
   times <- as.vector(times)
   surv <- as.vector(surv)
 
-  # input checks:
+  ## input checks:
   stopifnot(
     is.numeric(times),
     !is.unsorted(times),
@@ -77,7 +133,7 @@ int_surv <- function(times, surv,
         diff_times_k <- diff(c(start_k, times[idx], stop_k))
         surv_k <- c(surv[idx[1] - 1], surv[idx])
       } else {
-        idx_last <- tail(which(times <= stop_k), 1)
+        idx_last <- data.table::last(which(times <= stop_k))
         diff_times_k <- diff(c(start_k, stop_k))
         surv_k <- surv[idx_last]
       }
