@@ -204,7 +204,7 @@ riskreg_cens <- function(response,
       ##     blocksize = control$blocksize
       ##     )
       ##   valid_data[, "_pred"] <- rms
-      ## } else {      
+      ## } else {
       Fhat <- 1 - as.vector(cumhaz(T.est,
                                    newdata = valid_data.a,
                                    times = tau)$surv)

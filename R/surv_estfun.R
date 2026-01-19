@@ -273,6 +273,3 @@ rcai <- function(T_model,
 
   return(out)
 }
-
-
-

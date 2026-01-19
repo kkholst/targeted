@@ -9,7 +9,8 @@
 #' mod <- learner_cox(Surv(time, status>0) ~ sex + strata(age))
 #' mod$estimate(sTRACE)
 #' mod$predict(head(sTRACE), time=5) # P(T>t|X)
-learner_cox <- function(formula, info="mets::phreg", learner.args = NULL, ...) {
+learner_cox <- function(formula, info="mets::phreg",
+                        learner.args = NULL, ...) {
   args <- c(learner.args,
             list(formula = formula,
                  predict.args = c(),
@@ -18,10 +19,12 @@ learner_cox <- function(formula, info="mets::phreg", learner.args = NULL, ...) {
   args$estimate <- function(formula, data, ...) {
     mets::phreg(formula, data, ...)
   }
-  args$predict <- function(object, newdata, time=NULL, individual.time=FALSE, se=FALSE, ...) {
+  args$predict <- function(object, newdata, time=NULL,
+                           individual.time=FALSE,
+                           se=FALSE, ...) {
     predict(object, newdata=newdata, se=se, time=time,
             individual.time = individual.time,
-            ...)$surv[,,drop=TRUE]
+            ...)$surv[, , drop=TRUE]
   }
   mod <- do.call(learner$new, args)
   class(mod) <- c("learner_cox", class(mod))
