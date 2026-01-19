@@ -23,6 +23,7 @@
 cumhaz <- function(object, newdata, times = NULL, individual.time = FALSE,
   extend = FALSE, ...) {
   n <- nrow(newdata)
+
   ## input check: times
   if (!is.null(times)) {
     stopifnot(
@@ -212,10 +213,11 @@ cumhaz <- function(object, newdata, times = NULL, individual.time = FALSE,
     stopifnot(length(tt) == length(chf))
   }
 
+  dchf <- t(apply(cbind(0, rbind(chf)), 1, diff))
   list(
     time = tt,
     chf = chf,
     surv = exp(-chf),
-    dchf = t(diff(rbind(0, t(chf))))
+    dchf = dchf
   )
 }
