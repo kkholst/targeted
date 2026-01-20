@@ -18,10 +18,10 @@ SOURCES = RcppExports.cpp \
 	target/src/target.cpp \
 	target/src/utils.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
-PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) -DARMA_R -I. -I$(PKGROOT)/include -I../inst/include
+PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) -DARMA_R -DARMA_DONT_USE_OPENMP -I. -I$(PKGROOT)/include -I../inst/include
 PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 
 all: clean $(SHLIB)
 
 clean:
-	rm -f $(OBJECTS)
+		rm -f $(OBJECTS)

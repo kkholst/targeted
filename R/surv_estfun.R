@@ -204,7 +204,6 @@ rcai <- function(T_model,
   data_C <- data[event == 0, , drop = FALSE]
   time_C <- time[event == 0]
 
-
   ## Counting term \int_0^\tau \frac{H(u|X)}{S^c} dN^c(u|X):
   H_Nc <- H_constructor(
     T_model = T_model,
