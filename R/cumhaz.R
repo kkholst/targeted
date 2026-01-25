@@ -47,7 +47,7 @@ cumhaz <- function(object, newdata, times = NULL, individual.time = FALSE,
   `:=` <- data.table::`:=`
 
   if (inherits(object, "phreg")) {
-    if (is.null(times)) times <- object$times
+    if (is.null(times)) times <- as.vector(object$time)
     pp <- predict(object,
       newdata = newdata,
       times = times, se = FALSE,
