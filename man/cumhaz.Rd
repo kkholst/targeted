@@ -14,7 +14,8 @@ cumhaz(
 )
 }
 \arguments{
-\item{object}{Survival model object: phreg, coxph, rfsrc, ranger}
+\item{object}{Survival model object: phreg, coxph, rfsrc, ranger,
+survSuperLearner}
 
 \item{newdata}{data.frame}
 

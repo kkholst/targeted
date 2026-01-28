@@ -6,10 +6,10 @@
 #' @export
 #' @examples
 #' data(sTRACE, package="mets")
-#' mod <- learner_cox(Surv(time, status>0) ~ sex + strata(age))
+#' mod <- learner_surv_cox(Surv(time, status>0) ~ sex + strata(age))
 #' mod$estimate(sTRACE)
 #' mod$predict(head(sTRACE), time=5) # P(T>t|X)
-learner_cox <- function(formula, info="mets::phreg",
+learner_surv_cox <- function(formula, info="mets::phreg",
                         learner.args = NULL, ...) {
   args <- c(learner.args,
             list(formula = formula,
@@ -27,6 +27,7 @@ learner_cox <- function(formula, info="mets::phreg",
             ...)$surv[, , drop=TRUE]
   }
   mod <- do.call(learner$new, args)
-  class(mod) <- c("learner_cox", class(mod))
+  class(mod) <- c("learner_surv_cox", class(mod))
   return(mod)
 }
+
