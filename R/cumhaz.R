@@ -1,7 +1,8 @@
 .datatable.aware <- TRUE
 
 #' @title Predict the cumulative hazard/survival function for a survival model
-#' @param object Survival model object: phreg, coxph, rfsrc, ranger
+#' @param object Survival model object: phreg, coxph, rfsrc, ranger,
+#'   survSuperLearner
 #' @param newdata data.frame
 #' @param times numeric vector: Time points at which the survival model is
 #'   evaluated. If NULL, the time points associated with the survival model is
@@ -135,6 +136,16 @@ cumhaz <- function(object, newdata, times = NULL, individual.time = FALSE,
       if (individual.time) {
         chf <- diag(chf)
       }
+    }
+  } else if (inherits(object, "survSuperLearner")) {
+    pr <- survSuperLearner::predict.survSuperLearner(
+      object, onlySL=TRUE,
+      newdata=newdata,
+      new.times=times)$event.SL.predict
+    tt <- times
+    chf <- -log(pr)
+    if (individual.time) {
+      chf <- diag(chf)
     }
   } else if (inherits(object, "survfit")) {
     if (inherits(object, "survfitcox")) {
