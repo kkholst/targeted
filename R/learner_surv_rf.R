@@ -5,7 +5,7 @@
 #' @export
 #' @examples
 #' data(sTRACE, package="mets")
-#' mod <- learner_surv_rf(Surv(time, status>0) ~ sex + strata(age))
+#' mod <- learner_surv_rf(Surv(time, status>0) ~ sex + age)
 #' mod$estimate(sTRACE)
 #' mod$predict(head(sTRACE), time=5) # P(T>t|X)
 learner_surv_rf <- function(formula,
@@ -19,10 +19,11 @@ learner_surv_rf <- function(formula,
   args$estimate.args <- c(
     list(num.threads = num.threads),
     list(...))
+  args$predict.args <- list(times = NULL)
   args$estimate <- function(formula, data, ...) {
-    ranger::ranger(formula, data, ...)
+    ranger::ranger(formula, data = data, ...)
   }
-  args$predict <- function(object, newdata, times = NULL, ...) {
+  args$predict <- function(object, newdata, times, ...) {
     res <- cumhaz(object, newdata, times=times, ...)$surv
     if (NCOL(res)==1L) res <- as.vector(res)
     return(res)
