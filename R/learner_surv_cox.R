@@ -8,7 +8,7 @@
 #' data(sTRACE, package="mets")
 #' mod <- learner_surv_cox(Surv(time, status>0) ~ sex + strata(age))
 #' mod$estimate(sTRACE)
-#' mod$predict(head(sTRACE), time=5) # P(T>t|X)
+#' mod$predict(head(sTRACE), times=5) # P(T>t|X)
 learner_surv_cox <- function(formula, info="mets::phreg",
                         learner.args = NULL, ...) {
   args <- c(learner.args,
@@ -17,28 +17,28 @@ learner_surv_cox <- function(formula, info="mets::phreg",
                  info = info))
   args$estimate.args <- c(list(...))
   args$predict.args <- list(
-    time = NULL,
+    times = NULL,
     individual.time = FALSE,
     se = FALSE)
   args$estimate <- function(formula, data, ...) {
     mets::phreg(formula, data, ...)
   }
   args$predict <- function(object, newdata,
-                           time, individual.time, se,
+                           times, individual.time, se,
                            ...) {
-    if (is.null(time)) {
-      time <- object$time
+    if (is.null(times)) {
+      times <- object$time
     }
-    ord <- order(time)
-    time <- time[ord]
+    ord <- order(times)
+    times <- times[ord]
     ## suppressMessages(browser())
-    if (individual.time && length(time) == nrow(newdata)) {
+    if (individual.time && length(times) == nrow(newdata)) {
       newdata <- newdata[ord, , drop=FALSE]
     }
-    pr <- predict(object, newdata=newdata, se=se, time=time,
+    pr <- predict(object, newdata=newdata, se=se, times=times,
                   individual.time = individual.time,
                   ...)$surv[, , drop=TRUE]
-    if (length(time) > 1L) {
+    if (length(times) > 1L) {
       if (individual.time) return(pr[order(ord)])
       pr <- pr[, order(ord), drop=FALSE]
     }

@@ -7,7 +7,7 @@
 #' data(sTRACE, package="mets")
 #' mod <- learner_surv_rf(Surv(time, status>0) ~ sex + age)
 #' mod$estimate(sTRACE)
-#' mod$predict(head(sTRACE), time=5) # P(T>t|X)
+#' mod$predict(head(sTRACE), times=5) # P(T>t|X)
 learner_surv_rf <- function(formula,
                             info="survival forest (ranger)",
                             num.threads = 1L,
