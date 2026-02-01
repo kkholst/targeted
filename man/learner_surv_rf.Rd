@@ -35,7 +35,7 @@ Constructs a \link{learner} class object for random survival forests
 data(sTRACE, package="mets")
 mod <- learner_surv_rf(Surv(time, status>0) ~ sex + age)
 mod$estimate(sTRACE)
-mod$predict(head(sTRACE), time=5) # P(T>t|X)
+mod$predict(head(sTRACE), times=5) # P(T>t|X)
 }
 \author{
 Klaus Kähler Holst

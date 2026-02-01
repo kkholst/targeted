@@ -28,7 +28,7 @@ hazards models.
 data(sTRACE, package="mets")
 mod <- learner_surv_cox(Surv(time, status>0) ~ sex + strata(age))
 mod$estimate(sTRACE)
-mod$predict(head(sTRACE), time=5) # P(T>t|X)
+mod$predict(head(sTRACE), times=5) # P(T>t|X)
 }
 \author{
 Klaus Kähler Holst
