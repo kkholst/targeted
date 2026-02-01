@@ -19,12 +19,27 @@ learner_surv_cox <- function(formula, info="mets::phreg",
   args$estimate <- function(formula, data, ...) {
     mets::phreg(formula, data, ...)
   }
-  args$predict <- function(object, newdata, time=NULL,
+  args$predict <- function(object, newdata,
+                           time=NULL,
                            individual.time=FALSE,
                            se=FALSE, ...) {
-    predict(object, newdata=newdata, se=se, time=time,
-            individual.time = individual.time,
-            ...)$surv[, , drop=TRUE]
+    if (is.null(time)) {
+      time <- object$time
+    }
+    ord <- order(time)
+    time <- time[ord]
+    ## suppressMessages(browser())
+    if (individual.time && length(time) == nrow(newdata)) {
+      newdata <- newdata[ord, , drop=FALSE]
+    }
+    pr <- predict(object, newdata=newdata, se=se, time=time,
+                  individual.time = individual.time,
+                  ...)$surv[, , drop=TRUE]
+    if (length(time) > 1L) {
+      if (individual.time) return(pr[order(ord)])
+      pr <- pr[, order(ord), drop=FALSE]
+    }
+    return(pr)
   }
   mod <- do.call(learner$new, args)
   class(mod) <- c("learner_surv_cox", class(mod))
