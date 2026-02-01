@@ -1,3 +1,12 @@
+# targetd 0.8
+
+Development version
+
+- `learner_surv_cox`, `learner_surv_rf`, `cumhaz`
+- feature(superlearner): more robust metalearner (in case quadratic prog. fails)
+- feature(learner_cox): mets::phreg wrapper. Also disabling openMP in
+  RcppArmadillo
+
 # targeted 0.7.1
 
 Maintenance release
