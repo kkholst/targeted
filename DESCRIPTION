@@ -63,9 +63,11 @@ Suggests:
     ranger,
     riskRegression,
     scatterplot3d,
+    survSuperLearner,
     tinytest,
     viridisLite,
     xgboost (>= 3.1.2.1),
+Remotes: tedwestling/survSuperLearner
 BugReports: https://github.com/kkholst/targeted/issues
 URL: https://kkholst.github.io/targeted/
 License: Apache License (== 2.0)

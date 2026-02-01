@@ -48,4 +48,3 @@ learner_surv_cox <- function(formula, info="mets::phreg",
   class(mod) <- c("learner_surv_cox", class(mod))
   return(mod)
 }
-

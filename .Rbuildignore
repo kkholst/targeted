@@ -1,3 +1,4 @@
+^.dir.locals.el$
 ._files$
 ^.github$
 ^.cache$

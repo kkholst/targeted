@@ -138,9 +138,10 @@ cumhaz <- function(object, newdata, times = NULL, individual.time = FALSE,
       }
     }
   } else if (inherits(object, "survSuperLearner")) {
-    pr <- predict.survSuperLearner(object, onlySL=TRUE,
-                                   newdata=newdata,
-                                   new.times=times)$event.SL.predict
+    pr <- survSuperLearner::predict.survSuperLearner(
+      object, onlySL=TRUE,
+      newdata=newdata,
+      new.times=times)$event.SL.predict
     tt <- times
     chf <- -log(pr)
     if (individual.time) {
