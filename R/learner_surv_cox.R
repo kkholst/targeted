@@ -16,13 +16,16 @@ learner_surv_cox <- function(formula, info="mets::phreg",
                  predict.args = c(),
                  info = info))
   args$estimate.args <- c(list(...))
+  args$predict.args <- list(
+    time = NULL,
+    individual.time = FALSE,
+    se = FALSE)
   args$estimate <- function(formula, data, ...) {
     mets::phreg(formula, data, ...)
   }
   args$predict <- function(object, newdata,
-                           time=NULL,
-                           individual.time=FALSE,
-                           se=FALSE, ...) {
+                           time, individual.time, se,
+                           ...) {
     if (is.null(time)) {
       time <- object$time
     }
