@@ -2,6 +2,8 @@
 
 ## targeted 0.7.1
 
+CRAN release: 2026-01-12
+
 Maintenance release
 
 ## targeted 0.7

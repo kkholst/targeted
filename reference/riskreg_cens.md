@@ -38,11 +38,11 @@ riskreg_cens(
 
 - treatment:
 
-  Optional treatment model ([learner](learner.md))
+  Optional treatment model (ml_model)
 
 - prediction:
 
-  Optional prediction model ([learner](learner.md))
+  Optional prediction model (ml_model)
 
 - data:
 
@@ -51,7 +51,7 @@ riskreg_cens(
 - newdata:
 
   Optional data.frame. In this case the uncentered influence function
-  evaluated in 'newdata' is returned with nuisance parameters obtained
+  evalued in 'newdata' is returned with nuisance parameters obtained
   from 'data'.
 
 - tau:

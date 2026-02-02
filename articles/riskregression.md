@@ -322,7 +322,7 @@ riskreg(y~a, nuisance=~x+z, data=d2, type="rd")
 ```
 
                 Estimate Std.Err   2.5% 97.5% P-value
-    (Intercept)   0.9942 0.02041 0.9542 1.034       0
+    (Intercept)   0.9749 0.02003 0.9356 1.014       0
 
 ### Influence-function
 
@@ -372,17 +372,17 @@ sessionInfo()
     [1] stats     graphics  grDevices utils     datasets  methods   base
 
     other attached packages:
-    [1] targeted_0.7.1
+    [1] targeted_0.8
 
     loaded via a namespace (and not attached):
      [1] mets_1.3.9             cli_3.6.5              knitr_1.51
-     [4] rlang_1.1.7            xfun_0.55              jsonlite_2.0.0
+     [4] rlang_1.1.7            xfun_0.56              jsonlite_2.0.0
      [7] future.apply_1.20.1    listenv_0.10.0         lava_1.8.2
     [10] htmltools_0.5.9        rmarkdown_2.30         grid_4.5.2
     [13] evaluate_1.0.5         fastmap_1.2.0          numDeriv_2016.8-1.1
     [16] mvtnorm_1.3-3          yaml_2.3.12            timereg_2.0.7
-    [19] compiler_4.5.2         codetools_0.2-20       Rcpp_1.1.0
-    [22] future_1.68.0          lattice_0.22-7         digest_0.6.39
+    [19] compiler_4.5.2         codetools_0.2-20       Rcpp_1.1.1
+    [22] future_1.69.0          lattice_0.22-7         digest_0.6.39
     [25] R6_2.6.1               parallelly_1.46.1      parallel_4.5.2
     [28] splines_4.5.2          Matrix_1.7-4           RcppArmadillo_15.2.3-1
     [31] tools_4.5.2            globals_0.18.0         survival_3.8-3        

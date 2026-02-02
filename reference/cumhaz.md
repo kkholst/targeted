@@ -19,7 +19,7 @@ cumhaz(
 
 - object:
 
-  Survival model object: phreg, coxph, rfsrc, ranger
+  Survival model object: phreg, coxph, rfsrc, ranger, survSuperLearner
 
 - newdata:
 

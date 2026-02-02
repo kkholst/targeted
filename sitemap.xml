@@ -30,6 +30,7 @@
 <url><loc>/reference/design.html</loc></url>
 <url><loc>/reference/estimate_truncatedscore.html</loc></url>
 <url><loc>/reference/expand.list.html</loc></url>
+<url><loc>/reference/fit_survival_models.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
 <url><loc>/reference/int_surv.html</loc></url>
 <url><loc>/reference/learner.html</loc></url>
@@ -44,6 +45,8 @@
 <url><loc>/reference/learner_naivebayes.html</loc></url>
 <url><loc>/reference/learner_sl.html</loc></url>
 <url><loc>/reference/learner_stratify.html</loc></url>
+<url><loc>/reference/learner_surv_cox.html</loc></url>
+<url><loc>/reference/learner_surv_rf.html</loc></url>
 <url><loc>/reference/learner_svm.html</loc></url>
 <url><loc>/reference/learner_xgboost.html</loc></url>
 <url><loc>/reference/ml_model.html</loc></url>
@@ -54,6 +57,7 @@
 <url><loc>/reference/predict.density.html</loc></url>
 <url><loc>/reference/predict.naivebayes.html</loc></url>
 <url><loc>/reference/predict.superlearner.html</loc></url>
+<url><loc>/reference/rcai.html</loc></url>
 <url><loc>/reference/reexports.html</loc></url>
 <url><loc>/reference/riskreg.html</loc></url>
 <url><loc>/reference/riskreg_cens.html</loc></url>
@@ -64,6 +68,7 @@
 <url><loc>/reference/specify_ode.html</loc></url>
 <url><loc>/reference/stratify.html</loc></url>
 <url><loc>/reference/superlearner.html</loc></url>
+<url><loc>/reference/survival_treatment_level_estfun.html</loc></url>
 <url><loc>/reference/targeted-class.html</loc></url>
 <url><loc>/reference/targeted-package.html</loc></url>
 <url><loc>/reference/terms.design.html</loc></url>

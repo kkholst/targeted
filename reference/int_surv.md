@@ -1,8 +1,7 @@
-# Integral approximation of a time dependent function. Computes an approximation of \\\int_start^stop S(t) dt\\, where \\S(t)\\ is a survival function, for a selection of start and stop time points.
+# Integral approximation of a time dependent function.
 
-Integral approximation of a time dependent function. Computes an
-approximation of \\\int_start^stop S(t) dt\\, where \\S(t)\\ is a
-survival function, for a selection of start and stop time points.
+Computes an approximation of \\\int_start^stop S(t) dt\\, where \\S(t)\\
+is a survival function, for a selection of start and stop time points.
 
 ## Usage
 
@@ -31,8 +30,7 @@ int_surv(times, surv, start = 0, stop = max(times), extend = FALSE)
 
 - extend:
 
-  (logical) If TRUE, integral is extended beyond the last observed time
-  point
+  should the integral be extended beyond the last observed time point
 
 ## Value
 
