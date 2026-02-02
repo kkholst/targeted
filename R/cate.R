@@ -440,7 +440,7 @@ cate_est <- function(y, # response vector
     r <- (Yhat - h0)
     IF <- apply(h1, 2, function(x) x * r)
     n <- nrow(data)
-    B <- solve(crossprod(V)) * n
+    B <- lava::Inverse(crossprod(V)) * n
     IF <- IF %*% B
     rownames(IF) <- rownames(X.cate)
 

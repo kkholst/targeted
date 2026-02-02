@@ -173,7 +173,7 @@ crr <- function(treatment,
 
   M1 <- desA$x
   C <-  -n^(-1) * crossprod(M1)
-  IF <- -solve(C) %*% t(M1 * as.vector(score - M1 %*% est))
+  IF <- -lava::Inverse(C) %*% t(M1 * as.vector(score - M1 %*% est))
   IF <- t(IF)
 
   estimate <- estimate(coef=est, IC=IF)
