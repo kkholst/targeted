@@ -10,25 +10,29 @@
 #' @param data A data.frame containing the analysis dataset. Must include columns
 #'   'id' (unique identifier) and 'a' (binary treatment variable with values 0 or 1).
 #'   Data.table and tibble objects will be coerced to data.frame.
+#' @param delta A vector with the non-missing indicator
+#' @param A A vector of the treatment variable
+#' @param levels A vector of the unique treatment levels
 #' @param learner A learner object of class 'learner_glm' used to fit the imputation
 #'   model. The learner must specify the outcome variable and model formula.
 #' @param subset Optional. A character string containing an R expression that
 #'   evaluates to a logical vector indicating which rows to use for fitting the
 #'   imputation model. The expression is evaluated in the context of 'data'.
-#'   If NULL (default), all rows with non-missing outcomes are used.
+#'   If NULL (default), all rows are used.
 #'
 #' @return An estimate object containing:
 #'   \item{coef}{Estimates for \eqn{E[U|A=1,\Delta=0]} and \eqn{E[U|A=0,\Delta=0]}}
 #'   \item{IC}{Influence curve values for each observation}
 #'   \item{id}{Observation identifiers}
 moi <- function(data,
+                delta,
+                A,
+                levels,
                 learner,
                 subset = NULL) {
-
-
   ## input checks
   if (!inherits(learner, "learner_glm")) {
-    stop("imputation learner must be of inherited class 'learner_glm'")
+    stop("imputation model/learner must be of inherited class 'learner_glm'")
   }
   if (inherits(data, c("data.table", "tbl_df"))) {
     data <- as.data.frame(data)
@@ -39,7 +43,7 @@ moi <- function(data,
   if (nrow(data) == 0) {
     stop("'data' cannot be empty (0 rows)")
   }
-  required_cols <- c("id", "a")
+  required_cols <- c("id")
   missing_cols <- setdiff(required_cols, names(data))
   if (length(missing_cols) > 0) {
     stop(sprintf("'data' is missing required column(s): %s",
@@ -51,13 +55,6 @@ moi <- function(data,
   }
   if (any(duplicated(data[["id"]]))) {
     stop("'id' column contains duplicate values")
-  }
-  if (any(is.na(data[["a"]]))) {
-    stop("'a' column cannot contain missing values (NA)")
-  }
-  unique_a <- unique(data[["a"]])
-  if (!all(unique_a %in% c(0, 1))) {
-    stop("'a' must be binary (contain only 0 and 1 values)")
   }
 
   ## evaluate subset expression
@@ -85,23 +82,9 @@ moi <- function(data,
     stop("'subset' expression excludes all rows (no TRUE values)")
   }
 
-  ## extracting the non-missing indicator
-  delta <- !is.na(learner$response(data, na.action = stats::na.pass))
-
-  ## combining model rows with delta == 1
-  model_rows <- model_rows & (delta == 1)
-
   # validate rows are available
   if (!any(model_rows)) {
     stop("No observations with non-missing outcome in the selected subset. Cannot fit imputation model.")
-  }
-
-  # check potential issues with stratification on treatment
-  if (!any(delta == 0 & data[["a"]] == 0)) {
-    warning("No observations with missing outcomes and a == 0. Estimate for E[U|A=0,delta=0] is invalid.")
-  }
-  if (!any(delta == 0 & data[["a"]] == 1)) {
-    warning("No observations with missing outcomes and a == 1. Estimate for E[U|A=1,delta=0] is invalid.")
   }
 
   ## extract id
@@ -125,7 +108,10 @@ moi <- function(data,
   epsilon <- estimate(epsilon, keep = (1:n_coef))
 
   ## calculating the derivate of the imputation function/model
-  family <- learner$fit$family$family
+  family <- learner$fit$family
+  if (inherits(family, "family")){
+    family <- family$family
+  }
   link <- learner$fit$family$link
   if (family == "binomial" && link == "logit") {
     nabla <- pred * (1 - pred)
@@ -139,13 +125,13 @@ moi <- function(data,
 
   # getting the estimate for E[U(X,A;\theta)|A = a, \Delta = 0]
   fun <- function(a) {
-    est <- mean(pred[delta == 0 & data[["a"]] == a])
+    est <- mean(pred[delta == 0 & A == a])
 
-    IC <- (data[["a"]] == a) * (delta == 0) /
-      mean((data[["a"]] == a) * (delta == 0)) * (pred - est)
+    IC <- (A == a) * (delta == 0) /
+      mean((A == a) * (delta == 0)) * (pred - est)
 
     IC <- IC +
-      t(colMeans(nabla[data[["a"]] == a & delta == 0,]) %*%
+      t(colMeans(nabla[A == a & delta == 0,]) %*%
         t(IC(epsilon)))
 
     estimate(coef = est,
@@ -155,10 +141,159 @@ moi <- function(data,
   }
 
   est <- lapply(
-    c(1,0),
+    levels,
     FUN = fun
   )
   est <- do.call("merge", est)
 
   return(est)
+}
+
+moiate <- function(data,
+                   response.model,
+                   propensity.model,
+                   missing.model,
+                   imputation.model,
+                   imputation.subset = NULL,
+                   transform = NULL,
+                   back.transform = NULL,
+                   return.all = FALSE) {
+  ## TODO: check that the missing reponse and treatment strata are well defined
+  n <- nrow(data)
+  if (inherits(data, c("data.table", "tbl_df"))) {
+    data <- as.data.frame(data)
+  }
+  if (!is.data.frame(data)) {
+    stop("'data' must be a data.frame")
+  }
+  if (n == 0) {
+    stop("'data' cannot be empty (0 rows)")
+  }
+  required_cols <- c("id")
+  missing_cols <- setdiff(required_cols, names(data))
+  if (length(missing_cols) > 0) {
+    stop(sprintf("'data' is missing required column(s): %s",
+                 paste(missing_cols, collapse = ", ")))
+  }
+  rm(required_cols, missing_cols)
+  if (any(is.na(data[["id"]]))) {
+    stop("'id' column cannot contain missing values (NA)")
+  }
+  if (any(duplicated(data[["id"]]))) {
+    stop("'id' column contains duplicate values")
+  }
+
+  if (inherits(response.model, "formula")) {
+    response.model <- learner_glm(response.model)
+  }
+  if (inherits(propensity.model, "formula")) {
+    propensity.model <- learner_glm(propensity.model, family = binomial())
+  }
+  if (inherits(missing.model, "formula")) {
+    missing.model <- learner_glm(missing.model, family = binomial())
+  }
+  if (inherits(imputation.model, "formula")) {
+    imputation.model <- learner_glm(imputation.model)
+  }
+
+  ## check that the propensity.model is a learner_glm with family = "binomial",
+  ## and that the formula RHS is 1, i.e., only an
+  ## intercept is included
+  if (!inherits(propensity.model, "learner_glm")) {
+    stop("propensity.model must be of inherited class 'learner_glm'")
+  }
+  ## TODO: implement family S3 function for learner_glm
+  family <- propensity.model$.__enclos_env__$private$init$estimate.args$family
+  if (inherits(family, "family")){
+    family <- family$family
+  }
+  if (family != "binomial") {
+    stop("propensity.model glm must be of family 'binomial'")
+  }
+  form <- formula(propensity.model)
+  if(length(attr(terms(form),"factors")) != 0) {
+    stop("only an intercept is allowed in the propensity.model formula")
+  }
+  rm(form, family)
+
+  ## clone models that are updated:
+  response.model <- response.model$clone()
+  missing.model <- missing.model$clone()
+
+  ## extract treatment variable
+  A <- propensity.model$response(data)
+
+  ## extract the non-missing indicator
+  ## updating the outcome response model
+  ## updating the non-missing model
+  response <- response.model$response(data, na.action = stats::na.pass)
+  delta <- !is.na(response)
+
+  if ("delta" %in% colnames(data)) {
+    stop("'delta' column not permitted in data")
+  }
+  data$delta <- delta
+  if ("delta_reponse" %in% colnames(data)) {
+    stop("'delta_response' column not permitted in data")
+  }
+  data$delta_response <- ifelse(!delta, 0, response)
+  response.model$update("delta_response")
+  ## TODO: bug in updating missing.model reponse, if no response given
+  missing.model$update("delta")
+
+  # fit model for E[\Delta Y | A = a]
+  outcome_model <- cate(
+    cate.model =  ~ 1,
+    response.model = response.model,
+    propensity.model = propensity.model,
+    data = data
+  )
+
+  # get the influence function/curve
+  outcome_est <- estimate(outcome_model,
+                          keep = c(1,2),
+                          id = data$id,
+                          labels = paste0("E[DY|A=",outcome_model$levels,"]"))
+
+
+
+  # fit model for P(Delta = 1 | A = a)
+  missing_model <- cate(
+    cate.model = ~ 1,
+    response.model = missing.model,
+    propensity.model = propensity.model,
+    data = data
+  )
+  # calculate P(Delta = 0 | A = a) and get the influence curve/function
+  missing_est <- estimate(missing_model, keep = c(1,2), id = data$id)
+  missing_est <- estimate(missing_est,
+                          f = function(x) 1 - x,
+                          labels = paste0("P(D=0|A=",missing_model$levels,")"))
+
+  if (!all(outcome_model$levels == missing_model$levels)) {
+    stop("treatment levels are not identical")
+  }
+
+  # fit model for E[U(X,A,Z; theta)|A = a, Delta = 0]
+  moi_est <- moi(data = data,
+                 delta = delta,
+                 A = A,
+                 levels = outcome_model$levels,
+                 learner = imputation.model,
+                 subset = imputation.subset)
+
+  ##  output
+  est <- merge(outcome_est, missing_est, moi_est)
+  ate <- estimate(est,
+                  f = function(x) x[1:2] + x[3:4] * x[5:6],
+                  labels = paste0("E[tildeY|A=",missing_model$levels,"]"))
+  ate <- estimate(ate, f = function(x) x[1] - x[2], labels = "ATE")
+  ## transform and back transform
+  ate <- estimate(ate, f = transform, back.transform = back.transform)
+
+  if (return.all == TRUE) {
+    ate <- merge(est, ate)
+  }
+
+  return(ate)
 }
