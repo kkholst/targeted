@@ -130,7 +130,127 @@ test_moi <- function() {
 
 test_moi()
 
+test_moiate_continuous <- function() {
 
+  ## covariate distribution
+  covariate = function(n) {
+    data.frame(
+      a = rbinom(n, 1, 0.5),
+      w1 = rnorm(n),
+      w2 = rbinom(n, 1, 0.8),
+      w3 = rbinom(n, 1, 0.5)
+    )
+  }
+
+  ##  outcome distribution
+  par0 <- c(10, -3, 0.1, 0.03, -0.04, 0.02)
+  outcome = setargs(
+    outcome_continuous,
+    mean = ~ 1 + a + w1 + w2 + w3 + w2:w3,
+    par = par0,
+    # coef order as defined by the above formula
+    sd = 1
+  )
+
+  ## tmp_d <- covariate(10000) %>% cbind(., outcome(.))
+  ## tmp <- lm(y ~ a + w1 + w2 + w3 + w2:w3, data = tmp_d)
+
+  ## true outcome model
+  q0 <- function(a, w1, w2, w3) {
+    apply(cbind(1, a, w1, w2, w3, w2*w3), MARGIN = 1, function(x) sum(x * par0))
+  }
+
+  ## predict(tmp, newdata = data.frame(a = c(0,1), w1 = c(1,2), w2 = c(1,2), w3 = c(1,3)))
+  ## q0(a = c(0,1), w1 = c(1,2), w2 = c(1,2), w3 = c(1,3))
+
+  ## coarsening distribution
+  coarsening_par0 <- c(1.5, 0.2, 0.3, 0.3, 0.4, 0.2)
+  coarsening = setargs(
+    outcome_binary,
+    mean = ~ 1 + a + w1 + w2 + w3 + w2:w3,
+    par = coarsening_par0 # coef order as defined by the above formula
+  )
+
+  ## true coarsening model
+  s0 <- function(a, w1, w2, w3) {
+    apply(cbind(1, a, w1, w2, w3, w2*w3), MARGIN = 1, function(x) lava::expit(sum(x * coarsening_par0)))
+  }
+
+  ## approximate true target parameters under imputation
+  approx_target <- function(n = 1e4) {
+    covar <- covariate(n)
+    ED1Y1 <- mean(q0(a = 1, w1 = covar$w1, w2 = covar$w2, w3 = covar$w3) * s0(a = 1, w1 = covar$w1, w2 = covar$w2, w3 = covar$w3))
+    ED0Y0 <- mean(q0(a = 0, w1 = covar$w1, w2 = covar$w2, w3 = covar$w3) * s0(a = 0, w1 = covar$w1, w2 = covar$w2, w3 = covar$w3))
+
+    PDeltaA1 <- mean(s0(a = 1, w1 = covar$w1, w2 = covar$w2, w3 = covar$w3))
+    PDeltaA0 <- mean(s0(a = 0, w1 = covar$w1, w2 = covar$w2, w3 = covar$w3))
+
+    E1DUA1 <- mean((1 - s0(a = 1, w1 = covar$w1, w2 = covar$w2, w3 = covar$w3)) * q0(a = 0, w1 = covar$w1, w2 = covar$w2, w3 = covar$w3))
+    E1DUA0 <- mean((1 - s0(a = 0, w1 = covar$w1, w2 = covar$w2, w3 = covar$w3)) * q0(a = 0, w1 = covar$w1, w2 = covar$w2, w3 = covar$w3))
+
+    EUD0A1 <- E1DUA1 / (1-PDeltaA1)
+    EUD0A0 <- E1DUA0 / (1-PDeltaA0)
+
+    targets <- c(
+      ED1Y1,
+      ED0Y0,
+      1 - PDeltaA1,
+      1 - PDeltaA0,
+      EUD0A1,
+      EUD0A0,
+      (ED1Y1 + E1DUA1) - (ED0Y0 + E1DUA0)
+    )
+
+    return(targets)
+  }
+
+  set.seed(1)
+  plan(tweak("multicore"), workers = 4)
+  targets0 <- future_replicate(1e3, approx_target())
+  targets0 <- rowMeans(targets0)
+
+  ## setup trial
+  trial <- Trial$new(covariates = covariate,
+                     outcome = \(data) outcome(data) *
+                                       ifelse(coarsening(data) == 1, 1, NA))
+
+  ## run and report the simulation study
+  onerun <- function(n) {
+    data <- trial$simulate(n)
+    est <- moiate(
+      data = data,
+      propensity.model = a ~ 1,
+      response.model = learner_glm(y ~ a),
+      missing.model = learner_glm(delta ~ a, family = binomial()),
+      imputation.model = learner_glm(y ~ w1 + w2 + w3 + w2:w3),
+      imputation.subset = "!is.na(y) & a == 0",
+      transform = NULL,
+      back.transform = NULL,
+      return.all = TRUE
+    )
+
+    out <- c(
+      est = coef(est),
+      se = sqrt(diag(vcov(est)))
+    )
+    return(out)
+  }
+
+  plan(tweak("multicore", workers = 7))
+  res <- sim(onerun, R = 1e4, seed = 1, args = list(n = 1e3))
+  sumres <- summary(res,
+                    estimate = 1:7,
+                    se = 8:14,
+                    true = targets0)
+
+
+  ## test bias, SE/SD and coverage within a given tolerance
+  lapply(sumres["Bias",], function(x) expect_equivalent(x, 0, tolerance=0.0025))
+  lapply(sumres["SE/SD",], function(x) expect_equivalent(x, 1, tolerance = 0.02))
+  lapply(sumres["Coverage",], function(x) expect_equivalent(x, 0.95, tolerance = 0.01))
+}
+
+test_moiate_continuous()
 
 test_moiate_binary <- function() {
 
