@@ -130,7 +130,9 @@ test_moi <- function() {
 
 test_moi()
 
-test__moiate_binary <- function() {
+
+
+test_moiate_binary <- function() {
 
   ## covariates and treatment distribution
   covariate <- function(n) {
