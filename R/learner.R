@@ -223,8 +223,13 @@ learner <- R6::R6Class("learner", # nolint
       if (is.character(formula)) {
         if (grepl("~", formula)) {
           formula <- as.formula(formula)
-        } else {
-          formula <- reformulate(as.character(private$.formula)[3], formula)
+        } else { # string
+          st <- as.character(private$.formula)
+          if (length(st) == 3L) { # includes response
+            formula <- reformulate(st[3], formula)
+          } else { # without response
+            formula <- reformulate(st[2], formula)
+          }
         }
       }
       private$.formula <- formula
