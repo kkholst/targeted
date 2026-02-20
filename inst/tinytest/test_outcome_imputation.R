@@ -8,7 +8,7 @@ z <- x + a * w^2 + (1-a) * sin(w) + rnorm(n) # post randomization variable
 delta <- rbinom(n = n, size = 1, prob = lava::expit(2 + z)) # non-missingness indicator
 y <- 1 + a + x - a * x + w + a * w + z + rnorm(n)           # outcome
 y <- ifelse(delta == 1, y, NA)
-d <- data.frame(y = y, z = z, a = a, x = x)
+d <- data.frame(id = n:1, y = y, z = z, a = a, x = x)
 if(full == TRUE) {
   d <- cbind(d, w = w)
 }
@@ -41,3 +41,12 @@ d <- simdata(n = 1e3)
 ## set.seed(1)
 ## target0 <- approx_target(n = 1e7)
 target0 <- c(2.768475, 1.449266)
+target0[1] - target0[2]
+
+moiate(data = d,
+       response.model = y ~ a * x,
+       propensity.model = learner_glm(a ~ 1, family = "binomial"),
+       missing.model = tmp ~ a * x,
+       imputation.model = y ~ x + z,
+       imputation.subset = "!is.na(y) & a == 0",
+       return.all = FALSE)
