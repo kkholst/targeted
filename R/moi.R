@@ -2,31 +2,34 @@
 #'
 #' Estimates the mean of a given parametric imputation model among observations
 #' with a missing outcome and a given treatment. Specifically, it provides
-#' estimates of \eqn{E[U(X,A,Z,\theta)|A=a, \Delta=0]}, for an imputation model \eqn{U},
-#' where \eqn{X} denotes baseline covariates,
-#' \eqn{A} denotes the treatment, \eqn{Z} denotes post randomization covariates, and \eqn{\Delta}
+#' estimates of \eqn{E[U(X,A,Z,\theta)|A=a, \Delta=0]}, for an imputation model
+#' \eqn{U}, where \eqn{X} denotes baseline covariates, \eqn{A} denotes the
+#' treatment, \eqn{Z} denotes post randomization covariates, and \eqn{\Delta}
 #' denotes a non-missing indicator. Influence function based standard errors are
 #' also provided.
-#' @param data A data.frame containing the analysis dataset. Must include columns
-#'   'id' (unique identifier) and 'a' (binary treatment variable with values 0 or 1).
-#'   Data.table and tibble objects will be coerced to data.frame.
+#' @param data A data.frame containing the analysis dataset. Must include
+#'   columns 'id' (unique identifier) and 'a' (binary treatment variable with
+#'   values 0 or 1). Data.table and tibble objects will be coerced to
+#'   data.frame.
 #' @param delta A vector with the non-missing indicator
 #' @param A A vector of the treatment variable
 #' @param levels A vector of the unique treatment levels
-#' @param learner A learner object of class 'learner_glm' used to fit the imputation
-#'   model. The learner must specify the outcome variable and model formula.
+#' @param learner A learner object of class 'learner_glm' used to fit the
+#'   imputation model. The learner must specify the outcome variable and model
+#'   formula.
 #' @param subset Optional. A character string containing an R expression that
 #'   evaluates to a logical vector indicating which rows to use for fitting the
-#'   imputation model. The expression is evaluated in the context of 'data'.
-#'   If NULL (default), all rows are used.
+#'   imputation model. The expression is evaluated in the context of 'data'. If
+#'   NULL (default), all rows are used.
 #'
 #' @return An estimate object containing:
-#'   \item{coef}{Estimates for \eqn{E[U|A=1,\Delta=0]} and \eqn{E[U|A=0,\Delta=0]}}
+#'   \item{coef}{Estimates for \eqn{E[U|A=1,\Delta=0]} and
+#'    \eqn{E[U|A=0,\Delta=0]}}
 #'   \item{IC}{Influence curve values for each observation}
 #'   \item{id}{Observation identifiers}
 moi <- function(data,
                 delta,
-                A,
+                A, # nolint, TODO: treatment.model argument
                 levels,
                 learner,
                 subset = NULL) {
@@ -60,7 +63,8 @@ moi <- function(data,
   ## evaluate subset expression
   if (!is.null(subset)) {
     tryCatch({
-      model_rows <- eval(parse(text = subset), envir = data, enclos = parent.frame())
+      model_rows <- eval(parse(text = subset),
+                         envir = data, enclos = parent.frame())
     }, error = function(e) {
       stop(sprintf("Error evaluating 'subset' expression: %s", e$message))
     })
@@ -72,8 +76,9 @@ moi <- function(data,
     stop("'subset' expression must evaluate to a logical vector")
   }
   if (length(model_rows) != nrow(data)) {
-    stop(sprintf("'subset' expression length (%d) does not match data rows (%d)",
-                 length(model_rows), nrow(data)))
+    stop(sprintf(
+      "'subset' expression length (%d) does not match data rows (%d)",
+              length(model_rows), nrow(data)))
   }
   if (any(is.na(model_rows))) {
     stop("'subset' expression cannot produce NA values")
@@ -84,7 +89,7 @@ moi <- function(data,
 
   # validate rows are available
   if (!any(model_rows)) {
-    stop("No observations with non-missing outcome in the selected subset. Cannot fit imputation model.")
+    stop("No observations with non-missing outcome in the selected subset. Cannot fit imputation model.") # nolint
   }
 
   ## extract id
@@ -109,7 +114,7 @@ moi <- function(data,
 
   ## calculating the derivate of the imputation function/model
   family <- learner$fit$family
-  if (inherits(family, "family")){
+  if (inherits(family, "family")) {
     family <- family$family
   }
   link <- learner$fit$family$link
@@ -118,7 +123,7 @@ moi <- function(data,
   } else if (family == "gaussian" && link == "identity") {
     nabla <- 1
   } else {
-    stop(sprintf("Unsupported family/link combination: family='%s', link='%s'. Supported combinations are: binomial/logit, gaussian/identity",
+    stop(sprintf("Unsupported family/link combination: family='%s', link='%s'. Supported combinations are: binomial/logit, gaussian/identity", # nolint
                  family, link))
   }
   nabla <- nabla * design_matrix
@@ -131,13 +136,13 @@ moi <- function(data,
       mean((A == a) * (delta == 0)) * (pred - est)
 
     IC <- IC +
-      t(colMeans(nabla[A == a & delta == 0,]) %*%
+      t(colMeans(nabla[A == a & delta == 0, ]) %*%
         t(IC(epsilon)))
 
     estimate(coef = est,
              IC = IC,
              id = id,
-             labels = paste0("E[U|A=",a,",delta=0]"))
+             labels = paste0("E[U|A=", a, ",delta=0]"))
   }
 
   est <- lapply(
@@ -204,14 +209,14 @@ moiate <- function(data,
   }
   ## TODO: implement family S3 function for learner_glm
   family <- propensity.model$.__enclos_env__$private$init$estimate.args$family
-  if (inherits(family, "family")){
+  if (inherits(family, "family")) {
     family <- family$family
   }
   if (family != "binomial") {
     stop("propensity.model glm must be of family 'binomial'")
   }
   form <- formula(propensity.model)
-  if(length(attr(terms(form),"factors")) != 0) {
+  if (length(attr(terms(form), "factors")) != 0) {
     stop("only an intercept is allowed in the propensity.model formula")
   }
   rm(form, family)
@@ -251,9 +256,9 @@ moiate <- function(data,
 
   # get the influence function/curve
   outcome_est <- estimate(outcome_model,
-                          keep = c(1,2),
+                          keep = c(1, 2),
                           id = data$id,
-                          labels = paste0("E[DY|A=",outcome_model$levels,"]"))
+                          labels = paste0("E[DY|A=", outcome_model$levels, "]"))
 
 
 
@@ -265,11 +270,12 @@ moiate <- function(data,
     data = data
   )
   # calculate P(Delta = 0 | A = a) and get the influence curve/function
-  missing_est <- estimate(missing_model, keep = c(1,2), id = data$id)
+  missing_est <- estimate(missing_model, keep = c(1, 2), id = data$id)
   missing_est <- estimate(missing_est,
                           f = function(x) 1 - x,
-                          labels = paste0("P(D=0|A=",missing_model$levels,")"))
-
+                          labels = paste0(
+                            "P(D=0|A=", missing_model$levels, ")"
+                          ))
   if (!all(outcome_model$levels == missing_model$levels)) {
     stop("treatment levels are not identical")
   }
@@ -286,8 +292,8 @@ moiate <- function(data,
   est <- merge(outcome_est, missing_est, moi_est)
   ate <- estimate(est,
                   f = function(x) x[1:2] + x[3:4] * x[5:6],
-                  labels = paste0("E[tildeY|A=",missing_model$levels,"]"))
-  ate <- estimate(ate, f = function(x) x[1] - x[2], labels = "ATE")
+                  labels = paste0("E[tildeY|A=", missing_model$levels, "]"))
+  ate <- estimate(ate, f = cbind(1, -1), labels = "ATE")
   ## transform and back transform
   ate <- estimate(ate, f = transform, back.transform = back.transform)
 
