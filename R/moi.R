@@ -12,7 +12,7 @@
 #'   values 0 or 1). Data.table and tibble objects will be coerced to
 #'   data.frame.
 #' @param delta A vector with the non-missing indicator
-#' @param A A vector of the treatment variable
+#' @param treatment.model
 #' @param levels A vector of the unique treatment levels
 #' @param learner A learner object of class 'learner_glm' used to fit the
 #'   imputation model. The learner must specify the outcome variable and model
@@ -29,8 +29,7 @@
 #'   \item{id}{Observation identifiers}
 moi <- function(data,
                 delta,
-                A, # nolint, TODO: treatment.model argument
-                levels,
+                treatment.model,
                 learner,
                 subset = NULL) {
   ## input checks
@@ -128,6 +127,11 @@ moi <- function(data,
   }
   nabla <- nabla * design_matrix
 
+  ## getting the treatment variable and levels:
+  A <- treatment.model$response(data)
+  levels <- rev(sort(unique(A)))
+
+
   # getting the estimate for E[U(X,A;\theta)|A = a, \Delta = 0]
   fun <- function(a) {
     est <- mean(pred[delta == 0 & A == a])
@@ -151,12 +155,19 @@ moi <- function(data,
   )
   est <- do.call("merge", est)
 
-  return(est)
+  out <- list(
+    estimate = est,
+    learner = learner,
+    subset = subset,
+    levels = as.character(levels)
+  )
+
+  return(out)
 }
 
 moiate <- function(data,
                    response.model,
-                   propensity.model,
+                   treatment.model,
                    missing.model,
                    imputation.model,
                    imputation.subset = NULL,
@@ -191,8 +202,8 @@ moiate <- function(data,
   if (inherits(response.model, "formula")) {
     response.model <- learner_glm(response.model)
   }
-  if (inherits(propensity.model, "formula")) {
-    propensity.model <- learner_glm(propensity.model, family = binomial())
+  if (inherits(treatment.model, "formula")) {
+    treatment.model <- learner_glm(treatment.model, family = binomial())
   }
   if (inherits(missing.model, "formula")) {
     missing.model <- learner_glm(missing.model, family = binomial())
@@ -204,29 +215,26 @@ moiate <- function(data,
   ## check that the propensity.model is a learner_glm with family = "binomial",
   ## and that the formula RHS is 1, i.e., only an
   ## intercept is included
-  if (!inherits(propensity.model, "learner_glm")) {
-    stop("propensity.model must be of inherited class 'learner_glm'")
+  if (!inherits(treatment.model, "learner_glm")) {
+    stop("treatment.model must be of inherited class 'learner_glm'")
   }
   ## TODO: implement family S3 function for learner_glm
-  family <- propensity.model$.__enclos_env__$private$init$estimate.args$family
+  family <- treatment.model$.__enclos_env__$private$init$estimate.args$family
   if (inherits(family, "family")) {
     family <- family$family
   }
   if (family != "binomial") {
-    stop("propensity.model glm must be of family 'binomial'")
+    stop("treatment.model glm must be of family 'binomial'")
   }
-  form <- formula(propensity.model)
+  form <- formula(treatment.model)
   if (length(attr(terms(form), "factors")) != 0) {
-    stop("only an intercept is allowed in the propensity.model formula")
+    stop("only an intercept is allowed in the treatment.model formula")
   }
   rm(form, family)
 
   ## clone models that are updated:
   response.model <- response.model$clone()
   missing.model <- missing.model$clone()
-
-  ## extract treatment variable
-  A <- propensity.model$response(data)
 
   ## extract the non-missing indicator
   ## updating the outcome response model
@@ -243,14 +251,13 @@ moiate <- function(data,
   }
   data$delta_response <- ifelse(!delta, 0, response)
   response.model$update("delta_response")
-  ## TODO: bug in updating missing.model reponse, if no response given
   missing.model$update("delta")
 
   # fit model for E[\Delta Y | A = a]
   outcome_model <- cate(
     cate.model =  ~ 1,
     response.model = response.model,
-    propensity.model = propensity.model,
+    propensity.model = treatment.model,
     data = data
   )
 
@@ -266,7 +273,7 @@ moiate <- function(data,
   missing_model <- cate(
     cate.model = ~ 1,
     response.model = missing.model,
-    propensity.model = propensity.model,
+    propensity.model = treatment.model,
     data = data
   )
   # calculate P(Delta = 0 | A = a) and get the influence curve/function
@@ -276,17 +283,19 @@ moiate <- function(data,
                           labels = paste0(
                             "P(D=0|A=", missing_model$levels, ")"
                           ))
-  if (!all(outcome_model$levels == missing_model$levels)) {
-    stop("treatment levels are not identical")
-  }
 
   # fit model for E[U(X,A,Z; theta)|A = a, Delta = 0]
-  moi_est <- moi(data = data,
-                 delta = delta,
-                 A = A,
-                 levels = outcome_model$levels,
-                 learner = imputation.model,
-                 subset = imputation.subset)
+  moi_model <- moi(data = data,
+                   delta = delta,
+                   treatment.model = treatment.model,
+                   learner = imputation.model,
+                   subset = imputation.subset)
+  moi_est <- moi_model$estimate
+  moi_levels <- moi_model$levels
+
+  if (!(identical(missing_model$levels, outcome_model$levels) & identical(missing_model$levels, moi_model$levels))) {
+    stop("treatment levels are not identical")
+  }
 
   ##  output
   est <- merge(outcome_est, missing_est, moi_est)
