@@ -98,14 +98,14 @@ test_moi <- function() {
     data <- trial$simulate(n)
 
     delta <- !is.na(data$y)
-    A <- data$a
 
-    est <- moi(data = data,
-               delta = delta,
-               A = A,
-               levels = c(1,0),
-               learner = learner_glm(y ~ w1 + w2, family = binomial()),
-               subset = "!is.na(y) & a == 0")
+    model <- moi(data = data,
+                 delta = delta,
+                 treatment.model = learner_glm(a ~ 1, family = binomial()),
+                 learner = learner_glm(y ~ w1 + w2, family = binomial()),
+                 subset = "!is.na(y) & a == 0")
+
+    est <- model$estimate
 
     out <- c(
       est = coef(est),
@@ -219,7 +219,7 @@ test_moiate_continuous <- function() {
     data <- trial$simulate(n)
     est <- moiate(
       data = data,
-      propensity.model = a ~ 1,
+      treatment.model = a ~ 1,
       response.model = learner_glm(y ~ a),
       missing.model = learner_glm(delta ~ a, family = binomial()),
       imputation.model = learner_glm(y ~ w1 + w2 + w3 + w2:w3),
@@ -365,7 +365,7 @@ test_moiate_binary <- function() {
                      estimators = list(
                        `onestep` = setargs(
                          moiate,
-                         propensity.model = a ~ 1,
+                         treatment.model = a ~ 1,
                          response.model = learner_glm(
                            formula = reformulate(attr(terms(mean0), "term.labels"), response = "y"),
                            family = binomial()
@@ -383,7 +383,7 @@ test_moiate_binary <- function() {
   ## test
   ## d <- trial$simulate(1e3)
   ## moiate(data = d,
-  ##        propensity.model = a ~ 1,
+  ##        treatment.model = a ~ 1,
   ##        response.model = learner_glm(
   ##          formula = reformulate(attr(terms(mean0), "term.labels"), response = "y"),
   ##          family = binomial()
