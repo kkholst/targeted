@@ -12,16 +12,14 @@
 #'   values 0 or 1). Data.table and tibble objects will be coerced to
 #'   data.frame.
 #' @param delta A vector with the non-missing indicator
-#' @param treatment.model
-#' @param levels A vector of the unique treatment levels
-#' @param learner A learner object of class 'learner_glm' used to fit the
+#' @param treatment.model Learner object
+#' @param imputation.model A learner object of class 'learner_glm' used to fit the
 #'   imputation model. The learner must specify the outcome variable and model
 #'   formula.
 #' @param subset Optional. A character string containing an R expression that
 #'   evaluates to a logical vector indicating which rows to use for fitting the
 #'   imputation model. The expression is evaluated in the context of 'data'. If
 #'   NULL (default), all rows are used.
-#'
 #' @return An estimate object containing:
 #'   \item{coef}{Estimates for \eqn{E[U|A=1,\Delta=0]} and
 #'    \eqn{E[U|A=0,\Delta=0]}}
@@ -30,11 +28,11 @@
 moi <- function(data,
                 delta,
                 treatment.model,
-                learner,
+                imputation.model,
                 subset = NULL) {
   ## input checks
-  if (!inherits(learner, "learner_glm")) {
-    stop("imputation model/learner must be of inherited class 'learner_glm'")
+  if (!inherits(imputation.model, "learner_glm")) {
+    stop("imputation.model must be of inherited class 'learner_glm'")
   }
   if (inherits(data, c("data.table", "tbl_df"))) {
     data <- as.data.frame(data)
@@ -95,16 +93,16 @@ moi <- function(data,
   id <- data[["id"]]
 
   ## fit imputation model
-  learner$estimate(data[model_rows, ])
+  imputation.model$estimate(data[model_rows, ])
 
   ## predict from imputation model
-  pred <- learner$predict(newdata = data, type = "response")
-  design_matrix <- learner$design(data = data,
+  pred <- imputation.model$predict(newdata = data, type = "response")
+  design_matrix <- imputation.model$design(data = data,
                                   intercept = TRUE,
                                   response = FALSE)$x
 
   # getting the influence function/curve
-  epsilon <- estimate(learner$fit, id = id[model_rows])
+  epsilon <- estimate(imputation.model$fit, id = id[model_rows])
   n_coef <- length(coef(epsilon))
   tmp <- estimate(coef = 0, IC = rep(0, length(id)), id = id)
   epsilon <- merge(epsilon, tmp)
@@ -112,11 +110,9 @@ moi <- function(data,
   epsilon <- estimate(epsilon, keep = (1:n_coef))
 
   ## calculating the derivate of the imputation function/model
-  family <- learner$fit$family
-  if (inherits(family, "family")) {
-    family <- family$family
-  }
-  link <- learner$fit$family$link
+  family <- family(imputation.model$fit)
+  link <- family$link
+  family <- family$family
   if (family == "binomial" && link == "logit") {
     nabla <- pred * (1 - pred)
   } else if (family == "gaussian" && link == "identity") {
@@ -157,7 +153,7 @@ moi <- function(data,
 
   out <- list(
     estimate = est,
-    learner = learner,
+    imputation.model = imputation.model,
     subset = subset,
     levels = as.character(levels)
   )
@@ -288,7 +284,7 @@ moiate <- function(data,
   moi_model <- moi(data = data,
                    delta = delta,
                    treatment.model = treatment.model,
-                   learner = imputation.model,
+                   imputation.model = imputation.model,
                    subset = imputation.subset)
   moi_est <- moi_model$estimate
   moi_levels <- moi_model$levels
