@@ -425,3 +425,75 @@ test_moiate_binary <- function() {
 }
 
 test_moiate_binary()
+
+test_moi_postrand <- function() {
+
+  simdata <- function(n, full = FALSE) {
+    w <- rnorm(n) # unmeasured baseline covariate
+    x <- rnorm(n) - 0.5 * w # baseline covariate
+    a <- rbinom(n, 1, 0.5)    # treatment
+    z <- x + a * w^2 + (1-a) * sin(w) + rnorm(n) # post randomization variable
+    delta <- rbinom(n = n, size = 1, prob = lava::expit(2 + z)) # non-missingness indicator
+    y <- 1 + a + x - a * x + w + a * w + z + rnorm(n)           # outcome
+    y <- ifelse(delta == 1, y, NA)
+    d <- data.frame(id = n:1, y = y, z = z, a = a, x = x)
+    if(full == TRUE) {
+      d <- cbind(d, w = w)
+    }
+    return(d)
+  }
+
+
+  ## true target parameter, E[U(X,A,Z)|A = a, \Delta = 0],
+  ## U(X,A,Z): linear model of x, z among the non-missing in
+  ## the reference treatment arm, a = 0
+
+  approx_target <- function(n = 1e5) {
+    data <- simdata(n = n, full = TRUE)
+    ## approximating the true imputation model u: y ~ x + z in a = 0
+    data$q <- with(data = data, 1 + a + x - a * x + w + a * w + z)
+    imp <- learner_glm(q ~ x + z, family = gaussian())
+    imp$estimate(data = data[!is.na(data$y) & data$a == 0,])
+    data$u <- imp$predict(data, type = "response")
+
+    sapply(
+      X = c(1,0),
+      FUN = function(a) {
+        mean(data[is.na(data$y) & data$a == a, ]$u)
+      }
+    )
+  }
+
+  set.seed(1)
+  plan(tweak("multicore"), workers = 4)
+  targets0 <- future_replicate(1e3, approx_target())
+  targets0 <- rowMeans(targets0)
+
+  ## target0 <- c(2.768475, 1.449266)
+  ## target0[1] - target0[2]
+
+  onerun <- function(n) {
+    data <- simdata(n = n, full = TRUE)
+    delta <- !is.na(data$y)
+
+    model <- moi(
+      data = data,
+      delta = delta,
+      imputation.model = learner_glm(formula = y  ~ x + z),
+      subset = "!is.na(y) & a == 0",
+      treatment.model = learner_glm(formula = a ~ 1, family = binomial())
+    )
+
+    model$estimate
+  }
+
+  plan(tweak("multicore"), workers = 7)
+  res <- sim(onerun, R = 5e4, seed = 1, args = list(n = 2e3))
+  sumres <- summary(res, estimate = 1:2, se = 3:4, true = targets0)
+
+  ## test bias, SE/SD and coverage within a given tolerance
+  lapply(sumres["Bias",], function(x) expect_equivalent(x, 0, tolerance=0.0015))
+  lapply(sumres["SE/SD",], function(x) expect_equivalent(x, 1, tolerance = 0.01))
+  lapply(sumres["Coverage",], function(x) expect_equivalent(x, 0.95, tolerance = 0.0025))
+
+}
