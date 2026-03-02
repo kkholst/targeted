@@ -16,10 +16,13 @@
 #' @param imputation.model A learner object of class 'learner_glm' used to fit the
 #'   imputation model. The learner must specify the outcome variable and model
 #'   formula.
-#' @param subset Optional. A character string containing an R expression that
+#' @param imputation.subset Optional. A character string containing an R expression that
 #'   evaluates to a logical vector indicating which rows to use for fitting the
 #'   imputation model. The expression is evaluated in the context of 'data'. If
 #'   NULL (default), all rows are used.
+#' @param imputation.augmentation
+#' @param missing.model
+#' @param imputation.augmentation.model
 #' @return An estimate object containing:
 #'   \item{coef}{Estimates for \eqn{E[U|A=1,\Delta=0]} and
 #'    \eqn{E[U|A=0,\Delta=0]}}
@@ -29,7 +32,10 @@ moi <- function(data,
                 delta,
                 treatment.model,
                 imputation.model,
-                subset = NULL) {
+                imputation.subset = NULL,
+                imputation.augmentation = FALSE,
+                missing.model = NULL,
+                imputation.augmentation.model = NULL) {
   ## input checks
   if (!inherits(imputation.model, "learner_glm")) {
     stop("imputation.model must be of inherited class 'learner_glm'")
@@ -56,37 +62,42 @@ moi <- function(data,
   if (any(duplicated(data[["id"]]))) {
     stop("'id' column contains duplicate values")
   }
+  if (isTRUE(imputation.augmentation)) {
+    if (is.null(missing.model)) {
+      stop("provide missing model when augmentation = TRUE")
+    }
+  }
 
-  ## evaluate subset expression
-  if (!is.null(subset)) {
+  ## evaluate imputation.subset expression
+  if (!is.null(imputation.subset)) {
     tryCatch({
-      model_rows <- eval(parse(text = subset),
+      model_rows <- eval(parse(text = imputation.subset),
                          envir = data, enclos = parent.frame())
     }, error = function(e) {
-      stop(sprintf("Error evaluating 'subset' expression: %s", e$message))
+      stop(sprintf("Error evaluating 'imputation.subset' expression: %s", e$message))
     })
   } else {
     model_rows <- rep(TRUE, times = nrow(data))
   }
-  # validate subset result
+  # validate imputation.subset result
   if (!is.logical(model_rows)) {
-    stop("'subset' expression must evaluate to a logical vector")
+    stop("'imputation.subset' expression must evaluate to a logical vector")
   }
   if (length(model_rows) != nrow(data)) {
     stop(sprintf(
-      "'subset' expression length (%d) does not match data rows (%d)",
+      "'imputation.subset' expression length (%d) does not match data rows (%d)",
               length(model_rows), nrow(data)))
   }
   if (any(is.na(model_rows))) {
-    stop("'subset' expression cannot produce NA values")
+    stop("'imputation.subset' expression cannot produce NA values")
   }
   if (!any(model_rows)) {
-    stop("'subset' expression excludes all rows (no TRUE values)")
+    stop("'imputation.subset' expression excludes all rows (no TRUE values)")
   }
 
   # validate rows are available
   if (!any(model_rows)) {
-    stop("No observations with non-missing outcome in the selected subset. Cannot fit imputation model.") # nolint
+    stop("No observations with non-missing outcome in the selected imputation subset. Cannot fit imputation model.") # nolint
   }
 
   ## extract id
@@ -126,18 +137,71 @@ moi <- function(data,
   ## getting the treatment variable and levels:
   A <- treatment.model$response(data)
   levels <- rev(sort(unique(A)))
+  treatment_name <- lava:::getoutcome(treatment.model$formula)
 
 
-  # getting the estimate for E[U(X,A;\theta)|A = a, \Delta = 0]
+  if (isTRUE(imputation.augmentation)) {
+    if (!is.null(imputation.augmentation.model)) {
+      ## fitting a model for E[U(X,A,Z;\theta)|W, A]
+      imputation.augmentation.model <- imputation.augmentation.model$clone()
+      imputation.augmentation.model$update("U_")
+      if ("U_" %in% colnames(data)) {
+        stop("'U_' column not permitted in data")
+      }
+      data$U_ <- pred
+      imputation.augmentation.model$estimate(data)
+      data$U_ <- NULL
+    }
+
+    ## fitting missing model
+    missing.model <- missing.model$clone()
+    missing.model$update("delta")
+    if ("delta" %in% colnames(data)) {
+      stop("'delta' column not permitted in data")
+    }
+    data$delta <- delta
+    missing.model$estimate(data = data)
+    data$delta <- NULL
+  }
+
+  # getting the estimate for E[U(X,A,Z;\theta)|A = a, \Delta = 0]
+  newdata <- data
   fun <- function(a) {
+    g <- mean(A == a)
+    S <- mean((delta == 1)[A == a])
+
+    ## plug-in estimate
     est <- mean(pred[delta == 0 & A == a])
 
+    if (isTRUE(imputation.augmentation)) {
+      newdata[[treatment_name]] <- a
+      if (!is.null(imputation.augmentation.model)) {
+        H <- imputation.augmentation.model$predict(newdata = newdata,
+                                                   type = "response")
+      } else {
+        H <- imputation.model$predict(newdata = newdata, type = "response")
+      }
+
+      SW <- missing.model$predict(newdata = newdata, type = "response")
+
+      aug2 <- (1 - SW) / (1 - S) * (H - est)
+      aug <- (g - (A == a)) / g * aug2
+
+      ## augmented estimate
+      est <- est + mean(aug)
+    }
+
     IC <- (A == a) * (delta == 0) /
-      mean((A == a) * (delta == 0)) * (pred - est)
+      (g * (1-S)) * (pred - est)
 
     IC <- IC +
       t(colMeans(nabla[A == a & delta == 0, ]) %*%
         t(IC(epsilon)))
+
+    if (isTRUE(imputation.augmentation)) {
+      aug2 <- ((A == a) - g) / g * mean(aug2)
+      IC <- IC + aug + aug2
+    }
 
     estimate(coef = est,
              IC = IC,
@@ -154,7 +218,7 @@ moi <- function(data,
   out <- list(
     estimate = est,
     imputation.model = imputation.model,
-    subset = subset,
+    imputation.subset = imputation.subset,
     levels = as.character(levels)
   )
 
@@ -167,6 +231,8 @@ moiate <- function(data,
                    missing.model,
                    imputation.model,
                    imputation.subset = NULL,
+                   imputation.augmentation = FALSE,
+                   imputation.augmentation.model = NULL,
                    transform = NULL,
                    back.transform = NULL,
                    return.all = FALSE) {
@@ -232,64 +298,72 @@ moiate <- function(data,
   response.model <- response.model$clone()
   missing.model <- missing.model$clone()
 
-  ## extract the non-missing indicator
-  ## updating the outcome response model
-  ## updating the non-missing model
+  ## extract the non-missing indicator \Delta
   response <- response.model$response(data, na.action = stats::na.pass)
+  if (is.null(response)) {
+    stop("invalid outcome in response.model")
+  }
   delta <- !is.na(response)
 
-  if ("delta" %in% colnames(data)) {
-    stop("'delta' column not permitted in data")
-  }
-  data$delta <- delta
+  # fit model for E[\Delta Y | A = a]
+  response.model$update("delta_response")
   if ("delta_reponse" %in% colnames(data)) {
     stop("'delta_response' column not permitted in data")
   }
   data$delta_response <- ifelse(!delta, 0, response)
-  response.model$update("delta_response")
-  missing.model$update("delta")
-
-  # fit model for E[\Delta Y | A = a]
-  outcome_model <- cate(
+  outcome_est <- cate(
     cate.model =  ~ 1,
     response.model = response.model,
     propensity.model = treatment.model,
     data = data
   )
+  data$delta_response <- NULL
+  outcome_levels <- outcome_est$levels
 
   # get the influence function/curve
-  outcome_est <- estimate(outcome_model,
+  outcome_est <- estimate(outcome_est,
                           keep = c(1, 2),
                           id = data$id,
-                          labels = paste0("E[DY|A=", outcome_model$levels, "]"))
+                          labels = paste0("E[DY|A=", outcome_levels, "]"))
 
 
 
   # fit model for P(Delta = 1 | A = a)
-  missing_model <- cate(
+  missing.model$update("delta")
+  if ("delta" %in% colnames(data)) {
+    stop("'delta' column not permitted in data")
+  }
+  data$delta <- delta
+  missing_est <- cate(
     cate.model = ~ 1,
     response.model = missing.model,
     propensity.model = treatment.model,
     data = data
   )
+  data$delta <- NULL
+  missing_levels <- missing_est$levels
+
   # calculate P(Delta = 0 | A = a) and get the influence curve/function
-  missing_est <- estimate(missing_model, keep = c(1, 2), id = data$id)
+  missing_est <- estimate(missing_est, keep = c(1, 2), id = data$id)
   missing_est <- estimate(missing_est,
                           f = function(x) 1 - x,
                           labels = paste0(
-                            "P(D=0|A=", missing_model$levels, ")"
+                            "P(D=0|A=", missing_levels, ")"
                           ))
 
   # fit model for E[U(X,A,Z; theta)|A = a, Delta = 0]
-  moi_model <- moi(data = data,
-                   delta = delta,
-                   treatment.model = treatment.model,
-                   imputation.model = imputation.model,
-                   subset = imputation.subset)
-  moi_est <- moi_model$estimate
-  moi_levels <- moi_model$levels
+  moi_est <- moi(data = data,
+                 delta = delta,
+                 treatment.model = treatment.model,
+                 imputation.model = imputation.model,
+                 imputation.subset = imputation.subset,
+                 imputation.augmentation = imputation.augmentation,
+                 imputation.augmentation.model = imputation.augmentation.model,
+                 missing.model = missing.model)
+  moi_levels <- moi_est$levels
+  moi_est <- moi_est$estimate
 
-  if (!(identical(missing_model$levels, outcome_model$levels) & identical(missing_model$levels, moi_model$levels))) {
+  if (!(identical(missing_levels, outcome_levels) & identical(missing_levels, moi_levels))) {
     stop("treatment levels are not identical")
   }
 
@@ -297,7 +371,7 @@ moiate <- function(data,
   est <- merge(outcome_est, missing_est, moi_est)
   ate <- estimate(est,
                   f = function(x) x[1:2] + x[3:4] * x[5:6],
-                  labels = paste0("E[tildeY|A=", missing_model$levels, "]"))
+                  labels = paste0("E[tildeY|A=", missing_levels, "]"))
   ate <- estimate(ate, f = cbind(1, -1), labels = "ATE")
   ## transform and back transform
   ate <- estimate(ate, f = transform, back.transform = back.transform)

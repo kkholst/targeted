@@ -102,23 +102,32 @@ test_moi <- function() {
     model <- moi(data = data,
                  delta = delta,
                  treatment.model = learner_glm(a ~ 1, family = binomial()),
-                 learner = learner_glm(y ~ w1 + w2, family = binomial()),
-                 subset = "!is.na(y) & a == 0")
-
+                 imputation.model = learner_glm(y ~ w1 + w2, family = binomial()),
+                 imputation.subset = "!is.na(y) & a == 0")
     est <- model$estimate
 
-    out <- c(
-      est = coef(est),
-      se = sqrt(diag(vcov(est)))
+    model_aug <- moi(
+      data = data,
+      delta = delta,
+      treatment.model = learner_glm(a ~ 1, family = binomial()),
+      imputation.model = learner_glm(y ~ w1 + w2, family = binomial()),
+      imputation.subset = "!is.na(y) & a == 0",
+      imputation.augmentation = TRUE,
+      missing.model =  learner_glm(
+        ~ 1 + w1 + w2 + a + a:w1 + a:w2 + a:w3 + a:w2:w3,
+        family = binomial()
+      )
     )
-    return(out)
+    est_aug <- model_aug$estimate
+
+    merge(est, est_aug)
   }
 
   plan(tweak("multicore", workers = 7))
   res <- sim(onerun, R = 1e4, seed = 1, args = list(n = 1e3))
   sumres <- summary(res,
-                    estimate = 1:2,
-                    se = 3:4,
+                    estimate = 1:4,
+                    se = 5:8,
                     true = targets0)
 
   ## test bias, SE/SD and coverage within a given tolerance
@@ -129,6 +138,144 @@ test_moi <- function() {
 }
 
 test_moi()
+
+test_moi_aug <- function() {
+
+  ## covariate distribution
+  covariate <- function(n) {
+    data.frame(
+      a = rbinom(n, 1, 0.5),
+      w1 = rnorm(n = n, mean = 0, sd = 4),
+      w2 = rbinom(n, 1, 0.8),
+      w3 = rbinom(n, 1, 0.5)
+    )
+  }
+
+  ## outcome distribution
+  par0 <- c(-0.8, 0.1, 0.3, -0.4, 0.4, 0.1, 0.03, -0.4, -0.2)
+  outcome <- setargs(
+    outcome_binary,
+    mean = ~ 1 + w1 + w2 + w3 + a + a:w1 + a:w3 +a:w2 + a:w2:w3,
+    par = par0
+  )
+
+  ## true outcome model
+  q0 <- function(a, w1, w2, w3) {
+    apply(cbind(1, w1, w2, w3, a, a*w1, a*w3, a*w2, a*w2*w3), MARGIN = 1, function(x) expit(sum(x * par0)))
+  }
+
+  ## tmp_d <- covariate(1e6)
+  ## tmp_d <- cbind(tmp_d, outcome(tmp_d))
+  ## tmp <- glm(y ~ w1 + w2 + w3 + a + a:w1 + a:w3 +a:w2 + a:w2:w3, family = binomial(), data = tmp_d)
+  ## predict(tmp, newdata = data.frame(a = c(0,1), w1 = c(1,2), w2 = c(1,2), w3 = c(1,3)), type = "response")
+  ## q0(a = c(0,1), w1 = c(1,2), w2 = c(1,2), w3 = c(1,3))
+  ## rm(tmp_d, tmp)
+
+  ## coarsening distribution
+  coarsening_par0 <- c(1.2,-0.2, 0.7, 0.2, 0.3, 0.3, 0.4, 0.2)
+  coarsening = setargs(
+    outcome_binary,
+    mean = ~ 1 + w1 + w2 + a + a:w1 + a:w2 + a:w3 + a:w2:w3,
+    par = coarsening_par0 # coef order as defined by the above formula
+  )
+
+  ## true coarsening model
+  s0 <- function(a, w1, w2, w3) {
+    apply(cbind(1, w1, w2, a, a*w1, a*w2, a*w3, a*w2*w3), MARGIN = 1, function(x) lava::expit(sum(x * coarsening_par0)))
+  }
+
+  ## tmp_d <- covariate(1e6)
+  ## tmp_d <- cbind(tmp_d, delta = coarsening(tmp_d)$y)
+  ## tmp <- glm(delta ~ w1 + w2 + a + a:w1 + a:w2 + a:w3 + a:w2:w3, family = binomial(), data = tmp_d)
+  ## predict(tmp, newdata = data.frame(a = c(0,1), w1 = c(1,2), w2 = c(0,1), w3 = c(0,1)), type = "response")
+  ## s0(a = c(0,1), w1 = c(1,2), w2 = c(0,1), w3 = c(0,1))
+
+  ## approximating true target parameter under imputation
+  approx_target <- function(n = 1e4) {
+    covar <- covariate(n)
+    covar$delta <- coarsening(covar)$y
+    covar$y <- outcome(covar)$y
+
+    ## approximating true value of P(\Delta = 1|A=a), a = 0,1
+    PDeltaA1 <- mean(s0(a = 1, w1 = covar$w1, w2 = covar$w2, w3 = covar$w3))
+    PDeltaA0 <- mean(s0(a = 0, w1 = covar$w1, w2 = covar$w2, w3 = covar$w3))
+
+
+    ## approximating the true imputation model u:  ~ a * (w1 + w2)
+    covar$q <- q0(a = covar$a, w1 = covar$w1, w2 = covar$w2, w3 = covar$w3)
+    imp0 <- learner_glm(q ~ a * (w1 + w2), family = quasibinomial())
+    imp0$estimate(data = covar[covar$delta == 1, ])
+
+    covar$a <- 1
+    covar$u1 <- imp0$predict(covar, type = "response")
+    covar$a <- 0
+    covar$u0 <- imp0$predict(covar, type = "response")
+    ## glm(y ~ a * (w1 + w2), data = covar[covar$delta == 1,], family = binomial())
+
+    ## approximating E[(1-\Delta) U(X)|A=a], a = 0,1
+    E1DUA1 <- mean((1 - s0(a = 1, w1 = covar$w1, w2 = covar$w2, w3 = covar$w3)) * covar$u1)
+    E1DUA0 <- mean((1 - s0(a = 0, w1 = covar$w1, w2 = covar$w2, w3 = covar$w3)) * covar$u0)
+
+    ## calculating E[U|A=a, \Delta = 0]
+    EUD0A1 <- E1DUA1 / (1-PDeltaA1)
+    EUD0A0 <- E1DUA0 / (1-PDeltaA0)
+
+    c(EUD0A1, EUD0A0)
+  }
+
+  set.seed(1)
+  plan(tweak("multicore"), workers = 4)
+  targets0 <- future_replicate(1e3, approx_target())
+  targets0 <- rowMeans(targets0)
+
+  ## setup trial
+  trial <- Trial$new(covariates = covariate,
+                     outcome = \(data) outcome(data) *
+                                       ifelse(coarsening(data) == 1, 1, NA))
+
+  ## run and report the simulation study
+  onerun <- function(n) {
+    data <- trial$simulate(n)
+
+    delta <- !is.na(data$y)
+
+    model <- moi(data = data,
+                 delta = delta,
+                 treatment.model = learner_glm(a ~ 1, family = binomial()),
+                 imputation.model = learner_glm(y ~ a * (w1 + w2), family = binomial()),
+                 imputation.subset = "!is.na(y)")
+    est <- model$estimate
+
+    model_aug <- moi(
+      data = data,
+      delta = delta,
+      treatment.model = learner_glm(a ~ 1, family = binomial()),
+      imputation.model = learner_glm(y ~ a * (w1 + w2), family = binomial()),
+      imputation.subset = "!is.na(y)",
+      imputation.augmentation = TRUE,
+      missing.model =  learner_glm(
+        ~ 1 + w1 + w2 + a + a:w1 + a:w2 + a:w3 + a:w2:w3,
+        family = binomial()
+      )
+    )
+    est_aug <- model_aug$estimate
+
+    merge(est, est_aug)
+  }
+
+  plan(tweak("multicore", workers = 7))
+  res <- sim(onerun, R = 2e4, seed = 1, args = list(n = 2e3))
+  sumres <- summary(res,
+                    estimate = 1:4,
+                    se = 5:8,
+                    true = targets0)
+
+  ## test bias, SE/SD and coverage within a given tolerance
+  lapply(sumres["Bias",], function(x) expect_equivalent(x, 0, tolerance = 0.00025))
+  lapply(sumres["SE/SD",], function(x) expect_equivalent(x, 1, tolerance = 0.0075))
+  lapply(sumres["Coverage",], function(x) expect_equivalent(x, 0.95, tolerance = 0.01))
+
+}
 
 test_moiate_continuous <- function() {
 
@@ -497,3 +644,25 @@ test_moi_postrand <- function() {
   lapply(sumres["Coverage",], function(x) expect_equivalent(x, 0.95, tolerance = 0.0025))
 
 }
+
+
+## model <- moi(
+##   data = data,
+##   delta = delta,
+##   imputation.model = learner_glm(formula = y  ~ x + z),
+##   imputation.subset = "!is.na(y) & a == 0",
+##   treatment.model = learner_glm(formula = a ~ 1, family = binomial()),
+##   response.model = learner_glm( ~ a * x),
+##   missing.model = learner_glm( ~ a * x, family = binomial())
+## )
+
+## model <- moiate(
+##   data = data,
+##   imputation.model = learner_glm(formula = y  ~ x + z),
+##   imputation.subset = "!is.na(y) & a == 0",
+##   imputation.augmentation = TRUE,
+##   imputation.augmentation.model = learner_glm( ~ a * x),
+##   treatment.model = learner_glm(formula = a ~ 1, family = binomial()),
+##   response.model = learner_glm(y ~ a * x),
+##   missing.model = learner_glm( ~ a * x, family = binomial())
+## )
