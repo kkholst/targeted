@@ -41,7 +41,9 @@ addition to predicted potential outcomes to include in the calibration.}
 
 \item{contrast}{treatment contrast (default 1 vs 0)}
 
-\item{nfolds}{number of folds}
+\item{nfolds}{number of folds (positive integer), or a pre-specified list of
+fold indices where each element is an integer vector of observation indices
+forming a partition of \code{1:nrow(data)}.}
 
 \item{rep}{number of replications of cross-fitting procedure}
 
