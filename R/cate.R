@@ -246,7 +246,9 @@ cate <- function(response.model, # nolint
       nfolds_int <- length(folds)
       all_idx <- sort(unlist(unname(folds)))
       if (!identical(all_idx, seq_len(n))) {
-        stop("`nfolds` list must be a partition of 1:nrow(data) with no duplicates")
+        stop(
+          "`nfolds` list must be a partition of 1:nrow(data) with no duplicates"
+        )
       }
     } else {
       nfolds_int <- max(nfolds, 1L)
