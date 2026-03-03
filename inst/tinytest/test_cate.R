@@ -242,6 +242,9 @@ test_cate_custom_folds <- function() {
                      learner_glm(a ~ x, family = binomial),
                      nfolds = custom_folds,
                      data = d)
+
+  expect_identical(res_custom$folds, custom_folds)
+
   res_int <- cate(y ~ a * x,
                   learner_glm(a ~ x, family = binomial),
                   nfolds = 5,
@@ -259,12 +262,13 @@ test_cate_custom_folds <- function() {
   )
 
   expect_warning(
-    cate(y ~ a * x,
+    res_rep <- cate(y ~ a * x,
          learner_glm(a ~ x, family = binomial),
          nfolds = custom_folds,
          rep = 2,
          data = d),
     pattern = "same folds in every repetition"
   )
+  expect_null(res_rep$folds) # blank folds attribute when rep > 1
 }
 test_cate_custom_folds()

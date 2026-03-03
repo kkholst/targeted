@@ -244,7 +244,7 @@ cate <- function(response.model, # nolint
     if (is.list(nfolds)) {
       folds <- lapply(nfolds, sort)
       nfolds_int <- length(folds)
-      all_idx <- sort(unlist(folds))
+      all_idx <- sort(unlist(unname(folds)))
       if (!identical(all_idx, seq_len(n))) {
         stop("`nfolds` list must be a partition of 1:nrow(data) with no duplicates")
       }
@@ -307,7 +307,7 @@ cate <- function(response.model, # nolint
     }
     names(qval) <- contrast
     names(pval) <- contrast
-    return(list(qval = qval, pval = pval))
+    return(list(qval = qval, pval = pval, folds = folds))
   }
 
   if (rep > 1) {
@@ -371,11 +371,13 @@ cate <- function(response.model, # nolint
     val$p <- lapply(val$nuisance, \(x) Reduce(cbind, x$pval))
     val$q <- lapply(val$nuisance, \(x) Reduce(cbind, x$qval))
   }
+  folds_out <- if (rep == 1) val$nuisance[[1]]$folds else NULL
   val$nuisance <- NULL
 
   res <- list(
     call = cl,
     propensity.model = propensity.model,
+    folds = folds_out,
     # (outcome, trt, propensity-pred, outcome-pred)
     data = val # (y, a, p, q)
   )
