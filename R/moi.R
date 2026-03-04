@@ -64,7 +64,7 @@ moi <- function(data,
   }
   if (isTRUE(imputation.augmentation)) {
     if (is.null(missing.model)) {
-      stop("provide missing model when augmentation = TRUE")
+      stop("provide missing model when imputation.augmentation = TRUE")
     }
   }
 
