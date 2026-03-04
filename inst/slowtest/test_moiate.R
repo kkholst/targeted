@@ -364,6 +364,8 @@ test_moiate_continuous <- function() {
   ## run and report the simulation study
   onerun <- function(n) {
     data <- trial$simulate(n)
+    delta <- !is.na(data$y)
+
     est <- moiate(
       data = data,
       treatment.model = a ~ 1,
@@ -376,19 +378,25 @@ test_moiate_continuous <- function() {
       return.all = TRUE
     )
 
-    out <- c(
-      est = coef(est),
-      se = sqrt(diag(vcov(est)))
+    est_aug <- moi(
+      data = data,
+      delta = delta,
+      treatment.model = learner_glm(a ~ 1, family = binomial()),
+      missing.model = learner_glm(delta ~ a, family = binomial()),
+      imputation.model = learner_glm(y ~ w1 + w2 + w3 + w2:w3),
+      imputation.subset = "!is.na(y) & a == 0",
+      imputation.augmentation = TRUE
     )
-    return(out)
+
+    merge(est, est_aug$estimate)
   }
 
-  plan(tweak("multicore", workers = 7))
+  plan(tweak("multicore", workers = 4))
   res <- sim(onerun, R = 1e4, seed = 1, args = list(n = 1e3))
   sumres <- summary(res,
-                    estimate = 1:7,
-                    se = 8:14,
-                    true = targets0)
+                    estimate = 1:9,
+                    se = 10:18,
+                    true = c(targets0, targets0[5:6]))
 
 
   ## test bias, SE/SD and coverage within a given tolerance
@@ -627,16 +635,28 @@ test_moi_postrand <- function() {
       data = data,
       delta = delta,
       imputation.model = learner_glm(formula = y  ~ x + z),
-      subset = "!is.na(y) & a == 0",
-      treatment.model = learner_glm(formula = a ~ 1, family = binomial())
+      imputation.subset = "!is.na(y) & a == 0",
+      treatment.model = learner_glm(formula = a ~ 1, family = binomial()),
+      imputation.augmentation = FALSE
     )
 
-    model$estimate
+    model_aug <- moi(
+      data = data,
+      delta = delta,
+      imputation.model = learner_glm(formula = y  ~ x + z),
+      imputation.subset = "!is.na(y) & a == 0",
+      treatment.model = learner_glm(formula = a ~ 1, family = binomial()),
+      imputation.augmentation = TRUE,
+      imputation.augmentation.model = learner_glm(y ~ x),
+      missing.model = learner_glm(~ x, family = binomial())
+    )
+
+    merge(model$estimate, model_aug$estimate)
   }
 
   plan(tweak("multicore"), workers = 7)
-  res <- sim(onerun, R = 5e4, seed = 1, args = list(n = 2e3))
-  sumres <- summary(res, estimate = 1:2, se = 3:4, true = targets0)
+  res <- sim(onerun, R = 2e4, seed = 1, args = list(n = 2e3))
+  sumres <- summary(res, estimate = 1:4, se = 5:8, true = targets0)
 
   ## test bias, SE/SD and coverage within a given tolerance
   lapply(sumres["Bias",], function(x) expect_equivalent(x, 0, tolerance=0.0015))
