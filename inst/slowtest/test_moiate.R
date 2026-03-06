@@ -786,7 +786,7 @@ test_rubins_rule <- function() {
 
   onerun <- function() {
     data <- simdata(1e3)
-    ## mi_est <- multiple_imputation(data, nrep = 100, increments = 100)
+    mi_est <- multiple_imputation(data, nrep = 100, increments = 100)
 
     onestep_est <- targeted:::moiate(data = data,
                                      response.model = learner_glm(y ~ a + x),
@@ -794,17 +794,16 @@ test_rubins_rule <- function() {
                                      missing.model = learner_glm(~ a + x, family = binomial()),
                                      imputation.model = learner_glm(y ~ a + x),
                                      imputation.subset = "!is.na(y)",
-                                     return.all = TRUE)
+                                     return.all = FALSE)
 
-    ## merge(mi_est, onestep_est)
-    onestep_est
-
+    merge(mi_est, onestep_est)
   }
   plan("multicore")
   simres <- sim(onerun, R = 1e4, seed = 1)
   sumres <- summary(simres,
-                    estimate = 1:7 ,
-                    se = 8:14)
+                    estimate = 1:2 ,
+                    se = 3:4,
+                    true = rep(targets0[1] - targets0[2]),2)
 
   ## test bias, SE/SD and coverage within a given tolerance
   lapply(sumres["Bias",], function(x) expect_equivalent(x, 0, tolerance=0.0025))
