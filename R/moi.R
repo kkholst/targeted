@@ -7,9 +7,7 @@
 #' treatment, \eqn{Z} denotes post randomization covariates, and \eqn{\Delta}
 #' denotes a non-missing indicator. Influence function based standard errors are
 #' also provided.
-#' @param data A data.frame containing the analysis dataset. Must include
-#'   columns 'id' (unique identifier) and 'a' (binary treatment variable with
-#'   values 0 or 1). Data.table and tibble objects will be coerced to
+#' @param data A data.frame containing the analysis dataset. Data.table and tibble objects will be coerced to
 #'   data.frame.
 #' @param delta A vector with the non-missing indicator
 #' @param treatment.model Learner object
@@ -29,6 +27,7 @@
 #'   \item{IC}{Influence curve values for each observation}
 #'   \item{id}{Observation identifiers}
 moi <- function(data,
+                id,
                 delta,
                 treatment.model,
                 imputation.model,
@@ -48,19 +47,6 @@ moi <- function(data,
   }
   if (nrow(data) == 0) {
     stop("'data' cannot be empty (0 rows)")
-  }
-  required_cols <- c("id")
-  missing_cols <- setdiff(required_cols, names(data))
-  if (length(missing_cols) > 0) {
-    stop(sprintf("'data' is missing required column(s): %s",
-                 paste(missing_cols, collapse = ", ")))
-  }
-  rm(required_cols, missing_cols)
-  if (any(is.na(data[["id"]]))) {
-    stop("'id' column cannot contain missing values (NA)")
-  }
-  if (any(duplicated(data[["id"]]))) {
-    stop("'id' column contains duplicate values")
   }
   if (isTRUE(imputation.augmentation)) {
     if (is.null(missing.model)) {
@@ -100,9 +86,6 @@ moi <- function(data,
     stop("No observations with non-missing outcome in the selected imputation subset. Cannot fit imputation model.") # nolint
   }
 
-  ## extract id
-  id <- data[["id"]]
-
   ## fit imputation model
   imputation.model$estimate(data[model_rows, ])
 
@@ -119,7 +102,7 @@ moi <- function(data,
   epsilon <- merge(epsilon, tmp)
   rm(tmp)
   epsilon <- estimate(epsilon, keep = (1:n_coef))
-  IC_epsilon <- IC(epsilon)[order(id), , drop = FALSE] # keep id ordering in data
+  IC_epsilon <- IC(epsilon)[order(id), , drop = FALSE] # keep id ordering
 
   ## calculating the derivate of the imputation function/model
   family <- family(imputation.model$fit)
@@ -239,6 +222,7 @@ moiate <- function(data,
                    return.all = FALSE) {
   ## TODO: check that the missing reponse and treatment strata are well defined
   n <- nrow(data)
+  id <- 1:nrow(data)
   if (inherits(data, c("data.table", "tbl_df"))) {
     data <- as.data.frame(data)
   }
@@ -247,19 +231,6 @@ moiate <- function(data,
   }
   if (n == 0) {
     stop("'data' cannot be empty (0 rows)")
-  }
-  required_cols <- c("id")
-  missing_cols <- setdiff(required_cols, names(data))
-  if (length(missing_cols) > 0) {
-    stop(sprintf("'data' is missing required column(s): %s",
-                 paste(missing_cols, collapse = ", ")))
-  }
-  rm(required_cols, missing_cols)
-  if (any(is.na(data[["id"]]))) {
-    stop("'id' column cannot contain missing values (NA)")
-  }
-  if (any(duplicated(data[["id"]]))) {
-    stop("'id' column contains duplicate values")
   }
 
   if (inherits(response.model, "formula")) {
@@ -324,7 +295,7 @@ moiate <- function(data,
   # get the influence function/curve
   outcome_est <- estimate(outcome_est,
                           keep = c(1, 2),
-                          id = data$id,
+                          id = id,
                           labels = paste0("E[DY|A=", outcome_levels, "]"))
 
 
@@ -345,7 +316,7 @@ moiate <- function(data,
   missing_levels <- missing_est$levels
 
   # calculate P(Delta = 0 | A = a) and get the influence curve/function
-  missing_est <- estimate(missing_est, keep = c(1, 2), id = data$id)
+  missing_est <- estimate(missing_est, keep = c(1, 2), id = id)
   missing_est <- estimate(missing_est,
                           f = function(x) 1 - x,
                           labels = paste0(
