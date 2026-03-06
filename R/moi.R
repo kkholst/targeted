@@ -109,8 +109,8 @@ moi <- function(data,
   ## predict from imputation model
   pred <- imputation.model$predict(newdata = data, type = "response")
   design_matrix <- imputation.model$design(data = data,
-                                  intercept = TRUE,
-                                  response = FALSE)$x
+                                           intercept = TRUE,
+                                           response = FALSE)$x
 
   # getting the influence function/curve
   epsilon <- estimate(imputation.model$fit, id = id[model_rows])
@@ -119,6 +119,7 @@ moi <- function(data,
   epsilon <- merge(epsilon, tmp)
   rm(tmp)
   epsilon <- estimate(epsilon, keep = (1:n_coef))
+  IC_epsilon <- IC(epsilon)[order(id), , drop = FALSE] # keep id ordering in data
 
   ## calculating the derivate of the imputation function/model
   family <- family(imputation.model$fit)
@@ -196,7 +197,7 @@ moi <- function(data,
 
     IC <- IC +
       t(colMeans(nabla[A == a & delta == 0, ]) %*%
-        t(IC(epsilon)))
+        t(IC_epsilon))
 
     if (isTRUE(imputation.augmentation)) {
       aug2 <- ((A == a) - g) / g * mean(aug2)
