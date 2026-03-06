@@ -591,7 +591,7 @@ test_moi_postrand <- function() {
     delta <- rbinom(n = n, size = 1, prob = lava::expit(2 + z)) # non-missingness indicator
     y <- 1 + a + x - a * x + w + a * w + z + rnorm(n)           # outcome
     y <- ifelse(delta == 1, y, NA)
-    d <- data.frame(id = n:1, y = y, z = z, a = a, x = x)
+    d <- data.frame(y = y, z = z, a = a, x = x)
     if(full == TRUE) {
       d <- cbind(d, w = w)
     }
@@ -704,7 +704,7 @@ test_rubins_rule <- function() {
     delta <- rbinom(n = n, size = 1, prob = lava::expit(2 + z)) # non-missingness indicator
     y <- 1 + a + x - a * x + w + a * w + z + rnorm(n)           # outcome
     y <- ifelse(delta == 1, y, NA)
-    d <- data.frame(id = n:1, y = y, z = z, a = a, x = x)
+    d <- data.frame(y = y, z = z, a = a, x = x)
     if(full == TRUE) {
       d <- cbind(d, w = w)
     }
@@ -821,7 +821,7 @@ test_moi_2 <- function() {
     delta <- rbinom(n = n, size = 1, prob = lava::expit(2 + z)) # non-missingness indicator
     y <- 1 + a + x - a * x + w + a * w + z + rnorm(n)           # outcome
     y <- ifelse(delta == 1, y, NA)
-    d <- data.frame(id = n:1, y = y, z = z, a = a, x = x)
+    d <- data.frame(y = y, z = z, a = a, x = x)
     if(full == TRUE) {
       d <- cbind(d, w = w)
     }
