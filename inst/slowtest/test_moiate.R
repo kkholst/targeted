@@ -598,8 +598,9 @@ test_moi_postrand <- function() {
     return(d)
   }
 
-
-  ## true target parameter, E[U(X,A,Z)|A = a, \Delta = 0],
+  ## true target parameters,
+  ##
+  ## E[U(X,A,Z)|A = a, \Delta = 0],
   ## U(X,A,Z): linear model of x, z among the non-missing in
   ## the reference treatment arm, a = 0
 
@@ -611,12 +612,38 @@ test_moi_postrand <- function() {
     imp$estimate(data = data[!is.na(data$y) & data$a == 0,])
     data$u <- imp$predict(data, type = "response")
 
-    sapply(
+    delta <- !is.na(data$y)
+    delta_y <- ifelse(delta, data$y, 0)
+
+
+    tt1 <- sapply(
+      X = c(1,0),
+      FUN = function(a) {
+        mean(delta_y[data$a == a])
+      }
+    )
+
+    tt2 <- sapply(
+      X = c(1,0),
+      FUN = function(a) {
+        mean(1 - delta[data$a == a])
+      }
+    )
+
+    tt3 <- sapply(
       X = c(1,0),
       FUN = function(a) {
         mean(data[is.na(data$y) & data$a == a, ]$u)
       }
     )
+
+    ate <- tt1 + tt2 * tt3
+    ate <- ate[1] - ate[2]
+
+    c(tt1,
+      tt2,
+      tt3,
+      ate)
   }
 
   set.seed(1)
@@ -628,16 +655,18 @@ test_moi_postrand <- function() {
   ## target0[1] - target0[2]
 
   onerun <- function(n) {
-    data <- simdata(n = n, full = TRUE)
+    data <- simdata(n = n, full = FALSE)
     delta <- !is.na(data$y)
 
-    model <- moi(
+    model <- moiate(
       data = data,
-      delta = delta,
+      response.model = learner_glm(y ~ a * x),
+      missing.model = learner_glm(~ a * x, family = binomial()),
       imputation.model = learner_glm(formula = y  ~ x + z),
       imputation.subset = "!is.na(y) & a == 0",
       treatment.model = learner_glm(formula = a ~ 1, family = binomial()),
-      imputation.augmentation = FALSE
+      imputation.augmentation = FALSE,
+      return.all = TRUE
     )
 
     model_aug <- moi(
@@ -651,12 +680,12 @@ test_moi_postrand <- function() {
       missing.model = learner_glm(~ x, family = binomial())
     )
 
-    merge(model$estimate, model_aug$estimate)
+    merge(model, model_aug$estimate)
   }
 
   plan(tweak("multicore"), workers = 7)
   res <- sim(onerun, R = 2e4, seed = 1, args = list(n = 2e3))
-  sumres <- summary(res, estimate = 1:4, se = 5:8, true = targets0)
+  sumres <- summary(res, estimate = 1:9, se = 10:18, true = c(targets0, targets0[5:6]))
 
   ## test bias, SE/SD and coverage within a given tolerance
   lapply(sumres["Bias",], function(x) expect_equivalent(x, 0, tolerance=0.0015))
@@ -665,24 +694,181 @@ test_moi_postrand <- function() {
 
 }
 
+test_rubins_rule <- function() {
 
-## model <- moi(
-##   data = data,
-##   delta = delta,
-##   imputation.model = learner_glm(formula = y  ~ x + z),
-##   imputation.subset = "!is.na(y) & a == 0",
-##   treatment.model = learner_glm(formula = a ~ 1, family = binomial()),
-##   response.model = learner_glm( ~ a * x),
-##   missing.model = learner_glm( ~ a * x, family = binomial())
-## )
+  simdata <- function(n, full = FALSE) {
+    w <- rnorm(n) # unmeasured baseline covariate
+    x <- rnorm(n) - 0.5 * w # baseline covariate
+    a <- rbinom(n, 1, 0.5)    # treatment
+    z <- x + a * w^2 + (1-a) * sin(w) + rnorm(n) # post randomization variable
+    delta <- rbinom(n = n, size = 1, prob = lava::expit(2 + z)) # non-missingness indicator
+    y <- 1 + a + x - a * x + w + a * w + z + rnorm(n)           # outcome
+    y <- ifelse(delta == 1, y, NA)
+    d <- data.frame(id = n:1, y = y, z = z, a = a, x = x)
+    if(full == TRUE) {
+      d <- cbind(d, w = w)
+    }
+    return(d)
+  }
 
-## model <- moiate(
-##   data = data,
-##   imputation.model = learner_glm(formula = y  ~ x + z),
-##   imputation.subset = "!is.na(y) & a == 0",
-##   imputation.augmentation = TRUE,
-##   imputation.augmentation.model = learner_glm( ~ a * x),
-##   treatment.model = learner_glm(formula = a ~ 1, family = binomial()),
-##   response.model = learner_glm(y ~ a * x),
-##   missing.model = learner_glm( ~ a * x, family = binomial())
-## )
+  ## target: E[\tilde Y | A = a]
+  approx_target <- function(n = 1e5) {
+    data <- simdata(n = n, full = TRUE)
+    ## approximating the true imputation model u: y ~ a + x
+    data$q <- with(data = data, 1 + a + x - a * x + w + a * w + z)
+    imp <- learner_glm(q ~ a + x, family = gaussian())
+    imp$estimate(data = data[!is.na(data$y),])
+    data$u <- imp$predict(data, type = "response")
+    data$tilde_y <- ifelse(is.na(data$y), data$u, data$y)
+
+    sapply(
+      X = c(1,0),
+      FUN = function(a) {
+        mean(data[(data$a == a), ]$tilde_y)
+      }
+    )
+  }
+
+  set.seed(1)
+  plan(tweak("multicore"), workers = 4)
+  targets0 <- future_replicate(1e3, approx_target())
+  targets0 <- rowMeans(targets0)
+
+  multiple_imputation <- function(data, nrep = 500, increments = 100) {
+    mi_sampling_fit = lm(formula = y ~ a + x,
+                         data = data[!is.na(data$y), ]) # & data$a == 1
+    delta <- is.na(data$y)
+    imputed <- data
+    nmis <- sum(delta)
+
+    mi_res <- future_replicate(
+      nrep,
+      expr = {
+        imputed[delta, "y"] <- rnorm(
+          n = nmis,
+          predict(mi_sampling_fit, newdata = data[delta, ]),
+          summary(mi_sampling_fit)$sigma
+        )
+        model <- lm(formula = y ~ a + x, data = imputed)
+        ate <- summary(pairs(emmeans::emmeans(model, ~ a), reverse = TRUE))
+        c(estimate = ate$estimate, SE = ate$SE)
+      },
+      future.envir = environment()
+    )
+
+    indx <- split(1:nrep, ceiling(seq_along(1:nrep) / increments))
+
+    cindx <- c()
+    tmp <- c()
+    for (j in seq_along(indx)) {
+      tmp <- c(tmp, indx[[j]])
+      cindx[[j]] <- tmp
+    }
+
+    res <- lapply(cindx,
+                  function(i) {
+
+                    tmp <- mice::pool.scalar(Q = mi_res["estimate", i],
+                                             U = (mi_res["SE", i])^2,
+                                             rule = 'rubin1987')
+                    lava::estimate(coef = tmp$qbar, vcov = tmp$t)
+                  })
+
+    out <- res[[1]]
+    if (length(res) > 1){
+      for (i in 2:length(res)) {
+        out <- merge(out, res[[i]])
+      }
+    }
+    out
+  }
+
+
+  onerun <- function() {
+    data <- simdata(1e3)
+    ## mi_est <- multiple_imputation(data, nrep = 100, increments = 100)
+
+    onestep_est <- targeted:::moiate(data = data,
+                                     response.model = learner_glm(y ~ a + x),
+                                     treatment.model = a ~ 1,
+                                     missing.model = learner_glm(~ a + x, family = binomial()),
+                                     imputation.model = learner_glm(y ~ a + x),
+                                     imputation.subset = "!is.na(y)",
+                                     return.all = TRUE)
+
+    ## merge(mi_est, onestep_est)
+    onestep_est
+
+  }
+  plan("multicore")
+  simres <- sim(onerun, R = 1e4, seed = 1)
+  sumres <- summary(simres,
+                    estimate = 1:7 ,
+                    se = 8:14)
+
+  ## test bias, SE/SD and coverage within a given tolerance
+  lapply(sumres["Bias",], function(x) expect_equivalent(x, 0, tolerance=0.0025))
+  lapply(sumres["SE/SD",], function(x) expect_equivalent(x, 1, tolerance = 0.01))
+  lapply(sumres["Coverage",], function(x) expect_equivalent(x, 0.95, tolerance = 0.0025))
+}
+
+test_moi_2 <- function() {
+
+  simdata <- function(n, full = FALSE) {
+    w <- rnorm(n) # unmeasured baseline covariate
+    x <- rnorm(n) - 0.5 * w # baseline covariate
+    a <- rbinom(n, 1, 0.5)    # treatment
+    z <- x + a * w^2 + (1-a) * sin(w) + rnorm(n) # post randomization variable
+    delta <- rbinom(n = n, size = 1, prob = lava::expit(2 + z)) # non-missingness indicator
+    y <- 1 + a + x - a * x + w + a * w + z + rnorm(n)           # outcome
+    y <- ifelse(delta == 1, y, NA)
+    d <- data.frame(id = n:1, y = y, z = z, a = a, x = x)
+    if(full == TRUE) {
+      d <- cbind(d, w = w)
+    }
+    return(d)
+  }
+
+  ## target: E[U(X,A,Z;\theta) | \Delta = 0,  A = a]
+  ## U: y ~ a + x
+  approx_target <- function(n = 1e5) {
+    data <- simdata(n = n, full = TRUE)
+    ## approximating the true imputation model u: y ~ a + x
+    data$q <- with(data = data, 1 + a + x - a * x + w + a * w + z)
+    imp <- learner_glm(q ~ a + x, family = gaussian())
+    imp$estimate(data = data[!is.na(data$y),])
+    data$u <- imp$predict(data, type = "response")
+    sapply(
+      X = c(1,0),
+      FUN = function(a) {
+        mean(data[is.na(data$y) & data$a == a, ]$u)
+      }
+    )
+  }
+
+  set.seed(1)
+  plan(tweak("multicore"), workers = 4)
+  targets0 <- future_replicate(1e3, approx_target())
+  targets0 <- rowMeans(targets0)
+
+  onerun <- function() {
+    data <- simdata(1e3)
+    delta <- !is.na(data$y)
+
+    out <- targeted:::moi(data = data,
+                          delta = delta,
+                          treatment.model = learner_glm(a ~ 1, family = binomial()),
+                          imputation.model = learner_glm(y ~ a + x),
+                          imputation.subset = "!is.na(y)")
+    out$estimate
+
+  }
+  plan("multicore")
+  simres <- sim(onerun, R = 1e4, seed = 1)
+  sumres <- summary(simres, estimate = 1:2 , se = 3:4, true = targets0)
+
+  ## test bias, SE/SD and coverage within a given tolerance
+  lapply(sumres["Bias",], function(x) expect_equivalent(x, 0, tolerance=0.0025))
+  lapply(sumres["SE/SD",], function(x) expect_equivalent(x, 1, tolerance = 0.01))
+  lapply(sumres["Coverage",], function(x) expect_equivalent(x, 0.95, tolerance = 0.0025))
+}
