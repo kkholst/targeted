@@ -325,6 +325,7 @@ moiate <- function(data,
 
   # fit model for E[U(X,A,Z; theta)|A = a, Delta = 0]
   moi_est <- moi(data = data,
+                 id = id,
                  delta = delta,
                  treatment.model = treatment.model,
                  imputation.model = imputation.model,

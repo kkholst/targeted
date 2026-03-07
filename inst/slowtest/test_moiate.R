@@ -96,10 +96,11 @@ test_moi <- function() {
   ## run and report the simulation study
   onerun <- function(n) {
     data <- trial$simulate(n)
-
+    id <- 1:n
     delta <- !is.na(data$y)
 
     model <- moi(data = data,
+                 id = id,
                  delta = delta,
                  treatment.model = learner_glm(a ~ 1, family = binomial()),
                  imputation.model = learner_glm(y ~ w1 + w2, family = binomial()),
@@ -108,6 +109,7 @@ test_moi <- function() {
 
     model_aug <- moi(
       data = data,
+      id = id,
       delta = delta,
       treatment.model = learner_glm(a ~ 1, family = binomial()),
       imputation.model = learner_glm(y ~ w1 + w2, family = binomial()),
@@ -236,10 +238,11 @@ test_moi_aug <- function() {
   ## run and report the simulation study
   onerun <- function(n) {
     data <- trial$simulate(n)
-
+    id <- 1:n
     delta <- !is.na(data$y)
 
     model <- moi(data = data,
+                 id = id,
                  delta = delta,
                  treatment.model = learner_glm(a ~ 1, family = binomial()),
                  imputation.model = learner_glm(y ~ a * (w1 + w2), family = binomial()),
@@ -248,6 +251,7 @@ test_moi_aug <- function() {
 
     model_aug <- moi(
       data = data,
+      id = id,
       delta = delta,
       treatment.model = learner_glm(a ~ 1, family = binomial()),
       imputation.model = learner_glm(y ~ a * (w1 + w2), family = binomial()),
@@ -364,6 +368,7 @@ test_moiate_continuous <- function() {
   ## run and report the simulation study
   onerun <- function(n) {
     data <- trial$simulate(n)
+    id <- 1:n
     delta <- !is.na(data$y)
 
     est <- moiate(
@@ -380,6 +385,7 @@ test_moiate_continuous <- function() {
 
     est_aug <- moi(
       data = data,
+      id = id,
       delta = delta,
       treatment.model = learner_glm(a ~ 1, family = binomial()),
       missing.model = learner_glm(delta ~ a, family = binomial()),
@@ -656,6 +662,7 @@ test_moi_postrand <- function() {
 
   onerun <- function(n) {
     data <- simdata(n = n, full = FALSE)
+    id <- 1:n
     delta <- !is.na(data$y)
 
     model <- moiate(
@@ -671,6 +678,7 @@ test_moi_postrand <- function() {
 
     model_aug <- moi(
       data = data,
+      id = id,
       delta = delta,
       imputation.model = learner_glm(formula = y  ~ x + z),
       imputation.subset = "!is.na(y) & a == 0",
@@ -693,6 +701,8 @@ test_moi_postrand <- function() {
   lapply(sumres["Coverage",], function(x) expect_equivalent(x, 0.95, tolerance = 0.0025))
 
 }
+
+test_moi_postrand()
 
 test_rubins_rule <- function() {
 
@@ -811,6 +821,8 @@ test_rubins_rule <- function() {
   lapply(sumres["Coverage",], function(x) expect_equivalent(x, 0.95, tolerance = 0.0025))
 }
 
+test_rubins_rule()
+
 test_moi_2 <- function() {
 
   simdata <- function(n, full = FALSE) {
@@ -852,9 +864,11 @@ test_moi_2 <- function() {
 
   onerun <- function() {
     data <- simdata(1e3)
+    id <- 1:1e3
     delta <- !is.na(data$y)
 
     out <- targeted:::moi(data = data,
+                          id = id,
                           delta = delta,
                           treatment.model = learner_glm(a ~ 1, family = binomial()),
                           imputation.model = learner_glm(y ~ a + x),
@@ -871,3 +885,5 @@ test_moi_2 <- function() {
   lapply(sumres["SE/SD",], function(x) expect_equivalent(x, 1, tolerance = 0.01))
   lapply(sumres["Coverage",], function(x) expect_equivalent(x, 0.95, tolerance = 0.0025))
 }
+
+test_moi_2()
