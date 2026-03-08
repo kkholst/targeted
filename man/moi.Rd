@@ -4,39 +4,50 @@
 \alias{moi}
 \title{Mean Missing Outcome Imputation (MOI)}
 \usage{
-moi(data, delta, A, levels, learner, subset = NULL)
+moi(
+  data,
+  id,
+  delta,
+  treatment.model,
+  imputation.model,
+  imputation.subset = NULL,
+  imputation.augmentation = FALSE,
+  missing.model = NULL,
+  imputation.augmentation.model = NULL
+)
 }
 \arguments{
-\item{data}{A data.frame containing the analysis dataset. Must include columns
-'id' (unique identifier) and 'a' (binary treatment variable with values 0 or 1).
-Data.table and tibble objects will be coerced to data.frame.}
+\item{data}{A data.frame containing the analysis dataset. Data.table and
+tibble objects will be coerced to
+data.frame.}
 
 \item{delta}{A vector with the non-missing indicator}
 
-\item{A}{A vector of the treatment variable}
+\item{treatment.model}{Learner object}
 
-\item{levels}{A vector of the unique treatment levels}
+\item{imputation.model}{A learner object of class 'learner_glm' used to fit
+the imputation model. The learner must specify the outcome variable and
+model formula.}
 
-\item{learner}{A learner object of class 'learner_glm' used to fit the imputation
-model. The learner must specify the outcome variable and model formula.}
-
-\item{subset}{Optional. A character string containing an R expression that
-evaluates to a logical vector indicating which rows to use for fitting the
-imputation model. The expression is evaluated in the context of 'data'.
-If NULL (default), all rows are used.}
+\item{imputation.subset}{Optional. A character string containing an R
+expression that evaluates to a logical vector indicating which rows to use
+for fitting the
+imputation model. The expression is evaluated in the context of 'data'. If
+NULL (default), all rows are used.}
 }
 \value{
 An estimate object containing:
-\item{coef}{Estimates for \eqn{E[U|A=1,\Delta=0]} and \eqn{E[U|A=0,\Delta=0]}}
+\item{coef}{Estimates for \eqn{E[U|A=1,\Delta=0]} and
+\eqn{E[U|A=0,\Delta=0]}}
 \item{IC}{Influence curve values for each observation}
 \item{id}{Observation identifiers}
 }
 \description{
 Estimates the mean of a given parametric imputation model among observations
 with a missing outcome and a given treatment. Specifically, it provides
-estimates of \eqn{E[U(X,A,Z,\theta)|A=a, \Delta=0]}, for an imputation model \eqn{U},
-where \eqn{X} denotes baseline covariates,
-\eqn{A} denotes the treatment, \eqn{Z} denotes post randomization covariates, and \eqn{\Delta}
+estimates of \eqn{E[U(X,A,Z,\theta)|A=a, \Delta=0]}, for an imputation model
+\eqn{U}, where \eqn{X} denotes baseline covariates, \eqn{A} denotes the
+treatment, \eqn{Z} denotes post randomization covariates, and \eqn{\Delta}
 denotes a non-missing indicator. Influence function based standard errors are
 also provided.
 }
