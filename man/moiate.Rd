@@ -13,8 +13,6 @@ moiate(
   imputation.subset = NULL,
   imputation.augmentation = FALSE,
   imputation.augmentation.model = NULL,
-  transform = NULL,
-  back.transform = NULL,
   return.all = FALSE
 )
 }
@@ -56,14 +54,6 @@ Default is \code{FALSE}.}
 or \code{NULL} specifying the model used for the augmentation of the
 imputation estimator. Only used if \code{imputation.augmentation = TRUE}.
 Default is \code{NULL}.}
-
-\item{transform}{An optional function to apply to the ATE estimate
-(e.g., \code{atanh}) before constructing confidence intervals.
-Default is \code{NULL} (no transformation).}
-
-\item{back.transform}{An optional back-transformation function
-(e.g., \code{tanh}). Applied after the transformation to return estimates
-to the original scale. Default is \code{NULL}.}
 
 \item{return.all}{Logical. If \code{TRUE}, the returned object includes all
 intermediate estimates

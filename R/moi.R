@@ -276,14 +276,6 @@ moi <- function(data,
 ##'   imputation estimator. Only used if \code{imputation.augmentation = TRUE}.
 ##'   Default is \code{NULL}.
 ##'
-##' @param transform An optional function to apply to the ATE estimate
-##'   (e.g., \code{atanh}) before constructing confidence intervals.
-##'   Default is \code{NULL} (no transformation).
-##'
-##' @param back.transform An optional back-transformation function
-##'   (e.g., \code{tanh}). Applied after the transformation to return estimates
-##'   to the original scale. Default is \code{NULL}.
-##'
 ##' @param return.all Logical. If \code{TRUE}, the returned object includes all
 ##'   intermediate estimates
 ##'   in addition to the final ATE estimate. Default is \code{FALSE}.
@@ -338,8 +330,6 @@ moiate <- function(data,
                    imputation.subset = NULL,
                    imputation.augmentation = FALSE,
                    imputation.augmentation.model = NULL,
-                   transform = NULL,
-                   back.transform = NULL,
                    return.all = FALSE) {
   ## TODO: check that the missing reponse and treatment strata are well defined
   n <- nrow(data)
@@ -468,8 +458,6 @@ moiate <- function(data,
                   f = function(x) x[1:2] + x[3:4] * x[5:6],
                   labels = paste0("E[tildeY|A=", missing_levels, "]"))
   ate <- estimate(ate, f = cbind(1, -1), labels = "ATE")
-  ## transform and back transform
-  ate <- estimate(ate, f = transform, back.transform = back.transform)
 
   if (return.all == TRUE) {
     ate <- merge(est, ate)
