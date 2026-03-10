@@ -378,8 +378,6 @@ test_moiate_continuous <- function() {
       missing.model = learner_glm(delta ~ a, family = binomial()),
       imputation.model = learner_glm(y ~ w1 + w2 + w3 + w2:w3),
       imputation.subset = "!is.na(y) & a == 0",
-      transform = NULL,
-      back.transform = NULL,
       return.all = TRUE
     )
 
@@ -535,8 +533,6 @@ test_moiate_binary <- function() {
                          imputation.model = learner_glm(imputation_form0,
                                                         family = binomial()),
                          imputation.subset = "!is.na(y) & a == 0",
-                         transform = NULL,
-                         back.transform = NULL,
                          return.all = TRUE
                        )
                      ))
@@ -553,8 +549,6 @@ test_moiate_binary <- function() {
   ##        imputation.model = learner_glm(imputation_form0,
   ##                                       family = binomial()),
   ##        imputation.subset = "!is.na(y) & a == 0",
-  ##        transform = NULL,
-  ##        back.transform = NULL,
   ##        return.all = TRUE)
   ## tmp <- trial$estimators("onestep")
   ## tmp(data = d)

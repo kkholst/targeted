@@ -62,7 +62,8 @@ moi <- function(data,
       model_rows <- eval(parse(text = imputation.subset),
                          envir = data, enclos = parent.frame())
     }, error = function(e) {
-      stop(sprintf("Error evaluating 'imputation.subset' expression: %s", e$message))
+      stop(sprintf("Error evaluating 'imputation.subset' expression: %s",
+                   e$message))
     })
   } else {
     model_rows <- rep(TRUE, times = nrow(data))
@@ -72,9 +73,10 @@ moi <- function(data,
     stop("'imputation.subset' expression must evaluate to a logical vector")
   }
   if (length(model_rows) != nrow(data)) {
-    stop(sprintf(
-      "'imputation.subset' expression length (%d) does not match data rows (%d)",
-              length(model_rows), nrow(data)))
+    stop(
+      sprintf(
+        "'imputation.subset' expression length (%d) does not match data rows (%d)", # nolint
+        length(model_rows), nrow(data)))
   }
   if (any(is.na(model_rows))) {
     stop("'imputation.subset' expression cannot produce NA values")
@@ -151,8 +153,8 @@ moi <- function(data,
   }
 
   # getting the estimate for E[U(X,A,Z;\theta)|A = a, \Delta = 0]
-  newdata <- data
   fun <- function(a) {
+    newdata <- data
     g <- mean(A == a)
     S <- mean((delta == 1)[A == a])
 
@@ -178,7 +180,7 @@ moi <- function(data,
     }
 
     IC <- (A == a) * (delta == 0) /
-      (g * (1-S)) * (pred - est)
+      (g * (1 - S)) * (pred - est)
 
     IC <- IC +
       t(colMeans(nabla[A == a & delta == 0, ]) %*%
@@ -333,7 +335,7 @@ moiate <- function(data,
                    return.all = FALSE) {
   ## TODO: check that the missing reponse and treatment strata are well defined
   n <- nrow(data)
-  id <- 1:nrow(data)
+  id <- seq_len(nrow(data))
   if (inherits(data, c("data.table", "tbl_df"))) {
     data <- as.data.frame(data)
   }
@@ -447,7 +449,7 @@ moiate <- function(data,
   moi_levels <- moi_est$levels
   moi_est <- moi_est$estimate
 
-  if (!(identical(missing_levels, outcome_levels) &
+  if (!(identical(missing_levels, outcome_levels) &&
         identical(missing_levels, moi_levels))) {
     stop("treatment levels are not identical")
   }
