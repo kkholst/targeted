@@ -416,7 +416,7 @@ test_moiate_binary <- function() {
   ## covariates and treatment distribution
   covariate <- function(n) {
     data.frame(
-      a = rbinom(n, 1, 0.5),
+      a = rbinom(n, 1, 2/3),
       w1 = rnorm(n),
       w2 = rbinom(n, 1, 0.8),
       w3 = rbinom(n, 1, 0.5)
