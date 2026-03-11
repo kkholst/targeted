@@ -89,37 +89,6 @@ treatment \eqn{A}, and a post randomization variable \eqn{Z}.
 Inference in based on the estimated influence functions (IFs)
 of the associated (covariate adjusted) one-step estimators.
 }
-\examples{
-\dontrun{
-library(targeted)
-
-set.seed(42)
-n <- 500
-
-# Simulate data
-A <- rbinom(n, 1, 0.5)
-X <- rnorm(n)
-Y <- 2 * A + X + rnorm(n)
-
-# Introduce missingness: outcome missing for ~20\% of observations
-missing_indicator <- rbinom(n, 1, 0.2)
-Y[missing_indicator == 1] <- NA
-
-data <- data.frame(Y = Y, A = A, X = X)
-
-# Fit moiate
-result <- moiate(
-  data             = data,
-  response.model   = Y ~ A + X,
-  treatment.model  = A ~ 1,
-  missing.model    = is.na(Y) ~ A + X,
-  imputation.model = Y ~ A + X
-)
-
-summary(result)
-}
-
-}
 \seealso{
 \code{\link{cate}} for Conditional Average Treatment Effect estimation,
 \code{\link{learner}} for creating learner objects,
