@@ -20,9 +20,13 @@
 #' for fitting the
 #' imputation model. The expression is evaluated in the context of 'data'. If
 #' NULL (default), all rows are used.
-#' @param imputation.augmentation
-#' @param missing.model
-#' @param imputation.augmentation.model
+#' @param imputation.augmentation Logical. Should an augmentation term
+#' associated with the imputation model be added to the one-step estimator
+#' @param missing.model \code{learner} object
+##'   specifying the model for the probability of the outcome being
+##'   observed/non-missing
+#' @param imputation.augmentation.model \code{learner} object
+##'   specifying the model for the imputation augmentation
 #' @return An estimate object containing:
 #'   \item{coef}{Estimates for \eqn{E[U|A=1,\Delta=0]} and
 #'    \eqn{E[U|A=0,\Delta=0]}}
@@ -125,7 +129,7 @@ moi <- function(data,
   ## getting the treatment variable and levels:
   A <- treatment.model$response(data)
   levels <- rev(sort(unique(A)))
-  treatment_name <- lava:::getoutcome(treatment.model$formula)
+  treatment_name <- lava::getoutcome(treatment.model$formula)
 
 
   if (isTRUE(imputation.augmentation)) {

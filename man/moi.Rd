@@ -34,6 +34,16 @@ expression that evaluates to a logical vector indicating which rows to use
 for fitting the
 imputation model. The expression is evaluated in the context of 'data'. If
 NULL (default), all rows are used.}
+
+\item{imputation.augmentation}{Logical. Should an augmentation term
+associated with the imputation model be added to the one-step estimator}
+
+\item{missing.model}{\code{learner} object
+specifying the model for the probability of the outcome being
+observed/non-missing}
+
+\item{imputation.augmentation.model}{\code{learner} object
+specifying the model for the imputation augmentation}
 }
 \value{
 An estimate object containing:
