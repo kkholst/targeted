@@ -269,6 +269,6 @@ test_cate_custom_folds <- function() {
          data = d),
     pattern = "`rep` argument is ignored"
   )
-  expect_null(res_rep$folds) # blank folds attribute when rep > 1
+  expect_equivalent(res_rep$folds, custom_folds)
 }
 test_cate_custom_folds()
