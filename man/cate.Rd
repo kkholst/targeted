@@ -16,7 +16,6 @@ cate(
   silent = FALSE,
   stratify = FALSE,
   mc.cores = NULL,
-  rep.type = c("nuisance", "average"),
   var.type = "IC",
   second.order = TRUE,
   response_model = deprecated,
@@ -45,7 +44,8 @@ addition to predicted potential outcomes to include in the calibration.}
 fold indices where each element is an integer vector of observation indices
 forming a partition of \code{1:nrow(data)}.}
 
-\item{rep}{number of replications of cross-fitting procedure}
+\item{rep}{number of replications of cross-fitting procedure
+by averaging estimates and influence functions from each replication}
 
 \item{silent}{suppress all messages and progressbars}
 
@@ -53,10 +53,6 @@ forming a partition of \code{1:nrow(data)}.}
 
 \item{mc.cores}{(optional) number of cores. parallel::mcmapply used instead
 of future}
-
-\item{rep.type}{repeated cross-fitting applied by averaging nuisance models
-(\code{rep.type="nuisance"}) or by average estimates from each replication
-(\code{rep.type="average"}).}
 
 \item{var.type}{when equal to "IC" the asymptotic variance is derived from
 the influence function. Otherwise, based on expressions in Bannick et al.
@@ -129,6 +125,9 @@ cate(cate.model=~1,
 \references{
 Mark J. van der Laan (2006) Statistical Inference for Variable
 Importance, The International Journal of Biostatistics.
+
+Bannick, Shao & Liu et al. (2025) A General Form of Covariate Adjustment in
+Clinical Trials under Covariate-Adaptive Randomization, Biometrika.
 }
 \author{
 Klaus Kähler Holst, Andreas Nordland

@@ -86,13 +86,11 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #'   fold indices where each element is an integer vector of observation indices
 #'   forming a partition of `1:nrow(data)`.
 #' @param rep number of replications of cross-fitting procedure
+#'   by averaging estimates and influence functions from each replication
 #' @param silent suppress all messages and progressbars
 #' @param stratify if TRUE the response.model will be stratified by treatment
 #' @param mc.cores (optional) number of cores. parallel::mcmapply used instead
 #'   of future
-#' @param rep.type repeated cross-fitting applied by averaging nuisance models
-#'   (`rep.type="nuisance"`) or by average estimates from each replication
-#'   (`rep.type="average"`).
 #' @param var.type when equal to "IC" the asymptotic variance is derived from
 #'   the influence function. Otherwise, based on expressions in Bannick et al.
 #'   (2025) valid under different covariate-adaptive randomization schemes (only
@@ -101,8 +99,12 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #'   of outcome models
 #' @return cate.targeted object
 #' @author Klaus Kähler Holst, Andreas Nordland
-#' @references Mark J. van der Laan (2006) Statistical Inference for Variable
+#' @references
+#'   Mark J. van der Laan (2006) Statistical Inference for Variable
 #'   Importance, The International Journal of Biostatistics.
+#'
+#'   Bannick, Shao & Liu et al. (2025) A General Form of Covariate Adjustment in
+#'   Clinical Trials under Covariate-Adaptive Randomization, Biometrika.
 #' @examples
 #' sim1 <- function(n=1000, ...) {
 #'   w1 <- rnorm(n)
@@ -149,7 +151,6 @@ cate <- function(response.model, # nolint
                  silent = FALSE,
                  stratify = FALSE,
                  mc.cores = NULL,
-                 rep.type = c("nuisance", "average"),
                  var.type = "IC",
                  second.order = TRUE,
                  response_model = deprecated,
@@ -350,30 +351,9 @@ cate <- function(response.model, # nolint
   val$y <- cbind(response.model$response(data, na.action=lava::na.pass0))
   colnames(val$y) <- lava::getoutcome(response.model$formula, data = data)
 
-  if (rep.type[1] == "nuisance") { # average nuisance model pred. over rep.
-    pval <- val$nuisance[[1]]$pval # list with treatment probabilities P(A=a|W)
-    qval <- val$nuisance[[1]]$qval # list with outcome models E(Y|A=a,W)
-    if (rep > 1) {
-      for (i in 2:rep) {
-        for (j in seq_along(contrast)) {
-          qval[[j]] <- qval[[j]] + val$nuisance[[i]]$qval[[j]]
-          pval[[j]] <- pval[[j]] + val$nuisance[[i]]$pval[[j]]
-        }
-      }
-      for (j in seq_along(contrast)) {
-        qval[[j]] <- qval[[j]] / rep
-        pval[[j]] <- pval[[j]] / rep
-      }
-    }
-    val$p <- list(Reduce(cbind, pval))
-    val$q <- list(Reduce(cbind, qval))
-    rm(qval, pval)
-  } else {
-    # rep.type[1] == "average" && rep > 1
-    val$p <- lapply(val$nuisance, \(x) Reduce(cbind, x$pval))
-    val$q <- lapply(val$nuisance, \(x) Reduce(cbind, x$qval))
-  }
   folds_out <- if (rep == 1) val$nuisance[[1]]$folds else NULL
+  val$p <- lapply(val$nuisance, \(x) Reduce(cbind, x$pval))
+  val$q <- lapply(val$nuisance, \(x) Reduce(cbind, x$qval))
   val$nuisance <- NULL
 
   res <- list(
@@ -384,7 +364,6 @@ cate <- function(response.model, # nolint
     data = val # (y, a, p, q)
   )
   class(res) <- c("cate.targeted", "targeted")
-
   res <- update(res,
                 cate.model = cate.model,
                 data = data,
@@ -511,35 +490,40 @@ update.cate.targeted <- function(object,
   vcov <- NULL
   if (!is.null(calibration.model)) {
     des_cal <- design(calibration.model, data, intercept = TRUE)
-    object$data$q0 <- object$data$q
-    q <- object$data$q[[1]]
     a <- object$data$a
     y <- object$data$y
-    Z <- cbind(des_cal$x, q)
-    rs <- c() # residuals
-    ps <- c() # treatment assignment prob.
-    bs <- c() # linear regr. coef.
-    for (i in seq_len(ncol(a))) {
-      idx <- which(a[, i])
-      b <- lm.fit(Z[idx, , drop = FALSE], y[idx])$coefficients
-      b[is.na(b)] <- 0
-      bs <- cbind(bs, cbind(b))
-      q[, i] <- Z %*% b
-      rs <- c(rs, list(y[idx] - Z[idx, , drop = FALSE] %*% b))
-      ps <- c(ps, mean(a[, i]))
+    object$data$q0 <- object$data$q # original outcome model
+    vcov <- matrix(0, ncol(a), ncol(a))
+    for (j in seq_along(object$data$q)) {
+      rs <- c() # residuals
+      ps <- c() # treatment assignment prob.
+      bs <- c() # linear regr. coef.
+      q <- object$data$q[[j]]
+      Z <- cbind(des_cal$x, q)
+      for (i in seq_len(ncol(a))) {
+        idx <- which(a[, i])
+        b <- lm.fit(Z[idx, , drop = FALSE], y[idx])$coefficients
+        b[is.na(b)] <- 0
+        q[, i] <- Z %*% b
+        bs <- cbind(bs, cbind(b))
+        rs <- c(rs, list(y[idx] - Z[idx, , drop = FALSE] %*% b))
+        ps <- c(ps, mean(a[, i]))
+      }
+      var <- function(x) stats::var(x) * (NROW(x) - 1) / NROW(x)
+      v1 <- diag(unlist(lapply(rs, var)) / ps)
+      v2 <- t(bs) %*% var(Z) %*% bs
+      v <- (v1 + v2)/NROW(Z) # see Bannick et al 2025
+      vcov <- vcov + v
     }
-    var <- function(x) stats::var(x) * (NROW(x) - 1) / NROW(x)
-    v1 <- diag(unlist(lapply(rs, var)) / ps)
-    v2 <- t(bs) %*% var(Z) %*% bs
-    vcov <- (v1 + v2)/NROW(Z)
-    object$data$q[[1]] <- q
+    object$data$q[[j]] <- q # calibrated outcome model
+    vcov <- vcov / length(object$data$q)
   }
 
 
   pmod <- object$propensity.model # nolint
   if (!second.order) pmod <- NULL
-  ests <- lapply(
-    seq_along(object$data$p),
+  ests <- lapply( # obtain estimates across repeated cross-fits
+    seq_along(object$data$q),
     \(x) {
       with(
         object$data,
@@ -555,10 +539,11 @@ update.cate.targeted <- function(object,
       )
     }
   )
-  est <- ests[[1]]$coef
-  IC <- ests[[1]]$IC
-  scores <- ests[[1]]$scores
+  est <- Reduce("+", lapply(ests, \(x) x$coef)) / length(ests)
+  scores <- Reduce("+", lapply(ests, \(x) x$scores)) / length(ests)
+
   if (tolower(var.type) == "ic" || is.null(vcov) || ncol(desA$x)>1) {
+    IC  <- Reduce("+", lapply(ests, \(x) x$IC)) / length(ests)
     estimate <- lava::estimate(coef = est, IC = IC)
   } else {
     e <- lava::estimate(coef = est[seq_len(ncol(vcov))], vcov = vcov)
@@ -603,6 +588,4 @@ print.summary.cate.targeted <- function(x, ...) {
   print(x$estimate, ...)
   cat("\nAverage Treatment Effect:\n")
   print(x$ate)
-
-
 }
