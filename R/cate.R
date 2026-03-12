@@ -82,7 +82,9 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #'   addition to predicted potential outcomes to include in the calibration.
 #' @param contrast treatment contrast (default 1 vs 0)
 #' @param data data.frame
-#' @param nfolds number of folds
+#' @param nfolds number of folds (positive integer), or a pre-specified list of
+#'   fold indices where each element is an integer vector of observation indices
+#'   forming a partition of `1:nrow(data)`.
 #' @param rep number of replications of cross-fitting procedure
 #' @param silent suppress all messages and progressbars
 #' @param stratify if TRUE the response.model will be stratified by treatment
@@ -230,16 +232,35 @@ cate <- function(response.model, # nolint
     contrast <- rev(sort(unique(data[, treatment_var])))
   }
 
+  if (is.list(nfolds) && rep > 1) {
+    warning(
+      "When `nfolds` is a list of pre-specified folds, ",
+      "`rep` argument is ignored. "
+    )
+    rep <- 1L
+  }
+
   estimate_nuisance_models <- function(args) {
     ## Create random folds
-    if (nfolds<1) nfolds <- 1
-    folds <- split(sample(1:n, n), rep(1:nfolds, length.out = n))
-    folds <- lapply(folds, sort)
+    if (is.list(nfolds)) {
+      folds <- lapply(nfolds, sort)
+      nfolds_int <- length(folds)
+      all_idx <- sort(unlist(unname(folds)))
+      if (!identical(all_idx, seq_len(n))) {
+        stop(
+          "`nfolds` list must be a partition of 1:nrow(data) with no duplicates"
+        )
+      }
+    } else {
+      nfolds_int <- max(nfolds, 1L)
+      folds <- split(sample(1:n, n), rep(1:nfolds_int, length.out = n))
+      folds <- lapply(folds, sort)
+    }
     ff <- Reduce(c, folds)
     idx <- order(ff)
-    fargs <- rbind(expand.grid(fold = seq_len(nfolds), a = contrast))
+    fargs <- rbind(expand.grid(fold = seq_len(nfolds_int), a = contrast))
 
-    if (!silent && (rep == 1) && (nfolds>1)) {
+    if (!silent && (rep == 1) && (nfolds_int>1)) {
       pb <- progressr::progressor(message="cross-fitting",
                                     steps = nrow(fargs))
     } else {
@@ -289,7 +310,7 @@ cate <- function(response.model, # nolint
     }
     names(qval) <- contrast
     names(pval) <- contrast
-    return(list(qval = qval, pval = pval))
+    return(list(qval = qval, pval = pval, folds = folds))
   }
 
   if (rep > 1) {
@@ -353,11 +374,13 @@ cate <- function(response.model, # nolint
     val$p <- lapply(val$nuisance, \(x) Reduce(cbind, x$pval))
     val$q <- lapply(val$nuisance, \(x) Reduce(cbind, x$qval))
   }
+  folds_out <- if (rep == 1) val$nuisance[[1]]$folds else NULL
   val$nuisance <- NULL
 
   res <- list(
     call = cl,
     propensity.model = propensity.model,
+    folds = folds_out,
     # (outcome, trt, propensity-pred, outcome-pred)
     data = val # (y, a, p, q)
   )

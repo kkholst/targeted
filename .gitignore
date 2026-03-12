@@ -1,5 +1,6 @@
 .dir-locals.el
 .tool-versions
+CLAUDE.md
 NEWS.html
 README.html
 .RDataTmp

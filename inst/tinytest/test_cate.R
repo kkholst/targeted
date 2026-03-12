@@ -230,3 +230,45 @@ test_cate_warning <- function() {
   )
 }
 test_cate_warning()
+
+test_cate_custom_folds <- function() {
+  set.seed(7)
+  n_obs <- nrow(d)
+  idx <- sample(n_obs)
+  custom_folds <- split(idx, rep(1:5, length.out = n_obs))
+  custom_folds <- lapply(custom_folds, sort)
+
+  res_custom <- cate(y ~ a * x,
+                     learner_glm(a ~ x, family = binomial),
+                     nfolds = custom_folds,
+                     data = d)
+
+  expect_identical(res_custom$folds, custom_folds)
+
+  res_int <- cate(y ~ a * x,
+                  learner_glm(a ~ x, family = binomial),
+                  nfolds = 5,
+                  data = d)
+  expect_true(inherits(res_custom, "cate.targeted"))
+  expect_equal(length(coef(res_custom)), length(coef(res_int)))
+
+  bad_folds <- list(1:3, 4:6) # doesn't cover 1:n
+  expect_error(
+    cate(y ~ a * x,
+         learner_glm(a ~ x, family = binomial),
+         nfolds = bad_folds,
+         data = d),
+    pattern = "partition"
+  )
+
+  expect_warning(
+    res_rep <- cate(y ~ a * x,
+         learner_glm(a ~ x, family = binomial),
+         nfolds = custom_folds,
+         rep = 2,
+         data = d),
+    pattern = "`rep` argument is ignored"
+  )
+  expect_equivalent(res_rep$folds, custom_folds)
+}
+test_cate_custom_folds()
