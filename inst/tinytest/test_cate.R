@@ -130,26 +130,6 @@ test_cate_ate <- function() {
 }
 test_cate_ate()
 
-
-test_cate_crossfit <- function() {
-
-  # repeated cross-fitting TODO
-  ## a <- cate(y ~ a + x,
-  ##           learner_glm(a ~ x, family=binomial),
-  ##           second.order = TRUE,
-  ##           nfolds = 2,
-  ##           rep = 3,
-  ##           rep.type = "average",
-  ##           mc.cores=1,
-  ##           data = d)
-  a <- cate(y ~ a + x,
-             learner_glm(a ~ x, family=binomial),
-             second.order = TRUE,
-             nfolds = 5,
-             rep = 3,
-             data = d)
-}
-
 test_cate_remainder <- function() {
   # Test seconder order remainder term
 
@@ -189,7 +169,6 @@ test_cate_remainder <- function() {
 
 }
 test_cate_remainder()
-
 
 ## multiple treatments
 n <- 1e3
@@ -272,3 +251,96 @@ test_cate_custom_folds <- function() {
   expect_null(res_rep$folds) # blank folds attribute when rep > 1
 }
 test_cate_custom_folds()
+
+
+test_cate_rep_crossfit <- function() {
+  set.seed(1)
+  n <- 2000
+  x <- rnorm(n)
+  a <- rbinom(n, 1, lava::expit(1 + x))
+  y <- 1 + a + x - a * x + rnorm(n)
+  d <- data.frame(y = y, a = a, x = x)
+
+  # Single cross-fitting reference
+  a1 <- cate(y ~ a * x,
+             learner_glm(a ~ x, family = binomial),
+             nfolds = 5,
+             rep = 1,
+             data = d)
+
+  # Repeated cross-fitting with nuisance averaging
+  a2 <- cate(y ~ a * x,
+             learner_glm(a ~ x, family = binomial),
+             nfolds = 5,
+             rep = 10,
+             mc.cores = 1L,
+             data = d)
+
+  # Estimates should be similar given large sample-size
+  expect_equivalent(coef(a1), coef(a2), tolerance = 0.05)
+  expect_equivalent(vcov(a1), vcov(a2), tolerance = 0.05)
+
+}
+test_cate_rep_crossfit()
+
+
+test_cate_rep_calibration_variance <- function() {
+  set.seed(1)
+  n <- 2000
+  x <- rnorm(n)
+  a <- rbinom(n, 1, lava::expit(x))
+  y <- 1 + a + x - a * x + rnorm(n)
+  d <- data.frame(y = y, a = a, x = x)
+
+  a1 <- cate(y ~ a + x,
+             learner_glm(a ~ x, family = binomial),
+             calibration.model = ~1,
+             nfolds = 5,
+             rep = 1,
+             data = d)
+
+  a2 <- cate(y ~ a + x,
+             learner_glm(a ~ x, family = binomial),
+             calibration.model = ~1,
+             nfolds = 5,
+             rep = 10,
+             mc.cores = 1,
+             data = d)
+
+  # estimates should be similar
+  expect_equivalent(coef(a1), coef(a2), tolerance = 0.05)
+  expect_equivalent(vcov(a1), vcov(a2), tolerance = 0.05)
+}
+test_cate_rep_calibration_variance()
+
+
+test_cate_rep_no_crossfit <- function() {
+  # With nfolds=1 (no cross-fitting), rep>1 should not affect variance
+  # since there is no fold-specific prediction noise to average out
+    set.seed(1)
+  n <- 2000
+  x <- rnorm(n)
+  a <- rbinom(n, 1, lava::expit(x))
+  y <- 1 + a + x - a * x + rnorm(n)
+  d <- data.frame(y = y, a = a, x = x)
+
+  a1 <- cate(y ~ a + x,
+             learner_glm(a ~ x, family = binomial),
+             calibration.model = ~1,
+             nfolds = 1,
+             rep = 1,
+             data = d)
+
+  a2 <- cate(y ~ a + x,
+             learner_glm(a ~ x, family = binomial),
+             calibration.model = ~1,
+             nfolds = 1,
+             rep = 5,
+             mc.cores=1,
+             data = d)
+
+  # With nfolds=1, rep>1 should not change estimates or variance
+  expect_equivalent(coef(a1), coef(a2), tolerance = 1e-6)
+  expect_equivalent(vcov(a1), vcov(a2), tolerance = 1e-6)
+}
+test_cate_rep_no_crossfit()
