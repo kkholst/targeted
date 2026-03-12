@@ -267,7 +267,7 @@ test_cate_custom_folds <- function() {
          nfolds = custom_folds,
          rep = 2,
          data = d),
-    pattern = "same folds in every repetition"
+    pattern = "`rep` argument is ignored"
   )
   expect_null(res_rep$folds) # blank folds attribute when rep > 1
 }
