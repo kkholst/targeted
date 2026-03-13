@@ -19,9 +19,10 @@ deprecate_arg_warn <- function(old, new, fun, vers) {
 #' Deprecated argument names
 #' @name deprecated_argument_names
 #' @param response_model Deprecated. Use response.model instead.
-#' @param propensity_model Deprecated. Use propensity.model instead.
+#' @param propensity_model Deprecated. Use treatment.model instead.
 #' @param cate_model Deprecated. Use cate.model instead.
 #' @param treatment Deprecated. Use cate.model instead.
+#' @param propensity.model Deprecated. Use treatment.model instead.
 # list of deprecated argument names. can be used in roxygen documentation
 # via @inheritParams deprecated_argument_names
 NULL

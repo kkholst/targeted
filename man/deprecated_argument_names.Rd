@@ -6,11 +6,13 @@
 \arguments{
 \item{response_model}{Deprecated. Use response.model instead.}
 
-\item{propensity_model}{Deprecated. Use propensity.model instead.}
+\item{propensity_model}{Deprecated. Use treatment.model instead.}
 
 \item{cate_model}{Deprecated. Use cate.model instead.}
 
 \item{treatment}{Deprecated. Use cate.model instead.}
+
+\item{propensity.model}{Deprecated. Use treatment.model instead.}
 }
 \description{
 Deprecated argument names

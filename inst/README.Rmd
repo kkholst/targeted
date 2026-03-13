@@ -209,7 +209,7 @@ prmod <- learner_glm(a ~ w1 + w2, family=binomial)
 We will reuse one of the outcome models from the previous section, and use the
 `cate` function to estimate the treatment effect
 ```{r ate, cache=TRUE}
-a <- cate(response.model = lr_rf, propensity.model = prmod, data = d, nfolds = 5)
+a <- cate(response.model = lr_rf, treatment.model = prmod, data = d, nfolds = 5)
 a
 ```
 In the output we get estimates of both the mean potential outcomes and the

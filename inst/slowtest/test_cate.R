@@ -12,7 +12,7 @@ test_cate_polle <- function() {
 
   ## Continuous endpoint
   a <- cate(response.model = learner_glm(y ~ a*x),
-            propensity.model = a ~ 1, data=d, mc.cores=1)
+            treatment.model = a ~ 1, data=d, mc.cores=1)
 
   pd <- polle::policy_data(data = data.table::data.table(d),
                            action = "a",
@@ -39,7 +39,7 @@ test_cate_polle <- function() {
 
   ## Binary endpoint
   a <- cate(response.model = learner_glm(yb ~ a*x, family=binomial),
-            propensity.model = a ~ 1, data=d, mc.cores=1)
+            treatment.model = a ~ 1, data=d, mc.cores=1)
 
   pd <- polle::policy_data(data = data.table::data.table(d),
                            action = "a",
@@ -65,7 +65,7 @@ test_cate_polle <- function() {
 
   ## Binary endpoint, propensity-model with covariate
   a <- cate(response.model = learner_glm(yb ~ a*x, family=binomial),
-            propensity.model = learner_glm(a ~ x, family=binomial),
+            treatment.model = learner_glm(a ~ x, family=binomial),
             data=d, mc.cores=1)
 
   pd <- polle::policy_data(data = data.table::data.table(d),
