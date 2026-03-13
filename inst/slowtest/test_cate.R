@@ -1,4 +1,5 @@
 library("tinytest")
+future::plan("multicore")
 
 test_cate_polle <- function() {
   set.seed(1)
@@ -102,41 +103,52 @@ test_cate_rep_variance_consistency <- function() {
   nsim <- 500
   n <- 500
 
-  cover1 <- cover2 <- numeric(nsim)
   true_ate <- 1
-
-  for (i in seq_len(nsim)) {
+  onerun <- function(n, true_ate, ...) {
     x <- rnorm(n)
     a <- rbinom(n, 1, 0.5)
     y <- true_ate * a + x + rnorm(n)
     d <- data.frame(y = y, a = a, x = x)
 
-    fit1 <- cate(y ~ a + x,
-                 learner_glm(a ~ x, family = binomial),
-                 calibration.model = ~1,
-                 nfolds = 5,
-                 rep = 1,
-                 data = d)
+    fit1 <- cate(
+      y ~ a + x,
+      learner_glm(a ~ x, family = binomial),
+      calibration.model = ~1,
+      nfolds = 5,
+      rep = 1,
+      data = d
+    )
 
-    fit2 <- cate(y ~ a + x,
-                 learner_glm(a ~ x, family = binomial),
-                 calibration.model = ~1,
-                 nfolds = 5,
-                 rep = 5,
-                 data = d)
+    fit2 <- cate(
+      y ~ a + x,
+      learner_glm(a ~ x, family = binomial),
+      calibration.model = ~1,
+      nfolds = 5,
+      rep = 5,
+      data = d
+    )
 
     ci1 <- parameter(subset(fit1, 3))[,3:4]
     ci2 <- parameter(subset(fit2, 3))[,3:4]
-
-    cover1[i] <- ci1[1] <= true_ate && true_ate <= ci1[2]
-    cover2[i] <- ci2[1] <= true_ate && true_ate <= ci2[2]
+    cover <- c(
+      ci1[1] <= true_ate && true_ate <= ci1[2],
+      ci2[1] <= true_ate && true_ate <= ci2[2]
+    )
+    return(cover)
   }
 
+  cover <- future.apply::future_sapply(
+    seq(nsim),
+    onerun,
+    n = n, true_ate = true_ate,
+    future.seed = TRUE
+  )
+
   # Both should have coverage close to 95%
-  expect_true(abs(mean(cover1) - 0.95) < 0.05)
-  expect_true(abs(mean(cover2) - 0.95) < 0.05)
+  expect_true(abs(mean(cover[1, ]) - 0.95) < 0.05)
+  expect_true(abs(mean(cover[2, ]) - 0.95) < 0.05)
 
   # Coverage should be similar between rep=1 and rep=5
-  expect_true(abs(mean(cover1) - mean(cover2)) < 0.05)
+  expect_equal(mean(cover[1, ]), mean(cover[2, ]), tol = 0.05)
 }
 test_cate_rep_variance_consistency()
