@@ -41,7 +41,6 @@ simcate <- function(qmod) {
 simcate(y ~ a * x) # cate: correct q-model
 simcate(y ~ a + x) # cate: mis-specified q-model
 
-
 test_cate_deprecated_arguments <- function() {
   qmod <- y ~ a * x
   q1 <- predict(lm(qmod, data = d), newdata = transform(d, a = 1))
@@ -246,12 +245,11 @@ test_cate_custom_folds <- function() {
          nfolds = custom_folds,
          rep = 2,
          data = d),
-    pattern = "same folds in every repetition"
+    pattern = "`rep` argument is ignored"
   )
-  expect_null(res_rep$folds) # blank folds attribute when rep > 1
+  expect_equivalent(res_rep$folds, custom_folds)
 }
 test_cate_custom_folds()
-
 
 test_cate_rep_crossfit <- function() {
   set.seed(1)

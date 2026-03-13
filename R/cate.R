@@ -236,8 +236,9 @@ cate <- function(response.model, # nolint
   if (is.list(nfolds) && rep > 1) {
     warning(
       "When `nfolds` is a list of pre-specified folds, ",
-      "`rep > 1` will use the same folds in every repetition."
+      "`rep` argument is ignored. "
     )
+    rep <- 1L
   }
 
   estimate_nuisance_models <- function(args) {
