@@ -6,7 +6,7 @@
 \usage{
 cate(
   response.model,
-  propensity.model,
+  treatment.model,
   cate.model = ~1,
   calibration.model = NULL,
   data,
@@ -21,6 +21,7 @@ cate(
   response_model = deprecated,
   cate_model = deprecated,
   propensity_model = deprecated,
+  propensity.model = deprecated,
   treatment = deprecated,
   ...
 )
@@ -28,7 +29,7 @@ cate(
 \arguments{
 \item{response.model}{formula or learner object (formula => learner_glm)}
 
-\item{propensity.model}{formula or learner object (formula => learner_glm)}
+\item{treatment.model}{formula or learner object (formula => learner_glm)}
 
 \item{cate.model}{formula specifying regression design for conditional
 average treatment effects}
@@ -66,7 +67,9 @@ of outcome models}
 
 \item{cate_model}{Deprecated. Use cate.model instead.}
 
-\item{propensity_model}{Deprecated. Use propensity.model instead.}
+\item{propensity_model}{Deprecated. Use treatment.model instead.}
+
+\item{propensity.model}{Deprecated. Use treatment.model instead.}
 
 \item{treatment}{Deprecated. Use cate.model instead.}
 
@@ -100,12 +103,12 @@ d <- sim1(5000)
 ## ATE
 cate(cate.model=~1,
      response.model=y~a*(w1+w2),
-     propensity.model=a~w1+w2,
+     treatment.model=a~w1+w2,
      data=d)
 ## CATE
 cate(cate.model=~1+w2,
      response.model=y~a*(w1+w2),
-     propensity.model=a~w1+w2,
+     treatment.model=a~w1+w2,
      data=d)
 
 \dontrun{ ## superlearner example
@@ -116,7 +119,7 @@ mod1 <- list(
 s1 <- learner_sl(mod1, nfolds=5)
 cate(cate.model=~1,
      response.model=s1,
-     propensity.model=learner_glm(a~w1+w2, family=binomial),
+     treatment.model=learner_glm(a~w1+w2, family=binomial),
      data=d,
      stratify=TRUE)
 }

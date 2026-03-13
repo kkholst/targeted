@@ -1,20 +1,20 @@
 procfold <- function(a, fold,
                      data,
-                     propensity.model,
+                     treatment.model,
                      response.model,
                      treatment_var,
                      stratify,
                      folds,
                      ...) {
   qmod <- response.model$clone(deep = TRUE)
-  pmod <- propensity.model$clone(deep = TRUE)
+  pmod <- treatment.model$clone(deep = TRUE)
   newf <- reformulate(as.character(pmod$formula)[[3]],
                       outcome_level(treatment_var, a))
   pmod$update(newf)
   val <- list(est_nuisance_fold(
     folds[[fold]],
     data,
-    propensity.model = pmod,
+    treatment.model = pmod,
     response.model = qmod,
     treatment = treatment_var,
     level = a,
@@ -25,7 +25,7 @@ procfold <- function(a, fold,
 
 est_nuisance_fold <- function(fold,
                               data,
-                              propensity.model,
+                              treatment.model,
                               response.model,
                               treatment, level,
                               stratify=FALSE) {
@@ -36,7 +36,7 @@ est_nuisance_fold <- function(fold,
     dtrain <- data[-fold, ]
     deval <- data[fold, ]
   }
-  propensity.model$estimate(dtrain)
+  treatment.model$estimate(dtrain)
   X <- deval
   if (stratify) {
     idx <- which(dtrain[, treatment]==level)
@@ -45,7 +45,7 @@ est_nuisance_fold <- function(fold,
     tmp <- response.model$estimate(dtrain)
     X[, treatment] <- level
   }
-  pr <- propensity.model$predict(newdata = deval)
+  pr <- treatment.model$predict(newdata = deval)
   if (NCOL(pr)>1)
     pr <- pr[, 2]
   eY <- response.model$predict(newdata = X)
@@ -75,7 +75,7 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #' @title Conditional Average Treatment Effect estimation
 #' @param response.model formula or learner object (formula => learner_glm)
 #' @param ... additional arguments to future.apply::future_mapply
-#' @param propensity.model formula or learner object (formula => learner_glm)
+#' @param treatment.model formula or learner object (formula => learner_glm)
 #' @param cate.model formula specifying regression design for conditional
 #'   average treatment effects
 #' @param calibration.model linear calibration model. Specify covariates in
@@ -118,12 +118,12 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #' ## ATE
 #' cate(cate.model=~1,
 #'      response.model=y~a*(w1+w2),
-#'      propensity.model=a~w1+w2,
+#'      treatment.model=a~w1+w2,
 #'      data=d)
 #' ## CATE
 #' cate(cate.model=~1+w2,
 #'      response.model=y~a*(w1+w2),
-#'      propensity.model=a~w1+w2,
+#'      treatment.model=a~w1+w2,
 #'      data=d)
 #'
 #' \dontrun{ ## superlearner example
@@ -134,14 +134,14 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #' s1 <- learner_sl(mod1, nfolds=5)
 #' cate(cate.model=~1,
 #'      response.model=s1,
-#'      propensity.model=learner_glm(a~w1+w2, family=binomial),
+#'      treatment.model=learner_glm(a~w1+w2, family=binomial),
 #'      data=d,
 #'      stratify=TRUE)
 #' }
 #'
 #' @export
 cate <- function(response.model, # nolint
-                 propensity.model,
+                 treatment.model,
                  cate.model = ~1,
                  calibration.model = NULL,
                  data,
@@ -156,6 +156,7 @@ cate <- function(response.model, # nolint
                  response_model = deprecated,
                  cate_model = deprecated,
                  propensity_model = deprecated,
+                 propensity.model = deprecated,
                  treatment = deprecated,
                  ...) {
 
@@ -172,8 +173,13 @@ cate <- function(response.model, # nolint
   }
 
   if (!missing(propensity_model)) {
-    deprecate_arg_warn("propensity_model", "propensity.model", "cate", dvers)
-    propensity.model <- propensity_model
+    deprecate_arg_warn("propensity_model", "treatment.model", "cate", dvers)
+    treatment.model <- propensity_model
+  }
+
+  if (!missing(propensity.model)) {
+    deprecate_arg_warn("propensity.model", "treatment.model", "cate", dvers)
+    treatment.model <- propensity.model
   }
 
   if (!missing(cate_model)) {
@@ -194,27 +200,26 @@ cate <- function(response.model, # nolint
     cate.model <- treatment
   }
 
-  if (missing(propensity.model)) {
-    propensity.model <- lava::getoutcome(cate.model)
+  if (missing(treatment.model)) {
+    treatment.model <- lava::getoutcome(cate.model)
   }
-  if (length(propensity.model) == 0) {
-    stop("Empty `propensity.model`")
+  if (length(treatment.model) == 0) {
+    stop("Empty `treatment.model`")
   }
 
-  if (is.character(propensity.model)) {
-    propensity.model <- stats::reformulate("1", propensity.model)
+  if (is.character(treatment.model)) {
+    treatment.model <- stats::reformulate("1", treatment.model)
   }
 
   if (inherits(response.model, "formula")) {
     response.model <- learner_glm(response.model)
   }
 
-  if (inherits(propensity.model, "formula")) {
-    propensity.model <- learner_glm(propensity.model, family = binomial)
+  if (inherits(treatment.model, "formula")) {
+    treatment.model <- learner_glm(treatment.model, family = binomial)
   }
   # treatment reponse variable
-  # treatment_response <- all.vars(update(propensity.model$formula, ~1))
-  treatment_var <- lava::getoutcome(propensity.model$formula)
+  treatment_var <- lava::getoutcome(treatment.model$formula)
   # variable in data.frame, in case propensity-model is of the form `I(a>0) ~ 1`
   # check that treatment variable is part of the response model
   preds <- union(rownames(attr(
@@ -272,7 +277,7 @@ cate <- function(response.model, # nolint
       a = as.list(fargs[, "a"]),
       fold = as.list(fargs[, "fold"]),
       MoreArgs = list(
-        propensity.model = propensity.model,
+        treatment.model = treatment.model,
         response.model = response.model,
         treatment_var = treatment_var,
         data = data, folds = folds,
@@ -337,7 +342,7 @@ cate <- function(response.model, # nolint
   }
   val <- list(nuisance = val)
   a <- c()
-  pmod <- propensity.model$clone(deep = TRUE)
+  pmod <- treatment.model$clone(deep = TRUE)
   for (i in seq_along(contrast)) {
     newf <- reformulate(
       as.character(pmod$formula)[[3]],
@@ -359,7 +364,7 @@ cate <- function(response.model, # nolint
 
   res <- list(
     call = cl,
-    propensity.model = propensity.model,
+    treatment.model = treatment.model,
     folds = folds_out,
     # (outcome, trt, propensity-pred, outcome-pred)
     data = val # (y, a, p, q)
@@ -380,7 +385,7 @@ cate_est <- function(y, # response vector
                      p, # matrix with treatment probabilities a=1, a=0
                      q, # matrix with outcome predictions E(Y|A=1,X), E(Y|A=0,X)
                      data, # data.frame
-                     propensity.model = NULL, # propensity model
+                     treatment.model = NULL, # propensity model
                      X.cate
                      ) {
 
@@ -391,14 +396,14 @@ cate_est <- function(y, # response vector
   est0 <- apply(scores, 2, mean)
   IF0 <- c()
   contrast <- colnames(a)
-  if (!is.null(propensity.model)) {
-    treatment_var <- lava::getoutcome(propensity.model$formula)
+  if (!is.null(treatment.model)) {
+    treatment_var <- lava::getoutcome(treatment.model$formula)
   }
   for (i in seq_along(est0)) {
     newIF <- scores[, i] - est0[i]
-    if (!is.null(propensity.model) &&
-        inherits(propensity.model, "learner_glm")) {
-      pmod <- propensity.model$clone(deep = TRUE)
+    if (!is.null(treatment.model) &&
+        inherits(treatment.model, "learner_glm")) {
+      pmod <- treatment.model$clone(deep = TRUE)
       newf <- reformulate(
         as.character(pmod$formula)[[3]],
         outcome_level(treatment_var, contrast[i])
@@ -524,7 +529,7 @@ update.cate.targeted <- function(object,
     vcov <- vcov / length(object$data$q)
   }
 
-  pmod <- object$propensity.model # nolint
+  pmod <- object$treatment.model # nolint
   if (!second.order) pmod <- NULL
   ests <- lapply( # obtain estimates across repeated cross-fits
     seq_along(object$data$q),
@@ -536,7 +541,7 @@ update.cate.targeted <- function(object,
           a = cbind(a),
           p = cbind(p[[x]]),
           q = cbind(q[[x]]),
-          propensity.model = pmod,
+          treatment.model = pmod,
           data = data,
           X.cate = desA$x
         )

@@ -50,7 +50,7 @@ test_cate_deprecated_arguments <- function() {
   expect_warning(
     aa1 <- cate(
       response_model = learner_glm(qmod),
-      propensity.model = learner_glm(a ~ x, family = binomial),
+      treatment.model = learner_glm(a ~ x, family = binomial),
       data = d
     ) |> estimate(),
     pattern = "Please use the `response.model` argument instead"
@@ -60,17 +60,17 @@ test_cate_deprecated_arguments <- function() {
   expect_warning(
     aa2 <- cate(
       response.model = learner_glm(qmod),
-      propensity_model = learner_glm(a ~ x, family = binomial),
+      propensity.model = learner_glm(a ~ x, family = binomial),
       data = d
     ) |> estimate(),
-    pattern = "Please use the `propensity.model` argument instead"
+    pattern = "Please use the `treatment.model` argument instead"
   )
   expect_equivalent(parameter(e1)[1:2], parameter(aa2)["E[y(1)]", 1:2])
 
   # user is informed when deprecated treatment argument is used
   expect_warning(aa4 <- cate(
     response.model = learner_glm(qmod),
-    propensity.model = learner_glm(a ~ x, family = binomial),
+    treatment.model = learner_glm(a ~ x, family = binomial),
     treatment = ~ 1,
     data = d) |> estimate(),
     pattern = "Please use the `cate.model` argument instead"
@@ -80,7 +80,7 @@ test_cate_deprecated_arguments <- function() {
   # same with cate_model argument
   expect_warning(aa4 <- cate(
     response.model = learner_glm(qmod),
-    propensity.model = learner_glm(a ~ x, family = binomial),
+    treatment.model = learner_glm(a ~ x, family = binomial),
     cate_model = ~ 1,
     data = d) |> estimate(),
     pattern = "Please use the `cate.model` argument instead"
@@ -92,7 +92,7 @@ test_cate_deprecated_arguments <- function() {
   expect_error(
     cate(
       response.model = learner_glm(qmod),
-      propensity.model = learner_glm(a ~ x, family = binomial),
+      treatment.model = learner_glm(a ~ x, family = binomial),
       cate.model = ~2,
       treatment = ~1,
       data = d
@@ -112,7 +112,7 @@ test_cate_ate <- function() {
   d <- data.frame(yb = yb, y = y, a = a, x = x)
 
   a <- cate(response.model = learner_glm(yb ~ a*x, family=binomial()),
-            propensity.model = learner_glm(a ~ x, family=binomial()),
+            treatment.model = learner_glm(a ~ x, family=binomial()),
             data=d, mc.cores=1)
 
   at <- ate(yb ~ a, nuisance = ~a*x, propensity = ~x, family=binomial(), data=d)
@@ -200,7 +200,7 @@ test_cate_multiple_treatment <- function() {
 test_cate_multiple_treatment()
 
 test_cate_warning <- function() {
-  # check we get a warning if the treatment from the propensity.model
+  # check we get a warning if the treatment from the treatment.model
   # is not part of the response.model
   expect_warning(
     cate(y ~ a * x, A ~ 1, data = d),

@@ -61,7 +61,7 @@ vignette:
 	@$(R) -q -e "devtools::build_vignettes(clean=FALSE, install=FALSE, quiet=FALSE)"
 
 test: test-installed
-test-installed: # tests locally installed version package
+test-installed: # tests locally installed package version
 	@echo 'tinytest::test_package("$(PKG)")' | $(R)
 
 test-loadall:
