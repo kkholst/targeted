@@ -173,7 +173,7 @@ cate <- function(response.model, # nolint
   }
 
   if (!missing(propensity_model)) {
-    deprecate_arg_warn("propensity_model", "propensity.model", "cate", dvers)
+    deprecate_arg_warn("propensity_model", "treatment.model", "cate", dvers)
     treatment.model <- propensity_model
   }
 
