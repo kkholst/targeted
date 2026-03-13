@@ -283,7 +283,6 @@ test_cate_rep_crossfit <- function() {
 }
 test_cate_rep_crossfit()
 
-
 test_cate_rep_calibration_variance <- function() {
   set.seed(1)
   n <- 2000
@@ -313,11 +312,10 @@ test_cate_rep_calibration_variance <- function() {
 }
 test_cate_rep_calibration_variance()
 
-
 test_cate_rep_no_crossfit <- function() {
   # With nfolds=1 (no cross-fitting), rep>1 should not affect variance
   # since there is no fold-specific prediction noise to average out
-    set.seed(1)
+  set.seed(1)
   n <- 2000
   x <- rnorm(n)
   a <- rbinom(n, 1, lava::expit(x))

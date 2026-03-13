@@ -514,8 +514,8 @@ update.cate.targeted <- function(object,
       v2 <- t(bs) %*% var(Z) %*% bs
       v <- (v1 + v2)/NROW(Z) # see Bannick et al 2025
       vcov <- vcov + v
+      object$data$q[[j]] <- q # calibrated outcome model
     }
-    object$data$q[[j]] <- q # calibrated outcome model
     vcov <- vcov / length(object$data$q)
   }
 
