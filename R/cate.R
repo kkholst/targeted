@@ -495,31 +495,34 @@ update.cate.targeted <- function(object,
     y <- object$data$y
     object$data$q0 <- object$data$q # original outcome model
     vcov <- matrix(0, ncol(a), ncol(a))
-    for (j in seq_along(object$data$q)) {
+    for (j in seq_along(object$data$q)) { # loop over replications
       rs <- c() # residuals
       ps <- c() # treatment assignment prob.
       bs <- c() # linear regr. coef.
       q <- object$data$q[[j]]
       Z <- cbind(des_cal$x, q)
-      for (i in seq_len(ncol(a))) {
+      for (i in seq_len(ncol(a))) { # loop over treatment levels
         idx <- which(a[, i])
         b <- lm.fit(Z[idx, , drop = FALSE], y[idx])$coefficients
         b[is.na(b)] <- 0
         q[, i] <- Z %*% b
-        bs <- cbind(bs, cbind(b))
-        rs <- c(rs, list(y[idx] - Z[idx, , drop = FALSE] %*% b))
-        ps <- c(ps, mean(a[, i]))
+        if (tolower(var.type) != "ic") {
+          bs <- cbind(bs, cbind(b))
+          rs <- c(rs, list(y[idx] - Z[idx, , drop = FALSE] %*% b))
+          ps <- c(ps, mean(a[, i]))
+        }
       }
-      var <- function(x) stats::var(x) * (NROW(x) - 1) / NROW(x)
-      v1 <- diag(unlist(lapply(rs, var)) / ps)
-      v2 <- t(bs) %*% var(Z) %*% bs
-      v <- (v1 + v2)/NROW(Z) # see Bannick et al 2025
-      vcov <- vcov + v
+      if (tolower(var.type) != "ic") {
+        var <- function(x) stats::var(x) * (NROW(x) - 1) / NROW(x)
+        v1 <- diag(unlist(lapply(rs, var)) / ps)
+        v2 <- t(bs) %*% var(Z) %*% bs
+        v <- (v1 + v2)/NROW(Z) # see Bannick et al 2025
+        vcov <- vcov + v
+      }
       object$data$q[[j]] <- q # calibrated outcome model
     }
     vcov <- vcov / length(object$data$q)
   }
-
 
   pmod <- object$propensity.model # nolint
   if (!second.order) pmod <- NULL
