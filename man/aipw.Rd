@@ -15,18 +15,20 @@ aipw(
 )
 }
 \arguments{
-\item{propensity.model}{Deprecated. Use treatment.model instead.}
+\item{response.model}{Model for the response given covariates (learner or
+formula)}
+
+\item{propensity.model}{Optional missing data mechanism model (propensity
+model) (learner or formula)}
 
 \item{formula}{design specifying the OLS estimator with outcome given by the
 EIF (see \code{cate})}
 
 \item{data}{data.frame}
 
-\item{response_model}{Model for the response given covariates (learner or
-formula)}
+\item{response_model}{Deprecated. Use response.model instead.}
 
-\item{propensity_model}{Optional missing data mechanism model (propensity
-model) (learner or formula)}
+\item{propensity_model}{Deprecated. Use treatment.model instead.}
 
 \item{...}{additional arguments (see \code{\link[=cate]{cate()}})}
 }

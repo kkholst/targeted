@@ -3,9 +3,9 @@
 #' AIPW for the mean (and linear projections of the EIF) with missing
 #' observations
 #' @export
-#' @param response_model Model for the response given covariates (learner or
+#' @param response.model Model for the response given covariates (learner or
 #'   formula)
-#' @param propensity_model Optional missing data mechanism model (propensity
+#' @param propensity.model Optional missing data mechanism model (propensity
 #'   model) (learner or formula)
 #' @param data data.frame
 #' @param ... additional arguments (see [cate()])
