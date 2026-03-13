@@ -340,5 +340,9 @@ test_cate_rep_no_crossfit <- function() {
   # With nfolds=1, rep>1 should not change estimates or variance
   expect_equivalent(coef(a1), coef(a2), tolerance = 1e-6)
   expect_equivalent(vcov(a1), vcov(a2), tolerance = 1e-6)
+  for (i in 2:5) {
+    expect_identical(a2$data$q[[1]], a2$data$q[[i]])
+    expect_identical(a2$data$p[[1]], a2$data$p[[i]])
+  }
 }
 test_cate_rep_no_crossfit()
