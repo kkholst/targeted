@@ -333,7 +333,7 @@ moiate <- function(data,
     imputation.model <- learner_glm(imputation.model)
   }
 
-  ## check that the propensity.model is a learner_glm with family = "binomial",
+  ## check that treatment.model is a learner_glm with family = "binomial",
   ## and that the formula RHS is 1, i.e., only an
   ## intercept is included
   if (!inherits(treatment.model, "learner_glm")) {
@@ -373,7 +373,7 @@ moiate <- function(data,
   outcome_est <- cate(
     cate.model =  ~ 1,
     response.model = response.model,
-    propensity.model = treatment.model,
+    treatment.model = treatment.model,
     data = data
   )
   data$delta_response <- NULL
@@ -396,7 +396,7 @@ moiate <- function(data,
   missing_est <- cate(
     cate.model = ~ 1,
     response.model = missing.model,
-    propensity.model = treatment.model,
+    treatment.model = treatment.model,
     data = data
   )
   data$delta <- NULL
