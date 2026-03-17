@@ -41,7 +41,6 @@ simcate <- function(qmod) {
 simcate(y ~ a * x) # cate: correct q-model
 simcate(y ~ a + x) # cate: mis-specified q-model
 
-
 test_cate_deprecated_arguments <- function() {
   qmod <- y ~ a * x
   q1 <- predict(lm(qmod, data = d), newdata = transform(d, a = 1))
@@ -51,7 +50,7 @@ test_cate_deprecated_arguments <- function() {
   expect_warning(
     aa1 <- cate(
       response_model = learner_glm(qmod),
-      propensity.model = learner_glm(a ~ x, family = binomial),
+      treatment.model = learner_glm(a ~ x, family = binomial),
       data = d
     ) |> estimate(),
     pattern = "Please use the `response.model` argument instead"
@@ -61,17 +60,17 @@ test_cate_deprecated_arguments <- function() {
   expect_warning(
     aa2 <- cate(
       response.model = learner_glm(qmod),
-      propensity_model = learner_glm(a ~ x, family = binomial),
+      propensity.model = learner_glm(a ~ x, family = binomial),
       data = d
     ) |> estimate(),
-    pattern = "Please use the `propensity.model` argument instead"
+    pattern = "Please use the `treatment.model` argument instead"
   )
   expect_equivalent(parameter(e1)[1:2], parameter(aa2)["E[y(1)]", 1:2])
 
   # user is informed when deprecated treatment argument is used
   expect_warning(aa4 <- cate(
     response.model = learner_glm(qmod),
-    propensity.model = learner_glm(a ~ x, family = binomial),
+    treatment.model = learner_glm(a ~ x, family = binomial),
     treatment = ~ 1,
     data = d) |> estimate(),
     pattern = "Please use the `cate.model` argument instead"
@@ -81,7 +80,7 @@ test_cate_deprecated_arguments <- function() {
   # same with cate_model argument
   expect_warning(aa4 <- cate(
     response.model = learner_glm(qmod),
-    propensity.model = learner_glm(a ~ x, family = binomial),
+    treatment.model = learner_glm(a ~ x, family = binomial),
     cate_model = ~ 1,
     data = d) |> estimate(),
     pattern = "Please use the `cate.model` argument instead"
@@ -93,7 +92,7 @@ test_cate_deprecated_arguments <- function() {
   expect_error(
     cate(
       response.model = learner_glm(qmod),
-      propensity.model = learner_glm(a ~ x, family = binomial),
+      treatment.model = learner_glm(a ~ x, family = binomial),
       cate.model = ~2,
       treatment = ~1,
       data = d
@@ -113,7 +112,7 @@ test_cate_ate <- function() {
   d <- data.frame(yb = yb, y = y, a = a, x = x)
 
   a <- cate(response.model = learner_glm(yb ~ a*x, family=binomial()),
-            propensity.model = learner_glm(a ~ x, family=binomial()),
+            treatment.model = learner_glm(a ~ x, family=binomial()),
             data=d, mc.cores=1)
 
   at <- ate(yb ~ a, nuisance = ~a*x, propensity = ~x, family=binomial(), data=d)
@@ -129,26 +128,6 @@ test_cate_ate <- function() {
                     vcov(at)["a=0","a=0"], tolerance=1e-2)
 }
 test_cate_ate()
-
-
-test_cate_crossfit <- function() {
-
-  # repeated cross-fitting TODO
-  ## a <- cate(y ~ a + x,
-  ##           learner_glm(a ~ x, family=binomial),
-  ##           second.order = TRUE,
-  ##           nfolds = 2,
-  ##           rep = 3,
-  ##           rep.type = "average",
-  ##           mc.cores=1,
-  ##           data = d)
-  a <- cate(y ~ a + x,
-             learner_glm(a ~ x, family=binomial),
-             second.order = TRUE,
-             nfolds = 5,
-             rep = 3,
-             data = d)
-}
 
 test_cate_remainder <- function() {
   # Test seconder order remainder term
@@ -190,7 +169,6 @@ test_cate_remainder <- function() {
 }
 test_cate_remainder()
 
-
 ## multiple treatments
 n <- 1e3
 a <- rbinom(n, 1, 0.5)
@@ -222,7 +200,7 @@ test_cate_multiple_treatment <- function() {
 test_cate_multiple_treatment()
 
 test_cate_warning <- function() {
-  # check we get a warning if the treatment from the propensity.model
+  # check we get a warning if the treatment from the treatment.model
   # is not part of the response.model
   expect_warning(
     cate(y ~ a * x, A ~ 1, data = d),
@@ -230,3 +208,139 @@ test_cate_warning <- function() {
   )
 }
 test_cate_warning()
+
+test_cate_custom_folds <- function() {
+  set.seed(7)
+  n_obs <- nrow(d)
+  idx <- sample(n_obs)
+  custom_folds <- split(idx, rep(1:5, length.out = n_obs))
+  custom_folds <- lapply(custom_folds, sort)
+
+  res_custom <- cate(y ~ a * x,
+                     learner_glm(a ~ x, family = binomial),
+                     nfolds = custom_folds,
+                     data = d)
+
+  expect_identical(res_custom$folds, custom_folds)
+
+  res_int <- cate(y ~ a * x,
+                  learner_glm(a ~ x, family = binomial),
+                  nfolds = 5,
+                  data = d)
+  expect_true(inherits(res_custom, "cate.targeted"))
+  expect_equal(length(coef(res_custom)), length(coef(res_int)))
+
+  bad_folds <- list(1:3, 4:6) # doesn't cover 1:n
+  expect_error(
+    cate(y ~ a * x,
+         learner_glm(a ~ x, family = binomial),
+         nfolds = bad_folds,
+         data = d),
+    pattern = "partition"
+  )
+
+  expect_warning(
+    res_rep <- cate(y ~ a * x,
+         learner_glm(a ~ x, family = binomial),
+         nfolds = custom_folds,
+         rep = 2,
+         data = d),
+    pattern = "`rep` argument is ignored"
+  )
+  expect_equivalent(res_rep$folds, custom_folds)
+}
+test_cate_custom_folds()
+
+test_cate_rep_crossfit <- function() {
+  set.seed(1)
+  n <- 2000
+  x <- rnorm(n)
+  a <- rbinom(n, 1, lava::expit(1 + x))
+  y <- 1 + a + x - a * x + rnorm(n)
+  d <- data.frame(y = y, a = a, x = x)
+
+  # Single cross-fitting reference
+  a1 <- cate(y ~ a * x,
+             learner_glm(a ~ x, family = binomial),
+             nfolds = 5,
+             rep = 1,
+             data = d)
+
+  # Repeated cross-fitting with nuisance averaging
+  a2 <- cate(y ~ a * x,
+             learner_glm(a ~ x, family = binomial),
+             nfolds = 5,
+             rep = 10,
+             mc.cores = 1L,
+             data = d)
+
+  # Estimates should be similar given large sample-size
+  expect_equivalent(coef(a1), coef(a2), tolerance = 0.05)
+  expect_equivalent(vcov(a1), vcov(a2), tolerance = 0.05)
+
+}
+test_cate_rep_crossfit()
+
+test_cate_rep_calibration_variance <- function() {
+  set.seed(1)
+  n <- 2000
+  x <- rnorm(n)
+  a <- rbinom(n, 1, lava::expit(x))
+  y <- 1 + a + x - a * x + rnorm(n)
+  d <- data.frame(y = y, a = a, x = x)
+
+  a1 <- cate(y ~ a + x,
+             learner_glm(a ~ x, family = binomial),
+             calibration.model = ~1,
+             nfolds = 5,
+             rep = 1,
+             data = d)
+
+  a2 <- cate(y ~ a + x,
+             learner_glm(a ~ x, family = binomial),
+             calibration.model = ~1,
+             nfolds = 5,
+             rep = 10,
+             mc.cores = 1,
+             data = d)
+
+  # estimates should be similar
+  expect_equivalent(coef(a1), coef(a2), tolerance = 0.05)
+  expect_equivalent(vcov(a1), vcov(a2), tolerance = 0.05)
+}
+test_cate_rep_calibration_variance()
+
+test_cate_rep_no_crossfit <- function() {
+  # With nfolds=1 (no cross-fitting), rep>1 should not affect variance
+  # since there is no fold-specific prediction noise to average out
+  set.seed(1)
+  n <- 2000
+  x <- rnorm(n)
+  a <- rbinom(n, 1, lava::expit(x))
+  y <- 1 + a + x - a * x + rnorm(n)
+  d <- data.frame(y = y, a = a, x = x)
+
+  a1 <- cate(y ~ a + x,
+             learner_glm(a ~ x, family = binomial),
+             calibration.model = ~1,
+             nfolds = 1,
+             rep = 1,
+             data = d)
+
+  a2 <- cate(y ~ a + x,
+             learner_glm(a ~ x, family = binomial),
+             calibration.model = ~1,
+             nfolds = 1,
+             rep = 5,
+             mc.cores=1,
+             data = d)
+
+  # With nfolds=1, rep>1 should not change estimates or variance
+  expect_equivalent(coef(a1), coef(a2), tolerance = 1e-6)
+  expect_equivalent(vcov(a1), vcov(a2), tolerance = 1e-6)
+  for (i in 2:5) {
+    expect_identical(a2$data$q[[1]], a2$data$q[[i]])
+    expect_identical(a2$data$p[[1]], a2$data$p[[i]])
+  }
+}
+test_cate_rep_no_crossfit()

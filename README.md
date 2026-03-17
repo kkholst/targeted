@@ -260,7 +260,7 @@ We will reuse one of the outcome models from the previous section, and
 use the `cate` function to estimate the treatment effect
 
 ``` r
-a <- cate(response.model = lr_rf, propensity.model = prmod, data = d, nfolds = 5)
+a <- cate(response.model = lr_rf, treatment.model = prmod, data = d, nfolds = 5)
 a
 #>             Estimate Std.Err       2.5%   97.5%   P-value
 #> E[y(1)]      -0.1700 0.02628 -0.2214840 -0.1185 9.939e-11
@@ -275,7 +275,7 @@ the difference of those, the average treatment effect, given as the term
 
 ``` r
 summary(a)
-#> cate(response.model = lr_rf, propensity.model = prmod, data = d, 
+#> cate(response.model = lr_rf, treatment.model = prmod, data = d,
 #>     nfolds = 5)
 #> 
 #>             Estimate Std.Err       2.5%   97.5%   P-value

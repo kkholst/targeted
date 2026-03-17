@@ -6,7 +6,7 @@
 \usage{
 cate(
   response.model,
-  propensity.model,
+  treatment.model,
   cate.model = ~1,
   calibration.model = NULL,
   data,
@@ -16,12 +16,12 @@ cate(
   silent = FALSE,
   stratify = FALSE,
   mc.cores = NULL,
-  rep.type = c("nuisance", "average"),
   var.type = "IC",
   second.order = TRUE,
   response_model = deprecated,
   cate_model = deprecated,
   propensity_model = deprecated,
+  propensity.model = deprecated,
   treatment = deprecated,
   ...
 )
@@ -29,7 +29,7 @@ cate(
 \arguments{
 \item{response.model}{formula or learner object (formula => learner_glm)}
 
-\item{propensity.model}{formula or learner object (formula => learner_glm)}
+\item{treatment.model}{formula or learner object (formula => learner_glm)}
 
 \item{cate.model}{formula specifying regression design for conditional
 average treatment effects}
@@ -41,9 +41,12 @@ addition to predicted potential outcomes to include in the calibration.}
 
 \item{contrast}{treatment contrast (default 1 vs 0)}
 
-\item{nfolds}{number of folds}
+\item{nfolds}{number of folds (positive integer), or a pre-specified list of
+fold indices where each element is an integer vector of observation indices
+forming a partition of \code{1:nrow(data)}.}
 
-\item{rep}{number of replications of cross-fitting procedure}
+\item{rep}{number of replications of cross-fitting procedure
+by averaging estimates and influence functions from each replication}
 
 \item{silent}{suppress all messages and progressbars}
 
@@ -51,10 +54,6 @@ addition to predicted potential outcomes to include in the calibration.}
 
 \item{mc.cores}{(optional) number of cores. parallel::mcmapply used instead
 of future}
-
-\item{rep.type}{repeated cross-fitting applied by averaging nuisance models
-(\code{rep.type="nuisance"}) or by average estimates from each replication
-(\code{rep.type="average"}).}
 
 \item{var.type}{when equal to "IC" the asymptotic variance is derived from
 the influence function. Otherwise, based on expressions in Bannick et al.
@@ -68,7 +67,9 @@ of outcome models}
 
 \item{cate_model}{Deprecated. Use cate.model instead.}
 
-\item{propensity_model}{Deprecated. Use propensity.model instead.}
+\item{propensity_model}{Deprecated. Use treatment.model instead.}
+
+\item{propensity.model}{Deprecated. Use treatment.model instead.}
 
 \item{treatment}{Deprecated. Use cate.model instead.}
 
@@ -102,12 +103,12 @@ d <- sim1(5000)
 ## ATE
 cate(cate.model=~1,
      response.model=y~a*(w1+w2),
-     propensity.model=a~w1+w2,
+     treatment.model=a~w1+w2,
      data=d)
 ## CATE
 cate(cate.model=~1+w2,
      response.model=y~a*(w1+w2),
-     propensity.model=a~w1+w2,
+     treatment.model=a~w1+w2,
      data=d)
 
 \dontrun{ ## superlearner example
@@ -118,7 +119,7 @@ mod1 <- list(
 s1 <- learner_sl(mod1, nfolds=5)
 cate(cate.model=~1,
      response.model=s1,
-     propensity.model=learner_glm(a~w1+w2, family=binomial),
+     treatment.model=learner_glm(a~w1+w2, family=binomial),
      data=d,
      stratify=TRUE)
 }
@@ -127,6 +128,9 @@ cate(cate.model=~1,
 \references{
 Mark J. van der Laan (2006) Statistical Inference for Variable
 Importance, The International Journal of Biostatistics.
+
+Bannick, Shao & Liu et al. (2025) A General Form of Covariate Adjustment in
+Clinical Trials under Covariate-Adaptive Randomization, Biometrika.
 }
 \author{
 Klaus Kähler Holst, Andreas Nordland

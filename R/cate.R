@@ -1,20 +1,20 @@
 procfold <- function(a, fold,
                      data,
-                     propensity.model,
+                     treatment.model,
                      response.model,
                      treatment_var,
                      stratify,
                      folds,
                      ...) {
   qmod <- response.model$clone(deep = TRUE)
-  pmod <- propensity.model$clone(deep = TRUE)
+  pmod <- treatment.model$clone(deep = TRUE)
   newf <- reformulate(as.character(pmod$formula)[[3]],
                       outcome_level(treatment_var, a))
   pmod$update(newf)
   val <- list(est_nuisance_fold(
     folds[[fold]],
     data,
-    propensity.model = pmod,
+    treatment.model = pmod,
     response.model = qmod,
     treatment = treatment_var,
     level = a,
@@ -25,7 +25,7 @@ procfold <- function(a, fold,
 
 est_nuisance_fold <- function(fold,
                               data,
-                              propensity.model,
+                              treatment.model,
                               response.model,
                               treatment, level,
                               stratify=FALSE) {
@@ -36,7 +36,7 @@ est_nuisance_fold <- function(fold,
     dtrain <- data[-fold, ]
     deval <- data[fold, ]
   }
-  propensity.model$estimate(dtrain)
+  treatment.model$estimate(dtrain)
   X <- deval
   if (stratify) {
     idx <- which(dtrain[, treatment]==level)
@@ -45,7 +45,7 @@ est_nuisance_fold <- function(fold,
     tmp <- response.model$estimate(dtrain)
     X[, treatment] <- level
   }
-  pr <- propensity.model$predict(newdata = deval)
+  pr <- treatment.model$predict(newdata = deval)
   if (NCOL(pr)>1)
     pr <- pr[, 2]
   eY <- response.model$predict(newdata = X)
@@ -75,22 +75,22 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #' @title Conditional Average Treatment Effect estimation
 #' @param response.model formula or learner object (formula => learner_glm)
 #' @param ... additional arguments to future.apply::future_mapply
-#' @param propensity.model formula or learner object (formula => learner_glm)
+#' @param treatment.model formula or learner object (formula => learner_glm)
 #' @param cate.model formula specifying regression design for conditional
 #'   average treatment effects
 #' @param calibration.model linear calibration model. Specify covariates in
 #'   addition to predicted potential outcomes to include in the calibration.
 #' @param contrast treatment contrast (default 1 vs 0)
 #' @param data data.frame
-#' @param nfolds number of folds
+#' @param nfolds number of folds (positive integer), or a pre-specified list of
+#'   fold indices where each element is an integer vector of observation indices
+#'   forming a partition of `1:nrow(data)`.
 #' @param rep number of replications of cross-fitting procedure
+#'   by averaging estimates and influence functions from each replication
 #' @param silent suppress all messages and progressbars
 #' @param stratify if TRUE the response.model will be stratified by treatment
 #' @param mc.cores (optional) number of cores. parallel::mcmapply used instead
 #'   of future
-#' @param rep.type repeated cross-fitting applied by averaging nuisance models
-#'   (`rep.type="nuisance"`) or by average estimates from each replication
-#'   (`rep.type="average"`).
 #' @param var.type when equal to "IC" the asymptotic variance is derived from
 #'   the influence function. Otherwise, based on expressions in Bannick et al.
 #'   (2025) valid under different covariate-adaptive randomization schemes (only
@@ -99,8 +99,12 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #'   of outcome models
 #' @return cate.targeted object
 #' @author Klaus Kähler Holst, Andreas Nordland
-#' @references Mark J. van der Laan (2006) Statistical Inference for Variable
+#' @references
+#'   Mark J. van der Laan (2006) Statistical Inference for Variable
 #'   Importance, The International Journal of Biostatistics.
+#'
+#'   Bannick, Shao & Liu et al. (2025) A General Form of Covariate Adjustment in
+#'   Clinical Trials under Covariate-Adaptive Randomization, Biometrika.
 #' @examples
 #' sim1 <- function(n=1000, ...) {
 #'   w1 <- rnorm(n)
@@ -114,12 +118,12 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #' ## ATE
 #' cate(cate.model=~1,
 #'      response.model=y~a*(w1+w2),
-#'      propensity.model=a~w1+w2,
+#'      treatment.model=a~w1+w2,
 #'      data=d)
 #' ## CATE
 #' cate(cate.model=~1+w2,
 #'      response.model=y~a*(w1+w2),
-#'      propensity.model=a~w1+w2,
+#'      treatment.model=a~w1+w2,
 #'      data=d)
 #'
 #' \dontrun{ ## superlearner example
@@ -130,14 +134,14 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #' s1 <- learner_sl(mod1, nfolds=5)
 #' cate(cate.model=~1,
 #'      response.model=s1,
-#'      propensity.model=learner_glm(a~w1+w2, family=binomial),
+#'      treatment.model=learner_glm(a~w1+w2, family=binomial),
 #'      data=d,
 #'      stratify=TRUE)
 #' }
 #'
 #' @export
 cate <- function(response.model, # nolint
-                 propensity.model,
+                 treatment.model,
                  cate.model = ~1,
                  calibration.model = NULL,
                  data,
@@ -147,12 +151,12 @@ cate <- function(response.model, # nolint
                  silent = FALSE,
                  stratify = FALSE,
                  mc.cores = NULL,
-                 rep.type = c("nuisance", "average"),
                  var.type = "IC",
                  second.order = TRUE,
                  response_model = deprecated,
                  cate_model = deprecated,
                  propensity_model = deprecated,
+                 propensity.model = deprecated,
                  treatment = deprecated,
                  ...) {
 
@@ -169,8 +173,13 @@ cate <- function(response.model, # nolint
   }
 
   if (!missing(propensity_model)) {
-    deprecate_arg_warn("propensity_model", "propensity.model", "cate", dvers)
-    propensity.model <- propensity_model
+    deprecate_arg_warn("propensity_model", "treatment.model", "cate", dvers)
+    treatment.model <- propensity_model
+  }
+
+  if (!missing(propensity.model)) {
+    deprecate_arg_warn("propensity.model", "treatment.model", "cate", dvers)
+    treatment.model <- propensity.model
   }
 
   if (!missing(cate_model)) {
@@ -191,27 +200,26 @@ cate <- function(response.model, # nolint
     cate.model <- treatment
   }
 
-  if (missing(propensity.model)) {
-    propensity.model <- lava::getoutcome(cate.model)
+  if (missing(treatment.model)) {
+    treatment.model <- lava::getoutcome(cate.model)
   }
-  if (length(propensity.model) == 0) {
-    stop("Empty `propensity.model`")
+  if (length(treatment.model) == 0) {
+    stop("Empty `treatment.model`")
   }
 
-  if (is.character(propensity.model)) {
-    propensity.model <- stats::reformulate("1", propensity.model)
+  if (is.character(treatment.model)) {
+    treatment.model <- stats::reformulate("1", treatment.model)
   }
 
   if (inherits(response.model, "formula")) {
     response.model <- learner_glm(response.model)
   }
 
-  if (inherits(propensity.model, "formula")) {
-    propensity.model <- learner_glm(propensity.model, family = binomial)
+  if (inherits(treatment.model, "formula")) {
+    treatment.model <- learner_glm(treatment.model, family = binomial)
   }
   # treatment reponse variable
-  # treatment_response <- all.vars(update(propensity.model$formula, ~1))
-  treatment_var <- lava::getoutcome(propensity.model$formula)
+  treatment_var <- lava::getoutcome(treatment.model$formula)
   # variable in data.frame, in case propensity-model is of the form `I(a>0) ~ 1`
   # check that treatment variable is part of the response model
   preds <- union(rownames(attr(
@@ -230,16 +238,35 @@ cate <- function(response.model, # nolint
     contrast <- rev(sort(unique(data[, treatment_var])))
   }
 
+  if (is.list(nfolds) && rep > 1) {
+    warning(
+      "When `nfolds` is a list of pre-specified folds, ",
+      "`rep` argument is ignored. "
+    )
+    rep <- 1L
+  }
+
   estimate_nuisance_models <- function(args) {
     ## Create random folds
-    if (nfolds<1) nfolds <- 1
-    folds <- split(sample(1:n, n), rep(1:nfolds, length.out = n))
-    folds <- lapply(folds, sort)
+    if (is.list(nfolds)) {
+      folds <- lapply(nfolds, sort)
+      nfolds_int <- length(folds)
+      all_idx <- sort(unlist(unname(folds)))
+      if (!identical(all_idx, seq_len(n))) {
+        stop(
+          "`nfolds` list must be a partition of 1:nrow(data) with no duplicates"
+        )
+      }
+    } else {
+      nfolds_int <- max(nfolds, 1L)
+      folds <- split(sample(1:n, n), rep(1:nfolds_int, length.out = n))
+      folds <- lapply(folds, sort)
+    }
     ff <- Reduce(c, folds)
     idx <- order(ff)
-    fargs <- rbind(expand.grid(fold = seq_len(nfolds), a = contrast))
+    fargs <- rbind(expand.grid(fold = seq_len(nfolds_int), a = contrast))
 
-    if (!silent && (rep == 1) && (nfolds>1)) {
+    if (!silent && (rep == 1) && (nfolds_int>1)) {
       pb <- progressr::progressor(message="cross-fitting",
                                     steps = nrow(fargs))
     } else {
@@ -250,7 +277,7 @@ cate <- function(response.model, # nolint
       a = as.list(fargs[, "a"]),
       fold = as.list(fargs[, "fold"]),
       MoreArgs = list(
-        propensity.model = propensity.model,
+        treatment.model = treatment.model,
         response.model = response.model,
         treatment_var = treatment_var,
         data = data, folds = folds,
@@ -289,7 +316,7 @@ cate <- function(response.model, # nolint
     }
     names(qval) <- contrast
     names(pval) <- contrast
-    return(list(qval = qval, pval = pval))
+    return(list(qval = qval, pval = pval, folds = folds))
   }
 
   if (rep > 1) {
@@ -315,7 +342,7 @@ cate <- function(response.model, # nolint
   }
   val <- list(nuisance = val)
   a <- c()
-  pmod <- propensity.model$clone(deep = TRUE)
+  pmod <- treatment.model$clone(deep = TRUE)
   for (i in seq_along(contrast)) {
     newf <- reformulate(
       as.character(pmod$formula)[[3]],
@@ -330,39 +357,19 @@ cate <- function(response.model, # nolint
   val$y <- cbind(response.model$response(data, na.action=lava::na.pass0))
   colnames(val$y) <- lava::getoutcome(response.model$formula, data = data)
 
-  if (rep.type[1] == "nuisance") { # average nuisance model pred. over rep.
-    pval <- val$nuisance[[1]]$pval # list with treatment probabilities P(A=a|W)
-    qval <- val$nuisance[[1]]$qval # list with outcome models E(Y|A=a,W)
-    if (rep > 1) {
-      for (i in 2:rep) {
-        for (j in seq_along(contrast)) {
-          qval[[j]] <- qval[[j]] + val$nuisance[[i]]$qval[[j]]
-          pval[[j]] <- pval[[j]] + val$nuisance[[i]]$pval[[j]]
-        }
-      }
-      for (j in seq_along(contrast)) {
-        qval[[j]] <- qval[[j]] / rep
-        pval[[j]] <- pval[[j]] / rep
-      }
-    }
-    val$p <- list(Reduce(cbind, pval))
-    val$q <- list(Reduce(cbind, qval))
-    rm(qval, pval)
-  } else {
-    # rep.type[1] == "average" && rep > 1
-    val$p <- lapply(val$nuisance, \(x) Reduce(cbind, x$pval))
-    val$q <- lapply(val$nuisance, \(x) Reduce(cbind, x$qval))
-  }
+  folds_out <- if (rep == 1) val$nuisance[[1]]$folds else NULL
+  val$p <- lapply(val$nuisance, \(x) Reduce(cbind, x$pval))
+  val$q <- lapply(val$nuisance, \(x) Reduce(cbind, x$qval))
   val$nuisance <- NULL
 
   res <- list(
     call = cl,
-    propensity.model = propensity.model,
+    treatment.model = treatment.model,
+    folds = folds_out,
     # (outcome, trt, propensity-pred, outcome-pred)
     data = val # (y, a, p, q)
   )
   class(res) <- c("cate.targeted", "targeted")
-
   res <- update(res,
                 cate.model = cate.model,
                 data = data,
@@ -378,7 +385,7 @@ cate_est <- function(y, # response vector
                      p, # matrix with treatment probabilities a=1, a=0
                      q, # matrix with outcome predictions E(Y|A=1,X), E(Y|A=0,X)
                      data, # data.frame
-                     propensity.model = NULL, # propensity model
+                     treatment.model = NULL, # propensity model
                      X.cate
                      ) {
 
@@ -389,14 +396,14 @@ cate_est <- function(y, # response vector
   est0 <- apply(scores, 2, mean)
   IF0 <- c()
   contrast <- colnames(a)
-  if (!is.null(propensity.model)) {
-    treatment_var <- lava::getoutcome(propensity.model$formula)
+  if (!is.null(treatment.model)) {
+    treatment_var <- lava::getoutcome(treatment.model$formula)
   }
   for (i in seq_along(est0)) {
     newIF <- scores[, i] - est0[i]
-    if (!is.null(propensity.model) &&
-        inherits(propensity.model, "learner_glm")) {
-      pmod <- propensity.model$clone(deep = TRUE)
+    if (!is.null(treatment.model) &&
+        inherits(treatment.model, "learner_glm")) {
+      pmod <- treatment.model$clone(deep = TRUE)
       newf <- reformulate(
         as.character(pmod$formula)[[3]],
         outcome_level(treatment_var, contrast[i])
@@ -489,35 +496,43 @@ update.cate.targeted <- function(object,
   vcov <- NULL
   if (!is.null(calibration.model)) {
     des_cal <- design(calibration.model, data, intercept = TRUE)
-    object$data$q0 <- object$data$q
-    q <- object$data$q[[1]]
     a <- object$data$a
     y <- object$data$y
-    Z <- cbind(des_cal$x, q)
-    rs <- c() # residuals
-    ps <- c() # treatment assignment prob.
-    bs <- c() # linear regr. coef.
-    for (i in seq_len(ncol(a))) {
-      idx <- which(a[, i])
-      b <- lm.fit(Z[idx, , drop = FALSE], y[idx])$coefficients
-      b[is.na(b)] <- 0
-      bs <- cbind(bs, cbind(b))
-      q[, i] <- Z %*% b
-      rs <- c(rs, list(y[idx] - Z[idx, , drop = FALSE] %*% b))
-      ps <- c(ps, mean(a[, i]))
+    object$data$q0 <- object$data$q # original outcome model
+    vcov <- matrix(0, ncol(a), ncol(a))
+    for (j in seq_along(object$data$q)) { # loop over replications
+      rs <- c() # residuals
+      ps <- c() # treatment assignment prob.
+      bs <- c() # linear regr. coef.
+      q <- object$data$q[[j]]
+      Z <- cbind(des_cal$x, q)
+      for (i in seq_len(ncol(a))) { # loop over treatment levels
+        idx <- which(a[, i])
+        b <- lm.fit(Z[idx, , drop = FALSE], y[idx])$coefficients
+        b[is.na(b)] <- 0
+        q[, i] <- Z %*% b
+        if (tolower(var.type) != "ic") {
+          bs <- cbind(bs, cbind(b))
+          rs <- c(rs, list(y[idx] - Z[idx, , drop = FALSE] %*% b))
+          ps <- c(ps, mean(a[, i]))
+        }
+      }
+      if (tolower(var.type) != "ic") {
+        var <- function(x) stats::var(x) * (NROW(x) - 1) / NROW(x)
+        v1 <- diag(unlist(lapply(rs, var)) / ps)
+        v2 <- t(bs) %*% var(Z) %*% bs
+        v <- (v1 + v2)/NROW(Z) # see Bannick et al 2025
+        vcov <- vcov + v
+      }
+      object$data$q[[j]] <- q # calibrated outcome model
     }
-    var <- function(x) stats::var(x) * (NROW(x) - 1) / NROW(x)
-    v1 <- diag(unlist(lapply(rs, var)) / ps)
-    v2 <- t(bs) %*% var(Z) %*% bs
-    vcov <- (v1 + v2)/NROW(Z)
-    object$data$q[[1]] <- q
+    vcov <- vcov / length(object$data$q)
   }
 
-
-  pmod <- object$propensity.model # nolint
+  pmod <- object$treatment.model # nolint
   if (!second.order) pmod <- NULL
-  ests <- lapply(
-    seq_along(object$data$p),
+  ests <- lapply( # obtain estimates across repeated cross-fits
+    seq_along(object$data$q),
     \(x) {
       with(
         object$data,
@@ -526,17 +541,18 @@ update.cate.targeted <- function(object,
           a = cbind(a),
           p = cbind(p[[x]]),
           q = cbind(q[[x]]),
-          propensity.model = pmod,
+          treatment.model = pmod,
           data = data,
           X.cate = desA$x
         )
       )
     }
   )
-  est <- ests[[1]]$coef
-  IC <- ests[[1]]$IC
-  scores <- ests[[1]]$scores
+  est <- Reduce("+", lapply(ests, \(x) x$coef)) / length(ests)
+  scores <- Reduce("+", lapply(ests, \(x) x$scores)) / length(ests)
+
   if (tolower(var.type) == "ic" || is.null(vcov) || ncol(desA$x)>1) {
+    IC  <- Reduce("+", lapply(ests, \(x) x$IC)) / length(ests)
     estimate <- lava::estimate(coef = est, IC = IC)
   } else {
     e <- lava::estimate(coef = est[seq_len(ncol(vcov))], vcov = vcov)
@@ -581,6 +597,4 @@ print.summary.cate.targeted <- function(x, ...) {
   print(x$estimate, ...)
   cat("\nAverage Treatment Effect:\n")
   print(x$ate)
-
-
 }

@@ -1,6 +1,8 @@
 library("data.table")
-library("survival")
 library("mets")
+suppressPackageStartupMessages({
+  library("survival")
+})
 int_surv <- targeted:::int_surv
 set.seed(42)
 
