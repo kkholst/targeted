@@ -169,7 +169,7 @@ test_cate_remainder <- function() {
 }
 test_cate_remainder()
 
-## multiple treatments
+# multiple treatments
 n <- 1e4
 a <- factor(sample(c("a", "b", "c"), n, replace = TRUE))
 z <- rbinom(n, 1, 0.5)
@@ -202,14 +202,37 @@ test_cate_multiple_treatment <- function() {
     vcov(a0)["E[y(1)]","E[y(1)]"],
     vcov(a)["E[y(a)]","E[y(a)]"]
   )
+}
+test_cate_multiple_treatment()
+
+test_cate_treatment_variable_types <- function() {
+  est_factor <- cate(y ~ a * x, a ~ 1, data = d)
 
   d_char <- d
   d_char$a <- as.character(d_char$a)
-  a_char <- cate(y ~ a * x, a ~ 1, data = d)
+  est_char <- cate(y ~ a * x, a ~ 1, data = d_char)
+  expect_equal(est_char$estimate$coefmat, est_factor$estimate$coefmat)
 
-  expect_equal(a_char$estimate$coefmat, a$estimate$coefmat)
+  d_int <- d
+  d_int$a <- as.integer(d$a) - 1
+  est_int <- cate(y ~ a * x, a ~ 1, data = d_int)
+
+  expect_equivalent(est_int$estimate$coefmat, est_factor$estimate$coefmat)
+
+  est_int_conv <- cate(y ~ factor(a) * x, a ~ 1, data = d_int)
+  expect_equivalent(est_int_conv$estimate$coefmat, est_factor$estimate$coefmat)
+
+  # things are fine when only two treatment levels exist
+  d_int_01 <- subset(d_int, a %in% c(0, 1))
+  d_int_01$a <- ifelse(d_int_01$a == 0, -2, 1)
+  est_int_01 <- cate(y ~ a * x, a ~ 1, data = d_int_01)
+  est_int_01_conv <- cate(y ~ factor(a) * x, a ~ 1, data = d_int_01)
+  expect_equivalent(
+    est_int_01$estimate$coefmat,
+    est_int_01_conv$estimate$coefmat
+  )
 }
-test_cate_multiple_treatment()
+test_cate_treatment_variable_types()
 
 test_cate_warning <- function() {
   # check we get a warning if the treatment from the treatment.model
