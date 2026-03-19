@@ -20,10 +20,12 @@ onerun <- function(n, true_ate, ...) {
   )
 
   outcome_model <- learner_sl(
-    # learner_glm(y ~ a + x),
-    # learner_glm(y ~ a * x),
-    learner_glm(y ~ factor(a))
-    # learner_gam(y ~ a + s(x))
+    list(
+      # learner_glm(y ~ a + x),
+      # learner_glm(y ~ a * x),
+      learner_glm(y ~ factor(a))
+      # learner_gam(y ~ a + s(x))
+    )
   )
 
   fit2 <- cate(
