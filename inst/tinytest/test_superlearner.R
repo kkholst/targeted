@@ -1,7 +1,7 @@
 sim1 <- function(n = 5e2) {
    x1 <- rnorm(n, sd = 2)
    x2 <- rnorm(n)
-   y <- x1 + cos(x1) + rnorm(n, sd = 0.5**.5)
+   y <- x1 + cos(x1) + x2 + x1 * x2 + rnorm(n, sd = 0.5**.5)
    yb <- as.numeric(y > 0)
    d <- data.frame(y, yb, x1, x2)
    d
@@ -89,3 +89,72 @@ test_score.superlearner <- function() {
   expect_equal(score(sl), sl$model.score)
 }
 test_score.superlearner()
+
+
+test_metalearners <- function() {
+  # check edge case where the predictions of two learners are identical
+  # set seed to ensure that the predictions in both runs are the same
+  set.seed(400)
+  d0 <- sim1()
+  lrs <- list(
+    learner_glm(y ~ I(x1 ** 2) + x2),
+    learner_glm(y ~ x1 + x2),
+    learner_glm(y ~ x1 + x2)
+  )
+  set.seed(1)
+  sl_quadprog <- superlearner(lrs, data = d0, nfolds = 2)
+  set.seed(1)
+  sl_nnls <- superlearner(lrs, data = d0, nfolds = 2,
+    meta.learner = targeted:::metalearner_nnls2
+  )
+  set.seed(1)
+  sl_convex <- superlearner(lrs, data = d0, nfolds = 2,
+    meta.learner = targeted:::metalearner_convexcomb
+  )
+
+  # using quadprog::solve.QP splits the weight of the duplicated learner equally
+  # whereas nnls::nnls assigns no weight to one learner
+  expect_equal(
+    sum(sl_quadprog$weights[c(2, 3)]), sum(sl_nnls$weights[c(2, 3)])
+  )
+  expect_true(0 %in% sl_nnls$weights[c(2, 3)])
+
+  # verify that estimating a convex combination of weights handles duplicated
+  # learners correctly
+  expect_equal(sum(sl_convex$weights), 1)
+  expect_equal(sl_convex$weights[2], sl_convex$weights[3], tol = 1e-4)
+
+  # discrete metalearner handles duplicated learners correctly by selecting only
+  # one of the duplicated learners
+  set.seed(1)
+  sl_discrete <- superlearner(lrs, data = d0, nfolds = 2,
+    meta.learner = targeted:::metalearner_discrete
+  )
+  expect_equal(sum(sl_discrete$weights == 0), 2)
+  expect_equal(sum(sl_discrete$weights), 1)
+  expect_equal(sl_discrete$weights[which.min(sl_discrete$model.score)][[1]], 1)
+
+  # can also be called with character argument
+  set.seed(1)
+  sl_discrete_char <- superlearner(lrs, data = d0, nfolds = 2,
+    meta.learner = "discrete"
+  )
+  expect_equal(sl_discrete_char$weights, sl_discrete$weights)
+
+  # nnls::nnls and quadprog::solve.QP should give the same solution
+  d0 <- sim1(n = 200)
+  lrs <- list(
+    learner_glm(y ~ x1 * x2 + cos(x1)),
+    learner_glm(y ~ x1 * x2)
+  )
+  set.seed(1)
+  sl_quadprog <- superlearner(lrs, data = d0, nfolds = 2)
+  set.seed(1)
+  sl_nnls <- superlearner(lrs, data = d0, nfolds = 2,
+    meta.learner = targeted:::metalearner_nnls2
+  )
+  # weights need to be equal when model scores are equal
+  expect_equal(sl_quadprog$score, sl_nnls$score)
+  expect_equal(sl_quadprog$weights, sl_nnls$weights)
+}
+test_metalearners()

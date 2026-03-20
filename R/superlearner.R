@@ -1,3 +1,15 @@
+#' utility function to ensure that Dmat in quadprog::solve.QP is positive
+#' definite by projecting the original matrix to the nearest positive definite
+#' matrix
+make_dmat_pos_definite <- function(pred) {
+  Dmat <- t(pred) %*% pred
+  .eigen <- eigen(Dmat)
+  tau <- .eigen$values
+  tau[tau < sqrt(.Machine$double.eps)] <- sqrt(.Machine$double.eps)
+  Dmat <- .eigen$vectors %*% diag(tau) %*% t(.eigen$vectors)
+  return(Dmat)
+}
+
 #' @export
 metalearner_nnls <- function(y, pred, method = "quadprog", ...) {
   if (NCOL(pred) == 1) {
@@ -12,7 +24,7 @@ metalearner_nnls <- function(y, pred, method = "quadprog", ...) {
   } else {
     opt <- tryCatch(
       quadprog::solve.QP(
-        Dmat = t(pred) %*% pred,
+        Dmat = make_dmat_pos_definite(pred),
         Amat = diag(nrow = ncol(pred)),
         dvec = t(pred) %*% y
       ),
@@ -38,12 +50,12 @@ metalearner_convexcomb <- function(y, pred, ...) {
   A <- cbind(1, A)
   b <- c(1, rep(0, ncol(pred)))
   opt <- quadprog::solve.QP(
-    Dmat = t(pred) %*% pred,
+    Dmat = make_dmat_pos_definite(pred),
     Amat = A,
     dvec = t(pred) %*% y,
     bvec = b,
     meq = 1
-    )
+  )
   coefs[idx] <- opt$solution
   if (any(is.na(coefs))) coefs[is.na(coefs)] <- 0
   if (all(coefs == 0)) coefs[1] <- 1
@@ -70,7 +82,7 @@ metalearner_convexcomb <- function(y, pred, ...) {
 
 metalearner_discrete <- function(y, pred, risk, ...) {
   weights <- rep(0, NCOL(pred))
-  risk[is.na] <- Inf
+  risk[is.na(weights)] <- Inf
   weights[which.min(risk)[1]] <- 1
   return(weights)
 }
