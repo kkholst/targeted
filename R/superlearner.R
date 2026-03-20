@@ -1,6 +1,6 @@
-#' utility function to ensure that Dmat in quadprog::solve.QP is positive
-#' definite by projecting the original matrix to the nearest positive definite
-#' matrix
+# utility function to ensure that Dmat in quadprog::solve.QP is positive
+# definite by projecting the original matrix to the nearest positive definite
+# matrix
 make_dmat_pos_definite <- function(pred) {
   Dmat <- t(pred) %*% pred
   .eigen <- eigen(Dmat)

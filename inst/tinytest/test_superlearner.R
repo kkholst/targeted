@@ -137,7 +137,7 @@ test_metalearners <- function() {
   # can also be called with character argument
   set.seed(1)
   sl_discrete_char <- superlearner(lrs, data = d0, nfolds = 2,
-    meta.learner = "discrete"
+  meta.learner = "discrete"
   )
   expect_equal(sl_discrete_char$weights, sl_discrete$weights)
 
