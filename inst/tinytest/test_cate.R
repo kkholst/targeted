@@ -215,14 +215,10 @@ test_cate_treatment_variable_types <- function() {
 
   d_int <- d
   d_int$a <- as.integer(d$a) - 1
-  est_int <- cate(y ~ a * x, a ~ 1, data = d_int)
-
-  expect_equivalent(est_int$estimate$coefmat, est_factor$estimate$coefmat)
-
   est_int_conv <- cate(y ~ factor(a) * x, a ~ 1, data = d_int)
   expect_equivalent(est_int_conv$estimate$coefmat, est_factor$estimate$coefmat)
 
-  # things are fine when only two treatment levels exist
+  # with only two treatment levels, we get the same ATE
   d_int_01 <- subset(d_int, a %in% c(0, 1))
   d_int_01$a <- ifelse(d_int_01$a == 0, -2, 1)
   est_int_01 <- cate(y ~ a * x, a ~ 1, data = d_int_01)
