@@ -3,6 +3,7 @@
 \name{superlearner}
 \alias{superlearner}
 \alias{metalearner_nnls}
+\alias{metalearner_discrete}
 \title{Superlearner (stacked/ensemble learner)}
 \usage{
 superlearner(

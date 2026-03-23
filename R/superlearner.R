@@ -80,6 +80,7 @@ metalearner_convexcomb <- function(y, pred, ...) {
 ## }
 
 
+#' @export
 metalearner_discrete <- function(y, pred, risk, ...) {
   weights <- rep(0, NCOL(pred))
   risk[is.na(weights)] <- Inf
@@ -138,7 +139,7 @@ get_learner_names <- function(model.list, name.prefix) {
 #'   [future.apply::future_lapply].
 #' @references Luedtke & van der Laan (2016) Super-Learning of an Optimal
 #'   Dynamic Treatment Rule, The International Journal of Biostatistics.
-#' @aliases superlearner metalearner_nnls
+#' @aliases superlearner metalearner_nnls metalearner_discrete
 #' @seealso [predict.superlearner] [weights.superlearner] [score.superlearner]
 #' @examples
 #' sim1 <- function(n = 5e2) {
