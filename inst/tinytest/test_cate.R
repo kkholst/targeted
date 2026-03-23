@@ -169,13 +169,12 @@ test_cate_remainder <- function() {
 }
 test_cate_remainder()
 
-## multiple treatments
-n <- 1e3
-a <- rbinom(n, 1, 0.5)
+# multiple treatments
+n <- 1e4
 a <- factor(sample(c("a", "b", "c"), n, replace = TRUE))
 z <- rbinom(n, 1, 0.5)
 x <- rnorm(n)
-y <- 1*(a==a[1]) + x*(a==a[1]) + rnorm(n, sd=1 + 2*(a==a[1]))
+y <- 1*(a=="a") + x*(a=="a") + rnorm(n, sd=1 + 2*(a=="a"))
 d <- data.frame(a, x, y, z, A = (a == "a") * 1)
 
 test_cate_multiple_treatment <- function() {
@@ -183,6 +182,13 @@ test_cate_multiple_treatment <- function() {
 
   a <- cate(y ~ a * x, a ~ 1, data = d)
   expect_true(length(coef(a)) == 6) # 3 exp. potential outcomes, and 3 contrasts
+  # verify that expected potential outcomes + contrasts are estimated correctly
+  expect_equivalent(coef(a)["E[y(a)]"], 1, tolerance = 0.1)
+  expect_equivalent(coef(a)["E[y(b)]"], 0, tolerance = 0.1)
+  expect_equivalent(coef(a)["E[y(c)]"], 0, tolerance = 0.1)
+  expect_equivalent(coef(a)["(Intercept)[c-a]"], -1, tolerance = 0.1)
+  expect_equivalent(coef(a)["(Intercept)[c-b]"], 0, tolerance = 0.1)
+  expect_equivalent(coef(a)["(Intercept)[b-a]"], -1, tolerance = 0.1)
 
   a2 <- update(a, ~z, data = d)
   expect_true(length(coef(a2)) == 9)
@@ -198,6 +204,31 @@ test_cate_multiple_treatment <- function() {
   )
 }
 test_cate_multiple_treatment()
+
+test_cate_treatment_variable_types <- function() {
+  est_factor <- cate(y ~ a * x, a ~ 1, data = d)
+
+  d_char <- d
+  d_char$a <- as.character(d_char$a)
+  est_char <- cate(y ~ a * x, a ~ 1, data = d_char)
+  expect_equal(est_char$estimate$coefmat, est_factor$estimate$coefmat)
+
+  d_int <- d
+  d_int$a <- as.integer(d$a) - 1
+  est_int_conv <- cate(y ~ factor(a) * x, a ~ 1, data = d_int)
+  expect_equivalent(est_int_conv$estimate$coefmat, est_factor$estimate$coefmat)
+
+  # with only two treatment levels, we get the same ATE
+  d_int_01 <- subset(d_int, a %in% c(0, 1))
+  d_int_01$a <- ifelse(d_int_01$a == 0, -2, 1)
+  est_int_01 <- cate(y ~ a * x, a ~ 1, data = d_int_01)
+  est_int_01_conv <- cate(y ~ factor(a) * x, a ~ 1, data = d_int_01)
+  expect_equivalent(
+    est_int_01$estimate$coefmat,
+    est_int_01_conv$estimate$coefmat
+  )
+}
+test_cate_treatment_variable_types()
 
 test_cate_warning <- function() {
   # check we get a warning if the treatment from the treatment.model
