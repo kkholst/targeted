@@ -309,7 +309,7 @@ learner <- R6::R6Class("learner", # nolint
     #' @field clear Remove fitted model from the learner object
     clear = function() invisible(private$fitted <- NULL),
     #' @field fit Return estimated model object.
-    fit = function() return(private$fitted),
+    fit = function() private$fitted,
     #' @field formula Return model formula. Use [learner$update()][learner] to
     #' update the formula.
     formula = function() {
