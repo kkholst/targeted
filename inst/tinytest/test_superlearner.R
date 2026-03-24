@@ -57,6 +57,16 @@ test_superlearner <- function() {
     ), data = d0),
     pattern = "Different response variables found among learners: yb, as"
   )
+
+  # verify that superlearner also works with a single learner
+  sl <- superlearner(list(glm = learner_glm(y ~ 1)), data = d0, nfolds = 2)
+  expect_equal(sl$weights, c(glm = 1))
+
+  sl2 <- superlearner(
+    list(glm = learner_glm(y ~ 1), glm = learner_glm(y ~ 1)),
+    data = d0, nfolds = 2
+  )
+  expect_equal(predict(sl, d0), predict(sl2, d0))
 }
 test_superlearner()
 
