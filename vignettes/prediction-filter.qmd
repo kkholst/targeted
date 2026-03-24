@@ -1,0 +1,119 @@
+---
+title: Prediction filter proof-of-concept
+author: Klaus Kähler Holst, Benedikt Sommer
+date: "`r Sys.Date()`"
+format:
+  html:
+    toc: true
+    html-math-method: mathjax
+execute:
+  echo: true
+  warning: false
+  collapse: true
+  comment: "#>"
+vignette: >
+  %\VignetteIndexEntry{Prediction models}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r}
+devtools::load_all()
+```
+
+```{r}
+n <- 1e3
+x1 <- rnorm(n, sd = 2)
+x2 <- rnorm(n)
+a <- factor(rbinom(n, 1, 0.5))
+y <- x1 + cos(x1) + rnorm(n, sd = 0.5**.5)
+d0 <- data.frame(y, x1, x2, a)
+```
+
+
+The prediction method of the constructored learner via `learner_glm` is now modified to insert NA values when `stats::predict` fails for some rows in `newdata`. This is implemented with
+
+```{r}
+trycatch_predictions
+```
+
+```{r}
+lr <- learner_glm(y ~ a + x1 + x2)
+lr$estimate(d0)
+```
+
+```{r}
+lr$predict(data.frame(x1 = 0, x2 = 0, a = factor(c(0, 1))))
+```
+
+```{r}
+
+lr$predict(data.frame(x1 = 0, x2 = 0, a = factor(c(0, 1, 2))))
+```
+
+```{r}
+library(logger)
+logger::log_threshold(DEBUG)
+lr$predict(data.frame(x1 =   0, x2 = 0, a = factor(c(0, 1, 2))))
+logger::log_threshold(OFF) # turn logger off see log_threshold()
+```
+
+The NA values can then be replaced by using the new `predict.filter` argument of the learner constructor.
+
+```{r}
+filter_mean_imputation <- function(data) {
+  mean_response <- mean(data$y)
+  function(pred, newdata) {
+    pred[is.na(pred)] <- mean_response
+    pred
+  }
+}
+lr_filter <- learner_glm(
+  y ~ a + x1 + x2,
+  learner.args = list(predict.filter = filter_mean_imputation))
+lr_filter$estimate(d0)
+lr_filter$predict.filter # inspect filter via active binding
+```
+
+```{r}
+lr_filter$predict(
+  data.frame(x1 = 0, x2 = 0, a = factor(c(0, 1, 2)))
+)
+mean(d0$y)
+```
+
+```{r}
+filter_fallback_learner <- function(data) {
+  fallback <- learner_glm(y ~ 1)
+  fallback$estimate(data)
+  function(pred, newdata) {
+    pred[is.na(pred)] <- fallback$predict(newdata[is.na(pred), ])
+    pred
+  }
+}
+lr_filter_fallback <- learner_glm(
+  y ~ a + x1 + x2,
+  learner.args = list(predict.filter = filter_fallback_learner))
+lr_filter_fallback$estimate(d0)
+```
+
+```{r}
+lr_filter_fallback$predict(
+  data.frame(x1 = 0, x2 = 0, a = factor(c(0, 1, 2)))
+)
+```
+
+Test fallback learner
+```{r}
+lr_filter_fallback$predict.filter(
+  c(1, 1, NA), data.frame(x1 = 0, x2 = 0, a = factor(c(0, 1, 2)))
+)
+```
+
+
+
+
+
+
+
+

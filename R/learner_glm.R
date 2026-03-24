@@ -58,9 +58,45 @@ learner_glm <- function(formula, info = "glm", family = gaussian(),
     dots <- list(...)
     if (!("type" %in% names(dots))) dots$type <- "response"
     args <- c(list(object, newdata = newdata), dots)
-    do.call(stats::predict, args)
+    trycatch_predictions(stats::predict, args)
   }
   mod <- do.call(learner$new, args)
   class(mod) <- c("learner_glm", class(mod))
   return(mod)
+}
+
+# implemented as a utility to be re-used across other learner constructors
+# for example, learner_gam also uses stats::predict
+# TODO: function needs to be tested, especially for multiclass predictions,
+# we need to ensure that the output format is consistent between the original
+# function call to the predict function and sapply
+trycatch_predictions <- function(pred_fun, args) {
+  newdata <- args$newdata
+
+  args_with_data <- args
+  args_with_data$newdata <- NULL
+  # TODO: also we might want to log when NAs are added
+  fallback <- function(i) {
+    tryCatch(
+      do.call(pred_fun, c(args_with_data, list(newdata = newdata[i, ]))),
+      error = \(e) NA
+    )
+  }
+
+  # TODO: I think we should somehow propagate the error message of
+  # do.call(pred_fun, args) to the user. otherwise it might be a bit tricky
+  # to understand why the prediction function fails / returns nan values
+  preds <- tryCatch(
+    do.call(pred_fun, args),
+    error = \(e) {
+      # TODO: also needs some hardening in case the message field doesn't exist
+      logger::log_debug(e$message)
+      sapply(
+        seq_len(NROW(newdata)),
+        fallback
+      )
+    }
+  )
+
+  return(preds)
 }
