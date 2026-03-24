@@ -314,6 +314,7 @@ score.superlearner <- function(x, ...) {
 #' @return numeric (`all.learners = FALSE`) or matrix (`all.learners = TRUE`)
 predict.superlearner <- function(object, newdata, all.learners = FALSE, ...) {
   pr <- lapply(object$fit, \(x) x$predict(newdata))
+  if (length(object$weights) == 1) return(unname(pr[[1]]))
   res <- Reduce(cbind, pr)
   colnames(res) <- names(object$fit)
 
