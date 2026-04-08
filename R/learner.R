@@ -61,7 +61,6 @@
 #'     lm(y ~ x, data = dt)
 #'   }
 #' )
-#' # TODO: write examples
 #' @export
 learner <- R6::R6Class("learner", # nolint
   public = list(
@@ -84,8 +83,9 @@ learner <- R6::R6Class("learner", # nolint
     #' @param formula.keep.specials if TRUE then special terms defined by
     #' `specials` will be removed from the formula before it is being passed to
     #' the estimate print.function()
-    #' @param predict.filter # TODO: write documentation //
-    #' mention that this argument is experimental
+    #' @param predict.filter function to post-process predictions. Useful to
+    #' bound predictions or handle NAs. The argument is experimental and its
+    #' behavior may change in the future.
     #' @param intercept (logical) include intercept in design matrix
     initialize = function(
       formula = NULL,
@@ -202,7 +202,8 @@ learner <- R6::R6Class("learner", # nolint
 
     #' @description
     #' Estimation method
-    #' @param ... Additional arguments to estimation method
+    #' @param ... Additional arguments to estimation and prediction filter
+    #' generator function
     #' @param store Logical determining if estimated model should be
     #'   stored inside the class.
     estimate = function(data, ..., store = TRUE) {
@@ -217,14 +218,16 @@ learner <- R6::R6Class("learner", # nolint
     #' @description
     #' Prediction method
     #' @param newdata data.frame
-    #' @param ... Additional arguments to prediction method
+    #' @param ... Additional arguments to prediction method and prediction
+    #' filter function
     #' @param object Optional model fit object
     predict = function(newdata, ..., object = NULL) {
       if (is.null(object)) object <- private$fitted
       if (is.null(object)) stop("Provide estimated model object")
 
       preds <- private$predfun(object, newdata, ...)
-      # TODO: do we want to pass on the ellipses to the filter function?
+      # TODO: do we want to pass on the ellipses to the filter function? is
+      # there some risk about argument name clashes?
       return(private$predict_filter(preds, newdata, ...))
     },
 
@@ -332,7 +335,8 @@ learner <- R6::R6Class("learner", # nolint
     },
     #' @field predict.filter Return instantiated prediction filter function
     predict.filter = function() private$predict_filter,
-    #' @field predict.filter Return prediction filter generator function
+    #' @field predict.filter.generator Return prediction filter generator
+    #' function
     predict.filter.generator = function() private$predict_filter_generator
   ),
   private = list(

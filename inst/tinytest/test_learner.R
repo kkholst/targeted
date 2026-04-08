@@ -331,3 +331,42 @@ test_specials <- function() {
   expect_true(!grepl("strata", as.character(f)[3]))
 }
 test_specials()
+
+test_prediction_filter <- function() {
+  filter_bound <- function(data) {
+    function(pred, newdata) {
+      pred[pred > 10] <- 10
+      pred
+    }
+  }
+
+  lr <- learner_glm(y ~ x1 + x2,
+    learner.args = list(predict.filter = filter_bound)
+  )
+
+  lr$estimate(ddata)
+
+  expect_equal(max(lr$predict(ddata)), 0)
+
+  # arguments are passed on correctly
+  expect_equal(max(lr$predict(ddata, bound = 0.5)), 0.5)
+
+  filter_bound_estimation <- function(data) {
+    bound <- max(data$y)
+    function(pred, newdata, thresh = 0) {
+      pred[pred > thresh] <- bound
+      pred
+    }
+  }
+
+  lr <- learner_glm(y ~ x1 + x2,
+    learner.args = list(predict.filter = filter_bound_estimation)
+  )
+  lr$estimate(ddata)
+
+  expect_equal(
+    lr$predict(data.frame(x1 = 1e6, x2 = 1e6))[[1]],
+    max(ddata$y)
+  )
+}
+test_prediction_filter()

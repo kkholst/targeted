@@ -70,7 +70,7 @@ learner_glm <- function(formula, info = "glm", family = gaussian(),
 # TODO: function needs to be tested, especially for multiclass predictions,
 # we need to ensure that the output format is consistent between the original
 # function call to the predict function and sapply
-trycatch_predictions <- function(pred_fun, args) {
+trycatch_predictions <- function(pred.fun, args) {
   newdata <- args$newdata
 
   args_with_data <- args
@@ -78,7 +78,7 @@ trycatch_predictions <- function(pred_fun, args) {
   # TODO: also we might want to log when NAs are added
   fallback <- function(i) {
     tryCatch(
-      do.call(pred_fun, c(args_with_data, list(newdata = newdata[i, ]))),
+      do.call(pred.fun, c(args_with_data, list(newdata = newdata[i, ]))),
       error = \(e) NA
     )
   }
@@ -87,10 +87,10 @@ trycatch_predictions <- function(pred_fun, args) {
   # do.call(pred_fun, args) to the user. otherwise it might be a bit tricky
   # to understand why the prediction function fails / returns nan values
   preds <- tryCatch(
-    do.call(pred_fun, args),
+    do.call(pred.fun, args),
     error = \(e) {
       # TODO: also needs some hardening in case the message field doesn't exist
-      logger::log_debug(e$message)
+      # TODO: enable logging logger::log_debug(e$message)
       sapply(
         seq_len(NROW(newdata)),
         fallback
