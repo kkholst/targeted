@@ -335,7 +335,7 @@ test_specials()
 test_prediction_filter <- function() {
   filter_bound <- function(data) {
     function(pred, newdata) {
-      pred[pred > 10] <- 10
+      pred[pred > 0] <- 0
       pred
     }
   }
@@ -343,7 +343,6 @@ test_prediction_filter <- function() {
   lr <- learner_glm(y ~ x1 + x2,
     learner.args = list(predict.filter = filter_bound)
   )
-
   lr$estimate(ddata)
 
   expect_equal(max(lr$predict(ddata)), 0)
