@@ -334,8 +334,8 @@ test_specials()
 
 test_prediction_filter <- function() {
   filter_bound <- function(data) {
-    function(pred, newdata) {
-      pred[pred > 0] <- 0
+    function(pred, newdata, thresh = 0, bound = 0) {
+      pred[pred > thresh] <- bound
       pred
     }
   }
