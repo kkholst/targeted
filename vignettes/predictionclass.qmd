@@ -202,6 +202,32 @@ lrs <- list(
 cv(lrs, data = pbc, rep = 2, nfolds = 5)
 ```
 
+## Prediction filter
+
+The experimental `predict.filter` argument allows post-processing of
+predictions, for example, to prevent predictions with extreme values or to
+handle rows for which the prediction function fails.
+
+```{r}
+n <- 1e3
+d0 <- data.frame(x = rnorm(n))
+d0$y <- with(d0, x + rnorm(n))
+
+filter_bound <- function(data) {
+  function(pred, newdata) {
+    pred[pred > 10] <- 10
+    pred
+  }
+}
+
+lr_bound <- learner_glm(
+  y ~ x,
+  learner.args = list(predict.filter = filter_bound)
+)
+lr_bound$estimate(d0)
+lr_bound$predict(data.frame(x = 1e6))
+```
+
 # Defining new learners
 
 Statistical or machine learning models for which no constructors are provided

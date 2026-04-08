@@ -83,17 +83,22 @@ learner <- R6::R6Class("learner", # nolint
     #' @param formula.keep.specials if TRUE then special terms defined by
     #' `specials` will be removed from the formula before it is being passed to
     #' the estimate print.function()
+    #' @param predict.filter function to post-process predictions. Useful to
+    #' bound predictions or handle NAs. The argument is experimental and its
+    #' behavior may change in the future.
     #' @param intercept (logical) include intercept in design matrix
-    initialize = function(formula = NULL,
-                          estimate,
-                          predict = stats::predict,
-                          predict.args = NULL,
-                          estimate.args = NULL,
-                          info = NULL,
-                          specials = c(),
-                          formula.keep.specials = FALSE,
-                          intercept = FALSE
-                         ) {
+    initialize = function(
+      formula = NULL,
+      estimate,
+      predict = stats::predict,
+      predict.args = NULL,
+      estimate.args = NULL,
+      info = NULL,
+      specials = c(),
+      formula.keep.specials = FALSE,
+      predict.filter = \(data, ...) \(pred, newdata, ...) pred,
+      intercept = FALSE
+    ) {
       estimate <- add_dots(estimate)
 
       private$des.args <- list(specials = specials, intercept = intercept)
@@ -101,6 +106,7 @@ learner <- R6::R6Class("learner", # nolint
       fit_data_arg <- "data" %in% formalArgs(estimate)
       private$init.estimate <- estimate
       private$init.predict <- predict
+      private$predict_filter_generator <- add_dots(predict.filter)
 
       private$estimate.args <- estimate.args
       no_formula <- is.null(formula)
@@ -196,10 +202,14 @@ learner <- R6::R6Class("learner", # nolint
 
     #' @description
     #' Estimation method
-    #' @param ... Additional arguments to estimation method
+    #' @param ... Additional arguments to estimation and prediction filter
+    #' generator function
     #' @param store Logical determining if estimated model should be
     #'   stored inside the class.
     estimate = function(data, ..., store = TRUE) {
+      private$predict_filter <- private$predict_filter_generator(
+        data, ...
+      ) |> add_dots()
       res <- private$fitfun(data, ...)
       if (store) private$fitted <- res
       return(invisible(res))
@@ -208,12 +218,17 @@ learner <- R6::R6Class("learner", # nolint
     #' @description
     #' Prediction method
     #' @param newdata data.frame
-    #' @param ... Additional arguments to prediction method
+    #' @param ... Additional arguments to prediction method and prediction
+    #' filter function
     #' @param object Optional model fit object
     predict = function(newdata, ..., object = NULL) {
       if (is.null(object)) object <- private$fitted
       if (is.null(object)) stop("Provide estimated model object")
-      return(private$predfun(object, newdata, ...))
+
+      preds <- private$predfun(object, newdata, ...)
+      # TODO: do we want to pass on the ellipses to the filter function? is
+      # there some risk about argument name clashes?
+      return(private$predict_filter(preds, newdata, ...))
     },
 
     #' @description
@@ -314,9 +329,16 @@ learner <- R6::R6Class("learner", # nolint
     #' update the formula.
     formula = function() {
       private$.formula
-    }
+    },
+    #' @field predict.filter Return instantiated prediction filter function
+    predict.filter = function() private$predict_filter,
+    #' @field predict.filter.generator Return prediction filter generator
+    #' function
+    predict.filter.generator = function() private$predict_filter_generator
   ),
   private = list(
+    predict_filter = NULL,
+    predict_filter_generator = NULL,
     # @field des.args Arguments for targeted::design
     des.args = NULL,
     # @field estimate.args Arguments for estimate method
