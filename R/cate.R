@@ -97,6 +97,8 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #'   available for ATE and when `calibration.model` is also specified)
 #' @param second.order add seconder order term to IF to handle misspecification
 #'   of outcome models
+#' @param effect.scale treatment effect defined on absolute scale (`identity`),
+#'  `log`-scale (for log-relative effects) or `logit`-scale (log-odds-ratio)
 #' @return cate.targeted object
 #' @author Klaus Kähler Holst, Andreas Nordland
 #' @references
@@ -153,6 +155,7 @@ cate <- function(response.model, # nolint
                  mc.cores = NULL,
                  var.type = "IC",
                  second.order = TRUE,
+                 effect.scale = c("identity", "log", "logit"),
                  response_model = deprecated,
                  cate_model = deprecated,
                  propensity_model = deprecated,
@@ -375,7 +378,8 @@ cate <- function(response.model, # nolint
                 data = data,
                 calibration.model = calibration.model,
                 var.type = var.type,
-                second.order = second.order
+                second.order = second.order,
+                effect.scale = effect.scale
   )
   return(res)
 }
@@ -386,7 +390,8 @@ cate_est <- function(y, # response vector
                      q, # matrix with outcome predictions E(Y|A=1,X), E(Y|A=0,X)
                      data, # data.frame
                      treatment.model = NULL, # propensity model
-                     X.cate
+                     X.cate,
+                     effect.scale = "identity"
                      ) {
 
   K <- a / p * (y %x% rbind(rep(1, NCOL(a))) - q)
@@ -422,7 +427,39 @@ cate_est <- function(y, # response vector
     }
     IF0 <- cbind(IF0,  newIF)
   }
+
+##1/(p(1-p))
+
+
+
+  effect.scale = tolower(effect.scale[1])
+  if (effect.scale %in% c("log", "logit")) {
+    epo <- colMeans(q)
+    est0 <- numeric(length(epo))
+    init <- switch(effect.scale,
+      log=log(epo),
+      logit=logit(epo),
+      epo
+    )
+    for (i in seq_along(init)) {
+      if (effect.scale == "log") {
+        IF0[,i] <- (scores[,i]) / epo[i] - 1
+      } else if (effect.scale == "logit") {
+        IF0[,i] <- (scores[,i] - epo[i]) / (epo[i]-epo[i]^2)
+      } else {
+        # no transformation
+      }
+      est0[i] <- init[i] + mean(IF0[,i])
+      scores[,i] <- IF0[,i] + init[i]
+    }
+  }
   nam <- paste0("E[", colnames(y), "(", colnames(a), ")]")
+  if (effect.scale == "log") {
+    nam <- paste0("log{", nam,"}")
+  }
+  if (effect.scale == "logit") {
+    nam <- paste0("logit{", nam, "}")
+  }
   names(est0) <- nam
 
   if (length(contrast) > 1) {
@@ -475,8 +512,9 @@ cate_est <- function(y, # response vector
       )
     }
   }
-  est0 <- c(est0, unlist(lapply(res, \(x) x$est)))
+
   IF0 <- cbind(IF0, Reduce(cbind, lapply(res, \(x) x$IF)))
+  est0 <- c(est0, unlist(lapply(res, \(x) x$est)))
 
   return(list(coef = est0, IC = IF0, scores = scores))
 }
@@ -487,7 +525,9 @@ update.cate.targeted <- function(object,
                                  data,
                                  calibration.model = NULL,
                                  var.type = "IC",
-                                 second.order = TRUE, ...) {
+                                 second.order = TRUE,
+                                 effect.scale = "identity",
+                                 ...) {
 
   desA <- design(cate.model, data, intercept = TRUE, rm_envir = FALSE)
   if (length(object$data$y) != nrow(desA$x)) {
@@ -543,7 +583,8 @@ update.cate.targeted <- function(object,
           q = cbind(q[[x]]),
           treatment.model = pmod,
           data = data,
-          X.cate = desA$x
+          X.cate = desA$x,
+          effect.scale = effect.scale
         )
       )
     }
