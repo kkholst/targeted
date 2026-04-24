@@ -96,6 +96,11 @@ Klaus Kähler Holst, Benedikt Sommer
 
 \item{\code{formula}}{Return model formula. Use \link[=learner]{learner$update()} to
 update the formula.}
+
+\item{\code{predict.filter}}{Return instantiated prediction filter function}
+
+\item{\code{predict.filter.generator}}{Return prediction filter generator
+function}
 }
 \if{html}{\out{</div>}}
 }
@@ -129,6 +134,7 @@ Create a new prediction model object
   info = NULL,
   specials = c(),
   formula.keep.specials = FALSE,
+  predict.filter = function(data, ...) function(pred, newdata, ...) pred,
   intercept = FALSE
 )}\if{html}{\out{</div>}}
 }
@@ -158,6 +164,10 @@ id, subset, ...) passed on to \link{design}}
 \code{specials} will be removed from the formula before it is being passed to
 the estimate print.function()}
 
+\item{\code{predict.filter}}{function to post-process predictions. Useful to
+bound predictions or handle NAs. The argument is experimental and its
+behavior may change in the future.}
+
 \item{\code{intercept}}{(logical) include intercept in design matrix}
 }
 \if{html}{\out{</div>}}
@@ -177,7 +187,8 @@ Estimation method
 \describe{
 \item{\code{data}}{data.frame}
 
-\item{\code{...}}{Additional arguments to estimation method}
+\item{\code{...}}{Additional arguments to estimation and prediction filter
+generator function}
 
 \item{\code{store}}{Logical determining if estimated model should be
 stored inside the class.}
@@ -199,7 +210,8 @@ Prediction method
 \describe{
 \item{\code{newdata}}{data.frame}
 
-\item{\code{...}}{Additional arguments to prediction method}
+\item{\code{...}}{Additional arguments to prediction method and prediction
+filter function}
 
 \item{\code{object}}{Optional model fit object}
 }
