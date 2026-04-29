@@ -30,9 +30,9 @@ riskreg_cens(
 \item{censoring}{Censoring formula (e.g., Surv(time, event == 0) ~ D + A +
 W)).}
 
-\item{treatment}{Optional treatment model (ml_model)}
+\item{treatment}{Optional treatment model (\link{learner})}
 
-\item{prediction}{Optional prediction model (ml_model)}
+\item{prediction}{Optional prediction model (\link{learner})}
 
 \item{data}{data.frame.}
 

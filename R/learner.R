@@ -477,21 +477,3 @@ print.summarized_learner <- function(x, ...) {
     "\n"
   )
 }
-
-#' @title R6 class for prediction models
-#' @description Replaced by [learner]
-#' @export
-ml_model <- R6Class("ml_model",
-  inherit = learner,
-  public = list(
-    #' @description Create a new prediction model object
-    #' @param ... deprecated
-    initialize = function(...) {
-      rlang::warn(paste0(
-        "targeted::ml_model is deprecated and will ",
-        "be removed in targeted v0.7.0. Use targeted::learner instead.")
-      )
-      super$initialize(...)
-    }
-  )
-)

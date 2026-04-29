@@ -41,8 +41,8 @@ test_continuous_response <- function() {
   # predictions can be generated on link scale
   expect_equal(lr$predict(newd, type = "link"), predict(fit_ref, newd))
 
-  # arguments for predict methods can be passed to ml_model in learner_glm
-  # call
+  # arguments for predict methods can be passed to learner constructor in
+  # learner_glm call
   lr <- learner_glm(y ~ x + offset(log(w)), family = poisson,
     learner.args = list(predict.args = list(type = "link")),
   )
