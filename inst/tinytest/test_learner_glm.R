@@ -20,7 +20,7 @@ simcount <- function(n = 5e2) {
 }
 dcount <- simcount()
 
-test_learner_glm <- function() {
+test_continuous_response <- function() {
   # basic check that default arguments for learner_glm perform linear
   # regression
   fit_ref <- glm(y ~ x1, data = d)
@@ -65,4 +65,16 @@ test_learner_glm <- function() {
   # predict method also works as expected
   expect_equal(lr$predict(newd), predict(fit_ref, newd, type = "response"))
 }
-test_learner_glm()
+test_continuous_response()
+
+test_binary_response <- function() {
+  # verifies that the output formats of predict.glm and
+  # learner_glm()$predict align
+  fit <- glm(yb ~ x1, family = binomial, data = d)
+
+  lr <- learner_glm(yb ~ x1, family = binomial)
+  lr$estimate(d)
+
+  expect_equal(fitted(fit), lr$predict(d))
+}
+test_binary_response()
