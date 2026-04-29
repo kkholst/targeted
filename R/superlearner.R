@@ -347,7 +347,7 @@ SL <- function(formula=~., ...,
   if (!requireNamespace("SuperLearner")) {
       stop("Package 'SuperLearner' required.")
   }
-  # attachNamespace("SuperLearner")
+
   pred <- as.character(formula)
   pred <- ifelse(length(pred)==2, pred[2], pred[3])
   if (pred=="1") {

@@ -7,7 +7,6 @@ y <- 1 + 2 * a * d + w + rnorm(n)
 dat <- data.frame(y, d, a = a, w)
 
 test_RATE <- function() {
-  # --- Test 1: efficient estimator with cross-fitting ---
   fit <- RATE(
       response = y ~ d * a,
       post.treatment = d ~ w,
@@ -19,16 +18,13 @@ test_RATE <- function() {
   expect_true(all(c("a1", "a0", "d", "rate") %in% names(cf)))
   expect_true(is.finite(cf[["rate"]]))
 
-  # --- Test 2: plug-in (non-efficient) ---
   fit_pi <- RATE(y ~ d * a, d ~ w, a ~ 1, data = dat, efficient = FALSE)
   expect_true(inherits(fit_pi, "estimate"))
   expect_true(is.finite(coef(fit_pi)[["rate"]]))
 
-  # --- Test 3: no cross-fitting (M = 1) ---
   fit_m1 <- RATE(y ~ d * a, d ~ w, a ~ 1, data = dat, M = 1)
   expect_true(inherits(fit_m1, "estimate"))
 
-  # --- Test 4: error on non-binary treatment ---
   dat_bad_a <- dat
   dat_bad_a$a <- sample(0:2, n, replace = TRUE)
   expect_error(
@@ -36,7 +32,6 @@ test_RATE <- function() {
     pattern = "Expected binary treatment variable"
   )
 
-  # --- Test 5: error on non-(0,1) post-treatment ---
   dat_bad_d <- dat
   dat_bad_d$d <- dat_bad_d$d + 2
   expect_error(
