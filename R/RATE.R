@@ -229,7 +229,7 @@ RATE.surv <- function(response, post.treatment, treatment, censoring,
     # post treatment model
     D.args <- c(list(formula = post.treatment), SL.args.post.treatment)
     D.fit <- do.call(SL, D.args)
-    D.est <- D.fit(train_data)
+    D.fit$estimate(train_data)
 
     # time-to-event outcome model
     T.args <- c(
@@ -259,7 +259,7 @@ RATE.surv <- function(response, post.treatment, treatment, censoring,
     # constructing the one-step estimator
     f.0 <- F.tau(
       T.est = T.est,
-      D.est = D.est,
+      D.est = D.fit,
       data = valid_data,
       tau = tau,
       a = 0,
@@ -268,7 +268,7 @@ RATE.surv <- function(response, post.treatment, treatment, censoring,
     )
     f.1 <- F.tau(
       T.est = T.est,
-      D.est = D.est,
+      D.est = D.fit,
       data = valid_data,
       tau = tau,
       a = 1,
@@ -300,7 +300,7 @@ RATE.surv <- function(response, post.treatment, treatment, censoring,
 
     D <- as.numeric(get_response(post.treatment, valid_data))
     valid_data[lava::getoutcome(treatment)] <- 1
-    pr.d <- predict(D.est, valid_data, type = "response")
+    pr.d <- predict(D.fit, valid_data, type = "response")
     phi.d <- A / pr.treatment * (D - pr.d) + pr.d
 
     phis <- list(a1 = phi.1, a0 = phi.0, d = phi.d)
