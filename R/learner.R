@@ -495,35 +495,3 @@ ml_model <- R6Class("ml_model",
     }
   )
 )
-
-#' @export
-estimate.ml_model <- function(x, ...) {
-  rlang::warn(paste0(
-        "targeted::ml_model is deprecated and will ",
-        "be removed in targeted v0.7.0. Use targeted::learner instead.")
-  )
-  return(x$estimate(...))
-}
-
-#' @export
-predict.ml_model <- function(object, ...) {
-  rlang::warn(paste0(
-        "targeted::ml_model is deprecated and will ",
-        "be removed in targeted v0.7.0. Use targeted::learner instead.")
-  )
-  return(object$predict(...))
-}
-
-#' ML model
-#'
-#' Wrapper for ml_model
-#' @export
-#' @param formula formula
-#' @param model model (sl, rf, pf, glm, ...)
-#' @param ... additional arguments to model object
-ML <- function(formula, model="glm", ...) {
-  stop(
-    "targeted::ML has been removed in targeted 0.6. ",
-    "Please use the targeted::learner_ functions instead."
-  )
-}
