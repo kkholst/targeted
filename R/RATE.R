@@ -61,8 +61,8 @@ RATE <- function(response, post.treatment, treatment,
         c(list(data = train_data, call = cl), dots)
       )
     }
-    D.est <- D.fit(train_data)
-    Y.est <- Y.fit(train_data)
+    D.fit$estimate(train_data)
+    Y.fit$estimate(train_data)
 
     A <- as.numeric(get_response(treatment, valid_data) == treatment.level[1])
     D <- as.numeric(get_response(post.treatment, valid_data))
@@ -75,19 +75,21 @@ RATE <- function(response, post.treatment, treatment,
       )
     }
     valid_data[lava::getoutcome(treatment)] <- treatment.level[1]
-    pr.Ya <- predict(Y.est, valid_data)
-    pr.Da <- predict(D.est, valid_data)
+    pr.Ya <- Y.fit$predict(valid_data)
+    pr.Da <- D.fit$predict(valid_data)
     valid_data[lava::getoutcome(treatment)] <- control.level
-    pr.Y0 <- predict(Y.est, valid_data)
+    pr.Y0 <- Y.fit$predict(valid_data)
 
     phi.a <- A / pr.treatment * (Y - pr.Ya) + pr.Ya
     phi.0 <- (1 - A) / (1 - pr.treatment) * (Y - pr.Y0) + pr.Y0
 
     phi.d <- A / pr.treatment * (D - pr.Da) + pr.Da
 
-    phis <- list(a1 = phi.a, a0 = phi.0, d = phi.d)
-
-    phis <- do.call(cbind, phis)
+    phis <- matrix(
+      cbind(phi.a, phi.0, phi.d),
+      ncol = 3,
+      dimnames = list(NULL, c("a1", "a0", "d"))
+    )
 
     return(phis)
   }
