@@ -158,6 +158,35 @@ test_predict <- function() {
 }
 test_predict()
 
+test_predict_s3 <- function() {
+  m <- learner$new(
+    formula = y ~ x + offset(w), estimate = glm,
+    estimate.args = list(family = poisson)
+  )
+  m$estimate(ddata_count)
+  expect_equal(
+    m$predict(ddata_count),
+    predict(m, ddata_count)
+  )
+
+  expect_equal(
+    m$predict(ddata_count, type = "response"),
+    predict(m, ddata_count, type = "response")
+  )
+}
+test_predict_s3()
+
+test_estimate_s3 <- function() {
+  m <- learner$new(
+    formula = y ~ x + offset(w), estimate = glm,
+    estimate.args = list(family = poisson)
+  )
+  expect_null(m$fit)
+  estimate(m, ddata_count)
+  expect_true(inherits(m$fit, "glm"))
+}
+test_estimate_s3()
+
 test_design <- function() {
   m <- learner$new(formula = y ~ x1 + x2, estimate = glm.fit, intercept = TRUE)
   m$estimate(ddata)
