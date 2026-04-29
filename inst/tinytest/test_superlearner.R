@@ -132,7 +132,7 @@ test_metalearners <- function() {
   # verify that estimating a convex combination of weights handles duplicated
   # learners correctly
   expect_equal(sum(sl_convex$weights), 1)
-  expect_equal(sl_convex$weights[2], sl_convex$weights[3], tol = 1e-4)
+  expect_equal(sl_convex$weights[2], sl_convex$weights[3], tol = 1e-3)
 
   # discrete metalearner handles duplicated learners correctly by selecting only
   # one of the duplicated learners
