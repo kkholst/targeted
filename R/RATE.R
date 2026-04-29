@@ -5,7 +5,6 @@
 #' @param post.treatment Post treatment marker formula (e.g., D ~ W)
 #' @param treatment Treatment formula (e.g, A ~ 1)
 #' @param data data.frame
-#' @param family Exponential family for response (default gaussian)
 #' @param M Number of folds in cross-fitting (M=1 is no cross-fitting)
 #' @param pr.treatment (optional) Randomization probability of treatment.
 #' @param treatment.level Treatment level in binary treatment (default 1)
@@ -20,7 +19,7 @@
 #' @author Andreas Nordland, Klaus K. Holst
 #' @export
 RATE <- function(response, post.treatment, treatment,
-                 data, family = gaussian(), M = 5,
+                 data, M = 5,
                  pr.treatment, treatment.level,
                  SL.args.response = list(
                    family = gaussian(), SL.library = c("SL.mean", "SL.glm")
