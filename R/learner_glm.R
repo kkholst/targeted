@@ -58,7 +58,7 @@ learner_glm <- function(formula, info = "glm", family = gaussian(),
     dots <- list(...)
     if (!("type" %in% names(dots))) dots$type <- "response"
     args <- c(list(object, newdata = newdata), dots)
-    trycatch_predictions(stats::predict, args)
+    standardize_learner_predictions(stats::predict, args)
   }
   mod <- do.call(learner$new, args)
   class(mod) <- c("learner_glm", class(mod))
@@ -70,7 +70,7 @@ learner_glm <- function(formula, info = "glm", family = gaussian(),
 # TODO: function needs to be tested, especially for multiclass predictions,
 # we need to ensure that the output format is consistent between the original
 # function call to the predict function and sapply
-trycatch_predictions <- function(pred.fun, args) {
+standardize_learner_predictions <- function(pred.fun, args) {
   newdata <- args$newdata
 
   args_with_data <- args
