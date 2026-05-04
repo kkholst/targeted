@@ -38,7 +38,7 @@ other learners weight 0.}
 
 \item{model.score}{(function) Model scoring method (see \link{learner})}
 
-\item{mc.cores}{(integer) If not NULL, then \link[parallel:mclapply]{parallel::mcmapply} is used with
+\item{mc.cores}{(integer) If not NULL, then \link[parallel:mcmapply]{parallel::mcmapply} is used with
 \code{mc.cores} number of cores for parallelization instead of the
 \link[future.apply:future_lapply]{future.apply::future_lapply} package. Parallelization is disabled with
 \code{mc.cores = 1}.}
