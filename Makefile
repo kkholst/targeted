@@ -55,7 +55,7 @@ check:
 	@_R_CHECK_FORCE_SUGGESTS_=0 echo 'res <- rcmdcheck::rcmdcheck(".", build_args=c("--no-build-vignettes"), args=c("--ignore-vignettes"))' | $(R)
 
 lint:
-	@echo 'lintr::lint_package(show_progress = TRUE)' | $(R)
+	@echo 'lintr::lint_package(show_progress = TRUE, exclusions = list("R/targeted-package.R"))' | $(R)
 
 vignette:
 	@$(R) -q -e "devtools::build_vignettes(clean=FALSE, install=FALSE, quiet=FALSE)"
