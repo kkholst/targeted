@@ -142,7 +142,7 @@ RATE <- function(response, post.treatment, treatment,
 #'
 #' Estimation of
 #' \deqn{
-#' \frac{P(T \leq \tau|A=1) - P(T \leq \tau|A=1)}{E[D|A=1]}
+#' \frac{P(T \leq \tau|A=1) - P(T \leq \tau|A=0)}{E[D|A=1]}
 #' }
 #' under right censoring based on plug-in estimates of \eqn{P(T \leq \tau|A=a)}
 #' and \eqn{E[D|A=1]}.
@@ -207,7 +207,7 @@ RATE.surv <- function(response, post.treatment, treatment, censoring,
   rm(surv.response, surv.censoring)
 
   A.levels <- sort(unique(get_response(treatment, data)))
-  if (all(A.levels != c(0, 1))) stop(
+  if (!all(c(0, 1) %in% A.levels) || (length(A.levels) != 2)) stop(
     "Expected binary treatment variable (0,1)."
   )
   if (missing(pr.treatment)) pr.treatment <- NULL
@@ -300,11 +300,15 @@ RATE.surv <- function(response, post.treatment, treatment, censoring,
 
     D <- as.numeric(get_response(post.treatment, valid_data))
     valid_data[lava::getoutcome(treatment)] <- 1
-    pr.d <- predict(D.fit, valid_data, type = "response")
+
+    pr.d <- predict(D.fit, valid_data)
     phi.d <- A / pr.treatment * (D - pr.d) + pr.d
 
-    phis <- list(a1 = phi.1, a0 = phi.0, d = phi.d)
-    phis <- do.call(cbind, phis)
+    phis <- matrix(
+      cbind(phi.1, phi.0, phi.d),
+      ncol = 3,
+      dimnames = list(NULL, c("a1", "a0", "d"))
+    )
 
     return(phis)
   }
@@ -346,7 +350,7 @@ RATE.surv <- function(response, post.treatment, treatment, censoring,
 
 F.tau <- function(T.est, D.est, data, tau, a, treatment, post.treatment) {
   data[lava::getoutcome(treatment)] <- a
-  pred.D <- predict(D.est, type = "response", data)
+  pred.D <- predict(D.est, data)
 
   data[lava::getoutcome(post.treatment)] <- 1
   surv.T.D1 <- cumhaz(T.est, newdata = data, times = tau)$surv[, 1]
@@ -383,7 +387,7 @@ HMc.tau <- function(T.est, C.est, data, time, event, tau) {
 
   Lc <- vector(mode = "numeric", length = n)
   S <- cumhaz(T.est, newdata = data, times = time)$surv
-  S.tau <- cumhaz(T.est, newdata = data, times = tau)$surv
+  S.tau <- cumhaz(T.est, newdata = data, times = rep(tau, nrow(data)))$surv
   Sc <- cumhaz(C.est, newdata = data, times = time)
   for (i in 1:n) {
     at.risk <- c(rep(1, i), rep(0, n - i))
