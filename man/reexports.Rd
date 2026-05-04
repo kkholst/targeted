@@ -17,8 +17,8 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
-  \item{lava}{\code{\link[lava:estimate.default]{estimate}}, \code{\link[lava:IC.default]{IC}}, \code{\link[lava:internal]{parameter}}, \code{\link[lava:gof]{score}}, \code{\link[lava:sim.default]{sim}}}
+  \item{lava}{\code{\link[lava:estimate]{estimate()}}, \code{\link[lava:IC]{IC()}}, \code{\link[lava:parameter]{parameter()}}, \code{\link[lava:score]{score()}}, \code{\link[lava:sim]{sim()}}}
 
-  \item{survival}{\code{\link[survival]{strata}}, \code{\link[survival]{Surv}}}
+  \item{survival}{\code{\link[survival:strata]{strata()}}, \code{\link[survival:Surv]{Surv()}}}
 }}
 
