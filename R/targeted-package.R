@@ -1,3 +1,4 @@
+# nolint start
 #' @keywords internal
 "_PACKAGE"
 
@@ -95,3 +96,4 @@ survival::strata
 
 ##' @export
 survival::Surv
+# nolint end
