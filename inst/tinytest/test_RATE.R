@@ -51,7 +51,7 @@ sim_surv_rate <- function(n) {
   d <- rbinom(n, 1, plogis(-0.5 + a + 0.5 * w))
 
   # piecewise-constant baseline cumulative hazard
-  cumhaz <- cbind(c(0, 10), c(0, 5))
+  cumhaz <- cbind(c(0, 3), c(0, 1))
   rr.event <- exp(-0.5 * a - 0.3 * d + 0.2 * w)
 
   sim <- mets::simrchaz(cumhaz, rr = rr.event, cens = cumhaz)
