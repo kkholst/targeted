@@ -1,5 +1,8 @@
-library("SuperLearner")
-library("mets")
+suppressPackageStartupMessages({
+  library("SuperLearner")
+  library("mets")
+}
+)
 
 set.seed(42)
 n <- 200
@@ -22,12 +25,25 @@ test_RATE <- function() {
   expect_true(all(c("a1", "a0", "d", "rate") %in% names(cf)))
   expect_true(is.finite(cf[["rate"]]))
 
+  fit <- RATE(
+    response = y ~ a,
+    post.treatment = d ~ 1,
+    treatment = a ~ 1,
+    data = dat, M = 1
+  )
+  expect_equal(
+    fit$coefmat[-4, 1],
+    c(
+      a1 = mean(subset(dat, a == 1)$y),
+      a0 =mean(subset(dat, a == 0)$y),
+      d = mean(subset(dat, a == 1)$d)
+    )
+  )
+
   fit_pi <- RATE(y ~ d * a, d ~ w, a ~ 1, data = dat, efficient = FALSE)
   expect_true(inherits(fit_pi, "estimate"))
   expect_true(is.finite(coef(fit_pi)[["rate"]]))
 
-  fit_m1 <- RATE(y ~ d * a, d ~ w, a ~ 1, data = dat, M = 1)
-  expect_true(inherits(fit_m1, "estimate"))
 
   dat_bad_a <- dat
   dat_bad_a$a <- sample(0:2, n, replace = TRUE)
@@ -41,14 +57,14 @@ test_RATE <- function() {
   expect_error(
     RATE(y ~ d * a, d ~ w, a ~ 1, data = dat_bad_d, M = 2),
     pattern = "Expected binary post treatment variable"
-  )
+    )
 }
 test_RATE()
 
 sim_surv_rate <- function(n) {
   w <- rnorm(n)
   a <- rbinom(n, 1, 0.5)
-  d <- rbinom(n, 1, plogis(-0.5 + a + 0.5 * w))
+  d <- rbinom(n, 1, expit(-0.5 + a + 0.5 * w))
 
   # piecewise-constant baseline cumulative hazard
   cumhaz <- cbind(c(0, 3), c(0, 1))
@@ -64,6 +80,30 @@ sim_surv_rate <- function(n) {
   out
 }
 
+
+# TODO: implement additional tests to verify that the function produces
+# the correct estimates
+# fitphreg <- phreg(
+  # Surv(time, event == 1) ~ strata(a), data = sdat
+# )
+#
+# lava::estimate(fitphreg, type = "risk", time = tau)
+#
+# fitrate <- RATE.surv(
+    # response = Surv(time, event) ~ a,
+    # post.treatment = d ~ w,
+    # treatment = a ~ 1,
+    # censoring = Surv(time, event == 0) ~ a,
+    # tau = tau,
+    # data = sdat,
+    # M = 1,
+    # call.response = "phreg",
+    # call.censoring = "phreg"
+  # )
+
+RATE.surv <- targeted:::RATE.surv # because function is currently not exported
+# the following tests verify only that the function is able to produce some
+# estimates. however, it seems that the estimates are off (see above example)
 test_RATE.surv <- function() {
   set.seed(42)
   sdat <- sim_surv_rate(150)

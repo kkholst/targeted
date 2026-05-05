@@ -175,7 +175,6 @@ RATE <- function(response, post.treatment, treatment,
 #' @param args.censoring Similar to args.response.
 #' @author Andreas Nordland, Klaus K. Holst
 #' @inherit RATE
-#' @export
 RATE.surv <- function(response, post.treatment, treatment, censoring,
                       tau,
                       data,
@@ -297,7 +296,6 @@ RATE.surv <- function(response, post.treatment, treatment, censoring,
       + (1 - (1 - A) / (1 - pr.treatment)) * f.0
     phi.1 <- A / (pr.treatment) * (valid.event / sc * (valid.time <= tau) + hmc)
       + (1 - A / (pr.treatment)) * f.1
-
     D <- as.numeric(get_response(post.treatment, valid_data))
     valid_data[lava::getoutcome(treatment)] <- 1
 
