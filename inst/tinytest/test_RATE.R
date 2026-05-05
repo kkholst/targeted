@@ -8,7 +8,7 @@ set.seed(42)
 n <- 200
 w <- rnorm(n)
 a <- rbinom(n, 1, 0.5)
-d <- rbinom(n, 1, plogis(-0.5 + a + 0.5 * w))
+d <- rbinom(n, 1, lava::expit(-0.5 + a + 0.5 * w))
 y <- 1 + 2 * a * d + w + rnorm(n)
 dat <- data.frame(y, d, a = a, w)
 
@@ -64,7 +64,7 @@ test_RATE()
 sim_surv_rate <- function(n) {
   w <- rnorm(n)
   a <- rbinom(n, 1, 0.5)
-  d <- rbinom(n, 1, expit(-0.5 + a + 0.5 * w))
+  d <- rbinom(n, 1, lava::expit(-0.5 + a + 0.5 * w))
 
   # piecewise-constant baseline cumulative hazard
   cumhaz <- cbind(c(0, 3), c(0, 1))
