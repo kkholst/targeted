@@ -25,6 +25,16 @@ test_learner_stratify <- function() {
 
   expect_true(sum(abs(pr-pr.)) == 0)
 
+  # verify that arguments can be passed to fit function during estimate method
+  # call
+  lr_new <- learner_stratify(
+    y ~ x + stratify(a),
+    learner_glm,
+  )
+  lr_new$estimate(d, family = binomial())
+
+  expect_equivalent(lr_new$predict(d), pr.)
+
   # works with only single level in 'a'
   lr$estimate(d0)
   pr <- lr$predict(d0)
