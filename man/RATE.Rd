@@ -9,7 +9,6 @@ RATE(
   post.treatment,
   treatment,
   data,
-  family = gaussian(),
   M = 5,
   pr.treatment,
   treatment.level,
@@ -28,8 +27,6 @@ RATE(
 \item{treatment}{Treatment formula (e.g, A ~ 1)}
 
 \item{data}{data.frame}
-
-\item{family}{Exponential family for response (default gaussian)}
 
 \item{M}{Number of folds in cross-fitting (M=1 is no cross-fitting)}
 
