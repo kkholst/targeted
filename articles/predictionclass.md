@@ -28,6 +28,7 @@ the prediction of the composite event of death or transplant before 2
 years.
 
 ``` r
+
 data(pbc, package="survival")
 pbc <- transform(pbc, y = (time < 730) * (status > 0))
 ```
@@ -36,6 +37,7 @@ A logistic regression model with a single `age` covariate is defined and
 estimated via
 
 ``` r
+
 lr <- learner_glm(y ~ age, family = binomial())
 lr$estimate(pbc)
 ```
@@ -44,6 +46,7 @@ and predictions for the event `y = 1` (class 2 probabilities) for new
 data are obtained by
 
 ``` r
+
 lr$predict(newdata = data.frame(age = c(20, 40, 60, 80)))
 ```
 
@@ -62,6 +65,7 @@ The various constructors for commonly used statistical and machine
 learning models are listed as part of the `learner` class documentation
 
 ``` r
+
 ?learner # help(learner)
 ```
 
@@ -75,6 +79,7 @@ specification of ensemble learners (superlearner), where individual
 learners operate on different subsets of features.
 
 ``` r
+
 lr_sl <- learner_sl(
   learners = list(
     glm1 = learner_glm(y ~ age * bili, family = "binomial"),
@@ -97,9 +102,9 @@ lr_sl
     Formula: y ~ age * bili
     ─────────────────────────────────────
               score    weight
-    glm1 0.09928065 0.4011367
-    glm2 0.10786864 0.1100628
-    gam  0.09925579 0.4888004
+    glm1 0.09767478 0.3327338
+    glm2 0.10692852 0.1262905
+    gam  0.09724746 0.5409757
 
 Most constructors have additional arguments that impact the resulting
 model fit, ranging from the specification of a link function for
@@ -119,6 +124,7 @@ hyper-parameters and to facilitate this we can use the
 `learner_expand_grid` function
 
 ``` r
+
 lrs <- learner_expand_grid( learner_xgboost,
                             list(formula = Sepal.Length ~ .,
                                 eta = c(0.2, 0.5, 0.3)) )
@@ -160,6 +166,7 @@ argument and the set of additional parameters that control the model
 fitting process and the task (binary classification in this example).
 
 ``` r
+
 lr_xgboost <- learner_xgboost(
   formula = y ~ age + sex + bili,
   eta = 0.3, nrounds = 5,  # hyperparameters
@@ -178,6 +185,7 @@ lr_xgboost
 The model is estimated via the `estimate` method
 
 ``` r
+
 lr_xgboost$estimate(data = pbc)
 ```
 
@@ -185,6 +193,7 @@ The default behavior is to assign the fitted model to the learner
 object, which can be accessed via
 
 ``` r
+
 class(lr_xgboost$fit)
 ```
 
@@ -193,6 +202,7 @@ class(lr_xgboost$fit)
 Once the model has been fitted, predictions are generated with
 
 ``` r
+
 lr_xgboost$predict(head(pbc))
 ```
 
@@ -206,6 +216,7 @@ alternative to the R6 class syntax for fitting the model and making
 predictions.
 
 ``` r
+
 lr <- learner_glm(y ~ age, family = "binomial")
 estimate(lr, pbc)
 predict(lr, head(pbc))
@@ -221,6 +232,7 @@ design immutable. Both functions can be inspected as part of the return
 values of the summary method
 
 ``` r
+
 lr_xgboost$summary()$estimate
 ```
 
@@ -237,13 +249,14 @@ lr_xgboost$summary()$estimate
             )
           return(res)
         }
-    <bytecode: 0x556a8d843bf0>
-    <environment: 0x556a925efb18>
+    <bytecode: 0x55fabf9a14a0>
+    <environment: 0x55fac4793080>
 
 Rare situations may arise where one wants to update the formula
 argument. This supported and implemented via the `update` method
 
 ``` r
+
 lr_xgboost$update(y ~ age + sex)
 ```
 
@@ -251,6 +264,7 @@ The design matrix that results from by the specified formula can be
 inspected via
 
 ``` r
+
 head(lr_xgboost$design(pbc)$x)
 ```
 
@@ -265,6 +279,7 @@ head(lr_xgboost$design(pbc)$x)
 and the response vector via
 
 ``` r
+
 head(lr_xgboost$response(pbc))
 ```
 
@@ -285,6 +300,7 @@ generic implementation for repeated k-fold cross-validation with
 [`?cv`](../reference/cv.default.md) for more details).
 
 ``` r
+
 # future::plan("multicore")
 lrs <- list(
   glm = learner_glm(y ~ age + age, family = "binomial"),
@@ -298,9 +314,39 @@ cv(lrs, data = pbc, rep = 2, nfolds = 5)
 
     5-fold cross-validation with 2 repetitions
 
-               mse       mae
-    glm 0.10725203 0.2128657
-    gam 0.09728991 0.1872949
+              mse       mae
+    glm 0.1076744 0.2128858
+    gam 0.0988547 0.1883206
+
+### Prediction filter
+
+The experimental `predict.filter` argument allows post-processing of
+predictions, for example, to prevent predictions with extreme values or
+to handle rows for which the prediction function fails.
+
+``` r
+
+n <- 1e3
+d0 <- data.frame(x = rnorm(n))
+d0$y <- with(d0, x + rnorm(n))
+
+filter_bound <- function(data) {
+  function(pred, newdata) {
+    pred[pred > 10] <- 10
+    pred
+  }
+}
+
+lr_bound <- learner_glm(
+  y ~ x,
+  learner.args = list(predict.filter = filter_bound)
+)
+lr_bound$estimate(d0)
+lr_bound$predict(data.frame(x = 1e6))
+```
+
+     1
+    10 
 
 ## Defining new learners
 
@@ -326,6 +372,7 @@ where we define a new constructor to return a `learner` class object
 that fits a generalized model
 
 ``` r
+
 new_glm <- function(formula, ...) {
   learner$new(
     formula = formula,
@@ -352,6 +399,7 @@ It can be seen that the optional arguments of `new_glm` define the
 model with
 
 ``` r
+
 lr$estimate(pbc)
 ```
 
@@ -361,6 +409,7 @@ the parameters defined in `estimate.args` are passed on with the
 above is equivalent to
 
 ``` r
+
 fit <- glm(y ~ age, family = "binomial", data = pbc)
 all(coef(fit) == coef(lr$fit))
 ```
@@ -373,6 +422,7 @@ predictions. The learner object similarly passes on the `predict.args`
 to [`stats::predict`](https://rdrr.io/r/stats/predict.html) for
 
 ``` r
+
 lr$predict(head(pbc))
 ```
 
@@ -382,6 +432,7 @@ lr$predict(head(pbc))
 which is equivalent to
 
 ``` r
+
 predict(fit, newdata = head(pbc), type = "response")
 ```
 
@@ -395,6 +446,7 @@ reveals that the predict method always requires an `object` and
 `predict.args` in the method calls.
 
 ``` r
+
 lr$estimate(pbc, family = "poisson")
 lr$predict(head(pbc), type = "link")
 ```
@@ -413,6 +465,7 @@ example of
 which expects a `X` (design matrix) and `Y` (response vector) as inputs.
 
 ``` r
+
 new_grf <- function(formula, ...) {
   learner$new(
     formula = formula,
@@ -435,6 +488,7 @@ design matrix and response vector from the defined `formula` argument.
 As shown previously,
 
 ``` r
+
 dsgn <- lr$design(pbc)
 ```
 
@@ -447,6 +501,7 @@ To support ensemble/meta learners, it is also possible to construct a
 learner without providing a formula argument.
 
 ``` r
+
 new_sl <- function(learners, ...) {
   learner$new(
     info = "new superlearner",
@@ -471,9 +526,9 @@ lr
     Predict arguments:
     Formula: NULL
     ─────────────────────────────────────
-            score weight
-    glm 0.1069901      1
-    gam 0.1135899      0
+            score    weight
+    glm 0.1065147 0.7685246
+    gam 0.1069013 0.2314754
 
 In this case, all arguments provided to `lr$estimate` are joined
 together with the specified `estimate.args` and passed on to the defined
@@ -486,6 +541,7 @@ formula. For example, let’s consider an aggregated dataset that includes
 only the response variable, treatment, and sex:
 
 ``` r
+
 library("data.table")
 dd <- data.table(pbc)[!is.na(trt), .(.N), by=.(y,trt,sex)]
 print(dd)
@@ -506,6 +562,7 @@ Next, we fit a Naive Bayes classifier using the `weights` special term
 to specify the frequency weights for the estimation
 
 ``` r
+
 lr <- learner_naivebayes(y ~ trt + sex + weights(N))
 lr$estimate(dd)
 lr$predict(dd)
@@ -517,11 +574,12 @@ lr$predict(dd)
 Here `weights.numeric` is simply the identity function
 
 ``` r
+
 targeted:::weights.numeric
 ```
 
     function(object, ...) object
-    <bytecode: 0x556a8d5732f8>
+    <bytecode: 0x55fac4c12880>
     <environment: namespace:targeted>
 
 To illustrate how to define a custom learner that utilizes special
@@ -531,6 +589,7 @@ regression model for each value of the strata variable, as well as a
 corresponding prediction method
 
 ``` r
+
 est <- function(formula, data, strata, ...)
   lapply(levels(strata), \(s) lm(formula, data[which(strata==s),]))
 
@@ -549,6 +608,7 @@ The new learner is now defined by including the argument \`specials =
 both the estimate and predict functions
 
 ``` r
+
 lr <- learner$new(y ~ sex + strata(trt),
                   estimate=est, predict=pred, specials = "strata")
 des <- lr$design(head(pbc))
@@ -577,6 +637,7 @@ des
     6   1   
 
 ``` r
+
 des$strata
 ```
 
@@ -585,6 +646,7 @@ des$strata
     Levels: trt=1 trt=2
 
 ``` r
+
 lr$estimate(pbc)
 lr
 ```
@@ -614,6 +676,7 @@ lr
         0.20000     -0.08489  
 
 ``` r
+
 lr$predict(head(pbc))
 ```
 

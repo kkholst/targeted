@@ -40,11 +40,19 @@ Klaus Kähler Holst, Benedikt Sommer
 
   Return model formula. Use learner\$update() to update the formula.
 
+- `predict.filter`:
+
+  Return instantiated prediction filter function
+
+- `predict.filter.generator`:
+
+  Return prediction filter generator function
+
 ## Methods
 
 ### Public methods
 
-- [`learner$new()`](#method-learner-new)
+- [`learner$new()`](#method-learner-initialize)
 
 - [`learner$estimate()`](#method-learner-estimate)
 
@@ -66,7 +74,7 @@ Klaus Kähler Holst, Benedikt Sommer
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `learner$new()`
 
 Create a new prediction model object
 
@@ -81,6 +89,7 @@ Create a new prediction model object
       info = NULL,
       specials = c(),
       formula.keep.specials = FALSE,
+      predict.filter = function(data, ...) function(pred, newdata, ...) pred,
       intercept = FALSE
     )
 
@@ -123,13 +132,19 @@ Create a new prediction model object
   if TRUE then special terms defined by `specials` will be removed from
   the formula before it is being passed to the estimate print.function()
 
+- `predict.filter`:
+
+  function to post-process predictions. Useful to bound predictions or
+  handle NAs. The argument is experimental and its behavior may change
+  in the future.
+
 - `intercept`:
 
   (logical) include intercept in design matrix
 
 ------------------------------------------------------------------------
 
-### Method [`estimate()`](http://kkholst.github.io/lava/reference/estimate.default.md)
+### `learner$estimate()`
 
 Estimation method
 
@@ -145,7 +160,8 @@ Estimation method
 
 - `...`:
 
-  Additional arguments to estimation method
+  Additional arguments to estimation and prediction filter generator
+  function
 
 - `store`:
 
@@ -154,7 +170,7 @@ Estimation method
 
 ------------------------------------------------------------------------
 
-### Method [`predict()`](https://rdrr.io/r/stats/predict.html)
+### `learner$predict()`
 
 Prediction method
 
@@ -170,7 +186,8 @@ Prediction method
 
 - `...`:
 
-  Additional arguments to prediction method
+  Additional arguments to prediction method and prediction filter
+  function
 
 - `object`:
 
@@ -178,7 +195,7 @@ Prediction method
 
 ------------------------------------------------------------------------
 
-### Method [`update()`](https://rdrr.io/r/stats/update.html)
+### `learner$update()`
 
 Update formula
 
@@ -194,7 +211,7 @@ Update formula
 
 ------------------------------------------------------------------------
 
-### Method [`print()`](https://rdrr.io/r/base/print.html)
+### `learner$print()`
 
 Print method
 
@@ -204,7 +221,7 @@ Print method
 
 ------------------------------------------------------------------------
 
-### Method [`summary()`](https://rdrr.io/r/base/summary.html)
+### `learner$summary()`
 
 Summary method to provide more extensive information than
 learner\$print().
@@ -260,7 +277,7 @@ summarized_learner object, which is a list with the following elements:
 
 ------------------------------------------------------------------------
 
-### Method `response()`
+### `learner$response()`
 
 Extract response from data
 
@@ -285,7 +302,7 @@ Extract response from data
 
 ------------------------------------------------------------------------
 
-### Method [`design()`](design.md)
+### `learner$design()`
 
 Generate [design](design.md) object (design matrix and response) from
 data
@@ -306,7 +323,7 @@ data
 
 ------------------------------------------------------------------------
 
-### Method `opt()`
+### `learner$opt()`
 
 Get options
 
@@ -322,7 +339,7 @@ Get options
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `learner$clone()`
 
 The objects of this class are cloneable with this method.
 
@@ -363,30 +380,30 @@ x <- models[[1]]$clone()
 x$estimate(iris)
 predict(x, newdata = head(iris))
 #>         setosa  versicolor   virginica
-#> [1,] 0.9823929 0.014178571 0.003428571
-#> [2,] 0.9510833 0.043488095 0.005428571
-#> [3,] 0.9844048 0.013095238 0.002500000
-#> [4,] 0.9687738 0.028726190 0.002500000
-#> [5,] 0.9898929 0.006678571 0.003428571
-#> [6,] 0.9064936 0.068506410 0.025000000
+#> [1,] 0.9960000 0.003000000 0.001000000
+#> [2,] 0.9612500 0.035083333 0.003666667
+#> [3,] 0.9950000 0.003333333 0.001666667
+#> [4,] 0.9852381 0.013095238 0.001666667
+#> [5,] 1.0000000 0.000000000 0.000000000
+#> [6,] 0.9528413 0.044492063 0.002666667
 
 # \donttest{
 # Reduce Ex. timing
 a <- targeted::cv(models, data = iris)
 cbind(coef(a), attr(args, "table"))
 #>              brier -logscore
-#> model1  0.10005912 0.2205740
-#> model2  0.10032820 0.2232710
-#> model3  0.08405392 0.1823416
-#> model4  0.08297912 0.1784703
-#> model5  0.08659444 0.1799173
-#> model6  0.08517396 0.1764445
-#> model7  0.35036559 0.5715464
-#> model8  0.34923672 0.5664500
-#> model9  0.34400827 0.5539763
-#> model10 0.34324098 0.5507146
-#> model11 0.34244349 0.5466884
-#> model12 0.34120762 0.5492056
+#> model1  0.09933114 0.2176723
+#> model2  0.09852394 0.2190576
+#> model3  0.08930160 0.1951197
+#> model4  0.08693167 0.1859497
+#> model5  0.07920760 0.1667053
+#> model6  0.07973235 0.1642473
+#> model7  0.33889722 0.5576471
+#> model8  0.34434199 0.5659671
+#> model9  0.33340380 0.5510511
+#> model10 0.33373744 0.5450570
+#> model11 0.34011615 0.5492692
+#> model12 0.33269580 0.5396498
 # }
 
 # defining learner via function with arguments y (response)
@@ -408,7 +425,7 @@ f3 <- learner$new(
 )
 
 ## ------------------------------------------------
-## Method `learner$summary`
+## Method `learner$summary()`
 ## ------------------------------------------------
 
 lr <- learner_glm(y ~ x, family = "nb")
@@ -416,7 +433,7 @@ lr$summary()
 #> ────────── learner object ──────────
 #> glm 
 #> 
-#> formula: y ~ x <environment: 0x5590b031a3b0> 
+#> formula: y ~ x <environment: 0x564a99a00128> 
 #> estimate: formula, data, family, ... 
 #> estimate.args: family=nb 
 #> predict: object, newdata, ... 
@@ -431,7 +448,7 @@ print(lr_sum)
 #> ────────── learner object ──────────
 #> glm 
 #> 
-#> formula: y ~ x <environment: 0x5590b031a3b0> 
+#> formula: y ~ x <environment: 0x564a99a00128> 
 #> estimate: formula, data, family, ... 
 #> estimate.args: family=nb 
 #> predict: object, newdata, ... 

@@ -92,7 +92,7 @@ d0 <- data.frame(y, x1, x2)
 lr <- learner_glmnet_cv(y ~ x1 + x2)
 lr$estimate(d0, nfolds = 3)
 lr$predict(data.frame(x1 = c(0, 1), x2 = 1))
-#> [1] 0.02458825 1.03957193
+#> [1] 0.04457322 1.07440242
 
 # count outcome with different exposure time
 w <- 50 + rexp(n, rate = 1 / 5)
@@ -102,5 +102,5 @@ d0 <- data.frame(y, x1, x2, w)
 lr <- learner_glmnet_cv(y ~ x1 + x2 + offset(log(w)), family = "poisson")
 lr$estimate(d0, nfolds = 3)
 lr$predict(data.frame(x1 = 1, x2 = 1, w = c(1, 5)))
-#> [1] 0.5722787 2.8613937
+#> [1] 0.5500479 2.7502394
 ```

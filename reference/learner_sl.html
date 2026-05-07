@@ -130,7 +130,7 @@ other learners weight 0.</p></dd>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span>, data <span class="op">=</span> <span class="va">d</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">x1</span>, <span class="va">pr</span>, col <span class="op">=</span> <span class="fl">2</span>, cex <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="va">x1</span><span class="op">)</span> <span class="op">+</span> <span class="va">x1</span> <span class="op">~</span> <span class="va">x1</span>, data <span class="op">=</span> <span class="va">d</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">x1</span><span class="op">)</span>, <span class="op">]</span>,</span></span>
-<span class="r-in"><span>          lwd <span class="op">=</span> <span class="fl">4</span>, col <span class="op">=</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="http://kkholst.github.io/lava/reference/Col.html" class="external-link">Col</a></span><span class="op">(</span><span class="st">"darkblue"</span>, <span class="fl">0.3</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>          lwd <span class="op">=</span> <span class="fl">4</span>, col <span class="op">=</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/Col.html" class="external-link">Col</a></span><span class="op">(</span><span class="st">"darkblue"</span>, <span class="fl">0.3</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">s</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ────────── learner object ──────────</span>
@@ -141,12 +141,12 @@ other learners weight 0.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Estimate arguments: learners=&lt;list&gt;, nfolds=10, meta.learner=&lt;function&gt;, model.score=&lt;function&gt; </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Predict arguments:   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Formula: y ~ 1 &lt;environment: 0x5590a85e4850&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Formula: y ~ 1 &lt;environment: 0x564a94d1a940&gt; </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ─────────────────────────────────────</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          score     weight</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mean 4.8684025 0.09195207</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> glm  0.8579904 0.07689746</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> iso  0.4668761 0.83115047</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mean 4.9077080 0.00000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> glm  0.9499446 0.04367903</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iso  0.4804848 0.95632097</span>
 <span class="r-in"><span><span class="co"># weights(s$fit)</span></span></span>
 <span class="r-in"><span><span class="co"># score(s$fit)</span></span></span>
 <span class="r-in"><span></span></span>
@@ -157,24 +157,24 @@ other learners weight 0.</p></dd>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── mse </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         mean      sd     min     max</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> sl   0.49724 0.04312 0.45503 0.55521</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mean 4.86631 0.29296 4.55459 5.23194</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> glm  0.86610 0.05665 0.76497 0.91749</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> iso  0.47305 0.01645 0.44241 0.49028</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> sl   0.53592 0.06583 0.45918 0.61290</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mean 4.93582 0.25062 4.61359 5.20491</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> glm  0.95943 0.09491 0.80637 1.04611</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iso  0.50016 0.06244 0.43834 0.60064</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── mae </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         mean      sd     min     max</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> sl   0.56817 0.02602 0.54496 0.61206</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mean 1.76295 0.06099 1.66893 1.85225</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> glm  0.75561 0.03516 0.69341 0.79557</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> iso  0.55661 0.01008 0.54620 0.56973</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> sl   0.58451 0.03767 0.53719 0.63085</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mean 1.78566 0.06822 1.68321 1.87589</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> glm  0.80297 0.04050 0.74230 0.85606</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iso  0.55979 0.04080 0.51443 0.62650</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── weight </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         mean      sd     min     max</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> sl         -       -       -       -</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mean 0.07748 0.04056 0.02455 0.11796</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> glm  0.09614 0.01524 0.07534 0.12235</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> iso  0.82638 0.04238 0.78781 0.87947</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mean 0.07109 0.06884 0.00000 0.17930</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> glm  0.06627 0.02725 0.02534 0.10524</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iso  0.86265 0.05976 0.76561 0.93646</span>
 <span class="r-in"><span><span class="co"># coef(cvres)</span></span></span>
 <span class="r-in"><span><span class="co"># score(cvres)</span></span></span>
 </code></pre></div>

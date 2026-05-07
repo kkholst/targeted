@@ -130,7 +130,7 @@ https://arxiv.org/abs/2511.07096.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><a href="test_zmax_onesided.html">test_zmax_onesided</a> <a href="http://kkholst.github.io/lava/reference/compare.html" class="external-link">lava::test_wald</a> <a href="http://kkholst.github.io/lava/reference/closed_testing.html" class="external-link">lava::closed_testing</a></p></div>
+    <div class="dont-index"><p><a href="test_zmax_onesided.html">test_zmax_onesided</a> <a href="https://kkholst.github.io/lava/reference/compare.html" class="external-link">lava::test_wald</a> <a href="https://kkholst.github.io/lava/reference/closed_testing.html" class="external-link">lava::closed_testing</a></p></div>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
@@ -148,7 +148,7 @@ https://arxiv.org/abs/2511.07096.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> data:  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Intersection null hypothesis: theta =&lt; [0, 0]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> w = [0.5, 0.5]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Q = 0.0625, p-value = 0.479</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Q = 0.0625, p-value = 0.4797</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="fu">test_intersection_sw</span><span class="op">(</span><span class="va">thetahat</span>, <span class="va">S</span>, weights <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -157,13 +157,13 @@ https://arxiv.org/abs/2511.07096.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> data:  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Intersection null hypothesis: theta =&lt; [0, 0]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> w = [0.5, 0.5]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Q = 0.0625, p-value = 0.465</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Q = 0.0625, p-value = 0.4638</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="co"># only on 'lava' &gt;= 1.8.2</span></span></span>
-<span class="r-in"><span><span class="va">e</span> <span class="op">&lt;-</span> <span class="fu"><a href="http://kkholst.github.io/lava/reference/estimate.default.html" class="external-link">estimate</a></span><span class="op">(</span>coef <span class="op">=</span> <span class="va">thetahat</span>, vcov <span class="op">=</span> <span class="va">S</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"p1"</span>, <span class="st">"p2"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="http://kkholst.github.io/lava/reference/closed_testing.html" class="external-link">closed_testing</a></span><span class="op">(</span><span class="va">e</span>, <span class="va">test_intersection_sw</span>, noninf <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.1</span>, <span class="op">-</span><span class="fl">0.1</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span><span class="va">e</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://kkholst.github.io/lava/reference/estimate.default.html" class="external-link">estimate</a></span><span class="op">(</span>coef <span class="op">=</span> <span class="va">thetahat</span>, vcov <span class="op">=</span> <span class="va">S</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"p1"</span>, <span class="st">"p2"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/closed_testing.html" class="external-link">closed_testing</a></span><span class="op">(</span><span class="va">e</span>, <span class="va">test_intersection_sw</span>, noninf <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.1</span>, <span class="op">-</span><span class="fl">0.1</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>

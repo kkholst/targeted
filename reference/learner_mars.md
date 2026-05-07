@@ -83,5 +83,5 @@ lr <- learner_mars(y ~ x + offset(log(w)), degree = 2,
 )
 lr$estimate(d0)
 lr$predict(data.frame(x = 0, w = c(1, 2)))
-#> [1]  7.033544 14.067088
+#> [1]  7.321076 14.642153
 ```

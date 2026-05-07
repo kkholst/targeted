@@ -81,8 +81,8 @@ https://arxiv.org/abs/2511.07096.
 ## See also
 
 [test_zmax_onesided](test_zmax_onesided.md)
-[lava::test_wald](http://kkholst.github.io/lava/reference/compare.md)
-[lava::closed_testing](http://kkholst.github.io/lava/reference/closed_testing.md)
+[lava::test_wald](https://kkholst.github.io/lava/reference/compare.html)
+[lava::closed_testing](https://kkholst.github.io/lava/reference/closed_testing.html)
 
 ## Author
 
@@ -100,7 +100,7 @@ test_intersection_sw(thetahat, S, nsim.null = 1e5)
 #> data:  
 #> Intersection null hypothesis: theta =< [0, 0]
 #> w = [0.5, 0.5]
-#> Q = 0.0625, p-value = 0.479
+#> Q = 0.0625, p-value = 0.4797
 #> 
 test_intersection_sw(thetahat, S, weights = NULL)
 #> 
@@ -109,7 +109,7 @@ test_intersection_sw(thetahat, S, weights = NULL)
 #> data:  
 #> Intersection null hypothesis: theta =< [0, 0]
 #> w = [0.5, 0.5]
-#> Q = 0.0625, p-value = 0.465
+#> Q = 0.0625, p-value = 0.4638
 #> 
 
 if (FALSE) { # \dontrun{

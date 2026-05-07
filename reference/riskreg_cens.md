@@ -38,11 +38,11 @@ riskreg_cens(
 
 - treatment:
 
-  Optional treatment model (ml_model)
+  Optional treatment model ([learner](learner.md))
 
 - prediction:
 
-  Optional prediction model (ml_model)
+  Optional prediction model ([learner](learner.md))
 
 - data:
 

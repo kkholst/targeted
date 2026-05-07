@@ -44,6 +44,8 @@ Useful links:
 
 Authors:
 
+- Klaus K. Holst <klaus@holst.it>
+
 - Benedikt Sommer <benediktsommer92@gmail.com>
 
 - Andreas Nordland <andreasnordland@gmail.com>

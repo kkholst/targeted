@@ -9,7 +9,7 @@ components:
 - estimate:
 
   An `estimate` object with the target parameter estimates (see
-  [`estimate.default`](http://kkholst.github.io/lava/reference/estimate.default.md))
+  [`estimate.default`](https://kkholst.github.io/lava/reference/estimate.default.html))
 
 - opt:
 

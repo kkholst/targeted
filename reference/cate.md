@@ -7,7 +7,7 @@ Conditional Average Treatment Effect estimation with cross-fitting.
 ``` r
 cate(
   response.model,
-  propensity.model,
+  treatment.model,
   cate.model = ~1,
   calibration.model = NULL,
   data,
@@ -17,12 +17,12 @@ cate(
   silent = FALSE,
   stratify = FALSE,
   mc.cores = NULL,
-  rep.type = c("nuisance", "average"),
   var.type = "IC",
   second.order = TRUE,
   response_model = deprecated,
   cate_model = deprecated,
   propensity_model = deprecated,
+  propensity.model = deprecated,
   treatment = deprecated,
   ...
 )
@@ -34,7 +34,7 @@ cate(
 
   formula or learner object (formula =\> learner_glm)
 
-- propensity.model:
+- treatment.model:
 
   formula or learner object (formula =\> learner_glm)
 
@@ -58,11 +58,14 @@ cate(
 
 - nfolds:
 
-  number of folds
+  number of folds (positive integer), or a pre-specified list of fold
+  indices where each element is an integer vector of observation indices
+  forming a partition of `1:nrow(data)`.
 
 - rep:
 
-  number of replications of cross-fitting procedure
+  number of replications of cross-fitting procedure by averaging
+  estimates and influence functions from each replication
 
 - silent:
 
@@ -75,12 +78,6 @@ cate(
 - mc.cores:
 
   (optional) number of cores. parallel::mcmapply used instead of future
-
-- rep.type:
-
-  repeated cross-fitting applied by averaging nuisance models
-  (`rep.type="nuisance"`) or by average estimates from each replication
-  (`rep.type="average"`).
 
 - var.type:
 
@@ -105,7 +102,11 @@ cate(
 
 - propensity_model:
 
-  Deprecated. Use propensity.model instead.
+  Deprecated. Use treatment.model instead.
+
+- propensity.model:
+
+  Deprecated. Use treatment.model instead.
 
 - treatment:
 
@@ -135,6 +136,9 @@ E\_{P}\[\\\Psi\_{1}(P)(V)-\Psi\_{0}(P)(V)\\ - m(V; \beta)\]^{2}\$\$
 Mark J. van der Laan (2006) Statistical Inference for Variable
 Importance, The International Journal of Biostatistics.
 
+Bannick, Shao & Liu et al. (2025) A General Form of Covariate Adjustment
+in Clinical Trials under Covariate-Adaptive Randomization, Biometrika.
+
 ## Author
 
 Klaus Kähler Holst, Andreas Nordland
@@ -154,24 +158,24 @@ d <- sim1(5000)
 ## ATE
 cate(cate.model=~1,
      response.model=y~a*(w1+w2),
-     propensity.model=a~w1+w2,
+     treatment.model=a~w1+w2,
      data=d)
 #>             Estimate Std.Err   2.5%  97.5%    P-value
-#> E[y(1)]       1.8508 0.04186 1.7687 1.9328  0.000e+00
-#> E[y(0)]       0.8279 0.02054 0.7876 0.8681  0.000e+00
+#> E[y(1)]       1.8047 0.04831 1.7100 1.8994 2.099e-305
+#> E[y(0)]       0.8308 0.01984 0.7919 0.8697  0.000e+00
 #> ───────────                                          
-#> (Intercept)   1.0229 0.04768 0.9295 1.1164 4.287e-102
+#> (Intercept)   0.9740 0.05337 0.8694 1.0786  2.054e-74
 ## CATE
 cate(cate.model=~1+w2,
      response.model=y~a*(w1+w2),
-     propensity.model=a~w1+w2,
+     treatment.model=a~w1+w2,
      data=d)
 #>             Estimate Std.Err   2.5%  97.5%    P-value
-#> E[y(1)]       1.8508 0.04186 1.7687 1.9328  0.000e+00
-#> E[y(0)]       0.8279 0.02054 0.7876 0.8681  0.000e+00
+#> E[y(1)]       1.8047 0.04831 1.7100 1.8994 2.099e-305
+#> E[y(0)]       0.8308 0.01984 0.7919 0.8697  0.000e+00
 #> ───────────                                          
-#> (Intercept)   0.9999 0.04654 0.9087 1.0911 2.146e-102
-#> w2            0.9879 0.04304 0.9035 1.0723 1.451e-116
+#> (Intercept)   0.9502 0.05280 0.8467 1.0536  2.093e-72
+#> w2            1.0377 0.04756 0.9445 1.1309 1.586e-105
 
 if (FALSE)  ## superlearner example
 mod1 <- list(
@@ -182,7 +186,7 @@ s1 <- learner_sl(mod1, nfolds=5)
 #> Error: object 'mod1' not found
 cate(cate.model=~1,
      response.model=s1,
-     propensity.model=learner_glm(a~w1+w2, family=binomial),
+     treatment.model=learner_glm(a~w1+w2, family=binomial),
      data=d,
      stratify=TRUE)
 #> Error: object 's1' not found

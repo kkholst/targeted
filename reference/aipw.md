@@ -6,27 +6,44 @@ observations
 ## Usage
 
 ``` r
-aipw(response_model, propensity_model, formula = ~1, data, ...)
+aipw(
+  response.model,
+  propensity.model,
+  formula = ~1,
+  data,
+  response_model = deprecated,
+  propensity_model = deprecated,
+  ...
+)
 ```
 
 ## Arguments
 
-- response_model:
+- response.model:
 
   Model for the response given covariates (learner or formula)
 
-- propensity_model:
+- propensity.model:
 
   Optional missing data mechanism model (propensity model) (learner or
   formula)
 
 - formula:
 
-  design specifying the OLS estimator with outcome given by the EIF
+  design specifying the OLS estimator with outcome given by the EIF (see
+  `cate`)
 
 - data:
 
   data.frame
+
+- response_model:
+
+  Deprecated. Use response.model instead.
+
+- propensity_model:
+
+  Deprecated. Use treatment.model instead.
 
 - ...:
 

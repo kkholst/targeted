@@ -87,13 +87,22 @@ Ensemble (super learner): <a href="learner_sl.html">learner_sl</a></p>
 <dd><p>Remove fitted model from the learner object</p></dd>
 
 
-<dt><code>fit</code></dt>
+    <dt><code>fit</code></dt>
 <dd><p>Return estimated model object.</p></dd>
 
 
-<dt><code>formula</code></dt>
+    <dt><code>formula</code></dt>
 <dd><p>Return model formula. Use learner$update() to
 update the formula.</p></dd>
+
+
+    <dt><code>predict.filter</code></dt>
+<dd><p>Return instantiated prediction filter function</p></dd>
+
+
+    <dt><code>predict.filter.generator</code></dt>
+<dd><p>Return prediction filter generator
+function</p></dd>
 
 
 </dl><p></p></div>
@@ -103,8 +112,7 @@ update the formula.</p></dd>
 
 <div class="section">
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
-
-<ul><li><p><a href="#method-learner-new"><code>learner$new()</code></a></p></li>
+<p></p><ul><li><p><a href="#method-learner-initialize"><code>learner$new()</code></a></p></li>
 <li><p><a href="#method-learner-estimate"><code>learner$estimate()</code></a></p></li>
 <li><p><a href="#method-learner-predict"><code>learner$predict()</code></a></p></li>
 <li><p><a href="#method-learner-update"><code>learner$update()</code></a></p></li>
@@ -114,8 +122,8 @@ update the formula.</p></dd>
 <li><p><a href="#method-learner-design"><code>learner$design()</code></a></p></li>
 <li><p><a href="#method-learner-opt"><code>learner$opt()</code></a></p></li>
 <li><p><a href="#method-learner-clone"><code>learner$clone()</code></a></p></li>
-</ul></div><p></p><hr><a id="method-learner-new"></a><div class="section">
-<h3 id="method-new-">Method <code>new()</code><a class="anchor" aria-label="anchor" href="#method-new-"></a></h3>
+</ul></div><p></p><hr><a id="method-learner-initialize"></a><div class="section">
+<h3 id="learner-new-"><code>learner$new()</code><a class="anchor" aria-label="anchor" href="#learner-new-"></a></h3>
 <p>Create a new prediction model object</p><div class="section">
 <h4 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va"><a href="../reference/learner.html">learner</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
@@ -127,75 +135,70 @@ update the formula.</p></dd>
 <span>  info <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  specials <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  formula.keep.specials <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  predict.filter <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">...</span><span class="op">)</span> <span class="kw">function</span><span class="op">(</span><span class="va">pred</span>, <span class="va">newdata</span>, <span class="va">...</span><span class="op">)</span> <span class="va">pred</span>,</span>
 <span>  intercept <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>formula</code></dt>
 <dd><p>formula specifying outcome and design matrix</p></dd>
 
-
-<dt><code>estimate</code></dt>
+      <dt><code>estimate</code></dt>
 <dd><p>function for fitting the model. This must be a function
 with response, 'y', and design matrix, 'x'. Alternatively, a function
 with a formula and data argument. See the examples section.</p></dd>
 
-
-<dt><code>predict</code></dt>
+      <dt><code>predict</code></dt>
 <dd><p>prediction function (must be a function of model
 object, 'object', and new design matrix, 'newdata')</p></dd>
 
-
-<dt><code>predict.args</code></dt>
+      <dt><code>predict.args</code></dt>
 <dd><p>optional arguments to prediction function</p></dd>
 
-
-<dt><code>estimate.args</code></dt>
+      <dt><code>estimate.args</code></dt>
 <dd><p>optional arguments to estimate function</p></dd>
 
-
-<dt><code>info</code></dt>
+      <dt><code>info</code></dt>
 <dd><p>optional description of the model</p></dd>
 
-
-<dt><code>specials</code></dt>
+      <dt><code>specials</code></dt>
 <dd><p>optional specials terms (weights, offset,
 id, subset, ...) passed on to <a href="design.html">design</a></p></dd>
 
-
-<dt><code>formula.keep.specials</code></dt>
+      <dt><code>formula.keep.specials</code></dt>
 <dd><p>if TRUE then special terms defined by
 <code>specials</code> will be removed from the formula before it is being passed to
 the estimate print.function()</p></dd>
 
+      <dt><code>predict.filter</code></dt>
+<dd><p>function to post-process predictions. Useful to
+bound predictions or handle NAs. The argument is experimental and its
+behavior may change in the future.</p></dd>
 
-<dt><code>intercept</code></dt>
+      <dt><code>intercept</code></dt>
 <dd><p>(logical) include intercept in design matrix</p></dd>
 
 
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-learner-estimate"></a><div class="section">
-<h3 id="method-estimate-">Method <code><a href="http://kkholst.github.io/lava/reference/estimate.default.html" class="external-link">estimate()</a></code><a class="anchor" aria-label="anchor" href="#method-estimate-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-learner-estimate"></a><div class="section">
+<h3 id="learner-estimate-"><code>learner$estimate()</code><a class="anchor" aria-label="anchor" href="#learner-estimate-"></a></h3>
 <p>Estimation method</p><div class="section">
 <h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">learner</span><span class="op">$</span><span class="fu">estimate</span><span class="op">(</span><span class="va">data</span>, <span class="va">...</span>, store <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>data</code></dt>
 <dd><p>data.frame</p></dd>
 
+      <dt><code>...</code></dt>
+<dd><p>Additional arguments to estimation and prediction filter
+generator function</p></dd>
 
-<dt><code>...</code></dt>
-<dd><p>Additional arguments to estimation method</p></dd>
-
-
-<dt><code>store</code></dt>
+      <dt><code>store</code></dt>
 <dd><p>Logical determining if estimated model should be
 stored inside the class.</p></dd>
 
@@ -203,38 +206,37 @@ stored inside the class.</p></dd>
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-learner-predict"></a><div class="section">
-<h3 id="method-predict-">Method <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code><a class="anchor" aria-label="anchor" href="#method-predict-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-learner-predict"></a><div class="section">
+<h3 id="learner-predict-"><code>learner$predict()</code><a class="anchor" aria-label="anchor" href="#learner-predict-"></a></h3>
 <p>Prediction method</p><div class="section">
 <h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">learner</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">newdata</span>, <span class="va">...</span>, object <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>newdata</code></dt>
 <dd><p>data.frame</p></dd>
 
+      <dt><code>...</code></dt>
+<dd><p>Additional arguments to prediction method and prediction
+filter function</p></dd>
 
-<dt><code>...</code></dt>
-<dd><p>Additional arguments to prediction method</p></dd>
-
-
-<dt><code>object</code></dt>
+      <dt><code>object</code></dt>
 <dd><p>Optional model fit object</p></dd>
 
 
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-learner-update"></a><div class="section">
-<h3 id="method-update-">Method <code><a href="https://rdrr.io/r/stats/update.html" class="external-link">update()</a></code><a class="anchor" aria-label="anchor" href="#method-update-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-learner-update"></a><div class="section">
+<h3 id="learner-update-"><code>learner$update()</code><a class="anchor" aria-label="anchor" href="#learner-update-"></a></h3>
 <p>Update formula</p><div class="section">
 <h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">learner</span><span class="op">$</span><span class="fu">update</span><span class="op">(</span><span class="va">formula</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>formula</code></dt>
 <dd><p>formula or character which defines the new response</p></dd>
@@ -243,23 +245,24 @@ stored inside the class.</p></dd>
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-learner-print"></a><div class="section">
-<h3 id="method-print-">Method <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code><a class="anchor" aria-label="anchor" href="#method-print-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-learner-print"></a><div class="section">
+<h3 id="learner-print-"><code>learner$print()</code><a class="anchor" aria-label="anchor" href="#learner-print-"></a></h3>
 <p>Print method</p><div class="section">
 <h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">learner</span><span class="op">$</span><span class="fu">print</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
+</div>
 
-</div><p></p><hr><a id="method-learner-summary"></a><div class="section">
-<h3 id="method-summary-">Method <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code><a class="anchor" aria-label="anchor" href="#method-summary-"></a></h3>
+<p></p><hr><a id="method-learner-summary"></a><div class="section">
+<h3 id="learner-summary-"><code>learner$summary()</code><a class="anchor" aria-label="anchor" href="#learner-summary-"></a></h3>
 <p>Summary method to provide more extensive information than
 learner$print().</p><div class="section">
 <h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">learner</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns">Returns<a class="anchor" aria-label="anchor" href="#returns"></a></h4>
 <p>summarized_learner object, which is a list with the following
 elements:</p><dl><dt>info</dt>
@@ -287,8 +290,8 @@ elements:</p><dl><dt>info</dt>
 <dd><p>include intercept in design matrix</p></dd>
 
 
-</dl></div>
-<div class="section">
+</dl><p></p>
+</div><p></p><div class="section">
 <h4 id="examples">Examples<a class="anchor" aria-label="anchor" href="#examples"></a></h4>
 <p></p><div class="r example copy"><div class="sourceCode"><pre><code><span><span class="va">lr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/learner_glm.html">learner_glm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span>, family <span class="op">=</span> <span class="st">"nb"</span><span class="op">)</span></span>
 <span><span class="va">lr</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span><span class="op">)</span></span>
@@ -298,60 +301,56 @@ elements:</p><dl><dt>info</dt>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">lr_sum</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
+</div>
 
-</div><p></p><hr><a id="method-learner-response"></a><div class="section">
-<h3 id="method-response-">Method <code>response()</code><a class="anchor" aria-label="anchor" href="#method-response-"></a></h3>
+<p></p><hr><a id="method-learner-response"></a><div class="section">
+<h3 id="learner-response-"><code>learner$response()</code><a class="anchor" aria-label="anchor" href="#learner-response-"></a></h3>
 <p>Extract response from data</p><div class="section">
 <h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">learner</span><span class="op">$</span><span class="fu">response</span><span class="op">(</span><span class="va">data</span>, eval <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-4">Arguments<a class="anchor" aria-label="anchor" href="#arguments-4"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>data</code></dt>
 <dd><p>data.frame</p></dd>
 
-
-<dt><code>eval</code></dt>
+      <dt><code>eval</code></dt>
 <dd><p>when FALSE return the untransformed outcome
 (i.e., return 'a' if formula defined as I(a==1) ~ ...)</p></dd>
 
-
-<dt><code>...</code></dt>
+      <dt><code>...</code></dt>
 <dd><p>additional arguments to <a href="design.html">design</a></p></dd>
 
 
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-learner-design"></a><div class="section">
-<h3 id="method-design-">Method <code><a href="design.html">design()</a></code><a class="anchor" aria-label="anchor" href="#method-design-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-learner-design"></a><div class="section">
+<h3 id="learner-design-"><code>learner$design()</code><a class="anchor" aria-label="anchor" href="#learner-design-"></a></h3>
 <p>Generate <a href="design.html">design</a> object (design matrix and response) from data</p><div class="section">
 <h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">learner</span><span class="op">$</span><span class="fu">design</span><span class="op">(</span><span class="va">data</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-5">Arguments<a class="anchor" aria-label="anchor" href="#arguments-5"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>data</code></dt>
 <dd><p>data.frame</p></dd>
 
-
-<dt><code>...</code></dt>
+      <dt><code>...</code></dt>
 <dd><p>additional arguments to <a href="design.html">design</a></p></dd>
 
 
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-learner-opt"></a><div class="section">
-<h3 id="method-opt-">Method <code>opt()</code><a class="anchor" aria-label="anchor" href="#method-opt-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-learner-opt"></a><div class="section">
+<h3 id="learner-opt-"><code>learner$opt()</code><a class="anchor" aria-label="anchor" href="#learner-opt-"></a></h3>
 <p>Get options</p><div class="section">
 <h4 id="usage-8">Usage<a class="anchor" aria-label="anchor" href="#usage-8"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">learner</span><span class="op">$</span><span class="fu">opt</span><span class="op">(</span><span class="va">arg</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-6">Arguments<a class="anchor" aria-label="anchor" href="#arguments-6"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>arg</code></dt>
 <dd><p>name of option to get value of</p></dd>
@@ -360,14 +359,14 @@ elements:</p><dl><dt>info</dt>
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-learner-clone"></a><div class="section">
-<h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-learner-clone"></a><div class="section">
+<h3 id="learner-clone-"><code>learner$clone()</code><a class="anchor" aria-label="anchor" href="#learner-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
 <h4 id="usage-9">Usage<a class="anchor" aria-label="anchor" href="#usage-9"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">learner</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-7">Arguments<a class="anchor" aria-label="anchor" href="#arguments-7"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
@@ -377,6 +376,7 @@ elements:</p><dl><dt>info</dt>
 </div>
 
 </div>
+
 
     </div>
 
@@ -406,30 +406,30 @@ elements:</p><dl><dt>info</dt>
 <span class="r-in"><span><span class="va">x</span><span class="op">$</span><span class="fu">estimate</span><span class="op">(</span><span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">x</span>, newdata <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         setosa  versicolor   virginica</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.9823929 0.014178571 0.003428571</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.9510833 0.043488095 0.005428571</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 0.9844048 0.013095238 0.002500000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 0.9687738 0.028726190 0.002500000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 0.9898929 0.006678571 0.003428571</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 0.9064936 0.068506410 0.025000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.9960000 0.003000000 0.001000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.9612500 0.035083333 0.003666667</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 0.9950000 0.003333333 0.001666667</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 0.9852381 0.013095238 0.001666667</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 1.0000000 0.000000000 0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 0.9528413 0.044492063 0.002666667</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="co"># Reduce Ex. timing</span></span></span>
 <span class="r-in"><span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu">targeted</span><span class="fu">::</span><span class="fu"><a href="cv.default.html">cv</a></span><span class="op">(</span><span class="va">models</span>, data <span class="op">=</span> <span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">a</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">args</span>, <span class="st">"table"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              brier -logscore</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model1  0.10005912 0.2205740</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model2  0.10032820 0.2232710</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model3  0.08405392 0.1823416</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model4  0.08297912 0.1784703</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model5  0.08659444 0.1799173</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model6  0.08517396 0.1764445</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model7  0.35036559 0.5715464</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model8  0.34923672 0.5664500</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model9  0.34400827 0.5539763</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model10 0.34324098 0.5507146</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model11 0.34244349 0.5466884</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model12 0.34120762 0.5492056</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model1  0.09933114 0.2176723</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model2  0.09852394 0.2190576</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model3  0.08930160 0.1951197</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model4  0.08693167 0.1859497</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model5  0.07920760 0.1667053</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model6  0.07973235 0.1642473</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model7  0.33889722 0.5576471</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model8  0.34434199 0.5659671</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model9  0.33340380 0.5510511</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model10 0.33373744 0.5450570</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model11 0.34011615 0.5492692</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model12 0.33269580 0.5396498</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># defining learner via function with arguments y (response)</span></span></span>
@@ -451,7 +451,7 @@ elements:</p><dl><dt>info</dt>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## ------------------------------------------------</span></span></span>
-<span class="r-in"><span><span class="co">## Method `learner$summary`</span></span></span>
+<span class="r-in"><span><span class="co">## Method `learner$summary()`</span></span></span>
 <span class="r-in"><span><span class="co">## ------------------------------------------------</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">lr</span> <span class="op">&lt;-</span> <span class="fu"><a href="learner_glm.html">learner_glm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span>, family <span class="op">=</span> <span class="st">"nb"</span><span class="op">)</span></span></span>
@@ -459,7 +459,7 @@ elements:</p><dl><dt>info</dt>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ────────── learner object ──────────</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> glm </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> formula: y ~ x &lt;environment: 0x5590b031a3b0&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> formula: y ~ x &lt;environment: 0x564a99a00128&gt; </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> estimate: formula, data, family, ... </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> estimate.args: family=nb </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> predict: object, newdata, ... </span>
@@ -474,7 +474,7 @@ elements:</p><dl><dt>info</dt>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ────────── learner object ──────────</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> glm </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> formula: y ~ x &lt;environment: 0x5590b031a3b0&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> formula: y ~ x &lt;environment: 0x564a99a00128&gt; </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> estimate: formula, data, family, ... </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> estimate.args: family=nb </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> predict: object, newdata, ... </span>

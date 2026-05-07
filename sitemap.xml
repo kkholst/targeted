@@ -8,7 +8,6 @@
 <url><loc>/authors.html</loc></url>
 <url><loc>/index.html</loc></url>
 <url><loc>/news/index.html</loc></url>
-<url><loc>/reference/ML.html</loc></url>
 <url><loc>/reference/RATE.html</loc></url>
 <url><loc>/reference/RATE.surv.html</loc></url>
 <url><loc>/reference/SL.html</loc></url>
@@ -49,7 +48,6 @@
 <url><loc>/reference/learner_surv_rf.html</loc></url>
 <url><loc>/reference/learner_svm.html</loc></url>
 <url><loc>/reference/learner_xgboost.html</loc></url>
-<url><loc>/reference/ml_model.html</loc></url>
 <url><loc>/reference/naivebayes-class.html</loc></url>
 <url><loc>/reference/naivebayes.html</loc></url>
 <url><loc>/reference/nondom.html</loc></url>

@@ -61,6 +61,11 @@ Klaus K. Holst
 
 ``` r
 library(data.table)
+#> 
+#> Attaching package: ‘data.table’
+#> The following object is masked from ‘package:base’:
+#> 
+#>     %notin%
 data(iris)
 m <- naivebayes(Species ~ Sepal.Width + Petal.Length, data = iris)
 pr <- predict(m, newdata = iris)

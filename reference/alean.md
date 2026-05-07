@@ -78,6 +78,7 @@ Klaus Kähler Holst
 ## Examples
 
 ``` r
+
 sim1 <- function(n, family=gaussian(), ...) {
    m <- lava::lvm() |>
      lava::distribution(~y, value=lava::binomial.lvm()) |>
@@ -99,7 +100,7 @@ e <- alean(
 )
 e
 #>   Estimate Std.Err   2.5% 97.5%   P-value
-#> a   0.9716 0.05424 0.8653 1.078 9.237e-72
+#> a   0.9992  0.0533 0.8947 1.104 2.084e-78
 
 e <- alean(response_model=learner_glm(y ~ a + l, family=binomial),
            exposure_model=learner_glm(a ~ l),
@@ -107,5 +108,5 @@ e <- alean(response_model=learner_glm(y ~ a + l, family=binomial),
            link = "logit", mc.cores=1, nfolds=1)
 e
 #>   Estimate Std.Err   2.5% 97.5%   P-value
-#> a   0.9629 0.05411 0.8568 1.069 7.718e-71
+#> a   0.9946  0.0532 0.8903 1.099 5.551e-78
 ```

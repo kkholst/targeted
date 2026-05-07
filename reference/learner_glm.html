@@ -106,20 +106,20 @@ regression is supported with <code>family = "nb"</code> (or alternatively <code>
 <span class="r-in"><span><span class="va">lr</span><span class="op">$</span><span class="fu">estimate</span><span class="op">(</span><span class="va">d0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">lr</span><span class="op">$</span><span class="va">fit</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)           x </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    479.0455    270.4083 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    434.8400    152.0976 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># negative binomial regression model with offset (using MASS::glm.nb)</span></span></span>
 <span class="r-in"><span><span class="va">lr</span> <span class="op">&lt;-</span> <span class="fu">learner_glm</span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/offset.html" class="external-link">offset</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">w</span><span class="op">)</span><span class="op">)</span>, family <span class="op">=</span> <span class="st">"nb"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">lr</span><span class="op">$</span><span class="fu">estimate</span><span class="op">(</span><span class="va">d0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">lr</span><span class="op">$</span><span class="va">fit</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)           x </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    2.022635    0.539455 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    2.005382    0.389838 </span>
 <span class="r-in"><span><span class="va">lr</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">1</span>, w <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="co"># response scale</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        1        2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12.96289 64.81443 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10.97061 54.85304 </span>
 <span class="r-in"><span><span class="va">lr</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">1</span>, w <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"link"</span><span class="op">)</span> <span class="co"># link scale</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        1        2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2.562090 4.171528 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2.395220 4.004658 </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

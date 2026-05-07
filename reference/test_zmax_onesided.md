@@ -52,8 +52,8 @@ test_zmax_onesided(par, vcov, noninf = 0, index = NULL, par.name = "theta")
 ## See also
 
 [`test_intersection_sw()`](test_intersection_sw.md)
-[`lava::test_wald()`](http://kkholst.github.io/lava/reference/compare.md)
-[`lava::closed_testing()`](http://kkholst.github.io/lava/reference/closed_testing.md)
+[`lava::test_wald()`](https://kkholst.github.io/lava/reference/compare.html)
+[`lava::closed_testing()`](https://kkholst.github.io/lava/reference/closed_testing.html)
 
 ## Author
 

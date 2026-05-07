@@ -10,7 +10,7 @@ following components:
 
   An array with the model score(s) evaluated for each fold, repetition,
   and model estimates (see
-  [`estimate.default`](http://kkholst.github.io/lava/reference/estimate.default.md))
+  [`estimate.default`](https://kkholst.github.io/lava/reference/estimate.default.html))
 
 - names:
 

@@ -10,7 +10,7 @@ Deprecated argument names
 
 - propensity_model:
 
-  Deprecated. Use propensity.model instead.
+  Deprecated. Use treatment.model instead.
 
 - cate_model:
 
@@ -19,3 +19,7 @@ Deprecated argument names
 - treatment:
 
   Deprecated. Use cate.model instead.
+
+- propensity.model:
+
+  Deprecated. Use treatment.model instead.

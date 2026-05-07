@@ -10,7 +10,6 @@ RATE(
   post.treatment,
   treatment,
   data,
-  family = gaussian(),
   M = 5,
   pr.treatment,
   treatment.level,
@@ -39,10 +38,6 @@ RATE(
 - data:
 
   data.frame
-
-- family:
-
-  Exponential family for response (default gaussian)
 
 - M:
 

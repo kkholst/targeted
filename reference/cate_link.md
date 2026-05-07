@@ -115,7 +115,7 @@ if (require("SuperLearner",quietly=TRUE)) {
 #> Average Treatment Effect:
 #>                     Estimate Std.Err   2.5%  97.5% P-value
 #> [(Intercept)] - [v]   -119.4   1.488 -122.3 -116.4       0
-#> 
-#>  Null Hypothesis: 
+#> ────────────────────────────────────────────────────────────
+#> Null Hypothesis: 
 #>   [(Intercept)] - [v] = 0 
 ```

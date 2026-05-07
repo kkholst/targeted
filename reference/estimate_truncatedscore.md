@@ -78,7 +78,7 @@ estimate_truncatedscore(
 
 ## Value
 
-[lava::estimate.default](http://kkholst.github.io/lava/reference/estimate.default.md)
+[lava::estimate.default](https://kkholst.github.io/lava/reference/estimate.default.html)
 object
 
 ## Author

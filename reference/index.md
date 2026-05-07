@@ -2,7 +2,6 @@
 
 ## All functions
 
-- [`ML()`](ML.md) : ML model
 - [`RATE()`](RATE.md) : Responder Average Treatment Effect
 - [`RATE.surv()`](RATE.surv.md) : Responder Average Treatment Effect
 - [`SL()`](SL.md) : SuperLearner wrapper for learner
@@ -56,7 +55,6 @@
 - [`learner_surv_rf()`](learner_surv_rf.md) : Construct a learner
 - [`learner_svm()`](learner_svm.md) : Construct a learner
 - [`learner_xgboost()`](learner_xgboost.md) : Construct a learner
-- [`ml_model`](ml_model.md) : R6 class for prediction models
 - [`naivebayes-class`](naivebayes-class.md) : naivebayes class object
 - [`naivebayes()`](naivebayes.md) : Naive Bayes classifier
 - [`nondom()`](nondom.md) : Find non-dominated points of a set

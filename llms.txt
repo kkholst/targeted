@@ -17,6 +17,7 @@ You can install the released version of targeted from
 [CRAN](https://CRAN.R-project.org) with:
 
 ``` r
+
 install.packages("targeted")
 ```
 
@@ -24,6 +25,7 @@ And the development version from
 [GitHub](https://github.com/kkholst/targeted) with:
 
 ``` r
+
 remotes::install_github("kkholst/targeted", ref="dev")
 ```
 
@@ -32,6 +34,7 @@ Computations such as cross-validation are parallelized via the
 computations and progress-bars the following code can be executed
 
 ``` r
+
 future::plan("multisession")
 progressr::handlers(global=TRUE)
 ```
@@ -40,13 +43,15 @@ progressr::handlers(global=TRUE)
 
 To illustrate some of the functionality of the `targeted` package we
 simulate some data from the following model
-$$Y = \exp\{ - \left( W_{1} - 1 \right)^{2} - \left( W_{2} - 1 \right)^{2})\} - 2\exp\{ - \left( W_{1} + 1 \right)^{2} - \left( W_{2} + 1 \right)^{2}\} A + \epsilon$$
-with independent measurement error $\epsilon \sim \mathcal{N}(0,1)$,
-treatment variable
-$A \sim Bernoulli\left( \text{expit}\{ - 1 + W_{1}\} \right)$ and
-independent covariates $W_{1},W_{2} \sim \mathcal{N}(0,1/2)$.
+``` math
+Y = \exp\{-(W_1 - 1)^2 - (W_2 - 1)^2)\} - 2\exp\{-(W_1+1)^2 - (W_2+1)^2\}A + \epsilon
+```
+with independent measurement error $`\epsilon\sim\mathcal{N}(0,1)`$,
+treatment variable $`A \sim Bernoulli(\text{expit}\{-1+W_1\})`$ and
+independent covariates $`W_1, W_2\sim\mathcal{N}(0,1/2)`$.
 
 ``` r
+
 library("targeted")
 
 simdata <- function(n, ...) {
@@ -72,6 +77,7 @@ head(d)
 ```
 
 ``` r
+
 wnew <- seq(-3,3, length.out=200)
 dnew <- expand.grid(w1 = wnew, w2 = wnew, a = 1)
 y <- with(dnew,
@@ -98,10 +104,11 @@ the `targeted:cate` function. Commonly used models are constructed as
 `learner` class objects through the `learner_*` functions.
 
 As an example, we can specify a linear regression model with an
-interaction term between treatment and the two covariates $W_{1}$ and
-$W_{2}$
+interaction term between treatment and the two covariates $`W_1`$ and
+$`W_2`$
 
 ``` r
+
 lr <- learner_glm(y ~ (w1 + w2)*a, family = gaussian)
 lr
 #> ────────── learner object ──────────
@@ -115,6 +122,7 @@ lr
 To fit the model to the data we use the `estimate` method
 
 ``` r
+
 lr$estimate(d)
 lr$fit
 #> 
@@ -129,16 +137,18 @@ lr$fit
 #> Residual Deviance: 2741  AIC: 11200
 ```
 
-Predictions, $E\left( Y \mid W_{1},W_{2} \right)$, can be performed with
-the `predict` method
+Predictions, $`E(Y\mid W_1, W_2)`$, can be performed with the `predict`
+method
 
 ``` r
+
 head(d) |> lr$predict()
 #>           1           2           3           4           5           6 
 #> -0.01878799  0.26395942 -0.05942914  0.68687155  0.32330487 -0.02109944
 ```
 
 ``` r
+
 pr <- matrix(lr$predict(dnew), ncol=length(wnew))
 image(wnew, wnew, pr, col=viridisLite::viridis(64),
       main=expression(paste("E(Y|",W[1],",",W[2],")")),
@@ -150,6 +160,7 @@ image(wnew, wnew, pr, col=viridisLite::viridis(64),
 Similarly, a Random Forest can be specified with
 
 ``` r
+
 lr_rf <- learner_grf(y ~ w1 + w2 + a, num.trees = 500)
 ```
 
@@ -158,10 +169,11 @@ with the `learner_expand_grid` function.
 
 ### Cross-validation
 
-To assess the model generalization error we can perform $k$-fold
+To assess the model generalization error we can perform $`k`$-fold
 cross-validation with the `cv` method
 
 ``` r
+
 mod <- list(glm = lr, rf = lr_rf)
 cv(mod, data = d, rep = 2, nfolds = 5) |> summary()
 #> , , mse
@@ -183,6 +195,7 @@ An ensemble learner (super-learner) can easily be constructed from lists
 of `learner` objects
 
 ``` r
+
 sl <- learner_sl(mod, nfolds = 10)
 sl$estimate(d)
 sl
@@ -201,6 +214,7 @@ sl
 ```
 
 ``` r
+
 pr <- matrix(sl$predict(dnew), ncol=length(wnew))
 image(wnew, wnew, pr, col=viridisLite::viridis(64),
       main=expression(paste("E(Y|",W[1],",",W[2],")")),
@@ -212,41 +226,51 @@ image(wnew, wnew, pr, col=viridisLite::viridis(64),
 ## Average Treatment Effects
 
 In the following we are interested in estimating the target parameter
-$\psi_{a}(P) = E_{P}\left\lbrack Y(a) \right\rbrack$, where $Y(a)$ is
-the *potential outcome* we would have observed if treatment $a$ had been
-administered, possibly contrary to the actual treatment that was
-observed, i.e., $Y = Y(A)$. To assess the treatment effect we can then
-the consider the *average treatment effect* (ATE)
-$$E_{P}\left\lbrack Y(1) \right\rbrack - E_{P}\left\lbrack Y(0) \right\rbrack,$$
-or some other contrast of interest
-$g\left( \psi_{1}(P),\psi_{0}(P) \right)$. Under the following
-assumptions
+$`\psi_a(P)
+= E_P[Y(a)]`$, where $`Y(a)`$ is the *potential outcome* we would have
+observed if treatment $`a`$ had been administered, possibly contrary to
+the actual treatment that was observed, i.e., $`Y = Y(A)`$. To assess
+the treatment effect we can then the consider the *average treatment
+effect* (ATE)
+``` math
+E_P[Y(1)]-E_P[Y(0)],
+```
+or some other contrast of interest $`g(\psi_1(P), \psi_0(P))`$. Under
+the following assumptions
 
 1.  Stable Unit Treatment Values Assumption (the treatment of a specific
     subject is not affecting the potential outcome of other subjects)
-2.  Positivity, $P(A \mid W) > \epsilon$ for some $\epsilon > 0$ and
-    baseline covariates $W$
-3.  No unmeasured confounders, $Y(a)\bot\!\!\!\bot A|W$
+2.  Positivity, $`P(A\mid W)>\epsilon`$ for some $`\epsilon>0`$ and
+    baseline covariates $`W`$
+3.  No unmeasured confounders, $`Y(a)\perp \!\!\! \perp A|W`$
 
 then the target parameter can be identified from the observed data
 distribution as
-$$E\left( E\left\lbrack Y|W,A = a \right\rbrack \right) = E\left( E\left\lbrack Y(a)|W \right\rbrack \right) = E\left\lbrack Y(a) \right\rbrack$$
+``` math
+E(E[Y|W,A=a]) = E(E[Y(a)|W]) = E[Y(a)]
+```
 or
-$$E\left\lbrack YI(A = a)/P\left( A = a|W \right) \right\rbrack = E\left\lbrack Y(a) \right\rbrack.$$
+``` math
+E[Y I(A=a)/P(A=a|W)] = E[Y(a)].
+```
 
-This suggests estimators based on outcome regression ($g$-computation)
+This suggests estimators based on outcome regression ($`g`$-computation)
 or inverse probability weighting. More generally, under the above
 assumption we can constructor a *one-step* estimator from the *Efficient
 Influence Function* combining these two
-$$E\left\lbrack \frac{I(A = a)}{\Pi_{a}(W)}\left( Y - Q(W,A) \right) + Q(W,a) \right\rbrack.$$  
+``` math
+ E\left[\frac{I(A=a)}{\Pi_a(W)}(Y-Q(W,A)) + Q(W,a)\right].
+```
+  
 In practice, this requires plugin estimates of both the outcome model,
-$Q(W,A):=E(Y \mid A,W)$, and of the treatment propensity model
-$\Pi_{a}(W):=P(A = a \mid W)$. The corresponding estimator is consistent
+$`Q(W,A) := E(Y\mid A, W)`$, and of the treatment propensity model
+$`\Pi_a(W) := P(A=a\mid W)`$. The corresponding estimator is consistent
 even if just one of the two nuisance models is correctly specified.
 
 First we specify the propensity model
 
 ``` r
+
 prmod <- learner_glm(a ~ w1 + w2, family=binomial)
 ```
 
@@ -254,7 +278,8 @@ We will reuse one of the outcome models from the previous section, and
 use the `cate` function to estimate the treatment effect
 
 ``` r
-a <- cate(response.model = lr_rf, propensity.model = prmod, data = d, nfolds = 5)
+
+a <- cate(response.model = lr_rf, treatment.model = prmod, data = d, nfolds = 5)
 a
 #>             Estimate Std.Err       2.5%   97.5%   P-value
 #> E[y(1)]      -0.1700 0.02628 -0.2214840 -0.1185 9.939e-11
@@ -268,8 +293,9 @@ the difference of those, the average treatment effect, given as the term
 `(Intercept)`.
 
 ``` r
+
 summary(a)
-#> cate(response.model = lr_rf, propensity.model = prmod, data = d, 
+#> cate(response.model = lr_rf, treatment.model = prmod, data = d,
 #>     nfolds = 5)
 #> 
 #>             Estimate Std.Err       2.5%   97.5%   P-value
@@ -290,7 +316,7 @@ Here we use the `nfolds=5` argument to use 5-fold *cross-fitting* to
 guarantee that the estimates converges weakly to a Gaussian distribution
 even though that the estimated influence function based on plugin
 estimates from the Random Forest does not necessarily lie in a
-$P$-Donsker class.
+$`P`$-Donsker class.
 
 # Project organization
 
@@ -324,7 +350,6 @@ for details about how to contribute code to this project.
 
 ## All functions
 
-- [`ML()`](ML.md) : ML model
 - [`RATE()`](RATE.md) : Responder Average Treatment Effect
 - [`RATE.surv()`](RATE.surv.md) : Responder Average Treatment Effect
 - [`SL()`](SL.md) : SuperLearner wrapper for learner
@@ -378,7 +403,6 @@ for details about how to contribute code to this project.
 - [`learner_surv_rf()`](learner_surv_rf.md) : Construct a learner
 - [`learner_svm()`](learner_svm.md) : Construct a learner
 - [`learner_xgboost()`](learner_xgboost.md) : Construct a learner
-- [`ml_model`](ml_model.md) : R6 class for prediction models
 - [`naivebayes-class`](naivebayes-class.md) : naivebayes class object
 - [`naivebayes()`](naivebayes.md) : Naive Bayes classifier
 - [`nondom()`](nondom.md) : Find non-dominated points of a set

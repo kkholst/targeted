@@ -133,7 +133,7 @@ lm(y~a-1, lava::sim(m0,2e4))
 #> 
 #> Coefficients:
 #>     a0      a1      a2      a3  
-#> 0.2168  0.3467  0.4051  0.6188  
+#> 0.2232  0.3481  0.4066  0.6236  
 #> 
 
 # Choosing a different contrast for the association measures

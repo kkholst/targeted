@@ -30,7 +30,7 @@ objects of the S3 class '`calibration`'
 ## S3 generics
 
 The following S3 generic functions are available for an object of class
-`targeted`:
+`calibration`:
 
 - `predict`:
 

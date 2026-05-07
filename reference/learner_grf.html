@@ -140,7 +140,7 @@ to the maximum hardware concurrency.</p></dd>
 <span class="r-in"><span><span class="va">x1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, sd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">x2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">lp</span> <span class="op">&lt;-</span> <span class="va">x2</span><span class="op">*</span><span class="va">x1</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="va">x1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">yb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">1</span>, <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="http://kkholst.github.io/lava/reference/internal.html" class="external-link">expit</a></span><span class="op">(</span><span class="va">lp</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">yb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">1</span>, <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/internal.html" class="external-link">expit</a></span><span class="op">(</span><span class="va">lp</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">y</span> <span class="op">&lt;-</span>  <span class="va">lp</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, sd <span class="op">=</span> <span class="fl">0.5</span><span class="op">**</span><span class="fl">.5</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">yb</span>, <span class="va">x1</span>, <span class="va">x2</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
@@ -148,25 +148,25 @@ to the maximum hardware concurrency.</p></dd>
 <span class="r-in"><span><span class="va">lr</span> <span class="op">&lt;-</span> <span class="fu">learner_grf</span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">lr</span><span class="op">$</span><span class="fu">estimate</span><span class="op">(</span><span class="va">d</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">lr</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  0.7819701 -2.5837244  1.1191245 -2.6589655  0.3622218  0.7357379</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -2.3103645  0.7980530 -2.4935290  1.1147601 -2.6651491  0.3719239</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># binary classification</span></span></span>
 <span class="r-in"><span><span class="va">lr</span> <span class="op">&lt;-</span> <span class="fu">learner_grf</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">yb</span><span class="op">)</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span>, model <span class="op">=</span> <span class="st">"probability_forest"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">lr</span><span class="op">$</span><span class="fu">estimate</span><span class="op">(</span><span class="va">d</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">lr</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span><span class="op">)</span> <span class="co"># predict class probabilities of class 2</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.8236664 0.1345047 0.8830038 0.1046585 0.6214976 0.7902968</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.16689463 0.64701852 0.08951532 0.76939134 0.09250615 0.71643981</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># multi-class classification</span></span></span>
 <span class="r-in"><span><span class="va">lr</span> <span class="op">&lt;-</span> <span class="fu">learner_grf</span><span class="op">(</span><span class="va">Species</span> <span class="op">~</span> <span class="va">.</span>, model <span class="op">=</span> <span class="st">"probability_forest"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">lr</span><span class="op">$</span><span class="fu">estimate</span><span class="op">(</span><span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">lr</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         setosa   versicolor    virginica</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.9991906 0.0005125000 0.0002969188</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.9856089 0.0128613095 0.0015297619</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 0.9988476 0.0009142857 0.0002380952</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 0.9970881 0.0023238095 0.0005880952</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 0.9989144 0.0004886905 0.0005969188</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 0.9451567 0.0515652431 0.0032780696</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.9981143 0.0008982143 9.875000e-04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.9860657 0.0125384921 1.395833e-03</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 0.9982458 0.0016708333 8.333333e-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 0.9961508 0.0035784091 2.708333e-04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 0.9983536 0.0007839286 8.625000e-04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 0.9503300 0.0469902597 2.679762e-03</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
