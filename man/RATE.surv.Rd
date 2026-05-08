@@ -65,7 +65,7 @@ Outcomes
 \details{
 Estimation of
 \deqn{
-\frac{P(T \leq \tau|A=1) - P(T \leq \tau|A=1)}{E[D|A=1]}
+\frac{P(T \leq \tau|A=1) - P(T \leq \tau|A=0)}{E[D|A=1]}
 }
 under right censoring based on plug-in estimates of \eqn{P(T \leq \tau|A=a)}
 and \eqn{E[D|A=1]}.
