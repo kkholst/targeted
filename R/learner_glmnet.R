@@ -6,7 +6,8 @@
 #' called with `s = "lambda.min"`.
 #' @inherit constructor_shared
 #' @inheritParams glmnet::cv.glmnet
-#' @inheritParams glmnet::glmnet # required to document family and alpha args
+#' @inheritParams glmnet::glmnet
+# inheritParams glmnet::glmnet is required to document family and alpha args
 #' @examples
 #' # continuous outcome
 #' n <- 5e2

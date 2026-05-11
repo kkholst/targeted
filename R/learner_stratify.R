@@ -73,7 +73,7 @@ learner_stratify <- function(formula,
   if (length(dots)>0) learner.args[names(dots)] <- dots
   est <- function(formula, data, stratify, ...) {
     dots <- list(...)
-    if (length(dots)>0) earner.args[names(dots)] <- dots
+    if (length(dots)>0) learner.args[names(dots)] <- dots
     lr <- do.call(learner, c(list(formula), learner.args))
     if (is.null(stratify)) stratify <- rep(1, nrow(data))
     res <- c()

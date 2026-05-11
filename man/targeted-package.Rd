@@ -46,6 +46,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Klaus K. Holst \email{klaus@holst.it}
   \item Benedikt Sommer \email{benediktsommer92@gmail.com}
   \item Andreas Nordland \email{andreasnordland@gmail.com}
 }

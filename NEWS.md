@@ -2,6 +2,7 @@
 
 Development version
 
+- removing deprecated ml_model
 - `learner_surv_cox`, `learner_surv_rf`, `cumhaz`
 - feature(superlearner): more robust metalearner (in case quadratic prog. fails)
 - feature(learner_cox): mets::phreg wrapper.

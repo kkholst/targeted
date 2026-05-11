@@ -347,6 +347,7 @@ SL <- function(formula=~., ...,
   if (!requireNamespace("SuperLearner")) {
       stop("Package 'SuperLearner' required.")
   }
+
   pred <- as.character(formula)
   pred <- ifelse(length(pred)==2, pred[2], pred[3])
   if (pred=="1") {
@@ -359,7 +360,8 @@ SL <- function(formula=~., ...,
       X <- as.data.frame(x)
       args <- c(list(
         Y = Y, X = X,
-        SL.library = SL.library
+        SL.library = SL.library,
+        env = asNamespace("SuperLearner")
       ), dots)
       if (binomial) {
         args <- c(args, list(family = binomial()))

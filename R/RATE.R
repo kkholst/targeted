@@ -5,7 +5,6 @@
 #' @param post.treatment Post treatment marker formula (e.g., D ~ W)
 #' @param treatment Treatment formula (e.g, A ~ 1)
 #' @param data data.frame
-#' @param family Exponential family for response (default gaussian)
 #' @param M Number of folds in cross-fitting (M=1 is no cross-fitting)
 #' @param pr.treatment (optional) Randomization probability of treatment.
 #' @param treatment.level Treatment level in binary treatment (default 1)
@@ -20,7 +19,7 @@
 #' @author Andreas Nordland, Klaus K. Holst
 #' @export
 RATE <- function(response, post.treatment, treatment,
-                 data, family = gaussian(), M = 5,
+                 data, M = 5,
                  pr.treatment, treatment.level,
                  SL.args.response = list(
                    family = gaussian(), SL.library = c("SL.mean", "SL.glm")
@@ -61,8 +60,8 @@ RATE <- function(response, post.treatment, treatment,
         c(list(data = train_data, call = cl), dots)
       )
     }
-    D.est <- D.fit(train_data)
-    Y.est <- Y.fit(train_data)
+    D.fit$estimate(train_data)
+    Y.fit$estimate(train_data)
 
     A <- as.numeric(get_response(treatment, valid_data) == treatment.level[1])
     D <- as.numeric(get_response(post.treatment, valid_data))
@@ -75,19 +74,21 @@ RATE <- function(response, post.treatment, treatment,
       )
     }
     valid_data[lava::getoutcome(treatment)] <- treatment.level[1]
-    pr.Ya <- predict(Y.est, valid_data)
-    pr.Da <- predict(D.est, valid_data)
+    pr.Ya <- Y.fit$predict(valid_data)
+    pr.Da <- D.fit$predict(valid_data)
     valid_data[lava::getoutcome(treatment)] <- control.level
-    pr.Y0 <- predict(Y.est, valid_data)
+    pr.Y0 <- Y.fit$predict(valid_data)
 
     phi.a <- A / pr.treatment * (Y - pr.Ya) + pr.Ya
     phi.0 <- (1 - A) / (1 - pr.treatment) * (Y - pr.Y0) + pr.Y0
 
     phi.d <- A / pr.treatment * (D - pr.Da) + pr.Da
 
-    phis <- list(a1 = phi.a, a0 = phi.0, d = phi.d)
-
-    phis <- do.call(cbind, phis)
+    phis <- matrix(
+      cbind(phi.a, phi.0, phi.d),
+      ncol = 3,
+      dimnames = list(NULL, c("a1", "a0", "d"))
+    )
 
     return(phis)
   }
@@ -141,7 +142,7 @@ RATE <- function(response, post.treatment, treatment,
 #'
 #' Estimation of
 #' \deqn{
-#' \frac{P(T \leq \tau|A=1) - P(T \leq \tau|A=1)}{E[D|A=1]}
+#' \frac{P(T \leq \tau|A=1) - P(T \leq \tau|A=0)}{E[D|A=1]}
 #' }
 #' under right censoring based on plug-in estimates of \eqn{P(T \leq \tau|A=a)}
 #' and \eqn{E[D|A=1]}.
@@ -174,7 +175,6 @@ RATE <- function(response, post.treatment, treatment,
 #' @param args.censoring Similar to args.response.
 #' @author Andreas Nordland, Klaus K. Holst
 #' @inherit RATE
-#' @export
 RATE.surv <- function(response, post.treatment, treatment, censoring,
                       tau,
                       data,
@@ -206,7 +206,7 @@ RATE.surv <- function(response, post.treatment, treatment, censoring,
   rm(surv.response, surv.censoring)
 
   A.levels <- sort(unique(get_response(treatment, data)))
-  if (all(A.levels != c(0, 1))) stop(
+  if (!all(c(0, 1) %in% A.levels) || (length(A.levels) != 2)) stop(
     "Expected binary treatment variable (0,1)."
   )
   if (missing(pr.treatment)) pr.treatment <- NULL
@@ -228,7 +228,7 @@ RATE.surv <- function(response, post.treatment, treatment, censoring,
     # post treatment model
     D.args <- c(list(formula = post.treatment), SL.args.post.treatment)
     D.fit <- do.call(SL, D.args)
-    D.est <- D.fit(train_data)
+    D.fit$estimate(train_data)
 
     # time-to-event outcome model
     T.args <- c(
@@ -258,7 +258,7 @@ RATE.surv <- function(response, post.treatment, treatment, censoring,
     # constructing the one-step estimator
     f.0 <- F.tau(
       T.est = T.est,
-      D.est = D.est,
+      D.est = D.fit,
       data = valid_data,
       tau = tau,
       a = 0,
@@ -267,7 +267,7 @@ RATE.surv <- function(response, post.treatment, treatment, censoring,
     )
     f.1 <- F.tau(
       T.est = T.est,
-      D.est = D.est,
+      D.est = D.fit,
       data = valid_data,
       tau = tau,
       a = 1,
@@ -296,14 +296,17 @@ RATE.surv <- function(response, post.treatment, treatment, censoring,
       + (1 - (1 - A) / (1 - pr.treatment)) * f.0
     phi.1 <- A / (pr.treatment) * (valid.event / sc * (valid.time <= tau) + hmc)
       + (1 - A / (pr.treatment)) * f.1
-
     D <- as.numeric(get_response(post.treatment, valid_data))
     valid_data[lava::getoutcome(treatment)] <- 1
-    pr.d <- predict(D.est, valid_data, type = "response")
+
+    pr.d <- predict(D.fit, valid_data)
     phi.d <- A / pr.treatment * (D - pr.d) + pr.d
 
-    phis <- list(a1 = phi.1, a0 = phi.0, d = phi.d)
-    phis <- do.call(cbind, phis)
+    phis <- matrix(
+      cbind(phi.1, phi.0, phi.d),
+      ncol = 3,
+      dimnames = list(NULL, c("a1", "a0", "d"))
+    )
 
     return(phis)
   }
@@ -345,7 +348,7 @@ RATE.surv <- function(response, post.treatment, treatment, censoring,
 
 F.tau <- function(T.est, D.est, data, tau, a, treatment, post.treatment) {
   data[lava::getoutcome(treatment)] <- a
-  pred.D <- predict(D.est, type = "response", data)
+  pred.D <- predict(D.est, data)
 
   data[lava::getoutcome(post.treatment)] <- 1
   surv.T.D1 <- cumhaz(T.est, newdata = data, times = tau)$surv[, 1]
@@ -382,7 +385,7 @@ HMc.tau <- function(T.est, C.est, data, time, event, tau) {
 
   Lc <- vector(mode = "numeric", length = n)
   S <- cumhaz(T.est, newdata = data, times = time)$surv
-  S.tau <- cumhaz(T.est, newdata = data, times = tau)$surv
+  S.tau <- cumhaz(T.est, newdata = data, times = rep(tau, nrow(data)))$surv
   Sc <- cumhaz(C.est, newdata = data, times = time)
   for (i in 1:n) {
     at.risk <- c(rep(1, i), rep(0, n - i))
