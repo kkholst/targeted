@@ -1,3 +1,4 @@
+^.tool-versions$
 ^.dir.locals.el$
 ._files$
 ^.github$
