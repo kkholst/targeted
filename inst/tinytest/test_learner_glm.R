@@ -1,4 +1,5 @@
 library("tinytest")
+library("logger")
 
 set.seed(42)
 
@@ -78,3 +79,45 @@ test_binary_response <- function() {
   expect_equal(fitted(fit), lr$predict(d))
 }
 test_binary_response()
+
+
+capture_warn_logs <- function(expr) {
+  msgs <- character(0L)
+  old_appender <- eval(
+    logger::log_appender(),
+    envir = getNamespace("logger")
+  )
+  on.exit(logger::log_appender(old_appender))
+  logger::log_appender(function(line) msgs <<- c(msgs, line))
+  force(expr)
+  msgs
+}
+
+test_insert_nas_when_pred_call_fails <- function() {
+  lr <- learner_glm(y ~ x1)
+  lr$estimate(d)
+  msg <- capture_warn_logs(pred <- lr$predict(data.frame(x = 1)))
+  expect_true(is.na(pred))
+  expect_true(grepl("NAs inserted", msg))
+  expect_true(grepl("glm", msg)) # info field is logged correctly
+  expect_true(grepl("object 'x1' not found", msg))
+
+  lr$info <- "glmx1"
+  msg <- capture_warn_logs(pred <- lr$predict(data.frame(x = 1)))
+  expect_true(grepl("glmx1", msg))
+
+  lr$info <- NULL # fallback is implemented when info field is NULL
+  msg <- capture_warn_logs(pred <- lr$predict(data.frame(x = 1)))
+  expect_true(grepl("learner", msg))
+
+  # changing log threshold avoids warning
+  logger::log_threshold(ERROR)
+  msg <- capture_warn_logs(pred <- lr$predict(data.frame(x = 1)))
+  expect_equal(length(msg), 0)
+
+  # only replaces NAs for failing rows
+  pred <- lr$predict(data.frame(x1 = c(NA, 1)))
+  expect_true(is.na(pred[[1]]))
+  expect_equal(length(pred), 2)
+}
+test_insert_nas_when_pred_call_fails()

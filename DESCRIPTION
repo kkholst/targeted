@@ -42,7 +42,8 @@ Imports:
     quadprog,
     progressr,
     rlang,
-    survival
+    survival,
+    logger
 Suggests:
     SuperLearner (>= 2.0-28),
     MASS,

@@ -184,6 +184,7 @@ learner <- R6::R6Class("learner", # nolint
               newdata = newdata
             ), predict_args_call)
           }
+          environment(private$init.predict)$self <- self
           return(do.call(private$init.predict, args))
         }
       }
