@@ -235,10 +235,10 @@ moi_missing <- function(data,
 ##' where
 ##'
 ##' \deqn{E[\tilde{Y}| A = a] = E[\Delta Y | A=a] + P(\Delta=0 | A=a) \cdot
-##' E[U(W, A, Z, \theta) | A=a, \Delta=0],}
+##' E[U(X, A, Z, \theta) | A=a, \Delta=0],}
 ##'
 ##' and \eqn{\Delta} denotes the non-missing indicator, and \eqn{U} denotes the
-##' imputation model possibly depending on baseline covariates \eqn{W}, the
+##' imputation model possibly depending on baseline covariates \eqn{X}, the
 ##' treatment \eqn{A}, and a post randomization variable \eqn{Z}.
 ##'
 ##' Inference in based on the estimated influence functions (IFs)
