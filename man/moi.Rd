@@ -14,7 +14,11 @@ moi(
   imputation.augmentation = FALSE,
   imputation.augmentation.model = NULL,
   return.all = FALSE,
-  nfolds = 1
+  nfolds = 1,
+  silent = FALSE,
+  stratify = FALSE,
+  mc.cores = NULL,
+  second.order = TRUE
 )
 }
 \arguments{
@@ -63,6 +67,16 @@ in addition to the final ATE estimate. Default is \code{FALSE}.}
 \item{nfolds}{number of folds (positive integer), or a pre-specified list of
 fold indices where each element is an integer vector of observation indices
 forming a partition of \code{1:nrow(data)}.}
+
+\item{silent}{suppress all messages and progressbars}
+
+\item{stratify}{if TRUE the response.model will be stratified by treatment}
+
+\item{mc.cores}{(optional) number of cores. parallel::mcmapply used instead
+of future}
+
+\item{second.order}{add seconder order term to IF to handle misspecification
+of outcome models}
 }
 \value{
 An object of class \code{estimate} (from the \code{lava}

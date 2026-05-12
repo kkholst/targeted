@@ -99,3 +99,35 @@ test_moi_nfolds <- function() {
   expect_true(all(is.finite(coef(res_custom))))
 }
 test_moi_nfolds()
+
+test_moi_cate_passthrough <- function() {
+  ## simulate a small dataset with missing outcomes
+  set.seed(42)
+  n <- 200
+  x <- rnorm(n)
+  a <- rbinom(n, 1, 0.5)
+  y <- 1 + a + x + rnorm(n)
+  delta <- rbinom(n, 1, lava::expit(1 + x))
+  y <- ifelse(delta == 1, y, NA)
+  d <- data.frame(y = y, a = a, x = x)
+
+  ## exercise silent / stratify / second.order forwarding to cate().
+  ## mc.cores left at NULL default to keep the test CRAN-friendly.
+  ## With stratify = TRUE, response.model and missing.model are fit per
+  ## treatment arm; we drop `a` from their RHS to avoid rank-deficient fits.
+  res <- suppressWarnings(moi(
+    data = d,
+    response.model = learner_glm(y ~ x),
+    treatment.model = a ~ 1,
+    missing.model = learner_glm(~ x, family = binomial()),
+    imputation.model = learner_glm(y ~ a + x),
+    imputation.subset = "!is.na(y)",
+    nfolds = 3,
+    silent = TRUE,
+    stratify = TRUE,
+    second.order = FALSE
+  ))
+  expect_true(inherits(res, "estimate"))
+  expect_true(all(is.finite(coef(res))))
+}
+test_moi_cate_passthrough()

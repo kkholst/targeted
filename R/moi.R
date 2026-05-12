@@ -309,7 +309,11 @@ moi <- function(data,
                 imputation.augmentation = FALSE,
                 imputation.augmentation.model = NULL,
                 return.all = FALSE,
-                nfolds = 1) {
+                nfolds = 1,
+                silent = FALSE,
+                stratify = FALSE,
+                mc.cores = NULL,
+                second.order = TRUE) {
   ## TODO: check that the missing reponse and treatment strata are well defined
   ## TODO: bug when parameters are NA in the imputation model
   n <- nrow(data)
@@ -379,7 +383,11 @@ moi <- function(data,
     response.model = response.model,
     treatment.model = treatment.model,
     data = data,
-    nfolds = nfolds
+    nfolds = nfolds,
+    silent = silent,
+    stratify = stratify,
+    mc.cores = mc.cores,
+    second.order = second.order
   )
   data$delta_response <- NULL
   outcome_levels <- outcome_est$levels
@@ -405,7 +413,11 @@ moi <- function(data,
     response.model = missing.model,
     treatment.model = treatment.model,
     data = data,
-    nfolds = shared_folds
+    nfolds = shared_folds,
+    silent = silent,
+    stratify = stratify,
+    mc.cores = mc.cores,
+    second.order = second.order
   )
   data$delta <- NULL
   missing_levels <- missing_est$levels
