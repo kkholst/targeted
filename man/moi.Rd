@@ -13,7 +13,8 @@ moi(
   imputation.subset = NULL,
   imputation.augmentation = FALSE,
   imputation.augmentation.model = NULL,
-  return.all = FALSE
+  return.all = FALSE,
+  nfolds = 1
 )
 }
 \arguments{
@@ -58,6 +59,10 @@ Default is \code{NULL}.}
 \item{return.all}{Logical. If \code{TRUE}, the returned object includes all
 intermediate estimates
 in addition to the final ATE estimate. Default is \code{FALSE}.}
+
+\item{nfolds}{number of folds (positive integer), or a pre-specified list of
+fold indices where each element is an integer vector of observation indices
+forming a partition of \code{1:nrow(data)}.}
 }
 \value{
 An object of class \code{estimate} (from the \code{lava}

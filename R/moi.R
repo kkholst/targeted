@@ -290,6 +290,8 @@ moi_missing <- function(data,
 ##'   package) containing the ATE estimate with associated
 ##'   influence function based standard errors and confidence intervals.
 ##'
+##' @inheritParams cate
+##'
 ##' @author Andreas Nordland
 ##'
 ##' @seealso
@@ -306,7 +308,8 @@ moi <- function(data,
                 imputation.subset = NULL,
                 imputation.augmentation = FALSE,
                 imputation.augmentation.model = NULL,
-                return.all = FALSE) {
+                return.all = FALSE,
+                nfolds = 1) {
   ## TODO: check that the missing reponse and treatment strata are well defined
   ## TODO: bug when parameters are NA in the imputation model
   n <- nrow(data)
@@ -375,10 +378,13 @@ moi <- function(data,
     cate.model =  ~ 1,
     response.model = response.model,
     treatment.model = treatment.model,
-    data = data
+    data = data,
+    nfolds = nfolds
   )
   data$delta_response <- NULL
   outcome_levels <- outcome_est$levels
+  ## reuse the same cross-fitting folds for subsequent cate() calls
+  shared_folds <- outcome_est$folds
 
   # get the influence function/curve
   outcome_est <- estimate(outcome_est,
@@ -398,7 +404,8 @@ moi <- function(data,
     cate.model = ~ 1,
     response.model = missing.model,
     treatment.model = treatment.model,
-    data = data
+    data = data,
+    nfolds = shared_folds
   )
   data$delta <- NULL
   missing_levels <- missing_est$levels

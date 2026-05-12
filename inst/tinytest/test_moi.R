@@ -44,3 +44,58 @@ test_moi <- function() {
                                 imputation.subset = "!is.na(y)")
 
 }
+
+test_moi_nfolds <- function() {
+  ## simulate a small dataset with missing outcomes
+  set.seed(42)
+  n <- 200
+  x <- rnorm(n)
+  a <- rbinom(n, 1, 0.5)
+  y <- 1 + a + x + rnorm(n)
+  delta <- rbinom(n, 1, lava::expit(1 + x))
+  y <- ifelse(delta == 1, y, NA)
+  d <- data.frame(y = y, a = a, x = x)
+
+  ## default (no cross-fitting)
+  res1 <- moi(
+    data = d,
+    response.model = learner_glm(y ~ a + x),
+    treatment.model = a ~ 1,
+    missing.model = learner_glm(~ a + x, family = binomial()),
+    imputation.model = learner_glm(y ~ a + x),
+    imputation.subset = "!is.na(y)"
+  )
+  expect_true(inherits(res1, "estimate"))
+  expect_true(all(is.finite(coef(res1))))
+
+  ## integer nfolds: same partition reused for both internal cate() calls.
+  ## Use return.all = TRUE to inspect intermediate components when needed.
+  res5 <- moi(
+    data = d,
+    response.model = learner_glm(y ~ a + x),
+    treatment.model = a ~ 1,
+    missing.model = learner_glm(~ a + x, family = binomial()),
+    imputation.model = learner_glm(y ~ a + x),
+    imputation.subset = "!is.na(y)",
+    nfolds = 5
+  )
+  expect_true(inherits(res5, "estimate"))
+  expect_true(all(is.finite(coef(res5))))
+
+  ## pre-specified list of folds: deterministic partition, reused for both
+  ## internal cate() calls.
+  custom_folds <- split(seq_len(n), rep(1:4, length.out = n))
+  custom_folds <- lapply(custom_folds, sort)
+  res_custom <- moi(
+    data = d,
+    response.model = learner_glm(y ~ a + x),
+    treatment.model = a ~ 1,
+    missing.model = learner_glm(~ a + x, family = binomial()),
+    imputation.model = learner_glm(y ~ a + x),
+    imputation.subset = "!is.na(y)",
+    nfolds = custom_folds
+  )
+  expect_true(inherits(res_custom, "estimate"))
+  expect_true(all(is.finite(coef(res_custom))))
+}
+test_moi_nfolds()
