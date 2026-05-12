@@ -13,8 +13,8 @@ NULL
 # TODO: function needs to be tested, especially for multiclass predictions,
 # we need to ensure that the output format is consistent between the original
 # function call to the predict function and sapply
-standardize_learner_predictions <- function(pred.fun, args, model_info) {
-  if (is.null(model_info)) model_info <- "learner"
+standardize_learner_predictions <- function(pred.fun, args, model.info) {
+  if (is.null(model.info)) model.info <- "learner"
   newdata <- args$newdata
   args_without_data <- args
   args_without_data$newdata <- NULL
@@ -31,7 +31,7 @@ standardize_learner_predictions <- function(pred.fun, args, model_info) {
       logger::log_warn(
         sprintf(
           "%s: NAs inserted during $predict method call\n %s",
-          model_info, e$message
+          model.info, e$message
         )
       )
       sapply(
