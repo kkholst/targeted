@@ -308,6 +308,7 @@ moiate <- function(data,
                    imputation.augmentation.model = NULL,
                    return.all = FALSE) {
   ## TODO: check that the missing reponse and treatment strata are well defined
+  ## TODO: bug when parameters are NA in the imputation model
   n <- nrow(data)
   id <- seq_len(nrow(data))
   if (inherits(data, c("data.table", "tbl_df"))) {

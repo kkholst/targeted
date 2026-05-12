@@ -38,7 +38,7 @@ matrix \eqn{R = \operatorname{diag}(S_{11}^{-0.5}, \ldots,
  S_{pp}^{-0.5})S\operatorname{diag}(S_{11}^{-0.5}, \ldots, S_{pp}^{-0.5})}.
 }
 \seealso{
-\code{\link[=test_intersection_sw]{test_intersection_sw()}} \code{\link[lava:test_wald]{lava::test_wald()}}
+\code{\link[=test_intersection_sw]{test_intersection_sw()}} \code{\link[lava:compare]{lava::test_wald()}}
 \code{\link[lava:closed_testing]{lava::closed_testing()}}
 }
 \author{
