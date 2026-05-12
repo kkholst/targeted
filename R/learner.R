@@ -105,6 +105,7 @@ learner <- R6::R6Class("learner", # nolint
       fit_formula <- "formula" %in% formalArgs(estimate)
       fit_data_arg <- "data" %in% formalArgs(estimate)
       private$init.estimate <- estimate
+
       private$init.predict <- predict
       private$predict_filter_generator <- add_dots(predict.filter)
 
@@ -184,13 +185,19 @@ learner <- R6::R6Class("learner", # nolint
               newdata = newdata
             ), predict_args_call)
           }
-          environment(private$init.predict)$self <- self
+          # check is required because stats::predict is a locked env, whereas
+          # user supplied envs should not be locked. injecting self into the
+          # environment of private$init.predict is only used for learner_
+          # constructors, and should not further be exposed to users
+          if (!environmentIsLocked(environment(private$init.predict))) {
+            environment(private$init.predict)$self <- self
+          }
           return(do.call(private$init.predict, args))
         }
       }
+      self$info <- info
       private$.formula <- formula
       private$formula.keep.specials <- formula.keep.specials
-      self$info <- info
       private$init <- list(
         estimate.args = estimate.args,
         predict.args = predict.args,
@@ -225,7 +232,6 @@ learner <- R6::R6Class("learner", # nolint
     predict = function(newdata, ..., object = NULL) {
       if (is.null(object)) object <- private$fitted
       if (is.null(object)) stop("Provide estimated model object")
-
       preds <- private$predfun(object, newdata, ...)
       # TODO: do we want to pass on the ellipses to the filter function? is
       # there some risk about argument name clashes?

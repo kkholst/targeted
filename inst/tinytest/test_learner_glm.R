@@ -94,6 +94,7 @@ capture_warn_logs <- function(expr) {
 }
 
 test_insert_nas_when_pred_call_fails <- function() {
+  log_threshold(WARN)
   lr <- learner_glm(y ~ x1)
   lr$estimate(d)
   msg <- capture_warn_logs(pred <- lr$predict(data.frame(x = 1)))
