@@ -440,9 +440,9 @@ moi <- function(data,
 
   ##  output
   est <- merge(outcome_est, missing_est, moi_missing_est)
-  ate <- estimate(est,
-                  f = function(x) x[1:2] + x[3:4] * x[5:6],
-                  labels = paste0("E[tildeY|A=", missing_levels, "]"))
+  ate <- est[1:2] + est[3:4] * est[5:6]
+  ate <- estimate(ate, labels = paste0("E[tildeY|A=", missing_levels, "]"))
+
   ate <- estimate(ate, f = cbind(1, -1), labels = "ATE")
 
   if (return.all == TRUE) {
