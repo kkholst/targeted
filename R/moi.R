@@ -1,4 +1,4 @@
-#' Mean Missing Outcome Imputation (MOI)
+#' Mean Imputation Among Missing Outcomes
 #'
 #' Estimates the mean of a given parametric imputation model among observations
 #' with a missing outcome and a given treatment. Specifically, it provides
@@ -32,15 +32,15 @@
 #'    \eqn{E[U|A=0,\Delta=0]}}
 #'   \item{IC}{Influence curve values for each observation}
 #'   \item{id}{Observation identifiers}
-moi <- function(data,
-                id,
-                delta,
-                treatment.model,
-                imputation.model,
-                imputation.subset = NULL,
-                imputation.augmentation = FALSE,
-                missing.model = NULL,
-                imputation.augmentation.model = NULL) {
+moi_missing <- function(data,
+                        id,
+                        delta,
+                        treatment.model,
+                        imputation.model,
+                        imputation.subset = NULL,
+                        imputation.augmentation = FALSE,
+                        missing.model = NULL,
+                        imputation.augmentation.model = NULL) {
   ## input checks
   if (!inherits(imputation.model, "learner_glm")) {
     stop("imputation.model must be of inherited class 'learner_glm'")
@@ -225,7 +225,7 @@ moi <- function(data,
 ##' imputation-based approach combined with doubly robust estimation techniques.
 ##'
 ##' @details
-##' The \code{moiate} function implements an estimator for the Average Treatment
+##' The \code{moi} function implements an estimator for the Average Treatment
 ##' Effect where missing outcomes are imputed using a parametric (glm) model.
 ##'
 ##' The function estimate the target parameter
@@ -298,15 +298,15 @@ moi <- function(data,
 ##'   \code{\link{lava::estimate}} for combining and transforming estimators
 ##'
 ##' @export
-moiate <- function(data,
-                   response.model,
-                   treatment.model,
-                   missing.model,
-                   imputation.model,
-                   imputation.subset = NULL,
-                   imputation.augmentation = FALSE,
-                   imputation.augmentation.model = NULL,
-                   return.all = FALSE) {
+moi <- function(data,
+                response.model,
+                treatment.model,
+                missing.model,
+                imputation.model,
+                imputation.subset = NULL,
+                imputation.augmentation = FALSE,
+                imputation.augmentation.model = NULL,
+                return.all = FALSE) {
   ## TODO: check that the missing reponse and treatment strata are well defined
   ## TODO: bug when parameters are NA in the imputation model
   n <- nrow(data)
@@ -412,25 +412,27 @@ moiate <- function(data,
                           ))
 
   # fit model for E[U(X,A,Z; theta)|A = a, Delta = 0]
-  moi_est <- moi(data = data,
-                 id = id,
-                 delta = delta,
-                 treatment.model = treatment.model,
-                 imputation.model = imputation.model,
-                 imputation.subset = imputation.subset,
-                 imputation.augmentation = imputation.augmentation,
-                 imputation.augmentation.model = imputation.augmentation.model,
-                 missing.model = missing.model)
-  moi_levels <- moi_est$levels
-  moi_est <- moi_est$estimate
+  moi_missing_est <- moi_missing(
+    data = data,
+    id = id,
+    delta = delta,
+    treatment.model = treatment.model,
+    imputation.model = imputation.model,
+    imputation.subset = imputation.subset,
+    imputation.augmentation = imputation.augmentation,
+    imputation.augmentation.model = imputation.augmentation.model,
+    missing.model = missing.model
+  )
+  moi_missing_levels <- moi_missing_est$levels
+  moi_missing_est <- moi_missing_est$estimate
 
   if (!(identical(missing_levels, outcome_levels) &&
-        identical(missing_levels, moi_levels))) {
+        identical(missing_levels, moi_missing_levels))) {
     stop("treatment levels are not identical")
   }
 
   ##  output
-  est <- merge(outcome_est, missing_est, moi_est)
+  est <- merge(outcome_est, missing_est, moi_missing_est)
   ate <- estimate(est,
                   f = function(x) x[1:2] + x[3:4] * x[5:6],
                   labels = paste0("E[tildeY|A=", missing_levels, "]"))

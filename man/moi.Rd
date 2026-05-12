@@ -2,62 +2,98 @@
 % Please edit documentation in R/moi.R
 \name{moi}
 \alias{moi}
-\title{Mean Missing Outcome Imputation (MOI)}
+\title{Average Treatment Effect Estimation with Missing Outcome Imputation}
 \usage{
 moi(
   data,
-  id,
-  delta,
+  response.model,
   treatment.model,
+  missing.model,
   imputation.model,
   imputation.subset = NULL,
   imputation.augmentation = FALSE,
-  missing.model = NULL,
-  imputation.augmentation.model = NULL
+  imputation.augmentation.model = NULL,
+  return.all = FALSE
 )
 }
 \arguments{
-\item{data}{A data.frame containing the analysis dataset. Data.table and
-tibble objects will be coerced to
-data.frame.}
+\item{data}{A \code{data.frame} containing all variables required by the
+models. \code{data.table} and \code{tbl_df} objects are automatically
+coerced to \code{data.frame}.}
 
-\item{delta}{A vector with the non-missing indicator}
+\item{response.model}{A \code{formula} or \code{learner} object
+specifying the response/outcome and the associated baseline adjusted
+model. If a \code{formula} is provided,
+it is automatically wrapped in \code{\link{learner_glm}}. Used to
+estimate \eqn{E[\Delta Y | A = a]}.}
 
-\item{treatment.model}{Learner object}
+\item{treatment.model}{A \code{formula}
+specifying the binary treatment variable, e.g., A ~ 1.}
 
-\item{imputation.model}{A learner object of class 'learner_glm' used to fit
-the imputation model. The learner must specify the outcome variable and
-model formula.}
-
-\item{imputation.subset}{Optional. A character string containing an R
-expression that evaluates to a logical vector indicating which rows to use
-for fitting the
-imputation model. The expression is evaluated in the context of 'data'. If
-NULL (default), all rows are used.}
-
-\item{imputation.augmentation}{Logical. Should an augmentation term
-associated with the imputation model be added to the one-step estimator}
-
-\item{missing.model}{\code{learner} object
+\item{missing.model}{A \code{formula} or \code{learner} object
 specifying the model for the probability of the outcome being
-observed/non-missing}
+observed/non-missing
+(i.e., \eqn{P(\Delta = 1 | A = a)}). If a \code{formula} is provided,
+it is wrapped in \code{learner_glm(..., family = binomial())}. Used to
+estimate \eqn{P(\Delta = 0 | A = a)}.}
 
-\item{imputation.augmentation.model}{\code{learner} object
-specifying the model for the imputation augmentation}
+\item{imputation.model}{A \code{formula} or \code{learner_glm} object
+specifying the missing outcome imputation model. If a \code{formula}
+is provided, it is wrapped in \code{\link{learner_glm}}. Used to estimate
+\eqn{E[U(X, A, Z; \theta) | A = a, \Delta = 0]}.}
+
+\item{imputation.subset}{An optional logical vector specifying a subset of
+the data to use when fitting the imputation model. Default is \code{NULL}
+(all observations are used).}
+
+\item{imputation.augmentation}{Logical. If \code{TRUE}, an augmentation
+term is added to the imputation estimator for improved efficiency.
+Default is \code{FALSE}.}
+
+\item{imputation.augmentation.model}{A \code{formula}, \code{learner},
+or \code{NULL} specifying the model used for the augmentation of the
+imputation estimator. Only used if \code{imputation.augmentation = TRUE}.
+Default is \code{NULL}.}
+
+\item{return.all}{Logical. If \code{TRUE}, the returned object includes all
+intermediate estimates
+in addition to the final ATE estimate. Default is \code{FALSE}.}
 }
 \value{
-An estimate object containing:
-\item{coef}{Estimates for \eqn{E[U|A=1,\Delta=0]} and
-\eqn{E[U|A=0,\Delta=0]}}
-\item{IC}{Influence curve values for each observation}
-\item{id}{Observation identifiers}
+An object of class \code{estimate} (from the \code{lava}
+package) containing the ATE estimate with associated
+influence function based standard errors and confidence intervals.
 }
 \description{
-Estimates the mean of a given parametric imputation model among observations
-with a missing outcome and a given treatment. Specifically, it provides
-estimates of \eqn{E[U(X,A,Z,\theta)|A=a, \Delta=0]}, for an imputation model
-\eqn{U}, where \eqn{X} denotes baseline covariates, \eqn{A} denotes the
-treatment, \eqn{Z} denotes post randomization covariates, and \eqn{\Delta}
-denotes a non-missing indicator. Influence function based standard errors are
-also provided.
+Estimates the Average Treatment Effect (ATE) in settings where the outcome
+may be missing (not observed for all individuals). The function uses an
+imputation-based approach combined with doubly robust estimation techniques.
+}
+\details{
+The \code{moi} function implements an estimator for the Average Treatment
+Effect where missing outcomes are imputed using a parametric (glm) model.
+
+The function estimate the target parameter
+
+\deqn{E[\tilde{Y}| A = 1] - E[\tilde{Y}| A = 0],}
+
+where
+
+\deqn{E[\tilde{Y}| A = a] = E[\Delta Y | A=a] + P(\Delta=0 | A=a) \cdot
+E[U(W, A, Z, \theta) | A=a, \Delta=0],}
+
+and \eqn{\Delta} denotes the non-missing indicator, and \eqn{U} denotes the
+imputation model possibly depending on baseline covariates \eqn{W}, the
+treatment \eqn{A}, and a post randomization variable \eqn{Z}.
+
+Inference in based on the estimated influence functions (IFs)
+of the associated (covariate adjusted) one-step estimators.
+}
+\seealso{
+\code{\link{cate}} for Conditional Average Treatment Effect estimation,
+\code{\link{learner}} for creating learner objects,
+\code{\link{lava::estimate}} for combining and transforming estimators
+}
+\author{
+Andreas Nordland
 }

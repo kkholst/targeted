@@ -37,10 +37,10 @@ test_moi <- function() {
   tmp <- learner_degen
   class(tmp) <- c("learner_glm", class(tmp))
 
-  out <- targeted:::moi(data = data,
-                        delta = delta,
-                        treatment.model = learner_glm(a ~ 1, family = binomial()),
-                        imputation.model = tmp,
-                        imputation.subset = "!is.na(y)")
+  out <- targeted:::moi_missing(data = data,
+                                delta = delta,
+                                treatment.model = learner_glm(a ~ 1, family = binomial()),
+                                imputation.model = tmp,
+                                imputation.subset = "!is.na(y)")
 
 }

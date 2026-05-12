@@ -99,15 +99,15 @@ test_moi <- function() {
     id <- 1:n
     delta <- !is.na(data$y)
 
-    model <- moi(data = data,
-                 id = id,
-                 delta = delta,
-                 treatment.model = learner_glm(a ~ 1, family = binomial()),
-                 imputation.model = learner_glm(y ~ w1 + w2, family = binomial()),
-                 imputation.subset = "!is.na(y) & a == 0")
+    model <- moi_missing(data = data,
+                         id = id,
+                         delta = delta,
+                         treatment.model = learner_glm(a ~ 1, family = binomial()),
+                         imputation.model = learner_glm(y ~ w1 + w2, family = binomial()),
+                         imputation.subset = "!is.na(y) & a == 0")
     est <- model$estimate
 
-    model_aug <- moi(
+    model_aug <- moi_missing(
       data = data,
       id = id,
       delta = delta,
@@ -241,15 +241,15 @@ test_moi_aug <- function() {
     id <- 1:n
     delta <- !is.na(data$y)
 
-    model <- moi(data = data,
-                 id = id,
-                 delta = delta,
-                 treatment.model = learner_glm(a ~ 1, family = binomial()),
-                 imputation.model = learner_glm(y ~ a * (w1 + w2), family = binomial()),
-                 imputation.subset = "!is.na(y)")
+    model <- moi_missing(data = data,
+                         id = id,
+                         delta = delta,
+                         treatment.model = learner_glm(a ~ 1, family = binomial()),
+                         imputation.model = learner_glm(y ~ a * (w1 + w2), family = binomial()),
+                         imputation.subset = "!is.na(y)")
     est <- model$estimate
 
-    model_aug <- moi(
+    model_aug <- moi_missing(
       data = data,
       id = id,
       delta = delta,
@@ -281,7 +281,7 @@ test_moi_aug <- function() {
 
 }
 
-test_moiate_continuous <- function() {
+test_moi_continuous <- function() {
 
   ## covariate distribution
   covariate = function(n) {
@@ -371,7 +371,7 @@ test_moiate_continuous <- function() {
     id <- 1:n
     delta <- !is.na(data$y)
 
-    est <- moiate(
+    est <- moi(
       data = data,
       treatment.model = a ~ 1,
       response.model = learner_glm(y ~ a),
@@ -381,7 +381,7 @@ test_moiate_continuous <- function() {
       return.all = TRUE
     )
 
-    est_aug <- moi(
+    est_aug <- moi_missing(
       data = data,
       id = id,
       delta = delta,
@@ -409,9 +409,9 @@ test_moiate_continuous <- function() {
   lapply(sumres["Coverage",], function(x) expect_equivalent(x, 0.95, tolerance = 0.01))
 }
 
-test_moiate_continuous()
+test_moi_continuous()
 
-test_moiate_binary <- function() {
+test_moi_binary <- function() {
 
   ## covariates and treatment distribution
   covariate <- function(n) {
@@ -523,7 +523,7 @@ test_moiate_binary <- function() {
                                        ifelse(coarsening(data) == 1, 1, NA),
                      estimators = list(
                        `onestep` = setargs(
-                         moiate,
+                         moi,
                          treatment.model = a ~ 1,
                          response.model = learner_glm(
                            formula = reformulate(attr(terms(mean0), "term.labels"), response = "y"),
@@ -539,7 +539,7 @@ test_moiate_binary <- function() {
 
   ## test
   ## d <- trial$simulate(1e3)
-  ## moiate(data = d,
+  ## moi(data = d,
   ##        treatment.model = a ~ 1,
   ##        response.model = learner_glm(
   ##          formula = reformulate(attr(terms(mean0), "term.labels"), response = "y"),
@@ -579,7 +579,7 @@ test_moiate_binary <- function() {
   lapply(sumres["Coverage",], function(x) expect_equivalent(x, 0.95, tolerance = 0.01))
 }
 
-test_moiate_binary()
+test_moi_binary()
 
 test_moi_postrand <- function() {
 
@@ -659,7 +659,7 @@ test_moi_postrand <- function() {
     id <- 1:n
     delta <- !is.na(data$y)
 
-    model <- moiate(
+    model <- moi(
       data = data,
       response.model = learner_glm(y ~ a * x),
       missing.model = learner_glm(~ a * x, family = binomial()),
@@ -670,7 +670,7 @@ test_moi_postrand <- function() {
       return.all = TRUE
     )
 
-    model_aug <- moi(
+    model_aug <- moi_missing(
       data = data,
       id = id,
       delta = delta,
@@ -792,13 +792,13 @@ test_rubins_rule <- function() {
     data <- simdata(1e3)
     mi_est <- multiple_imputation(data, nrep = 100, increments = 100)
 
-    onestep_est <- targeted:::moiate(data = data,
-                                     response.model = learner_glm(y ~ a + x),
-                                     treatment.model = a ~ 1,
-                                     missing.model = learner_glm(~ a + x, family = binomial()),
-                                     imputation.model = learner_glm(y ~ a + x),
-                                     imputation.subset = "!is.na(y)",
-                                     return.all = FALSE)
+    onestep_est <- targeted::moi(data = data,
+                                 response.model = learner_glm(y ~ a + x),
+                                 treatment.model = a ~ 1,
+                                 missing.model = learner_glm(~ a + x, family = binomial()),
+                                 imputation.model = learner_glm(y ~ a + x),
+                                 imputation.subset = "!is.na(y)",
+                                 return.all = FALSE)
 
     merge(mi_est, onestep_est)
   }
@@ -861,12 +861,12 @@ test_moi_2 <- function() {
     id <- 1:1e3
     delta <- !is.na(data$y)
 
-    out <- targeted:::moi(data = data,
-                          id = id,
-                          delta = delta,
-                          treatment.model = learner_glm(a ~ 1, family = binomial()),
-                          imputation.model = learner_glm(y ~ a + x),
-                          imputation.subset = "!is.na(y)")
+    out <- targeted:::moi_missing(data = data,
+                                  id = id,
+                                  delta = delta,
+                                  treatment.model = learner_glm(a ~ 1, family = binomial()),
+                                  imputation.model = learner_glm(y ~ a + x),
+                                  imputation.subset = "!is.na(y)")
     out$estimate
 
   }
