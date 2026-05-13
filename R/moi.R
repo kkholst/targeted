@@ -1,3 +1,10 @@
+## Label helper: Unicode "y with tilde" (U+1EF9) when locale is UTF-8;
+## ASCII fallback "tildeY" otherwise. Used to render E[\tilde{y}(a)] labels
+## in moi() output.
+.moi_tilde_y <- function() {
+  if (isTRUE(l10n_info()[["UTF-8"]])) "\u1ef9" else "tildeY"
+}
+
 #' Mean Imputation Among Missing Outcomes
 #'
 #' Estimates the mean of a given parametric imputation model among observations
@@ -198,7 +205,7 @@ moi_missing <- function(data,
     estimate(coef = est,
              IC = IC,
              id = id,
-             labels = paste0("E[U|A=", a, ",delta=0]"))
+             labels = paste0("E[u(", a, ")|d=0]"))
   }
 
   est <- lapply(
@@ -286,9 +293,26 @@ moi_missing <- function(data,
 ##'   intermediate estimates
 ##'   in addition to the final ATE estimate. Default is \code{FALSE}.
 ##'
-##' @return An object of class \code{estimate} (from the \code{lava}
-##'   package) containing the ATE estimate with associated
-##'   influence function based standard errors and confidence intervals.
+##' @return An object of class \code{moi.targeted} (inheriting from
+##'   \code{targeted}), a list with components:
+##'   \describe{
+##'     \item{call}{The matched call.}
+##'     \item{estimate}{A \code{lava::estimate} object containing the per-arm
+##'       expected potential outcomes \eqn{E[\tilde{Y}|A=a]} and the ATE
+##'       contrast \eqn{E[\tilde{Y}|A=1] - E[\tilde{Y}|A=0]}, with
+##'       influence-function-based standard errors. Row labels follow the
+##'       \code{\link{cate}} convention: per-arm rows are labeled
+##'       \code{E[\u1ef9(1)]} and \code{E[\u1ef9(0)]} (or
+##'       \code{E[tildeY(1)]} / \code{E[tildeY(0)]} in non-UTF-8 locales),
+##'       and the contrast row is labeled
+##'       \code{[E[\u1ef9(1)]] - [E[\u1ef9(0)]]}.}
+##'     \item{levels}{Treatment levels (character).}
+##'     \item{intermediate}{(only if \code{return.all = TRUE}) Intermediate
+##'       estimates: \eqn{E[\Delta Y|A=a]}, \eqn{P(\Delta=0|A=a)}, and
+##'       \eqn{E[U|A=a, \Delta=0]}.}
+##'   }
+##'   Standard methods (\code{print}, \code{summary}, \code{coef},
+##'   \code{vcov}, \code{IC}) are provided.
 ##'
 ##' @inheritParams cate
 ##'
@@ -316,6 +340,7 @@ moi <- function(data,
                 second.order = TRUE) {
   ## TODO: check that the missing reponse and treatment strata are well defined
   ## TODO: bug when parameters are NA in the imputation model
+  cl <- match.call()
   n <- nrow(data)
   id <- seq_len(nrow(data))
   if (inherits(data, c("data.table", "tbl_df"))) {
@@ -398,7 +423,7 @@ moi <- function(data,
   outcome_est <- estimate(outcome_est,
                           keep = c(1, 2),
                           id = id,
-                          labels = paste0("E[DY|A=", outcome_levels, "]"))
+                          labels = paste0("E[dy(", outcome_levels, ")]"))
 
 
 
@@ -427,7 +452,7 @@ moi <- function(data,
   missing_est <- estimate(missing_est,
                           f = function(x) 1 - x,
                           labels = paste0(
-                            "P(D=0|A=", missing_levels, ")"
+                            "P(1-d(", missing_levels, "))"
                           ))
 
   # fit model for E[U(X,A,Z; theta)|A = a, Delta = 0]
@@ -452,14 +477,50 @@ moi <- function(data,
 
   ##  output
   est <- merge(outcome_est, missing_est, moi_missing_est)
-  ate <- est[1:2] + est[3:4] * est[5:6]
-  ate <- estimate(ate, labels = paste0("E[tildeY|A=", missing_levels, "]"))
+  ## per-arm expected potential outcome under imputation:
+  ## E[\tilde{Y}|A=a] = E[\Delta Y|A=a] + P(\Delta=0|A=a) * E[U|A=a, \Delta=0]
+  ty <- .moi_tilde_y()
+  level_labels <- paste0("E[", ty, "(", missing_levels, ")]")
+  etilde <- est[1:2] + est[3:4] * est[5:6]
+  etilde <- estimate(etilde, labels = level_labels)
 
-  ate <- estimate(ate, f = cbind(1, -1), labels = "ATE")
+  ## ATE contrast row: [E[ty(1)] - [E[ty(0)]]
+  ate_label <- paste0("[", level_labels[1], "] - [", level_labels[2], "]")
+  ate_row <- estimate(etilde, f = cbind(1, -1), labels = ate_label)
 
-  if (return.all == TRUE) {
-    ate <- merge(est, ate)
+  ## per-level rows + contrast row, mirroring cate.targeted$estimate layout
+  estimate_full <- merge(etilde, ate_row)
+
+  res <- list(
+    call = cl,
+    estimate = estimate_full,
+    levels = missing_levels
+  )
+  if (isTRUE(return.all)) {
+    res$intermediate <- est
+    res$estimate <- merge(estimate_full, est)
   }
+  class(res) <- c("moi.targeted", "targeted")
+  return(res)
+}
 
-  return(ate)
+#' @export
+summary.moi.targeted <- function(object, ...) {
+  B <- rbind(rep(0, length(coef(object))))
+  B[1:2] <- c(1, -1)
+  obj <- structure(list(
+    estimate = object$estimate,
+    call = object$call,
+    ate = lava::estimate(object$estimate, B)
+  ), class = "summary.moi.targeted")
+  return(obj)
+}
+
+#' @export
+print.summary.moi.targeted <- function(x, ...) {
+  print(x$call)
+  cat("\n")
+  print(x$estimate, ...)
+  cat("\nAverage Treatment Effect:\n")
+  print(x$ate)
 }

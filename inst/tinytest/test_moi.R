@@ -65,7 +65,7 @@ test_moi_nfolds <- function() {
     imputation.model = learner_glm(y ~ a + x),
     imputation.subset = "!is.na(y)"
   )
-  expect_true(inherits(res1, "estimate"))
+  expect_true(inherits(res1, "moi.targeted"))
   expect_true(all(is.finite(coef(res1))))
 
   ## integer nfolds: same partition reused for both internal cate() calls.
@@ -79,7 +79,7 @@ test_moi_nfolds <- function() {
     imputation.subset = "!is.na(y)",
     nfolds = 5
   )
-  expect_true(inherits(res5, "estimate"))
+  expect_true(inherits(res5, "moi.targeted"))
   expect_true(all(is.finite(coef(res5))))
 
   ## pre-specified list of folds: deterministic partition, reused for both
@@ -95,7 +95,7 @@ test_moi_nfolds <- function() {
     imputation.subset = "!is.na(y)",
     nfolds = custom_folds
   )
-  expect_true(inherits(res_custom, "estimate"))
+  expect_true(inherits(res_custom, "moi.targeted"))
   expect_true(all(is.finite(coef(res_custom))))
 }
 test_moi_nfolds()
@@ -127,7 +127,61 @@ test_moi_cate_passthrough <- function() {
     stratify = TRUE,
     second.order = FALSE
   ))
-  expect_true(inherits(res, "estimate"))
+  expect_true(inherits(res, "moi.targeted"))
   expect_true(all(is.finite(coef(res))))
 }
 test_moi_cate_passthrough()
+
+test_moi_print_summary <- function() {
+  set.seed(13)
+  n <- 300
+  x <- rnorm(n)
+  a <- rbinom(n, 1, 0.5)
+  y <- 1 + a + x + rnorm(n)
+  delta <- rbinom(n, 1, lava::expit(1 + x))
+  y <- ifelse(delta == 1, y, NA)
+  d <- data.frame(y = y, a = a, x = x)
+
+  res <- moi(
+    data = d,
+    response.model = learner_glm(y ~ a + x),
+    treatment.model = a ~ 1,
+    missing.model = learner_glm(~ a + x, family = binomial()),
+    imputation.model = learner_glm(y ~ a + x),
+    imputation.subset = "!is.na(y)"
+  )
+
+  ## class structure
+  expect_true(inherits(res, "moi.targeted"))
+  expect_true(inherits(res, "targeted"))
+
+  ## three coef rows: per-level (a=1, a=0) plus the ATE contrast
+  cf <- coef(res)
+  expect_equal(length(cf), 3L)
+  expect_true(all(is.finite(cf)))
+
+  ## per-arm and contrast labels follow the cate() convention:
+  ##   E[\tilde y(a)] for per-arm; [E[\tilde y(1)]] - [E[\tilde y(0)]] for ATE.
+  ty <- if (isTRUE(l10n_info()[["UTF-8"]])) "\u1ef9" else "tildeY"
+  expect_equal(names(cf)[1], paste0("E[", ty, "(1)]"))
+  expect_equal(names(cf)[2], paste0("E[", ty, "(0)]"))
+  expect_equal(
+    names(cf)[3],
+    paste0("[E[", ty, "(1)]] - [E[", ty, "(0)]]")
+  )
+
+  ## guard against regression to the obsolete `|A=` label format
+  expect_false(any(grepl("|A=", names(cf), fixed = TRUE)))
+
+  ## summary structure
+  s <- summary(res)
+  expect_true(inherits(s, "summary.moi.targeted"))
+  expect_true(all(c("estimate", "call", "ate") %in% names(s)))
+
+  ## printed summary contains "Average Treatment Effect:" header
+  out <- capture.output(print(s))
+  expect_true(any(grepl("Average Treatment Effect:", out, fixed = TRUE)))
+  ## printed summary contains the tilde-y label
+  expect_true(any(grepl(ty, out, fixed = TRUE)))
+}
+test_moi_print_summary()

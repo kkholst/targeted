@@ -79,9 +79,26 @@ of future}
 of outcome models}
 }
 \value{
-An object of class \code{estimate} (from the \code{lava}
-package) containing the ATE estimate with associated
-influence function based standard errors and confidence intervals.
+An object of class \code{moi.targeted} (inheriting from
+\code{targeted}), a list with components:
+\describe{
+\item{call}{The matched call.}
+\item{estimate}{A \code{lava::estimate} object containing the per-arm
+expected potential outcomes \eqn{E[\tilde{Y}|A=a]} and the ATE
+contrast \eqn{E[\tilde{Y}|A=1] - E[\tilde{Y}|A=0]}, with
+influence-function-based standard errors. Row labels follow the
+\code{\link{cate}} convention: per-arm rows are labeled
+\code{E[\u1ef9(1)]} and \code{E[\u1ef9(0)]} (or
+\code{E[tildeY(1)]} / \code{E[tildeY(0)]} in non-UTF-8 locales),
+and the contrast row is labeled
+\code{[E[\u1ef9(1)]] - [E[\u1ef9(0)]]}.}
+\item{levels}{Treatment levels (character).}
+\item{intermediate}{(only if \code{return.all = TRUE}) Intermediate
+estimates: \eqn{E[\Delta Y|A=a]}, \eqn{P(\Delta=0|A=a)}, and
+\eqn{E[U|A=a, \Delta=0]}.}
+}
+Standard methods (\code{print}, \code{summary}, \code{coef},
+\code{vcov}, \code{IC}) are provided.
 }
 \description{
 Estimates the Average Treatment Effect (ATE) in settings where the outcome
@@ -99,10 +116,10 @@ The function estimate the target parameter
 where
 
 \deqn{E[\tilde{Y}| A = a] = E[\Delta Y | A=a] + P(\Delta=0 | A=a) \cdot
-E[U(W, A, Z, \theta) | A=a, \Delta=0],}
+E[U(X, A, Z, \theta) | A=a, \Delta=0],}
 
 and \eqn{\Delta} denotes the non-missing indicator, and \eqn{U} denotes the
-imputation model possibly depending on baseline covariates \eqn{W}, the
+imputation model possibly depending on baseline covariates \eqn{X}, the
 treatment \eqn{A}, and a post randomization variable \eqn{Z}.
 
 Inference in based on the estimated influence functions (IFs)
