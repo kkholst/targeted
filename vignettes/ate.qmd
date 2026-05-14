@@ -1,0 +1,235 @@
+---
+title: "Average Treatment Effect Estimation"
+author: Klaus Kähler Holst
+date: "`r Sys.Date()`"
+format:
+  html:
+    toc: true
+    html-math-method: mathjax
+vignette: >
+  %\VignetteIndexEntry{Average Treatment Effect Estimation}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+execute:
+  echo: true
+  warning: false
+  collapse: true
+  comment: "#>"
+---
+
+```{r, include = FALSE}
+library("targeted")
+```
+
+# Introduction
+
+Consider observed data $(Y, A, W)$ where $Y$ is the outcome, $A \in \{0,1\}$
+is the binary treatment, and $W$ is a vector of covariates. Under the potential
+outcomes framework, we define the *average treatment effect* (ATE) as
+
+$$\tau = E[Y(1)] - E[Y(0)]$$
+
+where $Y(a)$ denotes the outcome that would have been observed under treatment
+$A = a$. Identification of $\tau$ from observed data requires standard causal
+assumptions: consistency, positivity, and no unmeasured confounding.
+
+The `cate` function in the `targeted` package estimates the ATE using the
+*augmented inverse probability weighted* (AIPW) estimator, also known as the
+doubly-robust estimator. For each treatment level $a$, the efficient influence
+function for the marginal mean $\psi_a = E[Y(a)]$ is
+
+$$\varphi_a(Y, A, W) = \frac{I(A=a)}{\pi_a(W)}\{Y - \mu_a(W)\} + \mu_a(W) - \psi_a$$
+
+where $\pi_a(W) = P(A = a \mid W)$ is the propensity score and $\mu_a(W) = E[Y
+\mid A = a, W]$ is the outcome regression. The resulting estimator is
+*doubly robust*: it is consistent if either $\pi_a$ or $\mu_a$ is correctly
+specified. When both models are correctly specified, the estimator achieves the
+semiparametric efficiency bound.
+
+# Continuous outcome
+
+## Simulated data
+
+We generate data from a model with a known treatment effect. The outcome
+depends on confounders $W_1$ and $W_2$, with an interaction between treatment
+and $W_2$:
+
+$$
+Y = \cos(W_1) + W_2 A + 0.2 W_2^2 + A + \varepsilon, \quad \varepsilon \sim N(0,1)
+$$
+
+The true ATE is $E[W_2 + 1] = 1$ since $W_2 \sim N(0,1)$.
+
+```{r sim-continuous}
+sim_data <- function(n = 2000) {
+  w1 <- rnorm(n)
+  w2 <- rnorm(n)
+  a <- rbinom(n, 1, plogis(-1 + w1))
+  y <- cos(w1) + w2 * a + 0.2 * w2^2 + a + rnorm(n)
+  data.frame(y = y, a = a, w1 = w1, w2 = w2)
+}
+
+set.seed(2025)
+d <- sim_data(2000)
+```
+
+## Parametric estimation
+
+To estimate the ATE, we call `cate` with `cate.model = ~1` (an intercept-only
+model, which targets the marginal ATE rather than conditional effects). We
+specify parametric models for both the outcome regression and the propensity
+score:
+
+```{r ate-parametric}
+fit <- cate(
+  response.model = y ~ a * (w1 + w2),
+  treatment.model = a ~ w1 + w2,
+  cate.model = ~1,
+  data = d
+)
+fit
+```
+
+The output shows estimates of the potential outcome means $E[Y(1)]$ and
+$E[Y(0)]$, followed by the ATE (labelled `(Intercept)`). With correctly
+specified parametric models and no cross-fitting, the AIPW estimator is
+$\sqrt{n}$-consistent and asymptotically normal.
+
+By default, `cate` includes a second-order correction term (`second.order =
+TRUE`) that improves robustness to misspecification of the outcome model when
+the propensity model is a GLM.
+
+## Cross-fitting
+
+When flexible or data-adaptive models are used for the nuisance parameters, the
+AIPW estimator can suffer from overfitting bias. *Cross-fitting* (sample
+splitting) resolves this: the data are partitioned into $K$ folds, nuisance
+models are fitted on $K-1$ folds and predictions are made on the held-out fold.
+This relaxes the Donsker conditions that would otherwise be required for
+$\sqrt{n}$-consistency.
+
+With parametric models, cross-fitting is not strictly necessary but introduces
+no harm:
+
+```{r ate-crossfit}
+fit_cf <- cate(
+  response.model = y ~ a * (w1 + w2),
+  treatment.model = a ~ w1 + w2,
+  cate.model = ~1,
+  data = d,
+  nfolds = 5
+)
+fit_cf
+```
+
+## Flexible nuisance models
+
+One of the main strengths of the AIPW framework is that nuisance models can be
+replaced with flexible or machine learning estimators without sacrificing valid
+inference for the target parameter. The `learner` class in `targeted` provides a
+unified interface for specifying these models.
+
+Here we use a generalized additive model (GAM) for the outcome regression,
+stratified by treatment arm, combined with a logistic GLM for the propensity
+score. Stratification (`stratify = TRUE`) fits separate outcome models for
+treated and untreated units:
+
+```{r ate-gam}
+fit_gam <- cate(
+  response.model = learner_gam(y ~ s(w1) + s(w2)),
+  treatment.model = learner_glm(a ~ w1 + w2, family = binomial),
+  cate.model = ~1,
+  data = d,
+  nfolds = 5,
+  stratify = TRUE
+)
+fit_gam
+```
+
+For even greater flexibility, an ensemble learner (superlearner) can combine
+multiple candidate models. The superlearner selects the optimal convex
+combination of learners via cross-validation:
+
+```{r ate-sl}
+outcome_model <- learner_sl(
+  list(
+    glm = learner_glm(y ~ w1 * w2),
+    gam = learner_gam(y ~ s(w1) + s(w2))
+  ),
+  nfolds = 5
+)
+
+fit_sl <- cate(
+  response.model = outcome_model,
+  treatment.model = learner_glm(a ~ w1 + w2, family = binomial),
+  cate.model = ~1,
+  data = d,
+  nfolds = 5,
+  stratify = TRUE
+)
+fit_sl
+```
+
+# Binary outcome
+
+The AIPW estimator applies equally to binary outcomes. Here the ATE is a *risk
+difference*: the difference in marginal probabilities of the event under
+treatment versus control.
+
+## Simulated data
+
+We generate binary outcomes from a logistic model with a true log-odds ratio of
+$0.8$:
+
+```{r sim-binary}
+sim_binary <- function(n = 2000) {
+  w1 <- rnorm(n)
+  w2 <- rnorm(n)
+  a <- rbinom(n, 1, plogis(-0.5 + 0.5 * w1))
+  p1 <- plogis(-1 + 0.5 * w1 - 0.3 * w2 + 0.8 * a)
+  y <- rbinom(n, 1, p1)
+  data.frame(y = y, a = a, w1 = w1, w2 = w2)
+}
+
+set.seed(2025)
+db <- sim_binary(3000)
+```
+
+## Estimation
+
+```{r ate-binary}
+fit_bin <- cate(
+  response.model = learner_glm(y ~ a * (w1 + w2), family = binomial),
+  treatment.model = learner_glm(a ~ w1 + w2, family = binomial),
+  cate.model = ~1,
+  data = db,
+  nfolds = 5
+)
+fit_bin
+```
+
+The output shows the estimated marginal event probabilities $E[Y(1)]$ and
+$E[Y(0)]$ and their difference (the risk difference). To obtain an odds ratio,
+we can transform the potential outcome estimates using `lava::estimate`:
+
+```{r ate-or}
+logit <- lava::logit
+or <- lava::estimate(fit_bin$estimate, function(p) logit(p[1]) - logit(p[2]),
+                     labels = "log(OR)")
+merge(or, exp(or), labels = c("log(OR)", "OR"))
+```
+
+# Conditional average treatment effects
+
+The examples above all use `cate.model = ~1`, targeting the marginal ATE. The
+`cate` function also supports estimation of *conditional* average treatment
+effects (CATE) by specifying a richer projection model. For instance,
+`cate.model = ~1 + w2` projects the individual-level treatment effect onto a
+linear model in $W_2$, allowing the estimated effect to vary across levels of
+$W_2$. See `?cate` for details and examples.
+
+# Session info
+
+```{r sessioninfo}
+sessionInfo()
+```
