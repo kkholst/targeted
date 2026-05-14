@@ -267,7 +267,7 @@ test_summary <- function() {
   expect_stdout(print(lr_sum), "formula: y \\~ x1 \\+ x2")
   expect_stdout(print(lr_sum), "estimate: formula, data, family, ...")
   expect_stdout(print(lr_sum), "estimate.args: family=nb")
-  expect_stdout(print(lr_sum), "predict: object, newdata, ... ")
+  expect_stdout(print(lr_sum), "predict: object, newdata, ..self, ... ")
   expect_stdout(print(lr_sum), "predict.args: ")
   expect_stdout(print(lr_sum), "specials: ")
 

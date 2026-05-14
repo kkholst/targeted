@@ -43,14 +43,14 @@ learner_glm <- function(formula, info = "glm", family = gaussian(),
   }
 
   args$estimate <- fitfun
-  args$predict <- function(object, newdata, ...) {
+  args$predict <- function(object, newdata, ..self, ...) {
     dots <- list(...)
     if (!("type" %in% names(dots))) dots$type <- "response"
     args <- c(list(object, newdata = newdata), dots)
     standardize_learner_predictions(
       stats::predict,
       args,
-      get("self", envir = environment())$info
+      model.info = ..self$info
     )
     # `self` is injected into this function's environment at predict-time by
     # learner$new (see private$predfun in learner.R).

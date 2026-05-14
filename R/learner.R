@@ -185,12 +185,8 @@ learner <- R6::R6Class("learner", # nolint
               newdata = newdata
             ), predict_args_call)
           }
-          # check is required because stats::predict is a locked env, whereas
-          # user supplied envs should not be locked. injecting self into the
-          # environment of private$init.predict is only used for learner_
-          # constructors, and should not further be exposed to users
-          if (!environmentIsLocked(environment(private$init.predict))) {
-            environment(private$init.predict)$self <- self
+          if ("..self" %in% formalArgs(private$init.predict)) {
+            args[["..self"]] <- self
           }
           return(do.call(private$init.predict, args))
         }
