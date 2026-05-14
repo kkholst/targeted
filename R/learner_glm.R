@@ -43,7 +43,7 @@ learner_glm <- function(formula, info = "glm", family = gaussian(),
   }
 
   args$estimate <- fitfun
-  args$predict <- function(object, newdata, ..self, ...) {
+  args$predict <- function(object, newdata, ..., ..self) {
     dots <- list(...)
     if (!("type" %in% names(dots))) dots$type <- "response"
     args <- c(list(object, newdata = newdata), dots)
