@@ -34,11 +34,27 @@
 ##'   observed/non-missing
 #' @param imputation.augmentation.model \code{learner} object
 ##'   specifying the model for the imputation augmentation
-#' @return An estimate object containing:
-#'   \item{coef}{Estimates for \eqn{E[U|A=1,\Delta=0]} and
-#'    \eqn{E[U|A=0,\Delta=0]}}
-#'   \item{IC}{Influence curve values for each observation}
-#'   \item{id}{Observation identifiers}
+#' @param extended.output Logical. If \code{TRUE}, the returned list also
+#'   includes the per-level decomposition of the influence function as
+#'   \code{IC1}, \code{IC2}, and (when
+#'   \code{imputation.augmentation = TRUE}) \code{IC3}. Default is
+#'   \code{FALSE}.
+#' @return A list with components:
+#'   \item{estimate}{A \code{lava::estimate} object with coefficients
+#'     \eqn{E[U|A=1,\Delta=0]} and \eqn{E[U|A=0,\Delta=0]} and the
+#'     associated influence functions.}
+#'   \item{imputation.model}{The fitted imputation model.}
+#'   \item{imputation.subset}{The \code{imputation.subset} expression.}
+#'   \item{levels}{Treatment levels (character).}
+#'   \item{IC1, IC2, IC3}{(only if \code{extended.output = TRUE}) Named
+#'     lists (one entry per treatment level) giving the per-level
+#'     contributions to the influence function:
+#'     \code{IC1} is the missing-outcome plug-in part,
+#'     \code{IC2} is the imputation-model coefficient uncertainty part, and
+#'     \code{IC3} (only present when
+#'     \code{imputation.augmentation = TRUE}) is the augmentation part.
+#'     The full per-level IC equals \code{IC1 + IC2 [+ IC3]}.}
+#'   \item{IC_epsilon} influence function for the imputation model parameters
 moi_missing <- function(data,
                         id,
                         delta,
@@ -47,7 +63,8 @@ moi_missing <- function(data,
                         imputation.subset = NULL,
                         imputation.augmentation = FALSE,
                         missing.model = NULL,
-                        imputation.augmentation.model = NULL) {
+                        imputation.augmentation.model = NULL,
+                        extended.output = FALSE) {
   ## input checks
   if (!inherits(imputation.model, "learner_glm")) {
     stop("imputation.model must be of inherited class 'learner_glm'")
@@ -190,28 +207,47 @@ moi_missing <- function(data,
       est <- est + mean(aug)
     }
 
-    IC <- (A == a) * (delta == 0) /
+    IC1 <- (A == a) * (delta == 0) /
       (g * (1 - S)) * (pred - est)
 
-    IC <- IC +
-      t(colMeans(nabla[A == a & delta == 0, ]) %*%
+    IC2 <- t(colMeans(nabla[A == a & delta == 0, ]) %*%
         t(IC_epsilon))
 
+    IC <- IC1 + IC2
+
     if (isTRUE(imputation.augmentation)) {
-      aug2 <- ((A == a) - g) / g * mean(aug2)
-      IC <- IC + aug + aug2
+      IC3 <- aug + ((A == a) - g) / g * mean(aug2)
+      IC <- IC + IC3
     }
 
-    estimate(coef = est,
-             IC = IC,
-             id = id,
-             labels = paste0("E[u(", a, ")|d=0]"))
+    out <- estimate(coef = est,
+                    IC = IC,
+                    id = id,
+                    labels = paste0("E[u(", a, ")|d=0]"))
+    if (isTRUE(extended.output)) {
+      attr(out, "IC1") <- IC1
+      attr(out, "IC2") <- IC2
+      if (isTRUE(imputation.augmentation)) {
+        attr(out, "IC3") <- IC3
+      }
+    }
+    return(out)
   }
 
   est <- lapply(
     levels,
     FUN = fun
   )
+  if (isTRUE(extended.output)) {
+    ## Stash per-level IC components from attributes before merge() drops them.
+    level_names <- as.character(levels)
+    IC1 <- setNames(lapply(est, attr, "IC1"), level_names)
+    IC2 <- setNames(lapply(est, attr, "IC2"), level_names)
+    if (isTRUE(imputation.augmentation)) {
+      IC3 <- setNames(lapply(est, attr, "IC3"), level_names)
+    }
+  }
+
   est <- do.call("merge", est)
 
   out <- list(
@@ -220,6 +256,15 @@ moi_missing <- function(data,
     imputation.subset = imputation.subset,
     levels = as.character(levels)
   )
+  if (isTRUE(extended.output)) {
+    out$IC1 <- IC1
+    out$IC2 <- IC2
+    if (isTRUE(imputation.augmentation)) {
+      out$IC3 <- IC3
+    }
+    out$IC_epsilon <- IC_epsilon
+    out$nabla <- nabla
+  }
 
   return(out)
 }

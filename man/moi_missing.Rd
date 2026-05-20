@@ -13,7 +13,8 @@ moi_missing(
   imputation.subset = NULL,
   imputation.augmentation = FALSE,
   missing.model = NULL,
-  imputation.augmentation.model = NULL
+  imputation.augmentation.model = NULL,
+  extended.output = FALSE
 )
 }
 \arguments{
@@ -44,13 +45,29 @@ observed/non-missing}
 
 \item{imputation.augmentation.model}{\code{learner} object
 specifying the model for the imputation augmentation}
+
+\item{extended.output}{Logical. If \code{TRUE}, the returned list also
+includes the per-level decomposition of the influence function as
+\code{IC1}, \code{IC2}, and (when
+\code{imputation.augmentation = TRUE}) \code{IC3}. Default is
+\code{FALSE}.}
 }
 \value{
-An estimate object containing:
-\item{coef}{Estimates for \eqn{E[U|A=1,\Delta=0]} and
-\eqn{E[U|A=0,\Delta=0]}}
-\item{IC}{Influence curve values for each observation}
-\item{id}{Observation identifiers}
+A list with components:
+\item{estimate}{A \code{lava::estimate} object with coefficients
+\eqn{E[U|A=1,\Delta=0]} and \eqn{E[U|A=0,\Delta=0]} and the
+associated influence functions.}
+\item{imputation.model}{The fitted imputation model.}
+\item{imputation.subset}{The \code{imputation.subset} expression.}
+\item{levels}{Treatment levels (character).}
+\item{IC1, IC2, IC3}{(only if \code{extended.output = TRUE}) Named
+lists (one entry per treatment level) giving the per-level
+contributions to the influence function:
+\code{IC1} is the missing-outcome plug-in part,
+\code{IC2} is the imputation-model coefficient uncertainty part, and
+\code{IC3} (only present when
+\code{imputation.augmentation = TRUE}) is the augmentation part.
+The full per-level IC equals \code{IC1 + IC2 [+ IC3]}.}
 }
 \description{
 Estimates the mean of a given parametric imputation model among observations
