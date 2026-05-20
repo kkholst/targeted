@@ -1,5 +1,5 @@
 
-test_moi <- function() {
+test_moi_missing <- function() {
 
   simdata <- function(n, full = FALSE) {
     w <- rnorm(n) # unmeasured baseline covariate
@@ -185,3 +185,157 @@ test_moi_print_summary <- function() {
   expect_true(any(grepl(ty, out, fixed = TRUE)))
 }
 test_moi_print_summary()
+
+test_moi_standard_errors_reference_lava <- function() {
+
+  simdata <- function(n, full = FALSE) {
+    w <- rnorm(n) # unmeasured baseline covariate
+    x <- rnorm(n) - 0.5 * w # baseline covariate
+    a <- rbinom(n, 1, 0.5)    # treatment
+    z <- x + a * w^2 + (1-a) * sin(w) + rnorm(n) # post randomization variable
+    delta <- rbinom(n = n, size = 1, prob = lava::expit(2 + z)) # non-missingness indicator
+    y <- 1 + a + x - a * x + w + a * w + z + rnorm(n)           # outcome
+    y <- ifelse(delta == 1, y, NA)
+    d <- data.frame(id = n:1, y = y, z = z, a = a, x = x)
+    if(full == TRUE) {
+      d <- cbind(d, w = w)
+    }
+    return(d)
+  }
+  set.seed(1)
+  data <- simdata(1e2)
+  delta <- !is.na(data$y)
+
+  moi_est <- moi_missing(data = data,
+                         delta = delta,
+                         id = data$id,
+                         treatment.model = learner_glm(a ~ 1, family = binomial()),
+                         imputation.model = learner_glm(y ~ a + x),
+                         imputation.subset = "!is.na(y)",
+                         extended.output = TRUE)
+
+  ## helper function
+  predict_glm <- function(object, p=coef(object), data, offset = NULL,
+                          type=c("response", "link"), ...) {
+    x <- object
+    if (!inherits(x,"glm")) stop("need glm object")
+    link <- family(x)
+    if (missing(data)) {
+      X <- model.matrix.lm(x)
+    } else {
+      X <- model.matrix.lm(formula(x),
+                           data = data,
+                           na.action = na.pass)
+    }
+    offset <- x$offset
+    if(any(is.na(p))) {
+      warning("Over-parameterized model (setting NA's to zero)")
+      p[is.na(p)] <- 0
+    }
+    ginv <- link$linkinv
+    dginv <- link$mu.eta
+    Xbeta <- X%*%p
+    if (!is.null(offset)) Xbeta <- Xbeta+offset
+    if (missing(data) && !is.null(x$offset) && is.null(offset) ) {
+      Xbeta <- Xbeta+x$offset
+    }
+    if (tolower(type[1]) == "link") {
+      return(structure(Xbeta, grad=X))
+    }
+    pr <- ginv(Xbeta)
+    z <- dginv(Xbeta)
+    gr <- apply(X, 2, function(x) x*z)
+    return(structure(pr, grad=gr))
+  }
+
+  ## test the imputation model parameter influence function IC using lava
+  imp_mod <- glm(y ~ a + x,
+                 data = data,
+                 weights = as.numeric(!is.na(data$y)),
+                 na.action = lava::na.pass0)
+  lava_IC_epsilon <- IC(imp_mod)
+
+  expect_true(max(abs(moi_est$IC_epsilon - lava_IC_epsilon)) < 1e-14)
+
+  ## test the imputation model prediction influence function using lava
+
+  ## relies on numerical deriv
+  lava_pred_IC <- estimate(imp_mod,
+                           function(p, data) {
+                             p["(Intercept)"] + p["x"] * data$x + p["a"] * data$a
+                           },
+                           data = data,
+                           average = FALSE) |> IC()
+
+  ## exact deriv
+  lava_pred_IC_2 <- estimate(imp_mod,
+                           function(p, data) {
+                             pred <- p["(Intercept)"] + p["x"] * data$x + p["a"] * data$a
+                             structure(pred, grad = cbind(1, data$a, data$x))
+                           },
+                           data = data,
+                           average = FALSE) |> IC()
+
+  ## exact deriv
+  lava_pred_IC_3 <- estimate(imp_mod,
+                             predict_glm,
+                             data = data,
+                             average = FALSE) |> IC()
+
+  expect_true(
+    max(abs(t(moi_est$nabla %*% t(moi_est$IC_epsilon)) - lava_pred_IC)) < 1e-8
+  )
+
+  expect_true(
+    max(abs(t(moi_est$nabla %*% t(moi_est$IC_epsilon)) - lava_pred_IC_2)) < 1e-13
+  )
+
+  expect_true(
+    max(abs(lava_pred_IC_3 - lava_pred_IC_2)) == 0
+  )
+
+  est1 <- estimate(imp_mod,
+                   predict_glm,
+                   data = data,
+                   subset = (data$a == 1) & (delta == FALSE),
+                   average = TRUE,
+                   id = 1:nrow(data))
+  est0 <- estimate(imp_mod,
+                   predict_glm,
+                   data = data,
+                   subset = (data$a == 0) & (delta == FALSE),
+                   average = TRUE,
+                   id = 1:nrow(data))
+
+  expect_true(
+    max(abs(
+      coef(moi_est$estimate) -
+      coef(c(est1,est0)))) == 0
+  )
+
+  expect_true(
+    max(abs(moi_est$estimate$IC[, 1, drop = FALSE] - IC(est1)[order(data$id), ])) < 1e-14
+  )
+
+  expect_true(
+    max(abs(moi_est$estimate$IC[, 2, drop = FALSE] - IC(est0)[order(data$id), ])) < 1e-14
+  )
+}
+
+## library(lava)
+##   mm <- lava::lvm(a ~ x)
+##   ## lava::distribution(mm, ~a) <- lava::binomial.lvm()
+##   mm <- glm(a ~ x, family = binomial(), data = data)
+##   ## lava::estimate(mm, data=data, estimator="glm")
+##   e <- lava::estimate(mm, data=data, estimator="glm")
+##   summary(e)
+##   head(predict(e))
+##   head(predict(e, p=coef(e)))
+##   head(predict(e, p=1:2)) # test if p is used in predict
+
+## mm <- glm(a ~ x, family = binomial(), data = data)
+## e <- lava::estimate(mm)
+## pr  <- function(object, newdata, p=NULL) {
+##   X <- model.matrix(object, data=newdata)
+##   X%*%
+## }
