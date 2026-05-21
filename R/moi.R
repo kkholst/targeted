@@ -5,6 +5,39 @@
   if (isTRUE(l10n_info()[["UTF-8"]])) "\u1ef9" else "tildeY"
 }
 
+predict_glm <- function(object, p=coef(object), data, offset = NULL,
+                        type=c("response", "link"), ...) {
+  x <- object
+  if (!inherits(x,"glm")) stop("need glm object")
+  link <- family(x)
+  if (missing(data)) {
+    X <- model.matrix.lm(x)
+  } else {
+    X <- model.matrix.lm(formula(x),
+                         data = data,
+                         na.action = na.pass)
+  }
+  offset <- x$offset
+  if(any(is.na(p))) {
+    warning("Over-parameterized model (setting NA's to zero)")
+    p[is.na(p)] <- 0
+  }
+  ginv <- link$linkinv
+  dginv <- link$mu.eta
+  Xbeta <- X%*%p
+  if (!is.null(offset)) Xbeta <- Xbeta+offset
+  if (missing(data) && !is.null(x$offset) && is.null(offset) ) {
+    Xbeta <- Xbeta+x$offset
+  }
+  if (tolower(type[1]) == "link") {
+    return(structure(Xbeta, grad=X))
+  }
+  pr <- ginv(Xbeta)
+  z <- dginv(Xbeta)
+  gr <- apply(X, 2, function(x) x*z)
+  return(structure(pr, grad=gr))
+}
+
 #' Mean Imputation Among Missing Outcomes
 #'
 #' Estimates the mean of a given parametric imputation model among observations
@@ -96,7 +129,7 @@ moi_missing <- function(data,
   } else {
     model_rows <- rep(TRUE, times = nrow(data))
   }
-  # validate imputation.subset result
+  ## validate imputation.subset result
   if (!is.logical(model_rows)) {
     stop("'imputation.subset' expression must evaluate to a logical vector")
   }
@@ -112,49 +145,30 @@ moi_missing <- function(data,
   if (!any(model_rows)) {
     stop("'imputation.subset' expression excludes all rows (no TRUE values)")
   }
-
-  # validate rows are available
+  ## validate rows are available
   if (!any(model_rows)) {
     stop("No observations with non-missing outcome in the selected imputation subset. Cannot fit imputation model.") # nolint
   }
+  ## weights based on the model rows
+  ## TODO: update weights if already specified in imputation.model
+  weights <- model_rows * 1
 
   ## fit imputation model
-  imputation.model$estimate(data[model_rows, ])
+  imputation.model$estimate(data = data,
+                            weights = weights,
+                            na.action = lava::na.pass0)
 
   ## predict from imputation model
   pred <- imputation.model$predict(newdata = data, type = "response")
-  design_matrix <- imputation.model$design(data = data,
-                                           intercept = TRUE,
-                                           response = FALSE)$x
 
-  # getting the influence function/curve
-  epsilon <- estimate(imputation.model$fit, id = id[model_rows])
-  n_coef <- length(coef(epsilon))
-  tmp <- estimate(coef = 0, IC = rep(0, length(id)), id = id)
-  epsilon <- merge(epsilon, tmp)
-  rm(tmp)
-  epsilon <- estimate(epsilon, keep = (1:n_coef))
-  IC_epsilon <- IC(epsilon)[order(id), , drop = FALSE] # keep id ordering
-
-  ## calculating the derivate of the imputation function/model
-  family <- family(imputation.model$fit)
-  link <- family$link
-  family <- family$family
-  if (family == "binomial" && link == "logit") {
-    nabla <- pred * (1 - pred)
-  } else if (family == "gaussian" && link == "identity") {
-    nabla <- 1
-  } else {
-    stop(sprintf("Unsupported family/link combination: family='%s', link='%s'. Supported combinations are: binomial/logit, gaussian/identity", # nolint
-                 family, link))
+  if (isTRUE(extended.output)) {
+    IC_epsilon <- IC(imputation.model$fit)
   }
-  nabla <- nabla * design_matrix
 
   ## getting the treatment variable and levels:
   A <- treatment.model$response(data)
   levels <- rev(sort(unique(A)))
   treatment_name <- lava::getoutcome(treatment.model$formula)
-
 
   if (isTRUE(imputation.augmentation)) {
     if (!is.null(imputation.augmentation.model)) {
@@ -183,13 +197,19 @@ moi_missing <- function(data,
   # getting the estimate for E[U(X,A,Z;\theta)|A = a, \Delta = 0]
   fun <- function(a) {
     newdata <- data
-    g <- mean(A == a)
-    S <- mean((delta == 1)[A == a])
 
     ## plug-in estimate
-    est <- mean(pred[delta == 0 & A == a])
+    est <- estimate(imputation.model$fit,
+                    predict_glm,
+                    data = data,
+                    subset = (A == a) & (delta == 0),
+                    average = TRUE,
+                    id = 1:nrow(data))
+    IC <- IC(est)
+    est <- coef(est)
 
     if (isTRUE(imputation.augmentation)) {
+
       newdata[[treatment_name]] <- a
       if (!is.null(imputation.augmentation.model)) {
         H <- imputation.augmentation.model$predict(newdata = newdata,
@@ -199,23 +219,14 @@ moi_missing <- function(data,
       }
 
       SW <- missing.model$predict(newdata = newdata, type = "response")
+      g <- mean(A == a)
+      S <- mean((delta == 1)[A == a])
 
       aug2 <- (1 - SW) / (1 - S) * (H - est)
       aug <- (g - (A == a)) / g * aug2
 
-      ## augmented estimate
+      ## augmented estimate and influence function
       est <- est + mean(aug)
-    }
-
-    IC1 <- (A == a) * (delta == 0) /
-      (g * (1 - S)) * (pred - est)
-
-    IC2 <- t(colMeans(nabla[A == a & delta == 0, ]) %*%
-        t(IC_epsilon))
-
-    IC <- IC1 + IC2
-
-    if (isTRUE(imputation.augmentation)) {
       IC3 <- aug + ((A == a) - g) / g * mean(aug2)
       IC <- IC + IC3
     }
@@ -224,9 +235,8 @@ moi_missing <- function(data,
                     IC = IC,
                     id = id,
                     labels = paste0("E[u(", a, ")|d=0]"))
+
     if (isTRUE(extended.output)) {
-      attr(out, "IC1") <- IC1
-      attr(out, "IC2") <- IC2
       if (isTRUE(imputation.augmentation)) {
         attr(out, "IC3") <- IC3
       }
@@ -241,8 +251,6 @@ moi_missing <- function(data,
   if (isTRUE(extended.output)) {
     ## Stash per-level IC components from attributes before merge() drops them.
     level_names <- as.character(levels)
-    IC1 <- setNames(lapply(est, attr, "IC1"), level_names)
-    IC2 <- setNames(lapply(est, attr, "IC2"), level_names)
     if (isTRUE(imputation.augmentation)) {
       IC3 <- setNames(lapply(est, attr, "IC3"), level_names)
     }
@@ -257,13 +265,10 @@ moi_missing <- function(data,
     levels = as.character(levels)
   )
   if (isTRUE(extended.output)) {
-    out$IC1 <- IC1
-    out$IC2 <- IC2
     if (isTRUE(imputation.augmentation)) {
       out$IC3 <- IC3
     }
     out$IC_epsilon <- IC_epsilon
-    out$nabla <- nabla
   }
 
   return(out)

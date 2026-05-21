@@ -1,5 +1,6 @@
 library("tinytest")
 library("carts")
+library("targeted")
 library("lava")
 library("future.apply")
 
@@ -99,27 +100,27 @@ test_moi <- function() {
     id <- 1:n
     delta <- !is.na(data$y)
 
-    model <- moi_missing(data = data,
-                         id = id,
-                         delta = delta,
-                         treatment.model = learner_glm(a ~ 1, family = binomial()),
-                         imputation.model = learner_glm(y ~ w1 + w2, family = binomial()),
-                         imputation.subset = "!is.na(y) & a == 0")
+    model <- targeted:::moi_missing(data = data,
+                                    id = id,
+                                    delta = delta,
+                                    treatment.model = learner_glm(a ~ 1, family = binomial()),
+                                    imputation.model = learner_glm(y ~ w1 + w2, family = binomial()),
+                                    imputation.subset = "!is.na(y) & a == 0")
     est <- model$estimate
 
-    model_aug <- moi_missing(
-      data = data,
-      id = id,
-      delta = delta,
-      treatment.model = learner_glm(a ~ 1, family = binomial()),
-      imputation.model = learner_glm(y ~ w1 + w2, family = binomial()),
-      imputation.subset = "!is.na(y) & a == 0",
-      imputation.augmentation = TRUE,
-      missing.model =  learner_glm(
-        ~ 1 + w1 + w2 + a + a:w1 + a:w2 + a:w3 + a:w2:w3,
-        family = binomial()
-      )
-    )
+    model_aug <- targeted:::moi_missing(
+                              data = data,
+                              id = id,
+                              delta = delta,
+                              treatment.model = learner_glm(a ~ 1, family = binomial()),
+                              imputation.model = learner_glm(y ~ w1 + w2, family = binomial()),
+                              imputation.subset = "!is.na(y) & a == 0",
+                              imputation.augmentation = TRUE,
+                              missing.model =  learner_glm(
+                                ~ 1 + w1 + w2 + a + a:w1 + a:w2 + a:w3 + a:w2:w3,
+                                family = binomial()
+                              )
+                            )
     est_aug <- model_aug$estimate
 
     merge(est, est_aug)
@@ -241,15 +242,15 @@ test_moi_aug <- function() {
     id <- 1:n
     delta <- !is.na(data$y)
 
-    model <- moi_missing(data = data,
-                         id = id,
-                         delta = delta,
-                         treatment.model = learner_glm(a ~ 1, family = binomial()),
-                         imputation.model = learner_glm(y ~ a * (w1 + w2), family = binomial()),
-                         imputation.subset = "!is.na(y)")
+    model <- targeted:::moi_missing(data = data,
+                                    id = id,
+                                    delta = delta,
+                                    treatment.model = learner_glm(a ~ 1, family = binomial()),
+                                    imputation.model = learner_glm(y ~ a * (w1 + w2), family = binomial()),
+                                    imputation.subset = "!is.na(y)")
     est <- model$estimate
 
-    model_aug <- moi_missing(
+    model_aug <- targeted:::moi_missing(
       data = data,
       id = id,
       delta = delta,
@@ -280,6 +281,8 @@ test_moi_aug <- function() {
   lapply(sumres["Coverage",], function(x) expect_equivalent(x, 0.95, tolerance = 0.01))
 
 }
+
+test_moi_aug()
 
 test_moi_continuous <- function() {
 
@@ -381,7 +384,7 @@ test_moi_continuous <- function() {
       return.all = TRUE
     )
 
-    est_aug <- moi_missing(
+    est_aug <- targeted:::moi_missing(
       data = data,
       id = id,
       delta = delta,
@@ -425,7 +428,7 @@ test_moi_binary <- function() {
     data.frame(
       a = rbinom(n, 1, 2/3),
       w1 = rnorm(n),
-      w2 = rbinom(n, 1, 0.8),
+      w2 = rbinom(n, 1, 0.8)
       w3 = rbinom(n, 1, 0.5)
     )
   }
@@ -677,7 +680,7 @@ test_moi_postrand <- function() {
       return.all = TRUE
     )
 
-    model_aug <- moi_missing(
+    model_aug <- targeted:::moi_missing(
       data = data,
       id = id,
       delta = delta,

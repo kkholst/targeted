@@ -186,7 +186,184 @@ test_moi_print_summary <- function() {
 }
 test_moi_print_summary()
 
-test_moi_standard_errors_reference_lava <- function() {
+test_moi_missing_IC <- function() {
+  simdata <- function(n, full = FALSE) {
+    w <- rnorm(n) # unmeasured baseline covariate
+    x <- rnorm(n) - 0.5 * w # baseline covariate
+    a <- rbinom(n, 1, 0.5)    # treatment
+    z <- x + a * w^2 + (1-a) * sin(w) + rnorm(n) # post randomization variable
+    delta <- rbinom(n = n, size = 1, prob = lava::expit(2 + z)) # non-missingness indicator
+    y <- 1 + a + x - a * x + w + a * w + z + rnorm(n)           # outcome
+    y <- ifelse(delta == 1, y, NA)
+    d <- data.frame(id = n:1, y = y, z = z, a = a, x = x)
+    if(full == TRUE) {
+      d <- cbind(d, w = w)
+    }
+    return(d)
+  }
+  set.seed(1)
+  data <- simdata(1e2)
+  delta <- !is.na(data$y)
+
+  imp_mod <- learner_glm(y ~ a + x,
+                         weights = as.numeric(!is.na(data$y)),
+                         na.action = lava::na.pass0)
+  imp_mod$estimate(data = data)
+  pred <- imp_mod$predict(newdata = data, type = "response")
+  design_matrix <- imp_mod$design(data = data,
+                                    intercept = TRUE,
+                                    response = FALSE)$x
+  IC_epsilon <- IC(imp_mod$fit)
+  family <- family(imp_mod$fit)
+  link <- family$link
+  family <- family$family
+  if (family == "binomial" && link == "logit") {
+    nabla <- pred * (1 - pred)
+  } else if (family == "gaussian" && link == "identity") {
+    nabla <- 1
+  } else {
+    stop(sprintf("Unsupported family/link combination: family='%s', link='%s'. Supported combinations are: binomial/logit, gaussian/identity", # nolint
+                 family, link))
+  }
+  nabla <- nabla * design_matrix
+
+
+  A <- data$a
+  id <- data$id
+  fun <- function(a) {
+    newdata <- data
+
+    g <- mean(A == a)
+    S <- mean((delta == 1)[A == a])
+
+    ## plug-in estimate
+    est <- mean(pred[delta == 0 & A == a])
+
+    IC1 <- (A == a) * (delta == 0) /
+      (g * (1 - S)) * (pred - est)
+
+    IC2 <- t(colMeans(nabla[A == a & delta == 0, ]) %*%
+             t(IC_epsilon))
+
+    IC <- IC1 + IC2
+
+    out <- estimate(coef = est,
+                    IC = IC,
+                    id = id,
+                    labels = paste0("E[u(", a, ")|d=0]"))
+    return(out)
+  }
+  est_ref <- lapply(
+    c(1,0),
+    FUN = fun
+  )
+  est_ref <- do.call("merge", est_ref)
+
+  moi_est <- moi_missing(data = data,
+                         delta = delta,
+                         id = data$id,
+                         treatment.model = learner_glm(a ~ 1, family = binomial()),
+                         imputation.model = learner_glm(y ~ a + x),
+                         imputation.subset = "!is.na(y)",
+                         extended.output = TRUE)
+
+  expect_equal(coef(est_ref), coef(moi_est$estimate), tolerance = 1e-14)
+  expect_equal(IC(est_ref), IC(moi_est$estimate), tolerance = 1e-14)
+
+}
+
+test_moi_missing_IC()
+
+test_moi_missing_IC_2 <- function() {
+  simdata <- function(n, full = FALSE) {
+    w <- rnorm(n) # unmeasured baseline covariate
+    x <- rnorm(n) - 0.5 * w # baseline covariate
+    a <- rbinom(n, 1, 0.5)    # treatment
+    z <- x + a * w^2 + (1-a) * sin(w) + rnorm(n) # post randomization variable
+    delta <- rbinom(n = n, size = 1, prob = lava::expit(2 + z)) # non-missingness indicator
+    prob <- lava::expit(1 + a + x - a * x + w + a * w + z)
+    y <- rbinom(n = n, size = 1, prob = prob) # outcome
+    y <- ifelse(delta == 1, y, NA)
+    d <- data.frame(id = n:1, y = y, z = z, a = a, x = x)
+    if(full == TRUE) {
+      d <- cbind(d, w = w)
+    }
+    return(d)
+  }
+  set.seed(1)
+  data <- simdata(1e2)
+  delta <- !is.na(data$y)
+
+  imp_mod <- learner_glm(y ~ a + x,
+                         family = binomial(),
+                         weights = as.numeric(!is.na(data$y)),
+                         na.action = lava::na.pass0)
+  imp_mod$estimate(data = data)
+  pred <- imp_mod$predict(newdata = data, type = "response")
+  design_matrix <- imp_mod$design(data = data,
+                                    intercept = TRUE,
+                                    response = FALSE)$x
+  IC_epsilon <- IC(imp_mod$fit)
+  family <- family(imp_mod$fit)
+  link <- family$link
+  family <- family$family
+  if (family == "binomial" && link == "logit") {
+    nabla <- pred * (1 - pred)
+  } else if (family == "gaussian" && link == "identity") {
+    nabla <- 1
+  } else {
+    stop(sprintf("Unsupported family/link combination: family='%s', link='%s'. Supported combinations are: binomial/logit, gaussian/identity", # nolint
+                 family, link))
+  }
+  nabla <- nabla * design_matrix
+
+  A <- data$a
+  id <- data$id
+  fun <- function(a) {
+    newdata <- data
+
+    g <- mean(A == a)
+    S <- mean((delta == 1)[A == a])
+
+    ## plug-in estimate
+    est <- mean(pred[delta == 0 & A == a])
+
+    IC1 <- (A == a) * (delta == 0) /
+      (g * (1 - S)) * (pred - est)
+
+    IC2 <- t(colMeans(nabla[A == a & delta == 0, ]) %*%
+             t(IC_epsilon))
+
+    IC <- IC1 + IC2
+
+    out <- estimate(coef = est,
+                    IC = IC,
+                    id = id,
+                    labels = paste0("E[u(", a, ")|d=0]"))
+    return(out)
+  }
+  est_ref <- lapply(
+    c(1,0),
+    FUN = fun
+  )
+  est_ref <- do.call("merge", est_ref)
+
+  moi_est <- moi_missing(data = data,
+                         delta = delta,
+                         id = data$id,
+                         treatment.model = learner_glm(a ~ 1, family = binomial()),
+                         imputation.model = learner_glm(y ~ a + x, family = binomial()),
+                         imputation.subset = "!is.na(y)",
+                         extended.output = TRUE)
+
+  expect_equal(coef(est_ref), coef(moi_est$estimate), tolerance = 1e-14)
+  expect_equal(IC(est_ref), IC(moi_est$estimate), tolerance = 1e-14)
+
+}
+
+test_moi_missing_IC_2()
+
+test_moi_missing_IC_reference_lava <- function() {
 
   simdata <- function(n, full = FALSE) {
     w <- rnorm(n) # unmeasured baseline covariate
@@ -213,40 +390,6 @@ test_moi_standard_errors_reference_lava <- function() {
                          imputation.model = learner_glm(y ~ a + x),
                          imputation.subset = "!is.na(y)",
                          extended.output = TRUE)
-
-  ## helper function
-  predict_glm <- function(object, p=coef(object), data, offset = NULL,
-                          type=c("response", "link"), ...) {
-    x <- object
-    if (!inherits(x,"glm")) stop("need glm object")
-    link <- family(x)
-    if (missing(data)) {
-      X <- model.matrix.lm(x)
-    } else {
-      X <- model.matrix.lm(formula(x),
-                           data = data,
-                           na.action = na.pass)
-    }
-    offset <- x$offset
-    if(any(is.na(p))) {
-      warning("Over-parameterized model (setting NA's to zero)")
-      p[is.na(p)] <- 0
-    }
-    ginv <- link$linkinv
-    dginv <- link$mu.eta
-    Xbeta <- X%*%p
-    if (!is.null(offset)) Xbeta <- Xbeta+offset
-    if (missing(data) && !is.null(x$offset) && is.null(offset) ) {
-      Xbeta <- Xbeta+x$offset
-    }
-    if (tolower(type[1]) == "link") {
-      return(structure(Xbeta, grad=X))
-    }
-    pr <- ginv(Xbeta)
-    z <- dginv(Xbeta)
-    gr <- apply(X, 2, function(x) x*z)
-    return(structure(pr, grad=gr))
-  }
 
   ## test the imputation model parameter influence function IC using lava
   imp_mod <- glm(y ~ a + x,
@@ -283,11 +426,7 @@ test_moi_standard_errors_reference_lava <- function() {
                              average = FALSE) |> IC()
 
   expect_true(
-    max(abs(t(moi_est$nabla %*% t(moi_est$IC_epsilon)) - lava_pred_IC)) < 1e-8
-  )
-
-  expect_true(
-    max(abs(t(moi_est$nabla %*% t(moi_est$IC_epsilon)) - lava_pred_IC_2)) < 1e-13
+    max(abs(lava_pred_IC - lava_pred_IC_2)) < 1e-8
   )
 
   expect_true(
@@ -322,20 +461,4 @@ test_moi_standard_errors_reference_lava <- function() {
   )
 }
 
-## library(lava)
-##   mm <- lava::lvm(a ~ x)
-##   ## lava::distribution(mm, ~a) <- lava::binomial.lvm()
-##   mm <- glm(a ~ x, family = binomial(), data = data)
-##   ## lava::estimate(mm, data=data, estimator="glm")
-##   e <- lava::estimate(mm, data=data, estimator="glm")
-##   summary(e)
-##   head(predict(e))
-##   head(predict(e, p=coef(e)))
-##   head(predict(e, p=1:2)) # test if p is used in predict
-
-## mm <- glm(a ~ x, family = binomial(), data = data)
-## e <- lava::estimate(mm)
-## pr  <- function(object, newdata, p=NULL) {
-##   X <- model.matrix(object, data=newdata)
-##   X%*%
-## }
+test_moi_missing_IC_reference_lava()
