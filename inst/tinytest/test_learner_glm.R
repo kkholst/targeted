@@ -95,7 +95,6 @@ capture_warn_logs <- function(expr) {
 }
 
 test_insert_nas_when_pred_call_fails <- function() {
-  # TODO: test factors
   lr <- learner_glm(y ~ x1)
   lr$estimate(d)
   # the default logging threshold is INFO, thus the warning is cast
@@ -113,6 +112,29 @@ test_insert_nas_when_pred_call_fails <- function() {
   msg <- capture_warn_logs(pred <- lr$predict(data.frame(x = 1)))
   expect_true(grepl("learner", msg))
 
+  # test with factors
+  lr_factors <- learner_glm(y ~ xf)
+  lr_factors$estimate(d)
+  msg <- (pred <- lr_factors$predict(data.frame(xf = c(1, 2)))) |>
+    capture_warn_logs()
+
+  expect_true(all(is.na(pred)))
+  expect_true(grepl("variable 'xf' was fitted with type", msg))
+
+  # only replace failing rows
+  msg <- (pred <- lr_factors$predict(data.frame(xf = factor(c(1, 2, 3))))) |>
+    capture_warn_logs()
+  expect_equal(
+    pred,
+    c(lr_factors$predict(data.frame(xf = factor(c(1, 2)))), NA)
+  )
+  expect_true(grepl("factor xf has new level 3", msg))
+
+  # implement additional test to verify that no warning is cast when no
+  # NAs are inserted -> though not sure when this can happen with estimate.glm
+
+  # TODO: combination with factor and missing values (quite unlikely to happen)
+
   # changing log threshold avoids warning
   logger::log_threshold(ERROR)
   msg <- capture_warn_logs(pred <- lr$predict(data.frame(x = 1)))
@@ -122,11 +144,5 @@ test_insert_nas_when_pred_call_fails <- function() {
   pred <- lr$predict(data.frame(x1 = c(NA, 1)))
   expect_true(is.na(pred[[1]]))
   expect_equal(length(pred), 2)
-
-  logger::log_threshold(WARN)
-  lr_factors <- learner_glm(y ~ xf)
-  lr_factors$estimate(d)
-  lr_factors$predict(data.frame(xf = c(1, 2)))
-  lr_factors$predict(data.frame(xf = factor(c(1, 2, 3, 4))))
 }
 test_insert_nas_when_pred_call_fails()
