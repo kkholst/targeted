@@ -360,7 +360,6 @@ cate <- function(response.model, # nolint
   folds_out <- if (rep == 1) val$nuisance[[1]]$folds else NULL
   val$p <- lapply(val$nuisance, \(x) Reduce(cbind, x$pval))
   val$q <- lapply(val$nuisance, \(x) Reduce(cbind, x$qval))
-
   val$nuisance <- NULL
 
   res <- list(
