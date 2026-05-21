@@ -237,6 +237,35 @@ test_cate_warning <- function() {
     cate(y ~ a * x, A ~ 1, data = d),
     "treatment variable not present"
   )
+
+  # test users are informed about NAs in the q and propensity model
+  dd <- head(d, 50)
+  dd[1, "x"] <- NA
+  expect_warning(
+    cate(
+      response.model = y ~ a * x,
+      a ~ 1,
+      data = dd),
+    pattern = "NAs are present in the predictions of the response.model"
+  )
+  # also works with repetitions
+  expect_warning(
+    cate(
+      response.model = y ~ a * x,
+      a ~ 1,
+      rep = 2,
+      data = dd),
+    pattern = "NAs are present in the predictions of the response.model"
+  )
+  
+  # same for treatment.model
+  expect_warning(
+    cate(
+      response.model = y ~ a,
+      treatment.model = a ~ x,
+      data = dd),
+    pattern = "NAs are present in the predictions of the treatment.model"
+  )
 }
 test_cate_warning()
 

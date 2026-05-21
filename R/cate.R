@@ -360,6 +360,7 @@ cate <- function(response.model, # nolint
   folds_out <- if (rep == 1) val$nuisance[[1]]$folds else NULL
   val$p <- lapply(val$nuisance, \(x) Reduce(cbind, x$pval))
   val$q <- lapply(val$nuisance, \(x) Reduce(cbind, x$qval))
+
   val$nuisance <- NULL
 
   res <- list(
@@ -370,6 +371,23 @@ cate <- function(response.model, # nolint
     data = val # (y, a, p, q)
   )
   class(res) <- c("cate.targeted", "targeted")
+  if (any(mapply(\(x) any(is.na(x)), val$q))) warning(
+    "NAs are present in the predictions of the response.model. Inspect the ",
+    "data$q field of the returned object for more information."
+    # return empty estimate object
+    res$estimate <- lava::estimate(coef = NA, vcov = NULL)
+    return(res)
+  )
+  if (any(mapply(\(x) any(is.na(x)), val$p))) {
+    warning(
+    "NAs are present in the predictions of the treatment.model. Inspect the ",
+    "data$p field of the returned object for more information."
+    )
+    # return object because update method fails when val$p contains NAs and
+    # the error message begin cast does not inform the user about the NAs
+    res$estimate <- lava::estimate(coef = NA, vcov = NULL)
+    return(res)
+  }
   res <- update(res,
                 cate.model = cate.model,
                 data = data,
