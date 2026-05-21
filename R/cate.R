@@ -370,14 +370,15 @@ cate <- function(response.model, # nolint
     data = val # (y, a, p, q)
   )
   class(res) <- c("cate.targeted", "targeted")
-  if (any(mapply(\(x) any(is.na(x)), val$q))) warning(
+  if (any(mapply(\(x) any(is.na(x)), val$q))) {
+    warning(
       "NAs detect in the predictions of the response.model.",
       " Returning a cate object with an blanked estimate field.",
       " Inspect the data$q field of the returned object for more information."
-    # return empty estimate object
+    )
     res$estimate <- lava::estimate(coef = NA, vcov = NULL)
     return(res)
-  )
+  }
   if (any(mapply(\(x) any(is.na(x)), val$p))) {
     warning(
       "NAs detect in the predictions of the treatment.model.",
