@@ -246,7 +246,7 @@ test_cate_warning <- function() {
       response.model = y ~ a * x,
       a ~ 1,
       data = dd),
-    pattern = "NAs are present in the predictions of the response.model"
+    pattern = "NAs detect in the predictions of the response.model."
   )
   # also works with repetitions
   expect_warning(
