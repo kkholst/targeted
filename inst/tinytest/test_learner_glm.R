@@ -6,10 +6,11 @@ set.seed(42)
 sim1 <- function(n = 5e2) {
    x1 <- rnorm(n, sd = 2)
    x2 <- rnorm(n)
+   xf <- factor(rep(c(1, 2), n))
    lp <- x2*x1 + cos(x1)
    yb <- rbinom(n, 1, lava::expit(lp))
    y <-  lp + rnorm(n, sd = 0.5**.5)
-   return(data.frame(y, yb, x1, x2))
+   return(data.frame(y, yb, x1, x2, xf))
 }
 d <- sim1()
 
@@ -94,6 +95,7 @@ capture_warn_logs <- function(expr) {
 }
 
 test_insert_nas_when_pred_call_fails <- function() {
+  # TODO: test factors
   lr <- learner_glm(y ~ x1)
   lr$estimate(d)
   # the default logging threshold is INFO, thus the warning is cast
@@ -120,5 +122,11 @@ test_insert_nas_when_pred_call_fails <- function() {
   pred <- lr$predict(data.frame(x1 = c(NA, 1)))
   expect_true(is.na(pred[[1]]))
   expect_equal(length(pred), 2)
+
+  logger::log_threshold(WARN)
+  lr_factors <- learner_glm(y ~ xf)
+  lr_factors$estimate(d)
+  lr_factors$predict(data.frame(xf = c(1, 2)))
+  lr_factors$predict(data.frame(xf = factor(c(1, 2, 3, 4))))
 }
 test_insert_nas_when_pred_call_fails()

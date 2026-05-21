@@ -18,28 +18,45 @@ standardize_learner_predictions <- function(pred.fun, args, model.info) {
   newdata <- args$newdata
   args_without_data <- args
   args_without_data$newdata <- NULL
+  warn <- err <- NULL
   fallback <- function(i) {
     tryCatch(
-      do.call(pred.fun, c(args_without_data, list(newdata = newdata[i, ]))),
-      error = \(e) NA
+      do.call(pred.fun, c(
+        args_without_data,
+        list(newdata = newdata[i, ,drop = FALSE]))
+      ),
+      error = \(e) {
+        err <<- conditionMessage(e)
+        return(NA)
+      }
     )
   }
 
-  preds <- tryCatch(
-    do.call(pred.fun, args),
-    error = \(e) {
-      logger::log_warn(
-        sprintf(
-          "%s: NAs inserted during $predict method call\n %s",
-          model.info, e$message
+  preds <- withCallingHandlers(
+    tryCatch(
+      do.call(pred.fun, args),
+      error = \(e) {
+        err <<- conditionMessage(e)
+        sapply(
+          seq_len(NROW(newdata)),
+          fallback
         )
-      )
-      sapply(
-        seq_len(NROW(newdata)),
-        fallback
-      )
+      }
+    ),
+    warning = function(w) {
+      # catches also warnings that are emitted by the above sapply call
+      warn <<- c(warn, conditionMessage(w))
+      invokeRestart("muffleWarning")
     }
   )
+  if (!is.null(err)) { # TODO: also log warnings when do.call(pred.fun, args) does not produce an error
+    logger::log_warn(
+      sprintf(
+        "%s: NAs inserted during $predict method call\n \b %s",
+        model.info, paste0(unique(c(err, warn)), collapse = " \n \b ")
+      )
+    )
+  }
 
   return(preds)
 }

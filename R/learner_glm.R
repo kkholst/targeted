@@ -52,8 +52,6 @@ learner_glm <- function(formula, info = "glm", family = gaussian(),
       args,
       model.info = ..self$info
     )
-    # `self` is injected into this function's environment at predict-time by
-    # learner$new (see private$predfun in learner.R).
   }
   mod <- do.call(learner$new, args)
   class(mod) <- c("learner_glm", class(mod))
