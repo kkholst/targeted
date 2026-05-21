@@ -255,16 +255,16 @@ test_cate_warning <- function() {
       a ~ 1,
       rep = 2,
       data = dd),
-    pattern = "NAs are present in the predictions of the response.model"
+    pattern = "NAs detect in the predictions of the response.model."
   )
-  
+
   # same for treatment.model
   expect_warning(
     cate(
       response.model = y ~ a,
       treatment.model = a ~ x,
       data = dd),
-    pattern = "NAs are present in the predictions of the treatment.model"
+    pattern = "NAs detect in the predictions of the treatment.model."
   )
 }
 test_cate_warning()

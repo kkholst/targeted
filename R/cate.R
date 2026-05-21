@@ -371,16 +371,18 @@ cate <- function(response.model, # nolint
   )
   class(res) <- c("cate.targeted", "targeted")
   if (any(mapply(\(x) any(is.na(x)), val$q))) warning(
-    "NAs are present in the predictions of the response.model. Inspect the ",
-    "data$q field of the returned object for more information."
+      "NAs detect in the predictions of the response.model.",
+      " Returning a cate object with an blanked estimate field.",
+      " Inspect the data$q field of the returned object for more information."
     # return empty estimate object
     res$estimate <- lava::estimate(coef = NA, vcov = NULL)
     return(res)
   )
   if (any(mapply(\(x) any(is.na(x)), val$p))) {
     warning(
-    "NAs are present in the predictions of the treatment.model. Inspect the ",
-    "data$p field of the returned object for more information."
+      "NAs detect in the predictions of the treatment.model.",
+      " Returning a cate object with an blanked estimate field.",
+      " Inspect the data$q field of the returned object for more information."
     )
     # return object because update method fails when val$p contains NAs and
     # the error message begin cast does not inform the user about the NAs
