@@ -1,5 +1,6 @@
 library("tinytest")
 library("logger")
+LOG_THRESHOLD <- logger::log_threshold()
 
 set.seed(42)
 
@@ -130,13 +131,18 @@ test_insert_nas_when_pred_call_fails <- function() {
   )
   expect_true(grepl("factor xf has new level 3", msg))
 
-  # implement additional test to verify that no warning is cast when no
-  # NAs are inserted -> though not sure when this can happen with estimate.glm
-
-  # TODO: combination with factor and missing values (quite unlikely to happen)
+  # combination with factor and missing values (quite unlikely to happen)
+  lr1 <- learner_glm(y ~ x1 + xf)
+  lr1$estimate(d)
+  msg <- capture_warn_logs(
+    pred <- lr1$predict(data.frame(x1 = c(NA, 1, 2), xf = factor(c(1, 3, 1))))
+  )
+  expect_true(all(is.na(pred[1:2])))
+  expect_false(is.na(pred[3]))
 
   # changing log threshold avoids warning
   logger::log_threshold(ERROR)
+  on.exit(logger::log_threshold(LOG_THRESHOLD))
   msg <- capture_warn_logs(pred <- lr$predict(data.frame(x = 1)))
   expect_equal(length(msg), 0)
 
@@ -146,3 +152,31 @@ test_insert_nas_when_pred_call_fails <- function() {
   expect_equal(length(pred), 2)
 }
 test_insert_nas_when_pred_call_fails()
+
+test_standardize_learner_predictions_emit_warnings <- function() {
+  # TODO: test can be moved into its own file at a later point
+  base_pred_fun <- \(...) {warning("some warning"); stats::predict(...)}
+
+  # verify that no warning is logged when no NAs are inserted
+  pred_fun <- function(object, newdata, ...) {
+    targeted:::standardize_learner_predictions(
+      pred.fun = base_pred_fun,
+      args = c(list(object = object, newdata = newdata), list(...)),
+      model.info = "test"
+    )
+
+  }
+  lr <- learner$new(
+    formula = y ~ x1,
+    estimate = stats::glm,
+    predict = pred_fun
+  )
+  lr$estimate(d)
+
+  msg <- capture_warn_logs(pred <- lr$predict(data.frame(x1 = c(1, 2))))
+  expect_equal(length(msg), 0)
+
+  msg <- capture_warn_logs(pred <- lr$predict(data.frame(x1 = c(1, NA))))
+  expect_true(grepl("some warning", msg))
+}
+test_standardize_learner_predictions_emit_warnings()

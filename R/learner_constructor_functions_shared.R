@@ -23,7 +23,7 @@ standardize_learner_predictions <- function(pred.fun, args, model.info) {
     tryCatch(
       do.call(pred.fun, c(
         args_without_data,
-        list(newdata = newdata[i, ,drop = FALSE]))
+        list(newdata = newdata[i, , drop = FALSE]))
       ),
       error = \(e) {
         err <<- conditionMessage(e)
@@ -49,7 +49,8 @@ standardize_learner_predictions <- function(pred.fun, args, model.info) {
       invokeRestart("muffleWarning")
     }
   )
-  if (!is.null(err)) { # TODO: also log warnings when do.call(pred.fun, args) does not produce an error
+   # TODO: also log warnings when no NAs are inserted?
+  if (any(is.na(preds))) {
     logger::log_warn(
       sprintf(
         "%s: NAs inserted during $predict method call\n \b %s",
