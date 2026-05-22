@@ -16,9 +16,11 @@ NULL
 standardize_learner_predictions <- function(pred.fun, args, model.info) {
   if (is.null(model.info)) model.info <- "learner"
   newdata <- args$newdata
+
   args_without_data <- args
   args_without_data$newdata <- NULL
   warn <- err <- NULL
+
   fallback <- function(i) {
     tryCatch(
       do.call(pred.fun, c(
@@ -26,15 +28,31 @@ standardize_learner_predictions <- function(pred.fun, args, model.info) {
         list(newdata = newdata[i, , drop = FALSE]))
       ),
       error = \(e) {
-        err <<- conditionMessage(e)
+        err <<- c(err, conditionMessage(e))
         return(NA)
       }
     )
   }
 
+  missing_var <- FALSE
+  if (inherits(args[[1]], "glm")) {
+      # check to detect if glm.predict will look up predictors in the globalenv
+      # when they are missing in newdata
+      tt <- delete.response(terms(args[[1]]))
+      if (!all(all.vars(tt) %in% colnames(newdata))) {
+        missing_var <- TRUE
+        vars <- setdiff(all.vars(tt), colnames(newdata))
+        err <- sprintf( # TODO: improve warning message
+          "%s are missing in newdata",
+          paste0(vars, collapse =", ")
+        )
+      }
+    }
+
+
   preds <- withCallingHandlers(
     tryCatch(
-      do.call(pred.fun, args),
+      if (missing_var) rep(NA, NROW(newdata)) else do.call(pred.fun, args),
       error = \(e) {
         err <<- conditionMessage(e)
         sapply(

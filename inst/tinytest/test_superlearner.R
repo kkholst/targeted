@@ -189,6 +189,8 @@ test_failing_learner <- function() {
   data_failing <- d0
   data_failing[1, "x1"] <- NA
   # glm fails to be estimated for folds that includes the missing value
+  logthrs <- logger::log_threshold(ERROR)
+  on.exit(logger::log_threshold(logthrs))
   sl <- superlearner(lrs, data = data_failing, nfolds = 2)
   expect_equal(weights(sl), c(mean = 1, glm = 0))
 }

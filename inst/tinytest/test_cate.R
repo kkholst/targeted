@@ -231,6 +231,8 @@ test_cate_treatment_variable_types <- function() {
 test_cate_treatment_variable_types()
 
 test_cate_warning <- function() {
+  logthrs <- logger::log_threshold(logger::ERROR) # silence warning logs
+  on.exit(logger::log_threshold(logthrs))
   # check we get a warning if the treatment from the treatment.model
   # is not part of the response.model
   expect_warning(
