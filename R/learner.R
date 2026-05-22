@@ -105,7 +105,6 @@ learner <- R6::R6Class("learner", # nolint
       fit_formula <- "formula" %in% formalArgs(estimate)
       fit_data_arg <- "data" %in% formalArgs(estimate)
       private$init.estimate <- estimate
-
       private$init.predict <- predict
       private$predict_filter_generator <- add_dots(predict.filter)
 
@@ -191,9 +190,10 @@ learner <- R6::R6Class("learner", # nolint
           return(do.call(private$init.predict, args))
         }
       }
-      self$info <- info
+
       private$.formula <- formula
       private$formula.keep.specials <- formula.keep.specials
+      self$info <- info
       private$init <- list(
         estimate.args = estimate.args,
         predict.args = predict.args,
