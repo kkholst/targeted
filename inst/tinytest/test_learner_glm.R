@@ -97,12 +97,12 @@ capture_warn_logs <- function(expr) {
 test_insert_nas_when_pred_call_fails <- function() {
   lr <- learner_glm(y ~ x1)
   lr$estimate(d)
-  # the default logging threshold is INFO, thus the warning is cast
+  # the default logging threshold is INFO, thus the warning is logged
   msg <- capture_warn_logs(pred <- lr$predict(data.frame(x = 1)))
   expect_true(is.na(pred))
   expect_true(grepl("NAs inserted", msg))
   expect_true(grepl("glm", msg)) # info field is logged correctly
-  # expect_true(grepl("object 'x1' not found", msg))
+  expect_true(grepl("x1 is missing in newdata", msg))
 
   lr$info <- "glmx1"
   msg <- capture_warn_logs(pred <- lr$predict(data.frame(x = 1)))
@@ -129,11 +129,19 @@ test_insert_nas_when_pred_call_fails <- function() {
   expect_true(all(is.na(pred)))
 
   # predict.glm looks up predictors in R_GlobalEnv when they are not found
-  # in newdata
+  # in newdata. this should be prevent by learner_glm
   expect_warning(
     pred_ref <- predict(lr_factors$fit, data.frame(xff = c(1, 2)))
   )
   expect_equal(pred_ref, predict(lr_factors$fit, data.frame(xf = xf)))
+
+  # missing special variable is also handled correctly when it exists in
+  # R_GlobalEnv
+  x2 <- 1
+  lr2 <- learner_glm(y ~ x1 + offset(x2))
+  lr2$estimate(d)
+  msg <- capture_warn_logs(lr2$predict(data.frame(x1 =2, x3 = NA)))
+  expect_true(grepl("x2 is missing in newdata", msg))
 
   # only replace failing rows
   msg <- (pred <- lr_factors$predict(data.frame(xf = factor(c(1, 2, 3))))) |>
