@@ -68,7 +68,7 @@ standardize_learner_predictions <- function(pred.fun, args, model.info) {
       invokeRestart("muffleWarning")
     }
   )
-   # TODO: also log warnings when no NAs are inserted?
+
   if (any(is.na(preds))) {
     logger::log_warn(
       sprintf(
