@@ -29,3 +29,13 @@ test_nondom <- function() {
   expect_true(length(setdiff(res, true)) == 0)
 }
 test_nondom()
+
+test_add_dots <- function() {
+  add_dots <- targeted:::add_dots
+  foo <- function(x) x
+  foo_dots <- add_dots(foo)
+  expect_equal(foo(1), foo_dots(1))
+  expect_error(foo(x = 1, b = 2))
+  expect_equal(foo_dots(x = 1, b = 2), foo(x = 1))
+}
+test_add_dots()
