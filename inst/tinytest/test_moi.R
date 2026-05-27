@@ -462,3 +462,65 @@ test_moi_missing_IC_reference_lava <- function() {
 }
 
 test_moi_missing_IC_reference_lava()
+
+test_moi_missing_NA_coef <- function() {
+  ## Provoke NA coefficients in the imputation model by introducing an
+  ## exactly-collinear predictor (duplicate column). The underlying glm.fit
+  ## sets the redundant coefficient to NA. The expected (post-fix) behavior
+  ## is that `moi_missing()` proceeds gracefully and produces estimates
+  ## numerically equivalent to running with the rank-deficient column
+  ## removed (since an NA coef is functionally zero).
+  ##
+  ## Currently this test FAILS at the `lava::estimate(fit, predict_glm, ...)`
+  ## call inside `moi_missing()`, because `lava::score.glm` aborts with
+  ## "Over-parameterized model" before `predict_glm` is reached. See TODO
+  ## at R/moi.R: "bug when parameters are NA in the imputation model".
+  set.seed(1)
+  n <- 100
+  data <- data.frame(
+    id = seq_len(n),
+    a = rbinom(n, 1, 0.5),
+    x = rnorm(n)
+  )
+  data$x_dup <- data$x  # exact collinearity with `x`
+  data$y <- 1 + data$a + data$x + rnorm(n)
+  delta <- rbinom(n, 1, lava::expit(1 + data$x))
+  data$y <- ifelse(delta == 1, data$y, NA)
+
+  ## sanity: confirm the underlying glm has a NA coef
+  imp_fit <- glm(y ~ a + x + x_dup,
+                 data = data,
+                 weights = as.numeric(!is.na(data$y)),
+                 na.action = lava::na.pass0)
+  expect_true(any(is.na(coef(imp_fit))))
+
+  ## reference run: full-rank specification (no x_dup)
+  res_full_rank <- moi_missing(
+    data = data,
+    delta = !is.na(data$y),
+    id = data$id,
+    treatment.model = learner_glm(a ~ 1, family = binomial()),
+    imputation.model = learner_glm(y ~ a + x),
+    imputation.subset = "!is.na(y)"
+  )
+
+  ## test run: rank-deficient specification (x_dup duplicates x).
+  ## EXPECTED (post-fix): runs without error.
+  ## CURRENT (pre-fix): errors with "Over-parameterized model".
+  res_rank_def <- moi_missing(
+    data = data,
+    delta = !is.na(data$y),
+    id = data$id,
+    treatment.model = learner_glm(a ~ 1, family = binomial()),
+    imputation.model = learner_glm(y ~ a + x + x_dup),
+    imputation.subset = "!is.na(y)"
+  )
+
+  ## coefficients should be numerically equivalent across the two runs
+  expect_equal(
+    coef(res_rank_def$estimate),
+    coef(res_full_rank$estimate),
+    tolerance = 1e-12
+  )
+}
+test_moi_missing_NA_coef()

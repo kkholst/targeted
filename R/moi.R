@@ -389,7 +389,7 @@ moi <- function(data,
                 mc.cores = NULL,
                 second.order = TRUE) {
   ## TODO: check that the missing reponse and treatment strata are well defined
-  ## TODO: bug when parameters are NA in the imputation model
+  ## TODO: create test for NA parameters in the imputation model
   cl <- match.call()
   n <- nrow(data)
   id <- seq_len(nrow(data))
