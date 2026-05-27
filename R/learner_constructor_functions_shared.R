@@ -42,9 +42,10 @@ standardize_learner_predictions <- function(pred.fun, args, model.info) {
       if (!all(all.vars(tt) %in% colnames(newdata))) {
         missing_var <- TRUE
         vars <- setdiff(all.vars(tt), colnames(newdata))
-        err <- sprintf( # TODO: improve warning message
-          "%s are missing in newdata",
-          paste0(vars, collapse =", ")
+        err <- sprintf(
+          "%s %s missing in newdata",
+          paste0(vars, collapse = ", "),
+          ifelse(length(vars) == 1, "is", "are")
         )
       }
     }
@@ -73,6 +74,15 @@ standardize_learner_predictions <- function(pred.fun, args, model.info) {
       sprintf(
         "%s: NAs inserted during $predict method call\n \b %s",
         model.info, paste0(unique(c(err, warn)), collapse = " \n \b ")
+      )
+    )
+  }
+
+  if (length(warn) > 0 && !any(is.na(preds))) {
+    logger::log_warn(
+      sprintf(
+        "%s: %s",
+        model.info, paste0(unique(warn), collapse = " \n \b ")
       )
     )
   }

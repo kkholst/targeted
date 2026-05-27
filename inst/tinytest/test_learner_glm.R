@@ -175,7 +175,7 @@ test_standardize_learner_predictions_emit_warnings <- function() {
     targeted:::standardize_learner_predictions(
       pred.fun = base_pred_fun,
       args = c(list(object = object, newdata = newdata), list(...)),
-      model.info = "test"
+      model.info = "test-model"
     )
 
   }
@@ -186,10 +186,13 @@ test_standardize_learner_predictions_emit_warnings <- function() {
   )
   lr$estimate(d)
 
+  # only log warning from base_pred_fun
   msg <- capture_warn_logs(pred <- lr$predict(data.frame(x1 = c(1, 2))))
-  expect_equal(length(msg), 0)
+  expect_true(grepl("test-model: some warning", msg))
 
+  # log NA warning + warning from base_pred_fun
   msg <- capture_warn_logs(pred <- lr$predict(data.frame(x1 = c(1, NA))))
   expect_true(grepl("some warning", msg))
+  expect_true(grepl("NAs inserted", msg))
 }
 test_standardize_learner_predictions_emit_warnings()
