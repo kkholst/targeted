@@ -1,5 +1,6 @@
 library("tinytest")
 library("logger")
+source("helpers.R")
 
 set.seed(42)
 
@@ -81,18 +82,6 @@ test_binary_response <- function() {
 }
 test_binary_response()
 
-
-capture_warn_logs <- function(expr) {
-  msgs <- character(0L)
-  old_appender <- eval(
-    logger::log_appender(),
-    envir = getNamespace("logger")
-  )
-  on.exit(logger::log_appender(old_appender))
-  logger::log_appender(function(line) msgs <<- c(msgs, line))
-  force(expr)
-  msgs
-}
 
 test_insert_nas_when_pred_call_fails <- function() {
   lr <- learner_glm(y ~ x1)

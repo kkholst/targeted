@@ -1,5 +1,6 @@
 library("tinytest")
 library("logger")
+source("helpers.R")
 
 set.seed(42)
 
