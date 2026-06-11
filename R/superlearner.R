@@ -198,7 +198,7 @@ superlearner <- function(learners,
     "All provided learners must be of class targeted::learner"
   )
 
-  responses <- unlist(lapply(learners, \(m) as.character(m$formula)[[2]]))
+  responses <- unlist(lapply(learners, \(m) deparse(m$formula[[2]])))
   if (length(unique(responses)) > 1) {
     r <- paste0(unique(responses), collapse = ", ")
     warning("Different response variables found among learners: ", r)
@@ -359,8 +359,11 @@ SL <- function(formula=~., ...,
       stop("Package 'SuperLearner' required.")
   }
 
-  pred <- as.character(formula)
-  pred <- ifelse(length(pred)==2, pred[2], pred[3])
+  if (length(formula) == 3) {
+    pred <- paste(deparse(formula[[3]]), collapse = " ")
+  } else {
+    pred <- paste(deparse(formula[[2]]), collapse = " ")
+  }
   if (pred=="1") {
     SL.library <- "SL.mean"
   }

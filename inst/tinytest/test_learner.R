@@ -343,9 +343,9 @@ test_specials <- function() {
   expect_true(inherits(lr$fit[[2]], "lm"))
   f <- formula(lr$fit[[1]])
   # strata in original formula
-  expect_true(grepl("strata", as.character(lr$formula)[3]))
+  expect_true(grepl("strata", paste(deparse(lr$formula[[3]]), collapse = " ")))
   # but not in fitted model formula
-  expect_true(!grepl("strata", as.character(f)[3]))
+  expect_true(!grepl("strata", paste(deparse(f[[3]]), collapse = " ")))
 }
 test_specials()
 

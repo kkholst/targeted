@@ -8,7 +8,7 @@ procfold <- function(a, fold,
                      ...) {
   qmod <- response.model$clone(deep = TRUE)
   pmod <- treatment.model$clone(deep = TRUE)
-  newf <- reformulate(as.character(pmod$formula)[[3]],
+  newf <- reformulate(paste(deparse(pmod$formula[[3]]), collapse = " "),
                       outcome_level(treatment_var, a))
   pmod$update(newf)
   val <- list(est_nuisance_fold(
@@ -345,7 +345,7 @@ cate <- function(response.model, # nolint
   pmod <- treatment.model$clone(deep = TRUE)
   for (i in seq_along(contrast)) {
     newf <- reformulate(
-      as.character(pmod$formula)[[3]],
+      paste(deparse(pmod$formula[[3]]), collapse = " "),
       outcome_level(treatment_var, contrast[i])
     )
     pmod$update(newf)
@@ -425,7 +425,7 @@ cate_est <- function(y, # response vector
         inherits(treatment.model, "learner_glm")) {
       pmod <- treatment.model$clone(deep = TRUE)
       newf <- reformulate(
-        as.character(pmod$formula)[[3]],
+        paste(deparse(pmod$formula[[3]]), collapse = " "),
         outcome_level(treatment_var, contrast[i])
       )
       pmod$update(newf)
