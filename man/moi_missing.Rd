@@ -68,7 +68,8 @@ contributions to the influence function:
 \code{IC3} (only present when
 \code{imputation.augmentation = TRUE}) is the augmentation part.
 The full per-level IC equals \code{IC1 + IC2 [+ IC3]}.}
-\item{IC_epsilon} influence function for the imputation model parameters
+\item{IC_epsilon}{(only if \code{extended.output = TRUE}) Influence
+function for the imputation-model parameters.}
 }
 \description{
 Estimates the mean of a given parametric imputation model among observations

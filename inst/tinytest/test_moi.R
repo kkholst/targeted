@@ -463,6 +463,76 @@ test_moi_missing_IC_reference_lava <- function() {
 
 test_moi_missing_IC_reference_lava()
 
+test_moi_treatment_model_validation <- function() {
+  ## Validates the hardened treatment.model input handling in moi():
+  ## only base R stats formulas with an intercept-only RHS are accepted.
+  set.seed(1)
+  n <- 100
+  d <- data.frame(
+    id = seq_len(n),
+    a = rbinom(n, 1, 0.5),
+    x = rnorm(n)
+  )
+  d$y <- 1 + d$a + d$x + rnorm(n)
+  delta <- rbinom(n, 1, lava::expit(1 + d$x))
+  d$y <- ifelse(delta == 1, d$y, NA)
+
+  args_common <- list(
+    data = d,
+    response.model = learner_glm(y ~ a + x),
+    missing.model = learner_glm(~ a + x, family = binomial()),
+    imputation.model = learner_glm(y ~ a + x),
+    imputation.subset = "!is.na(y)"
+  )
+
+  ## (1) bare formula a ~ 1 is the canonical accepted form (positive control)
+  res_ok <- do.call(
+    moi,
+    c(args_common, list(treatment.model = a ~ 1))
+  )
+  expect_true(inherits(res_ok, "moi.targeted"))
+
+  ## (2) learner objects are no longer accepted
+  expect_error(
+    do.call(
+      moi,
+      c(args_common,
+        list(treatment.model = learner_glm(a ~ 1, family = binomial())))
+    ),
+    "must be a base R stats formula"
+  )
+
+  ## (3) subclassed formulas are rejected (the `identical(class(...))` check)
+  f_subclass <- a ~ 1
+  class(f_subclass) <- c("Foo", "formula")
+  expect_error(
+    do.call(
+      moi,
+      c(args_common, list(treatment.model = f_subclass))
+    ),
+    "must be a base R stats formula"
+  )
+
+  ## (4) character strings are rejected
+  expect_error(
+    do.call(
+      moi,
+      c(args_common, list(treatment.model = "a ~ 1"))
+    ),
+    "must be a base R stats formula"
+  )
+
+  ## (5) formulas with predictor variables on the RHS are rejected
+  expect_error(
+    do.call(
+      moi,
+      c(args_common, list(treatment.model = a ~ x))
+    ),
+    "only an intercept"
+  )
+}
+test_moi_treatment_model_validation()
+
 test_moi_missing_NA_coef <- function() {
   ## Provoke NA coefficients in the imputation model by introducing an
   ## exactly-collinear predictor (duplicate column). The underlying glm.fit

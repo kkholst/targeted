@@ -87,7 +87,8 @@ predict_glm <- function(object, p=coef(object), data, offset = NULL,
 #'     \code{IC3} (only present when
 #'     \code{imputation.augmentation = TRUE}) is the augmentation part.
 #'     The full per-level IC equals \code{IC1 + IC2 [+ IC3]}.}
-#'   \item{IC_epsilon} influence function for the imputation model parameters
+#'   \item{IC_epsilon}{(only if \code{extended.output = TRUE}) Influence
+#'     function for the imputation-model parameters.}
 moi_missing <- function(data,
                         id,
                         delta,
@@ -300,49 +301,40 @@ moi_missing <- function(data,
 ##'
 ##' Inference in based on the estimated influence functions (IFs)
 ##' of the associated (covariate adjusted) one-step estimators.
-##'
 ##' @param data A \code{data.frame} containing all variables required by the
 ##'   models. \code{data.table} and \code{tbl_df} objects are automatically
 ##'   coerced to \code{data.frame}.
-##'
 ##' @param response.model A \code{formula} or \code{learner} object
 ##'   specifying the response/outcome and the associated baseline adjusted
 ##'   model. If a \code{formula} is provided,
 ##'   it is automatically wrapped in \code{\link{learner_glm}}. Used to
 ##'   estimate \eqn{E[\Delta Y | A = a]}.
-##'
-##' @param treatment.model A \code{formula}
-##'   specifying the binary treatment variable, e.g., A ~ 1.
-##'
+##' @param treatment.model A base R \code{stats} formula specifying the
+##'   binary treatment variable. Only an intercept is allowed on the right-hand
+##'   side, e.g., \code{A ~ 1}.
 ##' @param missing.model A \code{formula} or \code{learner} object
 ##'   specifying the model for the probability of the outcome being
 ##'   observed/non-missing
 ##'   (i.e., \eqn{P(\Delta = 1 | A = a)}). If a \code{formula} is provided,
 ##'   it is wrapped in \code{learner_glm(..., family = binomial())}. Used to
 ##'   estimate \eqn{P(\Delta = 0 | A = a)}.
-##'
 ##' @param imputation.model A \code{formula} or \code{learner_glm} object
 ##'   specifying the missing outcome imputation model. If a \code{formula}
 ##'   is provided, it is wrapped in \code{\link{learner_glm}}. Used to estimate
 ##'   \eqn{E[U(X, A, Z; \theta) | A = a, \Delta = 0]}.
-##'
 ##' @param imputation.subset An optional logical vector specifying a subset of
 ##'   the data to use when fitting the imputation model. Default is \code{NULL}
 ##'   (all observations are used).
-##'
 ##' @param imputation.augmentation Logical. If \code{TRUE}, an augmentation
 ##'   term is added to the imputation estimator for improved efficiency.
 ##'   Default is \code{FALSE}.
-##'
 ##' @param imputation.augmentation.model A \code{formula}, \code{learner},
 ##'   or \code{NULL} specifying the model used for the augmentation of the
 ##'   imputation estimator. Only used if \code{imputation.augmentation = TRUE}.
 ##'   Default is \code{NULL}.
-##'
 ##' @param return.all Logical. If \code{TRUE}, the returned object includes all
 ##'   intermediate estimates
 ##'   in addition to the final ATE estimate. Default is \code{FALSE}.
-##'
 ##' @return An object of class \code{moi.targeted} (inheriting from
 ##'   \code{targeted}), a list with components:
 ##'   \describe{
@@ -405,9 +397,6 @@ moi <- function(data,
   if (inherits(response.model, "formula")) {
     response.model <- learner_glm(response.model)
   }
-  if (inherits(treatment.model, "formula")) {
-    treatment.model <- learner_glm(treatment.model, family = binomial())
-  }
   if (inherits(missing.model, "formula")) {
     missing.model <- learner_glm(missing.model, family = binomial())
   }
@@ -415,25 +404,27 @@ moi <- function(data,
     imputation.model <- learner_glm(imputation.model)
   }
 
-  ## check that treatment.model is a learner_glm with family = "binomial",
-  ## and that the formula RHS is 1, i.e., only an
-  ## intercept is included
-  if (!inherits(treatment.model, "learner_glm")) {
-    stop("treatment.model must be of inherited class 'learner_glm'")
+  ## treatment.model must be a base R stats formula (e.g., a ~ 1).
+  ## Learner objects and subclassed formulas are no longer accepted.
+  ## The strict `identical(class(...), "formula")` check rejects formulas
+  ## that have been subclassed by other packages overriding the formula
+  ## class (e.g., Formula::Formula, mgcv smoothers, lme4 mixed-model
+  ## formulas).
+  if (!identical(class(treatment.model), "formula")) {
+    stop(
+      "'treatment.model' must be a base R stats formula (e.g., 'a ~ 1'); ",
+      "subclassed formulas and learner objects are not supported."
+    )
   }
-  ## TODO: implement family S3 function for learner_glm
-  family <- treatment.model$.__enclos_env__$private$init$estimate.args$family
-  if (inherits(family, "family")) {
-    family <- family$family
-  }
-  if (family != "binomial") {
-    stop("treatment.model glm must be of family 'binomial'")
-  }
-  form <- formula(treatment.model)
-  if (length(attr(terms(form), "factors")) != 0) {
+  trm <- terms(treatment.model)
+  if (length(attr(trm, "factors")) != 0) {
     stop("only an intercept is allowed in the treatment.model formula")
   }
-  rm(form, family)
+  if (!is.null(attr(trm, "offset"))) {
+    stop("offset terms are not allowed in 'treatment.model'.")
+  }
+  rm(trm)
+  treatment.model <- learner_glm(treatment.model, family = binomial())
 
   ## clone models that are updated:
   response.model <- response.model$clone()

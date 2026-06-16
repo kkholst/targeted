@@ -32,8 +32,9 @@ model. If a \code{formula} is provided,
 it is automatically wrapped in \code{\link{learner_glm}}. Used to
 estimate \eqn{E[\Delta Y | A = a]}.}
 
-\item{treatment.model}{A \code{formula}
-specifying the binary treatment variable, e.g., A ~ 1.}
+\item{treatment.model}{A base R \code{stats} formula specifying the
+binary treatment variable. Only an intercept is allowed on the right-hand
+side, e.g., \code{A ~ 1}.}
 
 \item{missing.model}{A \code{formula} or \code{learner} object
 specifying the model for the probability of the outcome being

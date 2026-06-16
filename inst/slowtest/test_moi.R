@@ -675,7 +675,7 @@ test_moi_postrand <- function() {
       missing.model = learner_glm(~ a * x, family = binomial()),
       imputation.model = learner_glm(formula = y  ~ x + z),
       imputation.subset = "!is.na(y) & a == 0",
-      treatment.model = learner_glm(formula = a ~ 1, family = binomial()),
+      treatment.model = a ~ 1,
       imputation.augmentation = FALSE,
       return.all = TRUE
     )
