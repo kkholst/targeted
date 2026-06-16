@@ -533,6 +533,138 @@ test_moi_treatment_model_validation <- function() {
 }
 test_moi_treatment_model_validation()
 
+test_moi_missing_weights <- function() {
+  ## Verifies the merge logic for user-supplied weights x imputation.subset.
+  set.seed(2)
+  n <- 100
+  d <- data.frame(
+    id = seq_len(n),
+    a = rbinom(n, 1, 0.5),
+    x = rnorm(n)
+  )
+  d$y <- 1 + d$a + d$x + rnorm(n)
+  delta <- rbinom(n, 1, lava::expit(1 + d$x))
+  d$y <- ifelse(delta == 1, d$y, NA)
+
+  ## (a) baseline: no user weights, subset only
+  res_a <- moi_missing(
+    data = d, delta = !is.na(d$y), id = d$id,
+    treatment.model = learner_glm(a ~ 1, family = binomial()),
+    imputation.model = learner_glm(y ~ a + x),
+    imputation.subset = "!is.na(y)"
+  )
+  expect_true(all(is.finite(coef(res_a$estimate))))
+
+  ## (b) user weights merge: user_w * model_rows reproduces a manual fit
+  user_w <- runif(n, 0.5, 1.5)
+  res_b <- moi_missing(
+    data = d, delta = !is.na(d$y), id = d$id,
+    treatment.model = learner_glm(a ~ 1, family = binomial()),
+    imputation.model = learner_glm(y ~ a + x, weights = user_w),
+    imputation.subset = "!is.na(y)"
+  )
+  ref_fit <- glm(y ~ a + x, data = d[!is.na(d$y), ],
+                 weights = user_w[!is.na(d$y)],
+                 na.action = lava::na.pass0)
+
+  expect_equal(unname(coef(res_b$imputation.model$fit)),
+               unname(coef(ref_fit)),
+               tolerance = 1e-12)
+
+  ## (c) length mismatch is rejected
+  expect_error(
+    moi_missing(
+      data = d, delta = !is.na(d$y), id = d$id,
+      treatment.model = learner_glm(a ~ 1, family = binomial()),
+      imputation.model = learner_glm(y ~ a + x, weights = runif(n - 1)),
+      imputation.subset = "!is.na(y)"
+    ),
+    "length"
+  )
+
+  ## (d) NA in user weights is rejected
+  bad_na <- user_w
+  bad_na[1] <- NA
+  expect_error(
+    moi_missing(
+      data = d, delta = !is.na(d$y), id = d$id,
+      treatment.model = learner_glm(a ~ 1, family = binomial()),
+      imputation.model = learner_glm(y ~ a + x, weights = bad_na),
+      imputation.subset = "!is.na(y)"
+    ),
+    "must not contain NA"
+  )
+
+  ## (e) negative user weights rejected
+  bad_neg <- user_w
+  bad_neg[1] <- -0.1
+  expect_error(
+    moi_missing(
+      data = d, delta = !is.na(d$y), id = d$id,
+      treatment.model = learner_glm(a ~ 1, family = binomial()),
+      imputation.model = learner_glm(y ~ a + x, weights = bad_neg),
+      imputation.subset = "!is.na(y)"
+    ),
+    "non-negative"
+  )
+}
+test_moi_missing_weights()
+
+test_moi_missing_subset_zeroweight_equivalence <- function() {
+  ## Verifies that subsetting and zero-weighting
+  ## are equivalent at both the bare-glm level and the learner_glm level.
+  ## This underpins moi_missing()'s use of an
+  ## `imputation.subset`-derived 0/1 weight vector to fit the imputation
+  ## model on a subset of the data.
+  set.seed(3)
+  n <- 200
+  d <- data.frame(a = rbinom(n, 1, 0.5), x = rnorm(n))
+  d$y <- 1 + d$a + d$x + rnorm(n)
+  incl <- rep(c(TRUE, FALSE), c(150, 50))
+
+  ## --- Tier 1: bare glm() ---
+  fit_subset <- glm(y ~ a + x, data = d[incl, ])
+  fit_zerow  <- glm(y ~ a + x, data = d, weights = as.numeric(incl))
+  ## coefs match
+  expect_equal(unname(coef(fit_subset)),
+               unname(coef(fit_zerow)),
+               tolerance = 1e-12)
+  ## standard errors match (suppress the expected
+  ## "observations with zero weight" dispersion warning from summary.glm)
+  se_subset <- sqrt(diag(vcov(fit_subset)))
+  se_zerow  <- suppressWarnings(sqrt(diag(vcov(fit_zerow))))
+  expect_equal(unname(se_subset), unname(se_zerow), tolerance = 1e-10)
+  ## excluded rows in the zero-weighted fit contribute zero to the IC
+  ic_zerow <- IC(fit_zerow)
+  expect_true(all(ic_zerow[!incl, ] == 0))
+  ## the implied vcov (crossprod(IC) / n^2) matches across both fits.
+  ## Note: lava::IC.glm normalizes by the actual sample size used in the
+  ## fit, so per-row IC values differ by the ratio of n's, but the
+  ## resulting variance estimate is identical.
+  ic_subset <- IC(fit_subset)
+  vcov_from_ic_subset <- crossprod(ic_subset) / nrow(ic_subset)^2
+  vcov_from_ic_zerow  <- crossprod(ic_zerow)  / nrow(ic_zerow)^2
+  expect_equal(unname(diag(vcov_from_ic_subset)),
+               unname(diag(vcov_from_ic_zerow)),
+               tolerance = 1e-12)
+
+  ## --- Tier 2: learner_glm wrapped in moi_missing-style fit ---
+  lr_subset <- learner_glm(y ~ a + x)
+  lr_subset$estimate(data = d[incl, ], na.action = lava::na.pass0)
+  lr_zerow  <- learner_glm(y ~ a + x)
+  lr_zerow$estimate(data = d, weights = as.numeric(incl),
+                    na.action = lava::na.pass0)
+  expect_equal(unname(coef(lr_subset$fit)),
+               unname(coef(lr_zerow$fit)),
+               tolerance = 1e-12)
+  se_lr_subset <- sqrt(diag(vcov(lr_subset$fit)))
+  se_lr_zerow  <- suppressWarnings(sqrt(diag(vcov(lr_zerow$fit))))
+  expect_equal(unname(se_lr_subset),
+               unname(se_lr_zerow),
+               tolerance = 1e-12)
+}
+test_moi_missing_subset_zeroweight_equivalence()
+
 test_moi_missing_NA_coef <- function() {
   ## Provoke NA coefficients in the imputation model by introducing an
   ## exactly-collinear predictor (duplicate column). The underlying glm.fit

@@ -54,7 +54,9 @@ predict_glm <- function(object, p=coef(object), data, offset = NULL,
 #' @param treatment.model Learner object
 #' @param imputation.model A learner object of class 'learner_glm' used to fit
 #' the imputation model. The learner must specify the outcome variable and
-#' model formula.
+#' model formula. If the learner was constructed with user-supplied
+#' \code{weights}, those weights are multiplied by the
+#' \code{imputation.subset} indicator (excluded rows receive zero weight).
 #' @param imputation.subset Optional. A character string containing an R
 #' expression that evaluates to a logical vector indicating which rows to use
 #' for fitting the
@@ -150,9 +152,26 @@ moi_missing <- function(data,
   if (!any(model_rows)) {
     stop("No observations with non-missing outcome in the selected imputation subset. Cannot fit imputation model.") # nolint
   }
-  ## weights based on the model rows
-  ## TODO: update weights if already specified in imputation.model
-  weights <- model_rows * 1
+  ## Combine pre-specified weights with subset weights.
+  user_weights <-
+    imputation.model$.__enclos_env__$private$estimate.args$weights
+  if (is.null(user_weights)) {
+    weights <- as.numeric(model_rows)
+  } else {
+    if (length(user_weights) != nrow(data)) {
+      stop(sprintf(
+        "imputation.model 'weights' length (%d) does not match data rows (%d)",
+        length(user_weights), nrow(data)
+      ))
+    }
+    if (any(is.na(user_weights))) {
+      stop("imputation.model 'weights' must not contain NA values")
+    }
+    if (any(user_weights < 0)) {
+      stop("imputation.model 'weights' must be non-negative")
+    }
+    weights <- user_weights * as.numeric(model_rows)
+  }
 
   ## fit imputation model
   imputation.model$estimate(data = data,
@@ -403,13 +422,6 @@ moi <- function(data,
   if (inherits(imputation.model, "formula")) {
     imputation.model <- learner_glm(imputation.model)
   }
-
-  ## treatment.model must be a base R stats formula (e.g., a ~ 1).
-  ## Learner objects and subclassed formulas are no longer accepted.
-  ## The strict `identical(class(...), "formula")` check rejects formulas
-  ## that have been subclassed by other packages overriding the formula
-  ## class (e.g., Formula::Formula, mgcv smoothers, lme4 mixed-model
-  ## formulas).
   if (!identical(class(treatment.model), "formula")) {
     stop(
       "'treatment.model' must be a base R stats formula (e.g., 'a ~ 1'); ",

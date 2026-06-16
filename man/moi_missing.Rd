@@ -28,7 +28,9 @@ data.frame.}
 
 \item{imputation.model}{A learner object of class 'learner_glm' used to fit
 the imputation model. The learner must specify the outcome variable and
-model formula.}
+model formula. If the learner was constructed with user-supplied
+\code{weights}, those weights are multiplied by the
+\code{imputation.subset} indicator (excluded rows receive zero weight).}
 
 \item{imputation.subset}{Optional. A character string containing an R
 expression that evaluates to a logical vector indicating which rows to use
