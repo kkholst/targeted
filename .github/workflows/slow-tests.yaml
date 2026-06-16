@@ -1,0 +1,54 @@
+# Runs the slow tests in inst/slowtest/ weekly and on pushes to main.
+# Scheduled runs always use the workflow file from the default branch (main),
+# but check out the `dev` branch for the actual test run.
+name: r-cmd-check-slow
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # Sunday 23:00 UTC
+    - cron: '0 23 * * 0'
+  workflow_dispatch:
+
+jobs:
+  slow-tests:
+    runs-on: ubuntu-latest
+    name: slow tests (ubuntu-latest, release)
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          # On the weekly cron, run against `dev`. Otherwise use the
+          # triggering ref (push to main, or whatever workflow_dispatch
+          # targets).
+          ref: ${{ github.event_name == 'schedule' && 'dev' || github.ref }}
+
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-tinytex@v2
+      - uses: quarto-dev/quarto-actions/setup@v2
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: 'release'
+          use-public-rspm: true
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get install -y pandoc libcurl4-openssl-dev libharfbuzz-dev libfribidi-dev libpoppler-cpp-dev
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            any::remotes
+          needs: check
+
+      - name: Install package
+        run: make install
+
+      - name: Run slow tests
+        run: make test-slow
