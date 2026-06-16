@@ -8,7 +8,7 @@
 predict_glm <- function(object, p=coef(object), data, offset = NULL,
                         type=c("response", "link"), ...) {
   x <- object
-  if (!inherits(x,"glm")) stop("need glm object")
+  if (!inherits(x, "glm")) stop("need glm object")
   link <- family(x)
   if (missing(data)) {
     X <- model.matrix.lm(x)
@@ -26,7 +26,7 @@ predict_glm <- function(object, p=coef(object), data, offset = NULL,
   dginv <- link$mu.eta
   Xbeta <- X%*%p
   if (!is.null(offset)) Xbeta <- Xbeta+offset
-  if (missing(data) && !is.null(x$offset) && is.null(offset) ) {
+  if (missing(data) && !is.null(x$offset) && is.null(offset)) {
     Xbeta <- Xbeta+x$offset
   }
   if (tolower(type[1]) == "link") {
@@ -224,7 +224,7 @@ moi_missing <- function(data,
                     data = data,
                     subset = (A == a) & (delta == 0),
                     average = TRUE,
-                    id = 1:nrow(data))
+                    id = seq_len(nrow(data)))
     IC <- IC(est)
     est <- coef(est)
 
