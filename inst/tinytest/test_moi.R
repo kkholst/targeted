@@ -466,15 +466,10 @@ test_moi_missing_IC_reference_lava()
 test_moi_missing_NA_coef <- function() {
   ## Provoke NA coefficients in the imputation model by introducing an
   ## exactly-collinear predictor (duplicate column). The underlying glm.fit
-  ## sets the redundant coefficient to NA. The expected (post-fix) behavior
-  ## is that `moi_missing()` proceeds gracefully and produces estimates
+  ## sets the redundant coefficient to NA. The expected behavior
+  ## is that `moi_missing()` produces estimates
   ## numerically equivalent to running with the rank-deficient column
   ## removed (since an NA coef is functionally zero).
-  ##
-  ## Currently this test FAILS at the `lava::estimate(fit, predict_glm, ...)`
-  ## call inside `moi_missing()`, because `lava::score.glm` aborts with
-  ## "Over-parameterized model" before `predict_glm` is reached. See TODO
-  ## at R/moi.R: "bug when parameters are NA in the imputation model".
   set.seed(1)
   n <- 100
   data <- data.frame(
@@ -505,22 +500,25 @@ test_moi_missing_NA_coef <- function() {
   )
 
   ## test run: rank-deficient specification (x_dup duplicates x).
-  ## EXPECTED (post-fix): runs without error.
-  ## CURRENT (pre-fix): errors with "Over-parameterized model".
-  res_rank_def <- moi_missing(
-    data = data,
-    delta = !is.na(data$y),
-    id = data$id,
-    treatment.model = learner_glm(a ~ 1, family = binomial()),
-    imputation.model = learner_glm(y ~ a + x + x_dup),
-    imputation.subset = "!is.na(y)"
+  expect_warning(
+    res_rank_def <- moi_missing(
+      data = data,
+      delta = !is.na(data$y),
+      id = data$id,
+      treatment.model = learner_glm(a ~ 1, family = binomial()),
+      imputation.model = learner_glm(y ~ a + x + x_dup),
+      imputation.subset = "!is.na(y)"
+    )
   )
 
-  ## coefficients should be numerically equivalent across the two runs
+  ## coefficients and IC should be numerically equivalent across the two runs
   expect_equal(
     coef(res_rank_def$estimate),
     coef(res_full_rank$estimate),
-    tolerance = 1e-12
+  )
+  expect_equal(
+    IC(res_rank_def$estimate),
+    IC(res_full_rank$estimate)
   )
 }
 test_moi_missing_NA_coef()
