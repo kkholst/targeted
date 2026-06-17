@@ -69,6 +69,10 @@ learning models from other R packages. Once the usage of the returned
 `learner` class objects has been introduced, we provide details to implement
 new learners.
 
+# Logging
+
+Many of the following built-in learners use the [logger](https://daroczig.github.io/logger/index.html) package to inform users about non-critical warnings and errors. The behavior of the logger can be controlled by updating the [log threshold](https://daroczig.github.io/logger/reference/log_levels.html) and be disabled with `log_threshold(OFF)`. Note that the `{targeted}` packages imports `{logger}`.
+
 # Built-in learners
 
 The various constructors for commonly used statistical and machine learning
