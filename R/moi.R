@@ -101,7 +101,7 @@ moi_missing <- function(data,
                         missing.model = NULL,
                         imputation.augmentation.model = NULL,
                         extended.output = FALSE) {
-  ## input checks
+  ## Input checks
   if (!inherits(imputation.model, "learner_glm")) {
     stop("imputation.model must be of inherited class 'learner_glm'")
   }
@@ -120,7 +120,7 @@ moi_missing <- function(data,
     }
   }
 
-  ## evaluate imputation.subset expression
+  ## Evaluate imputation.subset expression
   if (!is.null(imputation.subset)) {
     tryCatch({
       model_rows <- eval(parse(text = imputation.subset),
@@ -132,7 +132,7 @@ moi_missing <- function(data,
   } else {
     model_rows <- rep(TRUE, times = nrow(data))
   }
-  ## validate imputation.subset result
+  ## Validate imputation.subset result
   if (!is.logical(model_rows)) {
     stop("'imputation.subset' expression must evaluate to a logical vector")
   }
@@ -148,11 +148,11 @@ moi_missing <- function(data,
   if (!any(model_rows)) {
     stop("'imputation.subset' expression excludes all rows (no TRUE values)")
   }
-  ## validate rows are available
+  ## Validate rows are available
   if (!any(model_rows)) {
     stop("No observations with non-missing outcome in the selected imputation subset. Cannot fit imputation model.") # nolint
   }
-  ## Combine pre-specified weights with subset weights.
+  ## Combine user-specified weights with subset weights.
   user_weights <-
     imputation.model$.__enclos_env__$private$estimate.args$weights
   if (is.null(user_weights)) {
@@ -173,26 +173,26 @@ moi_missing <- function(data,
     weights <- user_weights * as.numeric(model_rows)
   }
 
-  ## fit imputation model
+  ## Fit imputation model
   imputation.model$estimate(data = data,
                             weights = weights,
                             na.action = lava::na.pass0)
 
-  ## predict from imputation model
+  ## Predict from imputation model
   pred <- imputation.model$predict(newdata = data, type = "response")
 
   if (isTRUE(extended.output)) {
     IC_epsilon <- IC(imputation.model$fit)
   }
 
-  ## getting the treatment variable and levels:
+  ## Getting the treatment variable and levels:
   A <- treatment.model$response(data)
   levels <- rev(sort(unique(A)))
   treatment_name <- lava::getoutcome(treatment.model$formula)
 
   if (isTRUE(imputation.augmentation)) {
     if (!is.null(imputation.augmentation.model)) {
-      ## fitting a model for E[U(X,A,Z;\theta)|W, A]
+      ## Fitting a model for E[U(X,A,Z;\theta)|W, A]
       imputation.augmentation.model <- imputation.augmentation.model$clone()
       imputation.augmentation.model$update("U_")
       if ("U_" %in% colnames(data)) {
@@ -203,7 +203,7 @@ moi_missing <- function(data,
       data$U_ <- NULL
     }
 
-    ## fitting missing model
+    ## Fitting missing model
     missing.model <- missing.model$clone()
     missing.model$update("delta")
     if ("delta" %in% colnames(data)) {
@@ -214,11 +214,40 @@ moi_missing <- function(data,
     data$delta <- NULL
   }
 
-  # getting the estimate for E[U(X,A,Z;\theta)|A = a, \Delta = 0]
+  # Getting the estimate for E[U(X,A,Z;\theta)|A = a, \Delta = 0]
   fun <- function(a) {
     newdata <- data
+    n_observed_in_arm <- sum((A == a) & (delta == 1))
+    n_missing_in_arm  <- sum((A == a) & (delta == 0))
 
-    ## plug-in estimate
+    ## Case: no missing outcomes in this arm, i.e., {A = a, \Delta = 0}
+    ## is an empty set.
+    ## Setting E[U|A=a, Delta=0] = 0: return a
+    ## degenerate zero-coef/zero-IC estimate object
+    if (n_missing_in_arm == 0) {
+      out <- estimate(coef = 0,
+                      IC = matrix(0, nrow = length(id), ncol = 1),
+                      id = id,
+                      labels = paste0("E[u(", a, ")|d=0]"))
+      if (isTRUE(extended.output) && isTRUE(imputation.augmentation)) {
+        attr(out, "IC3") <- rep(0, length(id))
+      }
+      return(out)
+    }
+
+    ## Case: all missing in this arm.
+    ## Warn the user that this arm is identified solely by the
+    ## imputation model.
+    if (n_observed_in_arm == 0) {
+      warning(sprintf(
+        paste0("All outcomes are missing in arm '%s'; the per-arm ",
+               "potential outcome E[Y|A=%s] is identified only by the ",
+               "imputation model."),
+        a, a
+      ))
+    }
+
+    ## Plug-in estimate
     est <- estimate(imputation.model$fit,
                     predict_glm,
                     data = data,
@@ -250,7 +279,6 @@ moi_missing <- function(data,
       IC3 <- aug + ((A == a) - g) / g * mean(aug2)
       IC <- IC + IC3
     }
-
     out <- estimate(coef = est,
                     IC = IC,
                     id = id,
@@ -275,7 +303,6 @@ moi_missing <- function(data,
       IC3 <- setNames(lapply(est, attr, "IC3"), level_names)
     }
   }
-
   est <- do.call("merge", est)
 
   out <- list(
@@ -320,6 +347,13 @@ moi_missing <- function(data,
 ##'
 ##' Inference in based on the estimated influence functions (IFs)
 ##' of the associated (covariate adjusted) one-step estimators.
+##'
+##' If no observations are missing in an arm \eqn{a}, the imputation
+##' contribution for that arm vanishes
+##' (\eqn{P(\Delta = 0 | A = a) = 0}) and
+##' \eqn{E[\tilde{Y} | A = a] = E[Y | A = a]}. If no observations are
+##' missing in any arm, \code{moi} reduces to a standard
+##' \code{\link{cate}} call with \code{cate.model = ~ 1}.
 ##' @param data A \code{data.frame} containing all variables required by the
 ##'   models. \code{data.table} and \code{tbl_df} objects are automatically
 ##'   coerced to \code{data.frame}.
@@ -399,7 +433,6 @@ moi <- function(data,
                 stratify = FALSE,
                 mc.cores = NULL,
                 second.order = TRUE) {
-  ## TODO: check that the missing reponse and treatment strata are well defined
   cl <- match.call()
   n <- nrow(data)
   id <- seq_len(nrow(data))
@@ -438,18 +471,53 @@ moi <- function(data,
   rm(trm)
   treatment.model <- learner_glm(treatment.model, family = binomial())
 
-  ## clone models that are updated:
+  ## Clone models that are updated:
   response.model <- response.model$clone()
   missing.model <- missing.model$clone()
 
-  ## extract the non-missing indicator \Delta
+  ## Extract the non-missing indicator \Delta
   response <- response.model$response(data, na.action = stats::na.pass)
   if (is.null(response)) {
     stop("invalid outcome in response.model")
   }
   delta <- !is.na(response)
 
-  # fit model for E[\Delta Y | A = a]
+  ## Short-circuit: if no observations are missing anywhere, moi reduces
+  ## to a standard cate() call. Skip the missing-model and imputation
+  ## machinery (which would otherwise produce convergence warnings on
+  ## degenerate inputs) and return a moi.targeted-shaped result.
+  if (all(delta)) {
+    outcome_est <- cate(
+      cate.model = ~ 1,
+      response.model = response.model,
+      treatment.model = treatment.model,
+      data = data,
+      nfolds = nfolds,
+      silent = silent,
+      stratify = stratify,
+      mc.cores = mc.cores,
+      second.order = second.order
+    )
+    ty <- .moi_tilde_y()
+    level_labels <- paste0("E[", ty, "(", outcome_est$levels, ")]")
+    ate_label <- paste0("[", level_labels[1], "] - [", level_labels[2], "]")
+    per_level <- estimate(outcome_est,
+                          keep = c(1, 2),
+                          id = id,
+                          labels = level_labels)
+    ate <- estimate(per_level,
+                    f = cbind(1, -1),
+                    labels = ate_label)
+    out <- list(
+      call = cl,
+      estimate = c(per_level, ate),
+      levels = outcome_est$levels
+    )
+    class(out) <- c("moi.targeted", "targeted")
+    return(out)
+  }
+
+  # Fit model for E[\Delta Y | A = a]
   response.model$update("delta_response")
   if ("delta_reponse" %in% colnames(data)) {
     stop("'delta_response' column not permitted in data")
@@ -468,18 +536,17 @@ moi <- function(data,
   )
   data$delta_response <- NULL
   outcome_levels <- outcome_est$levels
-  ## reuse the same cross-fitting folds for subsequent cate() calls
+
+  ## Reuse the same cross-fitting folds for subsequent cate() calls
   shared_folds <- outcome_est$folds
 
-  # get the influence function/curve
+  # Get the influence function/curve
   outcome_est <- estimate(outcome_est,
                           keep = c(1, 2),
                           id = id,
                           labels = paste0("E[dy(", outcome_levels, ")]"))
 
-
-
-  # fit model for P(Delta = 1 | A = a)
+  # Fit model for P(Delta = 1 | A = a)
   missing.model$update("delta")
   if ("delta" %in% colnames(data)) {
     stop("'delta' column not permitted in data")
@@ -499,7 +566,7 @@ moi <- function(data,
   data$delta <- NULL
   missing_levels <- missing_est$levels
 
-  # calculate P(Delta = 0 | A = a) and get the influence curve/function
+  # Calculate P(Delta = 0 | A = a) and get the influence curve/function
   missing_est <- estimate(missing_est, keep = c(1, 2), id = id)
   missing_est <- estimate(missing_est,
                           f = function(x) 1 - x,
@@ -507,7 +574,7 @@ moi <- function(data,
                             "P(1-d(", missing_levels, "))"
                           ))
 
-  # fit model for E[U(X,A,Z; theta)|A = a, Delta = 0]
+  # Fit model for E[U(X,A,Z; theta)|A = a, Delta = 0]
   moi_missing_est <- moi_missing(
     data = data,
     id = id,
@@ -527,30 +594,26 @@ moi <- function(data,
     stop("treatment levels are not identical")
   }
 
-  ##  output
-  est <- merge(outcome_est, missing_est, moi_missing_est)
-  ## per-arm expected potential outcome under imputation:
+  ##  Merging estimates
+  est <- c(outcome_est, missing_est, moi_missing_est)
+  ## Per-level expected potential outcome under imputation:
   ## E[\tilde{Y}|A=a] = E[\Delta Y|A=a] + P(\Delta=0|A=a) * E[U|A=a, \Delta=0]
   ty <- .moi_tilde_y()
   level_labels <- paste0("E[", ty, "(", missing_levels, ")]")
-  etilde <- est[1:2] + est[3:4] * est[5:6]
-  etilde <- estimate(etilde, labels = level_labels)
+  per_level <- est[1:2] + est[3:4] * est[5:6]
+  per_level <- estimate(per_level, labels = level_labels)
 
   ## ATE contrast row: [E[ty(1)] - [E[ty(0)]]
   ate_label <- paste0("[", level_labels[1], "] - [", level_labels[2], "]")
-  ate_row <- estimate(etilde, f = cbind(1, -1), labels = ate_label)
-
-  ## per-level rows + contrast row, mirroring cate.targeted$estimate layout
-  estimate_full <- merge(etilde, ate_row)
+  ate <- estimate(per_level, f = cbind(1, -1), labels = ate_label)
 
   res <- list(
     call = cl,
-    estimate = estimate_full,
+    estimate = c(per_level, ate),
     levels = missing_levels
   )
   if (isTRUE(return.all)) {
-    res$intermediate <- est
-    res$estimate <- merge(estimate_full, est)
+    res$estimate <- merge(per_level, ate, est)
   }
   class(res) <- c("moi.targeted", "targeted")
   return(res)

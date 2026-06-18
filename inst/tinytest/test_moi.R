@@ -665,6 +665,128 @@ test_moi_missing_subset_zeroweight_equivalence <- function() {
 }
 test_moi_missing_subset_zeroweight_equivalence()
 
+test_moi_no_missing_anywhere <- function() {
+  ## Case B: full data, no missingness anywhere. moi() should short-circuit
+  ## to a standard cate() call and produce identical per-level and ATE
+  ## estimates.
+  set.seed(11)
+  n <- 300
+  d <- data.frame(a = rbinom(n, 1, 0.5), x = rnorm(n))
+  d$y <- 1 + d$a + d$x + rnorm(n)
+
+  res_moi <- moi(
+    data = d,
+    response.model = learner_glm(y ~ a + x),
+    treatment.model = a ~ 1,
+    missing.model = learner_glm(~ a + x, family = binomial()),
+    imputation.model = learner_glm(y ~ a + x),
+    imputation.subset = "!is.na(y)"
+  )
+  res_cate <- cate(cate.model = ~ 1,
+                   response.model = y ~ a + x,
+                   treatment.model = a ~ 1,
+                   data = d)
+
+  cf_moi <- coef(res_moi)
+  cf_cate <- coef(res_cate$estimate)
+  expect_true(all(is.finite(cf_moi)))
+  ## Per-level  rows match
+  expect_equal(unname(cf_moi[1:2]), unname(cf_cate[1:2]),
+               tolerance = 1e-12)
+  ## ATE row in moi (row 3) equals (Intercept) row in cate (row 3)
+  expect_equal(unname(cf_moi[3]), unname(cf_cate[3]),
+               tolerance = 1e-12)
+
+  ## IC
+  expect_equal(
+    IC(res_moi),
+    IC(res_cate),
+    check.attributes = FALSE
+  )
+}
+test_moi_no_missing_anywhere()
+
+test_moi_no_missing_in_one_arm <- function() {
+  ## Case A: level 0 fully observed, level 1 has missingness.
+  ## E[ỹ(0)] should equal the cate estimate for level 0
+  ## since no imputation is needed
+  ## for that level.
+  set.seed(12)
+  n <- 300
+  a <- rbinom(n, 1, 0.5)
+  x <- rnorm(n)
+  y_full <- 1 + a + x + rnorm(n)
+  delta <- ifelse(a == 0, 1L, rbinom(n, 1, lava::expit(0.5 + x)))
+  y <- ifelse(delta == 1, y_full, NA)
+  d <- data.frame(y = y, a = a, x = x)
+
+  res <- moi(
+    data = d,
+    response.model = learner_glm(y ~ a + x),
+    treatment.model = a ~ 1,
+    missing.model = learner_glm(~ a + x, family = binomial()),
+    imputation.model = learner_glm(y ~ a + x),
+    imputation.subset = "!is.na(y)"
+  )
+  cf <- coef(res)
+  expect_true(all(is.finite(cf)))
+  expect_false(any(is.nan(cf)))
+
+  ## E[ỹ(0)] (row 2) should equal the cate() E[Y(0)] estimate exactly,
+  res_cate <- cate(cate.model = ~ 1,
+                   response.model = learner_glm(y ~ a + x),
+                   treatment.model = a ~ 1,
+                   data = within(d, y[is.na(y)] <- 0))
+  ## Note: if the response model is not stratified on treatment level,
+  ## missing outcomes of Y(1) will effect the estimate E[Y(0)].
+  cf_cate <- coef(res_cate$estimate)
+  expect_equal(unname(cf[2]), unname(cf_cate[2]), tolerance = 1e-10)
+  ## IC
+  expect_equal(
+    IC(res)[, 2],
+    IC(res_cate)[, 2]
+  )
+
+}
+test_moi_no_missing_in_one_arm()
+
+test_moi_all_missing_in_one_arm <- function() {
+  ## Boundary: arm 1 fully missing. moi() should warn and return finite
+  ## estimates with E[ỹ(1)] identified solely by the imputation model.
+  set.seed(13)
+  n <- 300
+  a <- rbinom(n, 1, 0.5)
+  x <- rnorm(n)
+  y_full <- 1 + a + x + rnorm(n)
+  delta <- ifelse(a == 0, 1L, 0L)
+  y <- ifelse(delta == 1, y_full, NA)
+  d <- data.frame(y = y, a = a, x = x)
+
+  ## Capture all warnings; assert the moi-specific warning is among them.
+  ## The all-missing-in-arm scenario also triggers several upstream
+  ## warnings (glm.fit non-convergence, rank-deficient predictions, lava
+  ## IC mean-zero checks); we are only interested in moi()'s own.
+  ww <- list()
+  res <- withCallingHandlers(
+    moi(
+      data = d,
+      response.model = learner_glm(y ~ a + x),
+      treatment.model = a ~ 1,
+      missing.model = learner_glm(~ a + x, family = binomial()),
+      imputation.model = learner_glm(y ~ a + x),
+      imputation.subset = "!is.na(y)"
+    ),
+    warning = function(w) {
+      ww[[length(ww) + 1L]] <<- conditionMessage(w)
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_true(any(grepl("All outcomes are missing in arm",
+                        unlist(ww), fixed = TRUE)))
+  expect_true(all(is.finite(coef(res))))
+}
+test_moi_all_missing_in_one_arm()
+
 test_moi_missing_NA_coef <- function() {
   ## Provoke NA coefficients in the imputation model by introducing an
   ## exactly-collinear predictor (duplicate column). The underlying glm.fit
