@@ -271,13 +271,19 @@ moi_missing <- function(data,
       g <- mean(A == a)
       S <- mean((delta == 1)[A == a])
 
+      ## Get the uncentralized plug-in influence function
+      IC_noncen <- IC + est
+
+      ## augmented estimate
       aug2 <- (1 - SW) / (1 - S) * (H - est)
       aug <- (g - (A == a)) / g * aug2
-
-      ## augmented estimate and influence function
       est <- est + mean(aug)
+
+      ## augmented influence function
+      aug2 <- (1 - SW) / (1 - S) * (H - est)
+      aug <- (g - (A == a)) / g * aug2
       IC3 <- aug + ((A == a) - g) / g * mean(aug2)
-      IC <- IC + IC3
+      IC <- (IC_noncen - est)  + IC3
     }
     out <- estimate(coef = est,
                     IC = IC,
