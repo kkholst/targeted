@@ -131,9 +131,7 @@ contribution for that arm vanishes
 (\eqn{P(\Delta = 0 | A = a) = 0}) and
 \eqn{E[\tilde{Y} | A = a] = E[Y | A = a]}. If no observations are
 missing in any arm, \code{moi} reduces to a standard
-\code{\link{cate}} call with \code{cate.model = ~ 1}. If all
-observations are missing in some arm, a warning is issued and
-\eqn{E[Y | A = a]} is identified only by the imputation model.
+\code{\link{cate}} call with \code{cate.model = ~ 1}.
 }
 \seealso{
 \code{\link{cate}} for Conditional Average Treatment Effect estimation,
