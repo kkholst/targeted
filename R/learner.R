@@ -11,6 +11,9 @@
 #' Regression: [learner_isoreg] \cr
 #' Classification: [learner_naivebayes] \cr
 #' Ensemble (super learner): [learner_sl]
+#'
+#' The following constructors for commonly used filters are available:
+#' [predict_filter_bound], [predict_filter_bound_dynamic]
 #' @param data data.frame
 #' @author Klaus Kähler Holst, Benedikt Sommer
 #' @examples

@@ -6,6 +6,14 @@
 #' @return A filter generator function (see [learner]).
 #' @author Benedikt Sommer
 #' @export
+#' @examples
+#' data("cars")
+#' lr <- learner_glm(
+#'   speed ~ dist,
+#'   learner.args = list(predict.filter = predict_filter_bound(upper = 10))
+#' )
+#' lr$estimate(cars)
+#' lr$predict(data.frame(dist = c(10, 50)))
 predict_filter_bound <- function(lower = NULL, upper = NULL) {
   if (!is.null(lower) && !is.null(upper)) {
     if (lower > upper) stop(
@@ -31,6 +39,18 @@ predict_filter_bound <- function(lower = NULL, upper = NULL) {
 #' @return A filter generator function (see [learner]).
 #' @author Benedikt Sommer
 #' @export
+#' @examples
+#' data(cars)
+#' lr <- learner_glm(
+#'   speed ~ dist,
+#'   learner.args = list(
+#'     predict.filter = predict_filter_bound_dynamic(
+#'       upper = TRUE, response = "speed"
+#'     )
+#'   )
+#' )
+#' lr$estimate(cars)
+#' lr$predict(data.frame(dist = c(200, 2000)))
 predict_filter_bound_dynamic <- function(
     lower = FALSE,
     upper = FALSE,
@@ -44,8 +64,10 @@ predict_filter_bound_dynamic <- function(
   )
 
   function(data) {
-    if (lower) lb <- min(data[[response]])
-    if (upper) ub <- max(data[[response]])
+    if (is.null(data[[response]])) stop("response variable not found in data.")
+
+    if (lower) lb <- min(data[[response]], na.rm = TRUE)
+    if (upper) ub <- max(data[[response]], na.rm = TRUE)
     function(pred) {
       if (lower) pred[pred < lb] <- lb
       if (upper) pred[pred > ub] <- ub

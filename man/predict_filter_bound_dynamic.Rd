@@ -21,6 +21,19 @@ Generates a prediction filter for the \code{predict.filter}
 argument of \link{learner} that bounds predictions to the range of the
 response observed in the estimation data (min(response), max(response)).
 }
+\examples{
+data("cars")
+lr <- learner_glm(
+  speed ~ dist,
+  learner.args = list(
+    predict.filter = predict_filter_bound_dynamic(
+      upper = TRUE, response = "speed"
+    )
+  )
+)
+lr$estimate(cars)
+lr$predict(data.frame(dist = c(200, 2000)))
+}
 \author{
 Benedikt Sommer
 }

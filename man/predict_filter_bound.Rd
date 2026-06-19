@@ -18,6 +18,15 @@ A filter generator function (see \link{learner}).
 Generates a prediction filter for the \code{predict.filter} argument
 of \link{learner} that bounds predictions to a fixed range (lower, upper).
 }
+\examples{
+data("cars")
+lr <- learner_glm(
+  speed ~ dist,
+  learner.args = list(predict.filter = predict_filter_bound(upper = 10))
+)
+lr$estimate(cars)
+lr$predict(data.frame(dist = c(10, 50)))
+}
 \author{
 Benedikt Sommer
 }
