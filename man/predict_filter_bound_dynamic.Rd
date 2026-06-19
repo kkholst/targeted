@@ -22,7 +22,7 @@ argument of \link{learner} that bounds predictions to the range of the
 response observed in the estimation data (min(response), max(response)).
 }
 \examples{
-data("cars")
+data(cars)
 lr <- learner_glm(
   speed ~ dist,
   learner.args = list(

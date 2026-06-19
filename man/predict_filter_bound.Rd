@@ -19,7 +19,7 @@ Generates a prediction filter for the \code{predict.filter} argument
 of \link{learner} that bounds predictions to a fixed range (lower, upper).
 }
 \examples{
-data("cars")
+data(cars)
 lr <- learner_glm(
   speed ~ dist,
   learner.args = list(predict.filter = predict_filter_bound(upper = 10))

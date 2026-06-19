@@ -7,7 +7,7 @@
 #' @author Benedikt Sommer
 #' @export
 #' @examples
-#' data("cars")
+#' data(cars)
 #' lr <- learner_glm(
 #'   speed ~ dist,
 #'   learner.args = list(predict.filter = predict_filter_bound(upper = 10))
