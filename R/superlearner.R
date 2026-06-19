@@ -251,12 +251,27 @@ superlearner <- function(learners,
   }
   mod <- lapply(learners, \(x) x$clone())
   names(mod) <- model.names
+
+  ## Full predictions
+  est_mod(mod, data)
+  if (all(sapply(mod, \(x) is.null(x$fit)))) stop(
+    "All learners failed to be estimated."
+  )
+
   # Meta-learner
   y <- learners[[1]]$response(data)
   risk <- apply(pred, 2, \(x) model.score(y, x))
   # Learners with failed predictions
-  idx  <- which(apply(pred, 2, \(x) any(is.na(x) | is.nan(x))))
+  idx <- which(apply(pred, 2, \(x) any(is.na(x) | is.nan(x))))
+
+  if (length(idx) == length(mod)) stop(
+    "Terminating the estimation of the superlearner because the hold-out set ",
+    "predictions of all learners contain NAs. Therefore, the ensemble ",
+    "weights cannot be estimated."
+  )
+
   if (length(risk) > 0) risk[idx] <- Inf
+
   names(risk) <- model.names
   if (is.character(meta.learner)) {
     if (tolower(meta.learner[1]) == "discrete") {
@@ -267,8 +282,8 @@ superlearner <- function(learners,
   }
   w <- meta.learner(y = y, pred = pred, risk = risk)
   names(w) <- model.names
-  ## Full predictions
-  est_mod(mod, data)
+
+
   res <- list(
     model.score = risk,
     weights = w,
