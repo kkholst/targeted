@@ -33,6 +33,7 @@ predict_glm <- function(object, p=coef(object), data, offset = NULL,
     return(structure(Xbeta, grad=X))
   }
   pr <- ginv(Xbeta)
+  pr <- as.vector(pr)
   z <- dginv(Xbeta)
   gr <- apply(X, 2, function(x) x*z)
   return(structure(pr, grad=gr))
