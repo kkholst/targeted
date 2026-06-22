@@ -1,3 +1,5 @@
+library("tinytest")
+
 test_moi_nfolds <- function() {
   ## simulate a small dataset with missing outcomes
   set.seed(42)
@@ -212,13 +214,13 @@ test_moi_missing_IC <- function() {
   )
   est_ref <- do.call("merge", est_ref)
 
-  moi_est <- moi_missing(data = data,
-                         delta = delta,
-                         id = data$id,
-                         treatment.model = learner_glm(a ~ 1, family = binomial()),
-                         imputation.model = learner_glm(y ~ a + x),
-                         imputation.subset = "!is.na(y)",
-                         extended.output = TRUE)
+  moi_est <- targeted:::moi_missing(data = data,
+                                    delta = delta,
+                                    id = data$id,
+                                    treatment.model = learner_glm(a ~ 1, family = binomial()),
+                                    imputation.model = learner_glm(y ~ a + x),
+                                    imputation.subset = "!is.na(y)",
+                                    extended.output = TRUE)
 
   expect_equal(coef(est_ref), coef(moi_est$estimate), tolerance = 1e-14)
   expect_equal(IC(est_ref), IC(moi_est$estimate), tolerance = 1e-14)
@@ -301,13 +303,13 @@ test_moi_missing_IC_2 <- function() {
   )
   est_ref <- do.call("merge", est_ref)
 
-  moi_est <- moi_missing(data = data,
-                         delta = delta,
-                         id = data$id,
-                         treatment.model = learner_glm(a ~ 1, family = binomial()),
-                         imputation.model = learner_glm(y ~ a + x, family = binomial()),
-                         imputation.subset = "!is.na(y)",
-                         extended.output = TRUE)
+  moi_est <- targeted:::moi_missing(data = data,
+                                    delta = delta,
+                                    id = data$id,
+                                    treatment.model = learner_glm(a ~ 1, family = binomial()),
+                                    imputation.model = learner_glm(y ~ a + x, family = binomial()),
+                                    imputation.subset = "!is.na(y)",
+                                    extended.output = TRUE)
 
   expect_equal(coef(est_ref), coef(moi_est$estimate), tolerance = 1e-14)
   expect_equal(IC(est_ref), IC(moi_est$estimate), tolerance = 1e-14)
@@ -336,13 +338,13 @@ test_moi_missing_IC_reference_lava <- function() {
   data <- simdata(1e2)
   delta <- !is.na(data$y)
 
-  moi_est <- moi_missing(data = data,
-                         delta = delta,
-                         id = data$id,
-                         treatment.model = learner_glm(a ~ 1, family = binomial()),
-                         imputation.model = learner_glm(y ~ a + x),
-                         imputation.subset = "!is.na(y)",
-                         extended.output = TRUE)
+  moi_est <- targeted:::moi_missing(data = data,
+                                    delta = delta,
+                                    id = data$id,
+                                    treatment.model = learner_glm(a ~ 1, family = binomial()),
+                                    imputation.model = learner_glm(y ~ a + x),
+                                    imputation.subset = "!is.na(y)",
+                                    extended.output = TRUE)
 
   ## test the imputation model parameter influence function IC using lava
   imp_mod <- glm(y ~ a + x,
@@ -500,22 +502,18 @@ test_moi_missing_weights <- function() {
   d$y <- ifelse(delta == 1, d$y, NA)
 
   ## (a) baseline: no user weights, subset only
-  res_a <- moi_missing(
-    data = d, delta = !is.na(d$y), id = d$id,
-    treatment.model = learner_glm(a ~ 1, family = binomial()),
-    imputation.model = learner_glm(y ~ a + x),
-    imputation.subset = "!is.na(y)"
-  )
+  res_a <- targeted:::moi_missing(data = d, delta = !is.na(d$y), id = d$id,
+                                  treatment.model = learner_glm(a ~ 1, family = binomial()),
+                                  imputation.model = learner_glm(y ~ a + x),
+                                  imputation.subset = "!is.na(y)")
   expect_true(all(is.finite(coef(res_a$estimate))))
 
   ## (b) user weights merge: user_w * model_rows reproduces a manual fit
   user_w <- runif(n, 0.5, 1.5)
-  res_b <- moi_missing(
-    data = d, delta = !is.na(d$y), id = d$id,
-    treatment.model = learner_glm(a ~ 1, family = binomial()),
-    imputation.model = learner_glm(y ~ a + x, weights = user_w),
-    imputation.subset = "!is.na(y)"
-  )
+  res_b <- targeted:::moi_missing(data = d, delta = !is.na(d$y), id = d$id,
+                                  treatment.model = learner_glm(a ~ 1, family = binomial()),
+                                  imputation.model = learner_glm(y ~ a + x, weights = user_w),
+                                  imputation.subset = "!is.na(y)")
   ref_fit <- glm(y ~ a + x, data = d[!is.na(d$y), ],
                  weights = user_w[!is.na(d$y)],
                  na.action = lava::na.pass0)
@@ -526,12 +524,12 @@ test_moi_missing_weights <- function() {
 
   ## (c) length mismatch is rejected
   expect_error(
-    moi_missing(
-      data = d, delta = !is.na(d$y), id = d$id,
-      treatment.model = learner_glm(a ~ 1, family = binomial()),
-      imputation.model = learner_glm(y ~ a + x, weights = runif(n - 1)),
-      imputation.subset = "!is.na(y)"
-    ),
+    targeted:::moi_missing(
+                 data = d, delta = !is.na(d$y), id = d$id,
+                 treatment.model = learner_glm(a ~ 1, family = binomial()),
+                 imputation.model = learner_glm(y ~ a + x, weights = runif(n - 1)),
+                 imputation.subset = "!is.na(y)"
+               ),
     "length"
   )
 
@@ -539,7 +537,7 @@ test_moi_missing_weights <- function() {
   bad_na <- user_w
   bad_na[1] <- NA
   expect_error(
-    moi_missing(
+    targeted:::moi_missing(
       data = d, delta = !is.na(d$y), id = d$id,
       treatment.model = learner_glm(a ~ 1, family = binomial()),
       imputation.model = learner_glm(y ~ a + x, weights = bad_na),
@@ -552,7 +550,7 @@ test_moi_missing_weights <- function() {
   bad_neg <- user_w
   bad_neg[1] <- -0.1
   expect_error(
-    moi_missing(
+    targeted:::moi_missing(
       data = d, delta = !is.na(d$y), id = d$id,
       treatment.model = learner_glm(a ~ 1, family = binomial()),
       imputation.model = learner_glm(y ~ a + x, weights = bad_neg),
@@ -767,7 +765,7 @@ test_moi_missing_NA_coef <- function() {
   expect_true(any(is.na(coef(imp_fit))))
 
   ## reference run: full-rank specification (no x_dup)
-  res_full_rank <- moi_missing(
+  res_full_rank <- targeted:::moi_missing(
     data = data,
     delta = !is.na(data$y),
     id = data$id,
@@ -778,7 +776,7 @@ test_moi_missing_NA_coef <- function() {
 
   ## test run: rank-deficient specification (x_dup duplicates x).
   expect_warning(
-    res_rank_def <- moi_missing(
+    res_rank_def <- targeted:::moi_missing(
       data = data,
       delta = !is.na(data$y),
       id = data$id,
