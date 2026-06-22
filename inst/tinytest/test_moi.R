@@ -376,7 +376,7 @@ test_moi_missing_IC_reference_lava <- function() {
 
   ## exact deriv
   lava_pred_IC_3 <- estimate(imp_mod,
-                             predict_glm,
+                             lava:::predict_glm,
                              data = data,
                              average = FALSE) |> IC()
 
@@ -389,13 +389,13 @@ test_moi_missing_IC_reference_lava <- function() {
   )
 
   est1 <- estimate(imp_mod,
-                   predict_glm,
+                   lava:::predict_glm,
                    data = data,
                    subset = (data$a == 1) & (delta == FALSE),
                    average = TRUE,
                    id = 1:nrow(data))
   est0 <- estimate(imp_mod,
-                   predict_glm,
+                   lava:::predict_glm,
                    data = data,
                    subset = (data$a == 0) & (delta == FALSE),
                    average = TRUE,

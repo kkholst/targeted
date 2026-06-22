@@ -5,40 +5,6 @@
   if (isTRUE(l10n_info()[["UTF-8"]])) "\u1ef9" else "tildeY"
 }
 
-predict_glm <- function(object, p=coef(object), data, offset = NULL,
-                        type=c("response", "link"), ...) {
-  x <- object
-  if (!inherits(x, "glm")) stop("need glm object")
-  link <- family(x)
-  if (missing(data)) {
-    X <- model.matrix.lm(x)
-  } else {
-    X <- model.matrix.lm(formula(x),
-                         data = data,
-                         na.action = na.pass)
-  }
-  offset <- x$offset
-  if(any(is.na(p))) {
-    warning("Over-parameterized model (setting NA's to zero)")
-    p[is.na(p)] <- 0
-  }
-  ginv <- link$linkinv
-  dginv <- link$mu.eta
-  Xbeta <- X%*%p
-  if (!is.null(offset)) Xbeta <- Xbeta+offset
-  if (missing(data) && !is.null(x$offset) && is.null(offset)) {
-    Xbeta <- Xbeta+x$offset
-  }
-  if (tolower(type[1]) == "link") {
-    return(structure(Xbeta, grad=X))
-  }
-  pr <- ginv(Xbeta)
-  pr <- as.vector(pr)
-  z <- dginv(Xbeta)
-  gr <- apply(X, 2, function(x) x*z)
-  return(structure(pr, grad=gr))
-}
-
 #' Mean Imputation Among Missing Outcomes
 #'
 #' Estimates the mean of a given parametric imputation model among observations
@@ -251,7 +217,7 @@ moi_missing <- function(data,
 
     ## Plug-in estimate
     est <- estimate(imputation.model$fit,
-                    predict_glm,
+                    lava:::predict_glm,
                     data = data,
                     subset = (A == a) & (delta == 0),
                     average = TRUE,
