@@ -22,6 +22,8 @@ moi_missing(
 tibble objects will be coerced to
 data.frame.}
 
+\item{id}{A vector with subject IDs}
+
 \item{delta}{A vector with the non-missing indicator}
 
 \item{treatment.model}{Learner object}

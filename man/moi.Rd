@@ -84,7 +84,7 @@ An object of class \code{moi.targeted} (inheriting from
 \code{targeted}), a list with components:
 \describe{
 \item{call}{The matched call.}
-\item{estimate}{A \code{lava::estimate} object containing the per-arm
+\item{estimate}{A \code{\link{lava::estimate}} object containing the per-arm
 expected potential outcomes \eqn{E[\tilde{Y}|A=a]} and the ATE
 contrast \eqn{E[\tilde{Y}|A=1] - E[\tilde{Y}|A=0]}, with
 influence-function-based standard errors. Row labels follow the

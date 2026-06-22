@@ -50,6 +50,7 @@ predict_glm <- function(object, p=coef(object), data, offset = NULL,
 #' @param data A data.frame containing the analysis dataset. Data.table and
 #' tibble objects will be coerced to
 #'   data.frame.
+#' @param id A vector with subject IDs
 #' @param delta A vector with the non-missing indicator
 #' @param treatment.model Learner object
 #' @param imputation.model A learner object of class 'learner_glm' used to fit
@@ -65,10 +66,10 @@ predict_glm <- function(object, p=coef(object), data, offset = NULL,
 #' @param imputation.augmentation Logical. Should an augmentation term
 #' associated with the imputation model be added to the one-step estimator
 #' @param missing.model \code{learner} object
-##'   specifying the model for the probability of the outcome being
-##'   observed/non-missing
+#' specifying the model for the probability of the outcome being
+#' observed/non-missing
 #' @param imputation.augmentation.model \code{learner} object
-##'   specifying the model for the imputation augmentation
+#' specifying the model for the imputation augmentation
 #' @param extended.output Logical. If \code{TRUE}, the returned list also
 #'   includes the per-level decomposition of the influence function as
 #'   \code{IC1}, \code{IC2}, and (when
@@ -400,7 +401,7 @@ moi_missing <- function(data,
 ##'   \code{targeted}), a list with components:
 ##'   \describe{
 ##'     \item{call}{The matched call.}
-##'     \item{estimate}{A \code{lava::estimate} object containing the per-arm
+##'     \item{estimate}{A \code{\link{lava::estimate}} object containing the per-arm
 ##'       expected potential outcomes \eqn{E[\tilde{Y}|A=a]} and the ATE
 ##'       contrast \eqn{E[\tilde{Y}|A=1] - E[\tilde{Y}|A=0]}, with
 ##'       influence-function-based standard errors. Row labels follow the
