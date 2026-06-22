@@ -81,6 +81,9 @@ design <- function(formula, data, ..., # nolint
                    specials.call = NULL,
                    levels = NULL,
                    design.matrix = TRUE) {
+  if (inherits(data, c("data.table", "tbl_df"))) {
+    data <- as.data.frame(data)
+  }
   dots <- substitute(list(...))
   if ("subset" %in% names(dots)) stop(
     "subset is not an allowed specials argument for targeted::design"

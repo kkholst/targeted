@@ -3,6 +3,7 @@
 # matrix
 make_dmat_pos_definite <- function(pred) {
   Dmat <- t(pred) %*% pred
+  if (all(dim(Dmat) == c(1, 1))) return(Dmat)
   .eigen <- eigen(Dmat)
   tau <- .eigen$values
   tau[tau < sqrt(.Machine$double.eps)] <- sqrt(.Machine$double.eps)
@@ -179,11 +180,14 @@ superlearner <- function(learners,
   }
   est_mod <- function(models, data) {
     for (i in seq_along(models)) {
-      v <- tryCatch(models[[i]]$estimate(data), error=function(x) NULL)
-      if (is.null(v)) {
-        models[[i]]$fit <- NULL
-      }
+      v <- tryCatch(
+        models[[i]]$estimate(data),
+        error=function(x) NULL
+      )
+      # not strictly needed because model$fit == NULL upon learner instantiation
+      if (is.null(v)) models[[i]]$clear
     }
+    return(models)
   }
 
   if (is.character(model.score)) {
@@ -194,7 +198,7 @@ superlearner <- function(learners,
     "All provided learners must be of class targeted::learner"
   )
 
-  responses <- unlist(lapply(learners, \(m) as.character(m$formula)[[2]]))
+  responses <- unlist(lapply(learners, \(m) deparse(m$formula[[2]])))
   if (length(unique(responses)) > 1) {
     r <- paste0(unique(responses), collapse = ", ")
     warning("Different response variables found among learners: ", r)
@@ -210,6 +214,7 @@ superlearner <- function(learners,
     test <- data[fold, , drop = FALSE]
     train <- data[setdiff(1:n, fold), , drop = FALSE]
     mod <- lapply(learners, \(x) x$clone(deep = TRUE))
+
     est_mod(mod, train)
     pred.test <- pred_mod(mod, test)
     if (!silent) pb()
@@ -313,11 +318,17 @@ score.superlearner <- function(x, ...) {
 #' @param ... Not used.
 #' @return numeric (`all.learners = FALSE`) or matrix (`all.learners = TRUE`)
 predict.superlearner <- function(object, newdata, all.learners = FALSE, ...) {
-  pr <- lapply(object$fit, \(x) x$predict(newdata))
+  # learners that fail to be estimated on the full data have x$fit == NULL
+  pr <- lapply(
+    object$fit,
+    \(x) if(is.null(x$fit)) rep(0, NROW(newdata)) else x$predict(newdata)
+  )
   if (length(object$weights) == 1) return(unname(pr[[1]]))
   res <- Reduce(cbind, pr)
   colnames(res) <- names(object$fit)
 
+  # learners which produced predictions with some NAs during any fold will have
+  # their ensemble weight set to 0
   if (!all.learners) {
     res <- as.vector(res %*% object$weights)
   }
@@ -348,8 +359,11 @@ SL <- function(formula=~., ...,
       stop("Package 'SuperLearner' required.")
   }
 
-  pred <- as.character(formula)
-  pred <- ifelse(length(pred)==2, pred[2], pred[3])
+  if (length(formula) == 3) {
+    pred <- paste(deparse(formula[[3]]), collapse = " ")
+  } else {
+    pred <- paste(deparse(formula[[2]]), collapse = " ")
+  }
   if (pred=="1") {
     SL.library <- "SL.mean"
   }
