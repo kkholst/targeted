@@ -1,7 +1,8 @@
-# targetd 0.8
+# targeted 0.8
 
 Development version
 
+- removing legacy `crr` and `cate_link` functions
 - removing deprecated ml_model
 - `learner_surv_cox`, `learner_surv_rf`, `cumhaz`
 - feature(superlearner): more robust metalearner (in case quadratic prog. fails)
