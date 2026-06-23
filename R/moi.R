@@ -9,7 +9,7 @@
 #'
 #' Estimates the mean of a given parametric imputation model among observations
 #' with a missing outcome and a given treatment. Specifically, it provides
-#' estimates of \eqn{E[U(X,A,Z,\theta)|A=a, \Delta=0]}, for an imputation model
+#' estimates of \eqn{E[U(X,A,Z;\theta)|A=a, \Delta=0]}, for an imputation model
 #' \eqn{U}, where \eqn{X} denotes baseline covariates, \eqn{A} denotes the
 #' treatment, \eqn{Z} denotes post randomization covariates, and \eqn{\Delta}
 #' denotes a non-missing indicator. Influence function based standard errors are
@@ -19,7 +19,8 @@
 #'   data.frame.
 #' @param id A vector with subject IDs
 #' @param delta A vector with the non-missing indicator
-#' @param treatment.model Learner object
+#' @param treatment.model A \code{learner} object for the binary treatment,
+#' used to extract the treatment variable and its levels.
 #' @param imputation.model A learner object of class 'learner_glm' used to fit
 #' the imputation model. The learner must specify the outcome variable and
 #' model formula. If the learner was constructed with user-supplied
@@ -59,6 +60,7 @@
 #'     The full per-level IC equals \code{IC1 + IC2 [+ IC3]}.}
 #'   \item{IC_epsilon}{(only if \code{extended.output = TRUE}) Influence
 #'     function for the imputation-model parameters.}
+#' @keywords internal
 moi_missing <- function(data,
                         id,
                         delta,
@@ -301,8 +303,10 @@ moi_missing <- function(data,
 ##'
 ##' @description
 ##' Estimates the Average Treatment Effect (ATE) in settings where the outcome
-##' may be missing (not observed for all individuals). The function uses an
-##' imputation-based approach combined with doubly robust estimation techniques.
+##' may be missing (not observed for all individuals). The treatment effect
+##' implied by a parametric imputation model is targeted directly through an
+##' efficient one-step estimator constructed from its influence function
+##' (Nordland et al., 2026).
 ##'
 ##' @details
 ##' The \code{moi} function implements an estimator for the Average Treatment
@@ -315,7 +319,7 @@ moi_missing <- function(data,
 ##' where
 ##'
 ##' \deqn{E[\tilde{Y}| A = a] = E[\Delta Y | A=a] + P(\Delta=0 | A=a) \cdot
-##' E[U(X, A, Z, \theta) | A=a, \Delta=0],}
+##' E[U(X, A, Z; \theta) | A=a, \Delta=0],}
 ##'
 ##' and \eqn{\Delta} denotes the non-missing indicator, and \eqn{U} denotes the
 ##' imputation model possibly depending on baseline covariates \eqn{X}, the
@@ -323,6 +327,13 @@ moi_missing <- function(data,
 ##'
 ##' Inference in based on the estimated influence functions (IFs)
 ##' of the associated (covariate adjusted) one-step estimators.
+##'
+##' When \code{imputation.augmentation = TRUE}, an augmentation term built from
+##' the efficient influence function is added, giving an efficient one-step
+##' estimator of the treatment effect implied by the imputation model
+##' (Nordland et al., 2026). The augmentation uses a working model for the
+##' conditional imputation mean \eqn{E[U(X, A, Z; \theta) \mid W, A]} (see
+##' \code{imputation.augmentation.model}) together with the missingness model.
 ##'
 ##' If no observations are missing in an arm \eqn{a}, the imputation
 ##' contribution for that arm vanishes
@@ -351,16 +362,21 @@ moi_missing <- function(data,
 ##'   specifying the missing outcome imputation model. If a \code{formula}
 ##'   is provided, it is wrapped in \code{\link{learner_glm}}. Used to estimate
 ##'   \eqn{E[U(X, A, Z; \theta) | A = a, \Delta = 0]}.
-##' @param imputation.subset An optional logical vector specifying a subset of
-##'   the data to use when fitting the imputation model. Default is \code{NULL}
-##'   (all observations are used).
+##' @param imputation.subset Optional character string giving an R expression
+##'   that evaluates to a logical vector indicating which rows of \code{data}
+##'   to use when fitting the imputation model. The expression is parsed and
+##'   evaluated in the context of \code{data}; for example,
+##'   \code{imputation.subset = "!is.na(y)"} restricts the fit to the observed
+##'   outcomes. If \code{NULL} (default), all rows are used.
 ##' @param imputation.augmentation Logical. If \code{TRUE}, an augmentation
 ##'   term is added to the imputation estimator for improved efficiency.
 ##'   Default is \code{FALSE}.
 ##' @param imputation.augmentation.model A \code{formula}, \code{learner},
-##'   or \code{NULL} specifying the model used for the augmentation of the
-##'   imputation estimator. Only used if \code{imputation.augmentation = TRUE}.
-##'   Default is \code{NULL}.
+##'   or \code{NULL} specifying a working model for the conditional imputation
+##'   mean \eqn{E[U(X, A, Z; \theta) \mid W, A]}, used to augment the
+##'   imputation estimator. Only used when
+##'   \code{imputation.augmentation = TRUE}; if \code{NULL}, the imputation
+##'   model \eqn{U} itself is used. Default is \code{NULL}.
 ##' @param return.all Logical. If \code{TRUE}, the returned object includes all
 ##'   intermediate estimates
 ##'   in addition to the final ATE estimate. Default is \code{FALSE}.
@@ -390,10 +406,35 @@ moi_missing <- function(data,
 ##'
 ##' @author Andreas Nordland
 ##'
+##' @references
+##'   Nordland, A., Holst, K. K., Redek, D., Pipper, C. B. & Iversen, A. T.
+##'   (2026) One-step Outcome Imputation: An Alternative to Multiple
+##'   Imputation. arXiv: https://arxiv.org/abs/2606.07174.
+##'
 ##' @seealso
 ##'   \code{\link{cate}} for Conditional Average Treatment Effect estimation,
 ##'   \code{\link{learner}} for creating learner objects,
 ##'   \code{\link{lava::estimate}} for combining and transforming estimators
+##'
+##' @examples
+##' sim_moi <- function(n = 1000, ...) {
+##'   w <- rnorm(n)
+##'   a <- rbinom(n, 1, 0.5)
+##'   y <- 1 + a + w + rnorm(n)
+##'   ## outcome observed (delta = 1) with probability depending on w
+##'   delta <- rbinom(n, 1, lava::expit(1 + w))
+##'   y[delta == 0] <- NA
+##'   data.frame(y, a, w)
+##' }
+##'
+##' d <- sim_moi(1000)
+##' ## ATE with missing outcomes imputed by a working glm model
+##' moi(data = d,
+##'     response.model = y ~ a + w,
+##'     treatment.model = a ~ 1,
+##'     missing.model = ~ a + w,
+##'     imputation.model = y ~ a + w,
+##'     imputation.subset = "!is.na(y)")
 ##'
 ##' @export
 moi <- function(data,

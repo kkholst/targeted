@@ -48,18 +48,23 @@ specifying the missing outcome imputation model. If a \code{formula}
 is provided, it is wrapped in \code{\link{learner_glm}}. Used to estimate
 \eqn{E[U(X, A, Z; \theta) | A = a, \Delta = 0]}.}
 
-\item{imputation.subset}{An optional logical vector specifying a subset of
-the data to use when fitting the imputation model. Default is \code{NULL}
-(all observations are used).}
+\item{imputation.subset}{Optional character string giving an R expression
+that evaluates to a logical vector indicating which rows of \code{data}
+to use when fitting the imputation model. The expression is parsed and
+evaluated in the context of \code{data}; for example,
+\code{imputation.subset = "!is.na(y)"} restricts the fit to the observed
+outcomes. If \code{NULL} (default), all rows are used.}
 
 \item{imputation.augmentation}{Logical. If \code{TRUE}, an augmentation
 term is added to the imputation estimator for improved efficiency.
 Default is \code{FALSE}.}
 
 \item{imputation.augmentation.model}{A \code{formula}, \code{learner},
-or \code{NULL} specifying the model used for the augmentation of the
-imputation estimator. Only used if \code{imputation.augmentation = TRUE}.
-Default is \code{NULL}.}
+or \code{NULL} specifying a working model for the conditional imputation
+mean \eqn{E[U(X, A, Z; \theta) \mid W, A]}, used to augment the
+imputation estimator. Only used when
+\code{imputation.augmentation = TRUE}; if \code{NULL}, the imputation
+model \eqn{U} itself is used. Default is \code{NULL}.}
 
 \item{return.all}{Logical. If \code{TRUE}, the returned object includes all
 intermediate estimates
@@ -104,8 +109,10 @@ Standard methods (\code{print}, \code{summary}, \code{coef},
 }
 \description{
 Estimates the Average Treatment Effect (ATE) in settings where the outcome
-may be missing (not observed for all individuals). The function uses an
-imputation-based approach combined with doubly robust estimation techniques.
+may be missing (not observed for all individuals). The treatment effect
+implied by a parametric imputation model is targeted directly through an
+efficient one-step estimator constructed from its influence function
+(Nordland et al., 2026).
 }
 \details{
 The \code{moi} function implements an estimator for the Average Treatment
@@ -118,7 +125,7 @@ The function estimate the target parameter
 where
 
 \deqn{E[\tilde{Y}| A = a] = E[\Delta Y | A=a] + P(\Delta=0 | A=a) \cdot
-E[U(X, A, Z, \theta) | A=a, \Delta=0],}
+E[U(X, A, Z; \theta) | A=a, \Delta=0],}
 
 and \eqn{\Delta} denotes the non-missing indicator, and \eqn{U} denotes the
 imputation model possibly depending on baseline covariates \eqn{X}, the
@@ -127,12 +134,45 @@ treatment \eqn{A}, and a post randomization variable \eqn{Z}.
 Inference in based on the estimated influence functions (IFs)
 of the associated (covariate adjusted) one-step estimators.
 
+When \code{imputation.augmentation = TRUE}, an augmentation term built from
+the efficient influence function is added, giving an efficient one-step
+estimator of the treatment effect implied by the imputation model
+(Nordland et al., 2026). The augmentation uses a working model for the
+conditional imputation mean \eqn{E[U(X, A, Z; \theta) \mid W, A]} (see
+\code{imputation.augmentation.model}) together with the missingness model.
+
 If no observations are missing in an arm \eqn{a}, the imputation
 contribution for that arm vanishes
 (\eqn{P(\Delta = 0 | A = a) = 0}) and
 \eqn{E[\tilde{Y} | A = a] = E[Y | A = a]}. If no observations are
 missing in any arm, \code{moi} reduces to a standard
 \code{\link{cate}} call with \code{cate.model = ~ 1}.
+}
+\examples{
+sim_moi <- function(n = 1000, ...) {
+  w <- rnorm(n)
+  a <- rbinom(n, 1, 0.5)
+  y <- 1 + a + w + rnorm(n)
+  ## outcome observed (delta = 1) with probability depending on w
+  delta <- rbinom(n, 1, lava::expit(1 + w))
+  y[delta == 0] <- NA
+  data.frame(y, a, w)
+}
+
+d <- sim_moi(1000)
+## ATE with missing outcomes imputed by a working glm model
+moi(data = d,
+    response.model = y ~ a + w,
+    treatment.model = a ~ 1,
+    missing.model = ~ a + w,
+    imputation.model = y ~ a + w,
+    imputation.subset = "!is.na(y)")
+
+}
+\references{
+Nordland, A., Holst, K. K., Redek, D., Pipper, C. B. & Iversen, A. T.
+(2026) One-step Outcome Imputation: An Alternative to Multiple
+Imputation. arXiv: https://arxiv.org/abs/2606.07174.
 }
 \seealso{
 \code{\link{cate}} for Conditional Average Treatment Effect estimation,

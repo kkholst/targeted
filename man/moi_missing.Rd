@@ -26,7 +26,8 @@ data.frame.}
 
 \item{delta}{A vector with the non-missing indicator}
 
-\item{treatment.model}{Learner object}
+\item{treatment.model}{A \code{learner} object for the binary treatment,
+used to extract the treatment variable and its levels.}
 
 \item{imputation.model}{A learner object of class 'learner_glm' used to fit
 the imputation model. The learner must specify the outcome variable and
@@ -78,9 +79,10 @@ function for the imputation-model parameters.}
 \description{
 Estimates the mean of a given parametric imputation model among observations
 with a missing outcome and a given treatment. Specifically, it provides
-estimates of \eqn{E[U(X,A,Z,\theta)|A=a, \Delta=0]}, for an imputation model
+estimates of \eqn{E[U(X,A,Z;\theta)|A=a, \Delta=0]}, for an imputation model
 \eqn{U}, where \eqn{X} denotes baseline covariates, \eqn{A} denotes the
 treatment, \eqn{Z} denotes post randomization covariates, and \eqn{\Delta}
 denotes a non-missing indicator. Influence function based standard errors are
 also provided.
 }
+\keyword{internal}
