@@ -52,9 +52,9 @@ observed/non-missing}
 specifying the model for the imputation augmentation}
 
 \item{extended.output}{Logical. If \code{TRUE}, the returned list also
-includes the per-level decomposition of the influence function as
-\code{IC1}, \code{IC2}, and (when
-\code{imputation.augmentation = TRUE}) \code{IC3}. Default is
+includes the augmentation component \code{IC3} of the influence
+function (only when \code{imputation.augmentation = TRUE}) and the
+imputation-model influence function \code{IC_epsilon}. Default is
 \code{FALSE}.}
 }
 \value{
@@ -65,14 +65,10 @@ associated influence functions.}
 \item{imputation.model}{The fitted imputation model.}
 \item{imputation.subset}{The \code{imputation.subset} expression.}
 \item{levels}{Treatment levels (character).}
-\item{IC1, IC2, IC3}{(only if \code{extended.output = TRUE}) Named
-lists (one entry per treatment level) giving the per-level
-contributions to the influence function:
-\code{IC1} is the missing-outcome plug-in part,
-\code{IC2} is the imputation-model coefficient uncertainty part, and
-\code{IC3} (only present when
-\code{imputation.augmentation = TRUE}) is the augmentation part.
-The full per-level IC equals \code{IC1 + IC2 [+ IC3]}.}
+\item{IC3}{(only if \code{extended.output = TRUE} and
+\code{imputation.augmentation = TRUE}) Named list (one entry per
+treatment level) giving the per-level augmentation contribution to
+the influence function.}
 \item{IC_epsilon}{(only if \code{extended.output = TRUE}) Influence
 function for the imputation-model parameters.}
 }

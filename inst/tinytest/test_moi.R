@@ -797,3 +797,48 @@ test_moi_missing_NA_coef <- function() {
   )
 }
 test_moi_missing_NA_coef()
+
+test_moi_augmentation <- function() {
+  ## Exercises the imputation.augmentation = TRUE path through moi(),
+  ## supplying imputation.augmentation.model as both a formula and an
+  ## equivalent learner. This is a regression guard for the
+  ## formula -> learner_glm conversion in moi(): the two forms must agree.
+  set.seed(7)
+  n <- 300
+  x <- rnorm(n)
+  a <- rbinom(n, 1, 0.5)
+  z <- x + rnorm(n)
+  y <- 1 + a + x + z + rnorm(n)
+  delta <- rbinom(n, 1, lava::expit(1 + x))
+  y <- ifelse(delta == 1, y, NA)
+  d <- data.frame(y = y, a = a, x = x, z = z)
+
+  common <- list(
+    data = d,
+    response.model = learner_glm(y ~ a + x),
+    treatment.model = a ~ 1,
+    missing.model = learner_glm(~ a + x, family = binomial()),
+    imputation.model = learner_glm(y ~ a + x + z),
+    imputation.subset = "!is.na(y)",
+    imputation.augmentation = TRUE
+  )
+
+  ## (a) augmentation model supplied as a formula
+  res_f <- do.call(
+    moi,
+    c(common, list(imputation.augmentation.model = ~ a + x))
+  )
+  expect_true(inherits(res_f, "moi.targeted"))
+  expect_true(all(is.finite(coef(res_f))))
+
+  ## (b) augmentation model supplied as the equivalent learner object
+  res_l <- do.call(
+    moi,
+    c(common, list(imputation.augmentation.model = learner_glm(~ a + x)))
+  )
+  expect_true(inherits(res_l, "moi.targeted"))
+
+  ## formula and learner forms must produce identical estimates
+  expect_equal(coef(res_f), coef(res_l), tolerance = 1e-12)
+}
+test_moi_augmentation()
