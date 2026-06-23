@@ -213,7 +213,7 @@ moi_missing <- function(data,
 
     ## Plug-in estimate
     est <- estimate(imputation.model$fit,
-                    lava:::predict_glm,
+                    predict_glm, # nolint: object_usage_linter.
                     data = data,
                     subset = (A == a) & (delta == 0),
                     average = TRUE,
