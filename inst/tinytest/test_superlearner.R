@@ -1,9 +1,10 @@
 sim1 <- function(n = 5e2) {
    x1 <- rnorm(n, sd = 2)
    x2 <- rnorm(n)
-   y <- x1 + cos(x1) + x2 + x1 * x2 + rnorm(n, sd = 0.5**.5)
+   xf <- as.factor(rbinom(n, 1, 0.5))
+   y <- x1 + cos(x1) + x2 + x1 * x2 + as.numeric(xf) + rnorm(n, sd = 0.5**.5)
    yb <- as.numeric(y > 0)
-   d <- data.frame(y, yb, x1, x2)
+   d <- data.frame(y, yb, x1, x2, xf)
    d
 }
 d0 <- sim1()
@@ -210,3 +211,49 @@ test_failing_learner <- function() {
   )
 }
 test_failing_learner()
+
+
+test_superlearner_fallback_learner <- function() {
+  lrs <- list(learner_glm(y ~ 1), learner_glm(y ~ x1))
+  # test different error patterns
+  expect_error(
+    superlearner(lrs, fallback.learner = y ~ 1, data = d0),
+    pattern = "Expecting a fallback.learner of class targeted::learner."
+  )
+
+  expect_error( # response variable doesn't exist
+    superlearner(lrs, fallback.learner = learner_glm(yy ~ 1), data = d0),
+    pattern = "fallback.estimator failed to be estimated."
+  )
+
+  lrs <- list(glm.x1 = learner_glm(y ~ x1), glm.xf = learner_glm(y ~ xf))
+  fit <- superlearner(lrs, data = d0, nfolds = 2)
+  newdata <- data.frame(x1 = 2, xf = factor(3))
+  expect_error(
+    predict(fit, newdata = newdata),
+    pattern = "factor xf has new level 3"
+  )
+  fit <- superlearner(
+    lrs, data = d0, nfolds = 2, fallback.learner = learner_glm(y ~ 1)
+  )
+  pred <- c(
+    fit$fit[["glm.x1"]]$predict(newdata),
+    fit$fallback.learner$predict(newdata)
+  ) %*% fit$weights
+  # fallback.learner is used correctly to make predictions
+  expect_equal(predict(fit, newdata = newdata), pred[1, 1])
+
+  # fallback.learner is used even when the base learner could predict
+  # successfully for some rows
+  nd <- data.frame(x1 = c(2, 2), xf = factor(c(1, 3)))
+  preds <- predict(fit, newdata = nd, all.learners = TRUE)
+  expect_equal(
+    preds[, 2],
+    fit$fallback.learner$predict(nd)
+  )
+
+  # fallback.learner doesn't recover base learners which produces NA predictions
+  nd <- data.frame(x1 = c(2, NA), xf = factor(c(1, 3)))
+  expect_true(any(is.na(predict(fit, newdata = nd))))
+}
+test_superlearner_fallback_learner()

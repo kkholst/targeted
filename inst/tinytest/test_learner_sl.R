@@ -32,5 +32,23 @@ test_learner_sl <- function() {
   # nfolds can be overwritten in estimate method call
   lr$estimate(d, nfolds = 3)
   expect_equal(length(lr$fit$folds), 3)
+
+  # prediction method fails when one of the base learner's $predict method
+  # call fails
+  expect_error(
+    lr$predict(newdata = data.frame(x1 = 1)),
+    pattern = "object 'x2' not found"
+  )
+
+  # integration test that fallback.learner argument is correctly handled
+  lr_fallback <- learner_sl(lrs, nfolds = 2,
+    fallback.learner = learner_glm(y ~ 1)
+  )
+  lr_fallback$estimate(d)
+  preds <- lr_fallback$predict(
+    newdata = data.frame(x1 = 1), all.learners = TRUE
+  )
+  expect_equal(preds[1], preds[2]) # predictions are the same because the
+  # fallback.learner is the same as the mean base learner
 }
 test_learner_sl()

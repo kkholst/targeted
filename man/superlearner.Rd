@@ -16,6 +16,7 @@ superlearner(
   future.seed = TRUE,
   silent = TRUE,
   name.prefix = NULL,
+  fallback.learner = NULL,
   ...
 )
 }
@@ -53,14 +54,18 @@ holds a L'Ecuyer-CMRG RNG seed, otherwise one is created randomly.}
 \code{learners} without names. If NULL, then obtain the name from the info field
 of a learner.}
 
+\item{fallback.learner}{(\link{learner}) A fallback learner to be used as a
+replacement for learners that return an error when using the fitted model to
+make predictions.}
+
 \item{...}{Additional arguments to \link[parallel:mclapply]{parallel::mclapply} or
 \link[future.apply:future_lapply]{future.apply::future_lapply}.}
 }
 \description{
-This function creates a predictor object (class \link{learner}) from
-a list of existing \link{learner} objects. When estimating this model a stacked
-prediction will be created by weighting together the predictions of each of
-the initial learners The weights are learned using cross-validation.
+This function creates a \link{learner} class object from a list of
+existing \link{learner} objects. When estimating this model a stacked prediction
+will be created by weighting together the predictions of each of the
+initial learners. The weights are learned using cross-validation.
 }
 \examples{
 sim1 <- function(n = 5e2) {
@@ -76,6 +81,14 @@ m <- list(
 sl <- superlearner(m, data = sim1(), nfolds = 2)
 predict(sl, newdata = sim1(n = 5))
 predict(sl, newdata = sim1(n = 5), all.learners = TRUE)
+
+# fails because x2 is missing in newdata
+# predict(sl, newdata = data.frame(x1=1))
+sl <- superlearner(m, data = sim1(), nfolds = 2,
+  fallback.learner = learner_glm(y ~ 1)
+)
+# use fallback.learner for failing glm model with missing x2 predictor
+predict(sl, newdata = data.frame(x1=1))
 }
 \references{
 Luedtke & van der Laan (2016) Super-Learning of an Optimal

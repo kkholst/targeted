@@ -108,10 +108,10 @@ get_learner_names <- function(model.list, name.prefix) {
 
 #' @export
 #' @title Superlearner (stacked/ensemble learner)
-#' @description This function creates a predictor object (class [learner]) from
-#'   a list of existing [learner] objects. When estimating this model a stacked
-#'   prediction will be created by weighting together the predictions of each of
-#'   the initial learners The weights are learned using cross-validation.
+#' @description This function creates a [learner] class object from a list of
+#'   existing [learner] objects. When estimating this model a stacked prediction
+#'   will be created by weighting together the predictions of each of the
+#'   initial learners. The weights are learned using cross-validation.
 #' @param data (data.frame) Data containing the response variable and
 #'   covariates.
 #' @param learners (list) List of [learner] objects (i.e. [learner_glm])
@@ -138,6 +138,9 @@ get_learner_names <- function(model.list, name.prefix) {
 #'   holds a L'Ecuyer-CMRG RNG seed, otherwise one is created randomly.
 #' @param ... Additional arguments to [parallel::mclapply] or
 #'   [future.apply::future_lapply].
+#' @param fallback.learner ([learner]) A fallback learner to be used as a
+#' replacement for learners that return an error when using the fitted model for
+#' making predictions.
 #' @references Luedtke & van der Laan (2016) Super-Learning of an Optimal
 #'   Dynamic Treatment Rule, The International Journal of Biostatistics.
 #' @aliases superlearner metalearner_nnls metalearner_discrete
@@ -156,6 +159,14 @@ get_learner_names <- function(model.list, name.prefix) {
 #' sl <- superlearner(m, data = sim1(), nfolds = 2)
 #' predict(sl, newdata = sim1(n = 5))
 #' predict(sl, newdata = sim1(n = 5), all.learners = TRUE)
+#'
+#' # fails because x2 is missing in newdata
+#' # predict(sl, newdata = data.frame(x1=1))
+#' sl <- superlearner(m, data = sim1(), nfolds = 2,
+#'   fallback.learner = learner_glm(y ~ 1)
+#' )
+#' # use fallback.learner for failing glm model with missing x2 predictor
+#' predict(sl, newdata = data.frame(x1=1))
 superlearner <- function(learners,
                          data,
                          nfolds = 10,
@@ -165,6 +176,7 @@ superlearner <- function(learners,
                          future.seed = TRUE,
                          silent = TRUE,
                          name.prefix = NULL,
+                         fallback.learner = NULL,
                          ...) {
   pred_mod <- function(models, data) {
     n <- nrow(data)
@@ -258,6 +270,21 @@ superlearner <- function(learners,
     "All learners failed to be estimated."
   )
 
+  # TODO: if a fallback.learner is provided, should that learner be used when
+  # no base learner can be estimated? Or should we keep the current behavior?
+  if (!is.null(fallback.learner)) {
+    if (!inherits(fallback.learner, "learner")) stop(
+      "Expecting a fallback.learner of class targeted::learner."
+    )
+    tryCatch(
+      fallback.learner$estimate(data),
+      error = \(e) rlang::abort(
+        "fallback.estimator failed to be estimated.",
+        parent = e
+      )
+    )
+  }
+
   # Meta-learner
   y <- learners[[1]]$response(data)
   risk <- apply(pred, 2, \(x) model.score(y, x))
@@ -289,7 +316,8 @@ superlearner <- function(learners,
     weights = w,
     names = model.names,
     fit = mod,
-    folds = folds
+    folds = folds,
+    fallback.learner = fallback.learner
   )
   return(structure(res, class = "superlearner"))
 }
@@ -321,6 +349,7 @@ score.superlearner <- function(x, ...) {
   return(x$model.score)
 }
 
+
 #' @title Predict Method for superlearner Fits
 #' @description Obtains predictions for ensemble model or individual learners.
 #' @export
@@ -333,10 +362,32 @@ score.superlearner <- function(x, ...) {
 #' @param ... Not used.
 #' @return numeric (`all.learners = FALSE`) or matrix (`all.learners = TRUE`)
 predict.superlearner <- function(object, newdata, all.learners = FALSE, ...) {
-  # learners that fail to be estimated on the full data have x$fit == NULL
+  predict_learner <- function(newdata, learner, fallback.learner) {
+    # learners that fail to be estimated on the full data have x$fit == NULL
+    if (is.null(learner$fit)) return(rep(0, NROW(newdata)))
+    # don't attempt tryCatch when no fallback.learner has been provided during
+    # superlearner call
+    if (is.null(fallback.learner)) return(learner$predict(newdata))
+    # TODO: the fallback learner can also be applied when the above call does
+    # not raise an error but inserts NAs in the returned vectort
+
+    # TODO: this can be extended to apply learner$predict row-wise to newdata
+    # if learner$predict(newdata) fails
+    pred <- tryCatch(
+      learner$predict(newdata),
+      error = \(e) fallback.learner$predict(newdata)
+    )
+    return(pred)
+  }
+
   pr <- lapply(
     object$fit,
-    \(x) if(is.null(x$fit)) rep(0, NROW(newdata)) else x$predict(newdata)
+    \(learner) {
+      predict_learner(
+        newdata = newdata,
+        learner = learner,
+        fallback.learner = object$fallback.learner)
+    }
   )
   if (length(object$weights) == 1) return(unname(pr[[1]]))
   res <- Reduce(cbind, pr)
