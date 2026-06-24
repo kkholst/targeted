@@ -2,36 +2,15 @@
 % Please edit documentation in R/superlearner.R
 \name{SL}
 \alias{SL}
-\title{SuperLearner wrapper for learner}
+\title{SuperLearner wrapper for learner (defunct)}
 \usage{
-SL(
-  formula = ~.,
-  ...,
-  SL.library = c("SL.mean", "SL.glm"),
-  binomial = FALSE,
-  data = NULL,
-  info = "SuperLearner"
-)
+SL(...)
 }
 \arguments{
-\item{formula}{Model design}
-
-\item{...}{Additional arguments for SuperLearner::SuperLearner}
-
-\item{SL.library}{character vector of prediction algorithms}
-
-\item{binomial}{boolean specifying binomial or gaussian family (default
-FALSE)}
-
-\item{data}{Optional data.frame}
-
-\item{info}{model information (optional)}
-}
-\value{
-learner object
+\item{...}{Ignored.}
 }
 \description{
-SuperLearner wrapper for learner
+\code{SL()} has been removed. Use \link{learner_sl} instead.
 }
 \author{
 Klaus Kähler Holst

@@ -210,3 +210,8 @@ test_failing_learner <- function() {
   )
 }
 test_failing_learner()
+
+test_SL_defunct <- function() {
+  expect_error(SL(), pattern = "defunct")
+}
+test_SL_defunct()
