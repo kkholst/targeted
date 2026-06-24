@@ -324,6 +324,8 @@ superlearner <- function(learners,
 
 #' @export
 print.superlearner <- function(x, ...) {
+  # TODO: we may want to modify the print method to inform users about
+  # the fallback learner attribute
   res <- cbind("score" = x$model.score, "weight" = x$weights)
   if (!is.null(x$fit)) {
       rownames(res) <- x$names
