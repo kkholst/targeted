@@ -55,8 +55,8 @@ holds a L'Ecuyer-CMRG RNG seed, otherwise one is created randomly.}
 of a learner.}
 
 \item{fallback.learner}{(\link{learner}) A fallback learner to be used as a
-replacement for learners that return an error when using the fitted model to
-make predictions.}
+replacement for learners that return an error when using the fitted model for
+making predictions.}
 
 \item{...}{Additional arguments to \link[parallel:mclapply]{parallel::mclapply} or
 \link[future.apply:future_lapply]{future.apply::future_lapply}.}

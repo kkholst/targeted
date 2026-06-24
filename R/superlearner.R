@@ -278,10 +278,9 @@ superlearner <- function(learners,
     )
     tryCatch(
       fallback.learner$estimate(data),
-      error = \(e) rlang::abort(
-        "fallback.estimator failed to be estimated.",
-        parent = e
-      )
+      error = \(e) {
+        rlang::abort("fallback.estimator failed to be estimated.", parent = e)
+      }
     )
   }
 
