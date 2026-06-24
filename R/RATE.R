@@ -1,6 +1,3 @@
-# Normalize a 'response'/'post.treatment' argument into a learner object. A
-# formula is wrapped in learner_glm with the supplied family; an existing
-# learner object is returned unchanged.
 as_rate_learner <- function(x, family) {
   if (inherits(x, "learner")) return(x)
   return(learner_glm(x, family = family))
