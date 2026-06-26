@@ -2,13 +2,17 @@
 
 Development version
 
-- removing legacy `crr` and `cate_link` functions
 - removing deprecated ml_model
 - `learner_surv_cox`, `learner_surv_rf`, `cumhaz`
 - feature(superlearner): more robust metalearner (in case quadratic prog. fails)
 - feature(learner_cox): mets::phreg wrapper.
 - disabling openMP in RcppArmadillo
 - bugfix: issue with `cate` with repeated cross-fitting fixed.
+
+Breaking changes:
+
+- removing legacy `crr` and `cate_link` functions
+- removing legacy `SL` function. Use `learner_sl` instead.
 
 # targeted 0.7.1
 

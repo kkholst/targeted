@@ -1,4 +1,5 @@
 # ----- Deprecated: removed from targeted in version 0.8.0 -----
+# Note that SL has been hard-deprecated in targeted v0.8
 score_fold <- function(fold,
                        data,
                        propensity_model,
