@@ -147,7 +147,7 @@ test_metalearners <- function() {
   # we don't support providing a character argument anymore
   expect_error(
     superlearner(lrs, data = d0, nfolds = 2, meta.learner = "discrete"),
-    pattern = "Expecting meta.learner to be a function"
+    pattern = "meta.learner needs to be a function."
   )
 
 

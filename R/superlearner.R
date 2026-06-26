@@ -250,7 +250,7 @@ superlearner <- function(learners,
   }
 
   if (!is.function(meta.learner)) rlang::abort(
-    "Expecting meta.learner to be a function."
+    "meta.learner needs to be a function."
   )
 
   model.names <- get_learner_names(learners, name.prefix)
