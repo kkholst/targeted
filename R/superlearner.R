@@ -402,72 +402,15 @@ predict.superlearner <- function(object, newdata, all.learners = FALSE, ...) {
   return(res)
 }
 
-#' SuperLearner wrapper for learner
-#'
-#' @title SuperLearner wrapper for learner
-#' @aliases SL
-#' @param formula Model design
-#' @param ... Additional arguments for SuperLearner::SuperLearner
-#' @param SL.library character vector of prediction algorithms
-#' @param binomial boolean specifying binomial or gaussian family (default
-#'   FALSE)
-#' @param data Optional data.frame
-#' @param info model information (optional)
-#' @return learner object
+#' @title SuperLearner wrapper for learner (defunct)
+#' @description `SL()` has been removed. Use [learner_sl] instead.
+#' @param ... Ignored.
 #' @author Klaus Kähler Holst
 #' @export
-SL <- function(formula=~., ...,
-               SL.library=c("SL.mean", "SL.glm"),
-               binomial=FALSE,
-               data=NULL,
-               info = "SuperLearner") {
-  dots <- list(...)
-  if (!requireNamespace("SuperLearner")) {
-      stop("Package 'SuperLearner' required.")
-  }
-
-  if (length(formula) == 3) {
-    pred <- paste(deparse(formula[[3]]), collapse = " ")
-  } else {
-    pred <- paste(deparse(formula[[2]]), collapse = " ")
-  }
-  if (pred=="1") {
-    SL.library <- "SL.mean"
-  }
-  m <- learner$new(formula,
-    info = info,
-    estimate = function(x, y) {
-      Y <- as.numeric(y)
-      X <- as.data.frame(x)
-      args <- c(list(
-        Y = Y, X = X,
-        SL.library = SL.library,
-        env = asNamespace("SuperLearner")
-      ), dots)
-      if (binomial) {
-        args <- c(args, list(family = binomial()))
-      }
-      res <- do.call(SuperLearner::SuperLearner, args)
-      res$call <- quote(SuperLearner(...))
-      if (binomial) {
-        res$call <- quote(
-          SuperLearner::SuperLearner(
-            ...,
-            family = binomial()
-          )
-        )
-      }
-      return(res)
-    },
-    predict = function(object, newdata) {
-      pr <- predict(object, newdata = newdata)$pred
-      if (binomial) {
-        pr <- cbind((1 - pr), pr)
-      }
-      return(pr)
-    }
+SL <- function(...) {
+  .Defunct("learner_sl", package = "targeted",
+    msg = paste(
+      "'SL' is defunct. Use learner_sl instead."
     )
-  if (!is.null(data))
-    m$estimate(data)
-  return(m)
+  )
 }

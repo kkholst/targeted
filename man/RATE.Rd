@@ -12,17 +12,17 @@ RATE(
   M = 5,
   pr.treatment,
   treatment.level,
-  SL.args.response = list(family = gaussian(), SL.library = c("SL.mean", "SL.glm")),
-  SL.args.post.treatment = list(family = binomial(), SL.library = c("SL.mean", "SL.glm")),
   preprocess = NULL,
   efficient = TRUE,
   ...
 )
 }
 \arguments{
-\item{response}{Response formula (e.g, Y ~ D*A)}
+\item{response}{(formula or learner) Response model. A formula (e.g.,
+\code{Y ~ D*A}) is wrapped in \link{learner_glm} with a Gaussian family.}
 
-\item{post.treatment}{Post treatment marker formula (e.g., D ~ W)}
+\item{post.treatment}{(formula or learner) Post treatment marker model. A
+formula (e.g., \code{D ~ W}) is wrapped in \link{learner_glm} with a binomial family.}
 
 \item{treatment}{Treatment formula (e.g, A ~ 1)}
 
@@ -33,11 +33,6 @@ RATE(
 \item{pr.treatment}{(optional) Randomization probability of treatment.}
 
 \item{treatment.level}{Treatment level in binary treatment (default 1)}
-
-\item{SL.args.response}{Arguments to SuperLearner for the response model}
-
-\item{SL.args.post.treatment}{Arguments to SuperLearner for the post
-treatment indicator}
 
 \item{preprocess}{(optional) Data preprocessing function}
 

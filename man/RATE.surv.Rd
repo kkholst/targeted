@@ -15,7 +15,6 @@ RATE.surv(
   pr.treatment,
   call.response,
   args.response = list(),
-  SL.args.post.treatment = list(family = binomial(), SL.library = c("SL.mean", "SL.glm")),
   call.censoring,
   args.censoring = list(),
   preprocess = NULL,
@@ -25,7 +24,8 @@ RATE.surv(
 \arguments{
 \item{response}{Response formula (e.g., Surv(time, event) ~ D + W).}
 
-\item{post.treatment}{Post treatment marker formula (e.g., D ~ W)}
+\item{post.treatment}{(formula or learner) Post treatment marker model. A
+formula (e.g., \code{D ~ W}) is wrapped in \link{learner_glm} with a binomial family.}
 
 \item{treatment}{Treatment formula (e.g, A ~ 1)}
 
@@ -43,9 +43,6 @@ W)).}
 \item{call.response}{Model call for the response model (e.g. "mets::phreg").}
 
 \item{args.response}{Additional arguments to the response model.}
-
-\item{SL.args.post.treatment}{Arguments to SuperLearner for the post
-treatment indicator}
 
 \item{call.censoring}{Similar to call.response.}
 

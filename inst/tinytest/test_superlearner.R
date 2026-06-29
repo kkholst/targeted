@@ -257,3 +257,8 @@ test_superlearner_fallback_learner <- function() {
   expect_true(any(is.na(predict(fit, newdata = nd))))
 }
 test_superlearner_fallback_learner()
+
+test_SL_defunct <- function() {
+  expect_error(SL(), pattern = "defunct")
+}
+test_SL_defunct()
