@@ -44,7 +44,7 @@
 #'   imputation-model influence function \code{IC_epsilon}. Default is
 #'   \code{FALSE}.
 #' @return A list with components:
-#'   \item{estimate}{A \code{lava::estimate} object with coefficients
+#'   \item{estimate}{A \code{\link{lava::estimate}} object with coefficients
 #'     \eqn{E[U|A=1,\Delta=0]} and \eqn{E[U|A=0,\Delta=0]} and the
 #'     associated influence functions.}
 #'   \item{imputation.model}{The fitted imputation model.}
@@ -272,7 +272,7 @@ moi_missing <- function(data,
     ## Stash per-level IC components from attributes before merge() drops them.
     level_names <- as.character(levels)
     if (isTRUE(imputation.augmentation)) {
-      IC3 <- setNames(lapply(est, attr, "IC3"), level_names)
+      IC3 <- stats::setNames(lapply(est, attr, "IC3"), level_names)
     }
   }
   est <- do.call("merge", est)
