@@ -119,7 +119,7 @@ test_metalearners <- function() {
   )
   set.seed(1)
   sl_convex <- superlearner(lrs, data = d0, nfolds = 2,
-    meta.learner = targeted:::metalearner_convexcomb
+    meta.learner = metalearner_convexcomb
   )
 
   # using quadprog::solve.QP splits the weight of the duplicated learner equally
@@ -138,18 +138,18 @@ test_metalearners <- function() {
   # one of the duplicated learners
   set.seed(1)
   sl_discrete <- superlearner(lrs, data = d0, nfolds = 2,
-    meta.learner = targeted:::metalearner_discrete
+    meta.learner = metalearner_discrete
   )
   expect_equal(sum(sl_discrete$weights == 0), 2)
   expect_equal(sum(sl_discrete$weights), 1)
   expect_equal(sl_discrete$weights[which.min(sl_discrete$model.score)][[1]], 1)
 
-  # can also be called with character argument
-  set.seed(1)
-  sl_discrete_char <- superlearner(lrs, data = d0, nfolds = 2,
-  meta.learner = "discrete"
+  # we don't support providing a character argument anymore
+  expect_error(
+    superlearner(lrs, data = d0, nfolds = 2, meta.learner = "discrete"),
+    pattern = "meta.learner needs to be a function."
   )
-  expect_equal(sl_discrete_char$weights, sl_discrete$weights)
+
 
   # nnls::nnls and quadprog::solve.QP should give the same solution
   d0 <- sim1(n = 200)
