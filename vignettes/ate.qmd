@@ -35,7 +35,7 @@ assumptions: consistency, positivity, and no unmeasured confounding.
 
 The `cate` function in the `targeted` package estimates the ATE using the
 *augmented inverse probability weighted* (AIPW) estimator, also known as the
-doubly-robust **one-step** estimator. For each treatment level $a$, the efficient influence
+doubly-robust (DR) *one-step estimator*. For each treatment level $a$, the efficient influence
 function for the marginal mean $\psi_a = E[Y(a)]$ is
 
 $$\varphi_a(Y, A, W) = \frac{I(A=a)}{\pi_a(W)}\{Y - \mu_a(W)\} + \mu_a(W) - \psi_a$$
