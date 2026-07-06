@@ -1,4 +1,4 @@
-# targetd 0.8
+# targeted 0.8
 
 Development version
 
@@ -8,6 +8,11 @@ Development version
 - feature(learner_cox): mets::phreg wrapper.
 - disabling openMP in RcppArmadillo
 - bugfix: issue with `cate` with repeated cross-fitting fixed.
+
+Breaking changes:
+
+- removing legacy `crr` and `cate_link` functions
+- removing legacy `SL` function. Use `learner_sl` instead.
 
 # targeted 0.7.1
 

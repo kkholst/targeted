@@ -3,6 +3,7 @@
 # matrix
 make_dmat_pos_definite <- function(pred) {
   Dmat <- t(pred) %*% pred
+  if (all(dim(Dmat) == c(1, 1))) return(Dmat)
   .eigen <- eigen(Dmat)
   tau <- .eigen$values
   tau[tau < sqrt(.Machine$double.eps)] <- sqrt(.Machine$double.eps)
@@ -179,11 +180,14 @@ superlearner <- function(learners,
   }
   est_mod <- function(models, data) {
     for (i in seq_along(models)) {
-      v <- tryCatch(models[[i]]$estimate(data), error=function(x) NULL)
-      if (is.null(v)) {
-        models[[i]]$fit <- NULL
-      }
+      v <- tryCatch(
+        models[[i]]$estimate(data),
+        error=function(x) NULL
+      )
+      # not strictly needed because model$fit == NULL upon learner instantiation
+      if (is.null(v)) models[[i]]$clear
     }
+    return(models)
   }
 
   if (is.character(model.score)) {
@@ -194,7 +198,7 @@ superlearner <- function(learners,
     "All provided learners must be of class targeted::learner"
   )
 
-  responses <- unlist(lapply(learners, \(m) as.character(m$formula)[[2]]))
+  responses <- unlist(lapply(learners, \(m) deparse(m$formula[[2]])))
   if (length(unique(responses)) > 1) {
     r <- paste0(unique(responses), collapse = ", ")
     warning("Different response variables found among learners: ", r)
@@ -210,6 +214,7 @@ superlearner <- function(learners,
     test <- data[fold, , drop = FALSE]
     train <- data[setdiff(1:n, fold), , drop = FALSE]
     mod <- lapply(learners, \(x) x$clone(deep = TRUE))
+
     est_mod(mod, train)
     pred.test <- pred_mod(mod, test)
     if (!silent) pb()
@@ -246,12 +251,27 @@ superlearner <- function(learners,
   }
   mod <- lapply(learners, \(x) x$clone())
   names(mod) <- model.names
+
+  ## Full predictions
+  est_mod(mod, data)
+  if (all(sapply(mod, \(x) is.null(x$fit)))) stop(
+    "All learners failed to be estimated."
+  )
+
   # Meta-learner
   y <- learners[[1]]$response(data)
   risk <- apply(pred, 2, \(x) model.score(y, x))
   # Learners with failed predictions
-  idx  <- which(apply(pred, 2, \(x) any(is.na(x) | is.nan(x))))
+  idx <- which(apply(pred, 2, \(x) any(is.na(x) | is.nan(x))))
+
+  if (length(idx) == length(mod)) stop(
+    "Terminating the estimation of the superlearner because the hold-out set ",
+    "predictions of all learners contain NAs. Therefore, the ensemble ",
+    "weights cannot be estimated."
+  )
+
   if (length(risk) > 0) risk[idx] <- Inf
+
   names(risk) <- model.names
   if (is.character(meta.learner)) {
     if (tolower(meta.learner[1]) == "discrete") {
@@ -262,8 +282,8 @@ superlearner <- function(learners,
   }
   w <- meta.learner(y = y, pred = pred, risk = risk)
   names(w) <- model.names
-  ## Full predictions
-  est_mod(mod, data)
+
+
   res <- list(
     model.score = risk,
     weights = w,
@@ -313,80 +333,32 @@ score.superlearner <- function(x, ...) {
 #' @param ... Not used.
 #' @return numeric (`all.learners = FALSE`) or matrix (`all.learners = TRUE`)
 predict.superlearner <- function(object, newdata, all.learners = FALSE, ...) {
-  pr <- lapply(object$fit, \(x) x$predict(newdata))
+  # learners that fail to be estimated on the full data have x$fit == NULL
+  pr <- lapply(
+    object$fit,
+    \(x) if(is.null(x$fit)) rep(0, NROW(newdata)) else x$predict(newdata)
+  )
   if (length(object$weights) == 1) return(unname(pr[[1]]))
   res <- Reduce(cbind, pr)
   colnames(res) <- names(object$fit)
 
+  # learners which produced predictions with some NAs during any fold will have
+  # their ensemble weight set to 0
   if (!all.learners) {
     res <- as.vector(res %*% object$weights)
   }
   return(res)
 }
 
-#' SuperLearner wrapper for learner
-#'
-#' @title SuperLearner wrapper for learner
-#' @aliases SL
-#' @param formula Model design
-#' @param ... Additional arguments for SuperLearner::SuperLearner
-#' @param SL.library character vector of prediction algorithms
-#' @param binomial boolean specifying binomial or gaussian family (default
-#'   FALSE)
-#' @param data Optional data.frame
-#' @param info model information (optional)
-#' @return learner object
+#' @title SuperLearner wrapper for learner (defunct)
+#' @description `SL()` has been removed. Use [learner_sl] instead.
+#' @param ... Ignored.
 #' @author Klaus Kähler Holst
 #' @export
-SL <- function(formula=~., ...,
-               SL.library=c("SL.mean", "SL.glm"),
-               binomial=FALSE,
-               data=NULL,
-               info = "SuperLearner") {
-  dots <- list(...)
-  if (!requireNamespace("SuperLearner")) {
-      stop("Package 'SuperLearner' required.")
-  }
-
-  pred <- as.character(formula)
-  pred <- ifelse(length(pred)==2, pred[2], pred[3])
-  if (pred=="1") {
-    SL.library <- "SL.mean"
-  }
-  m <- learner$new(formula,
-    info = info,
-    estimate = function(x, y) {
-      Y <- as.numeric(y)
-      X <- as.data.frame(x)
-      args <- c(list(
-        Y = Y, X = X,
-        SL.library = SL.library,
-        env = asNamespace("SuperLearner")
-      ), dots)
-      if (binomial) {
-        args <- c(args, list(family = binomial()))
-      }
-      res <- do.call(SuperLearner::SuperLearner, args)
-      res$call <- quote(SuperLearner(...))
-      if (binomial) {
-        res$call <- quote(
-          SuperLearner::SuperLearner(
-            ...,
-            family = binomial()
-          )
-        )
-      }
-      return(res)
-    },
-    predict = function(object, newdata) {
-      pr <- predict(object, newdata = newdata)$pred
-      if (binomial) {
-        pr <- cbind((1 - pr), pr)
-      }
-      return(pr)
-    }
+SL <- function(...) {
+  .Defunct("learner_sl", package = "targeted",
+    msg = paste(
+      "'SL' is defunct. Use learner_sl instead."
     )
-  if (!is.null(data))
-    m$estimate(data)
-  return(m)
+  )
 }

@@ -168,3 +168,50 @@ test_metalearners <- function() {
   expect_equal(sl_quadprog$weights, sl_nnls$weights)
 }
 test_metalearners()
+
+test_failing_learner <- function() {
+  lrs <- list(
+    failing = learner_glm(y ~ covar_does_not_exit),
+    glm = learner_glm(y ~ x1)
+  )
+  sl <- superlearner(lrs, data = d0, nfolds = 2)
+  lrs$glm$estimate(d0)
+  expect_equivalent(
+    predict(sl, d0),
+    lrs$glm$predict(d0)
+  )
+
+  lrs <- list(
+    mean = learner_glm(y ~ 1),
+    glm = learner_glm(y ~ x1)
+  )
+
+  data_failing <- d0
+  data_failing[1, "x1"] <- NA
+  # glm fails to be estimated for folds that includes the missing value
+  sl <- superlearner(lrs, data = data_failing, nfolds = 2)
+  expect_equal(weights(sl), c(mean = 1, glm = 0))
+
+  expect_error(
+    superlearner(list(
+      learner_glm(y ~ covar_does_not_exit)), data = d0, nfolds = 2
+    ),
+    pattern = "All learners failed to be estimated."
+  )
+
+  lr_fail_to_predict <- learner$new(
+    y ~ 1, estimate = stats::glm, predict = \(fit, newdata) stop("Some error")
+  )
+  # verify that learner can be estimated
+  lr_fail_to_predict$estimate(d0)
+  expect_error(
+    superlearner(list(lr_fail_to_predict), data = d0),
+    pattern = "hold-out set predictions of all learners contain NAs"
+  )
+}
+test_failing_learner()
+
+test_SL_defunct <- function() {
+  expect_error(SL(), pattern = "defunct")
+}
+test_SL_defunct()
