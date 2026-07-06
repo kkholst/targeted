@@ -35,7 +35,7 @@ assumptions: consistency, positivity, and no unmeasured confounding.
 
 The `cate` function in the `targeted` package estimates the ATE using the
 *augmented inverse probability weighted* (AIPW) estimator, also known as the
-doubly-robust estimator. For each treatment level $a$, the efficient influence
+doubly-robust **one-step** estimator. For each treatment level $a$, the efficient influence
 function for the marginal mean $\psi_a = E[Y(a)]$ is
 
 $$\varphi_a(Y, A, W) = \frac{I(A=a)}{\pi_a(W)}\{Y - \mu_a(W)\} + \mu_a(W) - \psi_a$$
@@ -213,9 +213,8 @@ $E[Y(0)]$ and their difference (the risk difference). To obtain an odds ratio,
 we can transform the potential outcome estimates using `lava::estimate`:
 
 ```{r ate-or}
-logit <- lava::logit
-or <- lava::estimate(fit_bin$estimate, function(p) logit(p[1]) - logit(p[2]),
-                     labels = "log(OR)")
+or <- with(lava::estimate(fit_bin$estimate),
+           lava::logit(`E[y(1)]`) - lava::logit(`E[y(0)]`))
 merge(or, exp(or), labels = c("log(OR)", "OR"))
 ```
 
