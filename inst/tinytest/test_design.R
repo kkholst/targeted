@@ -499,3 +499,86 @@ test_print.design <- function() {
   expect_stdout(print(des), "response \\(length: 10\\)")
 }
 test_print.design()
+
+# test data.table and tibble coercion
+test_design_data_coercion <- function() {
+  # tibble input produces same result as data.frame
+  if (requireNamespace("tibble", quietly = TRUE)) {
+    tbl <- tibble::as_tibble(ddata)
+    dd_tbl <- design(y ~ x1 * x2, tbl)
+    dd_df <- design(y ~ x1 * x2, ddata)
+    expect_equivalent(dd_tbl$x, dd_df$x)
+    expect_equivalent(dd_tbl$y, dd_df$y)
+  }
+
+  # data.table input produces same result as data.frame
+  if (requireNamespace("data.table", quietly = TRUE)) {
+    dt <- data.table::as.data.table(ddata)
+    dd_dt <- design(y ~ x1 * x2, dt)
+    dd_df <- design(y ~ x1 * x2, ddata)
+    expect_equivalent(dd_dt$x, dd_df$x)
+    expect_equivalent(dd_dt$y, dd_df$y)
+  }
+}
+test_design_data_coercion()
+
+# test formula environment preservation
+test_design_formula_env <- function() {
+  # formula referencing a variable from a parent environment
+  make_design <- function() {
+    threshold <- 0
+    f <- y ~ I(x1 > threshold)
+    design(f, ddata)
+  }
+  dd <- make_design()
+  expect_equivalent(dd$y, ddata$y)
+  expect_equivalent(dd$x[, 1], as.numeric(ddata$x1 > 0))
+
+  # specials with formula from parent environment
+  make_design_specials <- function() {
+    f <- y ~ x1 + offset(x2)
+    design(f, ddata, specials = "offset")
+  }
+  dd <- make_design_specials()
+  expect_equivalent(unname(dd$offset), ddata$x2)
+  expect_equivalent(dd$x[, 1], ddata$x1)
+
+  # update also preserves environment correctly
+  dd_upd <- update(dd, head(ddata, 10))
+  expect_equivalent(unname(dd_upd$offset), head(ddata$x2, 10))
+}
+test_design_formula_env()
+
+# test na.action parameter
+test_design_na_action <- function() {
+  ddata_na <- ddata
+  ddata_na[1:3, "x1"] <- NA
+
+  # default na.omit removes rows with NAs
+  dd <- design(y ~ x1, ddata_na)
+  expect_equal(nrow(dd$x), n - 3)
+
+  # na.action is stored in the design object
+  expect_identical(dd$na.action, na.omit)
+
+  # explicit na.omit gives same result as default
+  dd_explicit <- design(y ~ x1, ddata_na, na.action = na.omit)
+  expect_equivalent(dd$x, dd_explicit$x)
+
+  # na.pass keeps all rows including NAs
+  dd_pass <- design(y ~ x1, ddata_na, na.action = na.pass)
+  expect_equal(nrow(dd_pass$x), n)
+  expect_true(all(is.na(dd_pass$x[1:3, ])))
+  expect_identical(dd_pass$na.action, na.pass)
+
+  # na.exclude also removes NA rows from the design matrix
+  dd_excl <- design(y ~ x1, ddata_na, na.action = na.exclude)
+  expect_equal(nrow(dd_excl$x), n - 3)
+  expect_identical(dd_excl$na.action, na.exclude)
+
+  # na.action is forwarded through update
+  dd_upd <- update(dd_pass, ddata_na, response = TRUE)
+  expect_equal(nrow(dd_upd$x), n)
+  expect_identical(dd_upd$na.action, na.pass)
+}
+test_design_na_action()

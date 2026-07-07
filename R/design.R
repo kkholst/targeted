@@ -1,4 +1,3 @@
-
 model.extract2 <- function(frame, component) {
   # model.extract version that works with response,offset components
   component <- as.character(substitute(component))
@@ -70,6 +69,8 @@ Specials <- function(formula, spec, split1 = ",", split2 = NULL, ...) {
 #' @param design.matrix (logical) if FALSE then only response and specials are
 #'   returned. Otherwise, the design.matrix `x` is als part of the returned
 #'   object.
+#' @param na.action (function) method to handle missing data
+#'   (default: \code{na.omit})
 #' @return An object of class 'design'
 #' @author Klaus Kähler Holst
 #' @export
@@ -80,7 +81,8 @@ design <- function(formula, data, ..., # nolint
                    specials = NULL,
                    specials.call = NULL,
                    levels = NULL,
-                   design.matrix = TRUE) {
+                   design.matrix = TRUE,
+                   na.action = na.omit) {
   if (inherits(data, c("data.table", "tbl_df"))) {
     data <- as.data.frame(data)
   }
@@ -88,11 +90,13 @@ design <- function(formula, data, ..., # nolint
   if ("subset" %in% names(dots)) stop(
     "subset is not an allowed specials argument for targeted::design"
   )
+  formulaenv <- environment(formula)
   tt <- terms(formula, data = data, specials = specials)
   term.labels <- attr(tt, "term.labels") # predictors
 
   if (response && inherits(
-    try(model.frame(update(tt, ~1), data = data), silent = TRUE),
+    try(model.frame(update(tt, ~1), data = data, na.action = na.action),
+        silent = TRUE),
     "try-error"
   )) { # response appears not to be in `data`
     response <- FALSE
@@ -134,10 +138,12 @@ design <- function(formula, data, ..., # nolint
       }
       fst <- gsub("[\\+]*$", "", fst) # remove potential any trailing '+'
       formula <- as.formula(fst)
+      environment(formula) <- formulaenv
     }
   }
 
   formula0 <- formula
+  environment(formula0) <- formulaenv
   if (!response) formula0 <- formula(delete.response(terms(formula)))
 
   xlev <- levels
@@ -150,11 +156,13 @@ design <- function(formula, data, ..., # nolint
       fs <- reformulate(paste(sterm.list, collapse = " + "))
       fs <- update(formula0, fs)
     }
-    mf <- model.frame(fs, data = data, ...)
+    environment(formula) <- formulaenv
+    mf <- model.frame(fs, data = data, na.action = na.action, ...)
   } else { # also extract design matrix
     mf <- model.frame(tt,
                       data = data, ...,
                       xlev = xlev,
+                      na.action = na.action,
                       drop.unused.levels = FALSE
                       )
     if (is.null(xlev)) {
@@ -209,6 +217,7 @@ design <- function(formula, data, ..., # nolint
         mf <- model.frame(formula0,
                           data = data, ...,
                           xlev = xlev0,
+                          na.action = na.action,
                           drop.unused.levels = FALSE
                           )
       }
@@ -225,7 +234,7 @@ design <- function(formula, data, ..., # nolint
   }
 
   if (design.matrix) {
-    x <- model.matrix(mf, data = data, xlev = xlev0)
+    x <- model.matrix(mf, data = mf)
     if (!intercept && has_intercept) {
       has_intercept <- FALSE
       x <- x[, -1, drop = FALSE]
@@ -250,6 +259,7 @@ design <- function(formula, data, ..., # nolint
       intercept = has_intercept,
       data = data[0, ], ## Empty data.frame to capture structure of data
       specials = specials,
+      na.action = na.action,
       specials.var = specials.var,
       specials.call = specials.call
     ),
@@ -270,6 +280,7 @@ update.design <- function(object, data = NULL, response = FALSE, levels, ...) {
       intercept = object$intercept,
       specials = object$specials,
       specials.call = object$specials.call,
+      na.action = object$na.action,
       response = response
     )
   )
