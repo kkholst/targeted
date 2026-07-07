@@ -38,7 +38,7 @@ lean inference for generalized linear model parameters (Vansteelandt et al.
 (2022) <doi:10.1111/rssb.12504>).
 
 
-# Installation
+## Installation
 
 You can install the released version of targeted from [CRAN](<https://CRAN.R-project.org>) with:
 
@@ -60,7 +60,7 @@ future::plan("multisession")
 progressr::handlers(global=TRUE)
 ```
 
-# Examples
+## Examples
 
 To illustrate some of the functionality of the `targeted` package we simulate
 some data from the following model
@@ -99,8 +99,7 @@ image(wnew, wnew, matrix(y, ncol=length(wnew)),
 ```
 
 
-
-## Nuisance (prediction) models
+### Nuisance (prediction) models
 
 Methods for targeted and semiparametric inference rely on fitting nuisance
 models to observed data when estimating the target parameter of interest. The
@@ -145,7 +144,7 @@ lr_rf <- learner_grf(y ~ w1 + w2 + a, num.trees = 500)
 Lists of models can also be constructed for different hyper-parameters with the
 `learner_expand_grid` function.
 
-### Cross-validation
+#### Cross-validation
 
 To assess the model generalization error we can perform $k$-fold cross-validation with the `cv` method
 ```{r lrcv, cache=TRUE}
@@ -154,17 +153,17 @@ cv(mod, data = d, rep = 2, nfolds = 5) |> summary()
 ```
 
 
-### Ensembles (Super-Learner)
+#### Ensembles (Super-Learner)
 
 An ensemble learner (super-learner) can easily be constructed from lists of `learner` objects
-```{r lrsl, cache=TRUE}
+```{r lrsl, cache=FALSE}
 sl <- learner_sl(mod, nfolds = 10)
 sl$estimate(d)
 sl
 ```
 
 
-```{r lrsl_plot, cache=TRUE}
+```{r lrsl_plot, cache=FALSE}
 pr <- matrix(sl$predict(dnew), ncol=length(wnew))
 image(wnew, wnew, pr, col=viridisLite::viridis(64),
       main=expression(paste("E(Y|",W[1],",",W[2],")")),
@@ -172,7 +171,7 @@ image(wnew, wnew, pr, col=viridisLite::viridis(64),
 ```
 
 
-## Average Treatment Effects
+### Average Treatment Effects
 
 In the following we are interested in estimating the target parameter $\psi_a(P)
 = E_P[Y(a)]$, where $Y(a)$ is the *potential outcome* we would have observed if
@@ -224,7 +223,7 @@ that the estimates converges weakly to a Gaussian distribution even though
 that the estimated influence function based on plugin estimates from the Random
 Forest does not necessarily lie in a $P$-Donsker class.
 
-# Project organization
+## Project organization
 
 We use the `dev` branch for development and the `main` branch for stable
 releases. All releases follow [semantic versioning](https://semver.org/), are
@@ -232,7 +231,7 @@ releases. All releases follow [semantic versioning](https://semver.org/), are
 changes are reported in
 [NEWS.md](https://github.com/kkholst/targeted/blob/main/NEWS.md).
 
-# I Have a Question / I Want to Report a Bug
+## I Have a Question / I Want to Report a Bug
 
 If you want to ask questions, require help or clarification, or report a
 bug, we recommend to either contact a maintainer directly or the
@@ -246,7 +245,7 @@ following:
 We will then take care of the issue as soon as possible.
 
 
-# Contributing to `targeted`
+## Contributing to `targeted`
 
 All types of contributions are encouraged and valued. See the
 [CONTRIBUTING.md](https://github.com/kkholst/targeted/blob/main/CONTRIBUTING.md)
