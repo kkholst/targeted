@@ -2,7 +2,7 @@
 ## ASCII fallback "tildeY" otherwise. Used to render E[\tilde{y}(a)] labels
 ## in moi() output.
 .moi_tilde_y <- function() {
-  if (isTRUE(l10n_info()[["UTF-8"]])) "\u1ef9" else "tildeY"
+        if (isTRUE(l10n_info()[["UTF-8"]])) "\u1ef9" else "tildeY"
 }
 
 #' Mean Imputation Among Missing Outcomes
@@ -44,7 +44,7 @@
 #'   imputation-model influence function \code{IC_epsilon}. Default is
 #'   \code{FALSE}.
 #' @return A list with components:
-#'   \item{estimate}{A \code{\link{lava::estimate}} object with coefficients
+#'   \item{estimate}{A [`lava::estimate`] object with coefficients
 #'     \eqn{E[U|A=1,\Delta=0]} and \eqn{E[U|A=0,\Delta=0]} and the
 #'     associated influence functions.}
 #'   \item{imputation.model}{The fitted imputation model.}
@@ -378,7 +378,7 @@ moi_missing <- function(data,
 ##'   \code{targeted}), a list with components:
 ##'   \describe{
 ##'     \item{call}{The matched call.}
-##'     \item{estimate}{A \code{\link{lava::estimate}} object containing
+##'     \item{estimate}{A [`lava::estimate`] object containing
 ##'       the per-arm
 ##'       expected potential outcomes \eqn{E[\tilde{Y}|A=a]} and the ATE
 ##'       contrast \eqn{E[\tilde{Y}|A=1] - E[\tilde{Y}|A=0]}, with
@@ -408,7 +408,7 @@ moi_missing <- function(data,
 ##' @seealso
 ##'   \code{\link{cate}} for Conditional Average Treatment Effect estimation,
 ##'   \code{\link{learner}} for creating learner objects,
-##'   \code{\link{lava::estimate}} for combining and transforming estimators
+##'   [`lava::estimate`] for combining and transforming estimators
 ##'
 ##' @examples
 ##' sim_moi <- function(n = 1000, ...) {

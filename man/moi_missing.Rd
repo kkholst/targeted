@@ -59,7 +59,7 @@ imputation-model influence function \code{IC_epsilon}. Default is
 }
 \value{
 A list with components:
-\item{estimate}{A \code{lava::estimate} object with coefficients
+\item{estimate}{A \code{\link[lava:estimate]{lava::estimate}} object with coefficients
 \eqn{E[U|A=1,\Delta=0]} and \eqn{E[U|A=0,\Delta=0]} and the
 associated influence functions.}
 \item{imputation.model}{The fitted imputation model.}

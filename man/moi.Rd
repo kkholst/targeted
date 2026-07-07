@@ -89,7 +89,7 @@ An object of class \code{moi.targeted} (inheriting from
 \code{targeted}), a list with components:
 \describe{
 \item{call}{The matched call.}
-\item{estimate}{A \code{\link{lava::estimate}} object containing
+\item{estimate}{A \code{\link[lava:estimate]{lava::estimate}} object containing
 the per-arm
 expected potential outcomes \eqn{E[\tilde{Y}|A=a]} and the ATE
 contrast \eqn{E[\tilde{Y}|A=1] - E[\tilde{Y}|A=0]}, with
@@ -177,7 +177,7 @@ Imputation. arXiv: https://arxiv.org/abs/2606.07174.
 \seealso{
 \code{\link{cate}} for Conditional Average Treatment Effect estimation,
 \code{\link{learner}} for creating learner objects,
-\code{\link{lava::estimate}} for combining and transforming estimators
+\code{\link[lava:estimate]{lava::estimate}} for combining and transforming estimators
 }
 \author{
 Andreas Nordland
