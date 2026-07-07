@@ -138,7 +138,7 @@ function}
   info = NULL,
   specials = c(),
   formula.keep.specials = FALSE,
-  predict.filter = function(data, ...) function(pred, newdata, ...) pred,
+  predict.filter = function(data) function(pred, newdata) pred,
   intercept = FALSE
 )}
     \if{html}{\out{</div>}}
