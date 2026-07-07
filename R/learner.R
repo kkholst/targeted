@@ -230,7 +230,7 @@ learner <- R6::R6Class("learner", # nolint
 
       preds <- private$predfun(object, newdata, ...)
       # TODO: do we want to pass on the ellipses to the filter function? is
-      # there some risk about argument name clashes?
+      # there some risk for argument name clashes?
       return(private$predict_filter(preds, newdata, ...))
     },
 
