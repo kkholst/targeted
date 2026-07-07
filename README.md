@@ -22,7 +22,7 @@ relative risks (Richardson et al. (2017)
 generalized linear model parameters (Vansteelandt et al. (2022)
 <doi:10.1111/rssb.12504>).
 
-# Installation
+## Installation
 
 You can install the released version of targeted from
 [CRAN](https://CRAN.R-project.org) with:
@@ -47,7 +47,7 @@ future::plan("multisession")
 progressr::handlers(global=TRUE)
 ```
 
-# Examples
+## Examples
 
 To illustrate some of the functionality of the `targeted` package we
 simulate some data from the following model
@@ -94,9 +94,9 @@ image(wnew, wnew, matrix(y, ncol=length(wnew)),
       xlab=expression(W[1]), ylab=expression(W[2]))
 ```
 
-<img src="man/figures/README-simplot-1.png" width="50%" />
+<img src="man/figures/README-simplot-1.png" alt="" width="70%" />
 
-## Nuisance (prediction) models
+### Nuisance (prediction) models
 
 Methods for targeted and semiparametric inference rely on fitting
 nuisance models to observed data when estimating the target parameter of
@@ -119,7 +119,7 @@ lr
 #> 
 #> Estimate arguments: family=<function> 
 #> Predict arguments:   
-#> Formula: y ~ (w1 + w2) * a <environment: 0xaee788b30>
+#> Formula: y ~ (w1 + w2) * a <environment: 0xae131d0e0>
 ```
 
 To fit the model to the data we use the `estimate` method
@@ -155,7 +155,7 @@ image(wnew, wnew, pr, col=viridisLite::viridis(64),
       xlab=expression(W[1]), ylab=expression(W[2]))
 ```
 
-<img src="man/figures/README-lrplot-1.png" width="50%" />
+<img src="man/figures/README-lrplot-1.png" alt="" width="70%" />
 
 Similarly, a Random Forest can be specified with
 
@@ -166,7 +166,7 @@ lr_rf <- learner_grf(y ~ w1 + w2 + a, num.trees = 500)
 Lists of models can also be constructed for different hyper-parameters
 with the `learner_expand_grid` function.
 
-### Cross-validation
+#### Cross-validation
 
 To assess the model generalization error we can perform $k$-fold
 cross-validation with the `cv` method
@@ -187,7 +187,7 @@ cv(mod, data = d, rep = 2, nfolds = 5) |> summary()
 #> rf  0.5684956 0.01659710 0.5453521 0.5953637
 ```
 
-### Ensembles (Super-Learner)
+#### Ensembles (Super-Learner)
 
 An ensemble learner (super-learner) can easily be constructed from lists
 of `learner` objects
@@ -203,7 +203,7 @@ sl
 #> 
 #> Estimate arguments: learners=<list>, nfolds=10, meta.learner=<function>, model.score=<function> 
 #> Predict arguments:   
-#> Formula: y ~ (w1 + w2) * a <environment: 0x15cf956c8> 
+#> Formula: y ~ (w1 + w2) * a <environment: 0xae131d0e0> 
 #> ─────────────────────────────────────
 #>         score     weight
 #> glm 0.5499084 0.03290729
@@ -217,9 +217,9 @@ image(wnew, wnew, pr, col=viridisLite::viridis(64),
       xlab=expression(W[1]), ylab=expression(W[2]))
 ```
 
-<img src="man/figures/README-lrsl_plot-1.png" width="50%" />
+<img src="man/figures/README-lrsl_plot-1.png" alt="" width="70%" />
 
-## Average Treatment Effects
+### Average Treatment Effects
 
 In the following we are interested in estimating the target parameter
 $\psi_a(P)
@@ -244,7 +244,7 @@ This suggests estimators based on outcome regression ($g$-computation)
 or inverse probability weighting. More generally, under the above
 assumption we can constructor a *one-step* estimator from the *Efficient
 Influence Function* combining these two
-$$ E\left[\frac{I(A=a)}{\Pi_a(W)}(Y-Q(W,A)) + Q(W,a)\right].$$  
+$$ E\left[\frac{I(A=a)}{\Pi_a(W)}(Y-Q(W,A)) + Q(W,a)\right].$$\
 In practice, this requires plugin estimates of both the outcome model,
 $Q(W,A) := E(Y\mid A, W)$, and of the treatment propensity model
 $\Pi_a(W) := P(A=a\mid W)$. The corresponding estimator is consistent
@@ -262,11 +262,11 @@ use the `cate` function to estimate the treatment effect
 ``` r
 a <- cate(response.model = lr_rf, treatment.model = prmod, data = d, nfolds = 5)
 a
-#>             Estimate Std.Err       2.5%   97.5%   P-value
-#> E[y(1)]      -0.1700 0.02628 -0.2214840 -0.1185 9.939e-11
-#> E[y(0)]       0.1483 0.07595 -0.0005763  0.2971 5.089e-02
-#> ───────────                                              
-#> (Intercept)  -0.3183 0.07996 -0.4749849 -0.1615 6.892e-05
+#>             Estimate Std.Err    2.5%   97.5%   P-value
+#> E[y(1)]      -0.1700 0.02628 -0.2215 -0.1185 9.939e-11
+#> E[y(0)]       0.1765 0.01272  0.1515  0.2014 9.034e-44
+#> ───────────                                           
+#> (Intercept)  -0.3464 0.02846 -0.4022 -0.2907 4.308e-34
 ```
 
 In the output we get estimates of both the mean potential outcomes and
@@ -275,21 +275,18 @@ the difference of those, the average treatment effect, given as the term
 
 ``` r
 summary(a)
-#> cate(response.model = lr_rf, treatment.model = prmod, data = d,
+#> cate(response.model = lr_rf, treatment.model = prmod, data = d, 
 #>     nfolds = 5)
 #> 
-#>             Estimate Std.Err       2.5%   97.5%   P-value
-#> E[y(1)]      -0.1700 0.02628 -0.2214840 -0.1185 9.939e-11
-#> E[y(0)]       0.1483 0.07595 -0.0005763  0.2971 5.089e-02
-#> ───────────                                              
-#> (Intercept)  -0.3183 0.07996 -0.4749849 -0.1615 6.892e-05
+#>             Estimate Std.Err    2.5%   97.5%   P-value
+#> E[y(1)]      -0.1700 0.02628 -0.2215 -0.1185 9.939e-11
+#> E[y(0)]       0.1765 0.01272  0.1515  0.2014 9.034e-44
+#> ───────────                                           
+#> (Intercept)  -0.3464 0.02846 -0.4022 -0.2907 4.308e-34
 #> 
 #> Average Treatment Effect:
 #>                       Estimate Std.Err    2.5%   97.5%   P-value
-#> [E[y(1)]] - [E[y(0)]]  -0.3183 0.08008 -0.4752 -0.1613 7.055e-05
-#> 
-#>  Null Hypothesis: 
-#>   [E[y(1)]] - [E[y(0)]] = 0
+#> [E[y(1)]] - [E[y(0)]]  -0.3464 0.02846 -0.4022 -0.2907 4.308e-34
 ```
 
 Here we use the `nfolds=5` argument to use 5-fold *cross-fitting* to
@@ -298,7 +295,7 @@ even though that the estimated influence function based on plugin
 estimates from the Random Forest does not necessarily lie in a
 $P$-Donsker class.
 
-# Project organization
+## Project organization
 
 We use the `dev` branch for development and the `main` branch for stable
 releases. All releases follow [semantic
@@ -307,7 +304,7 @@ versioning](https://semver.org/), are
 are reported in
 [NEWS.md](https://github.com/kkholst/targeted/blob/main/NEWS.md).
 
-# I Have a Question / I Want to Report a Bug
+## I Have a Question / I Want to Report a Bug
 
 If you want to ask questions, require help or clarification, or report a
 bug, we recommend to either contact a maintainer directly or the
@@ -320,7 +317,7 @@ following:
 
 We will then take care of the issue as soon as possible.
 
-# Contributing to `targeted`
+## Contributing to `targeted`
 
 All types of contributions are encouraged and valued. See the
 [CONTRIBUTING.md](https://github.com/kkholst/targeted/blob/main/CONTRIBUTING.md)
