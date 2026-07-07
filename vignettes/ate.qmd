@@ -81,13 +81,13 @@ specify parametric models for both the outcome regression and the propensity
 score:
 
 ```{r ate-parametric}
-fit <- cate(
+est <- cate(
   response.model = y ~ a * (w1 + w2),
   treatment.model = a ~ w1 + w2,
   cate.model = ~1,
   data = d
 )
-fit
+est
 ```
 
 The output shows estimates of the potential outcome means $E[Y(1)]$ and
@@ -112,14 +112,14 @@ With parametric models, cross-fitting is not strictly necessary but introduces
 no harm:
 
 ```{r ate-crossfit}
-fit_cf <- cate(
+est_cf <- cate(
   response.model = y ~ a * (w1 + w2),
   treatment.model = a ~ w1 + w2,
   cate.model = ~1,
   data = d,
   nfolds = 5
 )
-fit_cf
+est_cf
 ```
 
 ## Flexible nuisance models
@@ -135,7 +135,7 @@ score. Stratification (`stratify = TRUE`) fits separate outcome models for
 treated and untreated units:
 
 ```{r ate-gam}
-fit_gam <- cate(
+est_gam <- cate(
   response.model = learner_gam(y ~ s(w1) + s(w2)),
   treatment.model = learner_glm(a ~ w1 + w2, family = binomial),
   cate.model = ~1,
@@ -143,7 +143,7 @@ fit_gam <- cate(
   nfolds = 5,
   stratify = TRUE
 )
-fit_gam
+est_gam
 ```
 
 For even greater flexibility, an ensemble learner (superlearner) can combine
@@ -159,7 +159,7 @@ outcome_model <- learner_sl(
   nfolds = 5
 )
 
-fit_sl <- cate(
+est_sl <- cate(
   response.model = outcome_model,
   treatment.model = learner_glm(a ~ w1 + w2, family = binomial),
   cate.model = ~1,
@@ -167,7 +167,7 @@ fit_sl <- cate(
   nfolds = 5,
   stratify = TRUE
 )
-fit_sl
+est_sl
 ```
 
 # Binary outcome
@@ -198,14 +198,14 @@ db <- sim_binary(3000)
 ## Estimation
 
 ```{r ate-binary}
-fit_bin <- cate(
+est_bin <- cate(
   response.model = learner_glm(y ~ a * (w1 + w2), family = binomial),
   treatment.model = learner_glm(a ~ w1 + w2, family = binomial),
   cate.model = ~1,
   data = db,
   nfolds = 5
 )
-fit_bin
+est_bin
 ```
 
 The output shows the estimated marginal event probabilities $E[Y(1)]$ and
@@ -213,7 +213,7 @@ $E[Y(0)]$ and their difference (the risk difference). To obtain an odds ratio,
 we can transform the potential outcome estimates using `lava::estimate`:
 
 ```{r ate-or}
-or <- with(lava::estimate(fit_bin$estimate),
+or <- with(lava::estimate(est_bin$estimate),
            lava::logit(`E[y(1)]`) - lava::logit(`E[y(0)]`))
 merge(or, exp(or), labels = c("log(OR)", "OR"))
 ```
