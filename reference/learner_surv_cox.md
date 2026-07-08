@@ -26,7 +26,8 @@ learner_surv_cox(formula, info = "mets::phreg", learner.args = NULL, ...)
 
 - ...:
 
-  Additional arguments to lower level funtions
+  Additional arguments passed to lower-level functions (e.g.,
+  optimization controls).
 
 ## Value
 

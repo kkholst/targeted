@@ -118,6 +118,7 @@ m <- lava::lvm(y ~ a+x, a~x) |>
 d <- lava::sim(m, 1e3, seed=1)
 # (a <- ate(y~a|a*x|x, data=d))
 (a <- ate(y~a, nuisance=~a*x, propensity=~x, data = d))
+#> Warning: Not available for this class
 #>     Estimate Std.Err   2.5%  97.5%    P-value
 #> a=0   0.2302 0.05278 0.1268 0.3337  1.288e-05
 #> a=1   0.3148 0.05466 0.2077 0.4219  8.413e-09

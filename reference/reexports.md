@@ -8,7 +8,7 @@ to see their documentation.
   [`estimate()`](https://kkholst.github.io/lava/reference/estimate.default.html),
   [`IC()`](https://kkholst.github.io/lava/reference/IC.default.html),
   [`parameter()`](https://kkholst.github.io/lava/reference/internal.html),
-  [`score()`](https://kkholst.github.io/lava/reference/gof.html),
+  [`score()`](https://kkholst.github.io/lava/reference/score.html),
   [`sim()`](https://kkholst.github.io/lava/reference/sim.default.html)
 
 - survival:

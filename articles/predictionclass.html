@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Prediction model class (learner) • targeted</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="predictionclass_files/libs/quarto-html/popper.min.js"></script><script src="predictionclass_files/libs/quarto-html/tippy.umd.min.js"></script><link href="predictionclass_files/libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="predictionclass_files/libs/quarto-html/light-border.css" rel="stylesheet">
@@ -58,7 +58,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Prediction model class (<code>learner</code>)</h1>
 
       <p class="author">Klaus Kähler Holst, Benedikt Sommer</p>
-      <p class="date">2026-05-07</p>
+      <p class="date">2026-07-08</p>
 
       <small class="dont-index">Source: <a href="https://github.com/kkholst/targeted/blob/main/vignettes/predictionclass.qmd" class="external-link"><code>vignettes/predictionclass.qmd</code></a></small>
       <div class="d-none name"><code></code></div>
@@ -125,9 +125,9 @@ Predict arguments:
 Formula: y ~ age * bili
 ─────────────────────────────────────
           score    weight
-glm1 0.09767478 0.3327338
-glm2 0.10692852 0.1262905
-gam  0.09724746 0.5409757</code></pre>
+glm1 0.09808523 0.2767328
+glm2 0.10680633 0.1171093
+gam  0.09696203 0.6061579</code></pre>
 </div>
 </div>
 <p>Most constructors have additional arguments that impact the resulting model fit, ranging from the specification of a link function for generalized linear models to hyper hyperparameters of machine learning models. Arguments naturally vary between the constructors and are documented for each function (e.g. <code><a href="../reference/learner_gam.html">?learner_gam</a></code>). The implemented constructors only provide arguments for the most relevant parameters of the underlying fit function (<code><a href="https://rdrr.io/pkg/mgcv/man/gam.html" class="external-link">mgcv::gam</a></code> in case of <code>learner_gam</code>). As described in the documentation, the ellipsis argument (<code>...</code>) can be used to pass additional arguments to the fit function. However, in most situations this is rarely required.</p>
@@ -238,8 +238,8 @@ Formula: y ~ age + sex + bili </code></pre>
         )
       return(res)
     }
-&lt;bytecode: 0x55fabf9a14a0&gt;
-&lt;environment: 0x55fac4793080&gt;</code></pre>
+&lt;bytecode: 0x55e53e6adaa0&gt;
+&lt;environment: 0x55e53abacc38&gt;</code></pre>
 </div>
 </div>
 <p>Rare situations may arise where one wants to update the formula argument. This supported and implemented via the <code>update</code> method</p>
@@ -288,9 +288,9 @@ Formula: y ~ age + sex + bili </code></pre>
 
 5-fold cross-validation with 2 repetitions
 
-          mse       mae
-glm 0.1076744 0.2128858
-gam 0.0988547 0.1883206</code></pre>
+           mse       mae
+glm 0.10760016 0.2130529
+gam 0.09605659 0.1859371</code></pre>
 </div>
 </div>
 </section><section class="level2"><h3 id="prediction-filter">Prediction filter<a class="anchor" aria-label="anchor" href="#prediction-filter"></a>
@@ -445,8 +445,8 @@ Predict arguments:
 Formula: NULL
 ─────────────────────────────────────
         score    weight
-glm 0.1065147 0.7685246
-gam 0.1069013 0.2314754</code></pre>
+glm 0.1067381 0.4411309
+gam 0.1067092 0.5588691</code></pre>
 </div>
 </div>
 <p>In this case, all arguments provided to <code>lr$estimate</code> are joined together with the specified <code>estimate.args</code> and passed on to the defined estimate function (i.e. <code>superlearner</code>).</p>
@@ -488,7 +488,7 @@ gam 0.1069013 0.2314754</code></pre>
 <code class="sourceCode R"><span><span class="fu">targeted</span><span class="fu">:::</span><span class="va">weights.numeric</span></span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>function(object, ...) object
-&lt;bytecode: 0x55fac4c12880&gt;
+&lt;bytecode: 0x55e53fbe7b80&gt;
 &lt;environment: namespace:targeted&gt;</code></pre>
 </div>
 </div>
@@ -672,7 +672,7 @@ Coefficients:
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

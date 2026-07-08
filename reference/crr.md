@@ -99,7 +99,7 @@ if (require("SuperLearner",quietly=TRUE)) {
 #>     I(v^2), family = binomial), importance_model = learner_glm(D_ ~ 
 #>     v + I(v^2)), data = d, nfolds = 2, type = "dml2")
 #> 
-#>             Estimate Std.Err    2.5% 97.5%   P-value
-#> (Intercept)   1.1710 0.67906 -0.1599 2.502 8.462e-02
-#> v             0.9794 0.06828  0.8456 1.113 1.178e-46
+#>    Estimate Std.Err    2.5% 97.5%   P-value
+#> p1   1.1710 0.67906 -0.1599 2.502 8.462e-02
+#> p2   0.9794 0.06828  0.8456 1.113 1.178e-46
 ```
