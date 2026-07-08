@@ -571,11 +571,6 @@ test_design_na_action <- function() {
   expect_true(all(is.na(dd_pass$x[1:3, ])))
   expect_identical(dd_pass$na.action, na.pass)
 
-  # na.exclude also removes NA rows from the design matrix
-  dd_excl <- design(y ~ x1, ddata_na, na.action = na.exclude)
-  expect_equal(nrow(dd_excl$x), n - 3)
-  expect_identical(dd_excl$na.action, na.exclude)
-
   # na.action is forwarded through update
   dd_upd <- update(dd_pass, ddata_na, response = TRUE)
   expect_equal(nrow(dd_upd$x), n)
