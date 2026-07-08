@@ -40,7 +40,7 @@ jobs:
           r-version: ${{ matrix.config.r }}
           use-public-rspm: true
       - name: Install libpoppler-cpp-dev # required to install pdftools (R pkg)
-        run: sudo apt-get install libpoppler-cpp-dev
+        run: sudo apt-get install -y pandoc libcurl4-openssl-dev libharfbuzz-dev libfribidi-dev libpoppler-cpp-dev
 
       - uses: r-lib/actions/setup-r-dependencies@d3c5be51b12e724e68f33216ca3c148b66d5f0b6 # v2
         env:
