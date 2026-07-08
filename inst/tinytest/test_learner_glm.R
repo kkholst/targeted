@@ -78,3 +78,19 @@ test_binary_response <- function() {
   expect_equal(fitted(fit), lr$predict(d))
 }
 test_binary_response()
+
+test_known_issue_with_nse <- function() {
+  # test known issue with non-standard evaluations with stats::glm
+  fitfun <- function(formula, data, family = gaussian, ...) {
+    glm(formula, data = data, family = family, ...)
+  }
+  expect_error(fitfun(y ~ x1, data = d, weights = NULL))
+  reffit <- fitfun(y ~ x1, data = d)
+
+  lr <- learner_glm(y ~ x1, weights = NULL)
+  lr$estimate(d)
+  expect_equal(coef(reffit), coef(lr$fit))
+  # verify that weights argument is captured for estimate.args of learner obj
+  expect_null(lr$summary()$estimate.args[["weights"]])
+}
+test_known_issue_with_nse()
