@@ -13,6 +13,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
   slow-tests:
@@ -33,9 +34,6 @@ jobs:
           # targets).
           ref: ${{ github.event_name == 'schedule' && 'dev' || github.ref }}
 
-      - uses: r-lib/actions/setup-pandoc@v2
-      - uses: r-lib/actions/setup-tinytex@v2
-      - uses: quarto-dev/quarto-actions/setup@v2
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: 'release'
@@ -44,7 +42,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y pandoc libcurl4-openssl-dev libharfbuzz-dev libfribidi-dev
+          sudo apt-get install -y libcurl4-openssl-dev libharfbuzz-dev libfribidi-dev
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
@@ -57,3 +55,12 @@ jobs:
 
       - name: Run slow tests
         run: make test-slow
+
+      # - name: Open issue on failure
+      #   if: failure() && (github.event_name == 'schedule' || github.event_name == 'push')
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: |
+      #     gh issue create \
+      #       --title "Slow tests failed ($(date -u +%Y-%m-%d))" \
+      #       --body "The slow-tests workflow failed on \`${{ github.ref_name }}\`. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
