@@ -2,6 +2,7 @@
 
 Development version
 
+- adding `predict_filter` generator functions for experimental `predict.filter` argument of `learner`
 - removing deprecated ml_model
 - `learner_surv_cox`, `learner_surv_rf`, `cumhaz`
 - feature(superlearner): more robust metalearner (in case quadratic prog. fails)
