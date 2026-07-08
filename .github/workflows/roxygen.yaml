@@ -37,15 +37,12 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::devtools
+          dependencies: '"hard"'
 
-      - name: roxygen
+      - name: Regenerate roxygen docs and check for changes
         run: |
-          cp -r man .man
-          cp -r NAMESPACE .NAMESPACE
           make roxygen
-
-      - name: Check man pages
-        run: diff -r man .man
-
-      - name: Check NAMESPACE
-        run: diff -r NAMESPACE .NAMESPACE
+          # -N (intent-to-add) makes new, untracked man/ files visible to
+          # `git diff` so newly generated .Rd files also fail the check.
+          git add -A -N
+          git diff --exit-code
