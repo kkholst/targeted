@@ -8,9 +8,18 @@ on:
   push:
     branches: [main, deploy]
 
+# gh-pages deploy step (pkgdown::deploy_to_branch) needs write access.
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   r-cmd-check:
     runs-on: ${{ matrix.config.os }}
+    timeout-minutes: 60
 
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
 
@@ -37,7 +46,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get install -y pandoc libcurl4-openssl-dev libharfbuzz-dev libfribidi-dev libpoppler-cpp-dev
+          sudo apt-get update
+          sudo apt-get install -y pandoc libcurl4-openssl-dev libharfbuzz-dev libfribidi-dev
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:

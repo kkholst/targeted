@@ -23,10 +23,14 @@ on:
         description: 'Unique ID. You can leave this empty now.'
         type: string
 
+permissions:
+  contents: read
+
 jobs:
 
   setup:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     outputs:
       containers: ${{ steps.rhub-setup.outputs.containers }}
       platforms: ${{ steps.rhub-setup.outputs.platforms }}
@@ -43,6 +47,7 @@ jobs:
     if: ${{ needs.setup.outputs.containers != '[]' }}
     runs-on: ubuntu-latest
     name: ${{ matrix.config.label }}
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -70,6 +75,7 @@ jobs:
     if: ${{ needs.setup.outputs.platforms != '[]' }}
     runs-on: ${{ matrix.config.os }}
     name: ${{ matrix.config.label }}
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:

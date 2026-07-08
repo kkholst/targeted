@@ -5,9 +5,17 @@ on:
 
 name: check-roxygen
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check-roxygen:
     runs-on: ${{ matrix.config.os }}
+    timeout-minutes: 30
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
     strategy:
       matrix:
@@ -25,9 +33,6 @@ jobs:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
-
-      - name: Install libpoppler-cpp-dev
-        run: sudo apt-get install libpoppler-cpp-dev
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
