@@ -14,7 +14,8 @@ design(
   specials = NULL,
   specials.call = NULL,
   levels = NULL,
-  design.matrix = TRUE
+  design.matrix = TRUE,
+  na.action = na.omit
 )
 }
 \arguments{
@@ -42,6 +43,9 @@ to be assumed for each factor}
 \item{design.matrix}{(logical) if FALSE then only response and specials are
 returned. Otherwise, the design.matrix \code{x} is als part of the returned
 object.}
+
+\item{na.action}{(function) method to handle missing data
+(default: \code{na.omit})}
 }
 \value{
 An object of class 'design'
