@@ -234,7 +234,7 @@ design <- function(formula, data, ..., # nolint
   }
 
   if (design.matrix) {
-    x <- model.matrix(mf, data = mf)
+    x <- model.matrix(mf)
     if (!intercept && has_intercept) {
       has_intercept <- FALSE
       x <- x[, -1, drop = FALSE]
