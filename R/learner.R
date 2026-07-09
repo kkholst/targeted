@@ -11,6 +11,9 @@
 #' Regression: [learner_isoreg] \cr
 #' Classification: [learner_naivebayes] \cr
 #' Ensemble (super learner): [learner_sl]
+#'
+#' The following constructors for commonly used filters are available:
+#' [predict_filter_bound], [predict_filter_bound_dynamic]
 #' @param data data.frame
 #' @author Klaus Kähler Holst, Benedikt Sommer
 #' @examples
@@ -83,17 +86,22 @@ learner <- R6::R6Class("learner", # nolint
     #' @param formula.keep.specials if TRUE then special terms defined by
     #' `specials` will be removed from the formula before it is being passed to
     #' the estimate print.function()
+    #' @param predict.filter function to post-process predictions. Useful to
+    #' bound predictions or handle NAs. The argument is experimental and its
+    #' behavior may change in the future.
     #' @param intercept (logical) include intercept in design matrix
-    initialize = function(formula = NULL,
-                          estimate,
-                          predict = stats::predict,
-                          predict.args = NULL,
-                          estimate.args = NULL,
-                          info = NULL,
-                          specials = c(),
-                          formula.keep.specials = FALSE,
-                          intercept = FALSE
-                         ) {
+    initialize = function(
+      formula = NULL,
+      estimate,
+      predict = stats::predict,
+      predict.args = NULL,
+      estimate.args = NULL,
+      info = NULL,
+      specials = c(),
+      formula.keep.specials = FALSE,
+      predict.filter = \(data) \(pred, newdata) pred,
+      intercept = FALSE
+    ) {
       estimate <- add_dots(estimate)
 
       private$des.args <- list(specials = specials, intercept = intercept)
@@ -101,6 +109,7 @@ learner <- R6::R6Class("learner", # nolint
       fit_data_arg <- "data" %in% formalArgs(estimate)
       private$init.estimate <- estimate
       private$init.predict <- predict
+      private$predict_filter_generator <- add_dots(predict.filter)
 
       private$estimate.args <- estimate.args
       no_formula <- is.null(formula)
@@ -196,10 +205,14 @@ learner <- R6::R6Class("learner", # nolint
 
     #' @description
     #' Estimation method
-    #' @param ... Additional arguments to estimation method
+    #' @param ... Additional arguments to estimation and prediction filter
+    #' generator function
     #' @param store Logical determining if estimated model should be
     #'   stored inside the class.
     estimate = function(data, ..., store = TRUE) {
+      private$predict_filter <- private$predict_filter_generator(
+        data
+      ) |> add_dots()
       res <- private$fitfun(data, ...)
       if (store) private$fitted <- res
       return(invisible(res))
@@ -208,12 +221,15 @@ learner <- R6::R6Class("learner", # nolint
     #' @description
     #' Prediction method
     #' @param newdata data.frame
-    #' @param ... Additional arguments to prediction method
+    #' @param ... Additional arguments to prediction method and prediction
+    #' filter function
     #' @param object Optional model fit object
     predict = function(newdata, ..., object = NULL) {
       if (is.null(object)) object <- private$fitted
       if (is.null(object)) stop("Provide estimated model object")
-      return(private$predfun(object, newdata, ...))
+
+      preds <- private$predfun(object, newdata, ...)
+      return(private$predict_filter(preds, newdata))
     },
 
     #' @description
@@ -224,11 +240,12 @@ learner <- R6::R6Class("learner", # nolint
         if (grepl("~", formula)) {
           formula <- as.formula(formula)
         } else { # string
-          st <- as.character(private$.formula)
-          if (length(st) == 3L) { # includes response
-            formula <- reformulate(st[3], formula)
+          if (length(private$.formula) == 3L) { # includes response
+            formula <- reformulate(
+              paste(deparse(private$.formula[[3]]), collapse = " "), formula)
           } else { # without response
-            formula <- reformulate(st[2], formula)
+            formula <- reformulate(
+              paste(deparse(private$.formula[[2]]), collapse = " "), formula)
           }
         }
       }
@@ -314,9 +331,16 @@ learner <- R6::R6Class("learner", # nolint
     #' update the formula.
     formula = function() {
       private$.formula
-    }
+    },
+    #' @field predict.filter Return instantiated prediction filter function
+    predict.filter = function() private$predict_filter,
+    #' @field predict.filter.generator Return prediction filter generator
+    #' function
+    predict.filter.generator = function() private$predict_filter_generator
   ),
   private = list(
+    predict_filter = NULL,
+    predict_filter_generator = NULL,
     # @field des.args Arguments for targeted::design
     des.args = NULL,
     # @field estimate.args Arguments for estimate method
@@ -453,55 +477,5 @@ print.summarized_learner <- function(x, ...) {
     format_fit_predict_args(x$predict.args),
     "\nspecials:", paste(x$specials, collapse = ", "),
     "\n"
-  )
-}
-
-#' @title R6 class for prediction models
-#' @description Replaced by [learner]
-#' @export
-ml_model <- R6Class("ml_model",
-  inherit = learner,
-  public = list(
-    #' @description Create a new prediction model object
-    #' @param ... deprecated
-    initialize = function(...) {
-      rlang::warn(paste0(
-        "targeted::ml_model is deprecated and will ",
-        "be removed in targeted v0.7.0. Use targeted::learner instead.")
-      )
-      super$initialize(...)
-    }
-  )
-)
-
-#' @export
-estimate.ml_model <- function(x, ...) {
-  rlang::warn(paste0(
-        "targeted::ml_model is deprecated and will ",
-        "be removed in targeted v0.7.0. Use targeted::learner instead.")
-  )
-  return(x$estimate(...))
-}
-
-#' @export
-predict.ml_model <- function(object, ...) {
-  rlang::warn(paste0(
-        "targeted::ml_model is deprecated and will ",
-        "be removed in targeted v0.7.0. Use targeted::learner instead.")
-  )
-  return(object$predict(...))
-}
-
-#' ML model
-#'
-#' Wrapper for ml_model
-#' @export
-#' @param formula formula
-#' @param model model (sl, rf, pf, glm, ...)
-#' @param ... additional arguments to model object
-ML <- function(formula, model="glm", ...) {
-  stop(
-    "targeted::ML has been removed in targeted 0.6. ",
-    "Please use the targeted::learner_ functions instead."
   )
 }

@@ -8,7 +8,7 @@ procfold <- function(a, fold,
                      ...) {
   qmod <- response.model$clone(deep = TRUE)
   pmod <- treatment.model$clone(deep = TRUE)
-  newf <- reformulate(as.character(pmod$formula)[[3]],
+  newf <- reformulate(paste(deparse(pmod$formula[[3]]), collapse = " "),
                       outcome_level(treatment_var, a))
   pmod$update(newf)
   val <- list(est_nuisance_fold(
@@ -345,7 +345,7 @@ cate <- function(response.model, # nolint
   pmod <- treatment.model$clone(deep = TRUE)
   for (i in seq_along(contrast)) {
     newf <- reformulate(
-      as.character(pmod$formula)[[3]],
+      paste(deparse(pmod$formula[[3]]), collapse = " "),
       outcome_level(treatment_var, contrast[i])
     )
     pmod$update(newf)
@@ -370,6 +370,26 @@ cate <- function(response.model, # nolint
     data = val # (y, a, p, q)
   )
   class(res) <- c("cate.targeted", "targeted")
+  if (any(mapply(\(x) any(is.na(x)), val$q))) {
+    warning(
+      "NAs detect in the predictions of the response.model.",
+      " Returning a cate object with an blanked estimate field.",
+      " Inspect the data$q field of the returned object for more information."
+    )
+    res$estimate <- lava::estimate(coef = NA, vcov = NULL)
+    return(res)
+  }
+  if (any(mapply(\(x) any(is.na(x)), val$p))) {
+    warning(
+      "NAs detect in the predictions of the treatment.model.",
+      " Returning a cate object with an blanked estimate field.",
+      " Inspect the data$q field of the returned object for more information."
+    )
+    # return object because update method fails when val$p contains NAs and
+    # the error message begin cast does not inform the user about the NAs
+    res$estimate <- lava::estimate(coef = NA, vcov = NULL)
+    return(res)
+  }
   res <- update(res,
                 cate.model = cate.model,
                 data = data,
@@ -405,7 +425,7 @@ cate_est <- function(y, # response vector
         inherits(treatment.model, "learner_glm")) {
       pmod <- treatment.model$clone(deep = TRUE)
       newf <- reformulate(
-        as.character(pmod$formula)[[3]],
+        paste(deparse(pmod$formula[[3]]), collapse = " "),
         outcome_level(treatment_var, contrast[i])
       )
       pmod$update(newf)
@@ -489,7 +509,7 @@ update.cate.targeted <- function(object,
                                  var.type = "IC",
                                  second.order = TRUE, ...) {
 
-  desA <- design(cate.model, data, intercept = TRUE, rm_envir = FALSE)
+  desA <- design(cate.model, data, intercept = TRUE, rm.envir = FALSE)
   if (length(object$data$y) != nrow(desA$x)) {
     stop("Not same data as the `cate` object")
   }

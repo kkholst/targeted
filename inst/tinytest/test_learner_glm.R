@@ -20,7 +20,7 @@ simcount <- function(n = 5e2) {
 }
 dcount <- simcount()
 
-test_learner_glm <- function() {
+test_continuous_response <- function() {
   # basic check that default arguments for learner_glm perform linear
   # regression
   fit_ref <- glm(y ~ x1, data = d)
@@ -41,8 +41,8 @@ test_learner_glm <- function() {
   # predictions can be generated on link scale
   expect_equal(lr$predict(newd, type = "link"), predict(fit_ref, newd))
 
-  # arguments for predict methods can be passed to ml_model in learner_glm
-  # call
+  # arguments for predict methods can be passed to learner constructor in
+  # learner_glm call
   lr <- learner_glm(y ~ x + offset(log(w)), family = poisson,
     learner.args = list(predict.args = list(type = "link")),
   )
@@ -65,4 +65,32 @@ test_learner_glm <- function() {
   # predict method also works as expected
   expect_equal(lr$predict(newd), predict(fit_ref, newd, type = "response"))
 }
-test_learner_glm()
+test_continuous_response()
+
+test_binary_response <- function() {
+  # verifies that the output formats of predict.glm and
+  # learner_glm()$predict align
+  fit <- glm(yb ~ x1, family = binomial, data = d)
+
+  lr <- learner_glm(yb ~ x1, family = binomial)
+  lr$estimate(d)
+
+  expect_equal(fitted(fit), lr$predict(d))
+}
+test_binary_response()
+
+test_known_issue_with_nse <- function() {
+  # test known issue with non-standard evaluations with stats::glm
+  fitfun <- function(formula, data, family = gaussian, ...) {
+    glm(formula, data = data, family = family, ...)
+  }
+  expect_error(fitfun(y ~ x1, data = d, weights = NULL))
+  reffit <- fitfun(y ~ x1, data = d)
+
+  lr <- learner_glm(y ~ x1, weights = NULL)
+  lr$estimate(d)
+  expect_equal(coef(reffit), coef(lr$fit))
+  # verify that weights argument is captured for estimate.args of learner obj
+  expect_null(lr$summary()$estimate.args[["weights"]])
+}
+test_known_issue_with_nse()

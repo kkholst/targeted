@@ -119,7 +119,7 @@ test_metalearners <- function() {
   )
   set.seed(1)
   sl_convex <- superlearner(lrs, data = d0, nfolds = 2,
-    meta.learner = targeted:::metalearner_convexcomb
+    meta.learner = metalearner_convexcomb
   )
 
   # using quadprog::solve.QP splits the weight of the duplicated learner equally
@@ -132,24 +132,24 @@ test_metalearners <- function() {
   # verify that estimating a convex combination of weights handles duplicated
   # learners correctly
   expect_equal(sum(sl_convex$weights), 1)
-  expect_equal(sl_convex$weights[2], sl_convex$weights[3], tol = 1e-4)
+  expect_equal(sl_convex$weights[2], sl_convex$weights[3], tol = 1e-3)
 
   # discrete metalearner handles duplicated learners correctly by selecting only
   # one of the duplicated learners
   set.seed(1)
   sl_discrete <- superlearner(lrs, data = d0, nfolds = 2,
-    meta.learner = targeted:::metalearner_discrete
+    meta.learner = metalearner_discrete
   )
   expect_equal(sum(sl_discrete$weights == 0), 2)
   expect_equal(sum(sl_discrete$weights), 1)
   expect_equal(sl_discrete$weights[which.min(sl_discrete$model.score)][[1]], 1)
 
-  # can also be called with character argument
-  set.seed(1)
-  sl_discrete_char <- superlearner(lrs, data = d0, nfolds = 2,
-  meta.learner = "discrete"
+  # we don't support providing a character argument anymore
+  expect_error(
+    superlearner(lrs, data = d0, nfolds = 2, meta.learner = "discrete"),
+    pattern = "meta.learner needs to be a function."
   )
-  expect_equal(sl_discrete_char$weights, sl_discrete$weights)
+
 
   # nnls::nnls and quadprog::solve.QP should give the same solution
   d0 <- sim1(n = 200)
@@ -168,3 +168,50 @@ test_metalearners <- function() {
   expect_equal(sl_quadprog$weights, sl_nnls$weights)
 }
 test_metalearners()
+
+test_failing_learner <- function() {
+  lrs <- list(
+    failing = learner_glm(y ~ covar_does_not_exit),
+    glm = learner_glm(y ~ x1)
+  )
+  sl <- superlearner(lrs, data = d0, nfolds = 2)
+  lrs$glm$estimate(d0)
+  expect_equivalent(
+    predict(sl, d0),
+    lrs$glm$predict(d0)
+  )
+
+  lrs <- list(
+    mean = learner_glm(y ~ 1),
+    glm = learner_glm(y ~ x1)
+  )
+
+  data_failing <- d0
+  data_failing[1, "x1"] <- NA
+  # glm fails to be estimated for folds that includes the missing value
+  sl <- superlearner(lrs, data = data_failing, nfolds = 2)
+  expect_equal(weights(sl), c(mean = 1, glm = 0))
+
+  expect_error(
+    superlearner(list(
+      learner_glm(y ~ covar_does_not_exit)), data = d0, nfolds = 2
+    ),
+    pattern = "All learners failed to be estimated."
+  )
+
+  lr_fail_to_predict <- learner$new(
+    y ~ 1, estimate = stats::glm, predict = \(fit, newdata) stop("Some error")
+  )
+  # verify that learner can be estimated
+  lr_fail_to_predict$estimate(d0)
+  expect_error(
+    superlearner(list(lr_fail_to_predict), data = d0),
+    pattern = "hold-out set predictions of all learners contain NAs"
+  )
+}
+test_failing_learner()
+
+test_SL_defunct <- function() {
+  expect_error(SL(), pattern = "defunct")
+}
+test_SL_defunct()

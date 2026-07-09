@@ -16,6 +16,9 @@ Regression and classification: \link{learner_glm}, \link{learner_gam}, \link{lea
 Regression: \link{learner_isoreg} \cr
 Classification: \link{learner_naivebayes} \cr
 Ensemble (super learner): \link{learner_sl}
+
+The following constructors for commonly used filters are available:
+\link{predict_filter_bound}, \link{predict_filter_bound_dynamic}
 }
 \examples{
 data(iris)
@@ -67,7 +70,7 @@ f3 <- learner$new(
 )
 
 ## ------------------------------------------------
-## Method `learner$summary`
+## Method `learner$summary()`
 ## ------------------------------------------------
 
 lr <- learner_glm(y ~ x, family = "nb")
@@ -81,46 +84,52 @@ print(lr_sum)
 Klaus Kähler Holst, Benedikt Sommer
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{info}}{Optional information/name of the model}
-}
-\if{html}{\out{</div>}}
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{info}}{Optional information/name of the model}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Active bindings}{
-\if{html}{\out{<div class="r6-active-bindings">}}
-\describe{
-\item{\code{clear}}{Remove fitted model from the learner object}
+  \if{html}{\out{<div class="r6-active-bindings">}}
+  \describe{
+    \item{\code{clear}}{Remove fitted model from the learner object}
 
-\item{\code{fit}}{Return estimated model object.}
+    \item{\code{fit}}{Return estimated model object.}
 
-\item{\code{formula}}{Return model formula. Use \link[=learner]{learner$update()} to
+    \item{\code{formula}}{Return model formula. Use \link[=learner]{learner$update()} to
 update the formula.}
-}
-\if{html}{\out{</div>}}
+
+    \item{\code{predict.filter}}{Return instantiated prediction filter function}
+
+    \item{\code{predict.filter.generator}}{Return prediction filter generator
+function}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-learner-new}{\code{learner$new()}}
-\item \href{#method-learner-estimate}{\code{learner$estimate()}}
-\item \href{#method-learner-predict}{\code{learner$predict()}}
-\item \href{#method-learner-update}{\code{learner$update()}}
-\item \href{#method-learner-print}{\code{learner$print()}}
-\item \href{#method-learner-summary}{\code{learner$summary()}}
-\item \href{#method-learner-response}{\code{learner$response()}}
-\item \href{#method-learner-design}{\code{learner$design()}}
-\item \href{#method-learner-opt}{\code{learner$opt()}}
-\item \href{#method-learner-clone}{\code{learner$clone()}}
-}
+  \itemize{
+    \item \href{#method-learner-initialize}{\code{learner$new()}}
+    \item \href{#method-learner-estimate}{\code{learner$estimate()}}
+    \item \href{#method-learner-predict}{\code{learner$predict()}}
+    \item \href{#method-learner-update}{\code{learner$update()}}
+    \item \href{#method-learner-print}{\code{learner$print()}}
+    \item \href{#method-learner-summary}{\code{learner$summary()}}
+    \item \href{#method-learner-response}{\code{learner$response()}}
+    \item \href{#method-learner-design}{\code{learner$design()}}
+    \item \href{#method-learner-opt}{\code{learner$opt()}}
+    \item \href{#method-learner-clone}{\code{learner$clone()}}
+  }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-learner-new"></a>}}
-\if{latex}{\out{\hypertarget{method-learner-new}{}}}
-\subsection{Method \code{new()}}{
-Create a new prediction model object
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{learner$new(
+\if{html}{\out{<a id="method-learner-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-learner-initialize}{}}}
+\subsection{\code{learner$new()}}{
+  Create a new prediction model object
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{learner$new(
   formula = NULL,
   estimate,
   predict = stats::predict,
@@ -129,122 +138,126 @@ Create a new prediction model object
   info = NULL,
   specials = c(),
   formula.keep.specials = FALSE,
+  predict.filter = function(data) function(pred, newdata) pred,
   intercept = FALSE
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{formula}}{formula specifying outcome and design matrix}
-
-\item{\code{estimate}}{function for fitting the model. This must be a function
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{formula}}{formula specifying outcome and design matrix}
+      \item{\code{estimate}}{function for fitting the model. This must be a function
 with response, 'y', and design matrix, 'x'. Alternatively, a function
 with a formula and data argument. See the examples section.}
-
-\item{\code{predict}}{prediction function (must be a function of model
+      \item{\code{predict}}{prediction function (must be a function of model
 object, 'object', and new design matrix, 'newdata')}
-
-\item{\code{predict.args}}{optional arguments to prediction function}
-
-\item{\code{estimate.args}}{optional arguments to estimate function}
-
-\item{\code{info}}{optional description of the model}
-
-\item{\code{specials}}{optional specials terms (weights, offset,
+      \item{\code{predict.args}}{optional arguments to prediction function}
+      \item{\code{estimate.args}}{optional arguments to estimate function}
+      \item{\code{info}}{optional description of the model}
+      \item{\code{specials}}{optional specials terms (weights, offset,
 id, subset, ...) passed on to \link{design}}
-
-\item{\code{formula.keep.specials}}{if TRUE then special terms defined by
+      \item{\code{formula.keep.specials}}{if TRUE then special terms defined by
 \code{specials} will be removed from the formula before it is being passed to
 the estimate print.function()}
+      \item{\code{predict.filter}}{function to post-process predictions. Useful to
+bound predictions or handle NAs. The argument is experimental and its
+behavior may change in the future.}
+      \item{\code{intercept}}{(logical) include intercept in design matrix}
+    }
+    \if{html}{\out{</div>}}
+  }
+}
 
-\item{\code{intercept}}{(logical) include intercept in design matrix}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-learner-estimate"></a>}}
 \if{latex}{\out{\hypertarget{method-learner-estimate}{}}}
-\subsection{Method \code{estimate()}}{
-Estimation method
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{learner$estimate(data, ..., store = TRUE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{data}}{data.frame}
-
-\item{\code{...}}{Additional arguments to estimation method}
-
-\item{\code{store}}{Logical determining if estimated model should be
+\subsection{\code{learner$estimate()}}{
+  Estimation method
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{learner$estimate(data, ..., store = TRUE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{data}}{data.frame}
+      \item{\code{...}}{Additional arguments to estimation and prediction filter
+generator function}
+      \item{\code{store}}{Logical determining if estimated model should be
 stored inside the class.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
-\if{html}{\out{</div>}}
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-learner-predict"></a>}}
 \if{latex}{\out{\hypertarget{method-learner-predict}{}}}
-\subsection{Method \code{predict()}}{
-Prediction method
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{learner$predict(newdata, ..., object = NULL)}\if{html}{\out{</div>}}
+\subsection{\code{learner$predict()}}{
+  Prediction method
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{learner$predict(newdata, ..., object = NULL)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{newdata}}{data.frame}
+      \item{\code{...}}{Additional arguments to prediction method and prediction
+filter function}
+      \item{\code{object}}{Optional model fit object}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{newdata}}{data.frame}
-
-\item{\code{...}}{Additional arguments to prediction method}
-
-\item{\code{object}}{Optional model fit object}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-learner-update"></a>}}
 \if{latex}{\out{\hypertarget{method-learner-update}{}}}
-\subsection{Method \code{update()}}{
-Update formula
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{learner$update(formula)}\if{html}{\out{</div>}}
+\subsection{\code{learner$update()}}{
+  Update formula
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{learner$update(formula)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{formula}}{formula or character which defines the new response}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{formula}}{formula or character which defines the new response}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-learner-print"></a>}}
 \if{latex}{\out{\hypertarget{method-learner-print}{}}}
-\subsection{Method \code{print()}}{
-Print method
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{learner$print()}\if{html}{\out{</div>}}
+\subsection{\code{learner$print()}}{
+  Print method
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{learner$print()}
+    \if{html}{\out{</div>}}
+  }
 }
 
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-learner-summary"></a>}}
 \if{latex}{\out{\hypertarget{method-learner-summary}{}}}
-\subsection{Method \code{summary()}}{
-Summary method to provide more extensive information than
+\subsection{\code{learner$summary()}}{
+  Summary method to provide more extensive information than
 \link[=learner]{learner$print()}.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{learner$summary()}\if{html}{\out{</div>}}
-}
-
-\subsection{Returns}{
-summarized_learner object, which is a list with the following
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{learner$summary()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    summarized_learner object, which is a list with the following
 elements:
 \describe{
 \item{info}{description of the learner}
@@ -256,94 +269,98 @@ elements:
 \item{specials}{provided special terms}
 \item{intercept}{include intercept in design matrix}
 }
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{lr <- learner_glm(y ~ x, family = "nb")
+  }
+  \subsection{Examples}{
+    \if{html}{\out{<div class="r example copy">}}
+    \preformatted{lr <- learner_glm(y ~ x, family = "nb")
 lr$summary()
 
 lr_sum <- lr$summary() # store returned summary in new object
 names(lr_sum)
 print(lr_sum)
 }
-\if{html}{\out{</div>}}
-
+    \if{html}{\out{</div>}}
+  }
 }
 
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-learner-response"></a>}}
 \if{latex}{\out{\hypertarget{method-learner-response}{}}}
-\subsection{Method \code{response()}}{
-Extract response from data
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{learner$response(data, eval = TRUE, ...)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{data}}{data.frame}
-
-\item{\code{eval}}{when FALSE return the untransformed outcome
+\subsection{\code{learner$response()}}{
+  Extract response from data
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{learner$response(data, eval = TRUE, ...)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{data}}{data.frame}
+      \item{\code{eval}}{when FALSE return the untransformed outcome
 (i.e., return 'a' if formula defined as I(a==1) ~ ...)}
+      \item{\code{...}}{additional arguments to \link{design}}
+    }
+    \if{html}{\out{</div>}}
+  }
+}
 
-\item{\code{...}}{additional arguments to \link{design}}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-learner-design"></a>}}
 \if{latex}{\out{\hypertarget{method-learner-design}{}}}
-\subsection{Method \code{design()}}{
-Generate \link{design} object (design matrix and response) from data
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{learner$design(data, ...)}\if{html}{\out{</div>}}
+\subsection{\code{learner$design()}}{
+  Generate \link{design} object (design matrix and response) from data
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{learner$design(data, ...)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{data}}{data.frame}
+      \item{\code{...}}{additional arguments to \link{design}}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{data}}{data.frame}
-
-\item{\code{...}}{additional arguments to \link{design}}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-learner-opt"></a>}}
 \if{latex}{\out{\hypertarget{method-learner-opt}{}}}
-\subsection{Method \code{opt()}}{
-Get options
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{learner$opt(arg)}\if{html}{\out{</div>}}
+\subsection{\code{learner$opt()}}{
+  Get options
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{learner$opt(arg)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{arg}}{name of option to get value of}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{arg}}{name of option to get value of}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-learner-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-learner-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{learner$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{learner$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{learner$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

@@ -158,6 +158,35 @@ test_predict <- function() {
 }
 test_predict()
 
+test_predict_s3 <- function() {
+  m <- learner$new(
+    formula = y ~ x + offset(w), estimate = glm,
+    estimate.args = list(family = poisson)
+  )
+  m$estimate(ddata_count)
+  expect_equal(
+    m$predict(ddata_count),
+    predict(m, ddata_count)
+  )
+
+  expect_equal(
+    m$predict(ddata_count, type = "response"),
+    predict(m, ddata_count, type = "response")
+  )
+}
+test_predict_s3()
+
+test_estimate_s3 <- function() {
+  m <- learner$new(
+    formula = y ~ x + offset(w), estimate = glm,
+    estimate.args = list(family = poisson)
+  )
+  expect_null(m$fit)
+  estimate(m, ddata_count)
+  expect_true(inherits(m$fit, "glm"))
+}
+test_estimate_s3()
+
 test_design <- function() {
   m <- learner$new(formula = y ~ x1 + x2, estimate = glm.fit, intercept = TRUE)
   m$estimate(ddata)
@@ -266,18 +295,6 @@ test_summary <- function() {
 }
 test_summary()
 
-test_ml_model <- function() {
-  lr <- learner$new(formula = y ~ -1 + x1 + x2, estimate = glm)
-  expect_warning(
-    ml <- ml_model$new(formula = y ~ -1 + x1 + x2, estimate = glm),
-    pattern = "targeted::ml_model is deprecated"
-  )
-  lr$estimate(ddata)
-  ml$estimate(ddata)
-  expect_equal(coef(lr$fit), coef(ml$fit))
-}
-test_ml_model()
-
 test_specials <- function() {
   ## Here we test 'specials'
   n <- 200
@@ -326,8 +343,46 @@ test_specials <- function() {
   expect_true(inherits(lr$fit[[2]], "lm"))
   f <- formula(lr$fit[[1]])
   # strata in original formula
-  expect_true(grepl("strata", as.character(lr$formula)[3]))
+  expect_true(grepl("strata", paste(deparse(lr$formula[[3]]), collapse = " ")))
   # but not in fitted model formula
-  expect_true(!grepl("strata", as.character(f)[3]))
+  expect_true(!grepl("strata", paste(deparse(f[[3]]), collapse = " ")))
 }
 test_specials()
+
+test_prediction_filter <- function() {
+  filter_bound <- function(data) {
+    function(pred, newdata, thresh = 0, bound = 0) {
+      pred[pred > thresh] <- bound
+      pred
+    }
+  }
+
+  lr <- learner_glm(y ~ x1 + x2,
+    learner.args = list(predict.filter = filter_bound)
+  )
+  lr$estimate(ddata)
+
+  expect_equal(max(lr$predict(ddata)), 0)
+
+  # arguments are by the design of learner$predict not passed on to filter
+  expect_equal(max(lr$predict(ddata, bound = 0.5)), 0)
+
+  filter_bound_estimation <- function(data) {
+    bound <- max(data$y)
+    function(pred, newdata, thresh = 0) {
+      pred[pred > thresh] <- bound
+      pred
+    }
+  }
+
+  lr <- learner_glm(y ~ x1 + x2,
+    learner.args = list(predict.filter = filter_bound_estimation)
+  )
+  lr$estimate(ddata)
+
+  expect_equal(
+    lr$predict(data.frame(x1 = 1e6, x2 = 1e6))[[1]],
+    max(ddata$y)
+  )
+}
+test_prediction_filter()
