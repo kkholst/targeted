@@ -1,15 +1,93 @@
 library("tinytest")
 
-test_moi_nfolds <- function() {
-  ## simulate a small dataset with missing outcomes
-  set.seed(42)
-  n <- 200
+## gaussian missing-outcome sim; columns (y, a, x).
+sim_missing <- function(n) {
   x <- rnorm(n)
   a <- rbinom(n, 1, 0.5)
   y <- 1 + a + x + rnorm(n)
   delta <- rbinom(n, 1, lava::expit(1 + x))
+  data.frame(y = ifelse(delta == 1, y, NA), a = a, x = x)
+}
+
+## gaussian missing-outcome sim with an id column; columns (id, a, x, y).
+sim_missing_id <- function(n) {
+  d <- data.frame(id = seq_len(n), a = rbinom(n, 1, 0.5), x = rnorm(n))
+  d$y <- 1 + d$a + d$x + rnorm(n)
+  delta <- rbinom(n, 1, lava::expit(1 + d$x))
+  d$y <- ifelse(delta == 1, d$y, NA)
+  d
+}
+
+## post-randomization sim; columns (id, y, z, a, x). `w` is an unmeasured
+## baseline covariate, `x` a baseline covariate, `a` the treatment, and `z`
+## a post-randomization variable. binary = TRUE gives a binomial outcome,
+## otherwise a gaussian outcome.
+sim_complex <- function(n, binary = FALSE) {
+  w <- rnorm(n)
+  x <- rnorm(n) - 0.5 * w
+  a <- rbinom(n, 1, 0.5)
+  z <- x + a * w^2 + (1 - a) * sin(w) + rnorm(n)
+  delta <- rbinom(n = n, size = 1, prob = lava::expit(2 + z))
+  if (binary) {
+    prob <- lava::expit(1 + a + x - a * x + w + a * w + z)
+    y <- rbinom(n = n, size = 1, prob = prob)
+  } else {
+    y <- 1 + a + x - a * x + w + a * w + z + rnorm(n)
+  }
   y <- ifelse(delta == 1, y, NA)
-  d <- data.frame(y = y, a = a, x = x)
+  data.frame(id = n:1, y = y, z = z, a = a, x = x)
+}
+
+## Analytic influence-function reference for E[U(X,A,Z;theta)|A=a, Delta=0],
+## decomposed as IC1 (missing-outcome plug-in) + IC2 (imputation-coefficient
+## uncertainty). `imp_mod` is a learner_glm; it is
+## estimated here on the full data (weights encode the subset).
+ic_reference <- function(data, delta, imp_mod) {
+  imp_mod$estimate(data = data)
+  pred <- imp_mod$predict(newdata = data, type = "response")
+  design_matrix <- imp_mod$design(data = data,
+                                  intercept = TRUE,
+                                  response = FALSE)$x
+  IC_epsilon <- IC(imp_mod$fit)
+  fam <- family(imp_mod$fit)
+  if (fam$family == "binomial" && fam$link == "logit") {
+    nabla <- pred * (1 - pred)
+  } else if (fam$family == "gaussian" && fam$link == "identity") {
+    nabla <- 1
+  } else {
+    stop(sprintf("Unsupported family/link combination: family='%s', link='%s'. Supported combinations are: binomial/logit, gaussian/identity", # nolint
+                 fam$family, fam$link))
+  }
+  nabla <- nabla * design_matrix
+
+  A <- data$a
+  id <- data$id
+  fun <- function(a) {
+    g <- mean(A == a)
+    S <- mean((delta == 1)[A == a])
+
+    ## plug-in estimate
+    est <- mean(pred[delta == 0 & A == a])
+
+    IC1 <- (A == a) * (delta == 0) /
+      (g * (1 - S)) * (pred - est)
+
+    IC2 <- t(colMeans(nabla[A == a & delta == 0, ]) %*%
+             t(IC_epsilon))
+
+    estimate(coef = est,
+             IC = IC1 + IC2,
+             id = id,
+             labels = paste0("E[u(", a, ")|d=0]"))
+  }
+  do.call("merge", lapply(c(1, 0), fun))
+}
+
+test_moi_nfolds <- function() {
+  ## simulate a small dataset with missing outcomes
+  set.seed(42)
+  n <- 200
+  d <- sim_missing(n)
 
   ## default (no cross-fitting)
   res1 <- moi(
@@ -24,7 +102,6 @@ test_moi_nfolds <- function() {
   expect_true(all(is.finite(coef(res1))))
 
   ## integer nfolds: same partition reused for both internal cate() calls.
-  ## Use return.all = TRUE to inspect intermediate components when needed.
   res5 <- moi(
     data = d,
     response.model = learner_glm(y ~ a + x),
@@ -58,13 +135,7 @@ test_moi_nfolds()
 test_moi_cate_passthrough <- function() {
   ## simulate a small dataset with missing outcomes
   set.seed(42)
-  n <- 200
-  x <- rnorm(n)
-  a <- rbinom(n, 1, 0.5)
-  y <- 1 + a + x + rnorm(n)
-  delta <- rbinom(n, 1, lava::expit(1 + x))
-  y <- ifelse(delta == 1, y, NA)
-  d <- data.frame(y = y, a = a, x = x)
+  d <- sim_missing(200)
 
   ## exercise silent / stratify / second.order forwarding to cate().
   ## mc.cores left at NULL default to keep the test CRAN-friendly.
@@ -89,13 +160,7 @@ test_moi_cate_passthrough()
 
 test_moi_print_summary <- function() {
   set.seed(13)
-  n <- 300
-  x <- rnorm(n)
-  a <- rbinom(n, 1, 0.5)
-  y <- 1 + a + x + rnorm(n)
-  delta <- rbinom(n, 1, lava::expit(1 + x))
-  y <- ifelse(delta == 1, y, NA)
-  d <- data.frame(y = y, a = a, x = x)
+  d <- sim_missing(300)
 
   res <- moi(
     data = d,
@@ -142,77 +207,14 @@ test_moi_print_summary <- function() {
 test_moi_print_summary()
 
 test_moi_missing_IC <- function() {
-  simdata <- function(n, full = FALSE) {
-    w <- rnorm(n) # unmeasured baseline covariate
-    x <- rnorm(n) - 0.5 * w # baseline covariate
-    a <- rbinom(n, 1, 0.5)    # treatment
-    z <- x + a * w^2 + (1-a) * sin(w) + rnorm(n) # post randomization variable
-    delta <- rbinom(n = n, size = 1, prob = lava::expit(2 + z)) # non-missingness indicator
-    y <- 1 + a + x - a * x + w + a * w + z + rnorm(n)           # outcome
-    y <- ifelse(delta == 1, y, NA)
-    d <- data.frame(id = n:1, y = y, z = z, a = a, x = x)
-    if(full == TRUE) {
-      d <- cbind(d, w = w)
-    }
-    return(d)
-  }
   set.seed(1)
-  data <- simdata(1e2)
+  data <- sim_complex(1e2)
   delta <- !is.na(data$y)
 
   imp_mod <- learner_glm(y ~ a + x,
                          weights = as.numeric(!is.na(data$y)),
                          na.action = lava::na.pass0)
-  imp_mod$estimate(data = data)
-  pred <- imp_mod$predict(newdata = data, type = "response")
-  design_matrix <- imp_mod$design(data = data,
-                                    intercept = TRUE,
-                                    response = FALSE)$x
-  IC_epsilon <- IC(imp_mod$fit)
-  family <- family(imp_mod$fit)
-  link <- family$link
-  family <- family$family
-  if (family == "binomial" && link == "logit") {
-    nabla <- pred * (1 - pred)
-  } else if (family == "gaussian" && link == "identity") {
-    nabla <- 1
-  } else {
-    stop(sprintf("Unsupported family/link combination: family='%s', link='%s'. Supported combinations are: binomial/logit, gaussian/identity", # nolint
-                 family, link))
-  }
-  nabla <- nabla * design_matrix
-
-
-  A <- data$a
-  id <- data$id
-  fun <- function(a) {
-    newdata <- data
-
-    g <- mean(A == a)
-    S <- mean((delta == 1)[A == a])
-
-    ## plug-in estimate
-    est <- mean(pred[delta == 0 & A == a])
-
-    IC1 <- (A == a) * (delta == 0) /
-      (g * (1 - S)) * (pred - est)
-
-    IC2 <- t(colMeans(nabla[A == a & delta == 0, ]) %*%
-             t(IC_epsilon))
-
-    IC <- IC1 + IC2
-
-    out <- estimate(coef = est,
-                    IC = IC,
-                    id = id,
-                    labels = paste0("E[u(", a, ")|d=0]"))
-    return(out)
-  }
-  est_ref <- lapply(
-    c(1,0),
-    FUN = fun
-  )
-  est_ref <- do.call("merge", est_ref)
+  est_ref <- ic_reference(data, delta, imp_mod)
 
   moi_est <- targeted:::moi_missing(data = data,
                                     delta = delta,
@@ -230,78 +232,15 @@ test_moi_missing_IC <- function() {
 test_moi_missing_IC()
 
 test_moi_missing_IC_2 <- function() {
-  simdata <- function(n, full = FALSE) {
-    w <- rnorm(n) # unmeasured baseline covariate
-    x <- rnorm(n) - 0.5 * w # baseline covariate
-    a <- rbinom(n, 1, 0.5)    # treatment
-    z <- x + a * w^2 + (1-a) * sin(w) + rnorm(n) # post randomization variable
-    delta <- rbinom(n = n, size = 1, prob = lava::expit(2 + z)) # non-missingness indicator
-    prob <- lava::expit(1 + a + x - a * x + w + a * w + z)
-    y <- rbinom(n = n, size = 1, prob = prob) # outcome
-    y <- ifelse(delta == 1, y, NA)
-    d <- data.frame(id = n:1, y = y, z = z, a = a, x = x)
-    if(full == TRUE) {
-      d <- cbind(d, w = w)
-    }
-    return(d)
-  }
   set.seed(1)
-  data <- simdata(1e2)
+  data <- sim_complex(1e2, binary = TRUE)
   delta <- !is.na(data$y)
 
   imp_mod <- learner_glm(y ~ a + x,
                          family = binomial(),
                          weights = as.numeric(!is.na(data$y)),
                          na.action = lava::na.pass0)
-  imp_mod$estimate(data = data)
-  pred <- imp_mod$predict(newdata = data, type = "response")
-  design_matrix <- imp_mod$design(data = data,
-                                    intercept = TRUE,
-                                    response = FALSE)$x
-  IC_epsilon <- IC(imp_mod$fit)
-  family <- family(imp_mod$fit)
-  link <- family$link
-  family <- family$family
-  if (family == "binomial" && link == "logit") {
-    nabla <- pred * (1 - pred)
-  } else if (family == "gaussian" && link == "identity") {
-    nabla <- 1
-  } else {
-    stop(sprintf("Unsupported family/link combination: family='%s', link='%s'. Supported combinations are: binomial/logit, gaussian/identity", # nolint
-                 family, link))
-  }
-  nabla <- nabla * design_matrix
-
-  A <- data$a
-  id <- data$id
-  fun <- function(a) {
-    newdata <- data
-
-    g <- mean(A == a)
-    S <- mean((delta == 1)[A == a])
-
-    ## plug-in estimate
-    est <- mean(pred[delta == 0 & A == a])
-
-    IC1 <- (A == a) * (delta == 0) /
-      (g * (1 - S)) * (pred - est)
-
-    IC2 <- t(colMeans(nabla[A == a & delta == 0, ]) %*%
-             t(IC_epsilon))
-
-    IC <- IC1 + IC2
-
-    out <- estimate(coef = est,
-                    IC = IC,
-                    id = id,
-                    labels = paste0("E[u(", a, ")|d=0]"))
-    return(out)
-  }
-  est_ref <- lapply(
-    c(1,0),
-    FUN = fun
-  )
-  est_ref <- do.call("merge", est_ref)
+  est_ref <- ic_reference(data, delta, imp_mod)
 
   moi_est <- targeted:::moi_missing(data = data,
                                     delta = delta,
@@ -319,23 +258,8 @@ test_moi_missing_IC_2 <- function() {
 test_moi_missing_IC_2()
 
 test_moi_missing_IC_reference_lava <- function() {
-
-  simdata <- function(n, full = FALSE) {
-    w <- rnorm(n) # unmeasured baseline covariate
-    x <- rnorm(n) - 0.5 * w # baseline covariate
-    a <- rbinom(n, 1, 0.5)    # treatment
-    z <- x + a * w^2 + (1-a) * sin(w) + rnorm(n) # post randomization variable
-    delta <- rbinom(n = n, size = 1, prob = lava::expit(2 + z)) # non-missingness indicator
-    y <- 1 + a + x - a * x + w + a * w + z + rnorm(n)           # outcome
-    y <- ifelse(delta == 1, y, NA)
-    d <- data.frame(id = n:1, y = y, z = z, a = a, x = x)
-    if(full == TRUE) {
-      d <- cbind(d, w = w)
-    }
-    return(d)
-  }
   set.seed(1)
-  data <- simdata(1e2)
+  data <- sim_complex(1e2)
   delta <- !is.na(data$y)
 
   moi_est <- targeted:::moi_missing(data = data,
@@ -419,18 +343,9 @@ test_moi_missing_IC_reference_lava <- function() {
 test_moi_missing_IC_reference_lava()
 
 test_moi_treatment_model_validation <- function() {
-  ## Validates the hardened treatment.model input handling in moi():
-  ## only base R stats formulas with an intercept-only RHS are accepted.
+  ## Validates treatment.model input handling in moi():
   set.seed(1)
-  n <- 100
-  d <- data.frame(
-    id = seq_len(n),
-    a = rbinom(n, 1, 0.5),
-    x = rnorm(n)
-  )
-  d$y <- 1 + d$a + d$x + rnorm(n)
-  delta <- rbinom(n, 1, lava::expit(1 + d$x))
-  d$y <- ifelse(delta == 1, d$y, NA)
+  d <- sim_missing_id(100)
 
   args_common <- list(
     data = d,
@@ -492,14 +407,7 @@ test_moi_missing_weights <- function() {
   ## Verifies the merge logic for user-supplied weights x imputation.subset.
   set.seed(2)
   n <- 100
-  d <- data.frame(
-    id = seq_len(n),
-    a = rbinom(n, 1, 0.5),
-    x = rnorm(n)
-  )
-  d$y <- 1 + d$a + d$x + rnorm(n)
-  delta <- rbinom(n, 1, lava::expit(1 + d$x))
-  d$y <- ifelse(delta == 1, d$y, NA)
+  d <- sim_missing_id(n)
 
   ## (a) baseline: no user weights, subset only
   res_a <- targeted:::moi_missing(data = d, delta = !is.na(d$y), id = d$id,
@@ -746,16 +654,8 @@ test_moi_missing_NA_coef <- function() {
   ## numerically equivalent to running with the rank-deficient column
   ## removed (since an NA coef is functionally zero).
   set.seed(1)
-  n <- 100
-  data <- data.frame(
-    id = seq_len(n),
-    a = rbinom(n, 1, 0.5),
-    x = rnorm(n)
-  )
+  data <- sim_missing_id(100)
   data$x_dup <- data$x  # exact collinearity with `x`
-  data$y <- 1 + data$a + data$x + rnorm(n)
-  delta <- rbinom(n, 1, lava::expit(1 + data$x))
-  data$y <- ifelse(delta == 1, data$y, NA)
 
   ## sanity: confirm the underlying glm has a NA coef
   imp_fit <- glm(y ~ a + x + x_dup,
