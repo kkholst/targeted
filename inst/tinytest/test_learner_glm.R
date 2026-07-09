@@ -94,3 +94,52 @@ test_known_issue_with_nse <- function() {
   expect_null(lr$summary()$estimate.args[["weights"]])
 }
 test_known_issue_with_nse()
+
+test_fit_call_attribute <- function() {
+  # fit$call is rewritten to stay compact: `data`/`family` are stored as
+  # symbols rather than the fully-evaluated objects, so print(fit) does not
+  # dump the entire dataset
+
+  # --- stats::glm branch ---
+  lr <- learner_glm(y ~ x1, family = gaussian())
+  lr$estimate(d)
+  cl <- lr$fit$call
+  expect_true(is.call(cl))
+  expect_true(is.symbol(cl[["data"]])) # data kept as symbol
+  expect_equal(cl[["data"]], quote(data))
+
+  # the rewritten call is still evaluable and reproduces the model
+  data <- d
+  family <- gaussian()
+  refit <- eval(cl)
+  expect_equal(coef(refit), coef(lr$fit))
+
+  d$w <- runif(nrow(d))
+  lr <- learner_glm(y ~ x1 + weights(w), family = gaussian(),
+    learner.args = list(specials = "weights")
+  )
+  lr$estimate(d)
+}
+test_fit_call_attribute()
+
+test_fit_call_splices_dots <- function() {
+  # extra arguments passed through `...` are spliced into fit$call
+  lr <- learner_glm(y ~ x1, weights = rep(1, nrow(d)))
+  lr$estimate(d)
+  cl <- lr$fit$call
+  expect_true("weights" %in% names(cl))
+}
+test_fit_call_splices_dots()
+
+test_fit_call_compact_print <- function() {
+  # regression guard: the rewritten call must not embed the data frame, so
+  # printing the fit stays small even for larger datasets.
+  big <- sim1(n = 5e3)
+  lr <- learner_glm(y ~ x1)
+  lr$estimate(big)
+  # data argument is a symbol, so print(call) is a single short line
+  expect_true(is.symbol(lr$fit$call[["data"]]))
+  txt <- capture.output(print(lr$fit$call))
+  expect_true(length(txt) <= 2L)
+}
+test_fit_call_compact_print()

@@ -45,13 +45,29 @@ learner_glm <- function(formula, info = "glm", family = gaussian(),
     fitfun <- function(formula, data, family, ...) {
       # family is a "pseudo" argument to avoid "multiple local function
       # definitions for ‘fitfun’ with different formal arguments" warnings
-      args <- c(list(formula, data = data), list(...))
-      do.call(MASS::glm.nb, args) # use do.call to avoid issues with NSEs
+      dots <- list(...)
+      args <- c(list(formula, data = data), dots)
+      fit <- do.call(MASS::glm.nb, args) # use do.call to avoid issues with NSEs
+
+      fit$call <- bquote(
+      MASS::glm.nb(.(formula), data = data, ..(dots)),
+        splice = TRUE
+      )
+      fit
     }
   } else {
     fitfun <- function(formula, data, family, ...) {
-      args <- c(list(formula, data = data, family = family), list(...))
-      do.call(stats::glm, args)
+      dots <- list(...)
+      args <- c(list(formula, data = data, family = family), dots)
+      fit <- do.call(stats::glm, args)
+
+      # update call attributes to avoid verbose print statement of fit object
+      # due to data being an evaluated expression
+      fit$call <- bquote(
+      glm(.(formula), data = data, family = family, ..(dots)),
+        splice = TRUE
+      )
+      fit
     }
   }
 
