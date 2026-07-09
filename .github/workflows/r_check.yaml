@@ -8,9 +8,9 @@ on:
   push:
     branches: [main]
 
-# gh-pages deploy step (pkgdown::deploy_to_branch) needs write access.
+# Website deployment is handled separately by pkgdown.yaml.
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -55,7 +55,6 @@ jobs:
             any::rcmdcheck
             any::remotes
             any::covr
-            any::pkgdown
           needs: check
 
       - uses: r-lib/actions/check-r-package@d3c5be51b12e724e68f33216ca3c148b66d5f0b6 # v2
@@ -67,15 +66,6 @@ jobs:
       - name: Install package
         if: success() && (contains('refs/heads/main', github.ref) || contains('refs/heads/deploy', github.ref))
         run: make install
-
-      - name: Webpage deployment
-        if: >-
-          success() && github.ref == 'refs/heads/main'
-          && matrix.config.os == 'ubuntu-latest' && matrix.config.r == 'release'
-        run: |
-          git config --local user.name "$GITHUB_ACTOR"
-          git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
-          Rscript -e 'pkgdown::deploy_to_branch(new_process = FALSE)'
 
       - name: Code Coverage
         if: >-
