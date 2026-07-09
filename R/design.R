@@ -96,7 +96,7 @@ remove_terms <- function(formula, labels, data = NULL) {
 #' @param intercept (logical) If FALSE an intercept is not included in the
 #'   design matrix
 #' @param response (logical) if FALSE the response variable is dropped
-#' @param rm_envir Remove environment
+#' @param rm_envir Remove environment from terms attribute of returned object
 #' @param ... additional arguments (e.g, specials such weights, offsets, ...)
 #' @param specials character vector specifying functions in the formula that
 #'   should be marked as special in the [terms] object

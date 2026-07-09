@@ -30,7 +30,7 @@ design matrix}
 
 \item{response}{(logical) if FALSE the response variable is dropped}
 
-\item{rm_envir}{Remove environment}
+\item{rm_envir}{Remove environment from terms attribute of returned object}
 
 \item{specials}{character vector specifying functions in the formula that
 should be marked as special in the \link{terms} object}
