@@ -2,6 +2,8 @@
 
 Development version
 
+- `design` tolerates now `special` variables who are absent in `data`
+- rename `rm_envir` argument of `design` to `rm.envir`
 - adding `predict_filter` generator functions for experimental `predict.filter` argument of `learner`
 - removing deprecated ml_model
 - `learner_surv_cox`, `learner_surv_rf`, `cumhaz`
