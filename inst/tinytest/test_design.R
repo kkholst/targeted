@@ -577,3 +577,133 @@ test_design_na_action <- function() {
   expect_identical(dd_upd$na.action, na.pass)
 }
 test_design_na_action()
+
+# test tolerance of specials whose variables are absent from `data`
+test_design_specials_missing_var <- function() {
+  d1 <- ddata
+  d1$w <- runif(n)
+  # baseline: variable present -> special populated
+  f_orig <- "y ~ x1 + weights(w)"
+  dd <- design(formula(f_orig), d1, specials = "weights")
+  expect_equal(unname(dd$weights), d1$w)
+  expect_equal(colnames(dd$x), "x1")
+
+  # update with data lacking `w` -> weights slot becomes NULL, x still correct
+  d2 <- ddata # no `w`
+  dd_upd <- update(dd, d2, response = TRUE)
+  expect_true(
+    is.null(dd_upd$weights) &&
+    "weights" %in% names(dd_upd) && # slot exists
+    "weights" %in% dd_upd$specials # special variable still exist
+  )
+  expect_equal(colnames(dd_upd$x), "x1")
+  expect_equivalent(dd_upd$x[, "x1"], d2$x1)
+
+  # construction against data missing the special's variable also tolerated
+  dd2 <- design(y ~ x1 + weights(w), d2, specials = "weights")
+  expect_true(
+     is.null(dd2$weights) &&
+    "weights" %in% names(dd2) &&
+    "weights" %in% dd2$specials
+  )
+  expect_equal(colnames(dd2$x), "x1")
+
+  # two specials, only one droppable
+  d3 <- d1  # has x1, x2, w
+  dd3 <- design(y ~ x1 + offset(x2) + weights(w), d3,
+                specials = c("offset", "weights"))
+  expect_equivalent(unname(dd3$offset), d3$x2)
+  expect_equivalent(unname(dd3$weights), d3$w)
+  # drop only weights on update
+  d3b <- d3[, c("y", "x1", "x2")]
+  dd3b <- update(dd3, d3b, response = TRUE)
+  expect_true(is.null(dd3b$weights))
+  expect_equivalent(unname(dd3b$offset), d3b$x2)
+  expect_equal(colnames(dd3b$x), "x1")
+
+  # entire RHS is a droppable special -> zero-column design matrix
+  dd4 <- design(y ~ weights(w), d2, specials = "weights")
+  expect_true(is.null(dd4$weights))
+  expect_equal(ncol(dd4$x), 0)
+
+  # multi-arg special: any missing variable drops the whole special
+  dd5 <- design(y ~ x1 + stratify(x2, w), d2, specials = "stratify")
+  expect_true(is.null(dd5$stratify))
+  expect_equal(colnames(dd5$x), "x1")
+
+  # print() should not list a dropped special under "specials"
+  expect_stdout(print(dd_upd), "design matrix")
+  # (specifically: 'weights' should not appear in the specials section)
+  out <- capture.output(print(dd_upd))
+  expect_false(any(grepl("^ - weights", out)))
+
+  # dropped specials are resurrected when updating with data that contains
+  # the variable again
+  dd_res <- update(dd_upd, d1, response = TRUE)
+  expect_equal(unname(dd_res$weights), d1$w)
+  expect_equal(colnames(dd_res$x), "x1")
+
+  # also when the design was constructed against data missing the variable
+  dd2_res <- update(dd2, d1, response = TRUE)
+  expect_equal(unname(dd2_res$weights), d1$w)
+
+  # the original formula (incl. specials) is preserved across evaluations
+  expect_equal(deparse(dd$formula.original), f_orig)
+  expect_equal(deparse(dd_upd$formula.original), f_orig)
+  expect_equal(deparse(dd_res$formula.original), f_orig)
+  # while `formula` remains the specials-free formula
+  f_orig_wo_weights <- trimws(strsplit(f_orig, "\\+")[[1]][1])
+  expect_equal(deparse(dd$formula), f_orig_wo_weights)
+  expect_equal(deparse(dd_upd$formula), f_orig_wo_weights)
+
+  # two specials: dropped and restored through a round-trip
+  dd3_res <- update(dd3b, d3, response = TRUE)
+  expect_equivalent(unname(dd3_res$offset), d3$x2)
+  expect_equivalent(unname(dd3_res$weights), d3$w)
+}
+test_design_specials_missing_var()
+
+# unit tests for the internal helpers
+test_design_internal_helpers <- function() {
+  remove_terms <- targeted:::remove_terms
+  specials_unavailable <- targeted:::specials_unavailable
+
+  # remove a single term
+  expect_equal(deparse(remove_terms(y ~ x + weights(w), "weights(w)")),
+               "y ~ x")
+  # removing the only term collapses the rhs to an intercept
+  expect_equal(deparse(remove_terms(y ~ weights(w), "weights(w)")), "y ~ 1")
+  # explicitly removed intercept is preserved
+  expect_equal(deparse(remove_terms(y ~ -1 + x + weights(w), "weights(w)")),
+               "y ~ x - 1")
+  # multiple labels
+  expect_equal(
+    deparse(remove_terms(y ~ x + offset(z) + weights(w),
+                         c("offset(z)", "weights(w)"))),
+    "y ~ x"
+  )
+  # formula environment is preserved
+  e <- new.env()
+  f <- y ~ x + weights(w)
+  environment(f) <- e
+  expect_identical(environment(remove_terms(f, "weights(w)")), e)
+  # `.` on the rhs is expanded from data before removal
+  d <- data.frame(y = 1, x = 1, w = 1)
+  expect_equal(deparse(remove_terms(y ~ . - w + weights(w), "weights(w)",
+                                    data = d)),
+               "y ~ x")
+
+  # specials_unavailable: reports special terms with missing variables
+  tt <- terms(y ~ x + weights(w) + offset(z),
+              specials = c("weights", "offset"))
+  expect_equal(specials_unavailable(tt, data.frame(y = 1, x = 1)),
+               c("weights(w)", "offset(z)"))
+  expect_equal(specials_unavailable(tt, data.frame(y = 1, x = 1, w = 1)),
+               "offset(z)")
+  expect_equal(length(specials_unavailable(tt, data.frame(x = 1, w = 1, z = 1))),
+               0)
+  # no specials declared -> nothing to report
+  tt0 <- terms(y ~ x)
+  expect_equal(length(specials_unavailable(tt0, data.frame(x = 1))), 0)
+}
+test_design_internal_helpers()

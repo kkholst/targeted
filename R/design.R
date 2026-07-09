@@ -52,6 +52,43 @@ Specials <- function(formula, spec, split1 = ",", split2 = NULL, ...) {
   return(res)
 }
 
+# labels of special terms (e.g. "weights(w)") whose variables are not all
+# present in `data`
+specials_unavailable <- function(terms, data) {
+  pos <- unlist(attr(terms, "specials"))
+  if (length(pos) < 1) return(character(0))
+  labels <- rownames(attr(terms, "factors"))[pos]
+  unavailable <- vapply(labels, function(lab) {
+    vars <- all.vars(str2lang(lab))
+    # skip pathological cases (e.g. `.` inside a special) to avoid false drops
+    length(vars) > 0 && !("." %in% vars) && !all(vars %in% names(data))
+  }, logical(1))
+  return(labels[unavailable])
+}
+
+# remove terms (given by their labels) from a formula. The formula
+# environment is preserved and the right-hand side collapses to `1` when no
+# terms remain. The formula is reconstructed from its terms object, since
+# update(formula, . ~ . - label) cannot remove offset terms, which are
+# carried separately from the regular terms. `data` is only required for
+# formulas containing a `.` on the right-hand side
+remove_terms <- function(formula, labels, data = NULL) {
+  tt <- terms(formula, data = data)
+  vars <- attr(tt, "variables")
+  offset.labels <- vapply(
+    attr(tt, "offset"), function(i) deparse1(vars[[i + 1]]), character(1)
+  )
+  keep <- setdiff(c(attr(tt, "term.labels"), offset.labels), labels)
+  if (length(keep) < 1) keep <- "1"
+  response <- if (attr(tt, "response") == 1) vars[[2]] else NULL
+  f <- reformulate(keep,
+    response = response,
+    intercept = attr(tt, "intercept") == 1
+  )
+  environment(f) <- environment(formula)
+  return(f)
+}
+
 #' Extract design matrix from data.frame and formula
 #' @title Extract design matrix
 #' @param formula formula
@@ -59,7 +96,7 @@ Specials <- function(formula, spec, split1 = ",", split2 = NULL, ...) {
 #' @param intercept (logical) If FALSE an intercept is not included in the
 #'   design matrix
 #' @param response (logical) if FALSE the response variable is dropped
-#' @param rm_envir Remove environment
+#' @param rm_envir Remove environment from terms attribute of returned object
 #' @param ... additional arguments (e.g, specials such weights, offsets, ...)
 #' @param specials character vector specifying functions in the formula that
 #'   should be marked as special in the [terms] object
@@ -91,8 +128,38 @@ design <- function(formula, data, ..., # nolint
     "subset is not an allowed specials argument for targeted::design"
   )
   formulaenv <- environment(formula)
+
+  # Remember the user's un-stripped formula so future update.design() calls can
+  # re-extract specials if they become available again in new data.
+  # stats::formula() is the identity for formulas and converts a terms object
+  # into its formula (environment preserved in both cases).
+  formula.original <- stats::formula(formula)
+
   tt <- terms(formula, data = data, specials = specials)
+
+  # Drop specials whose variables are not available in `data`. This lets a
+  # design built with e.g. `y ~ x + weights(w)` be (re-)evaluated against data
+  # that lacks `w`: the special is silently omitted (its slot becomes NULL)
+  # instead of failing in the subsequent model.frame() call.
+  unavailable <- specials_unavailable(tt, data)
+  if (length(unavailable) > 0) {
+    formula <- remove_terms(formula, unavailable, data = data)
+    tt <- terms(formula, data = data, specials = specials)
+  }
+
   term.labels <- attr(tt, "term.labels") # predictors
+  sterm.list <- c()
+  if (length(specials) > 0) {
+    des <- attr(tt, "factors")
+    for (s in specials) {
+      sterm <- rownames(des)[attr(tt, "specials")[[s]]]
+      sterm.list <- c(sterm.list, sterm)
+    }
+    # predictors without the specials
+    term.labels <- setdiff(term.labels, unlist(sterm.list))
+    # remove special terms from formula
+    formula <- remove_terms(formula, sterm.list, data = data)
+  }
 
   if (response && inherits(
     try(model.frame(update(tt, ~1), data = data, na.action = na.action),
@@ -101,50 +168,14 @@ design <- function(formula, data, ..., # nolint
   )) { # response appears not to be in `data`
     response <- FALSE
   }
-  # delete response to generate design matrix when making predictions
-  if (!response) {
-    tt <- delete.response(tt)
-  }
-
-  sterm.list <- c()
-  if (length(specials) > 0) {
-    des <- attr(tt, "factors")
-    for (s in specials) {
-      sterm <- rownames(des)[attr(tt, "specials")[[s]]]
-      sterm.list <- c(sterm.list, sterm)
-    }
-    if (length(sterm.list) > 0) {
-      # create formula without specials
-      if ((nrow(attr(tt, "factors")) - attr(tt, "response")) ==
-        length(sterm.list)) {
-        # only specials on the rhs, remove everything
-        formula <- update(formula, ~1)
-      } else {
-        # predictors without the specials
-        term.labels <- setdiff(
-          term.labels,
-          unlist(sterm.list)
-        )
-        # formula <- update(tt, reformulate(term.labels))
-      }
-      # remove specials from formula
-      fst <- lava::trim(paste(deparse(formula), collapse = ""), all = TRUE)
-      for (s in sterm.list) {
-        fst <- gsub(
-          lava::trim(s, all = TRUE),
-          "", fst,
-          fixed = TRUE
-        )
-      }
-      fst <- gsub("[\\+]*$", "", fst) # remove potential any trailing '+'
-      formula <- as.formula(fst)
-      environment(formula) <- formulaenv
-    }
-  }
 
   formula0 <- formula
-  environment(formula0) <- formulaenv
-  if (!response) formula0 <- formula(delete.response(terms(formula)))
+  environment(formula0) <- formulaenv # preserve formula environment
+  if (!response) {
+    formula0 <- stats::formula(delete.response(terms(formula, data = data)))
+    # delete response to generate design matrix when making predictions
+    tt <- delete.response(tt)
+  }
 
   xlev <- levels
   xlev[["response_"]] <- NULL
@@ -251,6 +282,7 @@ design <- function(formula, data, ..., # nolint
   res <- c(
     list(
       formula = formula, # formula without specials
+      formula.original = formula.original, # user-provided formula (internal)
       terms = tt,
       term.labels = term.labels,
       levels = xlev,
@@ -273,7 +305,7 @@ update.design <- function(object, data = NULL, response = FALSE, levels, ...) {
   if (is.null(data)) data <- object$data
   if (missing(levels)) levels <- object$levels
   return(
-    design(object$terms,
+    design(object$formula.original,
       data = data,
       design.matrix = object$design.matrix,
       levels = levels,
