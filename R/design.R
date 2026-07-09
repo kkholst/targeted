@@ -147,8 +147,6 @@ design <- function(formula, data, ..., # nolint
     tt <- terms(formula, data = data, specials = specials)
   }
 
-  term.labels <- attr(tt, "term.labels") # predictors
-
   if (response && inherits(
     try(model.frame(update(tt, ~1), data = data, na.action = na.action),
         silent = TRUE),
@@ -161,6 +159,7 @@ design <- function(formula, data, ..., # nolint
     tt <- delete.response(tt)
   }
 
+  term.labels <- attr(tt, "term.labels") # predictors
   sterm.list <- c()
   if (length(specials) > 0) {
     des <- attr(tt, "factors")
@@ -168,12 +167,10 @@ design <- function(formula, data, ..., # nolint
       sterm <- rownames(des)[attr(tt, "specials")[[s]]]
       sterm.list <- c(sterm.list, sterm)
     }
-    if (length(sterm.list) > 0) {
-      # predictors without the specials
-      term.labels <- setdiff(term.labels, unlist(sterm.list))
-      # remove special terms from formula
-      formula <- remove_terms(formula, sterm.list, data = data)
-    }
+    # predictors without the specials
+    term.labels <- setdiff(term.labels, unlist(sterm.list))
+    # remove special terms from formula
+    formula <- remove_terms(formula, sterm.list, data = data)
   }
 
   formula0 <- formula
