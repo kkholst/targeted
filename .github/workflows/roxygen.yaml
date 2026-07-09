@@ -5,9 +5,17 @@ on:
 
 name: check-roxygen
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check-roxygen:
     runs-on: ${{ matrix.config.os }}
+    timeout-minutes: 30
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
     strategy:
       matrix:
@@ -19,28 +27,22 @@ jobs:
       R_KEEP_PKG_SOURCE: yes
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: r-lib/actions/setup-r@v2
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: r-lib/actions/setup-r@d3c5be51b12e724e68f33216ca3c148b66d5f0b6 # v2
         with:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
-      - name: Install libpoppler-cpp-dev
-        run: sudo apt-get install libpoppler-cpp-dev
-
-      - uses: r-lib/actions/setup-r-dependencies@v2
+      - uses: r-lib/actions/setup-r-dependencies@d3c5be51b12e724e68f33216ca3c148b66d5f0b6 # v2
         with:
           extra-packages: any::devtools
+          dependencies: '"hard"'
 
-      - name: roxygen
+      - name: Regenerate roxygen docs and check for changes
         run: |
-          cp -r man .man
-          cp -r NAMESPACE .NAMESPACE
           make roxygen
-
-      - name: Check man pages
-        run: diff -r man .man
-
-      - name: Check NAMESPACE
-        run: diff -r NAMESPACE .NAMESPACE
+          # -N (intent-to-add) makes new, untracked man/ files visible to
+          # `git diff` so newly generated .Rd files also fail the check.
+          git add -A -N
+          git diff --exit-code
