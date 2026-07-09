@@ -97,7 +97,7 @@ crr <- function(treatment,
   if (is.character(treatment)) {
     treatment <- as.formula(paste0(treatment, "~", 1))
   }
-  desA <- design(treatment, data, intercept=TRUE, rm_envir=FALSE)
+  desA <- design(treatment, data, intercept=TRUE, rm.envir=FALSE)
   if (inherits(response_model, "formula")) {
     response_model <- SL(response_model, ...)
   }
@@ -246,7 +246,7 @@ cate_link <- function(treatment,
   if (is.character(treatment)) {
     treatment <- as.formula(paste0(treatment, "~", 1))
   }
-  desA <- design(treatment, data, intercept=TRUE, rm_envir=FALSE)
+  desA <- design(treatment, data, intercept=TRUE, rm.envir=FALSE)
   if (inherits(response_model, "formula")) {
     response_model <- SL(response_model, ...)
   }

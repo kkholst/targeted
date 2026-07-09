@@ -46,8 +46,14 @@ test_design <- function() {
   # terms includes environment
   expect_true(".Environment" %in% names(attributes(dd$terms)))
   # environment is successfully removed from terms
-  dd <- design(y ~ x1, ddata, rm_envir = TRUE)
+  dd <- design(y ~ x1, ddata, rm.envir = TRUE)
   expect_false(".Environment" %in% names(attributes(dd$terms)))
+  # soft-deprecated `rm_envir` still works but warns
+  expect_warning(
+    dd2 <- design(y ~ x1, ddata, rm_envir = TRUE),
+    pattern = "deprecated"
+  )
+  expect_false(".Environment" %in% names(attributes(dd2$terms)))
 }
 test_design()
 

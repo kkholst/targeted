@@ -96,7 +96,8 @@ remove_terms <- function(formula, labels, data = NULL) {
 #' @param intercept (logical) If FALSE an intercept is not included in the
 #'   design matrix
 #' @param response (logical) if FALSE the response variable is dropped
-#' @param rm_envir Remove environment from terms attribute of returned object
+#' @param rm.envir (logical) Remove environment from terms attribute of
+#'   returned object
 #' @param ... additional arguments (e.g, specials such weights, offsets, ...)
 #' @param specials character vector specifying functions in the formula that
 #'   should be marked as special in the [terms] object
@@ -114,12 +115,22 @@ remove_terms <- function(formula, labels, data = NULL) {
 design <- function(formula, data, ..., # nolint
                    intercept = FALSE,
                    response = TRUE,
-                   rm_envir = FALSE,
+                   rm.envir = FALSE,
                    specials = NULL,
                    specials.call = NULL,
                    levels = NULL,
                    design.matrix = TRUE,
                    na.action = na.omit) {
+  # Soft-deprecation: `rm_envir` was renamed to `rm.envir`. When supplied it is
+  # now captured by `...`; intercept it, warn, and re-dispatch with the new
+  # name so it is not mistaken for a special.
+  mc <- match.call()
+  if ("rm_envir" %in% names(mc)) {
+    deprecate_arg_warn("rm_envir", "rm.envir", "design", "0.9.5")
+    mc[["rm.envir"]] <- mc[["rm_envir"]]
+    mc[["rm_envir"]] <- NULL
+    return(eval(mc, parent.frame()))
+  }
   if (inherits(data, c("data.table", "tbl_df"))) {
     data <- as.data.frame(data)
   }
@@ -275,7 +286,7 @@ design <- function(formula, data, ..., # nolint
     x <- NULL
   }
 
-  if (rm_envir) attr(tt, ".Environment") <- NULL
+  if (rm.envir) attr(tt, ".Environment") <- NULL
   if (is.null(specials.call)) specials.call <- dots
 
   xlev[["response_"]] <- levels[["response_"]]
