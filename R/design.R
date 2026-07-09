@@ -96,7 +96,7 @@ remove_terms <- function(formula, labels, data = NULL) {
 #' @param intercept (logical) If FALSE an intercept is not included in the
 #'   design matrix
 #' @param response (logical) if FALSE the response variable is dropped
-#' @param rm_envir Remove environment
+#' @param rm_envir Remove environment from terms attribute of returned object
 #' @param ... additional arguments (e.g, specials such weights, offsets, ...)
 #' @param specials character vector specifying functions in the formula that
 #'   should be marked as special in the [terms] object
@@ -148,6 +148,18 @@ design <- function(formula, data, ..., # nolint
   }
 
   term.labels <- attr(tt, "term.labels") # predictors
+  sterm.list <- c()
+  if (length(specials) > 0) {
+    des <- attr(tt, "factors")
+    for (s in specials) {
+      sterm <- rownames(des)[attr(tt, "specials")[[s]]]
+      sterm.list <- c(sterm.list, sterm)
+    }
+    # predictors without the specials
+    term.labels <- setdiff(term.labels, unlist(sterm.list))
+    # remove special terms from formula
+    formula <- remove_terms(formula, sterm.list, data = data)
+  }
 
   if (response && inherits(
     try(model.frame(update(tt, ~1), data = data, na.action = na.action),
@@ -156,30 +168,13 @@ design <- function(formula, data, ..., # nolint
   )) { # response appears not to be in `data`
     response <- FALSE
   }
-  # delete response to generate design matrix when making predictions
-  if (!response) {
-    tt <- delete.response(tt)
-  }
-
-  sterm.list <- c()
-  if (length(specials) > 0) {
-    des <- attr(tt, "factors")
-    for (s in specials) {
-      sterm <- rownames(des)[attr(tt, "specials")[[s]]]
-      sterm.list <- c(sterm.list, sterm)
-    }
-    if (length(sterm.list) > 0) {
-      # predictors without the specials
-      term.labels <- setdiff(term.labels, unlist(sterm.list))
-      # remove special terms from formula
-      formula <- remove_terms(formula, sterm.list, data = data)
-    }
-  }
 
   formula0 <- formula
   environment(formula0) <- formulaenv # preserve formula environment
   if (!response) {
     formula0 <- stats::formula(delete.response(terms(formula, data = data)))
+    # delete response to generate design matrix when making predictions
+    tt <- delete.response(tt)
   }
 
   xlev <- levels
