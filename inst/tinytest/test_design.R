@@ -583,20 +583,29 @@ test_design_specials_missing_var <- function() {
   d1 <- ddata
   d1$w <- runif(n)
   # baseline: variable present -> special populated
-  dd <- design(y ~ x1 + weights(w), d1, specials = "weights")
+  f_orig <- "y ~ x1 + weights(w)"
+  dd <- design(formula(f_orig), d1, specials = "weights")
   expect_equal(unname(dd$weights), d1$w)
   expect_equal(colnames(dd$x), "x1")
 
   # update with data lacking `w` -> weights slot becomes NULL, x still correct
   d2 <- ddata # no `w`
   dd_upd <- update(dd, d2, response = TRUE)
-  expect_true(is.null(dd_upd$weights))
+  expect_true(
+    is.null(dd_upd$weights) &&
+    "weights" %in% names(dd_upd) && # slot exists
+    "weights" %in% dd_upd$specials # special variable still exist
+  )
   expect_equal(colnames(dd_upd$x), "x1")
   expect_equivalent(dd_upd$x[, "x1"], d2$x1)
 
   # construction against data missing the special's variable also tolerated
   dd2 <- design(y ~ x1 + weights(w), d2, specials = "weights")
-  expect_true(is.null(dd2$weights))
+  expect_true(
+     is.null(dd2$weights) &&
+    "weights" %in% names(dd2) &&
+    "weights" %in% dd2$specials
+  )
   expect_equal(colnames(dd2$x), "x1")
 
   # two specials, only one droppable
@@ -639,13 +648,13 @@ test_design_specials_missing_var <- function() {
   expect_equal(unname(dd2_res$weights), d1$w)
 
   # the original formula (incl. specials) is preserved across evaluations
-  f_orig <- "y ~ x1 + weights(w)"
   expect_equal(deparse(dd$formula.original), f_orig)
   expect_equal(deparse(dd_upd$formula.original), f_orig)
   expect_equal(deparse(dd_res$formula.original), f_orig)
   # while `formula` remains the specials-free formula
-  expect_equal(deparse(dd$formula), "y ~ x1")
-  expect_equal(deparse(dd_upd$formula), "y ~ x1")
+  f_orig_wo_weights <- trimws(strsplit(f_orig, "\\+")[[1]][1])
+  expect_equal(deparse(dd$formula), f_orig_wo_weights)
+  expect_equal(deparse(dd_upd$formula), f_orig_wo_weights)
 
   # two specials: dropped and restored through a round-trip
   dd3_res <- update(dd3b, d3, response = TRUE)
