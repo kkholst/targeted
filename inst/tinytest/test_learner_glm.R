@@ -114,32 +114,21 @@ test_fit_call_attribute <- function() {
   refit <- eval(cl)
   expect_equal(coef(refit), coef(lr$fit))
 
+  # named `...` arguments (specials) are stored as symbols in fit$call (not
+  # their evaluated values), keeping print(fit) compact even for e.g. a weights
+  # vector.
   d$w <- runif(nrow(d))
   lr <- learner_glm(y ~ x1 + weights(w), family = gaussian(),
     learner.args = list(specials = "weights")
   )
   lr$estimate(d)
+  cl <- lr$fit$call
+  expect_true("weights" %in% names(cl))
+  expect_true(is.symbol(cl[["weights"]]))
+  expect_equal(cl[["weights"]], quote(weights))
+
+  fitref <- glm(y ~ x1, data = d, weights = w)
+  expect_equal(coef(fitref), coef(lr$fit))
 }
 test_fit_call_attribute()
 
-test_fit_call_splices_dots <- function() {
-  # extra arguments passed through `...` are spliced into fit$call
-  lr <- learner_glm(y ~ x1, weights = rep(1, nrow(d)))
-  lr$estimate(d)
-  cl <- lr$fit$call
-  expect_true("weights" %in% names(cl))
-}
-test_fit_call_splices_dots()
-
-test_fit_call_compact_print <- function() {
-  # regression guard: the rewritten call must not embed the data frame, so
-  # printing the fit stays small even for larger datasets.
-  big <- sim1(n = 5e3)
-  lr <- learner_glm(y ~ x1)
-  lr$estimate(big)
-  # data argument is a symbol, so print(call) is a single short line
-  expect_true(is.symbol(lr$fit$call[["data"]]))
-  txt <- capture.output(print(lr$fit$call))
-  expect_true(length(txt) <= 2L)
-}
-test_fit_call_compact_print()

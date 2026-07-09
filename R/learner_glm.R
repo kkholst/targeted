@@ -8,6 +8,19 @@
 #' @name constructor_shared
 NULL
 
+# Replace named `...` arguments with symbols of their own name so that a
+# rewritten `fit$call` prints compactly (e.g. `weights = weights`) instead of
+# embedding the evaluated value (e.g. a full weights vector). Unnamed
+# arguments are kept as-is. Purely cosmetic: the symbols only resolve within
+# the fitting environment, consistent with how `data`/`family` are stored.
+symbolize_dots <- function(dots) {
+  nms <- names(dots)
+  if (is.null(nms)) return(dots)
+  named <- nzchar(nms)
+  dots[named] <- lapply(nms[named], as.symbol)
+  dots
+}
+
 
 #' @description Constructs a [learner] class object for fitting generalized
 #' linear models with [stats::glm] and [MASS::glm.nb]. Negative binomial
@@ -49,8 +62,11 @@ learner_glm <- function(formula, info = "glm", family = gaussian(),
       args <- c(list(formula, data = data), dots)
       fit <- do.call(MASS::glm.nb, args) # use do.call to avoid issues with NSEs
 
+      # store data and named `...` arguments as symbols to avoid dumping the
+      # evaluated objects (e.g. the data frame or a weights vector) when the
+      # fit is printed
       fit$call <- bquote(
-      MASS::glm.nb(.(formula), data = data, ..(dots)),
+      MASS::glm.nb(.(formula), data = data, ..(symbolize_dots(dots))),
         splice = TRUE
       )
       fit
@@ -61,10 +77,11 @@ learner_glm <- function(formula, info = "glm", family = gaussian(),
       args <- c(list(formula, data = data, family = family), dots)
       fit <- do.call(stats::glm, args)
 
-      # update call attributes to avoid verbose print statement of fit object
-      # due to data being an evaluated expression
+      # store data, family and named `...` arguments as symbols to avoid
+      # dumping the evaluated objects (e.g. the data frame or a weights
+      # vector) when the fit is printed
       fit$call <- bquote(
-      glm(.(formula), data = data, family = family, ..(dots)),
+      glm(.(formula), data = data, family = family, ..(symbolize_dots(dots))),
         splice = TRUE
       )
       fit
