@@ -147,18 +147,6 @@ design <- function(formula, data, ..., # nolint
     tt <- terms(formula, data = data, specials = specials)
   }
 
-  if (response && inherits(
-    try(model.frame(update(tt, ~1), data = data, na.action = na.action),
-        silent = TRUE),
-    "try-error"
-  )) { # response appears not to be in `data`
-    response <- FALSE
-  }
-  # delete response to generate design matrix when making predictions
-  if (!response) {
-    tt <- delete.response(tt)
-  }
-
   term.labels <- attr(tt, "term.labels") # predictors
   sterm.list <- c()
   if (length(specials) > 0) {
@@ -173,10 +161,20 @@ design <- function(formula, data, ..., # nolint
     formula <- remove_terms(formula, sterm.list, data = data)
   }
 
+  if (response && inherits(
+    try(model.frame(update(tt, ~1), data = data, na.action = na.action),
+        silent = TRUE),
+    "try-error"
+  )) { # response appears not to be in `data`
+    response <- FALSE
+  }
+
   formula0 <- formula
   environment(formula0) <- formulaenv # preserve formula environment
   if (!response) {
     formula0 <- stats::formula(delete.response(terms(formula, data = data)))
+    # delete response to generate design matrix when making predictions
+    tt <- delete.response(tt)
   }
 
   xlev <- levels
