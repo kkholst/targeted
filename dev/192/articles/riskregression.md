@@ -379,7 +379,7 @@ riskreg(y~a, nuisance=~x+z, data=d2, type="rd")
 ```
 
                 Estimate Std.Err   2.5% 97.5% P-value
-    (Intercept)    1.013 0.02099 0.9723 1.055       0
+    (Intercept)   0.9942 0.02016 0.9547 1.034       0
 
 ### Influence-function
 
@@ -437,7 +437,7 @@ sessionInfo()
 
     loaded via a namespace (and not attached):
      [1] mets_1.3.11            cli_3.6.6              knitr_1.51
-     [4] rlang_1.3.0            xfun_0.59              otel_0.2.0
+     [4] rlang_1.3.0            xfun_0.60              otel_0.2.0
      [7] jsonlite_2.0.0         future.apply_1.20.2    listenv_1.0.0
     [10] lava_1.9.2             htmltools_0.5.9        rmarkdown_2.31
     [13] grid_4.6.1             evaluate_1.0.5         fastmap_1.2.0
