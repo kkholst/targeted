@@ -55,8 +55,7 @@ ic_reference <- function(data, delta, imp_mod) {
   } else if (fam$family == "gaussian" && fam$link == "identity") {
     nabla <- 1
   } else {
-    stop(sprintf("Unsupported family/link combination: family='%s', link='%s'. Supported combinations are: binomial/logit, gaussian/identity", # nolint
-                 fam$family, fam$link))
+    stop("Unsupported family/link combination")
   }
   nabla <- nabla * design_matrix
 
@@ -141,7 +140,7 @@ test_moi_cate_passthrough <- function() {
   ## mc.cores left at NULL default to keep the test CRAN-friendly.
   ## With stratify = TRUE, response.model and missing.model are fit per
   ## treatment arm; we drop `a` from their RHS to avoid rank-deficient fits.
-  res <- suppressWarnings(moi(
+  res <- moi(
     data = d,
     response.model = learner_glm(y ~ x),
     treatment.model = a ~ 1,
@@ -152,7 +151,7 @@ test_moi_cate_passthrough <- function() {
     silent = TRUE,
     stratify = TRUE,
     second.order = FALSE
-  ))
+  )
   expect_true(inherits(res, "moi.targeted"))
   expect_true(all(is.finite(coef(res))))
 }
