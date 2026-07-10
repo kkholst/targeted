@@ -87,6 +87,7 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #'   forming a partition of `1:nrow(data)`.
 #' @param rep number of replications of cross-fitting procedure
 #'   by averaging estimates and influence functions from each replication
+#' @param id (optional) subject id variable
 #' @param silent suppress all messages and progressbars
 #' @param stratify if TRUE the response.model will be stratified by treatment
 #' @param mc.cores (optional) number of cores. parallel::mcmapply used instead
@@ -148,6 +149,7 @@ cate <- function(response.model, # nolint
                  contrast,
                  nfolds = 1,
                  rep = 1,
+                 id = NULL,
                  silent = FALSE,
                  stratify = FALSE,
                  mc.cores = NULL,
@@ -505,6 +507,7 @@ cate_est <- function(y, # response vector
 update.cate.targeted <- function(object,
                                  cate.model = ~1,
                                  data,
+                                 id = NULL,
                                  calibration.model = NULL,
                                  var.type = "IC",
                                  second.order = TRUE, ...) {
@@ -573,7 +576,11 @@ update.cate.targeted <- function(object,
 
   if (tolower(var.type) == "ic" || is.null(vcov) || ncol(desA$x)>1) {
     IC  <- Reduce("+", lapply(ests, \(x) x$IC)) / length(ests)
-    estimate <- lava::estimate(coef = est, IC = IC)
+    if (!is.null(id)) {
+      estimate <- lava::estimate(coef = est, IC = IC, id = id)
+    } else {
+      estimate <- lava::estimate(coef = est, IC = IC)
+    }
   } else {
     e <- lava::estimate(coef = est[seq_len(ncol(vcov))], vcov = vcov)
     pairs <- utils::combn(seq_along(coef(e)), 2)

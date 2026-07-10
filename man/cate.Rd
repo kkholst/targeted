@@ -13,6 +13,7 @@ cate(
   contrast,
   nfolds = 1,
   rep = 1,
+  id = NULL,
   silent = FALSE,
   stratify = FALSE,
   mc.cores = NULL,
@@ -47,6 +48,8 @@ forming a partition of \code{1:nrow(data)}.}
 
 \item{rep}{number of replications of cross-fitting procedure
 by averaging estimates and influence functions from each replication}
+
+\item{id}{(optional) subject id variable}
 
 \item{silent}{suppress all messages and progressbars}
 
