@@ -395,6 +395,7 @@ cate <- function(response.model, # nolint
   res <- update(res,
                 cate.model = cate.model,
                 data = data,
+                id = id,
                 calibration.model = calibration.model,
                 var.type = var.type,
                 second.order = second.order
@@ -507,7 +508,7 @@ cate_est <- function(y, # response vector
 update.cate.targeted <- function(object,
                                  cate.model = ~1,
                                  data,
-                                 id = NULL,
+                                 id = lava::index(estimate(object)),
                                  calibration.model = NULL,
                                  var.type = "IC",
                                  second.order = TRUE, ...) {
@@ -624,4 +625,9 @@ print.summary.cate.targeted <- function(x, ...) {
   print(x$estimate, ...)
   cat("\nAverage Treatment Effect:\n")
   print(x$ate)
+}
+
+#' @export
+estimate.cate.targeted <- function(x, ...) {
+  lava::estimate(x$estimate, ...)
 }
