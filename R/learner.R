@@ -136,14 +136,21 @@ learner <- R6::R6Class("learner", # nolint
                 private$des.args
                 )
             )
-            args <- private$update_args(private$estimate.args, ...) #
+            args <- private$update_args(private$estimate.args, ...)
             form <- self$formula
             if (!private$formula.keep.specials) form <- des$formula
             args <- c(
               args, list(formula = form, data = data)
             )
             if (length(des$specials) > 0) {
-              args <- c(args, des[des$specials])
+              for (s in des$specials) {
+                # specials provided to fitfun call precede over specials
+                # obtained from design object
+                if (!(s %in% names(args))) {
+                  args[[s]] <- des[[s]]
+                }
+
+              }
             }
             return(structure(do.call(private$init.estimate, args),
                              design = summary(des)
@@ -160,7 +167,11 @@ learner <- R6::R6Class("learner", # nolint
             args <- c(list(x = xx$x, y = xx$y), args)
 
             if (length(xx$specials) > 0) {
-              args <- c(args, xx[xx$specials])
+              for (s in xx$specials) {
+                # specials provided to fitfun call precede over specials
+                # obtained from design object
+                if (!(s %in% names(args))) args[[s]] <- xx[[s]]
+              }
             }
             return(structure(do.call(private$init.estimate, args),
               design = summary(xx)
@@ -175,7 +186,9 @@ learner <- R6::R6Class("learner", # nolint
             args <- list(...)
             des <- update(attr(object, "design"), data)
             for (s in des$specials) {
-              if (is.null(args[[s]])) args[[s]] <- des[[s]]
+                # specials provided to predfun call precede over specials
+                # obtained from design object
+              if (!(s %in% names(args))) args[[s]] <- des[[s]]
             }
             predict_args_call <- predict.args
             predict_args_call[names(args)] <- args
