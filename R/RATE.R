@@ -1,16 +1,20 @@
+as_rate_learner <- function(x, family) {
+  if (inherits(x, "learner")) return(x)
+  return(learner_glm(x, family = family))
+}
+
 #' Estimation of the Average Treatment Effect among Responders
 #'
 #' @title Responder Average Treatment Effect
-#' @param response Response formula (e.g, Y ~ D*A)
-#' @param post.treatment Post treatment marker formula (e.g., D ~ W)
+#' @param response (formula or learner) Response model. A formula (e.g.,
+#' `Y ~ D*A`) is wrapped in [learner_glm] with a Gaussian family.
+#' @param post.treatment (formula or learner) Post treatment marker model. A
+#' formula (e.g., `D ~ W`) is wrapped in [learner_glm] with a binomial family.
 #' @param treatment Treatment formula (e.g, A ~ 1)
 #' @param data data.frame
 #' @param M Number of folds in cross-fitting (M=1 is no cross-fitting)
 #' @param pr.treatment (optional) Randomization probability of treatment.
 #' @param treatment.level Treatment level in binary treatment (default 1)
-#' @param SL.args.response Arguments to SuperLearner for the response model
-#' @param SL.args.post.treatment Arguments to SuperLearner for the post
-#' treatment indicator
 #' @param preprocess (optional) Data preprocessing function
 #' @param efficient If TRUE, the estimate will be efficient. If FALSE, the
 #' estimate will be a simple plug-in estimate.
@@ -21,15 +25,22 @@
 RATE <- function(response, post.treatment, treatment,
                  data, M = 5,
                  pr.treatment, treatment.level,
-                 SL.args.response = list(
-                   family = gaussian(), SL.library = c("SL.mean", "SL.glm")
-                 ),
-                 SL.args.post.treatment = list(
-                   family = binomial(), SL.library = c("SL.mean", "SL.glm")
-                 ),
                  preprocess = NULL, efficient = TRUE, ...) {
   dots <- list(...)
   cl <- match.call()
+
+  bad <- intersect(
+    names(dots), c("SL.args.response", "SL.args.post.treatment")
+  )
+  if (length(bad) > 0) stop(
+    "'", bad[1], "' is defunct. Pass a formula or learner via 'response'/",
+    "'post.treatment' (see ?RATE)."
+  )
+
+  response.learner <- as_rate_learner(response, gaussian())
+  post.treatment.learner <- as_rate_learner(post.treatment, binomial())
+  response <- response.learner$formula
+  post.treatment <- post.treatment.learner$formula
 
   A <- get_response(treatment, data)
   A.levels <- sort(unique(A))
@@ -50,10 +61,8 @@ RATE <- function(response, post.treatment, treatment,
   }
 
   fit.phis <- function(train_data, valid_data) {
-    D.args <- c(list(formula = post.treatment), SL.args.post.treatment)
-    D.fit <- do.call(SL, D.args)
-    Y.args <- c(list(formula = response), SL.args.response)
-    Y.fit <- do.call(SL, Y.args)
+    D.fit <- post.treatment.learner$clone(deep = TRUE)
+    Y.fit <- response.learner$clone(deep = TRUE)
     if (!is.null(preprocess)) {
       train_data <- do.call(
         "preprocess",
@@ -182,16 +191,15 @@ RATE.surv <- function(response, post.treatment, treatment, censoring,
                       pr.treatment,
                       call.response,
                       args.response = list(),
-                      SL.args.post.treatment = list(
-                        family = binomial(),
-                        SL.library = c("SL.mean", "SL.glm")
-                      ),
                       call.censoring,
                       args.censoring = list(),
                       preprocess = NULL,
                       ...) {
   dots <- list(...)
   cl <- match.call()
+
+  post.treatment.learner <- as_rate_learner(post.treatment, binomial())
+  post.treatment <- post.treatment.learner$formula
 
   surv.response <- get_response(formula = response, data)
   surv.censoring <- get_response(formula = censoring, data)
@@ -226,8 +234,7 @@ RATE.surv <- function(response, post.treatment, treatment, censoring,
     }
 
     # post treatment model
-    D.args <- c(list(formula = post.treatment), SL.args.post.treatment)
-    D.fit <- do.call(SL, D.args)
+    D.fit <- post.treatment.learner$clone(deep = TRUE)
     D.fit$estimate(train_data)
 
     # time-to-event outcome model

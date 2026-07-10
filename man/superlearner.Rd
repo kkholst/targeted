@@ -2,8 +2,6 @@
 % Please edit documentation in R/superlearner.R
 \name{superlearner}
 \alias{superlearner}
-\alias{metalearner_nnls}
-\alias{metalearner_discrete}
 \title{Superlearner (stacked/ensemble learner)}
 \usage{
 superlearner(
@@ -30,13 +28,15 @@ estimate the ensemble weights.}
 
 \item{meta.learner}{(function) Algorithm to learn the ensemble weights
 (default non-negative least squares). Must be a function of the response
-(nx1 vector), \code{y}, and the predictions (nxp matrix), \code{pred}, with p being
-the number of learners. Alternatively, this can be set to the character
-value "discrete", in which case the Discrete Super-Learner is applied where
-the model with the lowest risk (model-score) is given weight 1 and all
-other learners weight 0.}
+(nx1 vector), \code{y}, and the base learner predictions (nxp matrix), \code{pred},
+with p being the number of learners. The function can optionally accept a
+\code{model.score} argument for scoring the base learners. See
+\link{metalearner_nnls}, \link{metalearner_convexcomb} and \link{metalearner_discrete} for
+the available meta learners.}
 
-\item{model.score}{(function) Model scoring method (see \link{learner})}
+\item{model.score}{(function) Method for scoring the predictions of each base
+learner. Expects two arguments; vector of response variable and prediction
+from a base learner (see \code{targeted:::mse} for additional details).}
 
 \item{mc.cores}{(integer) If not NULL, then \link[parallel:mcmapply]{parallel::mcmapply} is used with
 \code{mc.cores} number of cores for parallelization instead of the

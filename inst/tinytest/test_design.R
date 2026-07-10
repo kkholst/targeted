@@ -46,8 +46,14 @@ test_design <- function() {
   # terms includes environment
   expect_true(".Environment" %in% names(attributes(dd$terms)))
   # environment is successfully removed from terms
-  dd <- design(y ~ x1, ddata, rm_envir = TRUE)
+  dd <- design(y ~ x1, ddata, rm.envir = TRUE)
   expect_false(".Environment" %in% names(attributes(dd$terms)))
+  # soft-deprecated `rm_envir` still works but warns
+  expect_warning(
+    dd2 <- design(y ~ x1, ddata, rm_envir = TRUE),
+    pattern = "deprecated"
+  )
+  expect_false(".Environment" %in% names(attributes(dd2$terms)))
 }
 test_design()
 
@@ -499,3 +505,211 @@ test_print.design <- function() {
   expect_stdout(print(des), "response \\(length: 10\\)")
 }
 test_print.design()
+
+# test data.table and tibble coercion
+test_design_data_coercion <- function() {
+  # tibble input produces same result as data.frame
+  if (requireNamespace("tibble", quietly = TRUE)) {
+    tbl <- tibble::as_tibble(ddata)
+    dd_tbl <- design(y ~ x1 * x2, tbl)
+    dd_df <- design(y ~ x1 * x2, ddata)
+    expect_equivalent(dd_tbl$x, dd_df$x)
+    expect_equivalent(dd_tbl$y, dd_df$y)
+  }
+
+  # data.table input produces same result as data.frame
+  if (requireNamespace("data.table", quietly = TRUE)) {
+    dt <- data.table::as.data.table(ddata)
+    dd_dt <- design(y ~ x1 * x2, dt)
+    dd_df <- design(y ~ x1 * x2, ddata)
+    expect_equivalent(dd_dt$x, dd_df$x)
+    expect_equivalent(dd_dt$y, dd_df$y)
+  }
+}
+test_design_data_coercion()
+
+# test formula environment preservation
+test_design_formula_env <- function() {
+  # formula referencing a variable from a parent environment
+  make_design <- function() {
+    threshold <- 0
+    f <- y ~ I(x1 > threshold)
+    design(f, ddata)
+  }
+  dd <- make_design()
+  expect_equivalent(dd$y, ddata$y)
+  expect_equivalent(dd$x[, 1], as.numeric(ddata$x1 > 0))
+
+  # specials with formula from parent environment
+  make_design_specials <- function() {
+    f <- y ~ x1 + offset(x2)
+    design(f, ddata, specials = "offset")
+  }
+  dd <- make_design_specials()
+  expect_equivalent(unname(dd$offset), ddata$x2)
+  expect_equivalent(dd$x[, 1], ddata$x1)
+
+  # update also preserves environment correctly
+  dd_upd <- update(dd, head(ddata, 10))
+  expect_equivalent(unname(dd_upd$offset), head(ddata$x2, 10))
+}
+test_design_formula_env()
+
+# test na.action parameter
+test_design_na_action <- function() {
+  ddata_na <- ddata
+  ddata_na[1:3, "x1"] <- NA
+
+  # default na.omit removes rows with NAs
+  dd <- design(y ~ x1, ddata_na)
+  expect_equal(nrow(dd$x), n - 3)
+
+  # na.action is stored in the design object
+  expect_identical(dd$na.action, na.omit)
+
+  # explicit na.omit gives same result as default
+  dd_explicit <- design(y ~ x1, ddata_na, na.action = na.omit)
+  expect_equivalent(dd$x, dd_explicit$x)
+
+  # na.pass keeps all rows including NAs
+  dd_pass <- design(y ~ x1, ddata_na, na.action = na.pass)
+  expect_equal(nrow(dd_pass$x), n)
+  expect_true(all(is.na(dd_pass$x[1:3, ])))
+  expect_identical(dd_pass$na.action, na.pass)
+
+  # na.action is forwarded through update
+  dd_upd <- update(dd_pass, ddata_na, response = TRUE)
+  expect_equal(nrow(dd_upd$x), n)
+  expect_identical(dd_upd$na.action, na.pass)
+}
+test_design_na_action()
+
+# test tolerance of specials whose variables are absent from `data`
+test_design_specials_missing_var <- function() {
+  d1 <- ddata
+  d1$w <- runif(n)
+  # baseline: variable present -> special populated
+  f_orig <- "y ~ x1 + weights(w)"
+  dd <- design(formula(f_orig), d1, specials = "weights")
+  expect_equal(unname(dd$weights), d1$w)
+  expect_equal(colnames(dd$x), "x1")
+
+  # update with data lacking `w` -> weights slot becomes NULL, x still correct
+  d2 <- ddata # no `w`
+  dd_upd <- update(dd, d2, response = TRUE)
+  expect_true(
+    is.null(dd_upd$weights) &&
+    "weights" %in% names(dd_upd) && # slot exists
+    "weights" %in% dd_upd$specials # special variable still exist
+  )
+  expect_equal(colnames(dd_upd$x), "x1")
+  expect_equivalent(dd_upd$x[, "x1"], d2$x1)
+
+  # construction against data missing the special's variable also tolerated
+  dd2 <- design(y ~ x1 + weights(w), d2, specials = "weights")
+  expect_true(
+     is.null(dd2$weights) &&
+    "weights" %in% names(dd2) &&
+    "weights" %in% dd2$specials
+  )
+  expect_equal(colnames(dd2$x), "x1")
+
+  # two specials, only one droppable
+  d3 <- d1  # has x1, x2, w
+  dd3 <- design(y ~ x1 + offset(x2) + weights(w), d3,
+                specials = c("offset", "weights"))
+  expect_equivalent(unname(dd3$offset), d3$x2)
+  expect_equivalent(unname(dd3$weights), d3$w)
+  # drop only weights on update
+  d3b <- d3[, c("y", "x1", "x2")]
+  dd3b <- update(dd3, d3b, response = TRUE)
+  expect_true(is.null(dd3b$weights))
+  expect_equivalent(unname(dd3b$offset), d3b$x2)
+  expect_equal(colnames(dd3b$x), "x1")
+
+  # entire RHS is a droppable special -> zero-column design matrix
+  dd4 <- design(y ~ weights(w), d2, specials = "weights")
+  expect_true(is.null(dd4$weights))
+  expect_equal(ncol(dd4$x), 0)
+
+  # multi-arg special: any missing variable drops the whole special
+  dd5 <- design(y ~ x1 + stratify(x2, w), d2, specials = "stratify")
+  expect_true(is.null(dd5$stratify))
+  expect_equal(colnames(dd5$x), "x1")
+
+  # print() should not list a dropped special under "specials"
+  expect_stdout(print(dd_upd), "design matrix")
+  # (specifically: 'weights' should not appear in the specials section)
+  out <- capture.output(print(dd_upd))
+  expect_false(any(grepl("^ - weights", out)))
+
+  # dropped specials are resurrected when updating with data that contains
+  # the variable again
+  dd_res <- update(dd_upd, d1, response = TRUE)
+  expect_equal(unname(dd_res$weights), d1$w)
+  expect_equal(colnames(dd_res$x), "x1")
+
+  # also when the design was constructed against data missing the variable
+  dd2_res <- update(dd2, d1, response = TRUE)
+  expect_equal(unname(dd2_res$weights), d1$w)
+
+  # the original formula (incl. specials) is preserved across evaluations
+  expect_equal(deparse(dd$formula.original), f_orig)
+  expect_equal(deparse(dd_upd$formula.original), f_orig)
+  expect_equal(deparse(dd_res$formula.original), f_orig)
+  # while `formula` remains the specials-free formula
+  f_orig_wo_weights <- trimws(strsplit(f_orig, "\\+")[[1]][1])
+  expect_equal(deparse(dd$formula), f_orig_wo_weights)
+  expect_equal(deparse(dd_upd$formula), f_orig_wo_weights)
+
+  # two specials: dropped and restored through a round-trip
+  dd3_res <- update(dd3b, d3, response = TRUE)
+  expect_equivalent(unname(dd3_res$offset), d3$x2)
+  expect_equivalent(unname(dd3_res$weights), d3$w)
+}
+test_design_specials_missing_var()
+
+# unit tests for the internal helpers
+test_design_internal_helpers <- function() {
+  remove_terms <- targeted:::remove_terms
+  specials_unavailable <- targeted:::specials_unavailable
+
+  # remove a single term
+  expect_equal(deparse(remove_terms(y ~ x + weights(w), "weights(w)")),
+               "y ~ x")
+  # removing the only term collapses the rhs to an intercept
+  expect_equal(deparse(remove_terms(y ~ weights(w), "weights(w)")), "y ~ 1")
+  # explicitly removed intercept is preserved
+  expect_equal(deparse(remove_terms(y ~ -1 + x + weights(w), "weights(w)")),
+               "y ~ x - 1")
+  # multiple labels
+  expect_equal(
+    deparse(remove_terms(y ~ x + offset(z) + weights(w),
+                         c("offset(z)", "weights(w)"))),
+    "y ~ x"
+  )
+  # formula environment is preserved
+  e <- new.env()
+  f <- y ~ x + weights(w)
+  environment(f) <- e
+  expect_identical(environment(remove_terms(f, "weights(w)")), e)
+  # `.` on the rhs is expanded from data before removal
+  d <- data.frame(y = 1, x = 1, w = 1)
+  expect_equal(deparse(remove_terms(y ~ . - w + weights(w), "weights(w)",
+                                    data = d)),
+               "y ~ x")
+
+  # specials_unavailable: reports special terms with missing variables
+  tt <- terms(y ~ x + weights(w) + offset(z),
+              specials = c("weights", "offset"))
+  expect_equal(specials_unavailable(tt, data.frame(y = 1, x = 1)),
+               c("weights(w)", "offset(z)"))
+  expect_equal(specials_unavailable(tt, data.frame(y = 1, x = 1, w = 1)),
+               "offset(z)")
+  expect_equal(length(specials_unavailable(tt, data.frame(x = 1, w = 1, z = 1))),
+               0)
+  # no specials declared -> nothing to report
+  tt0 <- terms(y ~ x)
+  expect_equal(length(specials_unavailable(tt0, data.frame(x = 1))), 0)
+}
+test_design_internal_helpers()

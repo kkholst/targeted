@@ -364,8 +364,8 @@ test_prediction_filter <- function() {
 
   expect_equal(max(lr$predict(ddata)), 0)
 
-  # arguments are passed on correctly
-  expect_equal(max(lr$predict(ddata, bound = 0.5)), 0.5)
+  # arguments are by the design of learner$predict not passed on to filter
+  expect_equal(max(lr$predict(ddata, bound = 0.5)), 0)
 
   filter_bound_estimation <- function(data) {
     bound <- max(data$y)

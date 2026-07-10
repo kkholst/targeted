@@ -11,6 +11,9 @@
 #' Regression: [learner_isoreg] \cr
 #' Classification: [learner_naivebayes] \cr
 #' Ensemble (super learner): [learner_sl]
+#'
+#' The following constructors for commonly used filters are available:
+#' [predict_filter_bound], [predict_filter_bound_dynamic]
 #' @param data data.frame
 #' @author Klaus Kähler Holst, Benedikt Sommer
 #' @examples
@@ -96,7 +99,7 @@ learner <- R6::R6Class("learner", # nolint
       info = NULL,
       specials = c(),
       formula.keep.specials = FALSE,
-      predict.filter = \(data, ...) \(pred, newdata, ...) pred,
+      predict.filter = \(data) \(pred, newdata) pred,
       intercept = FALSE
     ) {
       estimate <- add_dots(estimate)
@@ -208,7 +211,7 @@ learner <- R6::R6Class("learner", # nolint
     #'   stored inside the class.
     estimate = function(data, ..., store = TRUE) {
       private$predict_filter <- private$predict_filter_generator(
-        data, ...
+        data
       ) |> add_dots()
       res <- private$fitfun(data, ...)
       if (store) private$fitted <- res
@@ -226,9 +229,7 @@ learner <- R6::R6Class("learner", # nolint
       if (is.null(object)) stop("Provide estimated model object")
 
       preds <- private$predfun(object, newdata, ...)
-      # TODO: do we want to pass on the ellipses to the filter function? is
-      # there some risk about argument name clashes?
-      return(private$predict_filter(preds, newdata, ...))
+      return(private$predict_filter(preds, newdata))
     },
 
     #' @description

@@ -1,5 +1,4 @@
 suppressPackageStartupMessages({
-  library("SuperLearner")
   library("mets")
 }
 )
@@ -44,6 +43,41 @@ test_RATE <- function() {
   expect_true(inherits(fit_pi, "estimate"))
   expect_true(is.finite(coef(fit_pi)[["rate"]]))
 
+  # response/post.treatment accept learner objects directly
+  fit_lrn <- RATE(
+    response = learner_glm(y ~ d * a),
+    post.treatment = learner_sl(list(
+      learner_glm(d ~ 1, family = binomial()),
+      learner_glm(d ~ w, family = binomial())
+    ), nfolds = 2),
+    treatment = a ~ 1,
+    data = dat, M = 2
+  )
+  expect_true(inherits(fit_lrn, "estimate"))
+  expect_true(is.finite(coef(fit_lrn)[["rate"]]))
+
+  # also works with superlearner for response
+  fit_lrn <- RATE(
+    response = learner_sl(list(
+      learner_glm(y ~ d * a),
+      learner_glm(y ~ w * a)
+
+    ), nfolds = 2),
+    post.treatment = learner_sl(list(
+      learner_glm(d ~ 1, family = binomial()),
+      learner_glm(d ~ w, family = binomial())
+    ), nfolds = 2),
+    treatment = a ~ 1,
+    data = dat, M = 2
+  )
+  expect_true(inherits(fit_lrn, "estimate"))
+  expect_true(is.finite(coef(fit_lrn)[["rate"]]))
+
+  # defunct SuperLearner argument interface
+  expect_error(
+    RATE(y ~ d * a, d ~ w, a ~ 1, data = dat, SL.args.response = list()),
+    pattern = "defunct"
+  )
 
   dat_bad_a <- dat
   dat_bad_a$a <- sample(0:2, n, replace = TRUE)

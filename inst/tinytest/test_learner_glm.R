@@ -78,3 +78,57 @@ test_binary_response <- function() {
   expect_equal(fitted(fit), lr$predict(d))
 }
 test_binary_response()
+
+test_known_issue_with_nse <- function() {
+  # test known issue with non-standard evaluations with stats::glm
+  fitfun <- function(formula, data, family = gaussian, ...) {
+    glm(formula, data = data, family = family, ...)
+  }
+  expect_error(fitfun(y ~ x1, data = d, weights = NULL))
+  reffit <- fitfun(y ~ x1, data = d)
+
+  lr <- learner_glm(y ~ x1, weights = NULL)
+  lr$estimate(d)
+  expect_equal(coef(reffit), coef(lr$fit))
+  # verify that weights argument is captured for estimate.args of learner obj
+  expect_null(lr$summary()$estimate.args[["weights"]])
+}
+test_known_issue_with_nse()
+
+test_fit_call_attribute <- function() {
+  # fit$call is rewritten to stay compact: `data`/`family` are stored as
+  # symbols rather than the fully-evaluated objects, so print(fit) does not
+  # dump the entire dataset
+
+  # --- stats::glm branch ---
+  lr <- learner_glm(y ~ x1, family = gaussian())
+  lr$estimate(d)
+  cl <- lr$fit$call
+  expect_true(is.call(cl))
+  expect_true(is.symbol(cl[["data"]])) # data kept as symbol
+  expect_equal(cl[["data"]], quote(data))
+
+  # the rewritten call is still evaluable and reproduces the model
+  data <- d
+  family <- gaussian()
+  refit <- eval(cl)
+  expect_equal(coef(refit), coef(lr$fit))
+
+  # named `...` arguments (specials) are stored as symbols in fit$call (not
+  # their evaluated values), keeping print(fit) compact even for e.g. a weights
+  # vector.
+  d$w <- runif(nrow(d))
+  lr <- learner_glm(y ~ x1 + weights(w), family = gaussian(),
+    learner.args = list(specials = "weights")
+  )
+  lr$estimate(d)
+  cl <- lr$fit$call
+  expect_true("weights" %in% names(cl))
+  expect_true(is.symbol(cl[["weights"]]))
+  expect_equal(cl[["weights"]], quote(weights))
+
+  fitref <- glm(y ~ x1, data = d, weights = w)
+  expect_equal(coef(fitref), coef(lr$fit))
+}
+test_fit_call_attribute()
+

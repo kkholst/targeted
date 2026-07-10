@@ -509,7 +509,7 @@ update.cate.targeted <- function(object,
                                  var.type = "IC",
                                  second.order = TRUE, ...) {
 
-  desA <- design(cate.model, data, intercept = TRUE, rm_envir = FALSE)
+  desA <- design(cate.model, data, intercept = TRUE, rm.envir = FALSE)
   if (length(object$data$y) != nrow(desA$x)) {
     stop("Not same data as the `cate` object")
   }

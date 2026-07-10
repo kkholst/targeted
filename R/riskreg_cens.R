@@ -99,7 +99,7 @@ riskreg_cens <- function(response,
 
   if (!is.null(treatment)) { ## Potential outcome
     if (inherits(treatment, "formula"))
-      treatment <- SL(treatment, family=binomial())
+      treatment <- learner_glm(treatment, family=binomial())
     A <- treatment$response(data)
     A.levels <- sort(unique(A))
     A.var <- all.vars(update(formula(treatment), ~1))

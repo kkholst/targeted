@@ -1,3 +1,5 @@
+# ----- Deprecated: removed from targeted in version 0.8.0 -----
+# Note that SL has been hard-deprecated in targeted v0.8
 score_fold <- function(fold,
                        data,
                        propensity_model,
@@ -82,7 +84,6 @@ score_fold <- function(fold,
 #'   summary(e) # the true parameters are c(1,1)
 #' }
 #'
-#' @export
 crr <- function(treatment,
                 response_model,
                 propensity_model,
@@ -96,7 +97,7 @@ crr <- function(treatment,
   if (is.character(treatment)) {
     treatment <- as.formula(paste0(treatment, "~", 1))
   }
-  desA <- design(treatment, data, intercept=TRUE, rm_envir=FALSE)
+  desA <- design(treatment, data, intercept=TRUE, rm.envir=FALSE)
   if (inherits(response_model, "formula")) {
     response_model <- SL(response_model, ...)
   }
@@ -231,7 +232,6 @@ crr <- function(treatment,
 #'            nfolds = 10)
 #'   summary(e) # the true parameters are c(1,1)
 #' }
-#' @export
 cate_link <- function(treatment,
                 link = "identity",
                 response_model,
@@ -246,7 +246,7 @@ cate_link <- function(treatment,
   if (is.character(treatment)) {
     treatment <- as.formula(paste0(treatment, "~", 1))
   }
-  desA <- design(treatment, data, intercept=TRUE, rm_envir=FALSE)
+  desA <- design(treatment, data, intercept=TRUE, rm.envir=FALSE)
   if (inherits(response_model, "formula")) {
     response_model <- SL(response_model, ...)
   }
