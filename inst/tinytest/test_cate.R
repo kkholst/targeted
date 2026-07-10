@@ -404,3 +404,25 @@ test_cate_rep_no_crossfit <- function() {
   }
 }
 test_cate_rep_no_crossfit()
+
+test_cate_id_arg <- function() {
+  # test id argument
+  d$id <- paste("a", seq_len(nrow(d)))
+  a <- cate(y ~ a + x,
+            learner_glm(a ~ 1, family=binomial),
+            second.order = FALSE,
+            id = d$id,
+            data = d) |> estimate()
+  g <- glm(y ~ a + x, data=d)
+  q1 <- predict(g, newdata=transform(d, a=1))
+  if1 <- with(d, a/mean(a) * (y  - q1) + q1)
+
+  expect_equivalent(mean(if1), coef(a)[1])
+  if1 <- if1 - mean(if1)
+
+  id <- estimate(a)$id
+  ord <- match(id, d$id)
+  expect_true(length(ord) == nrow(d))
+  expect_true(mean(IC(a)[order(ord), 1] - if1)<1e-12)
+}
+test_cate_id_arg()
