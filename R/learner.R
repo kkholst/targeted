@@ -112,6 +112,23 @@ learner <- R6::R6Class("learner", # nolint
       private$predict_filter_generator <- add_dots(predict.filter)
 
       private$estimate.args <- estimate.args
+
+      if (length(intersect(names(estimate.args), specials)) > 0) rlang::abort(
+        paste0(
+          "Duplicated entries in specials and estimate.args. ",
+          "Use only one argument to provide additional arguments to the ",
+          "estimate function."
+        )
+      )
+
+      if (length(intersect(names(predict.args), specials)) > 0) rlang::abort(
+        paste0(
+          "Duplicated entries in specials and predict.args. ",
+          "Use only one argument to provide additional arguments to the ",
+          "predict function."
+        )
+      )
+
       no_formula <- is.null(formula)
       if (!no_formula && is.character(formula) || is.function(formula)) {
         no_formula <- TRUE

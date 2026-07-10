@@ -347,44 +347,79 @@ test_specials <- function() {
   # but not in fitted model formula
   expect_true(!grepl("strata", paste(deparse(f[[3]]), collapse = " ")))
 
+  test_special_args_to_estimate_predict_method <- function(lr) {
+    lr$estimate(dw)
+    expect_equivalent(lr$fit$weights, dw$w)
+
+    lr$estimate(dw, weights = rep(1, nrow(dw)))
+    expect_equivalent(lr$fit$weights, rep(1, nrow(dw)))
+    # special in design is not updated after fitting a model with specials that
+    # are provided to method call // that is, we don't temper with the internal
+    # design object
+    expect_equivalent(lr$design(dw)$weights, dw$w)
+
+    newd <- cbind(head(dw[, c("y", "a")]), w = 1:6)
+    # design removes special that does not exist in data // that's the behavior
+    # we want
+    expect_error(
+      lr$predict(head(newd[, c("y", "a")])),
+      pattern = 'argument "weights" is missing, with no default'
+    )
+    # provide via argument to predict method
+    expect_equivalent(
+      lr$predict(head(newd[, c("y", "a")]), weights = newd$w),
+      newd$w
+    )
+
+    # pick up special variable from data
+    expect_equivalent(lr$predict(newd), newd$w)
+
+    # providing special variable to method call precedes special variable from
+    # design function
+    expect_equal(lr$predict(newd, weights = 2), 2)
+  }
+
+  dw <- cbind(d, w = runif(nrow(d)))
   lr <- learner$new(
     y ~ a + weights(w),
     estimate = stats::glm,
     specials = "weights",
-    predict = function(object, data, weights, ...) {
-      weights
-    }
+    predict = function(object, data, weights, ...) weights
   )
-  dw <- cbind(d, w = runif(nrow(d)))
-  lr$estimate(dw)
-  expect_equivalent(lr$fit$weights, dw$w)
+  test_special_args_to_estimate_predict_method(lr)
 
-  lr$estimate(dw, weights = rep(1, nrow(dw)))
-  expect_equivalent(lr$fit$weights, rep(1, nrow(dw)))
-  # special in design is not updated after fitting a model with specials that
-  # are provided to method call // that is, we don't temper with the internal
-  # design object
-  expect_equivalent(lr$design(dw)$weights, dw$w)
+  # now for a learner who's estimate function does not accept a formula
+  # argument
+  lr <- learner$new(
+    y ~ a + weights(w),
+    estimate = glm.fit,
+    specials = "weights",
+    predict = function(object, data, weights, ...) weights
+  )
+  test_special_args_to_estimate_predict_method(lr)
 
-  newd <- cbind(head(dw[, c("y", "a")]), w = 1:6)
-  # design removes special that does not exist in data // that's the behavior
-  # we want
   expect_error(
-    lr$predict(head(newd[, c("y", "a")])),
-    pattern = 'argument "weights" is missing, with no default'
-  )
-  # provide via argument to predict method
-  expect_equivalent(
-    lr$predict(head(newd[, c("y", "a")]), weights = newd$w),
-    newd$w
+    lr <- learner$new(
+      y ~ a + weights(w),
+      estimate = stats::glm,
+      specials = "weights",
+      predict = function(object, data, weights, ...) weights,
+      estimate.args = list(weights = dw$w)
+    ),
+    pattern = "Duplicated entries in specials and estimate.args"
   )
 
-  # pick up special variable from data
-  expect_equivalent(lr$predict(newd), newd$w)
 
-  # providing special variable to method call precedes special variable from
-  # design function
-  expect_equal(lr$predict(newd, weights = 2), 2)
+  expect_error(
+    lr <- learner$new(
+      y ~ a + weights(w),
+      estimate = stats::glm,
+      specials = "weights",
+      predict = function(object, data, weights, ...) weights,
+      predict.args = list(weights = dw$w)
+    ),
+    pattern = "Duplicated entries in specials and predict.args"
+  )
 }
 test_specials()
 
