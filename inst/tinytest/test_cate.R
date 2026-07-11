@@ -414,10 +414,11 @@ test_cate_id_arg <- function() {
             id = d$id,
             data = d) |> estimate()
   g <- glm(y ~ a + x, data=d)
-  q1 <- predict(g, newdata=transform(d, a=1))
-  if1 <- with(d, a/mean(a) * (y  - q1) + q1)
-
-  expect_equivalent(mean(if1), coef(a)[1])
+  lev <- levels(d$a)[1]
+  q1 <- predict(g, newdata=transform(d, a=lev))
+  if1 <- with(d, (a==lev)/mean(a==lev) * (y  - q1) + q1)
+  idx <- paste0("E[y(", lev, ")]")
+  expect_equivalent(mean(if1), coef(a)[idx])
   if1 <- if1 - mean(if1)
 
   id <- estimate(a)$id
