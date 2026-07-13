@@ -14,11 +14,7 @@
 #' treatment, \eqn{Z} denotes post randomization covariates, and \eqn{\Delta}
 #' denotes a non-missing indicator. Influence function based standard errors are
 #' also provided.
-#' @param data A data.frame containing the analysis dataset. Data.table and
-#' tibble objects will be coerced to
-#'   data.frame.
 #' @param id A vector with subject IDs
-#' @param delta A vector with the non-missing indicator
 #' @param treatment.model A \code{learner} object for the binary treatment,
 #' used to extract the treatment variable and its levels.
 #' @param imputation.model A learner object of class 'learner_glm' used to fit
@@ -26,13 +22,6 @@
 #' model formula. If the learner was constructed with user-supplied
 #' \code{weights}, those weights are multiplied by the
 #' \code{imputation.subset} indicator (excluded rows receive zero weight).
-#' @param imputation.subset Optional. A character string containing an R
-#' expression that evaluates to a logical vector indicating which rows to use
-#' for fitting the
-#' imputation model. The expression is evaluated in the context of 'data'. If
-#' NULL (default), all rows are used.
-#' @param imputation.augmentation Logical. Should an augmentation term
-#' associated with the imputation model be added to the one-step estimator
 #' @param missing.model \code{learner} object
 #' specifying the model for the probability of the outcome being
 #' observed/non-missing
@@ -57,6 +46,7 @@
 #'   \item{IC_epsilon}{(only if \code{extended.output = TRUE}) Influence
 #'     function for the imputation-model parameters.}
 #' @keywords internal
+#' @inheritParams moi_missing
 moi_missing <- function(data,
                         id,
                         delta,
@@ -116,9 +106,24 @@ moi_missing <- function(data,
   if (!any(model_rows)) {
     stop("'imputation.subset' expression excludes all rows (no TRUE values)")
   }
+
+  extract_weights <- function(lr) {
+    if (!is.null(weights <- lr$opt("weights"))) {
+      rlang::warn(
+        paste0(
+          "Provide imputation.model 'weights' via 'specials' and not ",
+          "'learner.args' argument."
+        ),
+        call = call("moi")
+      )
+    } else {
+      weights <- lr$design(data, na.action = na.pass)$weights
+    }
+    weights
+  }
+
   ## Combine user-specified weights with subset weights.
-  user_weights <-
-    imputation.model$.__enclos_env__$private$estimate.args$weights
+  user_weights <- extract_weights(imputation.model)
   if (is.null(user_weights)) {
     weights <- as.numeric(model_rows)
   } else {
