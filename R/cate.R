@@ -169,16 +169,6 @@ cate <- function(response.model, # nolint
     data <- as.data.frame(data)
   }
 
-  if (!is.null(id)) {
-    if (!is.vector(id)) { # in case users provide a matrix or the like
-      rlang::abort("subject ids must be a vector")
-    }
-    if (length(id) != n) { # downstream lava::estimate also fails in this case
-    # however, stop here to provide more informative error message
-      rlang::abort("subject ids must be a vector of length `nrow(data)`")
-    }
-  }
-
   dvers <- "1.0.0"
   if (!missing(response_model)) {
     deprecate_arg_warn("response_model", "response.model", "cate", dvers)
@@ -257,6 +247,20 @@ cate <- function(response.model, # nolint
       "`rep` argument is ignored. "
     )
     rep <- 1L
+  }
+
+  des_cate <- design(cate.model, data, specials="cluster")
+  if (is.null(id)) {
+    id <- des_cate$cluster
+  }
+  if (!is.null(id)) {
+    if (!is.vector(id)) { # in case users provide a matrix or the like
+      rlang::abort("subject ids must be a vector")
+    }
+    if (length(id) != n) { # downstream lava::estimate also fails in this case
+    # however, stop here to provide more informative error message
+      rlang::abort("subject ids must be a vector of length `nrow(data)`")
+    }
   }
 
   estimate_nuisance_models <- function(args) {
@@ -524,7 +528,8 @@ update.cate.targeted <- function(object,
                                  var.type = "IC",
                                  second.order = TRUE, ...) {
 
-  desA <- design(cate.model, data, intercept = TRUE, rm.envir = FALSE)
+  desA <- design(cate.model, data,
+                 intercept = TRUE, rm.envir = FALSE, specials="cluster")
   if (length(object$data$y) != nrow(desA$x)) {
     stop("Not same data as the `cate` object")
   }

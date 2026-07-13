@@ -95,5 +95,8 @@ lava::estimate
 survival::strata
 
 ##' @export
+survival::cluster
+
+##' @export
 survival::Surv
 # nolint end
