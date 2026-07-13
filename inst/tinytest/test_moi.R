@@ -421,6 +421,12 @@ test_moi_missing_weights <- function() {
                                   treatment.model = learner_glm(a ~ 1, family = binomial()),
                                   imputation.model = learner_glm(y ~ a + x, weights = user_w),
                                   imputation.subset = "!is.na(y)")
+
+  res_b <- targeted:::moi_missing(data = cbind(d, user_w), delta = !is.na(d$y), id = d$id,
+                                  treatment.model = learner_glm(a ~ 1, family = binomial()),
+                                  imputation.model = learner_glm(y ~ a + x + weights(user_w),
+                                  learner.args = list(specials = "weights")),
+                                  imputation.subset = "!is.na(y)")
   ref_fit <- glm(y ~ a + x, data = d[!is.na(d$y), ],
                  weights = user_w[!is.na(d$y)],
                  na.action = lava::na.pass0)

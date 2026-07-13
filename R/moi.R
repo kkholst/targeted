@@ -116,9 +116,24 @@ moi_missing <- function(data,
   if (!any(model_rows)) {
     stop("'imputation.subset' expression excludes all rows (no TRUE values)")
   }
+
+  extract_weights <- function(lr) {
+    if (!is.null(weights <- lr$opt("weights"))) {
+      rlang::warn(
+        paste0(
+          "Provide imputation.model 'weights' via 'specials' and not ",
+          "'learner.args' argument."
+        ),
+        call = call("moi")
+      )
+    } else {
+      weights <- lr$design(data, na.action = na.pass)$weights
+    }
+    weights
+  }
+
   ## Combine user-specified weights with subset weights.
-  user_weights <-
-    imputation.model$.__enclos_env__$private$estimate.args$weights
+  user_weights <- extract_weights(imputation.model)
   if (is.null(user_weights)) {
     weights <- as.numeric(model_rows)
   } else {
