@@ -407,7 +407,7 @@ test_cate_rep_no_crossfit()
 
 test_cate_id_arg <- function() {
   # test id argument
-  d$id <- paste("a", seq_len(nrow(d)))
+  d$id <- paste0("a", seq_len(nrow(d)))
   a <- cate(y ~ a + x,
             learner_glm(a ~ 1, family=binomial),
             second.order = FALSE,
@@ -439,7 +439,19 @@ test_cate_id_arg <- function() {
   expect_error(
     cate(y ~ a + x, learner_glm(a ~ 1, family=binomial),
       second.order = FALSE, id = "id", data = d),
-    pattern = "subject ids must be a vector of length `nrow(data)`"
+    pattern = "subject ids must be a vector of length"
   )
+
+  # using cluster special term works:
+  a_cluster <- cate(y ~ a + x,
+    learner_glm(a ~ 1, family=binomial),
+    cate.model = ~ cluster(id),
+    data = d
+  ) |> estimate()
+
+  id <- lava::index(a_cluster)
+  ord <- match(id, d$id)
+  expect_true(length(ord) == nrow(d))
+  expect_true(mean(IC(a)[order(ord), 1] - if1)<1e-12)
 }
 test_cate_id_arg()
