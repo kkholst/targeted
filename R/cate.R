@@ -249,7 +249,9 @@ cate <- function(response.model, # nolint
     rep <- 1L
   }
 
-  des_cate <- design(cate.model, data, specials="cluster")
+  environment(cate.model)$cluster <- targeted::cluster
+  des_cate <- design(cate.model, data,
+                     specials="cluster")
   if (is.null(id)) {
     id <- des_cate$cluster
   }
