@@ -87,6 +87,8 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #'   forming a partition of `1:nrow(data)`.
 #' @param rep number of replications of cross-fitting procedure
 #'   by averaging estimates and influence functions from each replication
+#' @param id (integer or character) optional subject id vector of length
+#' `nrow(data)`.
 #' @param silent suppress all messages and progressbars
 #' @param stratify if TRUE the response.model will be stratified by treatment
 #' @param mc.cores (optional) number of cores. parallel::mcmapply used instead
@@ -148,6 +150,7 @@ cate <- function(response.model, # nolint
                  contrast,
                  nfolds = 1,
                  rep = 1,
+                 id = NULL,
                  silent = FALSE,
                  stratify = FALSE,
                  mc.cores = NULL,
@@ -244,6 +247,22 @@ cate <- function(response.model, # nolint
       "`rep` argument is ignored. "
     )
     rep <- 1L
+  }
+
+  environment(cate.model)$cluster <- targeted::cluster
+  des_cate <- design(cate.model, data,
+                     specials="cluster")
+  if (is.null(id)) {
+    id <- des_cate$cluster
+  }
+  if (!is.null(id)) {
+    if (!is.vector(id)) { # in case users provide a matrix or the like
+      rlang::abort("subject ids must be a vector")
+    }
+    if (length(id) != n) { # downstream lava::estimate also fails in this case
+    # however, stop here to provide more informative error message
+      rlang::abort("subject ids must be a vector of length `nrow(data)`")
+    }
   }
 
   estimate_nuisance_models <- function(args) {
@@ -393,6 +412,7 @@ cate <- function(response.model, # nolint
   res <- update(res,
                 cate.model = cate.model,
                 data = data,
+                id = id,
                 calibration.model = calibration.model,
                 var.type = var.type,
                 second.order = second.order
@@ -505,11 +525,13 @@ cate_est <- function(y, # response vector
 update.cate.targeted <- function(object,
                                  cate.model = ~1,
                                  data,
+                                 id = lava::index(estimate(object)),
                                  calibration.model = NULL,
                                  var.type = "IC",
                                  second.order = TRUE, ...) {
 
-  desA <- design(cate.model, data, intercept = TRUE, rm.envir = FALSE)
+  desA <- design(cate.model, data,
+                 intercept = TRUE, rm.envir = FALSE, specials="cluster")
   if (length(object$data$y) != nrow(desA$x)) {
     stop("Not same data as the `cate` object")
   }
@@ -573,7 +595,11 @@ update.cate.targeted <- function(object,
 
   if (tolower(var.type) == "ic" || is.null(vcov) || ncol(desA$x)>1) {
     IC  <- Reduce("+", lapply(ests, \(x) x$IC)) / length(ests)
-    estimate <- lava::estimate(coef = est, IC = IC)
+    if (!is.null(id)) {
+      estimate <- lava::estimate(coef = est, IC = IC, id = id)
+    } else {
+      estimate <- lava::estimate(coef = est, IC = IC)
+    }
   } else {
     e <- lava::estimate(coef = est[seq_len(ncol(vcov))], vcov = vcov)
     pairs <- utils::combn(seq_along(coef(e)), 2)
@@ -617,4 +643,9 @@ print.summary.cate.targeted <- function(x, ...) {
   print(x$estimate, ...)
   cat("\nAverage Treatment Effect:\n")
   print(x$ate)
+}
+
+#' @export
+estimate.cate.targeted <- function(x, ...) {
+  lava::estimate(x$estimate, ...)
 }

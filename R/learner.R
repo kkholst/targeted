@@ -456,7 +456,6 @@ format_fit_predict_args <- function(args) {
   return(paste0(names(args), "=", args, collapse =", "))
 }
 
-
 learner_print <- function(self, private) {
   cat_ruler(" learner object ", 10)
 
