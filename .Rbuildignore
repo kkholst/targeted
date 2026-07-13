@@ -23,6 +23,7 @@
 ^src/target/tests$
 ^src/target/config$
 ^README\.Rmd$
+^AGENTS\.md$
 ^LICENSE$
 ^examples$
 ^TODO$
