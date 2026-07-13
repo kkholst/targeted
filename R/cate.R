@@ -87,7 +87,8 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #'   forming a partition of `1:nrow(data)`.
 #' @param rep number of replications of cross-fitting procedure
 #'   by averaging estimates and influence functions from each replication
-#' @param id (optional) subject id variable
+#' @param id (integer or character) optional subject id vector of length
+#' `nrow(data)`.
 #' @param silent suppress all messages and progressbars
 #' @param stratify if TRUE the response.model will be stratified by treatment
 #' @param mc.cores (optional) number of cores. parallel::mcmapply used instead
@@ -166,6 +167,16 @@ cate <- function(response.model, # nolint
   n <- nrow(data)
   if (inherits(data, c("data.table", "tbl_df"))) {
     data <- as.data.frame(data)
+  }
+
+  if (!is.null(id)) {
+    if (!is.vector(id)) { # in case users provide a matrix or the like
+      rlang::abort("subject ids must be a vector")
+    }
+    if (length(id) != n) { # downstream lava::estimate also fails in this case
+    # however, stop here to provide more informative error message
+      rlang::abort("subject ids must be a vector of length `nrow(data)`")
+    }
   }
 
   dvers <- "1.0.0"
