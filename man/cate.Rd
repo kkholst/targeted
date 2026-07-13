@@ -49,7 +49,8 @@ forming a partition of \code{1:nrow(data)}.}
 \item{rep}{number of replications of cross-fitting procedure
 by averaging estimates and influence functions from each replication}
 
-\item{id}{(optional) subject id variable}
+\item{id}{(integer or character) optional subject id vector of length
+\code{nrow(data)}.}
 
 \item{silent}{suppress all messages and progressbars}
 

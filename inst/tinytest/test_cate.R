@@ -425,5 +425,21 @@ test_cate_id_arg <- function() {
   ord <- match(id, d$id)
   expect_true(length(ord) == nrow(d))
   expect_true(mean(IC(a)[order(ord), 1] - if1)<1e-12)
+
+  # id column also accepts integer vector
+  a_int <- cate(y ~ a + x,
+    learner_glm(a ~ 1, family=binomial),
+    second.order = FALSE,
+    id = seq_len(nrow(d)),
+    data = d
+  ) |> estimate()
+  expect_equal(a_int$id, seq_len(nrow(d)))
+  expect_equal(parameter(a_int), parameter(a))
+
+  expect_error(
+    cate(y ~ a + x, learner_glm(a ~ 1, family=binomial),
+      second.order = FALSE, id = "id", data = d),
+    pattern = "subject ids must be a vector of length `nrow(data)`"
+  )
 }
 test_cate_id_arg()
