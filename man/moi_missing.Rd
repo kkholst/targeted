@@ -18,13 +18,7 @@ moi_missing(
 )
 }
 \arguments{
-\item{data}{A data.frame containing the analysis dataset. Data.table and
-tibble objects will be coerced to
-data.frame.}
-
 \item{id}{A vector with subject IDs}
-
-\item{delta}{A vector with the non-missing indicator}
 
 \item{treatment.model}{A \code{learner} object for the binary treatment,
 used to extract the treatment variable and its levels.}
@@ -34,15 +28,6 @@ the imputation model. The learner must specify the outcome variable and
 model formula. If the learner was constructed with user-supplied
 \code{weights}, those weights are multiplied by the
 \code{imputation.subset} indicator (excluded rows receive zero weight).}
-
-\item{imputation.subset}{Optional. A character string containing an R
-expression that evaluates to a logical vector indicating which rows to use
-for fitting the
-imputation model. The expression is evaluated in the context of 'data'. If
-NULL (default), all rows are used.}
-
-\item{imputation.augmentation}{Logical. Should an augmentation term
-associated with the imputation model be added to the one-step estimator}
 
 \item{missing.model}{\code{learner} object
 specifying the model for the probability of the outcome being
