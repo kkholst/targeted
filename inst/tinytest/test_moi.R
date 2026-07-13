@@ -409,24 +409,40 @@ test_moi_missing_weights <- function() {
   d <- sim_missing_id(n)
 
   ## (a) baseline: no user weights, subset only
-  res_a <- targeted:::moi_missing(data = d, delta = !is.na(d$y), id = d$id,
-                                  treatment.model = learner_glm(a ~ 1, family = binomial()),
-                                  imputation.model = learner_glm(y ~ a + x),
-                                  imputation.subset = "!is.na(y)")
+  args <- list(
+    delta = !is.na(d$y), id = d$id,
+    treatment.model = learner_glm(a ~ 1, family = binomial()),
+    imputation.subset = "!is.na(y)"
+  )
+  moi_missing <- targeted:::moi_missing
+  res_a <- do.call(
+    moi_missing,
+    c(args, list(data = d, imputation.model = learner_glm(y ~ a + x)))
+  )
   expect_true(all(is.finite(coef(res_a$estimate))))
 
   ## (b) user weights merge: user_w * model_rows reproduces a manual fit
+  # incorrect way of handling user weights in imputation.model
   user_w <- runif(n, 0.5, 1.5)
-  res_b <- targeted:::moi_missing(data = d, delta = !is.na(d$y), id = d$id,
-                                  treatment.model = learner_glm(a ~ 1, family = binomial()),
-                                  imputation.model = learner_glm(y ~ a + x, weights = user_w),
-                                  imputation.subset = "!is.na(y)")
+  args_extra <- list(
+    data = d, imputation.model = learner_glm(y ~ a + x, weights = user_w)
+  )
+  expect_warning(
+    res_b_ref <- do.call(moi_missing, c(args, args_extra)),
+    pattern = "Provide imputation.model 'weights'"
+  )
 
-  res_b <- targeted:::moi_missing(data = cbind(d, user_w), delta = !is.na(d$y), id = d$id,
-                                  treatment.model = learner_glm(a ~ 1, family = binomial()),
-                                  imputation.model = learner_glm(y ~ a + x + weights(user_w),
-                                  learner.args = list(specials = "weights")),
-                                  imputation.subset = "!is.na(y)")
+  # correct way of handling user weights in imputation.model
+  args_extra <- list(
+    data = cbind(d, user_w),
+    imputation.model = learner_glm(
+      y ~ a + x + weights(user_w),
+      learner.args = list(specials = "weights")
+  ))
+
+  res_b <- do.call(moi_missing, c(args, args_extra))
+  expect_equal(res_b_ref$coefmat, res_b$coefmat)
+
   ref_fit <- glm(y ~ a + x, data = d[!is.na(d$y), ],
                  weights = user_w[!is.na(d$y)],
                  na.action = lava::na.pass0)
@@ -436,40 +452,62 @@ test_moi_missing_weights <- function() {
                tolerance = 1e-12)
 
   ## (c) length mismatch is rejected
+  # suppress warning about incorrect way of providing user weights to
+  # imputation.model
+  args_extra <- list(
+    data = d,
+    imputation.model = learner_glm(y ~ a + x, weights = runif(n - 1))
+  )
   expect_error(
-    targeted:::moi_missing(
-                 data = d, delta = !is.na(d$y), id = d$id,
-                 treatment.model = learner_glm(a ~ 1, family = binomial()),
-                 imputation.model = learner_glm(y ~ a + x, weights = runif(n - 1)),
-                 imputation.subset = "!is.na(y)"
-               ),
-    "length"
+    do.call(moi_missing, c(args, args_extra)) |> suppressWarnings(),
+    pattern = "length"
   )
 
   ## (d) NA in user weights is rejected
   bad_na <- user_w
   bad_na[1] <- NA
+  args_extra <- list(
+    data = d,
+    imputation.model = learner_glm(y ~ a + x, weights = bad_na)
+  )
   expect_error(
-    targeted:::moi_missing(
-      data = d, delta = !is.na(d$y), id = d$id,
-      treatment.model = learner_glm(a ~ 1, family = binomial()),
-      imputation.model = learner_glm(y ~ a + x, weights = bad_na),
-      imputation.subset = "!is.na(y)"
-    ),
-    "must not contain NA"
+    do.call(moi_missing, c(args, args_extra)) |> suppressWarnings(),
+    pattern = "must not contain NA"
+  )
+
+  args_extra <- list(
+    data = cbind(d, bad_na),
+    imputation.model = learner_glm(
+        y ~ a + x + weights(bad_na), learner.args = list(specials = "weights")
+    )
+  )
+  expect_error(
+    do.call(moi_missing, c(args, args_extra)),
+    pattern = "must not contain NA"
   )
 
   ## (e) negative user weights rejected
   bad_neg <- user_w
   bad_neg[1] <- -0.1
+  args_extra <- list(
+    data = d,
+    imputation.model = learner_glm(y ~ a + x, weights = bad_neg)
+  )
   expect_error(
-    targeted:::moi_missing(
-      data = d, delta = !is.na(d$y), id = d$id,
-      treatment.model = learner_glm(a ~ 1, family = binomial()),
-      imputation.model = learner_glm(y ~ a + x, weights = bad_neg),
-      imputation.subset = "!is.na(y)"
-    ),
-    "non-negative"
+    do.call(moi_missing, c(args, args_extra)) |> suppressWarnings(),
+    pattern = "non-negative"
+  )
+
+  args_extra <- list(
+    data = cbind(d, bad_neg),
+    imputation.model = learner_glm(
+      y ~ a + x + weights(bad_neg),
+      learner.args = list(specials = "weights")
+    )
+  )
+  expect_error(
+    do.call(moi_missing, c(args, args_extra)),
+    pattern = "non-negative"
   )
 }
 test_moi_missing_weights()
