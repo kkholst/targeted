@@ -393,7 +393,8 @@ moi_missing <- function(data,
 ##'       \ifelse{latex}{$E[\tilde{y}(0)]$}{\code{E[ỹ(0)]}} (or
 ##'       \code{E[tildeY(1)]} / \code{E[tildeY(0)]} in non-UTF-8 locales),
 ##'       and the contrast row is labeled
-##'       \ifelse{latex}{$E[\tilde{y}(1)$]-$E[\tilde{y}(0)]$}{\code{E[ỹ(1)]-E[ỹ(0)]}}.}
+##'       \ifelse{latex}{$E[\tilde{y}(1)$]-$E[\tilde{y}(0)]$}
+##'              {\code{E[ỹ(1)]-E[ỹ(0)]}}.}
 ##'     \item{levels}{Treatment levels (character).}
 ##'     \item{intermediate}{(only if \code{return.all = TRUE}) Intermediate
 ##'       estimates: \eqn{E[\Delta Y|A=a]}, \eqn{P(\Delta=0|A=a)}, and
