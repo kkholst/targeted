@@ -389,12 +389,11 @@ moi_missing <- function(data,
 ##'       contrast \eqn{E[\tilde{Y}|A=1] - E[\tilde{Y}|A=0]}, with
 ##'       influence-function-based standard errors. Row labels follow the
 ##'       \code{\link{cate}} convention: per-arm rows are labeled
-##'       \ifelse{latex}{$E[\tilde{y}(1)]$}{\code{E[ỹ(1)]}} and
-##'       \ifelse{latex}{$E[\tilde{y}(0)]$}{\code{E[ỹ(0)]}} (or
-##'       \code{E[tildeY(1)]} / \code{E[tildeY(0)]} in non-UTF-8 locales),
+##'       \if{latex}{\eqn{E[\tilde{y}(1)]}}{E[ỹ(1)]} and
+##'       \if{latex}{\eqn{E[\tilde{y}(0)]}}{E[ỹ(0)]}
+##'       (or \code{E[tildeY(1)]} / \code{E[tildeY(0)]} in non-UTF-8 locales),
 ##'       and the contrast row is labeled
-##'       \ifelse{latex}{$E[\tilde{y}(1)$]-$E[\tilde{y}(0)]$}
-##'              {\code{E[ỹ(1)]-E[ỹ(0)]}}.}
+##'       \if{latex}{\eqn{E[\tilde{y}(1)]-E[\tilde{y}(0)]}}{E[ỹ(1)]-E[ỹ(0)]}.}
 ##'     \item{levels}{Treatment levels (character).}
 ##'     \item{intermediate}{(only if \code{return.all = TRUE}) Intermediate
 ##'       estimates: \eqn{E[\Delta Y|A=a]}, \eqn{P(\Delta=0|A=a)}, and
