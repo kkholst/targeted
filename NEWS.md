@@ -1,7 +1,7 @@
 # targeted 0.8
 
-Development version
-
+- `moi`: implementation of one-step outcome imputation estimator
+  [(arXiv.2606.07174)](https://doi.org/10.48550/arXiv.2606.07174):
 - `design` tolerates now `special` variables who are absent in `data`
 - rename `rm_envir` argument of `design` to `rm.envir`
 - adding `predict_filter` generator functions for experimental `predict.filter` argument of `learner`

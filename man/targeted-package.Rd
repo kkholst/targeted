@@ -37,6 +37,7 @@ The International Journal of Biostatistics.
 Useful links:
 \itemize{
   \item \url{https://kkholst.github.io/targeted/}
+  \item \url{https://github.com/kkholst/targeted}
   \item Report bugs at \url{https://github.com/kkholst/targeted/issues}
 }
 
