@@ -71,7 +71,6 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #' \beta)} denote a parametric working model, then the target parameter is the
 #' mean-squared error \deqn{\beta(P) = \operatorname{argmin}_{\beta}
 #' E_{P}[\{\Psi_{1}(P)(V)-\Psi_{0}(P)(V)\} - m(V; \beta)]^{2}}
-#' @inheritParams deprecated_argument_names
 #' @title Conditional Average Treatment Effect estimation
 #' @param response.model formula or learner object (formula => learner_glm)
 #' @param ... additional arguments to future.apply::future_mapply
@@ -99,6 +98,11 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #'   available for ATE and when `calibration.model` is also specified)
 #' @param second.order add seconder order term to IF to handle misspecification
 #'   of outcome models
+#' @param response_model Deprecated. Use response.model instead.
+#' @param propensity_model Deprecated. Use treatment.model instead.
+#' @param cate_model Deprecated. Use cate.model instead.
+#' @param treatment Deprecated. Use cate.model instead.
+#' @param propensity.model Deprecated. Use treatment.model instead.
 #' @return cate.targeted object
 #' @author Klaus Kähler Holst, Andreas Nordland
 #' @references
