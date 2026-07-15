@@ -11,6 +11,9 @@
 #' Regression: [learner_isoreg] \cr
 #' Classification: [learner_naivebayes] \cr
 #' Ensemble (super learner): [learner_sl]
+#'
+#' The following constructors for commonly used filters are available:
+#' [predict_filter_bound], [predict_filter_bound_dynamic]
 #' @param data data.frame
 #' @author Klaus Kähler Holst, Benedikt Sommer
 #' @examples
@@ -96,7 +99,7 @@ learner <- R6::R6Class("learner", # nolint
       info = NULL,
       specials = c(),
       formula.keep.specials = FALSE,
-      predict.filter = \(data, ...) \(pred, newdata, ...) pred,
+      predict.filter = \(data) \(pred, newdata) pred,
       intercept = FALSE
     ) {
       estimate <- add_dots(estimate)
@@ -109,6 +112,23 @@ learner <- R6::R6Class("learner", # nolint
       private$predict_filter_generator <- add_dots(predict.filter)
 
       private$estimate.args <- estimate.args
+
+      if (length(intersect(names(estimate.args), specials)) > 0) rlang::abort(
+        paste0(
+          "Duplicated entries in specials and estimate.args. ",
+          "Use only one argument to provide additional arguments to the ",
+          "estimate function."
+        )
+      )
+
+      if (length(intersect(names(predict.args), specials)) > 0) rlang::abort(
+        paste0(
+          "Duplicated entries in specials and predict.args. ",
+          "Use only one argument to provide additional arguments to the ",
+          "predict function."
+        )
+      )
+
       no_formula <- is.null(formula)
       if (!no_formula && is.character(formula) || is.function(formula)) {
         no_formula <- TRUE
@@ -133,14 +153,21 @@ learner <- R6::R6Class("learner", # nolint
                 private$des.args
                 )
             )
-            args <- private$update_args(private$estimate.args, ...) #
+            args <- private$update_args(private$estimate.args, ...)
             form <- self$formula
             if (!private$formula.keep.specials) form <- des$formula
             args <- c(
               args, list(formula = form, data = data)
             )
             if (length(des$specials) > 0) {
-              args <- c(args, des[des$specials])
+              for (s in des$specials) {
+                # specials provided to fitfun call precede over specials
+                # obtained from design object
+                if (!(s %in% names(args))) {
+                  args[[s]] <- des[[s]]
+                }
+
+              }
             }
             return(structure(do.call(private$init.estimate, args),
                              design = summary(des)
@@ -157,7 +184,11 @@ learner <- R6::R6Class("learner", # nolint
             args <- c(list(x = xx$x, y = xx$y), args)
 
             if (length(xx$specials) > 0) {
-              args <- c(args, xx[xx$specials])
+              for (s in xx$specials) {
+                # specials provided to fitfun call precede over specials
+                # obtained from design object
+                if (!(s %in% names(args))) args[[s]] <- xx[[s]]
+              }
             }
             return(structure(do.call(private$init.estimate, args),
               design = summary(xx)
@@ -172,7 +203,9 @@ learner <- R6::R6Class("learner", # nolint
             args <- list(...)
             des <- update(attr(object, "design"), data)
             for (s in des$specials) {
-              if (is.null(args[[s]])) args[[s]] <- des[[s]]
+                # specials provided to predfun call precede over specials
+                # obtained from design object
+              if (!(s %in% names(args))) args[[s]] <- des[[s]]
             }
             predict_args_call <- predict.args
             predict_args_call[names(args)] <- args
@@ -208,7 +241,7 @@ learner <- R6::R6Class("learner", # nolint
     #'   stored inside the class.
     estimate = function(data, ..., store = TRUE) {
       private$predict_filter <- private$predict_filter_generator(
-        data, ...
+        data
       ) |> add_dots()
       res <- private$fitfun(data, ...)
       if (store) private$fitted <- res
@@ -226,9 +259,7 @@ learner <- R6::R6Class("learner", # nolint
       if (is.null(object)) stop("Provide estimated model object")
 
       preds <- private$predfun(object, newdata, ...)
-      # TODO: do we want to pass on the ellipses to the filter function? is
-      # there some risk about argument name clashes?
-      return(private$predict_filter(preds, newdata, ...))
+      return(private$predict_filter(preds, newdata))
     },
 
     #' @description
@@ -239,11 +270,12 @@ learner <- R6::R6Class("learner", # nolint
         if (grepl("~", formula)) {
           formula <- as.formula(formula)
         } else { # string
-          st <- as.character(private$.formula)
-          if (length(st) == 3L) { # includes response
-            formula <- reformulate(st[3], formula)
+          if (length(private$.formula) == 3L) { # includes response
+            formula <- reformulate(
+              paste(deparse(private$.formula[[3]]), collapse = " "), formula)
           } else { # without response
-            formula <- reformulate(st[2], formula)
+            formula <- reformulate(
+              paste(deparse(private$.formula[[2]]), collapse = " "), formula)
           }
         }
       }
@@ -423,7 +455,6 @@ format_fit_predict_args <- function(args) {
 
   return(paste0(names(args), "=", args, collapse =", "))
 }
-
 
 learner_print <- function(self, private) {
   cat_ruler(" learner object ", 10)

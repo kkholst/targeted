@@ -9,6 +9,7 @@
 \alias{parameter}
 \alias{estimate}
 \alias{strata}
+\alias{cluster}
 \alias{Surv}
 \title{Objects exported from other packages}
 \keyword{internal}
@@ -19,6 +20,6 @@ below to see their documentation.
 \describe{
   \item{lava}{\code{\link[lava:estimate]{estimate()}}, \code{\link[lava:IC]{IC()}}, \code{\link[lava:parameter]{parameter()}}, \code{\link[lava:score]{score()}}, \code{\link[lava:sim]{sim()}}}
 
-  \item{survival}{\code{\link[survival:strata]{strata()}}, \code{\link[survival:Surv]{Surv()}}}
+  \item{survival}{\code{\link[survival:cluster]{cluster()}}, \code{\link[survival:strata]{strata()}}, \code{\link[survival:Surv]{Surv()}}}
 }}
 

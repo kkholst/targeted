@@ -11,7 +11,8 @@
 #' @param ... additional arguments (see [cate()])
 #' @param formula design specifying the OLS estimator with outcome given by the
 #'   EIF (see `cate`)
-#' @inheritParams deprecated_argument_names
+#' @param response_model Deprecated. Use response.model instead.
+#' @param propensity_model Deprecated. Use treatment.model instead.
 #' @examples
 #' m <- lava::lvm(y ~ x+z, r ~ x) |>
 #'      lava::distribution(~ r, value = lava::binomial.lvm()) |>

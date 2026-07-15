@@ -10,11 +10,12 @@ design(
   ...,
   intercept = FALSE,
   response = TRUE,
-  rm_envir = FALSE,
+  rm.envir = FALSE,
   specials = NULL,
   specials.call = NULL,
   levels = NULL,
-  design.matrix = TRUE
+  design.matrix = TRUE,
+  na.action = na.omit
 )
 }
 \arguments{
@@ -29,7 +30,8 @@ design matrix}
 
 \item{response}{(logical) if FALSE the response variable is dropped}
 
-\item{rm_envir}{Remove environment}
+\item{rm.envir}{(logical) Remove environment from terms attribute of
+returned object}
 
 \item{specials}{character vector specifying functions in the formula that
 should be marked as special in the \link{terms} object}
@@ -42,6 +44,9 @@ to be assumed for each factor}
 \item{design.matrix}{(logical) if FALSE then only response and specials are
 returned. Otherwise, the design.matrix \code{x} is als part of the returned
 object.}
+
+\item{na.action}{(function) method to handle missing data
+(default: \code{na.omit})}
 }
 \value{
 An object of class 'design'

@@ -59,7 +59,7 @@ fit_treatment_model <- function(data,
                                 treatment) {
   # if treatment is a formula, the default super learner is applied:
   if (inherits(treatment, "formula")) {
-    treatment <- SL(treatment, family = binomial())
+    treatment <- learner_glm(treatment, family = binomial())
   }
 
   ## check if both levels are observed:

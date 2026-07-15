@@ -32,11 +32,11 @@ Depends:
     R (>= 4.1)
 Imports:
     R6,
-    Rcpp (>= 1.0.0),
+    Rcpp (>= 1.1.1),
     abind,
     cli,
     future.apply,
-    lava (>= 1.8.2),
+    lava (>= 1.9.2),
     methods,
     mets (>= 1.3.9),
     quadprog,
@@ -63,13 +63,11 @@ Suggests:
     ranger,
     riskRegression,
     scatterplot3d,
-    survSuperLearner,
     tinytest,
     viridisLite,
     xgboost (>= 3.1.2.1),
-Remotes: tedwestling/survSuperLearner
 BugReports: https://github.com/kkholst/targeted/issues
-URL: https://kkholst.github.io/targeted/
+URL: https://kkholst.github.io/targeted/, https://github.com/kkholst/targeted
 License: Apache License (== 2.0)
 LinkingTo: Rcpp, RcppArmadillo
 LazyLoad: yes

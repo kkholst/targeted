@@ -1,7 +1,7 @@
 #' @description Constructs a [learner] class object for fitting multivariate
 #' adaptive regression splines with [earth::earth].
 #' @param ... Additional arguments to [earth::earth].
-#' @inherit constructor_shared
+#' @inherit learner_glm
 #' @inheritParams earth::earth
 #' @export
 #' @examples

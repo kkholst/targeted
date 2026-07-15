@@ -16,6 +16,9 @@ Regression and classification: \link{learner_glm}, \link{learner_gam}, \link{lea
 Regression: \link{learner_isoreg} \cr
 Classification: \link{learner_naivebayes} \cr
 Ensemble (super learner): \link{learner_sl}
+
+The following constructors for commonly used filters are available:
+\link{predict_filter_bound}, \link{predict_filter_bound_dynamic}
 }
 \examples{
 data(iris)
@@ -135,7 +138,7 @@ function}
   info = NULL,
   specials = c(),
   formula.keep.specials = FALSE,
-  predict.filter = function(data, ...) function(pred, newdata, ...) pred,
+  predict.filter = function(data) function(pred, newdata) pred,
   intercept = FALSE
 )}
     \if{html}{\out{</div>}}

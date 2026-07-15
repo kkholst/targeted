@@ -8,7 +8,7 @@ procfold <- function(a, fold,
                      ...) {
   qmod <- response.model$clone(deep = TRUE)
   pmod <- treatment.model$clone(deep = TRUE)
-  newf <- reformulate(as.character(pmod$formula)[[3]],
+  newf <- reformulate(paste(deparse(pmod$formula[[3]]), collapse = " "),
                       outcome_level(treatment_var, a))
   pmod$update(newf)
   val <- list(est_nuisance_fold(
@@ -71,7 +71,6 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #' \beta)} denote a parametric working model, then the target parameter is the
 #' mean-squared error \deqn{\beta(P) = \operatorname{argmin}_{\beta}
 #' E_{P}[\{\Psi_{1}(P)(V)-\Psi_{0}(P)(V)\} - m(V; \beta)]^{2}}
-#' @inheritParams deprecated_argument_names
 #' @title Conditional Average Treatment Effect estimation
 #' @param response.model formula or learner object (formula => learner_glm)
 #' @param ... additional arguments to future.apply::future_mapply
@@ -87,6 +86,8 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #'   forming a partition of `1:nrow(data)`.
 #' @param rep number of replications of cross-fitting procedure
 #'   by averaging estimates and influence functions from each replication
+#' @param id (integer or character) optional subject id vector of length
+#' `nrow(data)`.
 #' @param silent suppress all messages and progressbars
 #' @param stratify if TRUE the response.model will be stratified by treatment
 #' @param mc.cores (optional) number of cores. parallel::mcmapply used instead
@@ -97,6 +98,11 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #'   available for ATE and when `calibration.model` is also specified)
 #' @param second.order add seconder order term to IF to handle misspecification
 #'   of outcome models
+#' @param response_model Deprecated. Use response.model instead.
+#' @param propensity_model Deprecated. Use treatment.model instead.
+#' @param cate_model Deprecated. Use cate.model instead.
+#' @param treatment Deprecated. Use cate.model instead.
+#' @param propensity.model Deprecated. Use treatment.model instead.
 #' @return cate.targeted object
 #' @author Klaus Kähler Holst, Andreas Nordland
 #' @references
@@ -148,6 +154,7 @@ cate <- function(response.model, # nolint
                  contrast,
                  nfolds = 1,
                  rep = 1,
+                 id = NULL,
                  silent = FALSE,
                  stratify = FALSE,
                  mc.cores = NULL,
@@ -244,6 +251,22 @@ cate <- function(response.model, # nolint
       "`rep` argument is ignored. "
     )
     rep <- 1L
+  }
+
+  environment(cate.model)$cluster <- targeted::cluster
+  des_cate <- design(cate.model, data,
+                     specials="cluster")
+  if (is.null(id)) {
+    id <- des_cate$cluster
+  }
+  if (!is.null(id)) {
+    if (!is.vector(id)) { # in case users provide a matrix or the like
+      rlang::abort("subject ids must be a vector")
+    }
+    if (length(id) != n) { # downstream lava::estimate also fails in this case
+    # however, stop here to provide more informative error message
+      rlang::abort("subject ids must be a vector of length `nrow(data)`")
+    }
   }
 
   estimate_nuisance_models <- function(args) {
@@ -345,7 +368,7 @@ cate <- function(response.model, # nolint
   pmod <- treatment.model$clone(deep = TRUE)
   for (i in seq_along(contrast)) {
     newf <- reformulate(
-      as.character(pmod$formula)[[3]],
+      paste(deparse(pmod$formula[[3]]), collapse = " "),
       outcome_level(treatment_var, contrast[i])
     )
     pmod$update(newf)
@@ -370,9 +393,30 @@ cate <- function(response.model, # nolint
     data = val # (y, a, p, q)
   )
   class(res) <- c("cate.targeted", "targeted")
+  if (any(mapply(\(x) any(is.na(x)), val$q))) {
+    warning(
+      "NAs detect in the predictions of the response.model.",
+      " Returning a cate object with an blanked estimate field.",
+      " Inspect the data$q field of the returned object for more information."
+    )
+    res$estimate <- lava::estimate(coef = NA, vcov = NULL)
+    return(res)
+  }
+  if (any(mapply(\(x) any(is.na(x)), val$p))) {
+    warning(
+      "NAs detect in the predictions of the treatment.model.",
+      " Returning a cate object with an blanked estimate field.",
+      " Inspect the data$q field of the returned object for more information."
+    )
+    # return object because update method fails when val$p contains NAs and
+    # the error message begin cast does not inform the user about the NAs
+    res$estimate <- lava::estimate(coef = NA, vcov = NULL)
+    return(res)
+  }
   res <- update(res,
                 cate.model = cate.model,
                 data = data,
+                id = id,
                 calibration.model = calibration.model,
                 var.type = var.type,
                 second.order = second.order
@@ -405,7 +449,7 @@ cate_est <- function(y, # response vector
         inherits(treatment.model, "learner_glm")) {
       pmod <- treatment.model$clone(deep = TRUE)
       newf <- reformulate(
-        as.character(pmod$formula)[[3]],
+        paste(deparse(pmod$formula[[3]]), collapse = " "),
         outcome_level(treatment_var, contrast[i])
       )
       pmod$update(newf)
@@ -485,11 +529,13 @@ cate_est <- function(y, # response vector
 update.cate.targeted <- function(object,
                                  cate.model = ~1,
                                  data,
+                                 id = lava::index(estimate(object)),
                                  calibration.model = NULL,
                                  var.type = "IC",
                                  second.order = TRUE, ...) {
 
-  desA <- design(cate.model, data, intercept = TRUE, rm_envir = FALSE)
+  desA <- design(cate.model, data,
+                 intercept = TRUE, rm.envir = FALSE, specials="cluster")
   if (length(object$data$y) != nrow(desA$x)) {
     stop("Not same data as the `cate` object")
   }
@@ -553,7 +599,11 @@ update.cate.targeted <- function(object,
 
   if (tolower(var.type) == "ic" || is.null(vcov) || ncol(desA$x)>1) {
     IC  <- Reduce("+", lapply(ests, \(x) x$IC)) / length(ests)
-    estimate <- lava::estimate(coef = est, IC = IC)
+    if (!is.null(id)) {
+      estimate <- lava::estimate(coef = est, IC = IC, id = id)
+    } else {
+      estimate <- lava::estimate(coef = est, IC = IC)
+    }
   } else {
     e <- lava::estimate(coef = est[seq_len(ncol(vcov))], vcov = vcov)
     pairs <- utils::combn(seq_along(coef(e)), 2)
@@ -597,4 +647,9 @@ print.summary.cate.targeted <- function(x, ...) {
   print(x$estimate, ...)
   cat("\nAverage Treatment Effect:\n")
   print(x$ate)
+}
+
+#' @export
+estimate.cate.targeted <- function(x, ...) {
+  lava::estimate(x$estimate, ...)
 }
