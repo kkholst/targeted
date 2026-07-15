@@ -41,9 +41,6 @@ jobs:
       with:
         config: ${{ github.event.inputs.config }}
       id: rhub-setup
-    - uses: r-lib/actions/setup-pandoc@v2
-    - uses: r-lib/actions/setup-tinytex@v2
-    - uses: quarto-dev/quarto-actions/setup@v2
 
   linux-containers:
     needs: setup
@@ -63,6 +60,11 @@ jobs:
         with:
           token: ${{ secrets.RHUB_TOKEN }}
           job-config: ${{ matrix.config.job-config }}
+
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-tinytex@v2
+      - uses: quarto-dev/quarto-actions/setup@v2
+
       - uses: r-hub/actions/setup-deps@v1
         with:
           token: ${{ secrets.RHUB_TOKEN }}
