@@ -100,6 +100,21 @@ jobs:
 
       - uses: r-hub/actions/setup-deps@v1
         with:
+            job-config: ${{ matrix.config.job-config }}
+            token: ${{ secrets.RHUB_TOKEN }}
+
+      - name: Overwrite stale CRAN targeted with the version under test
+        shell: Rscript {0}
+        run: |
+          # polle (Suggests) pulls targeted from CRAN; replace it so the
+          # quarto-spawned R process can't load an old shadowing copy.
+          # this is only needed for the windows runner // macos runner
+          # works fine without the additional install step
+          remotes::install_local(".", force = TRUE, dependencies = FALSE,
+                                  upgrade = "never")
+
+      - uses: r-hub/actions/run-check@v1
+        with:
           job-config: ${{ matrix.config.job-config }}
           token: ${{ secrets.RHUB_TOKEN }}
       - uses: r-hub/actions/run-check@v1
