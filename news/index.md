@@ -1,5 +1,26 @@
 # Changelog
 
+## targeted 0.8
+
+- `moi`: implementation of one-step outcome imputation estimator
+  [(arXiv.2606.07174)](https://doi.org/10.48550/arXiv.2606.07174):
+- `design` tolerates now `special` variables who are absent in `data`
+- rename `rm_envir` argument of `design` to `rm.envir`
+- adding `predict_filter` generator functions for experimental
+  `predict.filter` argument of `learner`
+- removing deprecated ml_model
+- `learner_surv_cox`, `learner_surv_rf`, `cumhaz`
+- feature(superlearner): more robust metalearner (in case quadratic
+  prog. fails)
+- feature(learner_cox): mets::phreg wrapper.
+- disabling openMP in RcppArmadillo
+- bugfix: issue with `cate` with repeated cross-fitting fixed.
+
+Breaking changes:
+
+- removing legacy `crr` and `cate_link` functions
+- removing legacy `SL` function. Use `learner_sl` instead.
+
 ## targeted 0.7.1
 
 CRAN release: 2026-01-12

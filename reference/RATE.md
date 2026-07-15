@@ -13,8 +13,6 @@ RATE(
   M = 5,
   pr.treatment,
   treatment.level,
-  SL.args.response = list(family = gaussian(), SL.library = c("SL.mean", "SL.glm")),
-  SL.args.post.treatment = list(family = binomial(), SL.library = c("SL.mean", "SL.glm")),
   preprocess = NULL,
   efficient = TRUE,
   ...
@@ -25,11 +23,14 @@ RATE(
 
 - response:
 
-  Response formula (e.g, Y ~ D\*A)
+  (formula or learner) Response model. A formula (e.g., `Y ~ D*A`) is
+  wrapped in [learner_glm](learner_glm.md) with a Gaussian family.
 
 - post.treatment:
 
-  Post treatment marker formula (e.g., D ~ W)
+  (formula or learner) Post treatment marker model. A formula (e.g.,
+  `D ~ W`) is wrapped in [learner_glm](learner_glm.md) with a binomial
+  family.
 
 - treatment:
 
@@ -50,14 +51,6 @@ RATE(
 - treatment.level:
 
   Treatment level in binary treatment (default 1)
-
-- SL.args.response:
-
-  Arguments to SuperLearner for the response model
-
-- SL.args.post.treatment:
-
-  Arguments to SuperLearner for the post treatment indicator
 
 - preprocess:
 

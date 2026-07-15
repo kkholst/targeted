@@ -43,15 +43,19 @@ superlearner(
 
   (function) Algorithm to learn the ensemble weights (default
   non-negative least squares). Must be a function of the response (nx1
-  vector), `y`, and the predictions (nxp matrix), `pred`, with p being
-  the number of learners. Alternatively, this can be set to the
-  character value "discrete", in which case the Discrete Super-Learner
-  is applied where the model with the lowest risk (model-score) is given
-  weight 1 and all other learners weight 0.
+  vector), `y`, and the base learner predictions (nxp matrix), `pred`,
+  with p being the number of learners. The function can optionally
+  accept a `model.score` argument for scoring the base learners. See
+  [metalearner_nnls](metalearner_nnls.md),
+  [metalearner_convexcomb](metalearner_convexcomb.md) and
+  [metalearner_discrete](metalearner_discrete.md) for the available meta
+  learners.
 
 - model.score:
 
-  (function) Model scoring method (see [learner](learner.md))
+  (function) Method for scoring the predictions of each base learner.
+  Expects two arguments; vector of response variable and prediction from
+  a base learner (see `targeted:::mse` for additional details).
 
 - mc.cores:
 

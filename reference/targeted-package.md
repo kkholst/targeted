@@ -36,6 +36,8 @@ Useful links:
 
 - <https://kkholst.github.io/targeted/>
 
+- <https://github.com/kkholst/targeted>
+
 - Report bugs at <https://github.com/kkholst/targeted/issues>
 
 ## Author

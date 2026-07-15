@@ -90,7 +90,7 @@ d0 <- data.frame(y, yb, x1, x2)
 lr <- learner_xgboost(y ~ x1 + x2, nrounds = 5)
 lr$estimate(d0)
 lr$predict(head(d0))
-#> [1] -2.2383063  1.9584796  0.4890891  0.4022491 -3.2510221  1.5743552
+#> [1] -3.3518436 -1.9301227 -2.1394951  1.8036846 -3.3518436  0.2587632
 
 # binary classification
 lr <- learner_xgboost(yb ~ x1 + x2, nrounds = 5,
@@ -98,7 +98,7 @@ lr <- learner_xgboost(yb ~ x1 + x2, nrounds = 5,
 )
 lr$estimate(d0)
 lr$predict(head(d0))
-#> [1] 0.6749873 0.8520706 0.6681195 0.8592636 0.1025898 0.6353486
+#> [1] 0.30862170 0.05665484 0.26753685 0.86729151 0.06602509 0.86753744
 
 # multi-class classification
 d0 <- iris

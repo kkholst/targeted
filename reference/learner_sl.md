@@ -38,15 +38,19 @@ learner_sl(
 
   (function) Algorithm to learn the ensemble weights (default
   non-negative least squares). Must be a function of the response (nx1
-  vector), `y`, and the predictions (nxp matrix), `pred`, with p being
-  the number of learners. Alternatively, this can be set to the
-  character value "discrete", in which case the Discrete Super-Learner
-  is applied where the model with the lowest risk (model-score) is given
-  weight 1 and all other learners weight 0.
+  vector), `y`, and the base learner predictions (nxp matrix), `pred`,
+  with p being the number of learners. The function can optionally
+  accept a `model.score` argument for scoring the base learners. See
+  [metalearner_nnls](metalearner_nnls.md),
+  [metalearner_convexcomb](metalearner_convexcomb.md) and
+  [metalearner_discrete](metalearner_discrete.md) for the available meta
+  learners.
 
 - model.score:
 
-  (function) Model scoring method (see [learner](learner.md))
+  (function) Method for scoring the predictions of each base learner.
+  Expects two arguments; vector of response variable and prediction from
+  a base learner (see `targeted:::mse` for additional details).
 
 - learner.args:
 
@@ -99,12 +103,12 @@ print(s)
 #> 
 #> Estimate arguments: learners=<list>, nfolds=10, meta.learner=<function>, model.score=<function> 
 #> Predict arguments:   
-#> Formula: y ~ 1 <environment: 0x55de8c2269d0> 
+#> Formula: y ~ 1 <environment: 0x55a6b5aef850> 
 #> ─────────────────────────────────────
 #>          score     weight
-#> mean 4.9077080 0.00000000
-#> glm  0.9499446 0.04367903
-#> iso  0.4804848 0.95632097
+#> mean 4.6075512 0.03921874
+#> glm  0.9789936 0.03968460
+#> iso  0.4999095 0.92109667
 # weights(s$fit)
 # score(s$fit)
 
@@ -115,24 +119,24 @@ cvres
 #> 
 #> ── mse 
 #>         mean      sd     min     max
-#> sl   0.53592 0.06583 0.45918 0.61290
-#> mean 4.93582 0.25062 4.61359 5.20491
-#> glm  0.95943 0.09491 0.80637 1.04611
-#> iso  0.50016 0.06244 0.43834 0.60064
+#> sl   0.53129 0.03245 0.49217 0.56774
+#> mean 4.59657 0.50115 3.70142 5.07191
+#> glm  0.97602 0.07337 0.88417 1.06816
+#> iso  0.52010 0.03172 0.47648 0.56542
 #> 
 #> ── mae 
 #>         mean      sd     min     max
-#> sl   0.58451 0.03767 0.53719 0.63085
-#> mean 1.78566 0.06822 1.68321 1.87589
-#> glm  0.80297 0.04050 0.74230 0.85606
-#> iso  0.55979 0.04080 0.51443 0.62650
+#> sl   0.58651 0.02967 0.54094 0.61505
+#> mean 1.65086 0.11119 1.47531 1.74119
+#> glm  0.79803 0.02926 0.76318 0.83569
+#> iso  0.58060 0.02988 0.52930 0.61327
 #> 
 #> ── weight 
 #>         mean      sd     min     max
 #> sl         -       -       -       -
-#> mean 0.07109 0.06884 0.00000 0.17930
-#> glm  0.06627 0.02725 0.02534 0.10524
-#> iso  0.86265 0.05976 0.76561 0.93646
+#> mean 0.05328 0.02734 0.01802 0.08715
+#> glm  0.07052 0.00591 0.06439 0.08101
+#> iso  0.87621 0.02468 0.84846 0.90740
 # coef(cvres)
 # score(cvres)
 ```

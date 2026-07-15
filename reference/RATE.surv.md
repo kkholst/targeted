@@ -17,7 +17,6 @@ RATE.surv(
   pr.treatment,
   call.response,
   args.response = list(),
-  SL.args.post.treatment = list(family = binomial(), SL.library = c("SL.mean", "SL.glm")),
   call.censoring,
   args.censoring = list(),
   preprocess = NULL,
@@ -33,7 +32,9 @@ RATE.surv(
 
 - post.treatment:
 
-  Post treatment marker formula (e.g., D ~ W)
+  (formula or learner) Post treatment marker model. A formula (e.g.,
+  `D ~ W`) is wrapped in [learner_glm](learner_glm.md) with a binomial
+  family.
 
 - treatment:
 
@@ -67,10 +68,6 @@ RATE.surv(
 
   Additional arguments to the response model.
 
-- SL.args.post.treatment:
-
-  Arguments to SuperLearner for the post treatment indicator
-
 - call.censoring:
 
   Similar to call.response.
@@ -94,7 +91,7 @@ estimate object
 ## Details
 
 Estimation of \$\$ \frac{P(T \leq \tau\|A=1) - P(T \leq
-\tau\|A=1)}{E\[D\|A=1\]} \$\$ under right censoring based on plug-in
+\tau\|A=0)}{E\[D\|A=1\]} \$\$ under right censoring based on plug-in
 estimates of \\P(T \leq \tau\|A=a)\\ and \\E\[D\|A=1\]\\.
 
 An efficient one-step estimator of \\P(T \leq \tau\|A=a)\\ is

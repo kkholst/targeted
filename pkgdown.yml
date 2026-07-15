@@ -2,6 +2,7 @@ pandoc: 3.8.3
 pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
+  ate: ate.html
   predictionclass: predictionclass.html
   riskregression: riskregression.html
-last_built: 2026-07-08T14:39Z
+last_built: 2026-07-15T07:44Z

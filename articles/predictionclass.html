@@ -6,7 +6,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Prediction model class (learner) • targeted</title>
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- katex math --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><script src="../katex-auto.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
@@ -36,7 +37,8 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/predictionclass.html">Prediction model class (`learner`)</a></li>
+<li><a class="dropdown-item" href="../articles/ate.html">Average Treatment Effect Estimation</a></li>
+    <li><a class="dropdown-item" href="../articles/predictionclass.html">Prediction model class (`learner`)</a></li>
     <li><a class="dropdown-item" href="../articles/riskregression.html">Estimating a relative risk or risk difference with a binary exposure</a></li>
   </ul>
 </li>
@@ -58,7 +60,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Prediction model class (<code>learner</code>)</h1>
 
       <p class="author">Klaus Kähler Holst, Benedikt Sommer</p>
-      <p class="date">2026-07-08</p>
+      <p class="date">2026-07-15</p>
 
       <small class="dont-index">Source: <a href="https://github.com/kkholst/targeted/blob/main/vignettes/predictionclass.qmd" class="external-link"><code>vignettes/predictionclass.qmd</code></a></small>
       <div class="d-none name"><code></code></div>
@@ -108,7 +110,7 @@
 <span>  learners <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    glm1 <span class="op">=</span> <span class="fu"><a href="../reference/learner_glm.html">learner_glm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">age</span> <span class="op">*</span> <span class="va">bili</span>, family <span class="op">=</span> <span class="st">"binomial"</span><span class="op">)</span>,</span>
 <span>    glm2 <span class="op">=</span> <span class="fu"><a href="../reference/learner_glm.html">learner_glm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">age</span>, family <span class="op">=</span> <span class="st">"binomial"</span><span class="op">)</span>,</span>
-<span>    gam <span class="op">=</span> <span class="fu"><a href="../reference/learner_gam.html">learner_gam</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/pkg/gam/man/gam.s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">age</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/gam/man/gam.s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">bili</span><span class="op">)</span>, family <span class="op">=</span> <span class="st">"binomial"</span><span class="op">)</span></span>
+<span>    gam <span class="op">=</span> <span class="fu"><a href="../reference/learner_gam.html">learner_gam</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu">s</span><span class="op">(</span><span class="va">age</span><span class="op">)</span> <span class="op">+</span> <span class="fu">s</span><span class="op">(</span><span class="va">bili</span><span class="op">)</span>, family <span class="op">=</span> <span class="st">"binomial"</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">lr_sl</span><span class="op">$</span><span class="fu">estimate</span><span class="op">(</span><span class="va">pbc</span>, nfolds <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
@@ -124,10 +126,10 @@ Estimate arguments: learners=&lt;list&gt;, nfolds=5, meta.learner=&lt;function&g
 Predict arguments:
 Formula: y ~ age * bili
 ─────────────────────────────────────
-          score    weight
-glm1 0.09808523 0.2767328
-glm2 0.10680633 0.1171093
-gam  0.09696203 0.6061579</code></pre>
+          score     weight
+glm1 0.09745565 0.31289733
+glm2 0.10730394 0.04260906
+gam  0.09574632 0.64449361</code></pre>
 </div>
 </div>
 <p>Most constructors have additional arguments that impact the resulting model fit, ranging from the specification of a link function for generalized linear models to hyper hyperparameters of machine learning models. Arguments naturally vary between the constructors and are documented for each function (e.g. <code><a href="../reference/learner_gam.html">?learner_gam</a></code>). The implemented constructors only provide arguments for the most relevant parameters of the underlying fit function (<code><a href="https://rdrr.io/pkg/mgcv/man/gam.html" class="external-link">mgcv::gam</a></code> in case of <code>learner_gam</code>). As described in the documentation, the ellipsis argument (<code>...</code>) can be used to pass additional arguments to the fit function. However, in most situations this is rarely required.</p>
@@ -238,8 +240,8 @@ Formula: y ~ age + sex + bili </code></pre>
         )
       return(res)
     }
-&lt;bytecode: 0x55e53e6adaa0&gt;
-&lt;environment: 0x55e53abacc38&gt;</code></pre>
+&lt;bytecode: 0x5652e4101e58&gt;
+&lt;environment: 0x5652e72abaf0&gt;</code></pre>
 </div>
 </div>
 <p>Rare situations may arise where one wants to update the formula argument. This supported and implemented via the <code>update</code> method</p>
@@ -279,7 +281,7 @@ Formula: y ~ age + sex + bili </code></pre>
 <code class="sourceCode R"><span><span class="co"># future::plan("multicore")</span></span>
 <span><span class="va">lrs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  glm <span class="op">=</span> <span class="fu"><a href="../reference/learner_glm.html">learner_glm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">age</span>, family <span class="op">=</span> <span class="st">"binomial"</span><span class="op">)</span>,</span>
-<span>  gam <span class="op">=</span> <span class="fu"><a href="../reference/learner_gam.html">learner_gam</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/pkg/gam/man/gam.s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">age</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/gam/man/gam.s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">bili</span><span class="op">)</span>, family <span class="op">=</span> <span class="st">"binomial"</span><span class="op">)</span></span>
+<span>  gam <span class="op">=</span> <span class="fu"><a href="../reference/learner_gam.html">learner_gam</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu">s</span><span class="op">(</span><span class="va">age</span><span class="op">)</span> <span class="op">+</span> <span class="fu">s</span><span class="op">(</span><span class="va">bili</span><span class="op">)</span>, family <span class="op">=</span> <span class="st">"binomial"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span> <span class="co"># 2 times repeated 5-fold cross-validation</span></span>
 <span><span class="fu"><a href="../reference/cv.default.html">cv</a></span><span class="op">(</span><span class="va">lrs</span>, data <span class="op">=</span> <span class="va">pbc</span>, rep <span class="op">=</span> <span class="fl">2</span>, nfolds <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
@@ -289,8 +291,8 @@ Formula: y ~ age + sex + bili </code></pre>
 5-fold cross-validation with 2 repetitions
 
            mse       mae
-glm 0.10760016 0.2130529
-gam 0.09605659 0.1859371</code></pre>
+glm 0.10741276 0.2125264
+gam 0.09744471 0.1882385</code></pre>
 </div>
 </div>
 </section><section class="level2"><h3 id="prediction-filter">Prediction filter<a class="anchor" aria-label="anchor" href="#prediction-filter"></a>
@@ -431,7 +433,7 @@ Formula: y ~ age </code></pre>
 <span><span class="op">}</span></span>
 <span><span class="va">lrs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  glm <span class="op">=</span> <span class="fu"><a href="../reference/learner_glm.html">learner_glm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">age</span>, family <span class="op">=</span> <span class="st">"binomial"</span><span class="op">)</span>,</span>
-<span>  gam <span class="op">=</span> <span class="fu"><a href="../reference/learner_gam.html">learner_gam</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/pkg/gam/man/gam.s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">age</span><span class="op">)</span>, family <span class="op">=</span> <span class="st">"binomial"</span><span class="op">)</span></span>
+<span>  gam <span class="op">=</span> <span class="fu"><a href="../reference/learner_gam.html">learner_gam</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu">s</span><span class="op">(</span><span class="va">age</span><span class="op">)</span>, family <span class="op">=</span> <span class="st">"binomial"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">lr</span> <span class="op">&lt;-</span> <span class="fu">new_sl</span><span class="op">(</span><span class="va">lrs</span>, nfolds <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">lr</span><span class="op">$</span><span class="fu">estimate</span><span class="op">(</span><span class="va">pbc</span><span class="op">)</span></span>
@@ -444,9 +446,9 @@ Estimate arguments: learners=&lt;list&gt;, nfolds=2
 Predict arguments:
 Formula: NULL
 ─────────────────────────────────────
-        score    weight
-glm 0.1067381 0.4411309
-gam 0.1067092 0.5588691</code></pre>
+        score weight
+glm 0.1125861      1
+gam 0.1167470      0</code></pre>
 </div>
 </div>
 <p>In this case, all arguments provided to <code>lr$estimate</code> are joined together with the specified <code>estimate.args</code> and passed on to the defined estimate function (i.e. <code>superlearner</code>).</p>
@@ -488,7 +490,7 @@ gam 0.1067092 0.5588691</code></pre>
 <code class="sourceCode R"><span><span class="fu">targeted</span><span class="fu">:::</span><span class="va">weights.numeric</span></span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>function(object, ...) object
-&lt;bytecode: 0x55e53fbe7b80&gt;
+&lt;bytecode: 0x5652e5940ed0&gt;
 &lt;environment: namespace:targeted&gt;</code></pre>
 </div>
 </div>

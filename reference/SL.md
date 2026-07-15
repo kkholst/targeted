@@ -1,49 +1,18 @@
-# SuperLearner wrapper for learner
+# SuperLearner wrapper for learner (defunct)
 
-SuperLearner wrapper for learner
+`SL()` has been removed. Use [learner_sl](learner_sl.md) instead.
 
 ## Usage
 
 ``` r
-SL(
-  formula = ~.,
-  ...,
-  SL.library = c("SL.mean", "SL.glm"),
-  binomial = FALSE,
-  data = NULL,
-  info = "SuperLearner"
-)
+SL(...)
 ```
 
 ## Arguments
 
-- formula:
-
-  Model design
-
 - ...:
 
-  Additional arguments for SuperLearner::SuperLearner
-
-- SL.library:
-
-  character vector of prediction algorithms
-
-- binomial:
-
-  boolean specifying binomial or gaussian family (default FALSE)
-
-- data:
-
-  Optional data.frame
-
-- info:
-
-  model information (optional)
-
-## Value
-
-learner object
+  Ignored.
 
 ## Author
 

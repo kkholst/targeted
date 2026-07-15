@@ -4,7 +4,7 @@
 
 - [`RATE()`](RATE.md) : Responder Average Treatment Effect
 - [`RATE.surv()`](RATE.surv.md) : Responder Average Treatment Effect
-- [`SL()`](SL.md) : SuperLearner wrapper for learner
+- [`SL()`](SL.md) : SuperLearner wrapper for learner (defunct)
 - [`aipw()`](aipw.md) : AIPW estimator
 - [`alean()`](alean.md) : Assumption Lean inference for generalized
   linear model parameters
@@ -13,12 +13,9 @@
 - [`calibration-class`](calibration-class.md) : calibration class object
 - [`calibration()`](calibration.md) : Calibration (training)
 - [`cate()`](cate.md) : Conditional Average Treatment Effect estimation
-- [`cate_link()`](cate_link.md) : Conditional Relative Risk estimation
-- [`constructor_shared`](constructor_shared.md) : Construct a learner
 - [`cross_validated-class`](cross_validated-class.md)
   [`cross_validated`](cross_validated-class.md) : cross_validated class
   object
-- [`crr()`](crr.md) : Conditional Relative Risk estimation
 - [`cumhaz()`](cumhaz.md) : Predict the cumulative hazard/survival
   function for a survival model
 - [`cv(`*`<default>`*`)`](cv.default.md) : Cross-validation
@@ -26,8 +23,6 @@
   learner_sl
 - [`deprecate_arg_warn()`](deprecate_arg_warn.md) : Cast warning for
   deprecated function argument names
-- [`deprecated_argument_names`](deprecated_argument_names.md) :
-  Deprecated argument names
 - [`design()`](design.md) : Extract design matrix
 - [`estimate_truncatedscore()`](estimate_truncatedscore.md) : Estimation
   of mean clinical outcome truncated by event process
@@ -55,6 +50,14 @@
 - [`learner_surv_rf()`](learner_surv_rf.md) : Construct a learner
 - [`learner_svm()`](learner_svm.md) : Construct a learner
 - [`learner_xgboost()`](learner_xgboost.md) : Construct a learner
+- [`metalearner_convexcomb()`](metalearner_convexcomb.md) : Convex
+  combination meta learner
+- [`metalearner_discrete()`](metalearner_discrete.md) : Discrete meta
+  learner
+- [`metalearner_nnls()`](metalearner_nnls.md) : Non-negative least
+  squares meta learner
+- [`moi()`](moi.md) : Average Treatment Effect Estimation with Missing
+  Outcome Imputation
 - [`naivebayes-class`](naivebayes-class.md) : naivebayes class object
 - [`naivebayes()`](naivebayes.md) : Naive Bayes classifier
 - [`nondom()`](nondom.md) : Find non-dominated points of a set
@@ -65,6 +68,10 @@
   for Naive Bayes Classifier
 - [`predict(`*`<superlearner>`*`)`](predict.superlearner.md) : Predict
   Method for superlearner Fits
+- [`predict_filter_bound()`](predict_filter_bound.md) : Prediction
+  filter bounding predictions to fixed range
+- [`predict_filter_bound_dynamic()`](predict_filter_bound_dynamic.md) :
+  Prediction filter bounding predictions to the observed response range
 - [`rcai()`](rcai.md) : Calculate the right censoring augmentation
   integral
 - [`riskreg()`](riskreg.md) : Risk regression

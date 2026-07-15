@@ -16,6 +16,10 @@ Regression: [learner_isoreg](learner_isoreg.md)
 Classification: [learner_naivebayes](learner_naivebayes.md)  
 Ensemble (super learner): [learner_sl](learner_sl.md)
 
+The following constructors for commonly used filters are available:
+[predict_filter_bound](predict_filter_bound.md),
+[predict_filter_bound_dynamic](predict_filter_bound_dynamic.md)
+
 ## Author
 
 Klaus Kähler Holst, Benedikt Sommer
@@ -89,7 +93,7 @@ Create a new prediction model object
       info = NULL,
       specials = c(),
       formula.keep.specials = FALSE,
-      predict.filter = function(data, ...) function(pred, newdata, ...) pred,
+      predict.filter = function(data) function(pred, newdata) pred,
       intercept = FALSE
     )
 
@@ -379,31 +383,31 @@ models <- lapply(args, function(par) do.call(rf, par))
 x <- models[[1]]$clone()
 x$estimate(iris)
 predict(x, newdata = head(iris))
-#>         setosa  versicolor   virginica
-#> [1,] 0.9960000 0.003000000 0.001000000
-#> [2,] 0.9612500 0.035083333 0.003666667
-#> [3,] 0.9950000 0.003333333 0.001666667
-#> [4,] 0.9852381 0.013095238 0.001666667
-#> [5,] 1.0000000 0.000000000 0.000000000
-#> [6,] 0.9528413 0.044492063 0.002666667
+#>         setosa versicolor   virginica
+#> [1,] 0.9975000 0.00250000 0.000000000
+#> [2,] 0.9552273 0.02872727 0.016045455
+#> [3,] 0.9793333 0.01233333 0.008333333
+#> [4,] 0.9570000 0.03550000 0.007500000
+#> [5,] 0.9975000 0.00250000 0.000000000
+#> [6,] 0.9457630 0.04592352 0.008313492
 
 # \donttest{
 # Reduce Ex. timing
 a <- targeted::cv(models, data = iris)
 cbind(coef(a), attr(args, "table"))
 #>              brier -logscore
-#> model1  0.09933114 0.2176723
-#> model2  0.09852394 0.2190576
-#> model3  0.08930160 0.1951197
-#> model4  0.08693167 0.1859497
-#> model5  0.07920760 0.1667053
-#> model6  0.07973235 0.1642473
-#> model7  0.33889722 0.5576471
-#> model8  0.34434199 0.5659671
-#> model9  0.33340380 0.5510511
-#> model10 0.33373744 0.5450570
-#> model11 0.34011615 0.5492692
-#> model12 0.33269580 0.5396498
+#> model1  0.09905229 0.2156259
+#> model2  0.09770097 0.2155833
+#> model3  0.09027414 0.1869423
+#> model4  0.08930044 0.1884777
+#> model5  0.08507715 0.1677289
+#> model6  0.08174147 0.1697481
+#> model7  0.32596732 0.5374138
+#> model8  0.33396408 0.5485199
+#> model9  0.32949550 0.5414416
+#> model10 0.33061998 0.5382947
+#> model11 0.32393173 0.5271123
+#> model12 0.32291826 0.5244176
 # }
 
 # defining learner via function with arguments y (response)
@@ -433,7 +437,7 @@ lr$summary()
 #> ────────── learner object ──────────
 #> glm 
 #> 
-#> formula: y ~ x <environment: 0x55de8d22a4f8> 
+#> formula: y ~ x <environment: 0x55a6c2e67148> 
 #> estimate: formula, data, family, ... 
 #> estimate.args: family=nb 
 #> predict: object, newdata, ... 
@@ -448,7 +452,7 @@ print(lr_sum)
 #> ────────── learner object ──────────
 #> glm 
 #> 
-#> formula: y ~ x <environment: 0x55de8d22a4f8> 
+#> formula: y ~ x <environment: 0x55a6c2e67148> 
 #> estimate: formula, data, family, ... 
 #> estimate.args: family=nb 
 #> predict: object, newdata, ... 

@@ -65,7 +65,7 @@ d <- data.frame(y, x1, x2)
 lr <- learner_naivebayes(y ~ x1 + x2)
 lr$estimate(d)
 lr$predict(head(d))
-#> [1] 0.5291631 0.6043444 0.5760567 0.5530771 0.5122315 0.4885785
+#> [1] 0.5104860 0.5102738 0.5093004 0.5067583 0.5058081 0.5971774
 
 # multi-class classification
 lr <- learner_naivebayes(Species ~ .)

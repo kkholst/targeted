@@ -54,5 +54,5 @@ data(sTRACE, package="mets")
 mod <- learner_surv_rf(Surv(time, status>0) ~ sex + age)
 mod$estimate(sTRACE)
 mod$predict(head(sTRACE), times=5) # P(T>t|X)
-#> [1] 0.1813138 0.7495813 0.4379002 0.8956209 0.7800441 0.5206638
+#> [1] 0.1790319 0.7669003 0.4353605 0.9125700 0.7696882 0.5115624
 ```

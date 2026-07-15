@@ -11,11 +11,12 @@ design(
   ...,
   intercept = FALSE,
   response = TRUE,
-  rm_envir = FALSE,
+  rm.envir = FALSE,
   specials = NULL,
   specials.call = NULL,
   levels = NULL,
-  design.matrix = TRUE
+  design.matrix = TRUE,
+  na.action = na.omit
 )
 ```
 
@@ -41,9 +42,9 @@ design(
 
   (logical) if FALSE the response variable is dropped
 
-- rm_envir:
+- rm.envir:
 
-  Remove environment
+  (logical) Remove environment from terms attribute of returned object
 
 - specials:
 
@@ -64,6 +65,10 @@ design(
 
   (logical) if FALSE then only response and specials are returned.
   Otherwise, the design.matrix `x` is als part of the returned object.
+
+- na.action:
+
+  (function) method to handle missing data (default: `na.omit`)
 
 ## Value
 

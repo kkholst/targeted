@@ -14,6 +14,7 @@ cate(
   contrast,
   nfolds = 1,
   rep = 1,
+  id = NULL,
   silent = FALSE,
   stratify = FALSE,
   mc.cores = NULL,
@@ -66,6 +67,11 @@ cate(
 
   number of replications of cross-fitting procedure by averaging
   estimates and influence functions from each replication
+
+- id:
+
+  (integer or character) optional subject id vector of length
+  `nrow(data)`.
 
 - silent:
 
