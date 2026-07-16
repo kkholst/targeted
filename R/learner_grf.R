@@ -9,7 +9,7 @@
 #' @param model (character) grf model to estimate. Usually regression_forest
 #' ([grf::regression_forest]) or probability_forest ([grf::probability_forest]).
 #' @param ... Additional arguments to `model`
-#' @inherit constructor_shared
+#' @inherit learner_glm
 #' @inheritParams grf::regression_forest
 #' @examples
 #' n <- 5e2

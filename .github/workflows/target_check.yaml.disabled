@@ -4,9 +4,17 @@ on:
   pull_request:
     branches: [main, dev]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   cpp_library:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout repository incl. submodules
         uses: actions/checkout@v4
@@ -14,6 +22,7 @@ jobs:
           submodules: recursive
       - name: Install dependencies
         run: |
+          sudo apt-get update
           sudo apt-get install -y lcov libblas-dev liblapack-dev
       - name: Unit tests
         run: |

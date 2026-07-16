@@ -6,7 +6,7 @@
 #' @param reg_lambda (numeric) L2 regularization term on weights.
 #' @param objective (character) Specify the learning task and the corresponding
 #' learning objective. See [xgboost::xgboost] for all available options.
-#' @inherit constructor_shared
+#' @inherit learner_glm
 #' @inheritParams xgboost::xgboost
 #' @export
 #' @examples
