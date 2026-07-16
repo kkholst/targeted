@@ -3,7 +3,7 @@ name: r-cmd-check
 
 on:
   pull_request:
-    branches: [main, dev]
+    branches: [main]
     # types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [main]
