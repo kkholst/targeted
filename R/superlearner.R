@@ -11,16 +11,6 @@ make_dmat_pos_definite <- function(pred) {
   return(Dmat)
 }
 
-#' @title Meta learners for the [superlearner]
-#' @param y (numeric) Response vector.
-#' @param pred (matrix) Matrix of cross-validated predictions with one column
-#'   per candidate learner.
-#' @param ... Additional arguments (currently ignored).
-#' @return (numeric) Vector of ensemble weights, one element per column of
-#'   `pred`.
-#' @seealso [superlearner] [learner_sl]
-#' @name metalearner
-NULL
 
 #' @title Non-negative least squares meta learner
 #' @description Estimates the ensemble weights of a [superlearner] by minimizing
@@ -29,10 +19,16 @@ NULL
 #' @param method (character) Quadratic-programming solver used to compute the
 #'   non-negative least squares weights. Either `"quadprog"` (default, using
 #'   [quadprog::solve.QP]) or `"nnls"` (using [nnls::nnls]).
+#' @param y (numeric) Response vector.
+#' @param pred (matrix) Matrix of cross-validated predictions with one column
+#'   per candidate learner.
+#' @param ... Additional arguments (currently ignored).
+#' @return (numeric) Vector of ensemble weights, one element per column of
+#'   `pred`.
 #' @details `targeted:::metalearner_nnls2` is an internal wrapper for using the
 #'  `"nnls"` package instead of `"quadprog"`.
-#' @inherit metalearner return seealso
-#' @inheritParams metalearner
+#' @seealso [superlearner] [learner_sl]
+#' @name metalearner_nnls
 #' @export
 metalearner_nnls <- function(y, pred, method = "quadprog", ...) {
   if (NCOL(pred) == 1) {
@@ -73,8 +69,8 @@ metalearner_nnls2 <- function(y, pred, ...) {
 #'  predictions, i.e. by least squares regression of the response on the
 #'   candidate predictions subject to the constraint that the weights are
 #'   non-negative and sum to one.
-#' @inherit metalearner return seealso
-#' @inheritParams metalearner
+#' @inherit metalearner_nnls return seealso
+#' @inheritParams metalearner_nnls
 #' @export
 metalearner_convexcomb <- function(y, pred, ...) {
   if (NCOL(pred)==1) return(1.0)
@@ -121,8 +117,8 @@ metalearner_convexcomb <- function(y, pred, ...) {
 #'   [superlearner]) is given weight one and all other learners weight zero.
 #' @param model.score (function) Method for scoring the predictions of each base
 #' learner.
-#' @inherit metalearner return seealso
-#' @inheritParams metalearner
+#' @inherit metalearner_nnls return seealso
+#' @inheritParams metalearner_nnls
 #' @export
 metalearner_discrete <- function(y, pred, model.score, ...) {
   risk <- apply(pred, 2, \(x) model.score(y, x))

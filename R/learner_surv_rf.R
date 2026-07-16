@@ -1,5 +1,6 @@
 #' @description Constructs a [learner] class object for random survival forests
-#' @inherit constructor_shared
+#' @inherit learner_glm title return
+#' @inheritParams learner_glm formula info learner.args
 #' @inheritParams ranger::ranger
 #' @author Klaus Kähler Holst
 #' @export

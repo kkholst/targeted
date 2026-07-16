@@ -2,7 +2,7 @@
 #' [targeted::isoregw].
 #' @export
 #' @param ... Additional arguments to [targeted::isoregw].
-#' @inherit constructor_shared
+#' @inherit learner_glm
 #' @inheritParams targeted::isoregw
 #' @examples
 #' x <- runif(5e3, -5, 5)

@@ -1,7 +1,7 @@
 #' @description Constructs a [learner] class object for fitting a
 #' [superlearner].
 #' @export
-#' @inherit constructor_shared
+#' @inherit learner_glm
 #' @inheritParams superlearner
 #' @seealso [cv.learner_sl]
 #' @param ... Additional arguments to [superlearner]

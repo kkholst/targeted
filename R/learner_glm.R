@@ -1,13 +1,3 @@
-#' @title Construct a learner
-#' @param info (character) Optional information to describe the instantiated
-#' [learner] object.
-#' @param formula (formula) Formula specifying response and design matrix.
-#' @param learner.args (list) Additional arguments to
-#' [learner$new()][learner].
-#' @return [learner] object.
-#' @name constructor_shared
-NULL
-
 # Replace named `...` arguments with symbols of their own name so that a
 # rewritten `fit$call` prints compactly (e.g. `weights = weights`) instead of
 # embedding the evaluated value (e.g. a full weights vector). Unnamed
@@ -22,11 +12,20 @@ symbolize_dots <- function(dots) {
 }
 
 
+
+#' @title Construct a learner
+#' @name learner_glm
 #' @description Constructs a [learner] class object for fitting generalized
 #' linear models with [stats::glm] and [MASS::glm.nb]. Negative binomial
 #' regression is supported with `family = "nb"` (or alternatively `family =
 #' "negbin"`).
+#' @param info (character) Optional information to describe the instantiated
+#' [learner] object.
+#' @param formula (formula) Formula specifying response and design matrix.
+#' @param learner.args (list) Additional arguments to
+#' [learner$new()][learner].
 #' @param ... Additional arguments to [stats::glm] or [MASS::glm.nb].
+#' @return [learner] object.
 #' @export
 #' @examples
 #' n <- 5e2
@@ -45,7 +44,6 @@ symbolize_dots <- function(dots) {
 #' coef(lr$fit)
 #' lr$predict(data.frame(x = 1, w = c(1, 5))) # response scale
 #' lr$predict(data.frame(x = 1, w = c(1, 5)), type = "link") # link scale
-#' @inherit constructor_shared
 #' @inheritParams stats::glm
 learner_glm <- function(formula, info = "glm", family = gaussian(),
   learner.args = NULL, ...) {

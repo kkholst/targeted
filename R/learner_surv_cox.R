@@ -1,6 +1,7 @@
 #' @description Constructs a [learner] class object for fitting Cox proportional
 #'   hazards models.
-#' @inherit constructor_shared
+#' @inherit learner_glm title return
+#' @inheritParams learner_glm formula info learner.args
 #' @inheritParams mets::phreg
 #' @author Klaus Kähler Holst
 #' @export
@@ -31,7 +32,6 @@ learner_surv_cox <- function(formula, info="mets::phreg",
     }
     ord <- order(times)
     times <- times[ord]
-    ## suppressMessages(browser())
     if (individual.time && length(times) == nrow(newdata)) {
       newdata <- newdata[ord, , drop=FALSE]
     }
