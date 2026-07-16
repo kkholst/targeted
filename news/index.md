@@ -2,6 +2,8 @@
 
 ## targeted 0.8
 
+CRAN release: 2026-07-15
+
 - `moi`: implementation of one-step outcome imputation estimator
   [(arXiv.2606.07174)](https://doi.org/10.48550/arXiv.2606.07174):
 - `design` tolerates now `special` variables who are absent in `data`
