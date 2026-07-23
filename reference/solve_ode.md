@@ -55,10 +55,13 @@ example(specify_ode)
 #> spcfy_+ )
 #> 
 #> spcfy_> ## No test: 
-#> spcfy_> ##D  # Reduce test time
-#> spcfy_> ##D dy <- specify_ode(ode)
-#> spcfy_> ##D tt <- seq(0, 100, length.out=2e4)
-#> spcfy_> ##D yy <- solve_ode(dy, input=tt, init=c(1, 1, 1), par=c(10, 28, 8/3))
+#> spcfy_>  # Reduce test time
+#> spcfy_> dy <- specify_ode(ode)
+#> 
+#> spcfy_> tt <- seq(0, 100, length.out=2e4)
+#> 
+#> spcfy_> yy <- solve_ode(dy, input=tt, init=c(1, 1, 1), par=c(10, 28, 8/3))
+#> 
 #> spcfy_> ## End(No test)
 #> spcfy_> 
 #> spcfy_> 

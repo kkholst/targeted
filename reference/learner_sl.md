@@ -94,6 +94,7 @@ if (interactive()) {
     lines(cos(x1) + x1 ~ x1, data = d[order(d$x1), ],
           lwd = 4, col = lava::Col("darkblue", 0.3))
 }
+
 print(s)
 #> ────────── learner object ──────────
 #> superlearner
@@ -103,7 +104,7 @@ print(s)
 #> 
 #> Estimate arguments: learners=<list>, nfolds=10, meta.learner=<function>, model.score=<function> 
 #> Predict arguments:   
-#> Formula: y ~ 1 <environment: 0x559ffca2dd38> 
+#> Formula: y ~ 1 <environment: 0xa61acce78> 
 #> ─────────────────────────────────────
 #>          score     weight
 #> mean 4.6075512 0.03921874

@@ -61,6 +61,8 @@ Klaus K. Holst
 
 ``` r
 library(data.table)
+#> data.table 1.18.4 using 5 threads (see ?getDTthreads).  
+#> Latest news: r-datatable.com
 #> 
 #> Attaching package: ‘data.table’
 #> The following object is masked from ‘package:base’:

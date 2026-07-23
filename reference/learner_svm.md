@@ -46,23 +46,23 @@ learner_svm(
 
   the kernel used in training and predicting. You might consider
   changing some of the following parameters, depending on the kernel
-  type.  
+  type.\
 
   linear:
 
-  :   \\u'v\\
+  : \\u'v\\
 
   polynomial:
 
-  :   \\(\gamma u'v + coef0)^{degree}\\
+  : \\(\gamma u'v + coef0)^{degree}\\
 
   radial basis:
 
-  :   \\e^(-\gamma \|u-v\|^2)\\
+  : \\e^(-\gamma \|u-v\|^2)\\
 
   sigmoid:
 
-  :   \\tanh(\gamma u'v + coef0)\\
+  : \\tanh(\gamma u'v + coef0)\\
 
 - learner.args:
 
@@ -102,7 +102,7 @@ lr <- learner_svm(as.factor(yb) ~ x1 + x2)
 lr$estimate(d)
 lr$predict(head(d)) # predict class probabilities of class 2
 #>         1         2         3         4         5         6 
-#> 0.1425906 0.1205991 0.1857465 0.8982434 0.1000389 0.5259357 
+#> 0.1426360 0.1205889 0.1857578 0.8982848 0.1000418 0.5260114 
 lr$predict(head(d), probability = FALSE) # predict labels
 #> 1 2 3 4 5 6 
 #> 1 1 1 0 1 1 
@@ -113,10 +113,10 @@ lr <- learner_svm(Species ~ .)
 lr$estimate(iris)
 lr$predict(head(iris))
 #>      setosa versicolor   virginica
-#> 1 0.9800195 0.01170111 0.008279405
-#> 2 0.9722976 0.01880674 0.008895639
-#> 3 0.9787085 0.01235435 0.008937102
-#> 4 0.9745059 0.01589414 0.009599940
-#> 5 0.9791852 0.01205276 0.008762017
-#> 6 0.9734598 0.01743414 0.009106024
+#> 1 0.9800063 0.01170421 0.008289509
+#> 2 0.9722969 0.01881110 0.008891995
+#> 3 0.9787042 0.01235736 0.008938397
+#> 4 0.9745057 0.01589782 0.009596491
+#> 5 0.9791698 0.01205585 0.008774312
+#> 6 0.9734446 0.01743760 0.009117831
 ```

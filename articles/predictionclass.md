@@ -101,10 +101,10 @@ lr_sl
     Predict arguments:
     Formula: y ~ age * bili
     ─────────────────────────────────────
-              score    weight
-    glm1 0.09692326 0.7231481
-    glm2 0.10710283 0.1154725
-    gam  0.09973156 0.1613793
+              score     weight
+    glm1 0.09736344 0.21737402
+    glm2 0.10709258 0.04175439
+    gam  0.09479647 0.74087159
 
 Most constructors have additional arguments that impact the resulting
 model fit, ranging from the specification of a link function for
@@ -236,21 +236,20 @@ values of the summary method
 lr_xgboost$summary()$estimate
 ```
 
-    function(x, y, ...) {
-          params <- list(...)
-          par1 <- intersect(formalArgs(xgboost::xgb.params), names(params))
-          xgb_params <- params[par1]
-          xgb_train_args <- params
-          xgb_train_args[par1] <- NULL
-          d <- xgboost::xgb.DMatrix(x, label = y)
-          res <- do.call(
-            xgboost::xgb.train,
-            c(list(data = d), xgb_train_args, list(params = xgb_params)),
-            )
-          return(res)
-        }
-    <bytecode: 0x55cad90eda28>
-    <environment: 0x55cadc111e28>
+    function (x, y, ...)
+    {
+        params <- list(...)
+        par1 <- intersect(formalArgs(xgboost::xgb.params), names(params))
+        xgb_params <- params[par1]
+        xgb_train_args <- params
+        xgb_train_args[par1] <- NULL
+        d <- xgboost::xgb.DMatrix(x, label = y)
+        res <- do.call(xgboost::xgb.train, c(list(data = d), xgb_train_args,
+            list(params = xgb_params)), )
+        return(res)
+    }
+    <bytecode: 0x7673c0e08>
+    <environment: 0x76543f738>
 
 Rare situations may arise where one wants to update the formula
 argument. This supported and implemented via the `update` method
@@ -315,8 +314,8 @@ cv(lrs, data = pbc, rep = 2, nfolds = 5)
     5-fold cross-validation with 2 repetitions
 
                mse       mae
-    glm 0.10696278 0.2122016
-    gam 0.09992549 0.1886820
+    glm 0.10672378 0.2120555
+    gam 0.09729299 0.1875423
 
 ### Prediction filter
 
@@ -526,9 +525,9 @@ lr
     Predict arguments:
     Formula: NULL
     ─────────────────────────────────────
-            score weight
-    glm 0.1065346      1
-    gam 0.1079257      0
+            score    weight
+    glm 0.1061157 0.8038688
+    gam 0.1065644 0.1961312
 
 In this case, all arguments provided to `lr$estimate` are joined
 together with the specified `estimate.args` and passed on to the defined
@@ -578,8 +577,9 @@ Here `weights.numeric` is simply the identity function
 targeted:::weights.numeric
 ```
 
-    function(object, ...) object
-    <bytecode: 0x55cadad0b4e0>
+    function (object, ...)
+    object
+    <bytecode: 0x7653f5bd0>
     <environment: namespace:targeted>
 
 To illustrate how to define a custom learner that utilizes special

@@ -11,9 +11,9 @@ Regression and classification: [learner_glm](learner_glm.md),
 [learner_hal](learner_hal.md),
 [learner_glmnet_cv](learner_glmnet_cv.md),
 [learner_svm](learner_svm.md), [learner_xgboost](learner_xgboost.md),
-[learner_mars](learner_mars.md)  
-Regression: [learner_isoreg](learner_isoreg.md)  
-Classification: [learner_naivebayes](learner_naivebayes.md)  
+[learner_mars](learner_mars.md)\
+Regression: [learner_isoreg](learner_isoreg.md)\
+Classification: [learner_naivebayes](learner_naivebayes.md)\
 Ensemble (super learner): [learner_sl](learner_sl.md)
 
 The following constructors for commonly used filters are available:
@@ -437,7 +437,7 @@ lr$summary()
 #> ────────── learner object ──────────
 #> glm 
 #> 
-#> formula: y ~ x <environment: 0x559ffc227fa0> 
+#> formula: y ~ x <environment: 0xa5efa5c40> 
 #> estimate: formula, data, family, ... 
 #> estimate.args: family=nb 
 #> predict: object, newdata, ... 
@@ -452,7 +452,7 @@ print(lr_sum)
 #> ────────── learner object ──────────
 #> glm 
 #> 
-#> formula: y ~ x <environment: 0x559ffc227fa0> 
+#> formula: y ~ x <environment: 0xa5efa5c40> 
 #> estimate: formula, data, family, ... 
 #> estimate.args: family=nb 
 #> predict: object, newdata, ... 

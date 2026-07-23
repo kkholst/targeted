@@ -28,8 +28,9 @@ via Rcpp + RcppArmadillo.
 - `make check-cran` — full `R CMD check --as-cran --run-donttest`.
 - `make test` — runs tinytest against the **installed** package. Run
   `make install` first if you changed code.
-- `make test-loadall` — `devtools::load_all` + tinytest; use during
-  iteration to skip reinstall.
+- `make test-loadall` —
+  [`devtools::load_all`](https://devtools.r-lib.org/reference/load_all.html) +
+  tinytest; use during iteration to skip reinstall.
 - `make test-slow` — runs `inst/slowtest/` (expensive, not in normal
   `make test`).
 - `make lint` — `lintr::lint_package()`. Config in `.lintr` (line 80,

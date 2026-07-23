@@ -100,6 +100,7 @@ if (interactive()) {
   with(c1$xy[[1]], points(pred,freq,type="b", col="red"))
 }
 
+
 set.seed(1)
 beta <- c(-2,rep(1,10))
 dd <- lava::csplit(sim1(1e4, beta=beta), k=3)
