@@ -253,7 +253,10 @@ cate <- function(response.model, # nolint
     rep <- 1L
   }
 
-  environment(cate.model)$cluster <- targeted::cluster
+  formulaenv <- new.env(parent = environment(cate.model))
+  formulaenv$cluster <- targeted::cluster
+  formulaenv$strata <- targeted::strata
+  environment(cate.model) <- formulaenv
   des_cate <- design(cate.model, data,
                      specials="cluster")
   if (is.null(id)) {
