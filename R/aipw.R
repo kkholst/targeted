@@ -5,7 +5,7 @@
 #' @export
 #' @param response.model (learner or formula)Model for the response given
 #'   covariates
-#' @param (learner or formula) propensity.model missing data mechanism model and
+#' @param propensity.model (learner or formula) missing data mechanism model and
 #'   if omitted a logistic regression model with the same covariates as
 #'   `response.model` is used
 #' @param data data.frame

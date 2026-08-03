@@ -10,16 +10,16 @@ aipw(response.model, propensity.model, formula = ~1, data, ...)
 \item{response.model}{(learner or formula)Model for the response given
 covariates}
 
+\item{propensity.model}{(learner or formula) missing data mechanism model and
+if omitted a logistic regression model with the same covariates as
+\code{response.model} is used}
+
 \item{formula}{design specifying the OLS estimator with outcome given by the
 EIF (see \code{cate})}
 
 \item{data}{data.frame}
 
 \item{...}{additional arguments (see \code{\link[=cate]{cate()}})}
-
-\item{(learner}{or formula) propensity.model missing data mechanism model and
-if omitted a logistic regression model with the same covariates as
-\code{response.model} is used}
 }
 \description{
 AIPW for the mean (and linear projections of the EIF) with missing
