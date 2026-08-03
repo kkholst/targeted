@@ -123,8 +123,8 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #'   observation indicator is used automatically. When `stratify = TRUE` the
 #'   missing model is fit separately per treatment arm. When supplied, the AIPW
 #'   score is inverse-probability-of-observation weighted and (if `second.order
-#'   = TRUE` and `stratify = FALSE`) an additional second-order term is added to
-#'   the influence function.
+#'   = TRUE`) an additional second-order term is added to the influence
+#'   function.
 #' @param cate.model formula specifying regression design for conditional
 #'   average treatment effects
 #' @param calibration.model linear calibration model. Specify covariates in
@@ -606,12 +606,9 @@ cate_est <- function(y, # response vector
       newIF <- newIF + icprop %*% colMeans(adj)
     }
     ## Second-order correction for the missing-data nuisance model.
-    ## We refit the missing model on the full data (mirrors how the
-    ## treatment.model correction is computed). When stratify=TRUE the
-    ## missing model was fit per-arm during cross-fitting, so we skip
-    ## the second-order term here (its structure would not match).
+    ## The model is refitted the same way it was fitted during
+    ## cross-fitting: pooled, or per treatment arm when stratify = TRUE.
     if (use_ipmw &&
-        !stratify &&
         !is.null(missing.model) &&
         inherits(missing.model, "learner_glm")) {
       rmod <- missing.model$clone(deep = TRUE)
@@ -621,15 +618,27 @@ cate_est <- function(y, # response vector
         stop("`R_` column not permitted in `data`")
       }
       dat_r[["R_"]] <- r
-      rfit <- rmod$estimate(dat_r)
-      dlinkinv_r <- rfit$family$mu.eta
-      adj_r <- -K[, i] / pr[, i] * dlinkinv_r(rfit$family$linkfun(pr[, i]))
-      X.miss <- rmod$design(dat_r, intercept = TRUE)$x
-      for (j in seq_len(ncol(X.miss))) {
-        X.miss[, j] <- X.miss[, j] * adj_r
+      n_r <- nrow(dat_r)
+      midx <- if (stratify) which(a[, i] == 1) else seq_len(n_r)
+      if (length(midx) > 0) {
+        rfit <- rmod$estimate(dat_r[midx, , drop = FALSE])
+        dlinkinv_r <- rfit$family$mu.eta
+        adj_r <- -K[, i] / pr[, i] * dlinkinv_r(rfit$family$linkfun(pr[, i]))
+        X.miss <- rmod$design(dat_r, intercept = TRUE)$x
+        for (j in seq_len(ncol(X.miss))) {
+          X.miss[, j] <- X.miss[, j] * adj_r
+        }
+        icmiss <- IC(rfit)
+        if (stratify) {
+          ## IF of an arm-specific fit is normalised by the size of that
+          ## arm; rescale by n/m and pad with zeros to obtain the
+          ## corresponding full-sample influence function.
+          ic_full <- matrix(0, nrow = n_r, ncol = ncol(icmiss))
+          ic_full[midx, ] <- icmiss * (n_r / length(midx))
+          icmiss <- ic_full
+        }
+        newIF <- newIF + icmiss %*% colMeans(X.miss)
       }
-      icmiss <- IC(rfit)
-      newIF <- newIF + icmiss %*% colMeans(X.miss)
     }
     IF0 <- cbind(IF0,  newIF)
   }
