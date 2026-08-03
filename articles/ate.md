@@ -262,24 +262,27 @@ sessionInfo()
 ```
 
     R version 4.6.1 (2026-06-24)
-    Platform: aarch64-apple-darwin25.5.0
-    Running under: macOS Tahoe 26.5.2
+    Platform: x86_64-pc-linux-gnu
+    Running under: Ubuntu 24.04.4 LTS
 
     Matrix products: default
-    BLAS:   /Users/klaus/.asdf/installs/r/4.6.1/lib/R/lib/libRblas.dylib
-    LAPACK: /Users/klaus/.asdf/installs/r/4.6.1/lib/R/lib/libRlapack.dylib;  LAPACK version 3.12.1
+    BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3
+    LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so;  LAPACK version 3.12.0
 
     locale:
-    [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+     [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8
+     [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8
+     [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C
+    [10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C
 
-    time zone: Europe/Copenhagen
-    tzcode source: internal
+    time zone: UTC
+    tzcode source: system (glibc)
 
     attached base packages:
     [1] stats     graphics  grDevices utils     datasets  methods   base
 
     other attached packages:
-    [1] future_1.70.0 targeted_0.8
+    [1] future_1.75.0 targeted_0.8
 
     loaded via a namespace (and not attached):
      [1] nlme_3.1-169           progressr_1.0.0        mets_1.3.12
@@ -293,5 +296,5 @@ sessionInfo()
     [25] Rcpp_1.1.2             mgcv_1.9-4             lattice_0.22-9
     [28] digest_0.6.39          R6_2.6.1               parallelly_1.48.0
     [31] parallel_4.6.1         splines_4.6.1          Matrix_1.7-5
-    [34] RcppArmadillo_15.4.0-1 tools_4.6.1            globals_0.19.1
+    [34] RcppArmadillo_15.4.2-1 tools_4.6.1            globals_0.19.1
     [37] survival_3.8-6        

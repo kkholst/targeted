@@ -244,7 +244,7 @@ This suggests estimators based on outcome regression (g-computation) or
 inverse probability weighting. More generally, under the above
 assumption we can constructor a *one-step* estimator from the *Efficient
 Influence Function* combining these two
-E\left\[\frac{I(A=a)}{\Pi_a(W)}(Y-Q(W,A)) + Q(W,a)\right\].\
+E\left\[\frac{I(A=a)}{\Pi_a(W)}(Y-Q(W,A)) + Q(W,a)\right\].  
 In practice, this requires plugin estimates of both the outcome model,
 Q(W,A) := E(Y\mid A, W), and of the treatment propensity model \Pi_a(W)
 := P(A=a\mid W). The corresponding estimator is consistent even if just

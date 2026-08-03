@@ -100,7 +100,7 @@ d <- data.frame(y, yb, x1, x2)
 lr <- learner_grf(y ~ x1 + x2)
 lr$estimate(d)
 lr$predict(head(d))
-#> [1]  0.7506038  0.8345163 -2.6566228  1.0894577  1.9225957  0.8445338
+#> [1]  0.7517240  0.8353015 -2.6525150  1.0890892  1.9278862  0.8442065
 
 # binary classification
 lr <- learner_grf(as.factor(yb) ~ x1 + x2, model = "probability_forest")

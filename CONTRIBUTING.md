@@ -28,10 +28,10 @@ We use prefixes to label branches. A meaningful short description
 follows the prefix and hyphens (-) are used for separation. For example,
 `feature/new-ml-model-interface` is a valid feature branch name.
 
-*feature/*: Branches for developing new features.\
-*bugfix/*: Branches for fixing non-critical bugs.\
-*hotfix/*: Branches for fixing critical bugs.\
-*docs/*: Branches for writing, updating, or fixing documentation.\
+*feature/*: Branches for developing new features.  
+*bugfix/*: Branches for fixing non-critical bugs.  
+*hotfix/*: Branches for fixing critical bugs.  
+*docs/*: Branches for writing, updating, or fixing documentation.  
 *develop/*: Branches for anything else.
 
 ### Pull requests

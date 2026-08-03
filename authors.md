@@ -13,7 +13,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/kkholst/targeted/blob/HEAD/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/kkholst/targeted/blob/main/DESCRIPTION)
 
 Holst K, Sommer B, Nordland A (2026). *targeted: Targeted Inference*. R
 package version 0.8, <https://kkholst.github.io/targeted/>.

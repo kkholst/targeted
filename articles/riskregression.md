@@ -343,7 +343,7 @@ riskreg(y~a, nuisance=~x+z, data=d2, type="rd")
 ```
 
                 Estimate Std.Err   2.5% 97.5% P-value
-    (Intercept)   0.9899  0.0201 0.9505 1.029       0
+    (Intercept)   0.9934 0.02066 0.9529 1.034       0
 
 ### Influence-function
 
@@ -362,11 +362,11 @@ head(IC(fit))
 
       (Intercept)          x
     1   0.6226459 -0.4585424
-    2   1.2319959  0.7925974
-    3   0.3941326 -0.5798067
-    4  -0.8854891  2.9621437
-    5  -6.9949137 -5.2133648
-    6   0.5853934 -0.7571452
+    2   1.2319960  0.7925974
+    3   0.3941325 -0.5798067
+    4  -0.8854890  2.9621436
+    5  -6.9949142 -5.2133643
+    6   0.5853933 -0.7571452
 
 ## SessionInfo
 
@@ -376,18 +376,21 @@ sessionInfo()
 ```
 
     R version 4.6.1 (2026-06-24)
-    Platform: aarch64-apple-darwin25.5.0
-    Running under: macOS Tahoe 26.5.2
+    Platform: x86_64-pc-linux-gnu
+    Running under: Ubuntu 24.04.4 LTS
 
     Matrix products: default
-    BLAS:   /Users/klaus/.asdf/installs/r/4.6.1/lib/R/lib/libRblas.dylib
-    LAPACK: /Users/klaus/.asdf/installs/r/4.6.1/lib/R/lib/libRlapack.dylib;  LAPACK version 3.12.1
+    BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3
+    LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so;  LAPACK version 3.12.0
 
     locale:
-    [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+     [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8
+     [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8
+     [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C
+    [10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C
 
-    time zone: Europe/Copenhagen
-    tzcode source: internal
+    time zone: UTC
+    tzcode source: system (glibc)
 
     attached base packages:
     [1] stats     graphics  grDevices utils     datasets  methods   base
@@ -403,8 +406,8 @@ sessionInfo()
     [13] grid_4.6.1             evaluate_1.0.5         fastmap_1.2.0
     [16] numDeriv_2016.8-1.1    mvtnorm_1.4-2          yaml_2.3.12
     [19] timereg_2.0.7          compiler_4.6.1         codetools_0.2-20
-    [22] Rcpp_1.1.2             future_1.70.0          lattice_0.22-9
+    [22] Rcpp_1.1.2             future_1.75.0          lattice_0.22-9
     [25] digest_0.6.39          R6_2.6.1               parallelly_1.48.0
     [28] parallel_4.6.1         splines_4.6.1          Matrix_1.7-5
-    [31] RcppArmadillo_15.4.0-1 tools_4.6.1            globals_0.19.1
+    [31] RcppArmadillo_15.4.2-1 tools_4.6.1            globals_0.19.1
     [34] survival_3.8-6        

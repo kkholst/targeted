@@ -40,8 +40,8 @@ learner_mars(
   Default is NULL, meaning all terms created by the forward pass (but
   typically not all terms will remain after pruning). Use this to
   enforce an upper bound on the model size (that is less than `nk`), or
-  to reduce exhaustive search time with `pmethod="exhaustive"`.\
-  \
+  to reduce exhaustive search time with `pmethod="exhaustive"`.  
+    
   **The following arguments are for cross validation.**
 
 - glm:
@@ -49,9 +49,10 @@ learner_mars(
   NULL (default) or a list of arguments to pass on to
   [`glm`](https://rdrr.io/r/stats/glm.html). See the documentation of
   [`glm`](https://rdrr.io/r/stats/glm.html) for a description of these
-  arguments See “*Generalized linear models*” in the vignette. Example:\
-  `earth(survived~., data=etitanic, degree=2, glm=list(family=binomial))`\
-  \
+  arguments See “*Generalized linear models*” in the vignette.
+  Example:  
+  `earth(survived~., data=etitanic, degree=2, glm=list(family=binomial))`  
+    
   **The following arguments are for the forward pass.**
 
 - learner.args:
