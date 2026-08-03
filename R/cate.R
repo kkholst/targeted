@@ -544,7 +544,8 @@ cate <- function(response.model, # nolint
                 calibration.model = calibration.model,
                 var.type = var.type,
                 second.order = second.order
-  )
+                )
+  res$response.model <- response.model
   return(res)
 }
 
@@ -630,9 +631,8 @@ cate_est <- function(y, # response vector
         }
         icmiss <- IC(rfit)
         if (stratify) {
-          ## IF of an arm-specific fit is normalised by the size of that
-          ## arm; rescale by n/m and pad with zeros to obtain the
-          ## corresponding full-sample influence function.
+          # rescale arm-specific IF by n/m and pad with zeros to obtain the
+          # corresponding full-sample influence function.
           ic_full <- matrix(0, nrow = n_r, ncol = ncol(icmiss))
           ic_full[midx, ] <- icmiss * (n_r / length(midx))
           icmiss <- ic_full
@@ -832,10 +832,16 @@ update.cate.targeted <- function(object,
 summary.cate.targeted <- function(object, ...) {
   B <- rbind(rep(0, length(coef(object))))
   B[1:2] <- c(1, -1)
+  est <- summary(object$estimate)
+  est$compare <- NULL
+  est$call <- NULL
+  ate <- summary(lava::estimate(object$estimate, B))
+  ate$compare <- NULL
+  ate$call <- NULL
   obj <- structure(list(
-    estimate = object$estimate,
+    estimate = est,
     call = object$call,
-    ate = lava::estimate(object$estimate, B)
+    ate = ate
   ), class = "summary.cate.targeted")
   return(obj)
 }
