@@ -48,7 +48,7 @@ lrs # use info of constructed learner as names
 #> 
 #> Estimate arguments: max_depth=2, learning_rate=1, nrounds=2, subsample=1, reg_lambda=1, objective=reg:squarederror, eta=0.2 
 #> Predict arguments:   
-#> Formula: Sepal.Length ~ . <environment: 0x558896021820> 
+#> Formula: Sepal.Length ~ . <environment: 0x560eed72d740> 
 #> 
 #> $`xgboost reg:squarederror.1`
 #> ────────── learner object ──────────
@@ -56,7 +56,7 @@ lrs # use info of constructed learner as names
 #> 
 #> Estimate arguments: max_depth=2, learning_rate=1, nrounds=2, subsample=1, reg_lambda=1, objective=reg:squarederror, eta=0.5 
 #> Predict arguments:   
-#> Formula: Sepal.Length ~ . <environment: 0x558896021820> 
+#> Formula: Sepal.Length ~ . <environment: 0x560eed72d740> 
 #> 
 #> $`xgboost reg:squarederror.2`
 #> ────────── learner object ──────────
@@ -64,7 +64,7 @@ lrs # use info of constructed learner as names
 #> 
 #> Estimate arguments: max_depth=2, learning_rate=1, nrounds=2, subsample=1, reg_lambda=1, objective=reg:squarederror, eta=0.3 
 #> Predict arguments:   
-#> Formula: Sepal.Length ~ . <environment: 0x558896021820> 
+#> Formula: Sepal.Length ~ . <environment: 0x560eed72d740> 
 #> 
 
 lrs <- learner_expand_grid(
