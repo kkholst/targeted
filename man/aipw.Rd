@@ -4,20 +4,31 @@
 \alias{aipw}
 \title{AIPW estimator}
 \usage{
-aipw(response.model, propensity.model, formula = ~1, data, ...)
+aipw(
+  response.model,
+  propensity.model,
+  formula = ~1,
+  data,
+  response_model = deprecated,
+  propensity_model = deprecated,
+  ...
+)
 }
 \arguments{
-\item{response.model}{(learner or formula)Model for the response given
-covariates}
+\item{response.model}{Model for the response given covariates (learner or
+formula)}
 
-\item{propensity.model}{(learner or formula) missing data mechanism model and
-if omitted a logistic regression model with the same covariates as
-\code{response.model} is used}
+\item{propensity.model}{Optional missing data mechanism model (propensity
+model) (learner or formula)}
 
 \item{formula}{design specifying the OLS estimator with outcome given by the
 EIF (see \code{cate})}
 
 \item{data}{data.frame}
+
+\item{response_model}{Deprecated. Use response.model instead.}
+
+\item{propensity_model}{Deprecated. Use treatment.model instead.}
 
 \item{...}{additional arguments (see \code{\link[=cate]{cate()}})}
 }
@@ -29,7 +40,7 @@ observations
 m <- lava::lvm(y ~ x+z, r ~ x) |>
      lava::distribution(~ r, value = lava::binomial.lvm()) |>
      transform(y0~r+y, value = \(x) { x[x[,1]==0,2] <- NA; x[,2] })
-d <- lava::sim(m,5e3,seed=1)
+d <- lava::sim(m,1e3,seed=1)
 
-aipw(y0 ~ x, ~ x + z, data=d)
+aipw(y0 ~ x, data=d)
 }

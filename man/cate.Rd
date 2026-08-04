@@ -9,7 +9,6 @@ cate(
   treatment.model,
   cate.model = ~1,
   calibration.model = NULL,
-  missing.model = NULL,
   data,
   contrast,
   nfolds = 1,
@@ -39,14 +38,6 @@ average treatment effects}
 \item{calibration.model}{linear calibration model. Specify covariates in
 addition to predicted potential outcomes to include in the calibration.}
 
-\item{missing.model}{formula or learner object; default \code{NULL}. Model for the
-missingness mechanism \eqn{P(R=1 \mid X, A)}. Required when the outcome in
-\code{response.model} contains NAs. If the formula LHS is omitted, the
-observation indicator is used automatically. When \code{stratify = TRUE} the
-missing model is fit separately per treatment arm. When supplied, the AIPW
-score is inverse-probability-of-observation weighted and (if \code{second.order = TRUE}) an additional second-order term is added to the influence
-function.}
-
 \item{data}{data.frame}
 
 \item{contrast}{treatment contrast (default 1 vs 0)}
@@ -55,12 +46,11 @@ function.}
 fold indices where each element is an integer vector of observation indices
 forming a partition of \code{1:nrow(data)}.}
 
-\item{rep}{number of replications of cross-fitting procedure by averaging
-estimates and influence functions from each replication}
+\item{rep}{number of replications of cross-fitting procedure
+by averaging estimates and influence functions from each replication}
 
 \item{id}{(integer or character) optional subject id vector of length
-\code{nrow(data)}. The \code{id} can also be specified as part of the \code{cate.model}
-argument with a formula syntax: \code{~ 1 + cluster(id)}.}
+\code{nrow(data)}.}
 
 \item{silent}{suppress all messages and progressbars}
 
@@ -103,14 +93,6 @@ be a subset of the covariates. Define the conditional potential mean outcome
 \beta)} denote a parametric working model, then the target parameter is the
 mean-squared error \deqn{\beta(P) = \operatorname{argmin}_{\beta}
 E_{P}[\{\Psi_{1}(P)(V)-\Psi_{0}(P)(V)\} - m(V; \beta)]^{2}}
-
-Missing data is handled under a Missing At Random assumption (MAR). Let
-\eqn{R} denote the indicator for data not being missing, \eqn{R\perp Y|W,A}.
-The nuisance models are \eqn{Q(w,a) = E(Y|W=w, A=a)}, \eqn{g_a(w) =
-P(A=a|W=w)}, and \eqn{\rho(w, a) = P(R=1|W=w, A=a)}. For the expected
-potential outcome \eqn{E[Y(a)]}, the AIPW estimator then takes the form
-\deqn{\frac{1}{n}\sum_{i=1}^n R_i I(A_i=a) / \{g_a(W_i) \rho(W_i, a)\} (Y_i -
-Q(W_i,a)) + Q(W_i, a)}.
 }
 \examples{
 sim1 <- function(n=1000, ...) {
