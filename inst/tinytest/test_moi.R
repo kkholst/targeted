@@ -263,7 +263,7 @@ test_moi_missing_IC_reference_lava <- function() {
 
   moi_est <- targeted:::moi_missing(data = data,
                                     delta = delta,
-                                    id = data$id,
+                                    id = seq_len(nrow(data)),
                                     treatment.model = learner_glm(a ~ 1, family = binomial()),
                                     imputation.model = learner_glm(y ~ a + x),
                                     imputation.subset = "!is.na(y)",
@@ -317,7 +317,7 @@ test_moi_missing_IC_reference_lava <- function() {
                    subset = (data$a == 1) & (delta == FALSE),                   
                    average = TRUE,
                    id = 1:nrow(data))
-  
+
   est0 <- estimate(imp_mod,
                    lava::predict_glm,
                    data = data,
@@ -331,12 +331,13 @@ test_moi_missing_IC_reference_lava <- function() {
       coef(c(est1,est0)))) == 0
   )
 
+  ic1 <- IC(est1)
+  ic0 <- IC(est0)
   expect_true(
-    max(abs(moi_est$estimate$IC[, 1, drop = FALSE] - IC(est1))) < 1e-14
+    max(abs(moi_est$estimate$IC[, 1, drop = FALSE] - ic1)) < 1e-14
   )
-
   expect_true(
-    max(abs(moi_est$estimate$IC[, 2, drop = FALSE] - IC(est0))) < 1e-14
+    max(abs(moi_est$estimate$IC[, 2, drop = FALSE] - ic0)) < 1e-14
   )
 }
 
