@@ -4,6 +4,8 @@ Various methods for targeted and semiparametric inference including
 augmented inverse probability weighted (AIPW) estimators for missing
 data and causal inference (Bang and Robins (2005)
 [doi:10.1111/j.1541-0420.2005.00377.x](https://doi.org/10.1111/j.1541-0420.2005.00377.x)
+), one-step imputation (Nordland et al (2026))
+[doi:10.48550/arXiv.2606.07174](https://doi.org/10.48550/arXiv.2606.07174)
 ), variable importance and conditional average treatment effects (CATE)
 (van der Laan (2006)
 [doi:10.2202/1557-4679.1008](https://doi.org/10.2202/1557-4679.1008) ),
