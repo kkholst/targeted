@@ -28,7 +28,6 @@ aipw <- function(response.model,
   if (inherits(response.model, "formula")) {
     response.model <- learner_glm(response.model)
   }
-  resp <- lava::getoutcome(response.model$formula)
   for (nm in c("R_", "AIPW_Y_")) {
     if (nm %in% colnames(data)) {
       stop("`", nm, "` is used internally and not permitted in `data`")
