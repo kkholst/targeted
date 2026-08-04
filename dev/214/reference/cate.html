@@ -49,7 +49,6 @@
 <span>  <span class="va">treatment.model</span>,</span>
 <span>  cate.model <span class="op">=</span> <span class="op">~</span><span class="fl">1</span>,</span>
 <span>  calibration.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  missing.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">data</span>,</span>
 <span>  <span class="va">contrast</span>,</span>
 <span>  nfolds <span class="op">=</span> <span class="fl">1</span>,</span>
@@ -91,16 +90,6 @@ average treatment effects</p></dd>
 addition to predicted potential outcomes to include in the calibration.</p></dd>
 
 
-<dt id="arg-missing-model">missing.model<a class="anchor" aria-label="anchor" href="#arg-missing-model"></a></dt>
-<dd><p>formula or learner object; default <code>NULL</code>. Model for the
-missingness mechanism \(P(R=1 \mid X, A)\). Required when the outcome in
-<code>response.model</code> contains NAs. If the formula LHS is omitted, the
-observation indicator is used automatically. When <code>stratify = TRUE</code> the
-missing model is fit separately per treatment arm. When supplied, the AIPW
-score is inverse-probability-of-observation weighted and (if <code>second.order = TRUE</code>) an additional second-order term is added to the influence
-function.</p></dd>
-
-
 <dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
 <dd><p>data.frame</p></dd>
 
@@ -116,14 +105,13 @@ forming a partition of <code>1:nrow(data)</code>.</p></dd>
 
 
 <dt id="arg-rep">rep<a class="anchor" aria-label="anchor" href="#arg-rep"></a></dt>
-<dd><p>number of replications of cross-fitting procedure by averaging
-estimates and influence functions from each replication</p></dd>
+<dd><p>number of replications of cross-fitting procedure
+by averaging estimates and influence functions from each replication</p></dd>
 
 
 <dt id="arg-id">id<a class="anchor" aria-label="anchor" href="#arg-id"></a></dt>
 <dd><p>(integer or character) optional subject id vector of length
-<code>nrow(data)</code>. The <code>id</code> can also be specified as part of the <code>cate.model</code>
-argument with a formula syntax: <code>~ 1 + cluster(id)</code>.</p></dd>
+<code>nrow(data)</code>.</p></dd>
 
 
 <dt id="arg-silent">silent<a class="anchor" aria-label="anchor" href="#arg-silent"></a></dt>
@@ -188,13 +176,6 @@ $$\psi_{a}(P)(V) = E_{P}[E_{P}(Y\mid A=a, W)|V]$$ and let \(m(V;
 \beta)\) denote a parametric working model, then the target parameter is the
 mean-squared error $$\beta(P) = \operatorname{argmin}_{\beta}
 E_{P}[\{\Psi_{1}(P)(V)-\Psi_{0}(P)(V)\} - m(V; \beta)]^{2}$$</p>
-<p>Missing data is handled under a Missing At Random assumption (MAR). Let
-\(R\) denote the indicator for data not being missing, \(R\perp Y|W,A\).
-The nuisance models are \(Q(w,a) = E(Y|W=w, A=a)\), \(g_a(w) =
-P(A=a|W=w)\), and \(\rho(w, a) = P(R=1|W=w, A=a)\). For the expected
-potential outcome \(E[Y(a)]\), the AIPW estimator then takes the form
-$$\frac{1}{n}\sum_{i=1}^n R_i I(A_i=a) / \{g_a(W_i) \rho(W_i, a)\} (Y_i -
-Q(W_i,a)) + Q(W_i, a)$$.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

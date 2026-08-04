@@ -10,7 +10,6 @@ cate(
   treatment.model,
   cate.model = ~1,
   calibration.model = NULL,
-  missing.model = NULL,
   data,
   contrast,
   nfolds = 1,
@@ -50,17 +49,6 @@ cate(
   linear calibration model. Specify covariates in addition to predicted
   potential outcomes to include in the calibration.
 
-- missing.model:
-
-  formula or learner object; default `NULL`. Model for the missingness
-  mechanism \\P(R=1 \mid X, A)\\. Required when the outcome in
-  `response.model` contains NAs. If the formula LHS is omitted, the
-  observation indicator is used automatically. When `stratify = TRUE`
-  the missing model is fit separately per treatment arm. When supplied,
-  the AIPW score is inverse-probability-of-observation weighted and (if
-  `second.order = TRUE`) an additional second-order term is added to the
-  influence function.
-
 - data:
 
   data.frame
@@ -83,8 +71,7 @@ cate(
 - id:
 
   (integer or character) optional subject id vector of length
-  `nrow(data)`. The `id` can also be specified as part of the
-  `cate.model` argument with a formula syntax: `~ 1 + cluster(id)`.
+  `nrow(data)`.
 
 - silent:
 
@@ -149,14 +136,6 @@ let \\m(V; \beta)\\ denote a parametric working model, then the target
 parameter is the mean-squared error \$\$\beta(P) =
 \operatorname{argmin}\_{\beta}
 E\_{P}\[\\\Psi\_{1}(P)(V)-\Psi\_{0}(P)(V)\\ - m(V; \beta)\]^{2}\$\$
-
-Missing data is handled under a Missing At Random assumption (MAR). Let
-\\R\\ denote the indicator for data not being missing, \\R\perp
-Y\|W,A\\. The nuisance models are \\Q(w,a) = E(Y\|W=w, A=a)\\, \\g_a(w)
-= P(A=a\|W=w)\\, and \\\rho(w, a) = P(R=1\|W=w, A=a)\\. For the expected
-potential outcome \\E\[Y(a)\]\\, the AIPW estimator then takes the form
-\$\$\frac{1}{n}\sum\_{i=1}^n R_i I(A_i=a) / \\g_a(W_i) \rho(W_i, a)\\
-(Y_i - Q(W_i,a)) + Q(W_i, a)\$\$.
 
 ## References
 

@@ -47,7 +47,15 @@ observations</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">aipw</span><span class="op">(</span><span class="va">response.model</span>, <span class="va">propensity.model</span>, formula <span class="op">=</span> <span class="op">~</span><span class="fl">1</span>, <span class="va">data</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">aipw</span><span class="op">(</span></span>
+<span>  <span class="va">response.model</span>,</span>
+<span>  <span class="va">propensity.model</span>,</span>
+<span>  formula <span class="op">=</span> <span class="op">~</span><span class="fl">1</span>,</span>
+<span>  <span class="va">data</span>,</span>
+<span>  response_model <span class="op">=</span> <span class="va">deprecated</span>,</span>
+<span>  propensity_model <span class="op">=</span> <span class="va">deprecated</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -55,14 +63,13 @@ observations</p>
 
 
 <dl><dt id="arg-response-model">response.model<a class="anchor" aria-label="anchor" href="#arg-response-model"></a></dt>
-<dd><p>(learner or formula)Model for the response given
-covariates</p></dd>
+<dd><p>Model for the response given covariates (learner or
+formula)</p></dd>
 
 
 <dt id="arg-propensity-model">propensity.model<a class="anchor" aria-label="anchor" href="#arg-propensity-model"></a></dt>
-<dd><p>(learner or formula) missing data mechanism model and
-if omitted a logistic regression model with the same covariates as
-<code>response.model</code> is used</p></dd>
+<dd><p>Optional missing data mechanism model (propensity
+model) (learner or formula)</p></dd>
 
 
 <dt id="arg-formula">formula<a class="anchor" aria-label="anchor" href="#arg-formula"></a></dt>
@@ -72,6 +79,14 @@ EIF (see <code>cate</code>)</p></dd>
 
 <dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
 <dd><p>data.frame</p></dd>
+
+
+<dt id="arg-response-model">response_model<a class="anchor" aria-label="anchor" href="#arg-response-model"></a></dt>
+<dd><p>Deprecated. Use response.model instead.</p></dd>
+
+
+<dt id="arg-propensity-model">propensity_model<a class="anchor" aria-label="anchor" href="#arg-propensity-model"></a></dt>
+<dd><p>Deprecated. Use treatment.model instead.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -84,11 +99,11 @@ EIF (see <code>cate</code>)</p></dd>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/lvm.html" class="external-link">lvm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span><span class="op">+</span><span class="va">z</span>, <span class="va">r</span> <span class="op">~</span> <span class="va">x</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>     <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.lvm.html" class="external-link">distribution</a></span><span class="op">(</span><span class="op">~</span> <span class="va">r</span>, value <span class="op">=</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.lvm.html" class="external-link">binomial.lvm</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>     <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span><span class="va">y0</span><span class="op">~</span><span class="va">r</span><span class="op">+</span><span class="va">y</span>, value <span class="op">=</span> \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span> <span class="va">x</span><span class="op">[</span><span class="va">x</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">==</span><span class="fl">0</span>,<span class="fl">2</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA</span>; <span class="va">x</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span> <span class="op">}</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.default.html" class="external-link">sim</a></span><span class="op">(</span><span class="va">m</span>,<span class="fl">5e3</span>,seed<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">lava</span><span class="fu">::</span><span class="fu"><a href="https://kkholst.github.io/lava/reference/sim.default.html" class="external-link">sim</a></span><span class="op">(</span><span class="va">m</span>,<span class="fl">1e3</span>,seed<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu">aipw</span><span class="op">(</span><span class="va">y0</span> <span class="op">~</span> <span class="va">x</span>, <span class="op">~</span> <span class="va">x</span> <span class="op">+</span> <span class="va">z</span>, data<span class="op">=</span><span class="va">d</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err     2.5%   97.5% P-value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) -0.02208 0.03092 -0.08269 0.03852  0.4751</span>
+<span class="r-in"><span><span class="fu">aipw</span><span class="op">(</span><span class="va">y0</span> <span class="op">~</span> <span class="va">x</span>, data<span class="op">=</span><span class="va">d</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err    2.5%  97.5% P-value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)  0.05148 0.08338 -0.1119 0.2149   0.537</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

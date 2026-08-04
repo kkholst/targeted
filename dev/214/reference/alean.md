@@ -99,8 +99,8 @@ e <- alean(
  link = "logit", mc.cores=1, nfolds=1
 )
 e
-#>   Estimate Std.Err 2.5% 97.5%   P-value
-#> a    1.104 0.05301    1 1.208 2.354e-96
+#>   Estimate Std.Err   2.5% 97.5%   P-value
+#> a   0.9992  0.0533 0.8947 1.104 2.084e-78
 
 e <- alean(response_model=learner_glm(y ~ a + l, family=binomial),
            exposure_model=learner_glm(a ~ l),
@@ -108,5 +108,5 @@ e <- alean(response_model=learner_glm(y ~ a + l, family=binomial),
            link = "logit", mc.cores=1, nfolds=1)
 e
 #>   Estimate Std.Err   2.5% 97.5%   P-value
-#> a      1.1 0.05284 0.9969 1.204 2.488e-96
+#> a   0.9946  0.0532 0.8903 1.099 5.551e-78
 ```
