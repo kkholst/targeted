@@ -437,7 +437,7 @@ lr$summary()
 #> ────────── learner object ──────────
 #> glm 
 #> 
-#> formula: y ~ x <environment: 0x55b8c78f61e0> 
+#> formula: y ~ x <environment: 0x5602480921c0> 
 #> estimate: formula, data, family, ... 
 #> estimate.args: family=nb 
 #> predict: object, newdata, ... 
@@ -452,7 +452,7 @@ print(lr_sum)
 #> ────────── learner object ──────────
 #> glm 
 #> 
-#> formula: y ~ x <environment: 0x55b8c78f61e0> 
+#> formula: y ~ x <environment: 0x5602480921c0> 
 #> estimate: formula, data, family, ... 
 #> estimate.args: family=nb 
 #> predict: object, newdata, ... 
