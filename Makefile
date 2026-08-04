@@ -27,7 +27,7 @@ readme:
 	@cp inst/README.md README.md
 
 roxygen:
-	@echo 'devtools::document(".")' | $(R)
+	@echo 'roxygen2::roxygenize(".")' | $(R)
 
 doc: roxygen rcpp readme
 
