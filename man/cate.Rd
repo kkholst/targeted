@@ -146,6 +146,32 @@ cate(cate.model=~1,
      stratify=TRUE)
 }
 
+## Missing data
+sim_missing_cate <- function(n = 5000, seed = 1) {
+  set.seed(seed)
+  w1 <- rnorm(n)
+  w2 <- rnorm(n)
+  a  <- rbinom(n, 1, 0.5) # randomized trial
+  y_full <- 1 + a + w1 + 0.5 * w2 + rnorm(n)
+  pR <- plogis(0.5 - 1 * w2 * a + 0.5 * a)
+  R  <- rbinom(n, 1, pR)
+  y  <- ifelse(R == 1, y_full, NA_real_)
+  data.frame(y0 = y_full, y = y, a = a, w1 = w1, w2 = w2)
+}
+d <- sim_missing_cate()
+
+# ignoring missing data (complete-case analysis)
+cate(cate.model = ~1,
+     response.model = y ~ a * w2, # wrong outcome model
+     treatment.model = a ~ 1,
+     data = na.omit(d), nfolds = 1L)
+# MAR analysis
+fit <- cate(cate.model = ~1,
+            response.model = y ~ a * w2,
+            treatment.model = a ~ 1,
+            missing.model  = ~ a * (w1 + w2),
+            data = d, nfolds = 1L)
+fit
 }
 \references{
 Mark J. van der Laan (2006) Statistical Inference for Variable
