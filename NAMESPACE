@@ -117,69 +117,81 @@ import(Rcpp)
 import(methods)
 importFrom(R6,R6Class)
 importFrom(grDevices,nclass.Sturges)
-importFrom(graphics,abline)
-importFrom(graphics,lines)
-importFrom(graphics,plot)
-importFrom(graphics,points)
-importFrom(lava,IC)
-importFrom(lava,Inverse)
-importFrom(lava,estimate)
-importFrom(lava,expit)
-importFrom(lava,getoutcome)
-importFrom(lava,logit)
-importFrom(lava,na.pass0)
-importFrom(lava,parameter)
-importFrom(lava,predict_glm)
-importFrom(lava,score)
-importFrom(lava,sim)
-importFrom(rlang,call_match)
-importFrom(rlang,hash)
-importFrom(stats,.getXlevels)
-importFrom(stats,approxfun)
-importFrom(stats,as.formula)
-importFrom(stats,binomial)
-importFrom(stats,coef)
-importFrom(stats,cov2cor)
-importFrom(stats,delete.response)
-importFrom(stats,density)
-importFrom(stats,deriv)
-importFrom(stats,dnorm)
-importFrom(stats,drop.terms)
-importFrom(stats,formula)
-importFrom(stats,gaussian)
-importFrom(stats,glm)
-importFrom(stats,glm.fit)
-importFrom(stats,lm)
-importFrom(stats,lm.fit)
-importFrom(stats,lm.wfit)
-importFrom(stats,model.extract)
-importFrom(stats,model.frame)
-importFrom(stats,model.matrix)
-importFrom(stats,model.offset)
-importFrom(stats,model.response)
-importFrom(stats,na.omit)
-importFrom(stats,na.pass)
-importFrom(stats,nlminb)
-importFrom(stats,offset)
-importFrom(stats,pchisq)
-importFrom(stats,pnorm)
-importFrom(stats,predict)
-importFrom(stats,quantile)
-importFrom(stats,reformulate)
-importFrom(stats,runif)
-importFrom(stats,sd)
-importFrom(stats,terms)
-importFrom(stats,uniroot)
-importFrom(stats,update)
-importFrom(stats,vcov)
-importFrom(stats,weighted.mean)
-importFrom(stats,weights)
-importFrom(survival,Surv)
-importFrom(survival,cluster)
-importFrom(survival,strata)
-importFrom(survival,survfit)
-importFrom(utils,capture.output)
-importFrom(utils,getFromNamespace)
-importFrom(utils,head)
-importFrom(utils,tail)
+importFrom(graphics,
+  abline,
+  lines,
+  plot,
+  points
+)
+importFrom(lava,
+  IC,
+  Inverse,
+  estimate,
+  expit,
+  getoutcome,
+  logit,
+  na.pass0,
+  parameter,
+  predict_glm,
+  score,
+  sim
+)
+importFrom(rlang,
+  call_match,
+  hash
+)
+importFrom(stats,
+  .getXlevels,
+  approxfun,
+  as.formula,
+  binomial,
+  coef,
+  cov2cor,
+  delete.response,
+  density,
+  deriv,
+  dnorm,
+  drop.terms,
+  formula,
+  gaussian,
+  glm,
+  glm.fit,
+  lm,
+  lm.fit,
+  lm.wfit,
+  model.extract,
+  model.frame,
+  model.matrix,
+  model.offset,
+  model.response,
+  na.omit,
+  na.pass,
+  nlminb,
+  offset,
+  pchisq,
+  pnorm,
+  predict,
+  quantile,
+  reformulate,
+  runif,
+  sd,
+  terms,
+  uniroot,
+  update,
+  vcov,
+  weighted.mean,
+  weights
+)
+importFrom(survival,
+  Surv,
+  cluster,
+  strata,
+  survfit
+)
+importFrom(utils,
+  capture.output,
+  getFromNamespace,
+  head,
+  tail
+)
 useDynLib(targeted, .registration=TRUE)
