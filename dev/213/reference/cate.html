@@ -256,6 +256,42 @@ Clinical Trials under Covariate-Adaptive Randomization, Biometrika.</p>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 's1' not found</span>
 <span class="r-in"><span> <span class="co"># \dontrun{}</span></span></span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## Missing data</span></span></span>
+<span class="r-in"><span><span class="va">sim_missing_cate</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span> <span class="op">=</span> <span class="fl">5000</span>, <span class="va">seed</span> <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="va">seed</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">w1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">w2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">a</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">1</span>, <span class="fl">0.5</span><span class="op">)</span> <span class="co"># randomized trial</span></span></span>
+<span class="r-in"><span>  <span class="va">y_full</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">+</span> <span class="va">a</span> <span class="op">+</span> <span class="va">w1</span> <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="va">w2</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">pR</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Logistic.html" class="external-link">plogis</a></span><span class="op">(</span><span class="fl">0.5</span> <span class="op">-</span> <span class="fl">1</span> <span class="op">*</span> <span class="va">w2</span> <span class="op">*</span> <span class="va">a</span> <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="va">a</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">R</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">1</span>, <span class="va">pR</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">y</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">R</span> <span class="op">==</span> <span class="fl">1</span>, <span class="va">y_full</span>, <span class="cn">NA_real_</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>y0 <span class="op">=</span> <span class="va">y_full</span>, y <span class="op">=</span> <span class="va">y</span>, a <span class="op">=</span> <span class="va">a</span>, w1 <span class="op">=</span> <span class="va">w1</span>, w2 <span class="op">=</span> <span class="va">w2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">sim_missing_cate</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># ignoring missing data (complete-case analysis)</span></span></span>
+<span class="r-in"><span><span class="fu">cate</span><span class="op">(</span>cate.model <span class="op">=</span> <span class="op">~</span><span class="fl">1</span>,</span></span>
+<span class="r-in"><span>     response.model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">a</span> <span class="op">*</span> <span class="va">w2</span>, <span class="co"># wrong outcome model</span></span></span>
+<span class="r-in"><span>     treatment.model <span class="op">=</span> <span class="va">a</span> <span class="op">~</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>     data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/na.fail.html" class="external-link">na.omit</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span>, nfolds <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err   2.5%  97.5%    P-value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> E[y(1)]       1.9271 0.03483 1.8588 1.9953  0.000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> E[y(0)]       0.9076 0.03607 0.8370 0.9783 9.391e-140</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ───────────                                          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   1.0194 0.04879 0.9238 1.1150  6.127e-97</span>
+<span class="r-in"><span><span class="co"># MAR analysis</span></span></span>
+<span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">cate</span><span class="op">(</span>cate.model <span class="op">=</span> <span class="op">~</span><span class="fl">1</span>,</span></span>
+<span class="r-in"><span>            response.model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">a</span> <span class="op">*</span> <span class="va">w2</span>,</span></span>
+<span class="r-in"><span>            treatment.model <span class="op">=</span> <span class="va">a</span> <span class="op">~</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>            missing.model  <span class="op">=</span> <span class="op">~</span> <span class="va">a</span> <span class="op">*</span> <span class="op">(</span><span class="va">w1</span> <span class="op">+</span> <span class="va">w2</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>            data <span class="op">=</span> <span class="va">d</span>, nfolds <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fit</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err   2.5% 97.5%    P-value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> E[y(1)]       1.9807 0.03372 1.9146 2.047  0.000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> E[y(0)]       0.9725 0.03237 0.9091 1.036 2.485e-198</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ───────────                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   1.0082 0.04573 0.9186 1.098 1.033e-107</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

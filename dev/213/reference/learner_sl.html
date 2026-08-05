@@ -144,12 +144,12 @@ from a base learner (see <code>targeted:::mse</code> for additional details).</p
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Estimate arguments: learners=&lt;list&gt;, nfolds=10, meta.learner=&lt;function&gt;, model.score=&lt;function&gt; </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Predict arguments:   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Formula: y ~ 1 &lt;environment: 0x560249d52740&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Formula: y ~ 1 &lt;environment: 0x55954770a350&gt; </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ─────────────────────────────────────</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          score     weight</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mean 4.6075512 0.03921874</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> glm  0.9789936 0.03968460</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> iso  0.4999095 0.92109667</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         score     weight</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mean 5.011196 0.06440568</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> glm  1.058765 0.08033375</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iso  0.584849 0.85526057</span>
 <span class="r-in"><span><span class="co"># weights(s$fit)</span></span></span>
 <span class="r-in"><span><span class="co"># score(s$fit)</span></span></span>
 <span class="r-in"><span></span></span>
@@ -160,24 +160,24 @@ from a base learner (see <code>targeted:::mse</code> for additional details).</p
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── mse </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         mean      sd     min     max</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> sl   0.53129 0.03245 0.49217 0.56774</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mean 4.59657 0.50115 3.70142 5.07191</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> glm  0.97602 0.07337 0.88417 1.06816</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> iso  0.52010 0.03172 0.47648 0.56542</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> sl   0.62401 0.04650 0.56521 0.67953</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mean 5.01482 0.47872 4.43024 5.72789</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> glm  1.05843 0.08263 0.93481 1.18194</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iso  0.59872 0.04513 0.53342 0.66822</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── mae </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         mean      sd     min     max</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> sl   0.58651 0.02967 0.54094 0.61505</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mean 1.65086 0.11119 1.47531 1.74119</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> glm  0.79803 0.02926 0.76318 0.83569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> iso  0.58060 0.02988 0.52930 0.61327</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> sl   0.62822 0.01889 0.60529 0.65086</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mean 1.79246 0.04575 1.75501 1.87045</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> glm  0.82495 0.02906 0.78183 0.85334</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iso  0.61530 0.01998 0.58478 0.64198</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── weight </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         mean      sd     min     max</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> sl         -       -       -       -</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mean 0.05328 0.02734 0.01802 0.08715</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> glm  0.07052 0.00591 0.06439 0.08101</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> iso  0.87621 0.02468 0.84846 0.90740</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mean 0.07765 0.06591 0.00000 0.18818</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> glm  0.08344 0.03393 0.04148 0.14000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iso  0.83891 0.06840 0.72423 0.91004</span>
 <span class="r-in"><span><span class="co"># coef(cvres)</span></span></span>
 <span class="r-in"><span><span class="co"># score(cvres)</span></span></span>
 </code></pre></div>

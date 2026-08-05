@@ -140,7 +140,7 @@ classification.</p>
 <span class="r-in"><span><span class="va">lr</span><span class="op">$</span><span class="fu">estimate</span><span class="op">(</span><span class="va">d</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">lr</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          1          2          3          4          5          6 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2.6735533  1.1992319  1.0885052 -2.2480818  5.3942965 -0.8926302 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  0.8884265  3.1618182 -1.4885151 -0.3143763  1.0739773  0.7069004 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># binary classification</span></span></span>
 <span class="r-in"><span><span class="va">lr</span> <span class="op">&lt;-</span> <span class="fu">learner_svm</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">yb</span><span class="op">)</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span><span class="op">)</span></span></span>
@@ -148,11 +148,11 @@ classification.</p>
 <span class="r-in"><span><span class="co"># lr &lt;- learner_svm(yb ~ x1 + x2, type = "C-classification")</span></span></span>
 <span class="r-in"><span><span class="va">lr</span><span class="op">$</span><span class="fu">estimate</span><span class="op">(</span><span class="va">d</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">lr</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span><span class="op">)</span> <span class="co"># predict class probabilities of class 2</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         1         2         3         4         5         6 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.1425906 0.1205991 0.1857465 0.8982434 0.1000389 0.5259357 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          1          2          3          4          5          6 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.24577511 0.09768093 0.85972293 0.60689426 0.22507961 0.34472509 </span>
 <span class="r-in"><span><span class="va">lr</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span>, probability <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="co"># predict labels</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 2 3 4 5 6 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 1 1 0 1 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 1 0 0 1 1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Levels: 0 1</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># multi-class classification</span></span></span>
@@ -160,12 +160,12 @@ classification.</p>
 <span class="r-in"><span><span class="va">lr</span><span class="op">$</span><span class="fu">estimate</span><span class="op">(</span><span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">lr</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      setosa versicolor   virginica</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 0.9800195 0.01170111 0.008279405</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 0.9722976 0.01880674 0.008895639</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 0.9787085 0.01235435 0.008937102</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 0.9745059 0.01589414 0.009599940</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 0.9791852 0.01205276 0.008762017</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 0.9734598 0.01743414 0.009106024</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 0.9808704 0.01077337 0.008356246</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 0.9737522 0.01724343 0.009004387</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 0.9796085 0.01137440 0.009017115</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 0.9757146 0.01460345 0.009681995</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 0.9800849 0.01110037 0.008814722</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 0.9748801 0.01600648 0.009113379</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

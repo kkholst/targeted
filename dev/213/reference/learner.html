@@ -412,31 +412,31 @@ elements:</p><dl><dt>info</dt>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="va">models</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">x</span><span class="op">$</span><span class="fu">estimate</span><span class="op">(</span><span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">x</span>, newdata <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         setosa versicolor   virginica</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.9975000 0.00250000 0.000000000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.9552273 0.02872727 0.016045455</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 0.9793333 0.01233333 0.008333333</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 0.9570000 0.03550000 0.007500000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 0.9975000 0.00250000 0.000000000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 0.9457630 0.04592352 0.008313492</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         setosa  versicolor   virginica</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.9966667 0.003333333 0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.9551667 0.040666667 0.004166667</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 0.9983333 0.000000000 0.001666667</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 0.9893333 0.009000000 0.001666667</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 1.0000000 0.000000000 0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 0.9097778 0.086000000 0.004222222</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="co"># Reduce Ex. timing</span></span></span>
 <span class="r-in"><span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu">targeted</span><span class="fu">::</span><span class="fu"><a href="cv.default.html">cv</a></span><span class="op">(</span><span class="va">models</span>, data <span class="op">=</span> <span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">a</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">args</span>, <span class="st">"table"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              brier -logscore</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model1  0.09905229 0.2156259</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model2  0.09770097 0.2155833</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model3  0.09027414 0.1869423</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model4  0.08930044 0.1884777</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model5  0.08507715 0.1677289</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model6  0.08174147 0.1697481</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model7  0.32596732 0.5374138</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model8  0.33396408 0.5485199</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model9  0.32949550 0.5414416</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model10 0.33061998 0.5382947</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model11 0.32393173 0.5271123</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> model12 0.32291826 0.5244176</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model1  0.09764241 0.2170821</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model2  0.10508375 0.2247754</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model3  0.09148276 0.1873786</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model4  0.09408285 0.1958657</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model5  0.08431959 0.1695878</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model6  0.08802727 0.1732215</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model7  0.34069548 0.5607586</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model8  0.33682167 0.5557442</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model9  0.33857090 0.5511755</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model10 0.34094881 0.5541231</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model11 0.34110870 0.5529765</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model12 0.34453941 0.5607717</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># defining learner via function with arguments y (response)</span></span></span>
@@ -466,7 +466,7 @@ elements:</p><dl><dt>info</dt>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ────────── learner object ──────────</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> glm </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> formula: y ~ x &lt;environment: 0x5602480921c0&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> formula: y ~ x &lt;environment: 0x55953c4e9f08&gt; </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> estimate: formula, data, family, ... </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> estimate.args: family=nb </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> predict: object, newdata, ... </span>
@@ -481,7 +481,7 @@ elements:</p><dl><dt>info</dt>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ────────── learner object ──────────</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> glm </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> formula: y ~ x &lt;environment: 0x5602480921c0&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> formula: y ~ x &lt;environment: 0x55953c4e9f08&gt; </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> estimate: formula, data, family, ... </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> estimate.args: family=nb </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> predict: object, newdata, ... </span>

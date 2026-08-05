@@ -218,4 +218,41 @@ cate(cate.model=~1,
      stratify=TRUE)
 #> Error: object 's1' not found
  # \dontrun{}
+
+## Missing data
+sim_missing_cate <- function(n = 5000, seed = 1) {
+  set.seed(seed)
+  w1 <- rnorm(n)
+  w2 <- rnorm(n)
+  a  <- rbinom(n, 1, 0.5) # randomized trial
+  y_full <- 1 + a + w1 + 0.5 * w2 + rnorm(n)
+  pR <- plogis(0.5 - 1 * w2 * a + 0.5 * a)
+  R  <- rbinom(n, 1, pR)
+  y  <- ifelse(R == 1, y_full, NA_real_)
+  data.frame(y0 = y_full, y = y, a = a, w1 = w1, w2 = w2)
+}
+d <- sim_missing_cate()
+
+# ignoring missing data (complete-case analysis)
+cate(cate.model = ~1,
+     response.model = y ~ a * w2, # wrong outcome model
+     treatment.model = a ~ 1,
+     data = na.omit(d), nfolds = 1L)
+#>             Estimate Std.Err   2.5%  97.5%    P-value
+#> E[y(1)]       1.9271 0.03483 1.8588 1.9953  0.000e+00
+#> E[y(0)]       0.9076 0.03607 0.8370 0.9783 9.391e-140
+#> ───────────                                          
+#> (Intercept)   1.0194 0.04879 0.9238 1.1150  6.127e-97
+# MAR analysis
+fit <- cate(cate.model = ~1,
+            response.model = y ~ a * w2,
+            treatment.model = a ~ 1,
+            missing.model  = ~ a * (w1 + w2),
+            data = d, nfolds = 1L)
+fit
+#>             Estimate Std.Err   2.5% 97.5%    P-value
+#> E[y(1)]       1.9807 0.03372 1.9146 2.047  0.000e+00
+#> E[y(0)]       0.9725 0.03237 0.9091 1.036 2.485e-198
+#> ───────────                                         
+#> (Intercept)   1.0082 0.04573 0.9186 1.098 1.033e-107
 ```
