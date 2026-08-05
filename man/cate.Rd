@@ -9,6 +9,7 @@ cate(
   treatment.model,
   cate.model = ~1,
   calibration.model = NULL,
+  missing.model = NULL,
   data,
   contrast,
   nfolds = 1,
@@ -38,6 +39,14 @@ average treatment effects}
 \item{calibration.model}{linear calibration model. Specify covariates in
 addition to predicted potential outcomes to include in the calibration.}
 
+\item{missing.model}{formula or learner object; default \code{NULL}. Model for the
+missingness mechanism \eqn{P(R=1 \mid X, A)}. Required when the outcome in
+\code{response.model} contains NAs. If the formula LHS is omitted, the
+observation indicator is used automatically. When \code{stratify = TRUE} the
+missing model is fit separately per treatment arm. When supplied, the AIPW
+score is inverse-probability-of-observation weighted and (if \code{second.order = TRUE}) an additional second-order term is added to the influence
+function.}
+
 \item{data}{data.frame}
 
 \item{contrast}{treatment contrast (default 1 vs 0)}
@@ -46,11 +55,12 @@ addition to predicted potential outcomes to include in the calibration.}
 fold indices where each element is an integer vector of observation indices
 forming a partition of \code{1:nrow(data)}.}
 
-\item{rep}{number of replications of cross-fitting procedure
-by averaging estimates and influence functions from each replication}
+\item{rep}{number of replications of cross-fitting procedure by averaging
+estimates and influence functions from each replication}
 
 \item{id}{(integer or character) optional subject id vector of length
-\code{nrow(data)}.}
+\code{nrow(data)}. The \code{id} can also be specified as part of the \code{cate.model}
+argument with a formula syntax: \code{~ 1 + cluster(id)}.}
 
 \item{silent}{suppress all messages and progressbars}
 
@@ -93,6 +103,14 @@ be a subset of the covariates. Define the conditional potential mean outcome
 \beta)} denote a parametric working model, then the target parameter is the
 mean-squared error \deqn{\beta(P) = \operatorname{argmin}_{\beta}
 E_{P}[\{\Psi_{1}(P)(V)-\Psi_{0}(P)(V)\} - m(V; \beta)]^{2}}
+
+Missing data is handled under a Missing At Random assumption (MAR). Let
+\eqn{R} denote the indicator for data not being missing, \eqn{R\perp Y|W,A}.
+The nuisance models are \eqn{Q(w,a) = E(Y|W=w, A=a)}, \eqn{g_a(w) =
+P(A=a|W=w)}, and \eqn{\rho(w, a) = P(R=1|W=w, A=a)}. For the expected
+potential outcome \eqn{E[Y(a)]}, the AIPW estimator then takes the form
+\deqn{\frac{1}{n}\sum_{i=1}^n R_i I(A_i=a) / \{g_a(W_i) \rho(W_i, a)\} (Y_i -
+Q(W_i,a)) + Q(W_i, a)}.
 }
 \examples{
 sim1 <- function(n=1000, ...) {
@@ -128,6 +146,32 @@ cate(cate.model=~1,
      stratify=TRUE)
 }
 
+## Missing data
+sim_missing_cate <- function(n = 5000, seed = 1) {
+  set.seed(seed)
+  w1 <- rnorm(n)
+  w2 <- rnorm(n)
+  a  <- rbinom(n, 1, 0.5) # randomized trial
+  y_full <- 1 + a + w1 + 0.5 * w2 + rnorm(n)
+  pR <- plogis(0.5 - 1 * w2 * a + 0.5 * a)
+  R  <- rbinom(n, 1, pR)
+  y  <- ifelse(R == 1, y_full, NA_real_)
+  data.frame(y0 = y_full, y = y, a = a, w1 = w1, w2 = w2)
+}
+d <- sim_missing_cate()
+
+# ignoring missing data (complete-case analysis)
+cate(cate.model = ~1,
+     response.model = y ~ a * w2, # wrong outcome model
+     treatment.model = a ~ 1,
+     data = na.omit(d), nfolds = 1L)
+# MAR analysis
+fit <- cate(cate.model = ~1,
+            response.model = y ~ a * w2,
+            treatment.model = a ~ 1,
+            missing.model  = ~ a * (w1 + w2),
+            data = d, nfolds = 1L)
+fit
 }
 \references{
 Mark J. van der Laan (2006) Statistical Inference for Variable

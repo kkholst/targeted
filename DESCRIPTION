@@ -1,7 +1,7 @@
 Package: targeted
 Type: Package
 Title: Targeted Inference
-Version: 0.8
+Version: 0.8.1
 Authors@R: c(person(given = "Klaus K.",
                     family = "Holst",
                     role = c("aut", "cre"),
@@ -23,6 +23,7 @@ Maintainer: Klaus K. Holst <klaus@holst.it>
 Description: Various methods for targeted and semiparametric inference including
 	     augmented inverse probability weighted (AIPW) estimators for missing data and
 	     causal inference (Bang and Robins (2005) <doi:10.1111/j.1541-0420.2005.00377.x>),
+         one-step imputation (Nordland et al (2026)) <doi:10.48550/arXiv.2606.07174>),
          variable importance and conditional average treatment effects (CATE)
          (van der Laan (2006) <doi:10.2202/1557-4679.1008>),
 	     estimators for risk differences and relative risks (Richardson et al. (2017)
@@ -38,7 +39,7 @@ Imports:
     future.apply,
     lava (>= 1.9.2),
     methods,
-    mets (>= 1.3.9),
+    mets (>= 1.3.12),
     quadprog,
     progressr,
     rlang,
@@ -80,4 +81,4 @@ VignetteBuilder:
     quarto
 SystemRequirements: Quarto command line tools
     (https://github.com/quarto-dev/quarto-cli).
-Config/roxygen2/version: 8.0.0
+Config/roxygen2/version: 8.1.0
