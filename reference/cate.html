@@ -222,20 +222,19 @@ Clinical Trials under Covariate-Adaptive Randomization, Biometrika.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.9502 0.05280 0.8467 1.0536  2.093e-72</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> w2            1.0377 0.04756 0.9445 1.1309 1.586e-105</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span>  <span class="co">## superlearner example</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="co"># superlearner</span></span></span>
 <span class="r-in"><span><span class="va">mod1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>   glm <span class="op">=</span> <span class="fu"><a href="learner_glm.html">learner_glm</a></span><span class="op">(</span><span class="va">y</span><span class="op">~</span><span class="va">w1</span><span class="op">+</span><span class="va">w2</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>   gam <span class="op">=</span> <span class="fu"><a href="learner_gam.html">learner_gam</a></span><span class="op">(</span><span class="va">y</span><span class="op">~</span><span class="fu">s</span><span class="op">(</span><span class="va">w1</span><span class="op">)</span> <span class="op">+</span> <span class="fu">s</span><span class="op">(</span><span class="va">w2</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">s1</span> <span class="op">&lt;-</span> <span class="fu"><a href="learner_sl.html">learner_sl</a></span><span class="op">(</span><span class="va">mod1</span>, nfolds<span class="op">=</span><span class="fl">5</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mod1' not found</span>
 <span class="r-in"><span><span class="fu">cate</span><span class="op">(</span>cate.model<span class="op">=</span><span class="op">~</span><span class="fl">1</span>,</span></span>
 <span class="r-in"><span>     response.model<span class="op">=</span><span class="va">s1</span>,</span></span>
 <span class="r-in"><span>     treatment.model<span class="op">=</span><span class="fu"><a href="learner_glm.html">learner_glm</a></span><span class="op">(</span><span class="va">a</span><span class="op">~</span><span class="va">w1</span><span class="op">+</span><span class="va">w2</span>, family<span class="op">=</span><span class="va">binomial</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>     data<span class="op">=</span><span class="va">d</span>,</span></span>
 <span class="r-in"><span>     stratify<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 's1' not found</span>
-<span class="r-in"><span> <span class="co"># \dontrun{}</span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
