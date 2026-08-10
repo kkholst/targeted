@@ -22,7 +22,7 @@ jobs:
     concurrency:
       group: 'pkgdown-${{ github.event_name != ''pull_request'' || github.run_id }}'
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Generate custom token
         id: generate-token
         if:  ${{ inputs.generate_token }}
@@ -79,7 +79,7 @@ jobs:
           cp -r ./docs/* /home/runner/work/dev
       - name: Check out gh-pages branch
         if: github.event_name == 'pull_request'
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: gh-pages
       - name: Copy and push to gh-pages
