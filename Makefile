@@ -18,6 +18,7 @@ cliff-unreleased-prepend:
 .PHONY: pkgdown
 pkgdown:
 	@echo 'pkgdown::build_site(override = list(destination = "docs"))' | $(R)
+	@rm -rf vignettes/.quarto vignettes/.gitignore
 
 rcpp:
 	@echo 'Rcpp::compileAttributes(".")' | $(R)
