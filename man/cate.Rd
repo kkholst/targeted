@@ -115,7 +115,8 @@ cate(cate.model=~1+w2,
      treatment.model=a~w1+w2,
      data=d)
 
-\dontrun{ ## superlearner example
+\dontrun{
+# superlearner
 mod1 <- list(
    glm = learner_glm(y~w1+w2),
    gam = learner_gam(y~s(w1) + s(w2))
