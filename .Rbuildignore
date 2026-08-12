@@ -7,7 +7,6 @@
 ^.editorconfig$
 ^.lintr$
 ^src/CPPLINT.cfg$
-^Dockerfile$
 ^CONTRIBUTING.md$
 ^Makefile$
 ^tmp$
