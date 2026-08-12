@@ -18,6 +18,7 @@ cliff-unreleased-prepend:
 .PHONY: pkgdown
 pkgdown:
 	@echo 'pkgdown::build_site(override = list(destination = "docs"))' | $(R)
+	@rm -rf vignettes/.quarto vignettes/.gitignore
 
 rcpp:
 	@echo 'Rcpp::compileAttributes(".")' | $(R)
@@ -27,7 +28,7 @@ readme:
 	@cp inst/README.md README.md
 
 roxygen:
-	@echo 'devtools::document(".")' | $(R)
+	@echo 'roxygen2::roxygenize(".")' | $(R)
 
 doc: roxygen rcpp readme
 

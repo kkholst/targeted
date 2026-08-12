@@ -132,7 +132,8 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #'      treatment.model=a~w1+w2,
 #'      data=d)
 #'
-#' \dontrun{ ## superlearner example
+#' \dontrun{
+#' # superlearner
 #' mod1 <- list(
 #'    glm = learner_glm(y~w1+w2),
 #'    gam = learner_gam(y~s(w1) + s(w2))
@@ -253,7 +254,10 @@ cate <- function(response.model, # nolint
     rep <- 1L
   }
 
-  environment(cate.model)$cluster <- targeted::cluster
+  formulaenv <- new.env(parent = environment(cate.model))
+  formulaenv$cluster <- targeted::cluster
+  formulaenv$strata <- targeted::strata
+  environment(cate.model) <- formulaenv
   des_cate <- design(cate.model, data,
                      specials="cluster")
   if (is.null(id)) {
