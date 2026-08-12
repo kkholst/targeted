@@ -204,20 +204,19 @@ cate(cate.model=~1+w2,
 #> (Intercept)   0.9502 0.05280 0.8467 1.0536  2.093e-72
 #> w2            1.0377 0.04756 0.9445 1.1309 1.586e-105
 
-if (FALSE)  ## superlearner example
+if (FALSE) { # \dontrun{
+# superlearner
 mod1 <- list(
    glm = learner_glm(y~w1+w2),
    gam = learner_gam(y~s(w1) + s(w2))
 )
 s1 <- learner_sl(mod1, nfolds=5)
-#> Error: object 'mod1' not found
 cate(cate.model=~1,
      response.model=s1,
      treatment.model=learner_glm(a~w1+w2, family=binomial),
      data=d,
      stratify=TRUE)
-#> Error: object 's1' not found
- # \dontrun{}
+} # }
 
 ## Missing data
 sim_missing_cate <- function(n = 5000, seed = 1) {
