@@ -7,7 +7,6 @@
 ^.editorconfig$
 ^.lintr$
 ^src/CPPLINT.cfg$
-^Dockerfile$
 ^CONTRIBUTING.md$
 ^Makefile$
 ^tmp$
@@ -36,3 +35,4 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\.cliff\.toml$
+^certs$

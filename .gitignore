@@ -146,3 +146,7 @@ tests/lib/
 tests/coverage-report.html
 /doc/
 /Meta/
+
+# Local corporate CA certificates for docker builds
+certs
+certs/
