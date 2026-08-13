@@ -153,6 +153,62 @@ test_cate_rep_variance_consistency <- function() {
 }
 test_cate_rep_variance_consistency()
 
+# MAR cate vs polle
+test_cate_missing_vs_polle <- function() {
+
+  if (!requireNamespace("polle", quietly = TRUE)) {
+    return(invisible(NULL))
+  }
+
+  set.seed(1)
+  n <- 4000
+  w1 <- rnorm(n)
+  w2 <- rnorm(n)
+  r <- rbinom(n, 1, plogis(0.4 + 0.7 * w1 - 0.3 * w2))
+  y_full <- 1 + w1 + 0.5 * w2 + rnorm(n)     # truth: E[Y] = 1
+  trt <- rbinom(n = n, size = 1, prob = 0.5)
+  d <- data.frame(y = ifelse(r == 1, y_full, NA),
+                  w1 = w1, w2 = w2, trt = trt)
+
+  ## targeted::cate with missing.model
+  tc <- suppressWarnings(
+    cate(cate.model = ~ 1,
+         response.model = y ~ w1 * w2,
+         treatment.model = trt ~ 1,
+         missing.model = ~ w1 + w2,
+         stratify = TRUE,
+         second.order = FALSE,
+         data = d)
+  )
+  est_cate <- unname(coef(tc)[1])
+  ic_cate <- unname(IC(tc)[, 1])
+
+  ## polle package:
+  pd <- polle::policy_data(data = d,
+                    action = "trt",
+                    utility = "y",
+                    covariates = c("w1", "w2"))
+  p1 <- polle::policy_def(1)
+  a1 <- polle::policy_eval(policy_data = pd,
+                           policy = p1,
+                           g_models = polle::g_glm( ~ 1),
+                           q_models = polle::q_glm( ~ A * (w1 * w2)),
+                           m_model = polle::q_glm(~ A_1 * (w1_1 * w2_1)),
+                           m_full_history = TRUE,
+                           c_models = list(polle::c_no_censoring(),
+                                           polle::g_glm(~ A_1 * (w1_1 + w2_1))),
+                           c_full_history = TRUE
+                           )
+
+  est_polle <- unname(a1$coef)
+  ic_polle <- unname(a1$IC[, 1])
+
+  ## point estimate
+  expect_equal(est_cate, est_polle, tolerance = 1e-8)
+  expect_equal(ic_cate, ic_polle)
+}
+test_cate_missing_vs_polle()
+
 # comparison against the AIPW package on CRAN
 test_cate_missing_vs_AIPW_package <- function() {
   if (!requireNamespace("AIPW", quietly = TRUE) ||
