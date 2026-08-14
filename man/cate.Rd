@@ -65,7 +65,8 @@ argument with a formula syntax: \code{~ 1 + cluster(id)}.}
 
 \item{silent}{suppress all messages and progressbars}
 
-\item{stratify}{if TRUE the response.model will be stratified by treatment}
+\item{stratify}{if TRUE the response.model and missing.model (if provided)
+will be stratified by treatment}
 
 \item{mc.cores}{(optional) number of cores. parallel::mcmapply used instead
 of future}
