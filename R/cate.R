@@ -117,14 +117,14 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #' @param response.model formula or learner object (formula => learner_glm)
 #' @param ... additional arguments to future.apply::future_mapply
 #' @param treatment.model formula or learner object (formula => learner_glm)
-#' @param missing.model formula or learner object; default `NULL`. Model for the
-#'   missingness mechanism \eqn{P(R=1 \mid X, A)}. Required when the outcome in
-#'   `response.model` contains NAs. If the formula LHS is omitted, the
-#'   observation indicator is used automatically. When `stratify = TRUE` the
-#'   missing model is fit separately per treatment arm. When supplied, the AIPW
-#'   score is inverse-probability-of-observation weighted and (if `second.order
-#'   = TRUE`) an additional second-order term is added to the influence
-#'   function.
+#' @param missing.model formula or learner object (formula => learner_glm(family
+#'   = binomial); default `NULL`. Model for the missingness mechanism \eqn{P(R=1
+#'   \mid X, A)}. Required when the outcome in `response.model` contains NAs. If
+#'   the formula LHS is omitted, the observation indicator is used
+#'   automatically. When `stratify = TRUE` the missing model is fit separately
+#'   per treatment arm. When supplied, the AIPW score is
+#'   inverse-probability-of-observation weighted and (if `second.order = TRUE`)
+#'   an additional second-order term is added to the influence function.
 #' @param cate.model formula specifying regression design for conditional
 #'   average treatment effects
 #' @param calibration.model linear calibration model. Specify covariates in
@@ -140,7 +140,8 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #'   `nrow(data)`. The `id` can also be specified as part of the `cate.model`
 #'   argument with a formula syntax: `~ 1 + cluster(id)`.
 #' @param silent suppress all messages and progressbars
-#' @param stratify if TRUE the response.model will be stratified by treatment
+#' @param stratify if TRUE the response.model and missing.model (if provided)
+#'   will be stratified by treatment
 #' @param mc.cores (optional) number of cores. parallel::mcmapply used instead
 #'   of future
 #' @param var.type when equal to "IC" the asymptotic variance is derived from
@@ -536,7 +537,7 @@ cate <- function(response.model, # nolint
   if (any(mapply(\(x) any(is.na(x)), val$q))) {
     warning(
       "NAs detect in the predictions of the response.model.",
-      " Returning a cate object with an blanked estimate field.",
+      " Returning a cate object with a blanked estimate field.",
       " Inspect the data$q field of the returned object for more information."
     )
     res$estimate <- lava::estimate(coef = NA, vcov = NULL)
@@ -555,11 +556,12 @@ cate <- function(response.model, # nolint
   if (any(mapply(\(x) any(is.na(x)), val$p))) {
     warning(
       "NAs detect in the predictions of the treatment.model.",
-      " Returning a cate object with an blanked estimate field.",
+      " Returning a cate object with a blanked estimate field.",
       " Inspect the data$q field of the returned object for more information."
     )
-    # return object because update method fails when val$p contains NAs and
-    # the error message begin cast does not inform the user about the NAs
+    # return an object because update.cate.targeted fails when val$p contains
+    # NAs and the error message being cast here does not inform the user about
+    # the NAs
     res$estimate <- lava::estimate(coef = NA, vcov = NULL)
     return(res)
   }
@@ -587,7 +589,6 @@ cate_est <- function(y, # response vector
                      stratify = FALSE,
                      X.cate
                      ) {
-
   use_ipmw <- !is.null(r) && !is.null(pr)
   ## Expand length-n vectors to n x k (k = number of treatment levels) so
   ## that every term entering the score has conforming dimensions.

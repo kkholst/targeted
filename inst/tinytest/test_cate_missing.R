@@ -34,10 +34,10 @@ test_cate_missing_null_no_na()
 test_cate_missing_nuisance_invariants <- function() {
   ## Guards the `r` (indicator) / `pr` (probability matrix) convention.
   fit <- cate(cate.model = ~1,
-            response.model = y ~ a * (w1 + w2),
-            treatment.model = a ~ w1 + w2,
-            missing.model  = ~ a * (w1 + w2),
-            data = d)
+              response.model = y ~ a * (w1 + w2),
+              treatment.model = a ~ w1 + w2,
+              missing.model  = ~ a * (w1 + w2),
+              data = d)
   ## r: length-n 0/1 observation indicator matching is.na(y)
   expect_equal(length(fit$data$r), nrow(d))
   expect_true(all(fit$data$r %in% c(0L, 1L)))
@@ -47,6 +47,24 @@ test_cate_missing_nuisance_invariants <- function() {
   expect_equal(length(fit$data$pr), 1L)
   expect_equal(dim(fit$data$pr[[1]]), c(nrow(d), 2L))
   expect_true(all(fit$data$pr[[1]] > 0 & fit$data$pr[[1]] < 1))
+
+  ## Supplying missing.model as a pre-built learner (not a formula).
+  mmod <- learner_glm(R_ ~ a * (w1 + w2), family = binomial())
+  r <- cate(cate.model = ~1,
+            response.model = y ~ a * (w1 + w2),
+            treatment.model = a ~ w1 + w2,
+            missing.model  = mmod,
+            data = d)
+  expect_equal(coef(r), coef(fit))
+
+  ## also works with missing response variable in learner object
+  mmod <- learner_glm(~ a * (w1 + w2), family = binomial())
+  r <- cate(cate.model = ~1,
+            response.model = y ~ a * (w1 + w2),
+            treatment.model = a ~ w1 + w2,
+            missing.model  = mmod,
+            data = d)
+  expect_equal(coef(r), coef(fit))
 }
 test_cate_missing_nuisance_invariants()
 
@@ -135,22 +153,23 @@ test_cate_missing_calibration <- function() {
   cf <- coef(r)
   expect_equal(unname(cf["(Intercept)"]), 1, tolerance = 0.15)
   expect_true(all(!is.na(cf)))
+
+  expect_warning(
+    r_fallback <- cate(
+      cate.model = ~1,
+      response.model = y ~ a * (w1 + w2),
+      treatment.model = a ~ w1 + w2,
+      missing.model = ~ a * (w1 + w2),
+      calibration.model = ~ w1 + w2,
+      var.type = "adaptive",
+      data = d
+    ),
+    pattern = "IC"
+  )
+  expect_equal(cf, coef(r_fallback))
 }
 test_cate_missing_calibration()
 
-test_cate_missing_var_type_fallback <- function() {
-  expect_warning(
-    cate(cate.model = ~1,
-         response.model = y ~ a * (w1 + w2),
-         treatment.model = a ~ w1 + w2,
-         missing.model  = ~ a * (w1 + w2),
-         calibration.model = ~ w1 + w2,
-         var.type = "adaptive",
-         data = d),
-    pattern = "IC"
-  )
-}
-test_cate_missing_var_type_fallback()
 
 test_cate_missing_r_column_conflict <- function() {
   d$R_ <- 1L
@@ -164,19 +183,6 @@ test_cate_missing_r_column_conflict <- function() {
   )
 }
 test_cate_missing_r_column_conflict()
-
-test_cate_missing_learner_object <- function() {
-  ## Supplying missing.model as a pre-built learner (not a formula).
-  mmod <- learner_glm(R_ ~ a * (w1 + w2), family = binomial())
-  r <- cate(cate.model = ~1,
-            response.model = y ~ a * (w1 + w2),
-            treatment.model = a ~ w1 + w2,
-            missing.model  = mmod,
-            data = d)
-  expect_true(all(!is.na(coef(r))))
-  expect_true(!is.null(r$data$pr))
-}
-test_cate_missing_learner_object()
 
 test_cate_missing_rep <- function() {
   ## rep > 1 stores one `pr` matrix per replication; exercises the

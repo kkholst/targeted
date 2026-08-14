@@ -39,13 +39,14 @@ average treatment effects}
 \item{calibration.model}{linear calibration model. Specify covariates in
 addition to predicted potential outcomes to include in the calibration.}
 
-\item{missing.model}{formula or learner object; default \code{NULL}. Model for the
-missingness mechanism \eqn{P(R=1 \mid X, A)}. Required when the outcome in
-\code{response.model} contains NAs. If the formula LHS is omitted, the
-observation indicator is used automatically. When \code{stratify = TRUE} the
-missing model is fit separately per treatment arm. When supplied, the AIPW
-score is inverse-probability-of-observation weighted and (if \code{second.order = TRUE}) an additional second-order term is added to the influence
-function.}
+\item{missing.model}{formula or learner object (formula => learner_glm(family
+= binomial); default \code{NULL}. Model for the missingness mechanism \eqn{P(R=1
+\mid X, A)}. Required when the outcome in \code{response.model} contains NAs. If
+the formula LHS is omitted, the observation indicator is used
+automatically. When \code{stratify = TRUE} the missing model is fit separately
+per treatment arm. When supplied, the AIPW score is
+inverse-probability-of-observation weighted and (if \code{second.order = TRUE})
+an additional second-order term is added to the influence function.}
 
 \item{data}{data.frame}
 
