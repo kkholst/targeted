@@ -101,7 +101,8 @@ moi(
 
 - stratify:
 
-  if TRUE the response.model will be stratified by treatment
+  if TRUE the response.model and missing.model (if provided) will be
+  stratified by treatment
 
 - mc.cores:
 
