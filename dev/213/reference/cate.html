@@ -92,13 +92,14 @@ addition to predicted potential outcomes to include in the calibration.</p></dd>
 
 
 <dt id="arg-missing-model">missing.model<a class="anchor" aria-label="anchor" href="#arg-missing-model"></a></dt>
-<dd><p>formula or learner object; default <code>NULL</code>. Model for the
-missingness mechanism \(P(R=1 \mid X, A)\). Required when the outcome in
-<code>response.model</code> contains NAs. If the formula LHS is omitted, the
-observation indicator is used automatically. When <code>stratify = TRUE</code> the
-missing model is fit separately per treatment arm. When supplied, the AIPW
-score is inverse-probability-of-observation weighted and (if <code>second.order = TRUE</code>) an additional second-order term is added to the influence
-function.</p></dd>
+<dd><p>formula or learner object (formula =&gt; learner_glm(family
+= binomial); default <code>NULL</code>. Model for the missingness mechanism \(P(R=1
+\mid X, A)\). Required when the outcome in <code>response.model</code> contains NAs. If
+the formula LHS is omitted, the observation indicator is used
+automatically. When <code>stratify = TRUE</code> the missing model is fit separately
+per treatment arm. When supplied, the AIPW score is
+inverse-probability-of-observation weighted and (if <code>second.order = TRUE</code>)
+an additional second-order term is added to the influence function.</p></dd>
 
 
 <dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>

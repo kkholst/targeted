@@ -52,12 +52,13 @@ cate(
 
 - missing.model:
 
-  formula or learner object; default `NULL`. Model for the missingness
-  mechanism \\P(R=1 \mid X, A)\\. Required when the outcome in
-  `response.model` contains NAs. If the formula LHS is omitted, the
-  observation indicator is used automatically. When `stratify = TRUE`
-  the missing model is fit separately per treatment arm. When supplied,
-  the AIPW score is inverse-probability-of-observation weighted and (if
+  formula or learner object (formula =\> learner_glm(family = binomial);
+  default `NULL`. Model for the missingness mechanism \\P(R=1 \mid X,
+  A)\\. Required when the outcome in `response.model` contains NAs. If
+  the formula LHS is omitted, the observation indicator is used
+  automatically. When `stratify = TRUE` the missing model is fit
+  separately per treatment arm. When supplied, the AIPW score is
+  inverse-probability-of-observation weighted and (if
   `second.order = TRUE`) an additional second-order term is added to the
   influence function.
 

@@ -13,11 +13,11 @@ aipw(response.model, propensity.model, formula = ~1, data, ...)
 
 - response.model:
 
-  (learner or formula)Model for the response given covariates
+  (learner or formula) Model for the response given covariates
 
 - propensity.model:
 
-  (learner or formula) missing data mechanism model and if omitted a
+  (learner or formula) Missing data mechanism model and if omitted a
   logistic regression model with the same covariates as `response.model`
   is used
 
