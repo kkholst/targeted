@@ -1,10 +1,18 @@
+# development version
+
+- `cate`: doubly robust estimation with missing outcomes (MAR) via new
+  `missing.model` argument
+- `summary.cate` small object size
+
+
 # targeted 0.8
 
 - `moi`: implementation of one-step outcome imputation estimator
   [(arXiv.2606.07174)](https://doi.org/10.48550/arXiv.2606.07174):
 - `design` tolerates now `special` variables who are absent in `data`
 - rename `rm_envir` argument of `design` to `rm.envir`
-- adding `predict_filter` generator functions for experimental `predict.filter` argument of `learner`
+- adding `predict_filter` generator functions for experimental `predict.filter`
+  argument of `learner`
 - removing deprecated ml_model
 - `learner_surv_cox`, `learner_surv_rf`, `cumhaz`
 - feature(superlearner): more robust metalearner (in case quadratic prog. fails)
