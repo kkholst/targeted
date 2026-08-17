@@ -343,7 +343,7 @@ riskreg(y~a, nuisance=~x+z, data=d2, type="rd")
 ```
 
                 Estimate Std.Err   2.5% 97.5% P-value
-    (Intercept)    1.001 0.02031 0.9609 1.041       0
+    (Intercept)   0.9995 0.02055 0.9592  1.04       0
 
 ### Influence-function
 
@@ -396,7 +396,7 @@ sessionInfo()
     [1] stats     graphics  grDevices utils     datasets  methods   base
 
     other attached packages:
-    [1] targeted_0.8
+    [1] targeted_0.8.0.9000
 
     loaded via a namespace (and not attached):
      [1] mets_1.3.12            cli_3.6.6              knitr_1.51

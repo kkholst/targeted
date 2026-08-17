@@ -64,18 +64,18 @@ lr <- learner_glm(y ~ x) # linear Gaussian model
 lr$estimate(d0)
 coef(lr$fit)
 #> (Intercept)           x 
-#>    487.9661    244.6123 
+#>    455.5881    188.7124 
 
 # negative binomial regression model with offset (using MASS::glm.nb)
 lr <- learner_glm(y ~ x + offset(log(w)), family = "nb")
 lr$estimate(d0)
 coef(lr$fit)
 #> (Intercept)           x 
-#>   2.0413200   0.5380926 
+#>   2.0336765   0.4656123 
 lr$predict(data.frame(x = 1, w = c(1, 5))) # response scale
 #>        1        2 
-#> 13.18939 65.94694 
+#> 12.17383 60.86916 
 lr$predict(data.frame(x = 1, w = c(1, 5)), type = "link") # link scale
 #>        1        2 
-#> 2.579413 4.188851 
+#> 2.499289 4.108727 
 ```

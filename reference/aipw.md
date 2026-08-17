@@ -6,27 +6,20 @@ observations
 ## Usage
 
 ``` r
-aipw(
-  response.model,
-  propensity.model,
-  formula = ~1,
-  data,
-  response_model = deprecated,
-  propensity_model = deprecated,
-  ...
-)
+aipw(response.model, propensity.model, formula = ~1, data, ...)
 ```
 
 ## Arguments
 
 - response.model:
 
-  Model for the response given covariates (learner or formula)
+  (learner or formula) Model for the response given covariates
 
 - propensity.model:
 
-  Optional missing data mechanism model (propensity model) (learner or
-  formula)
+  (learner or formula) Missing data mechanism model and if omitted a
+  logistic regression model with the same covariates as `response.model`
+  is used
 
 - formula:
 
@@ -36,14 +29,6 @@ aipw(
 - data:
 
   data.frame
-
-- response_model:
-
-  Deprecated. Use response.model instead.
-
-- propensity_model:
-
-  Deprecated. Use treatment.model instead.
 
 - ...:
 
@@ -55,9 +40,9 @@ aipw(
 m <- lava::lvm(y ~ x+z, r ~ x) |>
      lava::distribution(~ r, value = lava::binomial.lvm()) |>
      transform(y0~r+y, value = \(x) { x[x[,1]==0,2] <- NA; x[,2] })
-d <- lava::sim(m,1e3,seed=1)
+d <- lava::sim(m,5e3,seed=1)
 
-aipw(y0 ~ x, data=d)
-#>             Estimate Std.Err    2.5%  97.5% P-value
-#> (Intercept)  0.05148 0.08338 -0.1119 0.2149   0.537
+aipw(y0 ~ x, ~ x + z, data=d)
+#>             Estimate Std.Err     2.5%   97.5% P-value
+#> (Intercept) -0.02208 0.03092 -0.08269 0.03852  0.4751
 ```

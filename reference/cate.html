@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">targeted</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,6 +49,7 @@
 <span>  <span class="va">treatment.model</span>,</span>
 <span>  cate.model <span class="op">=</span> <span class="op">~</span><span class="fl">1</span>,</span>
 <span>  calibration.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  missing.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">data</span>,</span>
 <span>  <span class="va">contrast</span>,</span>
 <span>  nfolds <span class="op">=</span> <span class="fl">1</span>,</span>
@@ -90,6 +91,17 @@ average treatment effects</p></dd>
 addition to predicted potential outcomes to include in the calibration.</p></dd>
 
 
+<dt id="arg-missing-model">missing.model<a class="anchor" aria-label="anchor" href="#arg-missing-model"></a></dt>
+<dd><p>formula or learner object (formula =&gt; learner_glm(family
+= binomial); default <code>NULL</code>. Model for the missingness mechanism \(P(R=1
+\mid X, A)\). Required when the outcome in <code>response.model</code> contains NAs. If
+the formula LHS is omitted, the observation indicator is used
+automatically. When <code>stratify = TRUE</code> the missing model is fit separately
+per treatment arm. When supplied, the AIPW score is
+inverse-probability-of-observation weighted and (if <code>second.order = TRUE</code>)
+an additional second-order term is added to the influence function.</p></dd>
+
+
 <dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
 <dd><p>data.frame</p></dd>
 
@@ -105,13 +117,14 @@ forming a partition of <code>1:nrow(data)</code>.</p></dd>
 
 
 <dt id="arg-rep">rep<a class="anchor" aria-label="anchor" href="#arg-rep"></a></dt>
-<dd><p>number of replications of cross-fitting procedure
-by averaging estimates and influence functions from each replication</p></dd>
+<dd><p>number of replications of cross-fitting procedure by averaging
+estimates and influence functions from each replication</p></dd>
 
 
 <dt id="arg-id">id<a class="anchor" aria-label="anchor" href="#arg-id"></a></dt>
 <dd><p>(integer or character) optional subject id vector of length
-<code>nrow(data)</code>.</p></dd>
+<code>nrow(data)</code>. The <code>id</code> can also be specified as part of the <code>cate.model</code>
+argument with a formula syntax: <code>~ 1 + cluster(id)</code>.</p></dd>
 
 
 <dt id="arg-silent">silent<a class="anchor" aria-label="anchor" href="#arg-silent"></a></dt>
@@ -119,7 +132,8 @@ by averaging estimates and influence functions from each replication</p></dd>
 
 
 <dt id="arg-stratify">stratify<a class="anchor" aria-label="anchor" href="#arg-stratify"></a></dt>
-<dd><p>if TRUE the response.model will be stratified by treatment</p></dd>
+<dd><p>if TRUE the response.model and missing.model (if provided)
+will be stratified by treatment</p></dd>
 
 
 <dt id="arg-mc-cores">mc.cores<a class="anchor" aria-label="anchor" href="#arg-mc-cores"></a></dt>
@@ -176,6 +190,13 @@ $$\psi_{a}(P)(V) = E_{P}[E_{P}(Y\mid A=a, W)|V]$$ and let \(m(V;
 \beta)\) denote a parametric working model, then the target parameter is the
 mean-squared error $$\beta(P) = \operatorname{argmin}_{\beta}
 E_{P}[\{\Psi_{1}(P)(V)-\Psi_{0}(P)(V)\} - m(V; \beta)]^{2}$$</p>
+<p>Missing data is handled under a Missing At Random assumption (MAR). Let
+\(R\) denote the indicator for data not being missing, \(R\perp Y|W,A\).
+The nuisance models are \(Q(w,a) = E(Y|W=w, A=a)\), \(g_a(w) =
+P(A=a|W=w)\), and \(\rho(w, a) = P(R=1|W=w, A=a)\). For the expected
+potential outcome \(E[Y(a)]\), the AIPW estimator then takes the form
+$$\frac{1}{n}\sum_{i=1}^n R_i I(A_i=a) / \{g_a(W_i) \rho(W_i, a)\} (Y_i -
+Q(W_i,a)) + Q(W_i, a)$$.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -236,6 +257,42 @@ Clinical Trials under Covariate-Adaptive Randomization, Biometrika.</p>
 <span class="r-in"><span>     stratify<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## Missing data</span></span></span>
+<span class="r-in"><span><span class="va">sim_missing_cate</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span> <span class="op">=</span> <span class="fl">5000</span>, <span class="va">seed</span> <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="va">seed</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">w1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">w2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">a</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">1</span>, <span class="fl">0.5</span><span class="op">)</span> <span class="co"># randomized trial</span></span></span>
+<span class="r-in"><span>  <span class="va">y_full</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">+</span> <span class="va">a</span> <span class="op">+</span> <span class="va">w1</span> <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="va">w2</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">pR</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Logistic.html" class="external-link">plogis</a></span><span class="op">(</span><span class="fl">0.5</span> <span class="op">-</span> <span class="fl">1</span> <span class="op">*</span> <span class="va">w2</span> <span class="op">*</span> <span class="va">a</span> <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="va">a</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">R</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">1</span>, <span class="va">pR</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">y</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">R</span> <span class="op">==</span> <span class="fl">1</span>, <span class="va">y_full</span>, <span class="cn">NA_real_</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>y0 <span class="op">=</span> <span class="va">y_full</span>, y <span class="op">=</span> <span class="va">y</span>, a <span class="op">=</span> <span class="va">a</span>, w1 <span class="op">=</span> <span class="va">w1</span>, w2 <span class="op">=</span> <span class="va">w2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">sim_missing_cate</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># ignoring missing data (complete-case analysis)</span></span></span>
+<span class="r-in"><span><span class="fu">cate</span><span class="op">(</span>cate.model <span class="op">=</span> <span class="op">~</span><span class="fl">1</span>,</span></span>
+<span class="r-in"><span>     response.model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">a</span> <span class="op">*</span> <span class="va">w2</span>, <span class="co"># wrong outcome model</span></span></span>
+<span class="r-in"><span>     treatment.model <span class="op">=</span> <span class="va">a</span> <span class="op">~</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>     data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/na.fail.html" class="external-link">na.omit</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span>, nfolds <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err   2.5%  97.5%    P-value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> E[y(1)]       1.9271 0.03483 1.8588 1.9953  0.000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> E[y(0)]       0.9076 0.03607 0.8370 0.9783 9.391e-140</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ───────────                                          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   1.0194 0.04879 0.9238 1.1150  6.127e-97</span>
+<span class="r-in"><span><span class="co"># MAR analysis</span></span></span>
+<span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">cate</span><span class="op">(</span>cate.model <span class="op">=</span> <span class="op">~</span><span class="fl">1</span>,</span></span>
+<span class="r-in"><span>            response.model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">a</span> <span class="op">*</span> <span class="va">w2</span>,</span></span>
+<span class="r-in"><span>            treatment.model <span class="op">=</span> <span class="va">a</span> <span class="op">~</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>            missing.model  <span class="op">=</span> <span class="op">~</span> <span class="va">a</span> <span class="op">*</span> <span class="op">(</span><span class="va">w1</span> <span class="op">+</span> <span class="va">w2</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>            data <span class="op">=</span> <span class="va">d</span>, nfolds <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fit</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err   2.5% 97.5%    P-value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> E[y(1)]       1.9807 0.03372 1.9146 2.047  0.000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> E[y(0)]       0.9725 0.03237 0.9091 1.036 2.485e-198</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ───────────                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   1.0082 0.04573 0.9186 1.098 1.033e-107</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

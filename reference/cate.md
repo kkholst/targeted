@@ -10,6 +10,7 @@ cate(
   treatment.model,
   cate.model = ~1,
   calibration.model = NULL,
+  missing.model = NULL,
   data,
   contrast,
   nfolds = 1,
@@ -49,6 +50,18 @@ cate(
   linear calibration model. Specify covariates in addition to predicted
   potential outcomes to include in the calibration.
 
+- missing.model:
+
+  formula or learner object (formula =\> learner_glm(family = binomial);
+  default `NULL`. Model for the missingness mechanism \\P(R=1 \mid X,
+  A)\\. Required when the outcome in `response.model` contains NAs. If
+  the formula LHS is omitted, the observation indicator is used
+  automatically. When `stratify = TRUE` the missing model is fit
+  separately per treatment arm. When supplied, the AIPW score is
+  inverse-probability-of-observation weighted and (if
+  `second.order = TRUE`) an additional second-order term is added to the
+  influence function.
+
 - data:
 
   data.frame
@@ -71,7 +84,8 @@ cate(
 - id:
 
   (integer or character) optional subject id vector of length
-  `nrow(data)`.
+  `nrow(data)`. The `id` can also be specified as part of the
+  `cate.model` argument with a formula syntax: `~ 1 + cluster(id)`.
 
 - silent:
 
@@ -79,7 +93,8 @@ cate(
 
 - stratify:
 
-  if TRUE the response.model will be stratified by treatment
+  if TRUE the response.model and missing.model (if provided) will be
+  stratified by treatment
 
 - mc.cores:
 
@@ -136,6 +151,14 @@ let \\m(V; \beta)\\ denote a parametric working model, then the target
 parameter is the mean-squared error \$\$\beta(P) =
 \operatorname{argmin}\_{\beta}
 E\_{P}\[\\\Psi\_{1}(P)(V)-\Psi\_{0}(P)(V)\\ - m(V; \beta)\]^{2}\$\$
+
+Missing data is handled under a Missing At Random assumption (MAR). Let
+\\R\\ denote the indicator for data not being missing, \\R\perp
+Y\|W,A\\. The nuisance models are \\Q(w,a) = E(Y\|W=w, A=a)\\, \\g_a(w)
+= P(A=a\|W=w)\\, and \\\rho(w, a) = P(R=1\|W=w, A=a)\\. For the expected
+potential outcome \\E\[Y(a)\]\\, the AIPW estimator then takes the form
+\$\$\frac{1}{n}\sum\_{i=1}^n R_i I(A_i=a) / \\g_a(W_i) \rho(W_i, a)\\
+(Y_i - Q(W_i,a)) + Q(W_i, a)\$\$.
 
 ## References
 
@@ -196,4 +219,41 @@ cate(cate.model=~1,
      data=d,
      stratify=TRUE)
 } # }
+
+## Missing data
+sim_missing_cate <- function(n = 5000, seed = 1) {
+  set.seed(seed)
+  w1 <- rnorm(n)
+  w2 <- rnorm(n)
+  a  <- rbinom(n, 1, 0.5) # randomized trial
+  y_full <- 1 + a + w1 + 0.5 * w2 + rnorm(n)
+  pR <- plogis(0.5 - 1 * w2 * a + 0.5 * a)
+  R  <- rbinom(n, 1, pR)
+  y  <- ifelse(R == 1, y_full, NA_real_)
+  data.frame(y0 = y_full, y = y, a = a, w1 = w1, w2 = w2)
+}
+d <- sim_missing_cate()
+
+# ignoring missing data (complete-case analysis)
+cate(cate.model = ~1,
+     response.model = y ~ a * w2, # wrong outcome model
+     treatment.model = a ~ 1,
+     data = na.omit(d), nfolds = 1L)
+#>             Estimate Std.Err   2.5%  97.5%    P-value
+#> E[y(1)]       1.9271 0.03483 1.8588 1.9953  0.000e+00
+#> E[y(0)]       0.9076 0.03607 0.8370 0.9783 9.391e-140
+#> ───────────                                          
+#> (Intercept)   1.0194 0.04879 0.9238 1.1150  6.127e-97
+# MAR analysis
+fit <- cate(cate.model = ~1,
+            response.model = y ~ a * w2,
+            treatment.model = a ~ 1,
+            missing.model  = ~ a * (w1 + w2),
+            data = d, nfolds = 1L)
+fit
+#>             Estimate Std.Err   2.5% 97.5%    P-value
+#> E[y(1)]       1.9807 0.03372 1.9146 2.047  0.000e+00
+#> E[y(0)]       0.9725 0.03237 0.9091 1.036 2.485e-198
+#> ───────────                                         
+#> (Intercept)   1.0082 0.04573 0.9186 1.098 1.033e-107
 ```
