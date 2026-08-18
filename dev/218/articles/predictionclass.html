@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">targeted</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,7 +60,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Prediction model class (<code>learner</code>)</h1>
 
       <p class="author">Klaus Kähler Holst, Benedikt Sommer</p>
-      <p class="date">2026-08-17</p>
+      <p class="date">2026-08-18</p>
 
       <small class="dont-index">Source: <a href="https://github.com/kkholst/targeted/blob/release/0.9/vignettes/predictionclass.qmd" class="external-link"><code>vignettes/predictionclass.qmd</code></a></small>
       <div class="d-none name"><code></code></div>
@@ -126,10 +126,10 @@ Estimate arguments: learners=&lt;list&gt;, nfolds=5, meta.learner=&lt;function&g
 Predict arguments:
 Formula: y ~ age * bili
 ─────────────────────────────────────
-         score     weight
-glm1 0.0973190 0.25617477
-glm2 0.1067733 0.07379872
-gam  0.0957428 0.67002651</code></pre>
+          score     weight
+glm1 0.09776053 0.31383315
+glm2 0.10760440 0.06380001
+gam  0.09689531 0.62236684</code></pre>
 </div>
 </div>
 <p>Most constructors have additional arguments that impact the resulting model fit, ranging from the specification of a link function for generalized linear models to hyper hyperparameters of machine learning models. Arguments naturally vary between the constructors and are documented for each function (e.g. <code><a href="../reference/learner_gam.html">?learner_gam</a></code>). The implemented constructors only provide arguments for the most relevant parameters of the underlying fit function (<code><a href="https://rdrr.io/pkg/mgcv/man/gam.html" class="external-link">mgcv::gam</a></code> in case of <code>learner_gam</code>). As described in the documentation, the ellipsis argument (<code>...</code>) can be used to pass additional arguments to the fit function. However, in most situations this is rarely required.</p>
@@ -239,8 +239,8 @@ Formula: y ~ age + sex + bili </code></pre>
         list(params = xgb_params)), )
     return(res)
 }
-&lt;bytecode: 0x557557fa76a8&gt;
-&lt;environment: 0x55755ded04d8&gt;</code></pre>
+&lt;bytecode: 0x55a1158b5ba0&gt;
+&lt;environment: 0x55a11232abc0&gt;</code></pre>
 </div>
 </div>
 <p>Rare situations may arise where one wants to update the formula argument. This supported and implemented via the <code>update</code> method</p>
@@ -290,8 +290,8 @@ Formula: y ~ age + sex + bili </code></pre>
 5-fold cross-validation with 2 repetitions
 
            mse       mae
-glm 0.10795647 0.2133189
-gam 0.09883573 0.1885365</code></pre>
+glm 0.10805919 0.2131729
+gam 0.09789954 0.1873848</code></pre>
 </div>
 </div>
 </section><section class="level2"><h3 id="prediction-filter">Prediction filter<a class="anchor" aria-label="anchor" href="#prediction-filter"></a>
@@ -446,8 +446,8 @@ Predict arguments:
 Formula: NULL
 ─────────────────────────────────────
         score weight
-glm 0.1082613      1
-gam 0.1097759      0</code></pre>
+glm 0.1072824      1
+gam 0.1110532      0</code></pre>
 </div>
 </div>
 <p>In this case, all arguments provided to <code>lr$estimate</code> are joined together with the specified <code>estimate.args</code> and passed on to the defined estimate function (i.e. <code>superlearner</code>).</p>
@@ -490,7 +490,7 @@ gam 0.1097759      0</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>function (object, ...)
 object
-&lt;bytecode: 0x55755cfab400&gt;
+&lt;bytecode: 0x55a1121ca878&gt;
 &lt;environment: namespace:targeted&gt;</code></pre>
 </div>
 </div>
