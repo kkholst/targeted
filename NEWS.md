@@ -1,9 +1,8 @@
-# development version
+# targeted 0.9
 
-- `cate`: doubly robust estimation with missing outcomes (MAR) via new
+- `cate`: doubly robust estimation with missing outcomes under MAR via the new
   `missing.model` argument
-- `summary.cate` small object size
-
+- `summary.cate` reduced object size
 
 # targeted 0.8
 
