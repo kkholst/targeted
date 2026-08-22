@@ -1,5 +1,11 @@
 # Changelog
 
+## targeted 0.9
+
+- `cate`: doubly robust estimation with missing outcomes under MAR via
+  the new `missing.model` argument
+- `summary.cate` reduced object size
+
 ## targeted 0.8
 
 CRAN release: 2026-07-15

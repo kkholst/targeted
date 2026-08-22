@@ -282,13 +282,13 @@ sessionInfo()
     [1] stats     graphics  grDevices utils     datasets  methods   base
 
     other attached packages:
-    [1] future_1.75.0       targeted_0.8.0.9000
+    [1] future_1.75.0  targeted_0.9.0
 
     loaded via a namespace (and not attached):
      [1] nlme_3.1-169           progressr_1.0.0        mets_1.3.12
      [4] cli_3.6.6              knitr_1.51             rlang_1.3.0
      [7] xfun_0.60              otel_0.2.0             jsonlite_2.0.0
-    [10] future.apply_1.20.2    listenv_1.0.0          lava_1.9.2
+    [10] future.apply_1.20.2    listenv_1.0.0          lava_1.9.3
     [13] htmltools_0.5.9        rmarkdown_2.31         quadprog_1.5-8
     [16] grid_4.6.1             evaluate_1.0.5         fastmap_1.2.0
     [19] numDeriv_2016.8-1.1    mvtnorm_1.4-2          yaml_2.3.12
