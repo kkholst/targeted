@@ -47,6 +47,7 @@
 #'     function for the imputation-model parameters.}
 #' @keywords internal
 #' @inheritParams moi_missing
+#' @noRd
 moi_missing <- function(data,
                         id,
                         delta,
