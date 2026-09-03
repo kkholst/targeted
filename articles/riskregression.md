@@ -342,8 +342,8 @@ And we can then fit the DRE with the syntax
 riskreg(y~a, nuisance=~x+z, data=d2, type="rd")
 ```
 
-                Estimate Std.Err   2.5%  97.5% P-value
-    (Intercept)   0.9508 0.01968 0.9122 0.9893       0
+                Estimate Std.Err   2.5% 97.5% P-value
+    (Intercept)   0.9857  0.0205 0.9455 1.026       0
 
 ### Influence-function
 
@@ -402,7 +402,7 @@ sessionInfo()
      [1] mets_1.3.12            cli_3.6.6              knitr_1.51
      [4] rlang_1.3.0            xfun_0.60              otel_0.2.0
      [7] jsonlite_2.0.0         future.apply_1.20.2    listenv_1.0.0
-    [10] lava_1.9.3             htmltools_0.5.9        rmarkdown_2.31
+    [10] lava_1.9.3             htmltools_0.5.9        rmarkdown_2.32
     [13] grid_4.6.1             evaluate_1.0.5         fastmap_1.2.0
     [16] numDeriv_2016.8-1.1    mvtnorm_1.4-2          yaml_2.3.12
     [19] timereg_2.0.7          compiler_4.6.1         codetools_0.2-20

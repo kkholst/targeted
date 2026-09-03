@@ -289,7 +289,7 @@ sessionInfo()
      [4] cli_3.6.6              knitr_1.51             rlang_1.3.0
      [7] xfun_0.60              otel_0.2.0             jsonlite_2.0.0
     [10] future.apply_1.20.2    listenv_1.0.0          lava_1.9.3
-    [13] htmltools_0.5.9        rmarkdown_2.31         quadprog_1.5-8
+    [13] htmltools_0.5.9        rmarkdown_2.32         quadprog_1.5-8
     [16] grid_4.6.1             evaluate_1.0.5         fastmap_1.2.0
     [19] numDeriv_2016.8-1.1    mvtnorm_1.4-2          yaml_2.3.12
     [22] timereg_2.0.7          compiler_4.6.1         codetools_0.2-20
