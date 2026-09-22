@@ -48,16 +48,16 @@ learner_hal(
 
   A `character` or a [`family`](https://rdrr.io/r/stats/family.html)
   object (supported by
-  [`glmnet`](https://glmnet.stanford.edu/reference/glmnet.html))
-  specifying the error/link family for a generalized linear model.
-  `character` options are limited to "gaussian" for fitting a standard
-  penalized linear model, "binomial" for penalized logistic regression,
-  "poisson" for penalized Poisson regression, "cox" for a penalized
-  proportional hazards model, and "mgaussian" for multivariate penalized
-  linear model. Note that passing in family objects leads to slower
-  performance relative to passing in a character family (if supported).
-  For example, one should set `family = "binomial"` instead of
-  `family = binomial()` when calling `fit_hal`.
+  [`glmnet`](https://rdrr.io/pkg/glmnet/man/glmnet.html)) specifying the
+  error/link family for a generalized linear model. `character` options
+  are limited to "gaussian" for fitting a standard penalized linear
+  model, "binomial" for penalized logistic regression, "poisson" for
+  penalized Poisson regression, "cox" for a penalized proportional
+  hazards model, and "mgaussian" for multivariate penalized linear
+  model. Note that passing in family objects leads to slower performance
+  relative to passing in a character family (if supported). For example,
+  one should set `family = "binomial"` instead of `family = binomial()`
+  when calling `fit_hal`.
 
 - learner.args:
 

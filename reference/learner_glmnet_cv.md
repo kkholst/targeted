@@ -3,10 +3,10 @@
 Constructs a [learner](learner.md) class object for fitting entire lasso
 or elastic-net regularization paths for various linear and non-linear
 regression models with
-[glmnet::cv.glmnet](https://glmnet.stanford.edu/reference/cv.glmnet.html).
+[glmnet::cv.glmnet](https://rdrr.io/pkg/glmnet/man/cv.glmnet.html).
 Predictions are returned for the value of `lambda` that gives minimum
 `cvm`. That is,
-[glmnet::predict.cv.glmnet](https://glmnet.stanford.edu/reference/predict.cv.glmnet.html)
+[glmnet::predict.cv.glmnet](https://rdrr.io/pkg/glmnet/man/predict.cv.glmnet.html)
 is called with `s = "lambda.min"`.
 
 ## Usage
