@@ -263,7 +263,7 @@ sessionInfo()
 
     R version 4.6.1 (2026-06-24)
     Platform: x86_64-pc-linux-gnu
-    Running under: Ubuntu 24.04.4 LTS
+    Running under: Ubuntu 24.04.5 LTS
 
     Matrix products: default
     BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3
@@ -286,8 +286,8 @@ sessionInfo()
 
     loaded via a namespace (and not attached):
      [1] nlme_3.1-169           progressr_1.0.0        mets_1.3.12
-     [4] cli_3.6.6              knitr_1.51             rlang_1.3.0
-     [7] xfun_0.60              otel_0.2.0             jsonlite_2.0.0
+     [4] cli_3.6.6              knitr_1.52             rlang_1.3.0
+     [7] xfun_0.61              otel_0.2.0             jsonlite_2.0.0
     [10] future.apply_1.20.2    listenv_1.0.0          lava_1.9.3
     [13] htmltools_0.5.9        rmarkdown_2.32         quadprog_1.5-8
     [16] grid_4.6.1             evaluate_1.0.5         fastmap_1.2.0
@@ -296,5 +296,5 @@ sessionInfo()
     [25] Rcpp_1.1.2             mgcv_1.9-4             lattice_0.22-9
     [28] digest_0.6.39          R6_2.6.1               parallelly_1.48.0
     [31] parallel_4.6.1         splines_4.6.1          Matrix_1.7-5
-    [34] RcppArmadillo_15.4.2-1 tools_4.6.1            globals_0.19.1
+    [34] RcppArmadillo_15.6.0-1 tools_4.6.1            globals_0.19.1
     [37] survival_3.8-6        
