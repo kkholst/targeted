@@ -68,7 +68,8 @@ learner_sl <- function(learners,
   if (length(unique(lapply(learners, \(m) all.vars(m$formula)[[1]]))) > 1) {
     stop("All learners must have the same response variable.")
   }
-  mod$update(learners[[1]]$formula) # TODO: not clean but will be fixed later
+  mod$update(as.character(learners[[1]]$formula)[[2]])
+  ## mod$update(learners[[1]]$formula) # TODO: not clean but will be fixed later
   # because it requires changes to the learner R6 class and the cv function
 
   attr(mod, "model.score") <- model.score
