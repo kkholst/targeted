@@ -266,6 +266,19 @@ learner <- R6::R6Class("learner", # nolint
     #' Update formula
     #' @param formula formula or character which defines the new response
     update = function(formula) {
+      if (all(c("learners", "nfolds", "meta.learner", "model.score")
+              %in% names(private$init$estimate.args))) {
+        lapply( # inplace update of base learners
+          private$init$estimate.args$learners,
+          \(lr) lr$update(formula)
+        )
+        if (!is.character(formula)) {
+          warning(
+            "Updating the response variable and covariates for all base ",
+            "learners."
+          )
+        }
+      }
       if (is.character(formula)) {
         if (grepl("~", formula)) {
           formula <- as.formula(formula)
