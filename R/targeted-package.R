@@ -86,6 +86,9 @@ lava::sim
 lava::score
 
 ##' @export
+lava::pars
+
+##' @export
 lava::parameter
 
 ##' @export

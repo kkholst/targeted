@@ -43,7 +43,7 @@ IC.mmrm <- function(x, ...) {
   pp <- pars(x, ...)
   I <- -numDeriv::jacobian(function(p) {
     score(x, p = p, indiv = FALSE, ...)
-  }, pp, method = lava.options()$Dmethod)
+  }, pp, method = lava::lava.options()$Dmethod)
   U <- score(x, indiv=TRUE, ...)
   bread <- Inverse(I)*NROW(U)
   res <- U%*%bread
@@ -64,17 +64,19 @@ estimate.mmrm <- function(x, which = c("beta", "theta"), ...) {
 ## Scope: discrete-visit covariances (us, cs, toep, ad, ar1)
 .mmrm_varcor <- function(fit, theta = NULL) {
   stopifnot(inherits(fit, "mmrm"))
-  if (is.null(theta)) theta <- component(fit, "theta_est")
+  if (is.null(theta)) theta <- mmrm::component(fit, "theta_est")
 
-  cs <- as.cov_struct(as.formula(component(fit, "formula")))
-  if (identical(component(fit, "cov_type"), "sp_exp")) {
+  cs <- mmrm::as.cov_struct(
+                as.formula(mmrm::component(fit, "formula"))
+              )
+  if (identical(mmrm::component(fit, "cov_type"), "sp_exp")) {
     stop("varcor_at(): spatial covariance (sp_exp) is not supported.")
   }
 
   rep <- fit$tmb_object$report(theta) # TMB API
   L   <- rep$covariance_lower_chol
-  ntimes  <- component(fit, "n_timepoints")
-  ngroups   <- component(fit, "n_groups")
+  ntimes  <- mmrm::component(fit, "n_timepoints")
+  ngroups   <- mmrm::component(fit, "n_groups")
   visit_names <- levels(fit$tmb_data$full_frame[[cs$visits]])
 
   cov_list <- lapply(seq_len(ngroups), function(g) {
@@ -104,14 +106,15 @@ estimate.mmrm <- function(x, which = c("beta", "theta"), ...) {
 ## us, cs, toep, ad, ar1
 .mmrm_subjects <- function(fit, theta=NULL) {
   stopifnot(inherits(fit, "mmrm"))
-  cs        <- as.cov_struct(as.formula(component(fit, "formula")))
-  subj_var  <- component(fit, "subject_var")
+  cs        <- mmrm::as.cov_struct(as.formula(
+    mmrm::component(fit, "formula")))
+  subj_var  <- mmrm::component(fit, "subject_var")
   visit_var <- cs$visits
   group_var <- if (length(cs$group) == 0L) NA_character_ else cs$group
 
-  ff <- component(fit, "full_frame")
-  X  <- component(fit, "x_matrix")
-  y  <- component(fit, "y_vector")
+  ff <- mmrm::component(fit, "full_frame")
+  X  <- mmrm::component(fit, "x_matrix")
+  y  <- mmrm::component(fit, "y_vector")
   w  <- ff[["(weights)"]]
   if (is.null(w)) w <- rep(1, length(y))
 
@@ -122,7 +125,7 @@ estimate.mmrm <- function(x, which = c("beta", "theta"), ...) {
   if (!is.null(theta)) {
     Sig <- .mmrm_varcor(fit, theta)
   } else {
-    Sig <- VarCorr(fit)
+    Sig <- mmrm::VarCorr(fit)
   }
   is_grouped <- is.list(Sig) && !is.matrix(Sig)
   if (is_grouped) {
@@ -158,14 +161,14 @@ estimate.mmrm <- function(x, which = c("beta", "theta"), ...) {
 ## (theta))
 .mmrm_loglik <- function(fit, beta=NULL, theta=NULL) {
   subj <- .mmrm_subjects(fit, theta=theta)
-  if (is.null(beta)) beta <- component(fit, "beta_est")
+  if (is.null(beta)) beta <- mmrm::component(fit, "beta_est")
   Sinv <- lapply(subj, function(s) lava::Inverse(s$Sigma))
   Sdet <- lapply(Sinv, function(s) attributes(s)$det)
   r    <- lapply(subj, function(s) s$y - as.numeric(s$X %*% beta))
-  loglik  <- unlist(Map(function(Si, Di, ri)
+  loglik  <- unlist(Map(function(Si, Di, ri) {
     -ncol(Si)/2 * log(2*pi)
-    -0.5*log(Di) - 0.5 * as.numeric(t(ri) %*% Si %*% ri),
-                             Sinv, Sdet, r))
+    -0.5*log(Di) - 0.5 * as.numeric(t(ri) %*% Si %*% ri)
+  }, Sinv, Sdet, r))
   sum(loglik)
 }
 
@@ -175,14 +178,14 @@ estimate.mmrm <- function(x, which = c("beta", "theta"), ...) {
   n <- length(subj)
   ## if (is.null(beta)) { #
   ## TODO: this only works if model fitted with vcov="Empirical"
-  ##   U <- component(fit, "score_per_subject")
+  ##   U <- mmrm::component(fit, "score_per_subject")
   ##   browser()
-  ##   colnames(U) <- names(component(fit, "beta_est"))
+  ##   colnames(U) <- names(mmrm::component(fit, "beta_est"))
   ##   rownames(U) <- vapply(subj, `[[`, character(1), "id")
   ##   return(U)
   ## }
   ## Analytical expression
-  if (is.null(beta)) beta <- component(fit, "beta_est")
+  if (is.null(beta)) beta <- mmrm::component(fit, "beta_est")
   p <- length(beta)
   Sinv <- lapply(subj, function(s) solve(s$Sigma))
   r    <- lapply(subj, function(s) s$y - as.numeric(s$X %*% beta))
@@ -200,4 +203,136 @@ estimate.mmrm <- function(x, which = c("beta", "theta"), ...) {
     }
   }
   Ub
+}
+
+## Derivative of the covariance matrix with respect to theta.
+##
+## mmrm uses TMB automatic differentiation internally but does not expose the
+## raw dSigma/dtheta. Differentiate the reported covariance instead. The
+## result has one element per theta parameter; each element is either a
+## covariance matrix or a named list of covariance matrices, one per group.
+dSigma_dtheta <- function(fit,
+                          theta = NULL,
+                          method = c("central", "richardson"),
+                          eps = 1e-5) {
+  stopifnot(inherits(fit, "mmrm"))
+  method <- match.arg(method)
+
+  if (is.null(theta)) {
+    theta <- mmrm::component(fit, "theta_est")
+  }
+
+  n_time <- mmrm::component(fit, "n_timepoints")
+  n_group <- mmrm::component(fit, "n_groups")
+  cov_struct <- mmrm::as.cov_struct(as.formula(
+    mmrm::component(fit, "formula")))
+  visit_names <- levels(fit$tmb_data$full_frame[[cov_struct$visits]])
+  group_names <- if (n_group > 1L) {
+    levels(fit$tmb_data$subject_groups)
+  } else {
+    NULL
+  }
+
+  ## Flatten Sigma(theta) so both differentiation methods share the same
+  ## output handling.
+  sigma_vector <- function(par) {
+    sigma <- .mmrm_varcor(fit, par)
+    if (is.list(sigma) && !is.matrix(sigma)) {
+      unlist(lapply(sigma, as.numeric), use.names = FALSE)
+    } else {
+      as.numeric(sigma)
+    }
+  }
+
+  as_covariance <- function(x) {
+    expected_length <- n_group * n_time^2
+    stopifnot(length(x) == expected_length)
+
+    covariances <- lapply(seq_len(n_group), function(g) {
+      first <- (g - 1L) * n_time^2 + 1L
+      last <- g * n_time^2
+      sigma <- matrix(x[first:last], nrow = n_time, ncol = n_time)
+      dimnames(sigma) <- list(visit_names, visit_names)
+      sigma
+    })
+
+    if (n_group == 1L) {
+      return(covariances[[1]])
+    }
+
+    names(covariances) <- group_names
+    return(covariances)
+  }
+
+  if (method == "central") {
+    derivative <- lapply(seq_along(theta), function(k) {
+      theta_plus <- theta_minus <- theta
+      theta_plus[k] <- theta[k] + eps
+      theta_minus[k] <- theta[k] - eps
+      (sigma_vector(theta_plus) - sigma_vector(theta_minus)) / (2 * eps)
+    })
+  } else {
+    if (!requireNamespace("numDeriv", quietly = TRUE)) {
+      stop(
+        "dSigma_dtheta(method = 'richardson') requires the 'numDeriv' package."
+      )
+    }
+
+    jacobian <- numDeriv::jacobian(
+      sigma_vector,
+      theta,
+      method = "Richardson"
+    )
+    derivative <- lapply(seq_along(theta), function(k) jacobian[, k])
+  }
+
+  derivative <- lapply(derivative, as_covariance)
+  return(derivative)
+}
+
+
+## Restrict a covariance derivative to one subject's observed visits.
+.subject_block <- function(dSigma, subject) {
+  if (is.list(dSigma) && !is.matrix(dSigma)) {
+    dSigma <- dSigma[[subject$group]]
+  }
+
+  return(dSigma[subject$visits, subject$visits, drop = FALSE])
+}
+
+## Per-subject score for theta.
+##
+##   U_ik = -1/2 { tr(Sigma_i^-1 dSigma_i/dtheta_k)
+##                 - r_i' Sigma_i^-1 dSigma_i/dtheta_k Sigma_i^-1 r_i }
+.mmrm_score_theta <- function(fit,
+                              beta = NULL,
+                              theta = NULL,
+                              method = c("central", "richardson"),
+                              eps = 1e-5) {
+  method <- match.arg(method)
+  subj <- .mmrm_subjects(fit, theta = theta)
+  n <- length(subj)
+
+  if (is.null(beta)) beta <- mmrm::component(fit, "beta_est")
+  if (is.null(theta)) theta <- mmrm::component(fit, "theta_est")
+  q <- length(theta)
+
+  Sinv <- lapply(subj, function(s) solve(s$Sigma))
+  r <- lapply(subj, function(s) s$y - as.numeric(s$X %*% beta))
+  Sir <- Map(function(Si, ri) as.numeric(Si %*% ri), Sinv, r)
+  dSig <- dSigma_dtheta(fit, theta = theta, method = method, eps = eps)
+
+  Ut <- matrix(0, n, q, dimnames = list(NULL, paste0("theta", seq_len(q))))
+  for (i in seq_len(n)) {
+    Si <- Sinv[[i]]
+    Siri <- Sir[[i]]
+    for (k in seq_len(q)) {
+      dS_ik <- .subject_block(dSig[[k]], subj[[i]])
+      tr_term <- sum(Si * dS_ik)
+      quad <- as.numeric(crossprod(Siri, dS_ik %*% Siri))
+      Ut[i, k] <- -0.5 * (tr_term - quad)
+    }
+  }
+
+  return(Ut)
 }

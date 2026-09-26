@@ -261,7 +261,7 @@ moi_missing <- function(data,
                     IC = IC,
                     id = id,
                     labels = paste0("E[u(", a, ")|d=0]"))
-    
+
     if (isTRUE(extended.output)) {
       if (isTRUE(imputation.augmentation)) {
         attr(out, "IC3") <- IC3

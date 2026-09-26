@@ -98,6 +98,7 @@ export(moi)
 export(naivebayes)
 export(nondom)
 export(parameter)
+export(pars)
 export(pars.mmrm)
 export(pava)
 export(predict_filter_bound)
@@ -136,6 +137,7 @@ importFrom(lava,
   logit,
   na.pass0,
   parameter,
+  pars,
   predict_glm,
   score,
   sim

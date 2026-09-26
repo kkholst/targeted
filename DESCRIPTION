@@ -55,6 +55,7 @@ Suggests:
     grf,
     hal9001,
     mgcv,
+    mmrm,
     nnls,
     optimx,
     polle (>= 1.5),
