@@ -9,6 +9,7 @@ moi(
   response.model,
   treatment.model,
   missing.model,
+  id = NULL,
   imputation.model,
   imputation.subset = NULL,
   imputation.augmentation = FALSE,
@@ -42,6 +43,9 @@ observed/non-missing
 (i.e., \eqn{P(\Delta = 1 | A = a)}). If a \code{formula} is provided,
 it is wrapped in \code{learner_glm(..., family = binomial())}. Used to
 estimate \eqn{P(\Delta = 0 | A = a)}.}
+
+\item{id}{(integer or character) optional subject id vector of length
+\code{nrow(data)}.}
 
 \item{imputation.model}{A \code{formula} or \code{learner_glm} object
 specifying the missing outcome imputation model. If a \code{formula}
