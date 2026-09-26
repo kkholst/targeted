@@ -72,7 +72,7 @@
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"targeted"</span><span class="op">)</span></span></code></pre></div>
 <p>And the development version from <a href="https://github.com/kkholst/targeted" class="external-link">GitHub</a> with:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"kkholst/targeted"</span>, ref<span class="op">=</span><span class="st">"dev"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"kkholst/targeted"</span>, ref<span class="op">=</span><span class="st">"dev"</span><span class="op">)</span></span></code></pre></div>
 <p>Computations such as cross-validation are parallelized via the <a href="https://future.futureverse.org" class="external-link">future</a> package. To enable parallel computations and progress-bars the following code can be executed</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="st">"multisession"</span><span class="op">)</span></span>

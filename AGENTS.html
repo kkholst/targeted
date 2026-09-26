@@ -70,7 +70,7 @@
 <li>
 <code>make rcpp</code> — only <code><a href="https://rdrr.io/pkg/Rcpp/man/compileAttributes.html" class="external-link">Rcpp::compileAttributes()</a></code>. Run after adding/removing <code>// [[Rcpp::export]]</code>.</li>
 <li>
-<code>make install</code> — <code>remotes::install_local</code>, needed before <code>make test</code>.</li>
+<code>make install</code> — <code><a href="https://remotes.r-lib.org/reference/install_local.html" class="external-link">remotes::install_local</a></code>, needed before <code>make test</code>.</li>
 </ul><p>Run a single test file (no built-in target): <code>R -e 'devtools::load_all("."); tinytest::run_test_file("inst/tinytest/test_cate.R")'</code>.</p>
 </div>
 <div class="section level2">
