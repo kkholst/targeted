@@ -102,9 +102,9 @@ lr_sl
     Formula: y ~ age * bili
     ─────────────────────────────────────
               score     weight
-    glm1 0.09808684 0.34453270
-    glm2 0.10751998 0.06125345
-    gam  0.09716763 0.59421385
+    glm1 0.09826324 0.32486370
+    glm2 0.10749844 0.08655969
+    gam  0.09720487 0.58857661
 
 Most constructors have additional arguments that impact the resulting
 model fit, ranging from the specification of a link function for
@@ -248,8 +248,8 @@ lr_xgboost$summary()$estimate
             list(params = xgb_params)), )
         return(res)
     }
-    <bytecode: 0x55a670214ba8>
-    <environment: 0x55a676581710>
+    <bytecode: 0x55acdccc60c0>
+    <environment: 0x55acd86ad588>
 
 Rare situations may arise where one wants to update the formula
 argument. This supported and implemented via the `update` method
@@ -314,8 +314,8 @@ cv(lrs, data = pbc, rep = 2, nfolds = 5)
     5-fold cross-validation with 2 repetitions
 
                mse       mae
-    glm 0.10751898 0.2130177
-    gam 0.09806308 0.1871618
+    glm 0.10720616 0.2131241
+    gam 0.09994054 0.1891041
 
 ### Prediction filter
 
@@ -526,8 +526,8 @@ lr
     Formula: NULL
     ─────────────────────────────────────
             score    weight
-    glm 0.1086401 0.8215072
-    gam 0.1089012 0.1784928
+    glm 0.1063706 0.2773156
+    gam 0.1061894 0.7226844
 
 In this case, all arguments provided to `lr$estimate` are joined
 together with the specified `estimate.args` and passed on to the defined
@@ -579,7 +579,7 @@ targeted:::weights.numeric
 
     function (object, ...)
     object
-    <bytecode: 0x55a6717ad368>
+    <bytecode: 0x55acde051520>
     <environment: namespace:targeted>
 
 To illustrate how to define a custom learner that utilizes special
