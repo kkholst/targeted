@@ -223,7 +223,7 @@ moi_missing <- function(data,
                     data = data,
                     subset = (A == a) & (delta == 0),
                     average = TRUE,
-                    id = seq_len(nrow(data)))
+                    id = seq_len(nrow(data))) # keep order of the IC
     IC <- IC(est)
     est <- coef(est)
 
@@ -358,6 +358,8 @@ moi_missing <- function(data,
 ##'   (i.e., \eqn{P(\Delta = 1 | A = a)}). If a \code{formula} is provided,
 ##'   it is wrapped in \code{learner_glm(..., family = binomial())}. Used to
 ##'   estimate \eqn{P(\Delta = 0 | A = a)}.
+##' @param id (integer or character) optional subject id vector of length
+##'   `nrow(data)`.
 ##' @param imputation.model A \code{formula} or \code{learner_glm} object
 ##'   specifying the missing outcome imputation model. If a \code{formula}
 ##'   is provided, it is wrapped in \code{\link{learner_glm}}. Used to estimate
@@ -441,6 +443,7 @@ moi <- function(data,
                 response.model,
                 treatment.model,
                 missing.model,
+                id = NULL,
                 imputation.model,
                 imputation.subset = NULL,
                 imputation.augmentation = FALSE,
@@ -453,7 +456,20 @@ moi <- function(data,
                 second.order = TRUE) {
   cl <- match.call()
   n <- nrow(data)
-  id <- seq_len(nrow(data))
+
+  if (is.null(id)) {
+    id <- seq_len(nrow(data))
+  }
+  if (!is.null(id)) {
+    if (!is.vector(id)) { # in case users provide a matrix or the like
+      rlang::abort("subject ids must be a vector")
+    }
+    if (length(id) != n) { # downstream lava::estimate also fails in this case
+    # however, stop here to provide more informative error message
+      rlang::abort("subject ids must be a vector of length `nrow(data)`")
+    }
+  }
+
   if (inherits(data, c("data.table", "tbl_df"))) {
     data <- as.data.frame(data)
   }
@@ -513,6 +529,7 @@ moi <- function(data,
       response.model = response.model,
       treatment.model = treatment.model,
       data = data,
+      id = id,
       nfolds = nfolds,
       silent = silent,
       stratify = stratify,
@@ -524,7 +541,6 @@ moi <- function(data,
     ate_label <- paste0("[", level_labels[1], "] - [", level_labels[2], "]")
     per_level <- estimate(outcome_est,
                           keep = c(1, 2),
-                          id = id,
                           labels = level_labels)
     ate <- estimate(per_level,
                     f = cbind(1, -1),
@@ -549,6 +565,7 @@ moi <- function(data,
     response.model = response.model,
     treatment.model = treatment.model,
     data = data,
+    id = id,
     nfolds = nfolds,
     silent = silent,
     stratify = stratify,
@@ -564,7 +581,6 @@ moi <- function(data,
   # Get the influence function/curve
   outcome_est <- estimate(outcome_est,
                           keep = c(1, 2),
-                          id = id,
                           labels = paste0("E[dy(", outcome_levels, ")]"))
 
   # Fit model for P(Delta = 1 | A = a)
@@ -578,6 +594,7 @@ moi <- function(data,
     response.model = missing.model,
     treatment.model = treatment.model,
     data = data,
+    id = id,
     nfolds = shared_folds,
     silent = silent,
     stratify = stratify,
@@ -588,7 +605,7 @@ moi <- function(data,
   missing_levels <- missing_est$levels
 
   # Calculate P(Delta = 0 | A = a) and get the influence curve/function
-  missing_est <- estimate(missing_est, keep = c(1, 2), id = id)
+  missing_est <- estimate(missing_est, keep = c(1, 2))
   missing_est <- estimate(missing_est,
                           f = function(x) 1 - x,
                           labels = paste0(
