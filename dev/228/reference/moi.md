@@ -14,6 +14,7 @@ moi(
   response.model,
   treatment.model,
   missing.model,
+  id = NULL,
   imputation.model,
   imputation.subset = NULL,
   imputation.augmentation = FALSE,
@@ -54,6 +55,11 @@ moi(
   \\P(\Delta = 1 \| A = a)\\). If a `formula` is provided, it is wrapped
   in `learner_glm(..., family = binomial())`. Used to estimate
   \\P(\Delta = 0 \| A = a)\\.
+
+- id:
+
+  (integer or character) optional subject id vector of length
+  `nrow(data)`.
 
 - imputation.model:
 
