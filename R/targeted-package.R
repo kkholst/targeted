@@ -6,8 +6,14 @@
 #' @import Rcpp methods
 #' @importFrom graphics plot points abline lines
 #' @importFrom grDevices nclass.Sturges
-#' @importFrom lava IC getoutcome estimate Inverse na.pass0 score logit expit parameter sim predict_glm
-#' @importFrom stats approxfun as.formula update binomial deriv density glm.fit lm.wfit lm.fit glm lm coef vcov model.frame model.matrix na.pass nlminb predict dnorm quantile terms weighted.mean runif .getXlevels delete.response model.response gaussian formula model.offset reformulate drop.terms weights model.extract cov2cor pnorm pchisq uniroot sd na.omit offset
+#' @importFrom lava IC getoutcome estimate Inverse na.pass0 score logit expit
+#'   parameter sim predict_glm pars
+#' @importFrom stats approxfun as.formula update binomial deriv density glm.fit
+#'   lm.wfit lm.fit glm lm coef vcov model.frame model.matrix na.pass nlminb
+#'   predict dnorm quantile terms weighted.mean runif .getXlevels
+#'   delete.response model.response gaussian formula model.offset reformulate
+#'   drop.terms weights model.extract cov2cor pnorm pchisq uniroot sd na.omit
+#'   offset
 #' @importFrom rlang hash call_match
 #' @importFrom R6 R6Class
 #' @importFrom survival survfit Surv strata cluster
@@ -76,30 +82,30 @@ NULL
 NULL
 
 
-##' @export
+#' @export
 lava::IC
 
-##' @export
+#' @export
 lava::sim
 
-##' @export
+#' @export
 lava::score
 
-##' @export
+#' @export
 lava::pars
 
-##' @export
+#' @export
 lava::parameter
 
-##' @export
+#' @export
 lava::estimate
 
-##' @export
+#' @export
 survival::strata
 
-##' @export
+#' @export
 survival::cluster
 
-##' @export
+#' @export
 survival::Surv
 # nolint end
