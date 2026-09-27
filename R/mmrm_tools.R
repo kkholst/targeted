@@ -52,9 +52,14 @@ IC.mmrm <- function(x, ...) {
 }
 
 #' @export
-estimate.mmrm <- function(x, which = c("beta", "theta"), ...) {
+estimate.mmrm <- function(x,
+                          which = c("beta", "theta"),
+                          id = NULL,
+                          ...) {
+  ic <- IC(x, which = which)
+  if (is.null(id)) id <- rownames(ic)
   res <- lava::estimate(coef = pars(x, which = which),
-                        IC = IC(x, which = which))
+                        IC = ic, id = id)
   lava::estimate(res, ...)
 }
 
@@ -85,7 +90,6 @@ estimate.mmrm <- function(x, which = c("beta", "theta"), ...) {
     dimnames(Sg) <- list(visit_names, visit_names)
     Sg
   })
-
   if (ngroups==1L) {
     return(cov_list[[1]])
   }
@@ -164,11 +168,14 @@ estimate.mmrm <- function(x, which = c("beta", "theta"), ...) {
   if (is.null(beta)) beta <- mmrm::component(fit, "beta_est")
   Sinv <- lapply(subj, function(s) lava::Inverse(s$Sigma))
   Sdet <- lapply(Sinv, function(s) attributes(s)$det)
-  r    <- lapply(subj, function(s) s$y - as.numeric(s$X %*% beta))
-  loglik  <- unlist(Map(function(Si, Di, ri) {
-    -ncol(Si)/2 * log(2*pi)
-    -0.5*log(Di) - 0.5 * as.numeric(t(ri) %*% Si %*% ri)
-  }, Sinv, Sdet, r))
+  res    <- lapply(subj, function(s) s$y - as.numeric(s$X %*% beta))
+  loglik <- unlist(Map(function(Si, D, r) {
+    -0.5 * (
+      ncol(Si) * log(2 * pi) +
+        log(D) +
+        as.numeric(t(r) %*% Si %*% r)
+    )
+  }, Sinv, Sdet, res))
   sum(loglik)
 }
 
