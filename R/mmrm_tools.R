@@ -65,7 +65,7 @@ estimate.mmrm <- function(x,
 
 #' @export
 mmrm2sigma <- function(object) {
-  function (p=pars(object), vec=TRUE) {
+  function(p = pars(object), vec = TRUE) {
     np <- length(object$beta_est)
     p1 <- p[-seq_len(np)]
     V <- .mmrm_varcor(object, p1)
