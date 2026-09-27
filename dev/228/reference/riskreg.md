@@ -164,8 +164,8 @@ with(d, riskreg_fit(y, a, nuisance=X, type="rr"))
 a <- riskreg(y ~ a | z, nuisance=~x,  propensity=~x, data=d, type="rr")
 a
 #>             Estimate Std.Err    2.5%     97.5%   P-value
-#> (Intercept)   0.9797  0.1212  0.7421  1.217291 6.365e-16
-#> z            -0.2218  0.1115 -0.4404 -0.003204 4.674e-02
+#> (Intercept)   0.9797  0.1212  0.7421  1.217281 6.366e-16
+#> z            -0.2218  0.1115 -0.4404 -0.003198 4.674e-02
 predict(a, d[1:5,])
 #> [1] 0.1491919 0.6897799 0.1040211 0.3736667 0.3304784
 
