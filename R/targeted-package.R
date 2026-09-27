@@ -13,7 +13,7 @@
 #'   predict dnorm quantile terms weighted.mean runif .getXlevels
 #'   delete.response model.response gaussian formula model.offset reformulate
 #'   drop.terms weights model.extract cov2cor pnorm pchisq uniroot sd na.omit
-#'   offset
+#'   offset rnorm rbinom
 #' @importFrom rlang hash call_match
 #' @importFrom R6 R6Class
 #' @importFrom survival survfit Surv strata cluster
