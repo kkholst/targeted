@@ -98,7 +98,7 @@ fit <- b
 ll <- c(targeted:::.mmrm_loglik(fit, beta=coef(fit)), logLik(fit))
 tinytest::expect_equivalent(ll[1], ll[2])
 
-S0 <- numDeriv::jacobian(\(p) targeted::::.mmrm_loglik(fit, beta=p),
+S0 <- numDeriv::jacobian(\(p) targeted:::.mmrm_loglik(fit, beta=p),
                          coef(fit)+1)
 S <- targeted:::.mmrm_score_beta(fit, beta=coef(fit)+1)
 tinytest::expect_equivalent(as.numeric(S0), colSums(S))
