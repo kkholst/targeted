@@ -38,18 +38,7 @@ a <- mmrm(
 )
 colSums(score(a))
 
-tosigma <- function(object) {
-  function (p=pars(object), vec=TRUE) {
-    np <- length(object$beta_est)
-    p1 <- p[-seq_len(np)]
-    V <- .mmrm_varcor(object, p1)
-    if (!vec) return(V)
-    if (is.matrix(V)) V <- list(V)
-    unlist(lapply(V, function(x) x[upper.tri(x, diag=TRUE)]))
-  }
-}
-f <- tosigma(a)
-
+f <- mmrm2sigma(a)
 transform(estimate(a), f)
 
 fit <- a
@@ -63,7 +52,7 @@ tinytest::expect_equivalent(as.numeric(S0), colSums(S))
 
 
 # Transformation to real variance/covariance scale
-f <- tosigma(a)
+f <- mmrm2sigma(a)
 ea <- estimate(a)
 avar <- transform(ea, f)
 tinytest::expect_equivalent(

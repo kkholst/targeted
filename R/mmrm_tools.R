@@ -63,6 +63,18 @@ estimate.mmrm <- function(x,
   lava::estimate(res, ...)
 }
 
+#' @export
+mmrm2sigma <- function(object) {
+  function (p=pars(object), vec=TRUE) {
+    np <- length(object$beta_est)
+    p1 <- p[-seq_len(np)]
+    V <- .mmrm_varcor(object, p1)
+    if (!vec) return(V)
+    if (is.matrix(V)) V <- list(V)
+    unlist(lapply(V, function(x) x[upper.tri(x, diag=TRUE)]))
+  }
+}
+
 ## Reconstruct the VarCorr-style covariance (matrix or list-per-group) for a
 ## given theta.  When theta is NULL (default) the result equals VarCorr(fit)
 ## exactly.
