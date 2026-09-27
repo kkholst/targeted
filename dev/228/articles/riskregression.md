@@ -343,7 +343,7 @@ riskreg(y~a, nuisance=~x+z, data=d2, type="rd")
 ```
 
                 Estimate Std.Err   2.5% 97.5% P-value
-    (Intercept)   0.9932 0.02059 0.9529 1.034       0
+    (Intercept)   0.9942 0.02068 0.9537 1.035       0
 
 ### Influence-function
 
