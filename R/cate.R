@@ -326,7 +326,9 @@ cate <- function(response.model, # nolint
 
   ## Missing-data handling:
   ## Extract raw outcome (with NAs) if IPW of missingness (IPMW) is needed
-  raw_response <- response.model$response(data, na.action = stats::na.pass)
+  raw_response <- factor2numeric(
+    response.model$response(data, na.action = stats::na.pass)
+  )
   has_missing <- any(is.na(raw_response))
   use_ipmw <- FALSE
   if (is.null(missing.model)) {
@@ -507,7 +509,9 @@ cate <- function(response.model, # nolint
   }
   colnames(a) <- contrast
   val$a <- a
-  val$y <- cbind(response.model$response(data, na.action=lava::na.pass0))
+  val$y <- cbind(factor2numeric(
+    response.model$response(data, na.action=lava::na.pass0)
+  ))
   colnames(val$y) <- lava::getoutcome(response.model$formula, data = data)
   val$r <- as.integer(!is.na(raw_response))
   rm(a, raw_response)
@@ -577,6 +581,7 @@ cate <- function(response.model, # nolint
   res$response.model <- response.model
   return(res)
 }
+
 
 cate_est <- function(y, # response vector
                      a, # matrix with treatment indicators a=1, a=0
