@@ -221,21 +221,21 @@ sl <- learnerSL$new(list(
 ), nfolds = 2)
 sl$formula # common response and union of covariates
 #> y ~ x1 + x2
-#> <environment: 0x560b5dfd1680>
+#> <environment: 0x5611e2d42f08>
 
 # update the response variable of the super learner and all base learners
 sl$update("z")
 sl$formula
 #> z ~ x1 + x2
-#> <environment: 0x560b5dfd1680>
+#> <environment: 0x5611e2d42f08>
 lapply(sl$learners, \(lr) lr$formula)
 #> $mean
 #> z ~ 1
-#> <environment: 0x560b5e22dc50>
+#> <environment: 0x5611e2fa3380>
 #> 
 #> $glm
 #> z ~ x1 + x2
-#> <environment: 0x560b5e236c60>
+#> <environment: 0x5611e2fb7298>
 #> 
 
 sl$estimate(d)
