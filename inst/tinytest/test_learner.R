@@ -245,6 +245,51 @@ test_update <- function() {
 }
 test_update()
 
+test_clone <- function() {
+  # testing the behaviour for deep=FALSE and deep=TRUE are regression tests
+  # because the behaviour should be exactly the same (i.e. no deep clone is
+  # required)
+  vars <- function(lr) setdiff(names(coef(lr$fit)), "(Intercept)")
+  for (deep in c(TRUE, FALSE)) {
+    # formula interface (glm) and design matrix interface (lm.fit)
+    for (est in list(glm, \(x, y, ...) lm.fit(x = x, y = y))) {
+      new_lr <- \(f) learner$new(f, estimate = est,
+        predict = \(object, newdata) {
+          if (is.matrix(newdata)) return(drop(newdata %*% coef(object)))
+          predict(object, newdata = newdata)
+        }
+      )
+      lr <- new_lr(y ~ x1)
+      cl <- lr$clone(deep = deep)
+
+      # updating the original leaves the clone untouched
+      lr$update(y ~ x2)
+      expect_equal(cl$formula, y ~ x1)
+      cl$estimate(ddata)
+      expect_equal(vars(cl), "x1")
+      lr$estimate(ddata)
+      expect_equal(vars(lr), "x2")
+
+      # updating the clone leaves the original untouched
+      cl$update(y ~ x1 + x2)
+      expect_equal(lr$formula, y ~ x2)
+      lr$estimate(ddata)
+      expect_equal(vars(lr), "x2")
+      cl$estimate(ddata)
+      expect_equal(vars(cl), c("x1", "x2"))
+
+      # fitted models are stored separately and predictions use own fit
+      ref <- new_lr(y ~ x1 + x2)
+      ref$estimate(ddata)
+      expect_equal(cl$predict(ddata), ref$predict(ddata))
+      ref$update(y ~ x2)
+      ref$estimate(ddata)
+      expect_equal(lr$predict(ddata), ref$predict(ddata))
+    }
+  }
+}
+test_clone()
+
 test_response <- function() {
   lr <- learner$new(formula = I(y > 0) ~ -1 + x1 + x2, estimate = glm)
 
