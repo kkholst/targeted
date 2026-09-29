@@ -32,5 +32,177 @@ test_learner_sl <- function() {
   # nfolds can be overwritten in estimate method call
   lr$estimate(d, nfolds = 3)
   expect_equal(length(lr$fit$folds), 3)
+
+  # base learners can be overwritten in estimate method call
+  lr$estimate(d, learners = list(glm2 = learner_glm(y ~ x1)))
+  expect_equal(names(lr$fit$fit), "glm2")
 }
 test_learner_sl()
+
+# deparsed formulas of the base learners of a learnerSL object
+base_formulas <- function(sl) {
+  vapply(sl$learners, \(lr) deparse(lr$formula), character(1))
+}
+
+test_learner_sl_class <- function() {
+  lrs <- list(
+    mean = learner_glm(y ~ 1),
+    glm = learner_glm(y ~ x1 + x2 + cos(x1))
+  )
+  lr <- learner_sl(lrs, nfolds = 2)
+  expect_equal(class(lr), c("learner_sl", "learner", "R6"))
+  expect_true(inherits(learnerSL$new(lrs), "learner_sl"))
+
+  # a single learner is returned as is
+  expect_identical(learner_sl(lrs$glm), lrs$glm)
+
+  # formula is defined by the response and union of covariates
+  expect_equal(deparse(lr$formula), "y ~ x1 + x2")
+  lr <- learner_sl(list(learner_glm(y ~ 1), learner_glm(y ~ 1)))
+  expect_equal(deparse(lr$formula), "y ~ 1")
+
+  # base learners
+  lr <- learner_sl(lrs, nfolds = 2)
+  expect_equal(names(lr$learners), c("mean", "glm"))
+  expect_identical(lr$opt("learners"), lr$learners)
+  expect_identical(lr$summary()$estimate.args$learners, lr$learners)
+  expect_equal(lr$opt("nfolds"), 2)
+  expect_error(lr$learners <- list(), pattern = "read-only")
+
+  # base learners are copies of the provided learners
+  expect_false(identical(lr$learners$glm, lrs$glm))
+
+  # input validation
+  expect_error(
+    learner_sl(list(learner_glm(y ~ x1), learner_glm(yb ~ x1))),
+    pattern = "same response variable"
+  )
+  expect_error(learner_sl(list()), pattern = "non-empty list")
+  expect_error(learner_sl(list(y ~ x1)), pattern = "non-empty list")
+  lr_noformula <- learner$new(estimate = function(y, x) lm.fit(x = x, y = y))
+  expect_error(
+    learner_sl(list(lr_noformula)),
+    pattern = "formula with a response"
+  )
+}
+test_learner_sl_class()
+
+test_learner_sl_update <- function() {
+  lrs <- list(
+    mean = learner_glm(y ~ 1),
+    glm = learner_glm(y ~ x1 + x2 + cos(x1))
+  )
+  lr <- learner_sl(lrs, nfolds = 2)
+
+  # response is updated for super learner and all base learners, where the
+  # base learners keep their covariates
+  lr$update("yb")
+  expect_equal(deparse(lr$formula), "yb ~ x1 + x2")
+  expect_equal(
+    unname(base_formulas(lr)),
+    c("yb ~ 1", "yb ~ x1 + x2 + cos(x1)")
+  )
+
+  # learners used to create the super learner are not modified
+  expect_equal(deparse(lrs$glm$formula), "y ~ x1 + x2 + cos(x1)")
+
+  # response variable defined by a function call
+  lr$update("I(yb == 1)")
+  expect_equal(deparse(lr$formula), "I(yb == 1) ~ x1 + x2")
+  expect_equal(
+    unname(base_formulas(lr)),
+    c("I(yb == 1) ~ 1", "I(yb == 1) ~ x1 + x2 + cos(x1)")
+  )
+
+  # no warning when formula has unchanged covariates or '.'
+  expect_silent(lr$update(yb ~ x1 + x2))
+  expect_silent(lr$update(y ~ .))
+  expect_silent(lr$update("yb ~ x2 + x1"))
+  expect_equal(
+    unname(base_formulas(lr)),
+    c("yb ~ 1", "yb ~ x1 + x2 + cos(x1)")
+  )
+
+  # warning when covariates differ, and covariates are left unchanged
+  expect_warning(lr$update(y ~ x1), pattern = "only updates the response")
+  expect_equal(deparse(lr$formula), "y ~ x1 + x2")
+  expect_equal(
+    unname(base_formulas(lr)),
+    c("y ~ 1", "y ~ x1 + x2 + cos(x1)")
+  )
+
+  expect_error(lr$update(~ x1), pattern = "response variable")
+
+  # estimation uses the updated response
+  lr$update("yb")
+  lr$estimate(d)
+  expect_equal(
+    unname(vapply(lr$fit$fit, \(x) deparse(x$formula[[2]]), character(1))),
+    c("yb", "yb")
+  )
+}
+test_learner_sl_update()
+
+test_learner_sl_clone <- function() {
+  lr <- learner_sl(
+    list(mean = learner_glm(y ~ 1), glm = learner_glm(y ~ x1 + x2)),
+    nfolds = 2
+  )
+  lr_clone <- lr$clone(deep = TRUE)
+  lr_clone$update("yb")
+
+  # updating the clone does not modify the original object
+  expect_equal(deparse(lr$formula), "y ~ x1 + x2")
+  expect_equal(unname(base_formulas(lr)), c("y ~ 1", "y ~ x1 + x2"))
+  expect_equal(unname(base_formulas(lr_clone)), c("yb ~ 1", "yb ~ x1 + x2"))
+
+  # each object is estimated with its own base learners
+  resp <- function(sl) {
+    unname(vapply(sl$fit$fit, \(x) deparse(x$formula[[2]]), character(1)))
+  }
+  lr_clone$estimate(d)
+  lr$estimate(d)
+  expect_equal(resp(lr), c("y", "y"))
+  expect_equal(resp(lr_clone), c("yb", "yb"))
+}
+test_learner_sl_clone()
+
+test_learner_sl_cate <- function() {
+  # cate updates the response of the treatment model with I(a == level) for
+  # each treatment level. The base learners must be updated accordingly, such
+  # that a super learner with a single base learner gives the same estimates
+  # as the base learner itself.
+  set.seed(1)
+  n <- 500
+  x <- rnorm(n)
+  a <- rbinom(n, 1, lava::expit(x))
+  y <- a + x + rnorm(n)
+  dd <- data.frame(y, a, x)
+
+  tm <- learner_sl(list(glm = learner_glm(a ~ x, family = binomial)))
+  warnings <- NULL
+  fit_sl <- withCallingHandlers(
+    cate(
+      treatment.model = tm,
+      response.model = learner_glm(y ~ a + x),
+      cate.model = ~1, data = dd
+    ),
+    warning = function(w) {
+      warnings <<- c(warnings, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_null(warnings)
+
+  fit_glm <- cate(
+    treatment.model = learner_glm(a ~ x, family = binomial),
+    response.model = learner_glm(y ~ a + x),
+    cate.model = ~1, data = dd
+  )
+  expect_equal(coef(fit_sl), coef(fit_glm))
+
+  # treatment model provided by the user is not modified
+  expect_equal(deparse(tm$formula), "a ~ x")
+  expect_equal(unname(base_formulas(tm)), "a ~ x")
+}
+test_learner_sl_cate()
