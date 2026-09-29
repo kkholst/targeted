@@ -1,6 +1,6 @@
 # Construct a learner
 
-Constructs a [learner](learner.md) class object for fitting a
+Constructs a [learnerSL](learnerSL.md) object for fitting a
 [superlearner](superlearner.md).
 
 ## Usage
@@ -62,11 +62,11 @@ learner_sl(
 
 ## Value
 
-[learner](learner.md) object.
+[learnerSL](learnerSL.md) object.
 
 ## See also
 
-[cv.learner_sl](cv.learner_sl.md)
+[learnerSL](learnerSL.md), [cv.learner_sl](cv.learner_sl.md)
 
 ## Examples
 
@@ -101,14 +101,14 @@ print(s)
 #>  glm
 #>  iso 
 #> 
-#> Estimate arguments: learners=<list>, nfolds=10, meta.learner=<function>, model.score=<function> 
+#> Estimate arguments: nfolds=10, meta.learner=<function>, model.score=<function> 
 #> Predict arguments:   
-#> Formula: y ~ NULL <environment: 0x55c12a392b10> 
+#> Formula: y ~ x1 + x2 <environment: 0x560b5f336700> 
 #> ─────────────────────────────────────
-#>         score     weight
-#> mean 5.011196 0.06440568
-#> glm  1.058765 0.08033375
-#> iso  0.584849 0.85526057
+#>          score     weight
+#> mean 4.5101604 0.03246338
+#> glm  1.0593160 0.06283154
+#> iso  0.5681082 0.90470508
 # weights(s$fit)
 # score(s$fit)
 
@@ -119,24 +119,24 @@ cvres
 #> 
 #> ── mse 
 #>         mean      sd     min     max
-#> sl   0.62401 0.04650 0.56521 0.67953
-#> mean 5.01482 0.47872 4.43024 5.72789
-#> glm  1.05843 0.08263 0.93481 1.18194
-#> iso  0.59872 0.04513 0.53342 0.66822
+#> sl   0.59424 0.03582 0.54221 0.63345
+#> mean 4.51392 0.24266 4.12502 4.78271
+#> glm  1.06691 0.08806 0.92500 1.19642
+#> iso  0.58440 0.03573 0.51989 0.61871
 #> 
 #> ── mae 
 #>         mean      sd     min     max
-#> sl   0.62822 0.01889 0.60529 0.65086
-#> mean 1.79246 0.04575 1.75501 1.87045
-#> glm  0.82495 0.02906 0.78183 0.85334
-#> iso  0.61530 0.01998 0.58478 0.64198
+#> sl   0.60215 0.01226 0.58744 0.61837
+#> mean 1.64096 0.05957 1.58145 1.74909
+#> glm  0.82839 0.03903 0.76473 0.88307
+#> iso  0.59698 0.01298 0.57424 0.60792
 #> 
 #> ── weight 
 #>         mean      sd     min     max
 #> sl         -       -       -       -
-#> mean 0.07765 0.06591 0.00000 0.18818
-#> glm  0.08344 0.03393 0.04148 0.14000
-#> iso  0.83891 0.06840 0.72423 0.91004
+#> mean 0.03984 0.02613 0.00152 0.07432
+#> glm  0.08342 0.03599 0.02634 0.11929
+#> iso  0.87674 0.03991 0.82968 0.92464
 # coef(cvres)
 # score(cvres)
 ```

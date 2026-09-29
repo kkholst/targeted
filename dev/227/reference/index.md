@@ -33,6 +33,7 @@
 - [`int_surv()`](int_surv.md) : Integral approximation of a time
   dependent function.
 - [`learner`](learner.md) : R6 class for prediction models
+- [`learnerSL`](learnerSL.md) : R6 class for super learners
 - [`learner_expand_grid()`](learner_expand_grid.md) : Construct learners
   from a grid of parameters
 - [`learner_gam()`](learner_gam.md) : Construct a learner
