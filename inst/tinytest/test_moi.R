@@ -787,3 +787,45 @@ test_moi_augmentation <- function() {
   expect_equal(coef(res_f), coef(res_l), tolerance = 1e-12)
 }
 test_moi_augmentation()
+
+test_moi_id <- function() {
+  set.seed(1)
+  data <- sim_complex(1e2, binary = TRUE)
+
+  moi_est <- moi(data = data,
+                 id = NULL,
+                 response.model = learner_glm(y ~ x, family = binomial()),
+                 missing.model = learner_glm(~ x, family = binomial()),
+                 stratify = TRUE,
+                 treatment.model = a ~ 1,
+                 imputation.model = learner_glm(y ~ a + x, family = binomial()),
+                 imputation.subset = "!is.na(y)")
+
+  id <- paste0("a", seq_len(length.out = nrow(data)))
+
+  moi_est_id <- moi(data = data,
+                    id = id,
+                    response.model = learner_glm(y ~ x, family = binomial()),
+                    missing.model = learner_glm(~ x, family = binomial()),
+                    stratify = TRUE,
+                    treatment.model = a ~ 1,
+                    imputation.model = learner_glm(y ~ a + x, family = binomial()),
+                    imputation.subset = "!is.na(y)")
+
+  expect_equal(
+    sort(id),
+    moi_est_id$estimate$id
+  )
+
+  expect_equal(
+    coef(moi_est),
+    coef(moi_est_id)
+  )
+
+  expect_equal(
+    IC(moi_est)[order(id),],
+    IC(moi_est_id),
+    check.attributes = FALSE
+  )
+}
+test_moi_id()
