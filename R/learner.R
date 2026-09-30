@@ -133,15 +133,13 @@ learner <- R6::R6Class("learner", # nolint
       if (!no_formula && is.character(formula) || is.function(formula)) {
         no_formula <- TRUE
       }
-      # State used by the private fitfun/predfun methods. These are stored as
-      # private fields (instead of being captured in closures created here) so
-      # that R6 correctly rebinds `self`/`private` when the object is cloned
-      # (see issue #230).
+      # State used by the private fitfun/predfun methods.
       private$no.formula <- no_formula
       private$fit.formula <- fit_formula
       private$predict.args <- predict.args
       private$.formula <- formula
       private$formula.keep.specials <- formula.keep.specials
+
       self$info <- info
       private$init <- list(
         estimate.args = estimate.args,
