@@ -23,7 +23,8 @@ score.mmrm <- function(x,
   if ("theta" %in% which) U2 <- .mmrm_score_theta(x, theta=theta)
   res <- cbind(U1, U2)
   ## Attach subject IDs as row names
-  rownames(res) <- vapply(.mmrm_subjects(x), `[[`, character(1), "id")
+  rownames(res) <- vapply(.mmrm_subjects(x),
+                          `[[`, character(1), "id")
   if (!indiv) return(colSums(res))
   return(res)
 }
@@ -54,21 +55,64 @@ IC.mmrm <- function(x, ...) {
 #' @export
 estimate.mmrm <- function(x,
                           which = c("beta", "theta"),
+                          sigma = FALSE,
                           id = NULL,
                           ...) {
   ic <- IC(x, which = which)
   if (is.null(id)) id <- rownames(ic)
   res <- lava::estimate(coef = pars(x, which = which),
                         IC = ic, id = id)
+  if (sigma && ("theta" %in% which)) {
+    tr <- mmrm2sigma(x)
+    sigmapar <- tr(coef(res))
+    nam <- names(sigmapar)
+    means <- if ("beta" %in% which) subset(res, seq_along(coef(x)))
+    vars <- transform(res, tr)
+    if (is.null(nam)) {
+      vars <- labels(vars, paste0("sigma", seq_along(sigmapar)))
+    }
+    res <- vars
+    if (!is.null(means)) {
+      res <- c(means, vars)
+    }
+  }
+  ## nam <- names(tr(coef(est)))
   lava::estimate(res, ...)
+}
+
+#' @export
+vec2sigma <- function(x) {
+  lbl <- names(x) # labeled as groupA1, ... groupAk, groupB1, ..., groupBK
+  m <- regexpr("^.*?(?=[0-9]+$)", lbl, perl=TRUE) # match string followed by int
+  groups <- regmatches(lbl, m)
+  ngroups <- length(unique(groups)) # groupA, groupB, ...
+  k <- length(x) / ngroups # k is the number of parameters in the upper-tri mat.
+  p <- (-1+sqrt(1+8*k))/2 # k = p*(p+1)/2 where sigma is a pxp matrix
+  res <- c()
+  for (i in seq_len(ngroups)) {
+    sigma <- matrix(0, p, p)
+    cur <- x[seq_len(k) + (i-1)*k]
+    sigma[upper.tri(sigma, diag=TRUE)] <- cur
+    for (i in seq_len(p-1)) { # make symmetric matrix
+      for (j in seq(i+1, p)) {
+        sigma[j, i] <- sigma[i, j]
+      }
+    }
+    res <- c(res, list(sigma))
+  }
+  names(res) <- unique(groups)
+  return(res)
 }
 
 #' @export
 mmrm2sigma <- function(object) {
   function(p = pars(object), vec = TRUE) {
-    np <- length(object$beta_est)
-    p1 <- p[-seq_len(np)]
-    V <- .mmrm_varcor(object, p1)
+    np1 <- length(object$beta_est)
+    np2 <- length(object$theta_est)
+    if (identical(length(p), np1+np2)) {
+      p <- p[-seq_len(np1)]
+    }
+    V <- .mmrm_varcor(object, p)
     if (!vec) return(V)
     if (is.matrix(V)) V <- list(V)
     unlist(lapply(V, function(x) x[upper.tri(x, diag=TRUE)]))
