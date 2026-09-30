@@ -1,3 +1,16 @@
+# development version
+
+- `learnerSL`: new R6 class for super learners, which inherits from `learner`.
+  `learner_sl` now returns a `learnerSL` object.
+- bugfix(`learner_sl`): `update` now changes the response variable of all base
+  learners, while each base learner keeps its covariates. Previously, only the
+  formula of the super learner was updated, such that, e.g., `cate` estimated
+  treatment models of the super learner with the wrong response variable.
+- `learner_sl`: formula is defined by the response variable and the union of
+  the covariates of all base learners. Base learners are copied on
+  instantiation and deep cloning, such that updating a super learner no longer
+  modifies other learner objects.
+
 # targeted 0.9
 
 - `cate`: doubly robust estimation with missing outcomes under MAR via the new
