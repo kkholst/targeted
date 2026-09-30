@@ -60,7 +60,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Prediction model class (<code>learner</code>)</h1>
 
       <p class="author">Klaus Kähler Holst, Benedikt Sommer</p>
-      <p class="date">2026-09-28</p>
+      <p class="date">2026-09-30</p>
 
       <small class="dont-index">Source: <a href="https://github.com/kkholst/targeted/blob/feat/moi-mmrm/vignettes/predictionclass.qmd" class="external-link"><code>vignettes/predictionclass.qmd</code></a></small>
       <div class="d-none name"><code></code></div>
@@ -127,9 +127,9 @@ Predict arguments:
 Formula: y ~ age * bili
 ─────────────────────────────────────
           score     weight
-glm1 0.09722725 0.28872135
-glm2 0.10664568 0.06715047
-gam  0.09582617 0.64412818</code></pre>
+glm1 0.09807146 0.20642457
+glm2 0.10732312 0.07476732
+gam  0.09622088 0.71880811</code></pre>
 </div>
 </div>
 <p>Most constructors have additional arguments that impact the resulting model fit, ranging from the specification of a link function for generalized linear models to hyper hyperparameters of machine learning models. Arguments naturally vary between the constructors and are documented for each function (e.g. <code><a href="../reference/learner_gam.html">?learner_gam</a></code>). The implemented constructors only provide arguments for the most relevant parameters of the underlying fit function (<code><a href="https://rdrr.io/pkg/mgcv/man/gam.html" class="external-link">mgcv::gam</a></code> in case of <code>learner_gam</code>). As described in the documentation, the ellipsis argument (<code>...</code>) can be used to pass additional arguments to the fit function. However, in most situations this is rarely required.</p>
@@ -239,8 +239,8 @@ Formula: y ~ age + sex + bili </code></pre>
         list(params = xgb_params)), )
     return(res)
 }
-&lt;bytecode: 0x55b1066aca18&gt;
-&lt;environment: 0x55b10b258908&gt;</code></pre>
+&lt;bytecode: 0x557ac79fbe88&gt;
+&lt;environment: 0x557acbfe35e0&gt;</code></pre>
 </div>
 </div>
 <p>Rare situations may arise where one wants to update the formula argument. This supported and implemented via the <code>update</code> method</p>
@@ -289,9 +289,9 @@ Formula: y ~ age + sex + bili </code></pre>
 
 5-fold cross-validation with 2 repetitions
 
-          mse       mae
-glm 0.1084068 0.2140060
-gam 0.1010314 0.1885191</code></pre>
+           mse       mae
+glm 0.10821036 0.2136067
+gam 0.09711698 0.1865774</code></pre>
 </div>
 </div>
 </section><section class="level2"><h3 id="prediction-filter">Prediction filter<a class="anchor" aria-label="anchor" href="#prediction-filter"></a>
@@ -445,9 +445,9 @@ Estimate arguments: learners=&lt;list&gt;, nfolds=2
 Predict arguments:
 Formula: NULL
 ─────────────────────────────────────
-        score    weight
-glm 0.1070880 0.8841935
-gam 0.1078019 0.1158065</code></pre>
+        score weight
+glm 0.1062893      1
+gam 0.1111122      0</code></pre>
 </div>
 </div>
 <p>In this case, all arguments provided to <code>lr$estimate</code> are joined together with the specified <code>estimate.args</code> and passed on to the defined estimate function (i.e. <code>superlearner</code>).</p>
@@ -490,7 +490,7 @@ gam 0.1078019 0.1158065</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>function (object, ...)
 object
-&lt;bytecode: 0x55b105a4c7f8&gt;
+&lt;bytecode: 0x557acc259760&gt;
 &lt;environment: namespace:targeted&gt;</code></pre>
 </div>
 </div>
