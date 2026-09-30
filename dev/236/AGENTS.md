@@ -33,8 +33,9 @@ via Rcpp + RcppArmadillo.
   tinytest; use during iteration to skip reinstall.
 - `make test-slow` — runs `inst/slowtest/` (expensive, not in normal
   `make test`).
-- `make lint` — `lintr::lint_package()`. Config in `.lintr` (line 80,
-  tidyverse-ish, several linters disabled).
+- `make lint` —
+  [`lintr::lint_package()`](https://lintr.r-lib.org/reference/lint.html).
+  Config in `.lintr` (line 80, tidyverse-ish, several linters disabled).
 - `make doc` — regenerate roxygen man pages, RcppExports, and README.
   Run after editing roxygen blocks, exported symbols, or
   `inst/README.Rmd`.
