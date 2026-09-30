@@ -133,95 +133,13 @@ learner <- R6::R6Class("learner", # nolint
       if (!no_formula && is.character(formula) || is.function(formula)) {
         no_formula <- TRUE
       }
-      if (no_formula) {
-        private$fitfun <- function(...) {
-          args <- private$update_args(private$estimate.args, ...)
-          return(do.call(private$init.estimate, args))
-        }
-        private$predfun <- function(...) {
-          args <- private$update_args(predict.args, ...)
-          return(do.call(private$init.predict, args))
-        }
-      } else {
-        if (fit_formula) { # Formula in arguments of estimation procedure
-          private$fitfun <- function(data, ...) {
-            des <- do.call(
-              targeted::design,
-              c(list(formula = self$formula,
-                     data = data,
-                     design.matrix = FALSE),
-                private$des.args
-                )
-            )
-            args <- private$update_args(private$estimate.args, ...)
-            form <- self$formula
-            if (!private$formula.keep.specials) form <- des$formula
-            args <- c(
-              args, list(formula = form, data = data)
-            )
-            if (length(des$specials) > 0) {
-              for (s in des$specials) {
-                # specials provided to fitfun call precede over specials
-                # obtained from design object
-                if (!(s %in% names(args))) {
-                  args[[s]] <- des[[s]]
-                }
-
-              }
-            }
-            return(structure(do.call(private$init.estimate, args),
-                             design = summary(des)
-                             ))
-          }
-        } else {
-          #  Formula automatically processed into design matrix & response
-          private$fitfun <- function(data, ...) {
-            xx <- do.call(
-              targeted::design,
-              c(list(formula = self$formula, data = data), private$des.args)
-            )
-            args <- private$update_args(private$estimate.args, ...)
-            args <- c(list(x = xx$x, y = xx$y), args)
-
-            if (length(xx$specials) > 0) {
-              for (s in xx$specials) {
-                # specials provided to fitfun call precede over specials
-                # obtained from design object
-                if (!(s %in% names(args))) args[[s]] <- xx[[s]]
-              }
-            }
-            return(structure(do.call(private$init.estimate, args),
-              design = summary(xx)
-            ))
-          }
-        }
-        private$predfun <- function(object, data, ...) {
-          if (no_formula) {
-            predict_args_call <- private$update_args(predict.args, ...)
-            args <- c(list(object, newdata = data), predict_args_call)
-          } else {
-            args <- list(...)
-            des <- update(attr(object, "design"), data)
-            for (s in des$specials) {
-                # specials provided to predfun call precede over specials
-                # obtained from design object
-              if (!(s %in% names(args))) args[[s]] <- des[[s]]
-            }
-            predict_args_call <- predict.args
-            predict_args_call[names(args)] <- args
-            newdata <- data
-            if (!fit_formula) {
-              newdata <- model.matrix(des)
-            }
-            args <- c(list(object,
-              newdata = newdata
-            ), predict_args_call)
-          }
-          return(do.call(private$init.predict, args))
-        }
-      }
+      # State used by the private fitfun/predfun methods.
+      private$no.formula <- no_formula
+      private$fit.formula <- fit_formula
+      private$predict.args <- predict.args
       private$.formula <- formula
       private$formula.keep.specials <- formula.keep.specials
+
       self$info <- info
       private$init <- list(
         estimate.args = estimate.args,
@@ -280,8 +198,6 @@ learner <- R6::R6Class("learner", # nolint
         }
       }
       private$.formula <- formula
-      environment(private$fitfun)$formula <- formula
-      environment(private$fitfun)$self <- self
       return(invisible(formula))
     },
 
@@ -379,10 +295,12 @@ learner <- R6::R6Class("learner", # nolint
     init.estimate = NULL,
     # @field init.predict Original predict method supplied at initialization
     init.predict = NULL,
-    # @field predfun Prediction method
-    predfun = NULL,
-    # @field fitfun Estimation method
-    fitfun = NULL,
+    # @field predict.args Arguments for predict method
+    predict.args = NULL,
+    # @field no.formula TRUE if the learner is not specified via a formula
+    no.formula = NULL,
+    # @field fit.formula TRUE if the estimate function has a formula argument
+    fit.formula = NULL,
     # @field fitted Fitted model object
     fitted = NULL,
     # @field .formula Model formula object // uses dot as a pre-fix to allow
@@ -394,23 +312,63 @@ learner <- R6::R6Class("learner", # nolint
     formula.keep.specials = NULL,
     # @field init Information on the initialized model
     init = NULL,
-    # When x$clone(deep=TRUE) is called, the deep_clone gets invoked once for
-    # each field, with the name and value.
-    deep_clone = function(name, value) {
-      if (name == "fitfun") {
-        env <- list2env(
-          as.list.environment(environment(value),
-            all.names = TRUE
-          ),
-          parent = globalenv()
-        )
-        environment(value) <- env
-        return(value)
-      } else {
-        # For everything else, just return it. This results in a shallow
-        # copy of s3.
-        return(value)
+    # Estimation method. Defined as a private method (rather than a closure
+    # created in initialize) such that cloned objects refer to their own
+    # `self` and `private` environments.
+    fitfun = function(data, ...) {
+      if (private$no.formula) {
+        args <- private$update_args(private$estimate.args, data, ...)
+        return(do.call(private$init.estimate, args))
       }
+      des <- do.call(
+        targeted::design,
+        c(
+          list(
+            formula = self$formula,
+            data = data,
+            design.matrix = !private$fit.formula
+          ),
+          private$des.args
+        )
+      )
+      args <- private$update_args(private$estimate.args, ...)
+      if (private$fit.formula) {
+        # Formula in arguments of estimation procedure
+        form <- self$formula
+        if (!private$formula.keep.specials) form <- des$formula
+        args <- c(args, list(formula = form, data = data))
+      } else {
+        # Formula automatically processed into design matrix & response
+        args <- c(list(x = des$x, y = des$y), args)
+      }
+      for (s in des$specials) {
+        # specials provided to fitfun call precede over specials
+        # obtained from design object
+        if (!(s %in% names(args))) args[[s]] <- des[[s]]
+      }
+      return(structure(do.call(private$init.estimate, args),
+        design = summary(des)
+      ))
+    },
+    # Prediction method
+    predfun = function(object, data, ...) {
+      if (private$no.formula) {
+        args <- private$update_args(private$predict.args, object, data, ...)
+        return(do.call(private$init.predict, args))
+      }
+      args <- list(...)
+      des <- update(attr(object, "design"), data)
+      for (s in des$specials) {
+        # specials provided to predfun call precede over specials
+        # obtained from design object
+        if (!(s %in% names(args))) args[[s]] <- des[[s]]
+      }
+      predict_args_call <- private$predict.args
+      predict_args_call[names(args)] <- args
+      newdata <- data
+      if (!private$fit.formula) newdata <- model.matrix(des)
+      args <- c(list(object, newdata = newdata), predict_args_call)
+      return(do.call(private$init.predict, args))
     },
     # Utility to update list of arguments with ellipsis
     # @param args list or NULL
