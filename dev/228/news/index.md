@@ -1,5 +1,14 @@
 # Changelog
 
+## targeted 0.9.0.9000
+
+Bug fixes:
+
+- `learner$clone()` produced a clone with unintended reference-type
+  behaviour. A clone used the formula of the original object, instead of
+  a new formula that was provided with the
+  [`update()`](https://rdrr.io/r/stats/update.html) method.
+
 ## targeted 0.9
 
 - `cate`: doubly robust estimation with missing outcomes under MAR via
