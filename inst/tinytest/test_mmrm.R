@@ -37,6 +37,39 @@ a <- mmrm(
   )
 )
 
+test_mmrm_subject <- function(fit, data_long) {
+  ref <- targeted:::.mmrm_subjects(fit = fit, theta = NULL)
+
+  new_data_long <- data_long
+  new_data_long$AVISIT <- as.character(new_data_long$AVISIT)
+  new_data_long$AVISIT[new_data_long$AVISIT == "FEV1"] <- "FEV4"
+  new_data_long$AVISIT <- factor(new_data_long$AVISIT)
+
+  new_fit <- mmrm(
+    FEV ~ -1 + AVISIT + ARMCD : AVISIT + us(AVISIT | USUBJID),
+    data = new_data_long, reml = FALSE,
+    optimizer = "nlminb",
+    optimizer_control = list(
+      eval.max = 1000,
+      iter.max = 1000,
+      rel.tol = 1e-9
+    )
+  )
+
+  ms <- targeted:::.mmrm_subjects(fit = new_fit, theta = NULL)
+
+  ## full frame in the model fit is ordered by IDs and AVIST
+  new_ord <- c(3, 1, 2)
+  expect_true(
+    all(ref[[1]]$visits[c(2,3)] == ms[[1]]$visits[new_ord][c(2,3)])
+  )
+  expect_true(
+    all(ref[[1]]$Sigma - ms[[1]]$Sigma[new_ord, new_ord] < 10-8)
+  )
+
+}
+test_mmrm_subject(fit = a, data_long = dl)
+
 test_mmrm_score <- function(fit) {
 
   expect_true(mean(colMeans(score(fit)))<1e-9)

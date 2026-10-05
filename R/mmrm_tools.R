@@ -153,14 +153,16 @@ mmrm2sigma <- function(object) {
   cov_list
 }
 
-## Return a list per subject with:
-##   id      : subject label
+## Return an id ordered list per subject with:
+##   id      : subject label (in order)
 ##   rows    : integer row indices into full_frame / x_matrix / y_vector
-##   visits  : character vector of observed visit-factor levels (or numeric
-##             coordinates for spatial structures)
-##   X, y, w : per-subject design, response, weights
-##   Sigma   : n_i x n_i observed-visit covariance matrix
+##             (ordered by IDs and visits)
+##   visits  : ordered character vector of observed visit-factor levels
+##             (or numeric coordinates for spatial structures)
+##   X, y, w : per-subject design, response, weights (ordeded by visits)
+##   Sigma   : observed-visit covariance matrix (ordered by vists)
 ##   group   : character group label (or NA_character_ if no grouping)
+##             (ordered by visits)
 ##
 ## This implementation focuses on discrete-time covariances:
 ## us, cs, toep, ad, ar1
@@ -195,7 +197,7 @@ mmrm2sigma <- function(object) {
   }
 
   ## Split rows by subject preserving encounter order
-  subj_char <- as.character(subj_full)
+  subj_char <- as.character(subj_full) # ordered list of IDs
   first_seen <- !duplicated(subj_char)
   subj_order <- subj_char[first_seen] # subject IDs in order
   rows_by <- split(seq_along(subj_char), subj_char)[subj_order]
