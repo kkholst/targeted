@@ -60,15 +60,39 @@ test_mmrm_subject <- function(fit, data_long) {
 
   ## full frame in the model fit is ordered by id and visit levels
   new_ord <- c(2, 3, 1)
-  expect_true(
+  tinytest::expect_true(
     all(ref[[1]]$visits == ms[[2]]$visits[new_ord])
   )
-  expect_true(
+  tinytest::expect_true(
     all(ref[[1]]$Sigma - ms[[2]]$Sigma[new_ord, new_ord] < 10-8)
   )
 
 }
 test_mmrm_subject(fit = a, data_long = dl)
+
+test_mmrm_varcor <- function(fit) {
+
+  ref <- mmrm::VarCorr(fit)
+  tmp <- targeted:::.mmrm_varcor(
+                      fit = fit,
+                      theta = mmrm::component(fit, "theta_est")
+                    )
+
+  tinytest::expect_equal(
+              ref,
+              tmp
+            )
+
+  tmp <- targeted:::.mmrm_varcor(
+                      fit = fit,
+                      theta = mmrm::component(fit, "theta_est") + 0.1
+                    )
+
+  tinytest::expect_true(
+              all(abs(ref - tmp) > 1e-2)
+            )
+
+}
 
 test_mmrm_score <- function(fit) {
 
