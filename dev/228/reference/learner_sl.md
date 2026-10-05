@@ -103,7 +103,7 @@ print(s)
 #> 
 #> Estimate arguments: learners=<list>, nfolds=10, meta.learner=<function>, model.score=<function> 
 #> Predict arguments:   
-#> Formula: y ~ 1 <environment: 0x56177e1b06d8> 
+#> Formula: y ~ 1 <environment: 0x56447a25cd80> 
 #> ─────────────────────────────────────
 #>         score     weight
 #> mean 5.011196 0.06440568
