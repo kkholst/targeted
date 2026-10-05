@@ -41,9 +41,9 @@ test_mmrm_subject <- function(fit, data_long) {
   ref <- targeted:::.mmrm_subjects(fit = fit, theta = NULL)
 
   new_data_long <- data_long
-  new_data_long$AVISIT <- as.character(new_data_long$AVISIT)
-  new_data_long$AVISIT[new_data_long$AVISIT == "FEV1"] <- "FEV4"
-  new_data_long$AVISIT <- factor(new_data_long$AVISIT)
+  new_data_long$AVISIT <- factor(new_data_long$AVISIT, levels = c("FEV3", "FEV1", "FEV2"))
+  new_data_long$USUBJID <- factor(new_data_long$USUBJID,
+                                  levels = levels(new_data_long$USUBJID)[c(2, 1, 3:65)])
 
   new_fit <- mmrm(
     FEV ~ -1 + AVISIT + ARMCD : AVISIT + us(AVISIT | USUBJID),
@@ -58,13 +58,13 @@ test_mmrm_subject <- function(fit, data_long) {
 
   ms <- targeted:::.mmrm_subjects(fit = new_fit, theta = NULL)
 
-  ## full frame in the model fit is ordered by IDs and AVIST
-  new_ord <- c(3, 1, 2)
+  ## full frame in the model fit is ordered by id and visit levels
+  new_ord <- c(2, 3, 1)
   expect_true(
-    all(ref[[1]]$visits[c(2,3)] == ms[[1]]$visits[new_ord][c(2,3)])
+    all(ref[[1]]$visits == ms[[2]]$visits[new_ord])
   )
   expect_true(
-    all(ref[[1]]$Sigma - ms[[1]]$Sigma[new_ord, new_ord] < 10-8)
+    all(ref[[1]]$Sigma - ms[[2]]$Sigma[new_ord, new_ord] < 10-8)
   )
 
 }

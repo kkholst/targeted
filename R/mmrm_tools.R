@@ -156,8 +156,8 @@ mmrm2sigma <- function(object) {
 ## Return an id ordered list per subject with:
 ##   id      : subject label (in order)
 ##   rows    : integer row indices into full_frame / x_matrix / y_vector
-##             (ordered by IDs and visits)
-##   visits  : ordered character vector of observed visit-factor levels
+##             (ordered by IDs and visit levels)
+##   visits  : character vector of observed visit-factor levels
 ##             (or numeric coordinates for spatial structures)
 ##   X, y, w : per-subject design, response, weights (ordeded by visits)
 ##   Sigma   : observed-visit covariance matrix (ordered by vists)
