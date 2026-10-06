@@ -72,3 +72,13 @@ cat_ruler <- function(x, n, unicode = "\u2500") {
   rule <- paste0(rep(unicode, n), collapse = "")
   cat(paste0(rule, x, rule, "\n"))
 }
+
+factor2numeric <- function(x) {
+  if (is.character(x)) {
+    x <- factor(x)
+  }
+  if (is.factor(x)) {
+    x <- as.numeric(x)-1
+  }
+  return(x)
+}

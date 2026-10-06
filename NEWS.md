@@ -19,6 +19,13 @@
     their upper-triangular elements
 - `pars` is re-exported from `lava`
 
+Bug fixes:
+
+- `learner$clone()` produced a clone with unintended reference-type behaviour. A
+  clone used the formula of the original object, instead of a new formula that
+  was provided with the `update()` method.
+
+
 # targeted 0.9
 
 - `cate`: doubly robust estimation with missing outcomes under MAR via the new
