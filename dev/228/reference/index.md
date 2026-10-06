@@ -102,5 +102,7 @@
   intersection test
 - [`test_zmax_onesided()`](test_zmax_onesided.md) : One-sided Zmax test
 - [`truncatedscore`](truncatedscore.md) : Scores truncated by death
+- [`vec2sigma()`](vec2sigma.md) [`sigma2vec()`](vec2sigma.md) :
+  Covariance matrix from upper-triangular elements
 - [`weights(`*`<superlearner>`*`)`](weights.superlearner.md) : Extract
   ensemble weights
