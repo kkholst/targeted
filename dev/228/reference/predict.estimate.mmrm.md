@@ -51,11 +51,10 @@ outcomes of the subject. With \\O\\ the observed visits of subject
 \\\Sigma\\ is the (group-specific) covariance matrix of all visits (the
 marginal mean \\x\_{it}^\top\beta\\ if no outcomes are observed). This
 corresponds to `predict(fit, newdata, conditional = TRUE)` of the mmrm
-package (observation weights are not used).
+package.
 
 `newdata` is first expanded to all subject and visit combinations with
-`expand_long()`. An outcome is observed if it and the covariates of the
-row are non-missing.
+[`complete_visits()`](complete_visits.md).
 
 ## Examples
 

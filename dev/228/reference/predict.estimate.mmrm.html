@@ -92,10 +92,9 @@ $$E(Y_{it} \mid Y_{iO}) = x_{it}^\top\beta +
 where \(\Sigma\) is the (group-specific) covariance matrix of all visits
 (the marginal mean \(x_{it}^\top\beta\) if no outcomes are observed).
 This corresponds to <code>predict(fit, newdata, conditional = TRUE)</code> of the mmrm
-package (observation weights are not used).</p>
+package.</p>
 <p><code>newdata</code> is first expanded to all subject and visit combinations with
-<code>expand_long()</code>. An outcome is observed if it and the covariates of the row
-are non-missing.</p>
+<code><a href="complete_visits.html">complete_visits()</a></code>.</p>
     </div>
 
     <div class="section level2">

@@ -13,6 +13,7 @@
 - [`calibration-class`](calibration-class.md) : calibration class object
 - [`calibration()`](calibration.md) : Calibration (training)
 - [`cate()`](cate.md) : Conditional Average Treatment Effect estimation
+- [`complete_visits()`](complete_visits.md) : Expand long-format data
 - [`cross_validated-class`](cross_validated-class.md)
   [`cross_validated`](cross_validated-class.md) : cross_validated class
   object
