@@ -78,7 +78,7 @@ IC.mmrm <- function(x, ..., numeric=FALSE) {
   ## The hessian is block-diagonal and can be extracted
   ## directly from the mmrm / TMB object
     I1 <- solve(x$beta_vcov)
-    I2 <- x$tmb_object$he()
+    I2 <- solve(x$theta_vcov) # should equal x$tmb_object$he()
     nn <- paste0("theta", seq_len(nrow(I2)))
     dimnames(I2) <- list(nn, nn)
     I <- lava::blockdiag(I1, I2)
