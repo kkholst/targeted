@@ -121,7 +121,37 @@ estimate.mmrm <- function(x,
   structure(res, class=c("estimate.mmrm", "estimate"))
 }
 
+#' Conversion between covariance matrices and their upper-triangular elements
+#'
+#' `vec2sigma` constructs symmetric (covariance) matrices from a vector of
+#' upper-triangular elements (column-major, including the diagonal), e.g., the
+#' covariance parameters returned by `estimate(fit, sigma = TRUE)` for an mmrm
+#' model. The vector may contain the elements of several matrices of the same
+#' dimension (one per group), stacked after each other. `sigma2vec` is the
+#' inverse operation.
+#' @title Covariance matrix from upper-triangular elements
+#' @param x (numeric) for `vec2sigma`, the vector of upper-triangular elements
+#'   of \eqn{G} \eqn{p\times p} matrices (length \eqn{G p (p + 1) / 2}). For
+#'   `sigma2vec`, a matrix or a (named) list of matrices.
+#' @param groups (character) group names of the covariance matrices. If
+#'   `NULL`, the groups are derived from the names of `x`, which must be of
+#'   the form `<group><index>` (e.g., `grpA1, ..., grpAk, grpB1, ..., grpBk`).
+#' @param visits (character) optional row and column names of the matrices.
+#' @param simplify (logical) if `TRUE` and there is only a single group, the
+#'   matrix is returned instead of a list.
+#' @return `vec2sigma`: list of matrices named by group (or a matrix if
+#'   `simplify = TRUE` and there is a single group). `sigma2vec`: numeric
+#'   vector with the upper-triangular elements of each matrix.
 #' @export
+#' @examples
+#' S <- matrix(c(2, 1, 1, 3), 2)
+#' x <- sigma2vec(list(sigma = S))
+#' x
+#' vec2sigma(x)
+#' vec2sigma(x, groups = "sigma", visits = c("v1", "v2"), simplify = TRUE)
+#'
+#' ## Two groups
+#' vec2sigma(c(1, 0.5, 2, 3, 1, 4), groups = c("A", "B"))
 vec2sigma <- function(x, groups=NULL, visits=NULL, simplify=FALSE) {
   if (is.null(groups)) { # derive groups from parameter names
     lbl <- names(x) # labeled as groupA1, ... groupAk, groupB1, ..., groupBK
@@ -151,6 +181,7 @@ vec2sigma <- function(x, groups=NULL, visits=NULL, simplify=FALSE) {
   return(res)
 }
 
+#' @rdname vec2sigma
 #' @export
 sigma2vec <- function(x) {
   if (is.matrix(x)) x <- list(x)

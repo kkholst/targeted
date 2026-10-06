@@ -1,3 +1,24 @@
+# development version
+
+- `moi`: new `id` argument for subject ids (propagated to the influence
+  functions of the nuisance and target parameter estimates)
+- Support for mixed models for repeated measures (MMRM) fitted with the `mmrm`
+  package (added to `Suggests`):
+  - `score`, `pars`, `IC` and `estimate` methods for `mmrm` objects
+    (subject-level scores and influence functions of the mean and covariance
+    parameters, including observation weights). `estimate(fit, sigma = TRUE)`
+    returns the covariance parameters on the scale of the covariance matrix
+    elements
+  - `predict` method for `estimate(fit, sigma = TRUE)` objects: per subject,
+    the observed outcome at a given visit, or the conditional mean given the
+    observed outcomes (as `predict(fit, conditional = TRUE)` in `mmrm`), as a
+    function of the parameters for use with the delta method
+  - `complete_visits`: expands long-format data to all subject and visit
+    combinations
+  - `vec2sigma` and `sigma2vec`: conversion between covariance matrices and
+    their upper-triangular elements
+- `pars` is re-exported from `lava`
+
 # targeted 0.9
 
 - `cate`: doubly robust estimation with missing outcomes under MAR via the new
