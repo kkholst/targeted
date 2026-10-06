@@ -357,11 +357,12 @@ dSigma_dtheta <- function(fit,
                         )
   derivative <- lapply(seq_along(theta), function(k) jacobian[, k])
   derivative <- lapply(derivative,
-                       function(x) vec2sigma(x,
-                                      groups = group_names,
-                                      visits = visit_names,
-                                      simplify=TRUE)
-                       )
+                       function(x) {
+                         vec2sigma(x,
+                                   groups = group_names,
+                                   visits = visit_names,
+                                   simplify=TRUE)
+                         })
   return(derivative)
 }
 
