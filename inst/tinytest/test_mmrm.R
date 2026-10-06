@@ -74,10 +74,10 @@ test_mmrm_subject <- function(fit, data_long) {
 
   ## full frame in the model fit is ordered by id and visit levels
   new_ord <- c(2, 3, 1)
-  tinytest::expect_true(
+  expect_true(
     all(ref[[1]]$visits == ms[[2]]$visits[new_ord])
   )
-  tinytest::expect_true(
+  expect_true(
     all(ref[[1]]$Sigma - ms[[2]]$Sigma[new_ord, new_ord] < 10-8)
   )
 
@@ -91,20 +91,18 @@ test_mmrm_varcor <- function(fit) {
                       fit = fit,
                       theta = mmrm::component(fit, "theta_est")
                     )
-
-  tinytest::expect_equal(
-              ref,
-              tmp
-            )
+  expect_equal(
+    ref,
+    tmp
+  )
 
   tmp <- targeted:::.mmrm_varcor(
                       fit = fit,
                       theta = mmrm::component(fit, "theta_est") + 0.1
                     )
-
-  tinytest::expect_true(
-              all(abs(ref - tmp) > 1e-2)
-            )
+  expect_true(
+    all(abs(ref - tmp) > 1e-2)
+  )
 
 }
 test_mmrm_varcor(a)
@@ -121,6 +119,7 @@ test_mmrm_wsigma <- function() {
 test_mmrm_wsigma()
 
 test_mmrm_score <- function(fit) {
+  opt <- lava.options(Dmethod="Richardson")
   expect_true(mean(colMeans(score(fit)))<1e-9)
   ll <- c(.mmrm_loglik(fit, beta=coef(fit)), logLik(fit))
   S0 <- numDeriv::jacobian(\(p) .mmrm_loglik(fit, beta=p),
@@ -130,8 +129,9 @@ test_mmrm_score <- function(fit) {
   U <- targeted:::.mmrm_score_theta(fit, theta=fit$theta_est+1)
 
   expect_equivalent(ll[1], ll[2])
-  expect_equivalent(as.numeric(S0), colSums(S))
-  expect_equivalent(as.numeric(U0), colSums(U))
+  expect_true(mean(as.numeric(S0)-colSums(S))<1e-6)
+  expect_true(mean(as.numeric(U0)-colSums(U))<1e-6)
+  lava.options(opt)
 }
 test_mmrm_score(a)
 

@@ -813,7 +813,7 @@ test_moi_id <- function() {
                     imputation.subset = "!is.na(y)")
 
   expect_equal(
-    sort(id),
+    id,
     moi_est_id$estimate$id
   )
 
@@ -823,7 +823,7 @@ test_moi_id <- function() {
   )
 
   expect_equal(
-    IC(moi_est)[order(id),],
+    IC(moi_est),
     IC(moi_est_id),
     check.attributes = FALSE
   )

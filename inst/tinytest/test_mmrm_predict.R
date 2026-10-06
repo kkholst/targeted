@@ -15,19 +15,19 @@ est_obj <- function(fit) {
 ## mmrm's conditional prediction at visit 'time' for each subject
 pred_mmrm <- function(fit, data, time) {
   fp <- fit$formula_parts
-  d <- expand_long(data, fp$subject_var, fp$visit_var, fp$response_var,
+  d <- complete_visits(data, fp$subject_var, fp$visit_var, fp$response_var,
                    levels(fit$tmb_data$full_frame[[fp$visit_var]]))
   pm <- predict(fit, newdata = d, conditional = TRUE)
   rr <- which(as.integer(d[[fp$visit_var]]) == time)
   setNames(pm[rr], as.character(d[[fp$subject_var]][rr]))
 }
 
-## expand_long
-test_expand_long <- function() {
+## complete_visits
+test_complete_visits <- function() {
   d <- data.frame(id = c("b", "b", "a", "a", "c"),
                   visit = c(3, 1, 1, 2, 2),
                   y = c(1, 2, 3, 4, 5), x = c(10, 20, 30, 40, 50))
-  res <- expand_long(d, "id", "visit", "y")
+  res <- complete_visits(d, "id", "visit", "y")
   expect_equal(nrow(res), 9L)
   expect_equal(res$id, rep(c("b", "a", "c"), each = 3))
   expect_equal(res$visit, factor(rep(1:3, 3)))
@@ -35,43 +35,41 @@ test_expand_long <- function() {
   ## Added rows: previous row (LOCF), or next row if first visit missing
   expect_equal(res$x, c(20, 20, 10, 30, 40, 40, 50, 50, 50))
   ## Without response: added rows keep the copied response
-  expect_equal(expand_long(d, "id", "visit")$y[2], 2)
+  expect_equal(complete_visits(d, "id", "visit")$y[2], 2)
   ## Visit levels
-  res <- expand_long(d, "id", "visit", "y", levels = 1:4)
+  res <- complete_visits(d, "id", "visit", "y", levels = 1:4)
   expect_equal(nlevels(res$visit), 4L)
   expect_equal(nrow(res), 12L)
   ## Complete data is unchanged (up to ordering)
-  res2 <- expand_long(res, "id", "visit", "y")
+  res2 <- complete_visits(res, "id", "visit", "y")
   expect_equal(res2, res)
   ## Errors
-  expect_error(expand_long(d, "id", "visit", levels = 1:2))
-  expect_error(expand_long(rbind(d, d[1, ]), "id", "visit"))
+  expect_error(complete_visits(d, "id", "visit", levels = 1:2))
+  expect_error(complete_visits(rbind(d, d[1, ]), "id", "visit"))
 }
-test_expand_long()
+test_complete_visits()
 
 ## Comparison with the conditional predictions of mmrm
 test_predict_vs_mmrm <- function(formula) {
   ## Data with entire rows removed
   dsub <- subset(fev_data, !is.na(FEV1) | VISITN %% 2 == 0)
   for (w in list(NULL, fev_data$WEIGHT)) {
-    for (form in forms) {
-      fit <- mmrm(form, data = fev_data, reml = FALSE, weights = w,
-                  optimizer = "nlminb", optimizer_control = ctrl)
-      e <- est_obj(fit)
-      for (time in 1:4) {
-        pr <- predict(e, time = time)
-        expect_equal(length(pr), nlevels(fev_data$USUBJID))
-        expect_equivalent(pr, pred_mmrm(fit, fev_data, time)[names(pr)],
-                          tolerance = 1e-8)
-        obs <- attr(pr, "observed")
-        y <- fev_data$FEV1[fev_data$AVISIT == levels(fev_data$AVISIT)[time]]
-        expect_equal(obs, !is.na(y))
-        expect_equivalent(pr[obs], y[obs])
+    fit <- mmrm(formula, data = fev_data, reml = FALSE, weights = w,
+                optimizer = "nlminb", optimizer_control = ctrl)
+    e <- est_obj(fit)
+    for (time in 1:4) {
+      pr <- predict(e, time = time)
+      expect_equal(length(pr), nlevels(fev_data$USUBJID))
+      expect_equivalent(pr, pred_mmrm(fit, fev_data, time)[names(pr)],
+                        tolerance = 1e-8)
+      obs <- attr(pr, "observed")
+      y <- fev_data$FEV1[fev_data$AVISIT == levels(fev_data$AVISIT)[time]]
+      expect_equal(obs, !is.na(y))
+      expect_equivalent(pr[obs], y[obs])
 
-        pr <- predict(e, newdata = dsub, time = time)
-        expect_equivalent(pr, pred_mmrm(fit, dsub, time)[names(pr)],
-                          tolerance = 1e-8)
-      }
+      pr <- predict(e, newdata = dsub, time = time)
+      expect_equivalent(pr, pred_mmrm(fit, dsub, time)[names(pr)],
+                        tolerance = 1e-8)
     }
   }
 }
