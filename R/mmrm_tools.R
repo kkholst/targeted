@@ -117,8 +117,7 @@ estimate.mmrm <- function(x,
   ## nam <- names(tr(coef(est)))
   res <- lava::estimate(res, ...)
   res$fit <- x
-  ## Parametrization of the coefficients (used by predict.estimate.mmrm)
-  res$mmrm <- list(which = which, sigma = sigma && ("theta" %in% which))
+  res$sigma <- sigma
   structure(res, class=c("estimate.mmrm", "estimate"))
 }
 
@@ -152,6 +151,7 @@ vec2sigma <- function(x, groups=NULL, visits=NULL, simplify=FALSE) {
   return(res)
 }
 
+#' @export
 sigma2vec <- function(x) {
   if (is.matrix(x)) x <- list(x)
   unlist(lapply(x, function(v) v[upper.tri(v, diag=TRUE)]))
