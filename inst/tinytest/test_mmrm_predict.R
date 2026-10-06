@@ -7,7 +7,7 @@ ctrl <- list(eval.max = 1000, iter.max = 1000, rel.tol = 1e-9)
 ## Lightweight estimate.mmrm object on the sigma scale (avoids computing the
 ## influence function)
 est_obj <- function(fit) {
-  structure(list(coef = c(fit$beta_est, mmrm2sigma(fit)()), fit = fit,
+  structure(list(coef = c(fit$beta_est, targeted:::mmrm2sigma(fit)()), fit = fit,
                  sigma = TRUE),
             class = c("estimate.mmrm", "estimate"))
 }
