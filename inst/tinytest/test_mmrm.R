@@ -51,6 +51,64 @@ a <- mmrm(
   sum(loglik)
 }
 
+test_mmrm_subject <- function(fit, data_long) {
+  ref <- targeted:::.mmrm_subjects(fit = fit, theta = NULL)
+
+  new_data_long <- data_long
+  new_data_long$AVISIT <- factor(new_data_long$AVISIT, levels = c("FEV3", "FEV1", "FEV2"))
+  new_data_long$USUBJID <- factor(new_data_long$USUBJID,
+                                  levels = levels(new_data_long$USUBJID)[c(2, 1, 3:65)])
+
+  new_fit <- mmrm(
+    FEV ~ -1 + AVISIT + ARMCD : AVISIT + us(AVISIT | USUBJID),
+    data = new_data_long, reml = FALSE,
+    optimizer = "nlminb",
+    optimizer_control = list(
+      eval.max = 1000,
+      iter.max = 1000,
+      rel.tol = 1e-9
+    )
+  )
+
+  ms <- targeted:::.mmrm_subjects(fit = new_fit, theta = NULL)
+
+  ## full frame in the model fit is ordered by id and visit levels
+  new_ord <- c(2, 3, 1)
+  tinytest::expect_true(
+    all(ref[[1]]$visits == ms[[2]]$visits[new_ord])
+  )
+  tinytest::expect_true(
+    all(ref[[1]]$Sigma - ms[[2]]$Sigma[new_ord, new_ord] < 10-8)
+  )
+
+}
+test_mmrm_subject(fit = a, data_long = dl)
+
+test_mmrm_varcor <- function(fit) {
+
+  ref <- mmrm::VarCorr(fit)
+  tmp <- targeted:::.mmrm_varcor(
+                      fit = fit,
+                      theta = mmrm::component(fit, "theta_est")
+                    )
+
+  tinytest::expect_equal(
+              ref,
+              tmp
+            )
+
+  tmp <- targeted:::.mmrm_varcor(
+                      fit = fit,
+                      theta = mmrm::component(fit, "theta_est") + 0.1
+                    )
+
+  tinytest::expect_true(
+              all(abs(ref - tmp) > 1e-2)
+            )
+
+}
+test_mmrm_varcor(a)
+
 ## Weights (cov(y_ij, y_ik) = Sigma_jk / sqrt(w_ij * w_ik))
 test_mmrm_wsigma <- function() {
   set.seed(1)
