@@ -25,29 +25,67 @@ score.mmrm <- function(x,
   ## Attach subject IDs as row names
   rownames(res) <- vapply(.mmrm_subjects(x),
                           `[[`, character(1), "id")
-  if (!indiv) return(colSums(res))
+ if (!indiv) return(colSums(res))
   return(res)
 }
 
 #' @export
-pars.mmrm <- function(x, which = c("beta", "theta"), ...) {
+pars.mmrm <- function(x, which = c("beta", "theta"),
+                      list = FALSE, p = NULL, ...) {
+  beta <- x$beta_est
   theta <- x$theta_est
-  if (is.null(names(theta))) names(theta) <- paste0("theta", seq_along(theta))
+  if (is.null(names(theta))) {
+    names(theta) <- paste0("theta", seq_along(theta))
+  }
+  if (!is.null(p)) {
+    pos <- 0
+    if ("beta" %in% which) {
+      beta <- structure(p[seq_along(x$beta_est)], names=names(beta))
+      pos <- length(beta)
+    }
+    if ("theta" %in% which) {
+      theta <- structure(p[seq_along(x$theta_est) + pos], names=names(theta))
+    }
+  }
   res <- c()
-  if ("beta" %in% which) res <- c(res, x$beta_est)
-  if ("theta" %in% which) res <- c(res, theta)
+  if ("beta" %in% which) {
+    res <- beta
+    if (list) {
+      res <- base::list(beta)
+      names(res) <- "beta"
+    }
+  }
+  if ("theta" %in% which) {
+    if (list) {
+      item <- base::list(theta)
+      names(item) <- "theta"
+      res <- c(res, item)
+    } else {
+      res <- c(res, theta)
+    }
+  }
   return(res)
 }
 
 #' @export
-IC.mmrm <- function(x, ...) {
+IC.mmrm <- function(x, ..., numeric=FALSE) {
   pp <- pars(x, ...)
-  I <- -numDeriv::jacobian(function(p) {
-    score(x, p = p, indiv = FALSE, ...)
-  }, pp, method = lava::lava.options()$Dmethod)
+  if (numeric) {
+    I <- -numDeriv::jacobian(function(p) {
+      score(x, p = p, indiv = FALSE)#, ...)
+    }, pp, method = lava::lava.options()$Dmethod)
+  } else {
+  ## The hessian is block-diagonal and can be extracted
+  ## directly from the mmrm / TMB object
+    I1 <- solve(x$beta_vcov)
+    I2 <- x$tmb_object$he()
+    nn <- paste0("theta", seq_len(nrow(I2)))
+    dimnames(I2) <- list(nn, nn)
+    I <- lava::blockdiag(I1, I2)
+  }
   U <- score(x, indiv=TRUE, ...)
-  bread <- Inverse(I)*NROW(U)
-  res <- U%*%bread
+  bread <- Inverse(I) * NROW(U)
+  res <- U %*% bread
   colnames(res) <- names(pp)
   return(res)
 }
@@ -77,15 +115,23 @@ estimate.mmrm <- function(x,
     }
   }
   ## nam <- names(tr(coef(est)))
-  lava::estimate(res, ...)
+  res <- lava::estimate(res, ...)
+  res$fit <- x
+  ## Parametrization of the coefficients (used by predict.estimate.mmrm)
+  res$mmrm <- list(which = which, sigma = sigma && ("theta" %in% which))
+  structure(res, class=c("estimate.mmrm", "estimate"))
 }
 
 #' @export
-vec2sigma <- function(x) {
-  lbl <- names(x) # labeled as groupA1, ... groupAk, groupB1, ..., groupBK
-  m <- regexpr("^.*?(?=[0-9]+$)", lbl, perl=TRUE) # match string followed by int
-  groups <- regmatches(lbl, m)
-  ngroups <- length(unique(groups)) # groupA, groupB, ...
+vec2sigma <- function(x, groups=NULL, visits=NULL, simplify=FALSE) {
+  if (is.null(groups)) { # derive groups from parameter names
+    lbl <- names(x) # labeled as groupA1, ... groupAk, groupB1, ..., groupBK
+    m <- regexpr("^.*?(?=[0-9]+$)", lbl, perl=TRUE) # match string###
+    groups <- regmatches(lbl, m)
+    ngroups <- length(unique(groups)) # groupA, groupB, ...
+  } else {
+    ngroups <- length(groups)
+  }
   k <- length(x) / ngroups # k is the number of parameters in the upper-tri mat.
   p <- (-1+sqrt(1+8*k))/2 # k = p*(p+1)/2 where sigma is a pxp matrix
   res <- c()
@@ -98,9 +144,11 @@ vec2sigma <- function(x) {
         sigma[j, i] <- sigma[i, j]
       }
     }
+    dimnames(sigma) <- list(visits, visits)
     res <- c(res, list(sigma))
   }
   names(res) <- unique(groups)
+  if (simplify && length(res)==1L) return(res[[1]])
   return(res)
 }
 
@@ -127,9 +175,7 @@ mmrm2sigma <- function(object) {
   stopifnot(inherits(fit, "mmrm"))
   if (is.null(theta)) theta <- mmrm::component(fit, "theta_est")
 
-  cs <- mmrm::as.cov_struct(
-                as.formula(mmrm::component(fit, "formula"))
-              )
+  cs <- mmrm::as.cov_struct(fit$formula_parts$formula)
   if (identical(mmrm::component(fit, "cov_type"), "sp_exp")) {
     stop("varcor_at(): spatial covariance (sp_exp) is not supported.")
   }
@@ -158,16 +204,17 @@ mmrm2sigma <- function(object) {
 ##   rows    : integer row indices into full_frame / x_matrix / y_vector
 ##   visits  : character vector of observed visit-factor levels (or numeric
 ##             coordinates for spatial structures)
+##   visitn  : integer indices of the observed visits in the full covariance
+##             matrix (i.e., Sigma == Sigma_full[visitn, visitn])
 ##   X, y, w : per-subject design, response, weights
 ##   Sigma   : n_i x n_i observed-visit covariance matrix
-##   group   : character group label (or NA_character_ if no grouping)
+##   group   : character group label (NA_character_ if no grouping)
 ##
 ## This implementation focuses on discrete-time covariances:
 ## us, cs, toep, ad, ar1
 .mmrm_subjects <- function(fit, theta=NULL) {
   stopifnot(inherits(fit, "mmrm"))
-  cs        <- mmrm::as.cov_struct(as.formula(
-    mmrm::component(fit, "formula")))
+  cs        <- mmrm::as.cov_struct(fit$formula_parts$formula)
   subj_var  <- mmrm::component(fit, "subject_var")
   visit_var <- cs$visits
   group_var <- if (length(cs$group) == 0L) NA_character_ else cs$group
@@ -199,30 +246,40 @@ mmrm2sigma <- function(object) {
   first_seen <- !duplicated(subj_char)
   subj_order <- subj_char[first_seen] # subject IDs in order
   rows_by <- split(seq_along(subj_char), subj_char)[subj_order]
-
   lapply(subj_order, function(sid) {
     rr <- rows_by[[sid]]
     vv <- visit_char[rr]
     gg <- group_full[rr[1]]
     Sfull <- if (is_grouped) Sig[[gg]] else Sig
     Si <- Sfull[vv, vv, drop = FALSE]
-    list(id     = sid,
-         rows   = rr,
-         visits = vv,
-         group  = gg,
-         X      = X[rr, , drop = FALSE],
-         y      = y[rr],
-         w      = w[rr],
-         Sigma  = Si)
+    vn <- match(vv, rownames(Sfull))
+    list(id      = sid,
+         rows    = rr,
+         visits  = vv,
+         visitn  = vn,
+         group   = gg,
+         X       = X[rr, , drop = FALSE],
+         y       = y[rr],
+         w       = w[rr],
+         Sigma   = Si)
   })
 }
 
+## Weighted covariance of a subject. mmrm models the covariance of subject i as
+##   Sigma_i = W_i^{-1/2} Sigma W_i^{-1/2}, W_i = diag(w_i) i.e., cov(y_ij,
+##   y_ik) = Sigma_jk / sqrt(w_ij * w_ik).
+.mmrm_wsigma <- function(S, w) {
+  if (all(w == 1)) return(S)
+  sw <- sqrt(w)
+  return(S / tcrossprod(sw)) # S_jk / sqrt(w_j * w_k) = W^{-1/2} S W^{-1/2}
+}
+
 ## log-likelihood as a function of parameters (mean (beta) and covariance
-## (theta))
+## (theta)). This function is only used for testing
 .mmrm_loglik <- function(fit, beta=NULL, theta=NULL) {
   subj <- .mmrm_subjects(fit, theta=theta)
   if (is.null(beta)) beta <- mmrm::component(fit, "beta_est")
-  Sinv <- lapply(subj, function(s) lava::Inverse(s$Sigma))
+  Sinv <- lapply(subj, function(s) lava::Inverse(.mmrm_wsigma(s$Sigma, s$w)))
   Sdet <- lapply(Sinv, function(s) attributes(s)$det)
   res    <- lapply(subj, function(s) s$y - as.numeric(s$X %*% beta))
   loglik <- unlist(Map(function(Si, D, r) {
@@ -239,31 +296,15 @@ mmrm2sigma <- function(object) {
 .mmrm_score_beta <- function(fit, beta=NULL, theta=NULL) {
   subj <- .mmrm_subjects(fit, theta = theta)
   n <- length(subj)
-  ## if (is.null(beta)) { #
-  ## TODO: this only works if model fitted with vcov="Empirical"
-  ##   U <- mmrm::component(fit, "score_per_subject")
-  ##   browser()
-  ##   colnames(U) <- names(mmrm::component(fit, "beta_est"))
-  ##   rownames(U) <- vapply(subj, `[[`, character(1), "id")
-  ##   return(U)
-  ## }
-  ## Analytical expression
   if (is.null(beta)) beta <- mmrm::component(fit, "beta_est")
   p <- length(beta)
-  Sinv <- lapply(subj, function(s) solve(s$Sigma))
+  Sinv <- lapply(subj, function(s) solve(.mmrm_wsigma(s$Sigma, s$w)))
   r    <- lapply(subj, function(s) s$y - as.numeric(s$X %*% beta))
   Sir  <- Map(function(Si, ri) Si %*% ri, Sinv, r)
   Ub <- matrix(0, n, p,
                dimnames = list(NULL, names(beta)))
   for (i in seq_len(n)) {
-    wi <- subj[[i]]$w # subject weights
-    if (all(wi == 1)) {
-      Ub[i, ] <- as.numeric(crossprod(subj[[i]]$X, Sir[[i]]))
-    } else {
-      W_half <- sqrt(wi)
-      SinvW  <- (W_half * Sinv[[i]]) * rep(W_half, each = length(wi))
-      Ub[i, ] <- as.numeric(crossprod(subj[[i]]$X, SinvW %*% r[[i]]))
-    }
+    Ub[i, ] <- as.numeric(crossprod(subj[[i]]$X, Sir[[i]]))
   }
   Ub
 }
@@ -275,92 +316,52 @@ mmrm2sigma <- function(object) {
 ## result has one element per theta parameter; each element is either a
 ## covariance matrix or a named list of covariance matrices, one per group.
 dSigma_dtheta <- function(fit,
-                          theta = NULL,
-                          method = c("central", "richardson"),
-                          eps = 1e-5) {
+                          theta = NULL
+                          ) {
   stopifnot(inherits(fit, "mmrm"))
-  method <- match.arg(method)
 
   if (is.null(theta)) {
     theta <- mmrm::component(fit, "theta_est")
   }
-
-  n_time <- mmrm::component(fit, "n_timepoints")
+  ## n_time <- mmrm::component(fit, "n_timepoints")
   n_group <- mmrm::component(fit, "n_groups")
-  cov_struct <- mmrm::as.cov_struct(as.formula(
-    mmrm::component(fit, "formula")))
+  cov_struct <- mmrm::as.cov_struct(fit$formula_parts$formula)
   visit_names <- levels(fit$tmb_data$full_frame[[cov_struct$visits]])
   group_names <- if (n_group > 1L) {
     levels(fit$tmb_data$subject_groups)
   } else {
-    NULL
+    "sigma"
+  }
+  sigma_vector <- function(theta) {
+    sigma <- .mmrm_varcor(fit, theta)
+    if (is.matrix(sigma)) sigma <- list(sigma)
+    unlist(lapply(sigma, function(x) x[upper.tri(x, diag=TRUE)]))
   }
 
-  ## Flatten Sigma(theta) so both differentiation methods share the same
-  ## output handling.
-  sigma_vector <- function(par) {
-    sigma <- .mmrm_varcor(fit, par)
-    if (is.list(sigma) && !is.matrix(sigma)) {
-      unlist(lapply(sigma, as.numeric), use.names = FALSE)
-    } else {
-      as.numeric(sigma)
-    }
-  }
-
-  as_covariance <- function(x) {
-    expected_length <- n_group * n_time^2
-    stopifnot(length(x) == expected_length)
-
-    covariances <- lapply(seq_len(n_group), function(g) {
-      first <- (g - 1L) * n_time^2 + 1L
-      last <- g * n_time^2
-      sigma <- matrix(x[first:last], nrow = n_time, ncol = n_time)
-      dimnames(sigma) <- list(visit_names, visit_names)
-      sigma
-    })
-
-    if (n_group == 1L) {
-      return(covariances[[1]])
-    }
-
-    names(covariances) <- group_names
-    return(covariances)
-  }
-
-  if (method == "central") {
-    derivative <- lapply(seq_along(theta), function(k) {
-      theta_plus <- theta_minus <- theta
-      theta_plus[k] <- theta[k] + eps
-      theta_minus[k] <- theta[k] - eps
-      (sigma_vector(theta_plus) - sigma_vector(theta_minus)) / (2 * eps)
-    })
-  } else {
-    if (!requireNamespace("numDeriv", quietly = TRUE)) {
-      stop(
-        "dSigma_dtheta(method = 'richardson') requires the 'numDeriv' package."
-      )
-    }
-
-    jacobian <- numDeriv::jacobian(
-      sigma_vector,
-      theta,
-      method = "Richardson"
-    )
-    derivative <- lapply(seq_along(theta), function(k) jacobian[, k])
-  }
-
-  derivative <- lapply(derivative, as_covariance)
+  jacobian <- numDeriv::jacobian(
+                          sigma_vector,
+                          theta,
+                          method = lava::lava.options()$Dmethod,
+                        )
+  derivative <- lapply(seq_along(theta), function(k) jacobian[, k])
+  derivative <- lapply(derivative,
+                       function(x) vec2sigma(x,
+                                      group_names,
+                                      visits = visit_names,
+                                      simplify=TRUE)
+                       )
   return(derivative)
 }
 
 
-## Restrict a covariance derivative to one subject's observed visits.
+## Restrict a covariance derivative to one subject's observed visits
+## (including the subject's weights, see .mmrm_wsigma).
 .subject_block <- function(dSigma, subject) {
   if (is.list(dSigma) && !is.matrix(dSigma)) {
     dSigma <- dSigma[[subject$group]]
   }
-
-  return(dSigma[subject$visits, subject$visits, drop = FALSE])
+  dS <- dSigma[subject$visits, subject$visits, drop = FALSE]
+  return(.mmrm_wsigma(dS, subject$w))
 }
 
 ## Per-subject score for theta.
@@ -368,11 +369,9 @@ dSigma_dtheta <- function(fit,
 ##   U_ik = -1/2 { tr(Sigma_i^-1 dSigma_i/dtheta_k)
 ##                 - r_i' Sigma_i^-1 dSigma_i/dtheta_k Sigma_i^-1 r_i }
 .mmrm_score_theta <- function(fit,
-                              beta = NULL,
                               theta = NULL,
-                              method = c("central", "richardson"),
-                              eps = 1e-5) {
-  method <- match.arg(method)
+                              beta = NULL
+                              ) {
   subj <- .mmrm_subjects(fit, theta = theta)
   n <- length(subj)
 
@@ -380,10 +379,10 @@ dSigma_dtheta <- function(fit,
   if (is.null(theta)) theta <- mmrm::component(fit, "theta_est")
   q <- length(theta)
 
-  Sinv <- lapply(subj, function(s) solve(s$Sigma))
+  Sinv <- lapply(subj, function(s) solve(.mmrm_wsigma(s$Sigma, s$w)))
   r <- lapply(subj, function(s) s$y - as.numeric(s$X %*% beta))
   Sir <- Map(function(Si, ri) as.numeric(Si %*% ri), Sinv, r)
-  dSig <- dSigma_dtheta(fit, theta = theta, method = method, eps = eps)
+  dSig <- dSigma_dtheta(fit, theta = theta)
 
   Ut <- matrix(0, n, q, dimnames = list(NULL, paste0("theta", seq_len(q))))
   for (i in seq_len(n)) {
