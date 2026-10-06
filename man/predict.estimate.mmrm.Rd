@@ -38,11 +38,10 @@ the subject. With \eqn{O} the observed visits of subject \eqn{i},
 where \eqn{\Sigma} is the (group-specific) covariance matrix of all visits
 (the marginal mean \eqn{x_{it}^\top\beta} if no outcomes are observed).
 This corresponds to \code{predict(fit, newdata, conditional = TRUE)} of the mmrm
-package (observation weights are not used).
+package.
 
 \code{newdata} is first expanded to all subject and visit combinations with
-\code{\link[=expand_long]{expand_long()}}. An outcome is observed if it and the covariates of the row
-are non-missing.
+\code{\link[=complete_visits]{complete_visits()}}.
 }
 \examples{
 if (requireNamespace("mmrm", quietly = TRUE)) {

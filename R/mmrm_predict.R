@@ -19,8 +19,8 @@
 #' @export
 #' @examples
 #' d <- data.frame(id = c(1, 1, 2), visit = c(1, 2, 2), y = 1:3, x = 4:6)
-#' expand_long(d, "id", "visit", "y")
-expand_long <- function(data, id, time, response = NULL, levels = NULL) {
+#' complete_visits(d, "id", "visit", "y")
+complete_visits <- function(data, id, time, response = NULL, levels = NULL) {
   if (is.null(levels)) {
     levels <- if (is.factor(data[[time]])) {
       levels(data[[time]])
@@ -59,11 +59,10 @@ expand_long <- function(data, id, time, response = NULL, levels = NULL) {
 #' where \eqn{\Sigma} is the (group-specific) covariance matrix of all visits
 #' (the marginal mean \eqn{x_{it}^\top\beta} if no outcomes are observed).
 #' This corresponds to `predict(fit, newdata, conditional = TRUE)` of the mmrm
-#' package (observation weights are not used).
+#' package.
 #'
 #' `newdata` is first expanded to all subject and visit combinations with
-#' [expand_long()]. An outcome is observed if it and the covariates of the row
-#' are non-missing.
+#' [complete_visits()].
 #' @title Predictions at a single visit from mmrm models
 #' @param object (estimate.mmrm) estimate of an mmrm model obtained with
 #'   `estimate(fit, sigma = TRUE)`.
@@ -109,7 +108,7 @@ predict.estimate.mmrm <- function(object, newdata = NULL, time = NULL,
   if (is.null(newdata)) newdata <- fit$tmb_data$data
   resp <- all.vars(fp$model_formula[[2]])
   if (!all(resp %in% names(newdata))) newdata[resp] <- NA_real_
-  d <- expand_long(newdata, fp$subject_var, fp$visit_var, resp[1], visits)
+  d <- complete_visits(newdata, fp$subject_var, fp$visit_var, resp[1], visits)
 
   mu <- matrix(.mmrm_design(fit, d) %*% cc$beta, ncol = K, byrow = TRUE)
   y <- matrix(eval(fp$model_formula[[2]], d), ncol = K, byrow = TRUE)
