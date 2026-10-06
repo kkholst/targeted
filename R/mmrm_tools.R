@@ -133,7 +133,7 @@ vec2sigma <- function(x, groups=NULL, visits=NULL, simplify=FALSE) {
     ngroups <- length(groups)
   }
   k <- length(x) / ngroups # k is the number of parameters in the upper-tri mat.
-  p <- (-1+sqrt(1+8*k))/2 # k = p*(p+1)/2 where sigma is a pxp matrix
+  p <- round((-1+sqrt(1+8*k))/2) # k = p*(p+1)/2 where sigma is a pxp matrix
   res <- c()
   for (i in seq_len(ngroups)) {
     sigma <- matrix(0, p, p)
@@ -152,7 +152,11 @@ vec2sigma <- function(x, groups=NULL, visits=NULL, simplify=FALSE) {
   return(res)
 }
 
-#' @export
+sigma2vec <- function(x) {
+  if (is.matrix(x)) x <- list(x)
+  unlist(lapply(x, function(v) v[upper.tri(v, diag=TRUE)]))
+}
+
 mmrm2sigma <- function(object) {
   function(p = pars(object), vec = TRUE) {
     np1 <- length(object$beta_est)
@@ -162,8 +166,7 @@ mmrm2sigma <- function(object) {
     }
     V <- .mmrm_varcor(object, p)
     if (!vec) return(V)
-    if (is.matrix(V)) V <- list(V)
-    unlist(lapply(V, function(x) x[upper.tri(x, diag=TRUE)]))
+    sigma2vec(V)
   }
 }
 
@@ -274,24 +277,6 @@ mmrm2sigma <- function(object) {
   return(S / tcrossprod(sw)) # S_jk / sqrt(w_j * w_k) = W^{-1/2} S W^{-1/2}
 }
 
-## log-likelihood as a function of parameters (mean (beta) and covariance
-## (theta)). This function is only used for testing
-.mmrm_loglik <- function(fit, beta=NULL, theta=NULL) {
-  subj <- .mmrm_subjects(fit, theta=theta)
-  if (is.null(beta)) beta <- mmrm::component(fit, "beta_est")
-  Sinv <- lapply(subj, function(s) lava::Inverse(.mmrm_wsigma(s$Sigma, s$w)))
-  Sdet <- lapply(Sinv, function(s) attributes(s)$det)
-  res    <- lapply(subj, function(s) s$y - as.numeric(s$X %*% beta))
-  loglik <- unlist(Map(function(Si, D, r) {
-    -0.5 * (
-      ncol(Si) * log(2 * pi) +
-        log(D) +
-        as.numeric(t(r) %*% Si %*% r)
-    )
-  }, Sinv, Sdet, res))
-  sum(loglik)
-}
-
 ## Per-subject beta score: n_subj x p_beta.
 .mmrm_score_beta <- function(fit, beta=NULL, theta=NULL) {
   subj <- .mmrm_subjects(fit, theta = theta)
@@ -321,9 +306,8 @@ dSigma_dtheta <- function(fit,
   stopifnot(inherits(fit, "mmrm"))
 
   if (is.null(theta)) {
-    theta <- mmrm::component(fit, "theta_est")
+    theta <- pars(fit, "theta")
   }
-  ## n_time <- mmrm::component(fit, "n_timepoints")
   n_group <- mmrm::component(fit, "n_groups")
   cov_struct <- mmrm::as.cov_struct(fit$formula_parts$formula)
   visit_names <- levels(fit$tmb_data$full_frame[[cov_struct$visits]])
@@ -332,21 +316,18 @@ dSigma_dtheta <- function(fit,
   } else {
     "sigma"
   }
-  sigma_vector <- function(theta) {
-    sigma <- .mmrm_varcor(fit, theta)
-    if (is.matrix(sigma)) sigma <- list(sigma)
-    unlist(lapply(sigma, function(x) x[upper.tri(x, diag=TRUE)]))
-  }
-
   jacobian <- numDeriv::jacobian(
-                          sigma_vector,
+                          function(theta) {
+                            sigma <- .mmrm_varcor(fit, theta)
+                            sigma2vec(sigma)
+                          },
                           theta,
                           method = lava::lava.options()$Dmethod,
                         )
   derivative <- lapply(seq_along(theta), function(k) jacobian[, k])
   derivative <- lapply(derivative,
                        function(x) vec2sigma(x,
-                                      group_names,
+                                      groups = group_names,
                                       visits = visit_names,
                                       simplify=TRUE)
                        )
