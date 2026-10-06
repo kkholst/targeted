@@ -64,6 +64,8 @@
 - [`pava()`](pava.md) : Pooled Adjacent Violators Algorithm
 - [`predict(`*`<density>`*`)`](predict.density.md) : Prediction for
   kernel density estimates
+- [`predict(`*`<estimate.mmrm>`*`)`](predict.estimate.mmrm.md) :
+  Predictions at a single visit from mmrm models
 - [`predict(`*`<naivebayes>`*`)`](predict.naivebayes.md) : Predictions
   for Naive Bayes Classifier
 - [`predict(`*`<superlearner>`*`)`](predict.superlearner.md) : Predict
