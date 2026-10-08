@@ -119,7 +119,7 @@ lr
 #> 
 #> Estimate arguments: family=<function> 
 #> Predict arguments:   
-#> Formula: y ~ (w1 + w2) * a <environment: 0x813e333b8>
+#> Formula: y ~ (w1 + w2) * a <environment: 0x795fdf3b8>
 ```
 
 To fit the model to the data we use the `estimate` method
@@ -203,7 +203,7 @@ sl
 #> 
 #> Estimate arguments: nfolds=10, meta.learner=<function>, model.score=<function> 
 #> Predict arguments:   
-#> Formula: y ~ w1 + w2 + a <environment: 0x813e333b8> 
+#> Formula: y ~ (w1 + w2) * a <environment: 0x79b775000> 
 #> ─────────────────────────────────────
 #>         score     weight
 #> glm 0.5499084 0.03290729

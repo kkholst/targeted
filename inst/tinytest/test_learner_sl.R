@@ -51,15 +51,18 @@ test_learner_sl_class <- function() {
   )
   lr <- learner_sl(lrs, nfolds = 2)
   expect_equal(class(lr), c("learner_sl", "learner", "R6"))
-  expect_true(inherits(learnerSL$new(lrs), "learner_sl"))
+  expect_true(
+    inherits(learnerSL$new(estimate.args = list(learners = lrs)), "learner_sl")
+  )
 
   # a single learner is returned as is
   expect_identical(learner_sl(lrs$glm), lrs$glm)
 
-  # formula is defined by the response and union of covariates
-  expect_equal(deparse(lr$formula), "y ~ x1 + x2")
-  lr <- learner_sl(list(learner_glm(y ~ 1), learner_glm(y ~ 1)))
+  # formula is the formula of the first base learner
   expect_equal(deparse(lr$formula), "y ~ 1")
+  expect_identical(environment(lr$formula), environment(lrs$mean$formula))
+  lr <- learner_sl(rev(lrs))
+  expect_equal(deparse(lr$formula), "y ~ x1 + x2 + cos(x1)")
 
   # base learners
   lr <- learner_sl(lrs, nfolds = 2)
@@ -87,48 +90,138 @@ test_learner_sl_class <- function() {
 }
 test_learner_sl_class()
 
-test_learner_sl_update <- function() {
+test_learner_sl_new <- function() {
   lrs <- list(
     mean = learner_glm(y ~ 1),
-    glm = learner_glm(y ~ x1 + x2 + cos(x1))
+    glm = learner_glm(y ~ x1 + x2)
+  )
+
+  # same interface as learner$new()
+  expect_identical(
+    names(formals(learnerSL$public_methods$initialize)),
+    names(formals(learner$public_methods$initialize))
+  )
+
+  # base learners are provided via estimate.args
+  lr <- learnerSL$new(estimate.args = list(learners = lrs, nfolds = 2))
+  expect_equal(deparse(lr$formula), "y ~ 1")
+  expect_equal(names(lr$learners), c("mean", "glm"))
+  expect_equal(lr$opt("nfolds"), 2)
+  expect_equal(lr$info, "superlearner\n\tmean\n\tglm")
+  expect_error(learnerSL$new(), pattern = "non-empty list")
+  expect_error(
+    learnerSL$new(estimate.args = list(nfolds = 2)),
+    pattern = "non-empty list"
+  )
+
+  # superlearner and its predict method are the default estimate and predict
+  # methods
+  lr_sum <- lr$summary()
+  expect_identical(lr_sum$estimate, superlearner)
+  expect_identical(lr_sum$predict, targeted:::predict.superlearner)
+
+  # defaults of superlearner apply to arguments that are not provided
+  lr <- learnerSL$new(estimate.args = list(learners = lrs))
+  expect_null(lr$opt("nfolds"))
+  lr$estimate(d)
+  expect_equal(length(lr$fit$folds), 10)
+
+  # formula argument is not used
+  expect_warning(
+    learnerSL$new(yb ~ x1, estimate.args = list(learners = lrs)),
+    pattern = "'formula' is not used"
+  )
+  lr <- suppressWarnings(
+    learnerSL$new(yb ~ x1, estimate.args = list(learners = lrs))
+  )
+  expect_equal(deparse(lr$formula), "y ~ 1")
+  expect_equal(unname(base_formulas(lr)), c("y ~ 1", "y ~ x1 + x2"))
+
+  expect_warning(
+    learnerSL$new(
+      estimate.args = list(learners = lrs),
+      formula.keep.specials = TRUE
+    ),
+    pattern = "formula.keep.specials"
+  )
+  expect_equal(
+    learnerSL$new(estimate.args = list(learners = lrs), info = "sl")$info,
+    "sl"
+  )
+
+  # user-defined estimate method receives the base learners via 'learners'
+  lr <- learnerSL$new(
+    estimate = function(data, learners, ...) {
+      superlearner(
+        learners = learners, data = data,
+        meta.learner = metalearner_discrete, ...
+      )
+    },
+    estimate.args = list(learners = lrs, nfolds = 2)
+  )
+  lr$estimate(d)
+  expect_true(all(weights(lr$fit) %in% c(0, 1)))
+  expect_equal(sum(weights(lr$fit)), 1)
+
+  # predict.args and predict.filter are passed on to learner$new()
+  lr <- learner_sl(lrs, nfolds = 2,
+    learner.args = list(predict.args = list(all.learners = TRUE))
+  )
+  lr$estimate(d)
+  expect_equal(dim(lr$predict(sim1(5))), c(5, 2))
+
+  lr <- learner_sl(lrs, nfolds = 2,
+    learner.args = list(predict.filter = \(data) \(pred, newdata) pmax(pred, 0))
+  )
+  lr$estimate(d)
+  expect_true(all(lr$predict(d) >= 0))
+}
+test_learner_sl_new()
+
+test_learner_sl_update <- function() {
+  lrs <- list(
+    glm = learner_glm(y ~ x1 + x2 + cos(x1)),
+    mean = learner_glm(y ~ 1)
   )
   lr <- learner_sl(lrs, nfolds = 2)
 
   # response is updated for super learner and all base learners, where the
   # base learners keep their covariates
   lr$update("yb")
-  expect_equal(deparse(lr$formula), "yb ~ x1 + x2")
+  expect_equal(deparse(lr$formula), "yb ~ x1 + x2 + cos(x1)")
   expect_equal(
     unname(base_formulas(lr)),
-    c("yb ~ 1", "yb ~ x1 + x2 + cos(x1)")
+    c("yb ~ x1 + x2 + cos(x1)", "yb ~ 1")
   )
+  # environment of the formula of the super learner is preserved
+  expect_identical(environment(lr$formula), environment(lrs$glm$formula))
 
   # learners used to create the super learner are not modified
   expect_equal(deparse(lrs$glm$formula), "y ~ x1 + x2 + cos(x1)")
 
   # response variable defined by a function call
   lr$update("I(yb == 1)")
-  expect_equal(deparse(lr$formula), "I(yb == 1) ~ x1 + x2")
+  expect_equal(deparse(lr$formula), "I(yb == 1) ~ x1 + x2 + cos(x1)")
   expect_equal(
     unname(base_formulas(lr)),
-    c("I(yb == 1) ~ 1", "I(yb == 1) ~ x1 + x2 + cos(x1)")
+    c("I(yb == 1) ~ x1 + x2 + cos(x1)", "I(yb == 1) ~ 1")
   )
 
   # no warning when formula has unchanged covariates or '.'
-  expect_silent(lr$update(yb ~ x1 + x2))
+  expect_silent(lr$update(yb ~ x1 + x2 + cos(x1)))
   expect_silent(lr$update(y ~ .))
-  expect_silent(lr$update("yb ~ x2 + x1"))
+  expect_silent(lr$update("yb ~ cos(x1) + x2 + x1"))
   expect_equal(
     unname(base_formulas(lr)),
-    c("yb ~ 1", "yb ~ x1 + x2 + cos(x1)")
+    c("yb ~ x1 + x2 + cos(x1)", "yb ~ 1")
   )
 
   # warning when covariates differ, and covariates are left unchanged
   expect_warning(lr$update(y ~ x1), pattern = "only updates the response")
-  expect_equal(deparse(lr$formula), "y ~ x1 + x2")
+  expect_equal(deparse(lr$formula), "y ~ x1 + x2 + cos(x1)")
   expect_equal(
     unname(base_formulas(lr)),
-    c("y ~ 1", "y ~ x1 + x2 + cos(x1)")
+    c("y ~ x1 + x2 + cos(x1)", "y ~ 1")
   )
 
   expect_error(lr$update(~ x1), pattern = "response variable")
@@ -152,7 +245,8 @@ test_learner_sl_clone <- function() {
   lr_clone$update("yb")
 
   # updating the clone does not modify the original object
-  expect_equal(deparse(lr$formula), "y ~ x1 + x2")
+  expect_equal(deparse(lr$formula), "y ~ 1")
+  expect_equal(deparse(lr_clone$formula), "yb ~ 1")
   expect_equal(unname(base_formulas(lr)), c("y ~ 1", "y ~ x1 + x2"))
   expect_equal(unname(base_formulas(lr_clone)), c("yb ~ 1", "yb ~ x1 + x2"))
 

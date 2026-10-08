@@ -5,14 +5,18 @@
 \title{R6 class for super learners}
 \description{
 Super learner (stacked ensemble) implementation of the
-\link{learner} R6 class. Objects are usually created with \code{\link[=learner_sl]{learner_sl()}}. A
-\code{learnerSL} object owns a list of base learners, which are estimated and
-combined by \code{\link[=superlearner]{superlearner()}}.
+\link{learner} R6 class. \code{learnerSL$new()} takes the same arguments as
+\link[=learner]{learner$new()}. The base learners are provided via
+\code{estimate.args$learners}, and by default the ensemble is estimated with
+\code{\link[=superlearner]{superlearner()}}. Objects are usually created with the constructor function
+\code{\link[=learner_sl]{learner_sl()}}. The arguments \code{formula} and \code{formula.keep.specials} of
+\code{learnerSL$new()} are not used, and a warning is raised if they are
+provided.
 
-The formula of the super learner is derived from its base learners. It is
-defined by their common response variable and the union of the covariates of
-all base learners. Special terms (e.g., weights or offsets) of the base
-learners are currently not handled and appear as covariates.
+The formula of the super learner is the formula of its first base learner.
+Hence, the methods \code{design()} and \code{response()} return the design and response
+of the first base learner. The formula is kept in sync with the first base
+learner by the \code{update()} method.
 
 The \code{update()} method changes the response variable of the super learner and
 of all base learners. The covariates of the base learners are never modified
@@ -29,11 +33,12 @@ d <- data.frame(x1 = rnorm(n), x2 = rnorm(n))
 d$y <- d$x1 + rnorm(n)
 d$z <- d$x1 - d$x2 + rnorm(n)
 
-sl <- learnerSL$new(list(
+lrs <- list(
   "mean" = learner_glm(y ~ 1),
   "glm" = learner_glm(y ~ x1 + x2)
-), nfolds = 2)
-sl$formula # common response and union of covariates
+)
+sl <- learnerSL$new(estimate.args = list(learners = lrs, nfolds = 2))
+sl$formula # formula of the first base learner
 
 # update the response variable of the super learner and all base learners
 sl$update("z")
@@ -81,36 +86,56 @@ base learners.}
 \if{html}{\out{<a id="method-learner_sl-initialize"></a>}}
 \if{latex}{\out{\hypertarget{method-learner_sl-initialize}{}}}
 \subsection{\code{learner_sl$new()}}{
-  Create a new super learner object
+  Create a new super learner object. The arguments are the same as for
+\link[=learner]{learner$new()}.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{learner_sl$new(
-  learners,
+  formula = NULL,
+  estimate = superlearner,
+  predict = predict.superlearner,
+  predict.args = NULL,
+  estimate.args = NULL,
   info = NULL,
-  nfolds = 5L,
-  meta.learner = metalearner_nnls,
-  model.score = mse,
-  learner.args = NULL,
-  ...
+  specials = c(),
+  formula.keep.specials = FALSE,
+  predict.filter = function(data) function(pred, newdata) pred,
+  intercept = FALSE
 )}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
-      \item{\code{learners}}{(list) List of \link{learner} objects that define the
-ensemble. All learners must be defined with a formula and share the same
-response variable.}
-      \item{\code{info}}{(character) Optional information to describe the
-instantiated object. Defaults to a listing of the names of \code{learners}.}
-      \item{\code{nfolds}}{(integer) Number of folds to use in cross-validation to
-estimate the ensemble weights.}
-      \item{\code{meta.learner}}{(function) Algorithm to learn the ensemble weights
-(see \link{superlearner}).}
-      \item{\code{model.score}}{(function) Model scoring method (see \link{superlearner}).}
-      \item{\code{learner.args}}{(list) Additional arguments to
-\link[=learner]{learner$new()}.}
-      \item{\code{...}}{Additional arguments to \link{superlearner}.}
+      \item{\code{formula}}{(formula) Not used by \code{learnerSL} objects, because the
+formula of a super learner is the formula of its first base learner. A
+warning is raised if provided. Use \link[=learnerSL]{learnerSL$update()} to
+update the response variable.}
+      \item{\code{estimate}}{(function) Estimation method of the ensemble. Defaults to
+\link{superlearner}. A user-defined function must have the arguments \code{data}
+and \code{learners} (base learners), e.g. \verb{function(data, learners, ...)}.}
+      \item{\code{predict}}{(function) Prediction method. Defaults to
+\link{predict.superlearner}, which matches the default \code{estimate} method. A
+user-defined \code{estimate} method that returns a different model object
+requires a matching \code{predict} method.}
+      \item{\code{predict.args}}{optional arguments to prediction function}
+      \item{\code{estimate.args}}{(list) Arguments to the \code{estimate} method. Must
+contain the element \code{learners}, a list of \link{learner} objects that define
+the ensemble. All base learners must be defined with a formula and share
+the same response variable. The remaining elements (e.g., \code{nfolds},
+\code{meta.learner}, \code{model.score}) are passed on to the \code{estimate} method.
+Hence, the defaults of \link{superlearner} apply to arguments that are not
+provided.}
+      \item{\code{info}}{(character) Optional description of the model. Defaults to a
+listing of the names of the base learners.}
+      \item{\code{specials}}{optional specials terms (weights, offset,
+id, subset, ...) passed on to \link{design}}
+      \item{\code{formula.keep.specials}}{(logical) Not used by \code{learnerSL} objects. A
+warning is raised if TRUE.}
+      \item{\code{predict.filter}}{function to post-process predictions. Useful to
+bound predictions or handle NAs. The argument is experimental and its
+behavior may change in the future.}
+      \item{\code{intercept}}{(logical) include intercept in design matrix}
     }
     \if{html}{\out{</div>}}
   }
@@ -148,7 +173,8 @@ object.}
   Update the response variable of the super learner and all its base
 learners. Each base learner keeps its covariates. A warning is raised
 when \code{formula} specifies covariates which differ from the covariates of
-the super learner, because the covariates are not updated.
+the super learner (i.e., of the first base learner), because the
+covariates are not updated.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{learner_sl$update(formula)}
