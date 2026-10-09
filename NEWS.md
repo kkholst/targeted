@@ -16,7 +16,13 @@ Bug fixes:
   while each base learner keeps its covariates. Previously, only the formula of
   the super learner was updated, such that, e.g., `cate` estimated treatment
   models of the super learner with the wrong response variable.
-
+- `learner$update()` with a character string lost the environment of the
+  formula. Formula variables that are not in the data (e.g., defined inside a
+  function) were not found or resolved to other objects with the same name
+  (e.g., `cut` to `base::cut()`). A new response variable now keeps the
+  environment of the current formula, and a formula string gets the calling
+  environment like a formula object. This also fixes `aipw()`, `cate()` and
+  `moi()`, which update the response variable of the provided learners.
 
 # targeted 0.9
 
