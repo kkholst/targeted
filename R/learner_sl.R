@@ -160,20 +160,29 @@ learnerSL <- R6::R6Class("learner_sl", # nolint
     },
 
     #' @description
-    #' Estimation method. Estimates the super learner with [superlearner].
+    #' Estimation method. Estimates the super learner with the base learners
+    #' of the object and the `estimate` function (by default [superlearner]).
     #' @param data (data.frame) Data used to estimate the super learner.
-    #' @param ... Additional arguments to [superlearner] and the prediction
-    #' filter generator function.
-    #' @param learners (list) Base learners. Defaults to the base learners of
-    #' the object.
+    #' @param ... Additional arguments to the `estimate` function (e.g.,
+    #' `nfolds`), which take precedence over `estimate.args`. The base learners
+    #' cannot be changed. Create a new super learner with [learner_sl()] to use
+    #' other base learners.
     #' @param store (logical) If TRUE, the estimated model is stored inside the
     #' object.
-    estimate = function(data, ..., learners = private$.learners,
-                        store = TRUE) {
-      # base learners are passed explicitly (instead of via estimate.args)
-      # because the base learners are cloned during initialization of this
-      # object
-      return(super$estimate(data, learners = learners, ..., store = store))
+    estimate = function(data, ..., store = TRUE) {
+      # Replacing the base learners would result in a fit that does not match
+      # the formula, response and base learners of the object.
+      if ("learners" %in% ...names()) {
+        stop(
+          "'learners' cannot be provided to the estimate method. Create a ",
+          "new super learner with learner_sl() to use other base learners."
+        )
+      }
+      # The base learners are stored separately from estimate.args (see
+      # initialize) and are therefore passed on explicitly.
+      return(
+        super$estimate(data, learners = private$.learners, ..., store = store)
+      )
     },
 
     #' @description

@@ -145,20 +145,22 @@ behavior may change in the future.}
 \if{html}{\out{<a id="method-learner_sl-estimate"></a>}}
 \if{latex}{\out{\hypertarget{method-learner_sl-estimate}{}}}
 \subsection{\code{learner_sl$estimate()}}{
-  Estimation method. Estimates the super learner with \link{superlearner}.
+  Estimation method. Estimates the super learner with the base learners
+of the object and the \code{estimate} function (by default \link{superlearner}).
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{learner_sl$estimate(data, ..., learners = private$.learners, store = TRUE)}
+    \preformatted{learner_sl$estimate(data, ..., store = TRUE)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
       \item{\code{data}}{(data.frame) Data used to estimate the super learner.}
-      \item{\code{...}}{Additional arguments to \link{superlearner} and the prediction
-filter generator function.}
-      \item{\code{learners}}{(list) Base learners. Defaults to the base learners of
-the object.}
+      \item{\code{...}}{Additional arguments to the \code{estimate} function (e.g.,
+\code{nfolds}), which take precedence over \code{estimate.args}. The base learners
+cannot be changed, and an error is raised if \code{learners} is provided.
+Create a new super learner with \code{\link[=learner_sl]{learner_sl()}} to use other base
+learners.}
       \item{\code{store}}{(logical) If TRUE, the estimated model is stored inside the
 object.}
     }

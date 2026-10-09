@@ -33,9 +33,22 @@ test_learner_sl <- function() {
   lr$estimate(d, nfolds = 3)
   expect_equal(length(lr$fit$folds), 3)
 
-  # base learners can be overwritten in estimate method call
-  lr$estimate(d, learners = list(glm2 = learner_glm(y ~ x1)))
-  expect_equal(names(lr$fit$fit), "glm2")
+  # base learners cannot be changed in estimate method call. A new super
+  # learner has to be created instead.
+  expect_error(
+    lr$estimate(d, learners = list(glm2 = learner_glm(y ~ x1))),
+    pattern = "Create a new super learner"
+  )
+
+  # neither the fitted model nor the base learners are modified
+  expect_equal(names(lr$fit$fit), c("mean", "glm"))
+  expect_equal(length(lr$fit$folds), 3)
+  expect_equal(names(lr$learners), c("mean", "glm"))
+
+  # store = FALSE returns the fitted model without storing it
+  fit <- lr$estimate(d, nfolds = 2, store = FALSE)
+  expect_equal(length(fit$folds), 2)
+  expect_equal(length(lr$fit$folds), 3)
 }
 test_learner_sl()
 
