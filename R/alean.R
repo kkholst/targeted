@@ -82,10 +82,7 @@ alean <- function(response_model,
     tf <- drop.terms(tf, which(attr(tf, "factors")[A_var, ] == 1))
     g_model <- learner_glm(formula(tf))
   }
-  g_model$update(update(
-    g_model$formula,
-    reformulate(".", response = g_model_response)
-    ))
+  g_model$update(g_model_response)
 
   glink <- stats::quasi(link)
   g <- glink$linkfun

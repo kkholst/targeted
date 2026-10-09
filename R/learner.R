@@ -182,18 +182,30 @@ learner <- R6::R6Class("learner", # nolint
 
     #' @description
     #' Update formula
-    #' @param formula formula or character which defines the new response
+    #' @param formula (formula or character) new formula, or new response
+    #' variable given as a character string without `~` (e.g., `"y"` or
+    #' `"I(a == 1)"`). A new response variable keeps the right-hand side and the
+    #' environment of the current formula.
     update = function(formula) {
       if (is.character(formula)) {
         if (grepl("~", formula)) {
-          formula <- as.formula(formula)
+          # using env = parent.frame() ensure equivalence to calling this method
+          # with a formula object
+          formula <- as.formula(formula, env = parent.frame())
         } else { # string
+          # keep the environment such that variables of the formula, which are
+          # not in the data, are found as before the update
+          env <- environment(private$.formula)
           if (length(private$.formula) == 3L) { # includes response
             formula <- reformulate(
-              paste(deparse(private$.formula[[3]]), collapse = " "), formula)
+              paste(deparse(private$.formula[[3]]), collapse = " "), formula,
+              env = env
+            )
           } else { # without response
             formula <- reformulate(
-              paste(deparse(private$.formula[[2]]), collapse = " "), formula)
+              paste(deparse(private$.formula[[2]]), collapse = " "), formula,
+              env = env
+            )
           }
         }
       }
