@@ -130,8 +130,7 @@ provided.}
 listing of the names of the base learners.}
       \item{\code{specials}}{optional specials terms (weights, offset,
 id, subset, ...) passed on to \link{design}}
-      \item{\code{formula.keep.specials}}{(logical) Not used by \code{learnerSL} objects. A
-warning is raised if TRUE.}
+      \item{\code{formula.keep.specials}}{(logical) Not used by \code{learnerSL} objects.}
       \item{\code{predict.filter}}{function to post-process predictions. Useful to
 bound predictions or handle NAs. The argument is experimental and its
 behavior may change in the future.}
@@ -158,9 +157,8 @@ of the object and the \code{estimate} function (by default \link{superlearner}).
       \item{\code{data}}{(data.frame) Data used to estimate the super learner.}
       \item{\code{...}}{Additional arguments to the \code{estimate} function (e.g.,
 \code{nfolds}), which take precedence over \code{estimate.args}. The base learners
-cannot be changed, and an error is raised if \code{learners} is provided.
-Create a new super learner with \code{\link[=learner_sl]{learner_sl()}} to use other base
-learners.}
+cannot be changed. Create a new super learner with \code{\link[=learner_sl]{learner_sl()}} to use
+other base learners.}
       \item{\code{store}}{(logical) If TRUE, the estimated model is stored inside the
 object.}
     }

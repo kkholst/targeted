@@ -89,8 +89,7 @@ learnerSL <- R6::R6Class("learner_sl", # nolint
     #' provided.
     #' @param info (character) Optional description of the model. Defaults to a
     #' listing of the names of the base learners.
-    #' @param formula.keep.specials (logical) Not used by `learnerSL` objects. A
-    #' warning is raised if TRUE.
+    #' @param formula.keep.specials (logical) Not used by `learnerSL` objects.
     initialize = function(
       formula = NULL,
       estimate = superlearner,
