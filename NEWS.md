@@ -1,15 +1,22 @@
-# development version
+# targeted 0.9.0.9000
 
 - `learnerSL`: new R6 class for super learners, which inherits from `learner`.
   `learnerSL$new()` has the same arguments as `learner$new()`, where the base
   learners are provided via `estimate.args$learners`. `learner_sl` now returns
   a `learnerSL` object.
-- bugfix(`learner_sl`): `update` now changes the response variable of all base
-  learners, while each base learner keeps its covariates. Previously, only the
-  formula of the super learner was updated, such that, e.g., `cate` estimated
-  treatment models of the super learner with the wrong response variable.
 - `learner_sl`: base learners are copied on instantiation and deep cloning,
   such that updating a super learner no longer modifies other learner objects.
+
+Bug fixes:
+
+- `learner$clone()` produced a clone with unintended reference-type behaviour. A
+  clone used the formula of the original object, instead of a new formula that
+  was provided with the `update()` method.
+- `learner_sl`: `update` now changes the response variable of all base learners,
+  while each base learner keeps its covariates. Previously, only the formula of
+  the super learner was updated, such that, e.g., `cate` estimated treatment
+  models of the super learner with the wrong response variable.
+
 
 # targeted 0.9
 
