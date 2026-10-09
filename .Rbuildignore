@@ -2,6 +2,7 @@
 ._files$
 ^.github$
 ^.cache$
+^.ccls-cache$
 ^\.git$
 ^.gitignore$
 ^.editorconfig$
