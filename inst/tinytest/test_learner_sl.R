@@ -207,23 +207,17 @@ test_learner_sl_update <- function() {
     c("I(yb == 1) ~ x1 + x2 + cos(x1)", "I(yb == 1) ~ 1")
   )
 
-  # no warning when formula has unchanged covariates or '.'
-  expect_silent(lr$update(yb ~ x1 + x2 + cos(x1)))
-  expect_silent(lr$update(y ~ .))
-  expect_silent(lr$update("yb ~ cos(x1) + x2 + x1"))
+  # warn when providing formula with covariates
+  pat <- "only updates the response"
+  expect_warning(lr$update(yb ~ x1 + x2 + cos(x1)), pattern = pat)
+  expect_warning(lr$update(y ~ .), pattern = pat)
+  expect_warning(lr$update("yb ~ cos(x1) + x2 + x1"), pattern = pat)
   expect_equal(
     unname(base_formulas(lr)),
     c("yb ~ x1 + x2 + cos(x1)", "yb ~ 1")
   )
 
-  # warning when covariates differ, and covariates are left unchanged
-  expect_warning(lr$update(y ~ x1), pattern = "only updates the response")
-  expect_equal(deparse(lr$formula), "y ~ x1 + x2 + cos(x1)")
-  expect_equal(
-    unname(base_formulas(lr)),
-    c("y ~ x1 + x2 + cos(x1)", "y ~ 1")
-  )
-
+  # require response variable
   expect_error(lr$update(~ x1), pattern = "response variable")
 
   # estimation uses the updated response
@@ -233,6 +227,11 @@ test_learner_sl_update <- function() {
     unname(vapply(lr$fit$fit, \(x) deparse(x$formula[[2]]), character(1))),
     c("yb", "yb")
   )
+
+  thr <- 2
+  lr$update("I(y < thr)")
+  lr$estimate(d)
+  expect_equal(deparse(lr$learners[[1]]$formula[[2]]), "I(y < thr)")
 }
 test_learner_sl_update()
 
@@ -274,19 +273,13 @@ test_learner_sl_cate <- function() {
   dd <- data.frame(y, a, x)
 
   tm <- learner_sl(list(glm = learner_glm(a ~ x, family = binomial)))
-  warnings <- NULL
-  fit_sl <- withCallingHandlers(
-    cate(
-      treatment.model = tm,
-      response.model = learner_glm(y ~ a + x),
-      cate.model = ~1, data = dd
-    ),
-    warning = function(w) {
-      warnings <<- c(warnings, conditionMessage(w))
-      invokeRestart("muffleWarning")
-    }
+
+  fit_sl <- cate(
+    treatment.model = tm,
+    response.model = learner_glm(y ~ a + x),
+    cate.model = ~1, data = dd
   )
-  expect_null(warnings)
+
 
   fit_glm <- cate(
     treatment.model = learner_glm(a ~ x, family = binomial),

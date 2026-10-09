@@ -172,19 +172,18 @@ learnerSL <- R6::R6Class("learner_sl", # nolint
     estimate = function(data, ..., learners = private$.learners,
                         store = TRUE) {
       # base learners are passed explicitly (instead of via estimate.args)
-      # because the estimation function of cloned objects is bound to the
-      # private environment of the original object
+      # because the base learners are cloned during initialization of this
+      # object
       return(super$estimate(data, learners = learners, ..., store = store))
     },
 
     #' @description
     #' Update the response variable of the super learner and all its base
     #' learners. Each base learner keeps its covariates. A warning is raised
-    #' when `formula` specifies covariates which differ from the covariates of
-    #' the super learner (i.e., of the first base learner), because the
-    #' covariates are not updated.
+    #' when `formula` specifies covariates.
     #' @param formula (formula or character) Formula or name of the new
     #' response variable (e.g., `"z"`, `"I(a == 1)"` or `z ~ .`).
+    #' TODO: change to only character because y ~ . is too ambiguous
     update = function(formula) {
       if (is.character(formula) && !grepl("~", formula)) {
         response <- formula
@@ -194,9 +193,8 @@ learnerSL <- R6::R6Class("learner_sl", # nolint
           stop("'formula' must specify a response variable.")
         }
         response <- paste(deparse(formula[[2]]), collapse = " ")
-        covariates <- all.vars(formula[[3]])
-        if (!identical(covariates, ".") &&
-            !setequal(covariates, all.vars(private$.formula[[3]]))) {
+        rhs <- all.vars(formula[[3]])
+        if (length(rhs) > 0) {
           warning(
             "learnerSL only updates the response variable of the base ",
             "learners. Their covariates are not modified."
