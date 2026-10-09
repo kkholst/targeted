@@ -38,6 +38,20 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.9.0.9000" id="targeted-0909000">targeted 0.9.0.9000<a class="anchor" aria-label="anchor" href="#targeted-0909000"></a></h2>
+<ul><li>
+<code>learnerSL</code>: new R6 class for super learners, which inherits from <code>learner</code>. <code>learnerSL$new()</code> has the same arguments as <code>learner$new()</code>, where the base learners are provided via <code>estimate.args$learners</code>. <code>learner_sl</code> now returns a <code>learnerSL</code> object.</li>
+<li>
+<code>learner_sl</code>: base learners are copied on instantiation and deep cloning, such that updating a super learner no longer modifies other learner objects.</li>
+</ul><p>Bug fixes:</p>
+<ul><li>
+<code>learner$clone()</code> produced a clone with unintended reference-type behaviour. A clone used the formula of the original object, instead of a new formula that was provided with the <code><a href="https://rdrr.io/r/stats/update.html" class="external-link">update()</a></code> method.</li>
+<li>
+<code>learner_sl</code>: <code>update</code> now changes the response variable of all base learners, while each base learner keeps its covariates. Previously, only the formula of the super learner was updated, such that, e.g., <code>cate</code> estimated treatment models of the super learner with the wrong response variable.</li>
+<li>
+<code>learner$update()</code> with a character string lost the environment of the formula. Formula variables that are not in the data (e.g., defined inside a function) were not found or resolved to other objects with the same name (e.g., <code>cut</code> to <code><a href="https://rdrr.io/r/base/cut.html" class="external-link">base::cut()</a></code>). A new response variable now keeps the environment of the current formula, and a formula string gets the calling environment like a formula object. This also fixes <code><a href="../reference/aipw.html">aipw()</a></code>, <code><a href="../reference/cate.html">cate()</a></code> and <code><a href="../reference/moi.html">moi()</a></code>, which update the response variable of the provided learners.</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.9" id="targeted-09">targeted 0.9<a class="anchor" aria-label="anchor" href="#targeted-09"></a></h2>
 <ul><li>
 <code>cate</code>: doubly robust estimation with missing outcomes under MAR via the new <code>missing.model</code> argument</li>

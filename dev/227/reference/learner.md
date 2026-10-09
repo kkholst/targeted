@@ -211,7 +211,10 @@ Update formula
 
 - `formula`:
 
-  formula or character which defines the new response
+  (formula or character) new formula, or new response variable given as
+  a character string without `~` (e.g., `"y"` or `"I(a == 1)"`). A new
+  response variable keeps the right-hand side and the environment of the
+  current formula.
 
 ------------------------------------------------------------------------
 
@@ -437,7 +440,7 @@ lr$summary()
 #> ────────── learner object ──────────
 #> glm 
 #> 
-#> formula: y ~ x <environment: 0x5611e2f7c1b0> 
+#> formula: y ~ x <environment: 0x559eaf477d18> 
 #> estimate: formula, data, family, ... 
 #> estimate.args: family=nb 
 #> predict: object, newdata, ... 
@@ -452,7 +455,7 @@ print(lr_sum)
 #> ────────── learner object ──────────
 #> glm 
 #> 
-#> formula: y ~ x <environment: 0x5611e2f7c1b0> 
+#> formula: y ~ x <environment: 0x559eaf477d18> 
 #> estimate: formula, data, family, ... 
 #> estimate.args: family=nb 
 #> predict: object, newdata, ... 

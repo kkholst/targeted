@@ -41,9 +41,7 @@ via Rcpp + RcppArmadillo.
 - `make rcpp` — only
   [`Rcpp::compileAttributes()`](https://rdrr.io/pkg/Rcpp/man/compileAttributes.html).
   Run after adding/removing `// [[Rcpp::export]]`.
-- `make install` —
-  [`remotes::install_local`](https://remotes.r-lib.org/reference/install_local.html),
-  needed before `make test`.
+- `make install` — `remotes::install_local`, needed before `make test`.
 
 Run a single test file (no built-in target):
 `R -e 'devtools::load_all("."); tinytest::run_test_file("inst/tinytest/test_cate.R")'`.

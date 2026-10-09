@@ -1,16 +1,19 @@
 # R6 class for super learners
 
 Super learner (stacked ensemble) implementation of the
-[learner](learner.md) R6 class. Objects are usually created with
-[`learner_sl()`](learner_sl.md). A `learnerSL` object owns a list of
-base learners, which are estimated and combined by
-[`superlearner()`](superlearner.md).
+[learner](learner.md) R6 class. `learnerSL$new()` takes the same
+arguments as [learner\$new()](learner.md). The base learners are
+provided via `estimate.args$learners`, and by default the ensemble is
+estimated with [`superlearner()`](superlearner.md). Objects are usually
+created with the constructor function [`learner_sl()`](learner_sl.md).
+The arguments `formula` and `formula.keep.specials` of `learnerSL$new()`
+are not used, and a warning is raised if they are provided.
 
-The formula of the super learner is derived from its base learners. It
-is defined by their common response variable and the union of the
-covariates of all base learners. Special terms (e.g., weights or
-offsets) of the base learners are currently not handled and appear as
-covariates.
+The formula of the super learner is the formula of its first base
+learner. Hence, the methods [`design()`](design.md) and `response()`
+return the design and response of the first base learner. The formula is
+kept in sync with the first base learner by the
+[`update()`](https://rdrr.io/r/stats/update.html) method.
 
 The [`update()`](https://rdrr.io/r/stats/update.html) method changes the
 response variable of the super learner and of all base learners. The
@@ -65,54 +68,85 @@ Inherited methods
 
 ### `learner_sl$new()`
 
-Create a new super learner object
+Create a new super learner object. The arguments are the same as for
+[learner\$new()](learner.md).
 
 #### Usage
 
     learner_sl$new(
-      learners,
+      formula = NULL,
+      estimate = superlearner,
+      predict = predict.superlearner,
+      predict.args = NULL,
+      estimate.args = NULL,
       info = NULL,
-      nfolds = 5L,
-      meta.learner = metalearner_nnls,
-      model.score = mse,
-      learner.args = NULL,
-      ...
+      specials = c(),
+      formula.keep.specials = FALSE,
+      predict.filter = function(data) function(pred, newdata) pred,
+      intercept = FALSE
     )
 
 #### Arguments
 
-- `learners`:
+- `formula`:
 
-  (list) List of [learner](learner.md) objects that define the ensemble.
-  All learners must be defined with a formula and share the same
-  response variable.
+  (formula) Not used by `learnerSL` objects, because the formula of a
+  super learner is the formula of its first base learner. A warning is
+  raised if provided. Use learnerSL\$update() to update the response
+  variable.
+
+- `estimate`:
+
+  (function) Estimation method of the ensemble. Defaults to
+  [superlearner](superlearner.md). A user-defined function must have the
+  arguments `data` and `learners` (base learners), e.g.
+  `function(data, learners, ...)`.
+
+- `predict`:
+
+  (function) Prediction method. Defaults to
+  [predict.superlearner](predict.superlearner.md), which matches the
+  default `estimate` method. A user-defined `estimate` method that
+  returns a different model object requires a matching `predict` method.
+
+- `predict.args`:
+
+  optional arguments to prediction function
+
+- `estimate.args`:
+
+  (list) Arguments to the `estimate` method. Must contain the element
+  `learners`, a list of [learner](learner.md) objects that define the
+  ensemble. All base learners must be defined with a formula and share
+  the same response variable. The remaining elements (e.g., `nfolds`,
+  `meta.learner`, `model.score`) are passed on to the `estimate` method.
+  Hence, the defaults of [superlearner](superlearner.md) apply to
+  arguments that are not provided.
 
 - `info`:
 
-  (character) Optional information to describe the instantiated object.
-  Defaults to a listing of the names of `learners`.
+  (character) Optional description of the model. Defaults to a listing
+  of the names of the base learners.
 
-- `nfolds`:
+- `specials`:
 
-  (integer) Number of folds to use in cross-validation to estimate the
-  ensemble weights.
+  optional specials terms (weights, offset, id, subset, ...) passed on
+  to [design](design.md)
 
-- `meta.learner`:
+- `formula.keep.specials`:
 
-  (function) Algorithm to learn the ensemble weights (see
-  [superlearner](superlearner.md)).
+  (logical) Not used by `learnerSL` objects. A warning is raised if
+  TRUE.
 
-- `model.score`:
+- `predict.filter`:
 
-  (function) Model scoring method (see [superlearner](superlearner.md)).
+  function to post-process predictions. Useful to bound predictions or
+  handle NAs. The argument is experimental and its behavior may change
+  in the future.
 
-- `learner.args`:
+- `intercept`:
 
-  (list) Additional arguments to [learner\$new()](learner.md).
-
-- `...`:
-
-  Additional arguments to [superlearner](superlearner.md).
+  (logical) include intercept in design matrix
 
 ------------------------------------------------------------------------
 
@@ -151,7 +185,8 @@ Estimation method. Estimates the super learner with
 Update the response variable of the super learner and all its base
 learners. Each base learner keeps its covariates. A warning is raised
 when `formula` specifies covariates which differ from the covariates of
-the super learner, because the covariates are not updated.
+the super learner (i.e., of the first base learner), because the
+covariates are not updated.
 
 #### Usage
 
@@ -215,27 +250,28 @@ d <- data.frame(x1 = rnorm(n), x2 = rnorm(n))
 d$y <- d$x1 + rnorm(n)
 d$z <- d$x1 - d$x2 + rnorm(n)
 
-sl <- learnerSL$new(list(
+lrs <- list(
   "mean" = learner_glm(y ~ 1),
   "glm" = learner_glm(y ~ x1 + x2)
-), nfolds = 2)
-sl$formula # common response and union of covariates
-#> y ~ x1 + x2
-#> <environment: 0x5611e2d42f08>
+)
+sl <- learnerSL$new(estimate.args = list(learners = lrs, nfolds = 2))
+sl$formula # formula of the first base learner
+#> y ~ 1
+#> <environment: 0x559eaf16a090>
 
 # update the response variable of the super learner and all base learners
 sl$update("z")
 sl$formula
-#> z ~ x1 + x2
-#> <environment: 0x5611e2d42f08>
+#> z ~ 1
+#> <environment: 0x559eaf16a090>
 lapply(sl$learners, \(lr) lr$formula)
 #> $mean
 #> z ~ 1
-#> <environment: 0x5611e2fa3380>
+#> <environment: 0x559eaf16a090>
 #> 
 #> $glm
 #> z ~ x1 + x2
-#> <environment: 0x5611e2fb7298>
+#> <environment: 0x559eaf16a090>
 #> 
 
 sl$estimate(d)
