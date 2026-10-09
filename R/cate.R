@@ -9,18 +9,12 @@ procfold <- function(a, fold,
                      ...) {
   qmod <- response.model$clone(deep = TRUE)
   pmod <- treatment.model$clone(deep = TRUE)
-  newf <- reformulate(paste(deparse(pmod$formula[[3]]), collapse = " "),
-                      outcome_level(treatment_var, a))
-  pmod$update(newf)
+  pmod$update(outcome_level(treatment_var, a))
   mmod <- NULL
   if (!is.null(missing.model)) {
     mmod <- missing.model$clone(deep = TRUE)
     ## Missing model's LHS is the observation indicator "R_" (see cate()).
-    mnewf <- reformulate(
-      paste(deparse(mmod$formula[[3]]), collapse = " "),
-      outcome_level("R_", 1)
-    )
-    mmod$update(mnewf)
+    mmod$update(outcome_level("R_", 1))
   }
   val <- list(est_nuisance_fold(
     folds[[fold]],
@@ -500,11 +494,7 @@ cate <- function(response.model, # nolint
   a <- c()
   pmod <- treatment.model$clone(deep = TRUE)
   for (i in seq_along(contrast)) {
-    newf <- reformulate(
-      paste(deparse(pmod$formula[[3]]), collapse = " "),
-      outcome_level(treatment_var, contrast[i])
-    )
-    pmod$update(newf)
+    pmod$update(outcome_level(treatment_var, contrast[i]))
     a <- cbind(a, pmod$response(data))
   }
   colnames(a) <- contrast
@@ -623,11 +613,7 @@ cate_est <- function(y, # response vector
     if (!is.null(treatment.model) &&
         inherits(treatment.model, "learner_glm")) {
       pmod <- treatment.model$clone(deep = TRUE)
-      newf <- reformulate(
-        paste(deparse(pmod$formula[[3]]), collapse = " "),
-        outcome_level(treatment_var, contrast[i])
-      )
-      pmod$update(newf)
+      pmod$update(outcome_level(treatment_var, contrast[i]))
       fit <- pmod$estimate(data)
       dlinkinv <- fit$family$mu.eta
       adj <- - K[, i] / p[, i] * dlinkinv(fit$family$linkfun(p[, i]))
