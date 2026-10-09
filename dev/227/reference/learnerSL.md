@@ -152,12 +152,13 @@ Create a new super learner object. The arguments are the same as for
 
 ### `learner_sl$estimate()`
 
-Estimation method. Estimates the super learner with
-[superlearner](superlearner.md).
+Estimation method. Estimates the super learner with the base learners of
+the object and the `estimate` function (by default
+[superlearner](superlearner.md)).
 
 #### Usage
 
-    learner_sl$estimate(data, ..., learners = private$.learners, store = TRUE)
+    learner_sl$estimate(data, ..., store = TRUE)
 
 #### Arguments
 
@@ -167,12 +168,11 @@ Estimation method. Estimates the super learner with
 
 - `...`:
 
-  Additional arguments to [superlearner](superlearner.md) and the
-  prediction filter generator function.
-
-- `learners`:
-
-  (list) Base learners. Defaults to the base learners of the object.
+  Additional arguments to the `estimate` function (e.g., `nfolds`),
+  which take precedence over `estimate.args`. The base learners cannot
+  be changed, and an error is raised if `learners` is provided. Create a
+  new super learner with [`learner_sl()`](learner_sl.md) to use other
+  base learners.
 
 - `store`:
 
@@ -256,21 +256,21 @@ lrs <- list(
 sl <- learnerSL$new(estimate.args = list(learners = lrs, nfolds = 2))
 sl$formula # formula of the first base learner
 #> y ~ 1
-#> <environment: 0x5614ad177648>
+#> <environment: 0x55e9673c7488>
 
 # update the response variable of the super learner and all base learners
 sl$update("z")
 sl$formula
 #> z ~ 1
-#> <environment: 0x5614ad177648>
+#> <environment: 0x55e9673c7488>
 lapply(sl$learners, \(lr) lr$formula)
 #> $mean
 #> z ~ 1
-#> <environment: 0x5614ad177648>
+#> <environment: 0x55e9673c7488>
 #> 
 #> $glm
 #> z ~ x1 + x2
-#> <environment: 0x5614ad177648>
+#> <environment: 0x55e9673c7488>
 #> 
 
 sl$estimate(d)
