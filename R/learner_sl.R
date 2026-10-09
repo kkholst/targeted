@@ -236,8 +236,8 @@ learnerSL <- R6::R6Class("learner_sl", # nolint
   private = list(
     # @field .learners List of base learners
     .learners = NULL,
-    # require custom deep clone method the default deep clone method does not
-    # handle lists with R6 objects
+    # require custom deep clone method because the default deep clone method
+    # does not handle lists with R6 objects
     deep_clone = function(name, value) {
       if (name == ".learners") {
         return(lapply(value, \(lr) lr$clone(deep = TRUE)))

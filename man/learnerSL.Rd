@@ -172,9 +172,7 @@ object.}
 \subsection{\code{learner_sl$update()}}{
   Update the response variable of the super learner and all its base
 learners. Each base learner keeps its covariates. A warning is raised
-when \code{formula} specifies covariates which differ from the covariates of
-the super learner (i.e., of the first base learner), because the
-covariates are not updated.
+when \code{formula} specifies covariates.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{learner_sl$update(formula)}
@@ -184,7 +182,8 @@ covariates are not updated.
     \if{html}{\out{<div class="arguments">}}
     \describe{
       \item{\code{formula}}{(formula or character) Formula or name of the new
-response variable (e.g., \code{"z"}, \code{"I(a == 1)"} or \code{z ~ .}).}
+response variable (e.g., \code{"z"}, \code{"I(a == 1)"} or \code{z ~ .}).
+TODO: change to only character because y ~ . is too ambiguous}
     }
     \if{html}{\out{</div>}}
   }
