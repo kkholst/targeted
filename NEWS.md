@@ -5,6 +5,13 @@ Bug fixes:
 - `learner$clone()` produced a clone with unintended reference-type behaviour. A
   clone used the formula of the original object, instead of a new formula that
   was provided with the `update()` method.
+- `learner$update()` with a character string lost the environment of the
+  formula. Formula variables that are not in the data (e.g., defined inside a
+  function) were not found or resolved to other objects with the same name
+  (e.g., `cut` to `base::cut()`). A new response variable now keeps the
+  environment of the current formula, and a formula string gets the calling
+  environment like a formula object. This also fixes `aipw()`, `cate()` and
+  `moi()`, which update the response variable of the provided learners.
 
 # targeted 0.9
 
