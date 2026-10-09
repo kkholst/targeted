@@ -184,9 +184,7 @@ Estimation method. Estimates the super learner with
 
 Update the response variable of the super learner and all its base
 learners. Each base learner keeps its covariates. A warning is raised
-when `formula` specifies covariates which differ from the covariates of
-the super learner (i.e., of the first base learner), because the
-covariates are not updated.
+when `formula` specifies covariates.
 
 #### Usage
 
@@ -197,7 +195,8 @@ covariates are not updated.
 - `formula`:
 
   (formula or character) Formula or name of the new response variable
-  (e.g., `"z"`, `"I(a == 1)"` or `z ~ .`).
+  (e.g., `"z"`, `"I(a == 1)"` or `z ~ .`). TODO: change to only
+  character because y ~ . is too ambiguous
 
 ------------------------------------------------------------------------
 
@@ -257,21 +256,21 @@ lrs <- list(
 sl <- learnerSL$new(estimate.args = list(learners = lrs, nfolds = 2))
 sl$formula # formula of the first base learner
 #> y ~ 1
-#> <environment: 0x559eaf16a090>
+#> <environment: 0x5614ad177648>
 
 # update the response variable of the super learner and all base learners
 sl$update("z")
 sl$formula
 #> z ~ 1
-#> <environment: 0x559eaf16a090>
+#> <environment: 0x5614ad177648>
 lapply(sl$learners, \(lr) lr$formula)
 #> $mean
 #> z ~ 1
-#> <environment: 0x559eaf16a090>
+#> <environment: 0x5614ad177648>
 #> 
 #> $glm
 #> z ~ x1 + x2
-#> <environment: 0x559eaf16a090>
+#> <environment: 0x5614ad177648>
 #> 
 
 sl$estimate(d)
