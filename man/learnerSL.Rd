@@ -171,8 +171,7 @@ object.}
 \if{latex}{\out{\hypertarget{method-learner_sl-update}{}}}
 \subsection{\code{learner_sl$update()}}{
   Update the response variable of the super learner and all its base
-learners. Each base learner keeps its covariates. A warning is raised
-when \code{formula} specifies covariates.
+learners. Each base learner keeps its covariates.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{learner_sl$update(formula)}
@@ -181,9 +180,8 @@ when \code{formula} specifies covariates.
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
-      \item{\code{formula}}{(formula or character) Formula or name of the new
-response variable (e.g., \code{"z"}, \code{"I(a == 1)"} or \code{z ~ .}).
-TODO: change to only character because y ~ . is too ambiguous}
+      \item{\code{formula}}{(character) Name or specification of the new response
+variable (e.g., \code{"z"} or \code{"I(a == 1)"}).}
     }
     \if{html}{\out{</div>}}
   }

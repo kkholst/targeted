@@ -186,11 +186,9 @@ learnerSL <- R6::R6Class("learner_sl", # nolint
 
     #' @description
     #' Update the response variable of the super learner and all its base
-    #' learners. Each base learner keeps its covariates. A warning is raised
-    #' when `formula` specifies covariates.
-    #' @param formula (formula or character) Formula or name of the new
-    #' response variable (e.g., `"z"`, `"I(a == 1)"` or `z ~ .`).
-    #' TODO: change to only character because y ~ . is too ambiguous
+    #' learners. Each base learner keeps its covariates.
+    #' @param formula (character) Name or specification of the new response
+    #' variable (e.g., `"z"` or `"I(a == 1)"`).
     update = function(formula) {
       if (is.character(formula) && !grepl("~", formula)) {
         response <- formula
@@ -201,6 +199,7 @@ learnerSL <- R6::R6Class("learner_sl", # nolint
         }
         response <- paste(deparse(formula[[2]]), collapse = " ")
         rhs <- all.vars(formula[[3]])
+        # cast warning whenever a formula object is provided
         if (length(rhs) > 0) {
           warning(
             "learnerSL only updates the response variable of the base ",
