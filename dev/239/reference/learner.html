@@ -246,7 +246,10 @@ filter function</p></dd>
 </div><p></p><div class="section">
 <h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>formula</code></dt>
-<dd><p>formula or character which defines the new response</p></dd>
+<dd><p>(formula or character) new formula, or new response
+variable given as a character string without <code>~</code> (e.g., <code>"y"</code> or
+<code>"I(a == 1)"</code>). A new response variable keeps the right-hand side and the
+environment of the current formula.</p></dd>
 
 
 </dl><p></p></div>
@@ -466,7 +469,7 @@ elements:</p><dl><dt>info</dt>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ────────── learner object ──────────</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> glm </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> formula: y ~ x &lt;environment: 0x55f18cea42b8&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> formula: y ~ x &lt;environment: 0x55794b834350&gt; </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> estimate: formula, data, family, ... </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> estimate.args: family=nb </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> predict: object, newdata, ... </span>
@@ -481,7 +484,7 @@ elements:</p><dl><dt>info</dt>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ────────── learner object ──────────</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> glm </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> formula: y ~ x &lt;environment: 0x55f18cea42b8&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> formula: y ~ x &lt;environment: 0x55794b834350&gt; </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> estimate: formula, data, family, ... </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> estimate.args: family=nb </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> predict: object, newdata, ... </span>
