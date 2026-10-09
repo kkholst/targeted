@@ -42,7 +42,7 @@ aipw <- function(response.model,
   response.model <- response.model$clone(deep = TRUE)
   response.model$update("AIPW_Y_")
   if (base::missing(propensity.model)) {
-    propensity.model <- update(response.model$formula, as.formula("R_ ~ ."))
+    propensity.model <- response.model$formula
   }
   if (inherits(propensity.model, "formula")) {
     propensity.model <- learner_glm(propensity.model, family = binomial)

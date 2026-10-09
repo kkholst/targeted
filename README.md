@@ -119,7 +119,7 @@ lr
 #> 
 #> Estimate arguments: family=<function> 
 #> Predict arguments:   
-#> Formula: y ~ (w1 + w2) * a <environment: 0xae131d0e0>
+#> Formula: y ~ (w1 + w2) * a <environment: 0x795fdf3b8>
 ```
 
 To fit the model to the data we use the `estimate` method
@@ -128,7 +128,7 @@ To fit the model to the data we use the `estimate` method
 lr$estimate(d)
 lr$fit
 #> 
-#> Call:  stats::glm(formula = formula, family = family, data = data)
+#> Call:  glm(y ~ (w1 + w2) * a, data = data, family = family)
 #> 
 #> Coefficients:
 #> (Intercept)           w1           w2            a         w1:a         w2:a  
@@ -201,9 +201,9 @@ sl
 #>  glm
 #>  rf 
 #> 
-#> Estimate arguments: learners=<list>, nfolds=10, meta.learner=<function>, model.score=<function> 
+#> Estimate arguments: nfolds=10, meta.learner=<function>, model.score=<function> 
 #> Predict arguments:   
-#> Formula: y ~ (w1 + w2) * a <environment: 0xae131d0e0> 
+#> Formula: y ~ (w1 + w2) * a <environment: 0x79b775000> 
 #> ─────────────────────────────────────
 #>         score     weight
 #> glm 0.5499084 0.03290729
