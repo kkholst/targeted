@@ -2,9 +2,8 @@
 # environment of the returned formula can be set via 'env', which is used to
 # preserve the environment of the super learner formula when the base learners
 # are updated.
-sl_formula <- function(learners, env = environment(learners[[1]]$formula)) {
+sl_formula <- function(learners) {
   formula <- learners[[1]]$formula
-  environment(formula) <- env
   return(formula)
 }
 
@@ -188,7 +187,7 @@ learnerSL <- R6::R6Class("learner_sl", # nolint
       if (is.character(formula) && !grepl("~", formula)) {
         response <- formula
       } else {
-        formula <- stats::as.formula(formula)
+        formula <- stats::as.formula(formula, env = parent.frame())
         if (length(formula) != 3L) {
           stop("'formula' must specify a response variable.")
         }
@@ -202,10 +201,7 @@ learnerSL <- R6::R6Class("learner_sl", # nolint
         }
       }
       for (lr in private$.learners) lr$update(response)
-      private$.formula <- sl_formula(
-        private$.learners,
-        env = environment(private$.formula)
-      )
+      private$.formula <- sl_formula(private$.learners)
       return(invisible(private$.formula))
     },
 

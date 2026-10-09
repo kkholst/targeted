@@ -228,6 +228,7 @@ test_learner_sl_update <- function() {
     c("yb", "yb")
   )
 
+  # variables are looked up correctly in global env
   thr <- 2
   lr$update("I(y < thr)")
   lr$estimate(d)
