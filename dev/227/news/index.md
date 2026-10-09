@@ -7,9 +7,6 @@
   `learner$new()`, where the base learners are provided via
   `estimate.args$learners`. `learner_sl` now returns a `learnerSL`
   object.
-- `learner_sl`: base learners are copied on instantiation and deep
-  cloning, such that updating a super learner no longer modifies other
-  learner objects.
 
 Bug fixes:
 
