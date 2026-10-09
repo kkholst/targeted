@@ -135,8 +135,7 @@ Create a new super learner object. The arguments are the same as for
 
 - `formula.keep.specials`:
 
-  (logical) Not used by `learnerSL` objects. A warning is raised if
-  TRUE.
+  (logical) Not used by `learnerSL` objects.
 
 - `predict.filter`:
 
@@ -170,9 +169,8 @@ the object and the `estimate` function (by default
 
   Additional arguments to the `estimate` function (e.g., `nfolds`),
   which take precedence over `estimate.args`. The base learners cannot
-  be changed, and an error is raised if `learners` is provided. Create a
-  new super learner with [`learner_sl()`](learner_sl.md) to use other
-  base learners.
+  be changed. Create a new super learner with
+  [`learner_sl()`](learner_sl.md) to use other base learners.
 
 - `store`:
 
@@ -183,8 +181,7 @@ the object and the `estimate` function (by default
 ### `learner_sl$update()`
 
 Update the response variable of the super learner and all its base
-learners. Each base learner keeps its covariates. A warning is raised
-when `formula` specifies covariates.
+learners. Each base learner keeps its covariates.
 
 #### Usage
 
@@ -194,9 +191,8 @@ when `formula` specifies covariates.
 
 - `formula`:
 
-  (formula or character) Formula or name of the new response variable
-  (e.g., `"z"`, `"I(a == 1)"` or `z ~ .`). TODO: change to only
-  character because y ~ . is too ambiguous
+  (character) Name or specification of the new response variable (e.g.,
+  `"z"` or `"I(a == 1)"`).
 
 ------------------------------------------------------------------------
 
@@ -256,21 +252,21 @@ lrs <- list(
 sl <- learnerSL$new(estimate.args = list(learners = lrs, nfolds = 2))
 sl$formula # formula of the first base learner
 #> y ~ 1
-#> <environment: 0x55e9673c7488>
+#> <environment: 0x55b73601f398>
 
 # update the response variable of the super learner and all base learners
 sl$update("z")
 sl$formula
 #> z ~ 1
-#> <environment: 0x55e9673c7488>
+#> <environment: 0x55b73601f398>
 lapply(sl$learners, \(lr) lr$formula)
 #> $mean
 #> z ~ 1
-#> <environment: 0x55e9673c7488>
+#> <environment: 0x55b73601f398>
 #> 
 #> $glm
 #> z ~ x1 + x2
-#> <environment: 0x55e9673c7488>
+#> <environment: 0x55b73601f398>
 #> 
 
 sl$estimate(d)

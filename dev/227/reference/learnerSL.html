@@ -187,8 +187,7 @@ listing of the names of the base learners.</p></dd>
 id, subset, ...) passed on to <a href="design.html">design</a></p></dd>
 
       <dt><code>formula.keep.specials</code></dt>
-<dd><p>(logical) Not used by <code>learnerSL</code> objects. A
-warning is raised if TRUE.</p></dd>
+<dd><p>(logical) Not used by <code>learnerSL</code> objects.</p></dd>
 
       <dt><code>predict.filter</code></dt>
 <dd><p>function to post-process predictions. Useful to
@@ -218,9 +217,8 @@ of the object and the <code>estimate</code> function (by default <a href="superl
       <dt><code>...</code></dt>
 <dd><p>Additional arguments to the <code>estimate</code> function (e.g.,
 <code>nfolds</code>), which take precedence over <code>estimate.args</code>. The base learners
-cannot be changed, and an error is raised if <code>learners</code> is provided.
-Create a new super learner with <code><a href="learner_sl.html">learner_sl()</a></code> to use other base
-learners.</p></dd>
+cannot be changed. Create a new super learner with <code><a href="learner_sl.html">learner_sl()</a></code> to use
+other base learners.</p></dd>
 
       <dt><code>store</code></dt>
 <dd><p>(logical) If TRUE, the estimated model is stored inside the
@@ -235,16 +233,14 @@ object.</p></dd>
 <p></p><hr><a id="method-learner_sl-update"></a><div class="section">
 <h3 id="learner-sl-update-"><code>learner_sl$update()</code><a class="anchor" aria-label="anchor" href="#learner-sl-update-"></a></h3>
 <p>Update the response variable of the super learner and all its base
-learners. Each base learner keeps its covariates. A warning is raised
-when <code>formula</code> specifies covariates.</p><div class="section">
+learners. Each base learner keeps its covariates.</p><div class="section">
 <h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">learner_sl</span><span class="op">$</span><span class="fu">update</span><span class="op">(</span><span class="va">formula</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
 <h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>formula</code></dt>
-<dd><p>(formula or character) Formula or name of the new
-response variable (e.g., <code>"z"</code>, <code>"I(a == 1)"</code> or <code>z ~ .</code>).
-TODO: change to only character because y ~ . is too ambiguous</p></dd>
+<dd><p>(character) Name or specification of the new response
+variable (e.g., <code>"z"</code> or <code>"I(a == 1)"</code>).</p></dd>
 
 
 </dl><p></p></div>
@@ -311,21 +307,21 @@ to get the base learners.</p></dd>
 <span class="r-in"><span><span class="va">sl</span> <span class="op">&lt;-</span> <span class="va">learnerSL</span><span class="op">$</span><span class="fu">new</span><span class="op">(</span>estimate.args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>learners <span class="op">=</span> <span class="va">lrs</span>, nfolds <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">sl</span><span class="op">$</span><span class="va">formula</span> <span class="co"># formula of the first base learner</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> y ~ 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x55e9673c7488&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x55b73601f398&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># update the response variable of the super learner and all base learners</span></span></span>
 <span class="r-in"><span><span class="va">sl</span><span class="op">$</span><span class="fu">update</span><span class="op">(</span><span class="st">"z"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">sl</span><span class="op">$</span><span class="va">formula</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> z ~ 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x55e9673c7488&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x55b73601f398&gt;</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">sl</span><span class="op">$</span><span class="va">learners</span>, \<span class="op">(</span><span class="va">lr</span><span class="op">)</span> <span class="va">lr</span><span class="op">$</span><span class="va">formula</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $mean</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> z ~ 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x55e9673c7488&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x55b73601f398&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $glm</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> z ~ x1 + x2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x55e9673c7488&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x55b73601f398&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">sl</span><span class="op">$</span><span class="fu">estimate</span><span class="op">(</span><span class="va">d</span><span class="op">)</span></span></span>
