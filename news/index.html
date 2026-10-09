@@ -42,6 +42,8 @@
 <p>Bug fixes:</p>
 <ul><li>
 <code>learner$clone()</code> produced a clone with unintended reference-type behaviour. A clone used the formula of the original object, instead of a new formula that was provided with the <code><a href="https://rdrr.io/r/stats/update.html" class="external-link">update()</a></code> method.</li>
+<li>
+<code>learner$update()</code> with a character string lost the environment of the formula. Formula variables that are not in the data (e.g., defined inside a function) were not found or resolved to other objects with the same name (e.g., <code>cut</code> to <code><a href="https://rdrr.io/r/base/cut.html" class="external-link">base::cut()</a></code>). A new response variable now keeps the environment of the current formula, and a formula string gets the calling environment like a formula object. This also fixes <code><a href="../reference/aipw.html">aipw()</a></code>, <code><a href="../reference/cate.html">cate()</a></code> and <code><a href="../reference/moi.html">moi()</a></code>, which update the response variable of the provided learners.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.9" id="targeted-09">targeted 0.9<a class="anchor" aria-label="anchor" href="#targeted-09"></a></h2>
