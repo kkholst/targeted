@@ -141,12 +141,10 @@ test_learner_sl_new <- function() {
 
   # formula argument is not used
   expect_warning(
-    learnerSL$new(yb ~ x1, estimate.args = list(learners = lrs)),
+    lr <- learnerSL$new(yb ~ x1, estimate.args = list(learners = lrs)),
     pattern = "'formula' is not used"
   )
-  lr <- suppressWarnings(
-    learnerSL$new(yb ~ x1, estimate.args = list(learners = lrs))
-  )
+
   expect_equal(deparse(lr$formula), "y ~ 1")
   expect_equal(unname(base_formulas(lr)), c("y ~ 1", "y ~ x1 + x2"))
 
