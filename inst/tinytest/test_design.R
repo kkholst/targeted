@@ -54,6 +54,12 @@ test_design <- function() {
     pattern = "deprecated"
   )
   expect_false(".Environment" %in% names(attributes(dd2$terms)))
+
+  # don't accept unnamed arguments
+  expect_error(
+    design(y ~ x1, data = ddata, x2),
+    pattern = "does not allow unnamed arguments"
+  )
 }
 test_design()
 

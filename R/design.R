@@ -134,8 +134,15 @@ design <- function(formula, data, ..., # nolint
   if (inherits(data, c("data.table", "tbl_df"))) {
     data <- as.data.frame(data)
   }
+
   dots <- substitute(list(...))
-  if ("subset" %in% names(dots)) stop(
+  .names <- names(dots)
+  # defensive programming to prevent undesired outcomes when ... is passed
+  # onwards to model.frame and argumetns are matched by position
+  if (any(.names[-1] == "") || (is.null(.names) && length(dots) > 1)) {
+    stop("targeted::design does not allow unnamed arguments in ...")
+  }
+  if ("subset" %in% .names) stop(
     "subset is not an allowed specials argument for targeted::design"
   )
   formulaenv <- environment(formula)
