@@ -581,6 +581,21 @@ test_design_na_action <- function() {
   dd_upd <- update(dd_pass, ddata_na, response = TRUE)
   expect_equal(nrow(dd_upd$x), n)
   expect_identical(dd_upd$na.action, na.pass)
+
+  ddata_na1 <- ddata
+  ddata_na1$w <- runif(nrow(ddata))
+  ddata_na1[1:3, "w"] <- NA
+
+  dd <- design(y ~ x1 + weights(w), ddata_na1, specials = "weights")
+  nn <- nrow(ddata_na1) - 3
+  expect_equal(length(dd$y), nn)
+  expect_equal(nrow(dd$x), nn)
+  expect_equal(length(dd$weights), nn)
+
+  dd <- design(y ~ x1 + weights(w), ddata_na1, specials = "weights",
+               design.matrix = FALSE)
+  expect_equal(length(dd$y), nn)
+  expect_equal(length(dd$weights), nn)
 }
 test_design_na_action()
 
