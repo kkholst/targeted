@@ -223,6 +223,7 @@ cate <- function(response.model, # nolint
                  cate.model = ~1,
                  calibration.model = NULL,
                  missing.model = NULL,
+                 imputation.model = NULL
                  data,
                  contrast,
                  nfolds = 1,
