@@ -12,6 +12,10 @@ Bug fixes:
   environment of the current formula, and a formula string gets the calling
   environment like a formula object. This also fixes `aipw()`, `cate()` and
   `moi()`, which update the response variable of the provided learners.
+- `design()` now throws an error for unnamed arguments in `...` and for
+  abbreviations of `subset` (e.g., `sub = `). Such arguments were passed on to
+  the `subset` argument of `model.frame()`, which silently dropped or
+  duplicated observations (#241).
 
 # targeted 0.9
 
