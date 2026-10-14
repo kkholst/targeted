@@ -130,13 +130,13 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Estimate arguments: family=&lt;function&gt; </span></span>
 <span><span class="co">#&gt; Predict arguments:   </span></span>
-<span><span class="co">#&gt; Formula: y ~ (w1 + w2) * a &lt;environment: 0xae131d0e0&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt; Formula: y ~ (w1 + w2) * a &lt;environment: 0x795fdf3b8&gt;</span></span></code></pre></div>
 <p>To fit the model to the data we use the <code>estimate</code> method</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lr</span><span class="op">$</span><span class="fu">estimate</span><span class="op">(</span><span class="va">d</span><span class="op">)</span></span>
 <span><span class="va">lr</span><span class="op">$</span><span class="va">fit</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Call:  stats::glm(formula = formula, family = family, data = data)</span></span>
+<span><span class="co">#&gt; Call:  glm(y ~ (w1 + w2) * a, data = data, family = family)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficients:</span></span>
 <span><span class="co">#&gt; (Intercept)           w1           w2            a         w1:a         w2:a  </span></span>
@@ -192,9 +192,9 @@
 <span><span class="co">#&gt;  glm</span></span>
 <span><span class="co">#&gt;  rf </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Estimate arguments: learners=&lt;list&gt;, nfolds=10, meta.learner=&lt;function&gt;, model.score=&lt;function&gt; </span></span>
+<span><span class="co">#&gt; Estimate arguments: nfolds=10, meta.learner=&lt;function&gt;, model.score=&lt;function&gt; </span></span>
 <span><span class="co">#&gt; Predict arguments:   </span></span>
-<span><span class="co">#&gt; Formula: y ~ (w1 + w2) * a &lt;environment: 0xae131d0e0&gt; </span></span>
+<span><span class="co">#&gt; Formula: y ~ (w1 + w2) * a &lt;environment: 0x79b775000&gt; </span></span>
 <span><span class="co">#&gt; ─────────────────────────────────────</span></span>
 <span><span class="co">#&gt;         score     weight</span></span>
 <span><span class="co">#&gt; glm 0.5499084 0.03290729</span></span>

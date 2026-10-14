@@ -97,14 +97,14 @@ lr_sl
         glm2
         gam
 
-    Estimate arguments: learners=<list>, nfolds=5, meta.learner=<function>, model.score=<function>
+    Estimate arguments: nfolds=5, meta.learner=<function>, model.score=<function>
     Predict arguments:
     Formula: y ~ age * bili
     ─────────────────────────────────────
-              score     weight
-    glm1 0.09774291 0.44452554
-    glm2 0.10721935 0.08584322
-    gam  0.09792700 0.46963124
+              score    weight
+    glm1 0.09912088 0.3976495
+    glm2 0.10741811 0.1248366
+    gam  0.09912983 0.4775139
 
 Most constructors have additional arguments that impact the resulting
 model fit, ranging from the specification of a link function for
@@ -248,8 +248,8 @@ lr_xgboost$summary()$estimate
             list(params = xgb_params)), )
         return(res)
     }
-    <bytecode: 0x55a992755758>
-    <environment: 0x55a99986cba8>
+    <bytecode: 0x558c0200f130>
+    <environment: 0x558bfe651670>
 
 Rare situations may arise where one wants to update the formula
 argument. This supported and implemented via the `update` method
@@ -314,8 +314,8 @@ cv(lrs, data = pbc, rep = 2, nfolds = 5)
     5-fold cross-validation with 2 repetitions
 
                mse       mae
-    glm 0.10723470 0.2124236
-    gam 0.09813917 0.1879736
+    glm 0.10768307 0.2126030
+    gam 0.09955483 0.1870915
 
 ### Prediction filter
 
@@ -525,9 +525,9 @@ lr
     Predict arguments:
     Formula: NULL
     ─────────────────────────────────────
-            score    weight
-    glm 0.1073489 0.2756508
-    gam 0.1072648 0.7243492
+            score weight
+    glm 0.1062748      1
+    gam 0.1068262      0
 
 In this case, all arguments provided to `lr$estimate` are joined
 together with the specified `estimate.args` and passed on to the defined
@@ -579,7 +579,7 @@ targeted:::weights.numeric
 
     function (object, ...)
     object
-    <bytecode: 0x55a992761218>
+    <bytecode: 0x558c01ad5100>
     <environment: namespace:targeted>
 
 To illustrate how to define a custom learner that utilizes special
