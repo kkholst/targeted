@@ -218,12 +218,15 @@ moi_missing <- function(data,
     }
 
     ## Plug-in estimate
-    est <- estimate(imputation.model$fit,
-                    predict_glm, # nolint: object_usage_linter.
+    subset_ <- (A == a) & (delta == 0)
+    imputation.object <- estimate(imputation.model$fit, id=seq_len(nrow(data)))
+    est <- lava::expectation(
+                    object = imputation.object,
+                    predict,
                     data = data,
-                    subset = (A == a) & (delta == 0),
-                    average = TRUE,
-                    id = seq_len(nrow(data))) # keep order of the IC
+                    subset = subset_,
+                    id = seq_len(nrow(data)) # keep order of the IC
+                  )
     IC <- IC(est)
     est <- coef(est)
 

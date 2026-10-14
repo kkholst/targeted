@@ -311,18 +311,16 @@ test_moi_missing_IC_reference_lava <- function() {
     max(abs(lava_pred_IC_3 - lava_pred_IC_2)) == 0
   )
 
-  est1 <- estimate(imp_mod,
+  est1 <- expectation(object=imp_mod,
                    lava::predict_glm,
                    data = data,
                    subset = (data$a == 1) & (delta == FALSE),                   
-                   average = TRUE,
                    id = 1:nrow(data))
 
-  est0 <- estimate(imp_mod,
+  est0 <- expectation(object=imp_mod,
                    lava::predict_glm,
                    data = data,
                    subset = (data$a == 0) & (delta == FALSE),
-                   average = TRUE,
                    id = 1:nrow(data))
 
   expect_true(
