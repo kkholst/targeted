@@ -98,7 +98,9 @@ remove_terms <- function(formula, labels, data = NULL) {
 #' @param response (logical) if FALSE the response variable is dropped
 #' @param rm.envir (logical) Remove environment from terms attribute of
 #'   returned object
-#' @param ... additional arguments (e.g, specials such weights, offsets, ...)
+#' @param ... additional named arguments (e.g., specials such as `weights = w`
+#'   or `offset = o`) that are passed on to [stats::model.frame] and returned
+#'   as specials. Unnamed arguments and `subset` are not allowed.
 #' @param specials character vector specifying functions in the formula that
 #'   should be marked as special in the [terms] object
 #' @param specials.call (call) specials optionally defined as a call-type
@@ -136,13 +138,22 @@ design <- function(formula, data, ..., # nolint
   }
 
   dots <- substitute(list(...))
-  .names <- names(dots)
-  # defensive programming to prevent undesired outcomes when ... is passed
-  # onwards to model.frame and argumetns are matched by position
-  if (any(.names[-1] == "") || (is.null(.names) && length(dots) > 1)) {
-    stop("targeted::design does not allow unnamed arguments in ...")
+  dots.names <- names(dots)[-1L]
+  if (is.null(dots.names)) dots.names <- character(length(dots) - 1L)
+  # `...` is forwarded to model.frame() right after `data`. Unnamed arguments
+  # would be matched by position (and abbreviated names such as `sub` by
+  # partial matching) to its `subset` argument (#241)
+  unnamed <- !nzchar(dots.names)
+  if (any(unnamed)) {
+    exprs <- vapply(as.list(dots)[-1L][unnamed],
+      \(e) deparse(e, nlines = 1L)[1L], character(1)
+    )
+    stop(
+      "all arguments in `...` must be named (e.g., `weights = w`). ",
+      "Unnamed: ", paste(exprs, collapse = ", ")
+    )
   }
-  if ("subset" %in% .names) stop(
+  if (any(startsWith("subset", dots.names))) stop(
     "subset is not an allowed specials argument for targeted::design"
   )
   formulaenv <- environment(formula)

@@ -54,12 +54,6 @@ test_design <- function() {
     pattern = "deprecated"
   )
   expect_false(".Environment" %in% names(attributes(dd2$terms)))
-
-  # don't accept unnamed arguments
-  expect_error(
-    design(y ~ x1, data = ddata, x2),
-    pattern = "does not allow unnamed arguments"
-  )
 }
 test_design()
 
@@ -182,6 +176,22 @@ test_design_ellipsis <- function() {
   expect_error(
     design(y ~ x1, data = ddata, subset = seq(10)),
     pattern = "subset is not an allowed specials argument"
+  )
+  # abbreviations would be partially matched to model.frame(subset = )
+  expect_error(
+    design(y ~ x1, data = ddata, sub = x2 > 0),
+    pattern = "subset is not an allowed specials argument"
+  )
+
+  # unnamed arguments would be matched by position to model.frame(subset = )
+  # (#241)
+  expect_error(
+    design(y ~ x1, data = ddata, x2),
+    pattern = "must be named"
+  )
+  expect_error(
+    design(y ~ x1, data = ddata, weights = x2, x1),
+    pattern = "Unnamed: x1"
   )
 
   # no error when argument is a vector of length n
