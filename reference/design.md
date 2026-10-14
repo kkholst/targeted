@@ -32,7 +32,10 @@ design(
 
 - ...:
 
-  additional arguments (e.g, specials such weights, offsets, ...)
+  additional named arguments (e.g., specials such as `weights = w` or
+  `offset = o`) that are passed on to
+  [stats::model.frame](https://rdrr.io/r/stats/model.frame.html) and
+  returned as specials. Unnamed arguments and `subset` are not allowed.
 
 - intercept:
 

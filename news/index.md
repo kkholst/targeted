@@ -18,6 +18,12 @@ Bug fixes:
   This also fixes [`aipw()`](../reference/aipw.md),
   [`cate()`](../reference/cate.md) and [`moi()`](../reference/moi.md),
   which update the response variable of the provided learners.
+- [`design()`](../reference/design.md) now throws an error for unnamed
+  arguments in `...` and for abbreviations of `subset` (e.g., `sub =`).
+  Such arguments were passed on to the `subset` argument of
+  [`model.frame()`](https://rdrr.io/r/stats/model.frame.html), which
+  silently dropped or duplicated observations
+  ([\#241](https://github.com/kkholst/targeted/issues/241)).
 
 ## targeted 0.9
 
