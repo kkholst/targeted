@@ -23,7 +23,9 @@ design(
 
 \item{data}{data.frame}
 
-\item{...}{additional arguments (e.g, specials such weights, offsets, ...)}
+\item{...}{additional named arguments (e.g., specials such as \code{weights = w}
+or \code{offset = o}) that are passed on to \link[stats:model.frame]{stats::model.frame} and returned
+as specials. Unnamed arguments and \code{subset} are not allowed.}
 
 \item{intercept}{(logical) If FALSE an intercept is not included in the
 design matrix}

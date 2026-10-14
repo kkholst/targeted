@@ -455,3 +455,22 @@ test_cate_id_arg <- function() {
   expect_true(mean(IC(a)[order(ord), 1] - if1)<1e-12)
 }
 test_cate_id_arg()
+
+
+test_cate_environment_lookups <- function() {
+  fs <- local({
+    cut <- 2
+    a ~ (x < cut)
+  })
+  qmod <- learner_glm(y ~ a)
+  pmod <- learner_glm(fs, family = binomial)
+
+  # verify that variables in the local formula enviroment are accessible after
+  # updating the response variable of the treatment.model inside cate
+  expect_silent(cate(qmod, treatment.model = pmod, data = d))
+
+  cut <- 2 # lookup on global enviroment
+  qmod <- learner_glm(y ~ a + (x < cut))
+  expect_silent(cate(qmod, treatment.model = pmod, data = d))
+}
+test_cate_environment_lookups()

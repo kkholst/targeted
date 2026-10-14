@@ -83,6 +83,6 @@ VignetteBuilder:
     quarto
 SystemRequirements: Quarto command line tools
     (https://github.com/quarto-dev/quarto-cli).
-Config/roxygen2/version: 8.1.0
+Config/roxygen2/version: 8.1.1
 Remotes:
     github::kkholst/lava@main
