@@ -126,7 +126,7 @@ learning objective. See <a href="https://rdrr.io/pkg/xgboost/man/xgboost.html" c
 <span class="r-in"><span><span class="va">lr</span> <span class="op">&lt;-</span> <span class="fu">learner_xgboost</span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span>, nrounds <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">lr</span><span class="op">$</span><span class="fu">estimate</span><span class="op">(</span><span class="va">d0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">lr</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">d0</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  2.424015 -2.605639 -1.584620 -1.342856 -2.605639 -4.579830</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  0.5070467  0.5070467 -1.9512477 -0.4580308  1.9601212  1.6954297</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># binary classification</span></span></span>
 <span class="r-in"><span><span class="va">lr</span> <span class="op">&lt;-</span> <span class="fu">learner_xgboost</span><span class="op">(</span><span class="va">yb</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span>, nrounds <span class="op">=</span> <span class="fl">5</span>,</span></span>
@@ -134,7 +134,7 @@ learning objective. See <a href="https://rdrr.io/pkg/xgboost/man/xgboost.html" c
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">lr</span><span class="op">$</span><span class="fu">estimate</span><span class="op">(</span><span class="va">d0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">lr</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">d0</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.96854961 0.14389719 0.28745785 0.21602966 0.04843019 0.21602966</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.408985049 0.408985049 0.133703023 0.005589996 0.267202526 0.881208956</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># multi-class classification</span></span></span>
 <span class="r-in"><span><span class="va">d0</span> <span class="op">&lt;-</span> <span class="va">iris</span></span></span>

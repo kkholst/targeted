@@ -225,5 +225,8 @@ moi(data = d,
     missing.model = ~ a + w,
     imputation.model = y ~ a + w,
     imputation.subset = "!is.na(y)")
-#> Error: 'expectation' is not an exported object from 'namespace:lava'
+#>                       Estimate Std.Err   2.5% 97.5%    P-value
+#> E[ỹ(1)]                 1.9796 0.06389 1.8544 2.105 8.900e-211
+#> E[ỹ(0)]                 0.9595 0.06426 0.8335 1.085  2.071e-50
+#> [E[ỹ(1)]] - [E[ỹ(0)]]   1.0201 0.07946 0.8644 1.176  1.009e-37
 ```

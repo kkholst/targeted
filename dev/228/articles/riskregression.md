@@ -342,8 +342,8 @@ And we can then fit the DRE with the syntax
 riskreg(y~a, nuisance=~x+z, data=d2, type="rd")
 ```
 
-                Estimate Std.Err   2.5% 97.5% P-value
-    (Intercept)   0.9648  0.0202 0.9252 1.004       0
+                Estimate Std.Err  2.5% 97.5% P-value
+    (Intercept)    1.055 0.02141 1.013 1.097       0
 
 ### Influence-function
 
@@ -399,15 +399,13 @@ sessionInfo()
     [1] targeted_0.9.0.9000
 
     loaded via a namespace (and not attached):
-     [1] mets_1.3.12            cli_3.6.6              knitr_1.52
-     [4] rlang_1.3.0            xfun_0.61              otel_0.2.0
-     [7] jsonlite_2.0.0         future.apply_1.20.2    listenv_1.1.0
-    [10] lava_1.9.3             htmltools_0.5.9        rmarkdown_2.32
-    [13] grid_4.6.1             evaluate_1.0.5         fastmap_1.2.0
-    [16] numDeriv_2016.8-1.1    mvtnorm_1.4-2          yaml_2.3.12
-    [19] timereg_2.0.7          compiler_4.6.1         codetools_0.2-20
-    [22] Rcpp_1.1.2             future_1.76.0          lattice_0.22-9
-    [25] digest_0.6.39          R6_2.6.1               parallelly_1.48.0
-    [28] parallel_4.6.1         splines_4.6.1          Matrix_1.7-5
-    [31] RcppArmadillo_15.6.0-1 tools_4.6.1            globals_0.20.0
-    [34] survival_3.8-6        
+     [1] cli_3.6.6           knitr_1.52          rlang_1.3.0
+     [4] xfun_0.61           otel_0.2.0          jsonlite_2.0.0
+     [7] future.apply_1.20.2 listenv_1.1.0       lava_1.9.3.9000
+    [10] htmltools_0.5.9     rmarkdown_2.32      grid_4.6.1
+    [13] evaluate_1.0.5      fastmap_1.2.0       yaml_2.3.12
+    [16] compiler_4.6.1      codetools_0.2-20    Rcpp_1.1.2
+    [19] future_1.76.0       lattice_0.22-9      digest_0.6.39
+    [22] R6_2.6.1            parallelly_1.48.0   parallel_4.6.1
+    [25] splines_4.6.1       Matrix_1.7-5        tools_4.6.1
+    [28] globals_0.20.0      survival_3.8-6     

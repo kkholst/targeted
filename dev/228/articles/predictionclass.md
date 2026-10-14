@@ -97,14 +97,14 @@ lr_sl
         glm2
         gam
 
-    Estimate arguments: learners=<list>, nfolds=5, meta.learner=<function>, model.score=<function>
+    Estimate arguments: nfolds=5, meta.learner=<function>, model.score=<function>
     Predict arguments:
     Formula: y ~ age * bili
     ─────────────────────────────────────
               score     weight
-    glm1 0.09784389 0.45613244
-    glm2 0.10726690 0.09348196
-    gam  0.09811368 0.45038560
+    glm1 0.09702259 0.48853801
+    glm2 0.10746932 0.04263033
+    gam  0.09726873 0.46883167
 
 Most constructors have additional arguments that impact the resulting
 model fit, ranging from the specification of a link function for
@@ -248,8 +248,8 @@ lr_xgboost$summary()$estimate
             list(params = xgb_params)), )
         return(res)
     }
-    <bytecode: 0x558014f59da8>
-    <environment: 0x55801aa18f30>
+    <bytecode: 0x563f755e6b90>
+    <environment: 0x563f72d9cd50>
 
 Rare situations may arise where one wants to update the formula
 argument. This supported and implemented via the `update` method
@@ -314,8 +314,8 @@ cv(lrs, data = pbc, rep = 2, nfolds = 5)
     5-fold cross-validation with 2 repetitions
 
                mse       mae
-    glm 0.10677110 0.2120143
-    gam 0.09861126 0.1878472
+    glm 0.10682264 0.2121986
+    gam 0.09670458 0.1864517
 
 ### Prediction filter
 
@@ -525,9 +525,9 @@ lr
     Predict arguments:
     Formula: NULL
     ─────────────────────────────────────
-            score    weight
-    glm 0.1061742 0.8235761
-    gam 0.1065665 0.1764239
+            score weight
+    glm 0.1074732      1
+    gam 0.1188902      0
 
 In this case, all arguments provided to `lr$estimate` are joined
 together with the specified `estimate.args` and passed on to the defined
@@ -579,7 +579,7 @@ targeted:::weights.numeric
 
     function (object, ...)
     object
-    <bytecode: 0x5580191e0318>
+    <bytecode: 0x563f6c022e88>
     <environment: namespace:targeted>
 
 To illustrate how to define a custom learner that utilizes special
