@@ -7,7 +7,7 @@
 superlearner(
   learners,
   data,
-  nfolds = 10,
+  nfolds = 5L,
   meta.learner = metalearner_nnls,
   model.score = mse,
   mc.cores = NULL,

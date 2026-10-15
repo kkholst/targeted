@@ -137,7 +137,7 @@ test_learner_sl_new <- function() {
   lr <- learnerSL$new(estimate.args = list(learners = lrs))
   expect_null(lr$opt("nfolds"))
   lr$estimate(d)
-  expect_equal(length(lr$fit$folds), 10)
+  expect_equal(length(lr$fit$folds), 5)
 
   # formula argument is not used
   expect_warning(
