@@ -342,8 +342,8 @@ And we can then fit the DRE with the syntax
 riskreg(y~a, nuisance=~x+z, data=d2, type="rd")
 ```
 
-                Estimate Std.Err   2.5% 97.5% P-value
-    (Intercept)   0.9844 0.02016 0.9449 1.024       0
+                Estimate Std.Err  2.5% 97.5% P-value
+    (Intercept)    1.033 0.02132 0.991 1.075       0
 
 ### Influence-function
 
