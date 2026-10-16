@@ -212,15 +212,22 @@ test_design_specials <- function() {
 
   # don't allow duplicated specials
   expect_error(
-    design(y ~ offset(x1) + offset(x2), ddata, specials="offset"),
+    design(y ~ offset(x1) + offset(x2), ddata, specials = "offset"),
     pattern = "Duplicated special"
   )
 
   # specials argument needs to be a character
   expect_error(
-    design(y ~ offset(x1), ddata, specials=offset),
+    design(y ~ offset(x1), ddata, specials = offset),
     pattern = "The special argument must be a character vector."
   )
+
+  # defined special function does not exist in the environment
+  expect_error(
+    design(y ~ ooffset(x1), ddata, specials = "ooffset"),
+    pattern = "could not find function"
+  )
+
 
   # offset is correctly identified as a special variable and not added as a
   # covariate
