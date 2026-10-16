@@ -59,6 +59,27 @@ An object of class 'design'
 \description{
 Extract design matrix from data.frame and formula
 }
+\details{
+Special terms are identified syntactically by the name of the
+called function (see \link[stats:terms.formula]{stats::terms.formula}). For example, with
+\code{specials = "stratify"}, the term \code{stratify(a)} is a special whereas
+\code{targeted::stratify(a)} is not.
+
+The special terms are evaluated by \link[stats:model.frame]{stats::model.frame} in \code{data} with the
+environment of \code{formula} as the enclosing environment. Following the
+lexical scoping rules of R, a special function is thus looked up in the
+environment of \code{formula} (by default the environment in which the formula
+was created) and its parent environments (e.g., the global environment and
+attached packages), but not in the environment from which \code{design()} is
+called. Hence, a special function must be visible from the environment of
+\code{formula}. The environment of \code{formula} is kept in the returned object such
+that the same lookup applies when the design is re-evaluated with
+\link{update.design}.
+
+Note that a special term is dropped (i.e., its field in the returned
+object is \code{NULL}) if any variable referenced in the term is not a column
+of \code{data}, even if the variable exists in the environment of \code{formula}.
+}
 \examples{
 n <- 1e2
 d0 <- data.frame(a = rbinom(n, 1, 0.5), x = rnorm(n), y = rnorm(n))

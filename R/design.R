@@ -114,6 +114,25 @@ remove_terms <- function(formula, labels, data = NULL) {
 #'   object.
 #' @param na.action (function) method to handle missing data (default:
 #'   \code{na.omit})
+#' @details Special terms are identified syntactically by the name of the
+#'   called function (see [stats::terms.formula]). For example, with
+#'   `specials = "stratify"`, the term `stratify(a)` is a special whereas
+#'   `targeted::stratify(a)` is not.
+#'
+#'   The special terms are evaluated by [stats::model.frame] in `data` with the
+#'   environment of `formula` as the enclosing environment. Following the
+#'   lexical scoping rules of R, a special function is thus looked up in the
+#'   environment of `formula` (by default the environment in which the formula
+#'   was created) and its parent environments (e.g., the global environment and
+#'   attached packages), but not in the environment from which `design()` is
+#'   called. Hence, a special function must be visible from the environment of
+#'   `formula`. The environment of `formula` is kept in the returned object such
+#'   that the same lookup applies when the design is re-evaluated with
+#'   [update.design].
+#'
+#'   Note that a special term is dropped (i.e., its field in the returned
+#'   object is `NULL`) if any variable referenced in the term is not a column
+#'   of `data`, even if the variable exists in the environment of `formula`.
 #' @return An object of class 'design'
 #' @author Klaus Kähler Holst
 #' @seealso [update.design]
@@ -364,6 +383,15 @@ design <- function(formula, data, ..., # nolint
 
 #' Update method for design
 #' @export
+#' @param object (design) object returned by [design]
+#' @param data (data.frame) data on which the design is re-evaluated. If `NULL`,
+#'   the empty data.frame stored in `object` is used.
+#' @param response (logical) if FALSE the response variable is dropped
+#' @param levels (list) named list of character vectors giving the full set of
+#'   levels to be assumed for each factor. Defaults to the levels stored in
+#'   `object`, such that factors are coded as in the original design.
+#' @param ... additional arguments (currently ignored)
+#' @return An object of class 'design'
 #' @examples
 #' n <- 1e2
 #' d0 <- data.frame(a = rbinom(n, 1, 0.5), x = rnorm(n), y = rnorm(n))

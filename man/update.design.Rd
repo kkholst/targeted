@@ -6,6 +6,23 @@
 \usage{
 \method{update}{design}(object, data = NULL, response = FALSE, levels, ...)
 }
+\arguments{
+\item{object}{(design) object returned by \link{design}}
+
+\item{data}{(data.frame) data on which the design is re-evaluated. If \code{NULL},
+the empty data.frame stored in \code{object} is used.}
+
+\item{response}{(logical) if FALSE the response variable is dropped}
+
+\item{levels}{(list) named list of character vectors giving the full set of
+levels to be assumed for each factor. Defaults to the levels stored in
+\code{object}, such that factors are coded as in the original design.}
+
+\item{...}{additional arguments (currently ignored)}
+}
+\value{
+An object of class 'design'
+}
 \description{
 Update method for design
 }
