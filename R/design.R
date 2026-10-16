@@ -166,6 +166,22 @@ design <- function(formula, data, ..., # nolint
 
   tt <- terms(formula, data = data, specials = specials)
 
+  missing_specials <- sapply(attr(tt, "specials")[specials], is.null)
+  if (any(missing_specials) && !is.null(specials)) {
+    msp <- specials[missing_specials]
+    .str <- ifelse(
+      length(msp) == 1,
+      sprintf("Special %s is provided", msp),
+      sprintf("Specials %s are provided", paste0(msp, collapse = ", "))
+    )
+    warning(
+      .str,
+      " in specials argument but ",
+      ifelse(length(msp) == 1, "is", "are"),
+      " missing in formula."
+    )
+  }
+
   # Drop specials whose variables are not available in `data`. This lets a
   # design built with e.g. `y ~ x + weights(w)` be (re-)evaluated against data
   # that lacks `w`: the special is silently omitted (its slot becomes NULL)
@@ -220,7 +236,7 @@ design <- function(formula, data, ..., # nolint
     mf <- model.frame(fs, data = data, na.action = na.action, ...)
   } else { # also extract design matrix
     mf <- model.frame(tt,
-                      data = data, ...,
+                      data = data, ..., # specials provided via ...
                       xlev = xlev,
                       na.action = na.action,
                       drop.unused.levels = FALSE
