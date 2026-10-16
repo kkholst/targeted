@@ -53,9 +53,10 @@ design(
 
   character vector specifying functions in the formula that should be
   marked as special in the [terms](https://rdrr.io/r/stats/terms.html)
-  object. Specials that are missing in the formula will still create
-  special fields in the returned design object. However, their value
-  will be `NULL`.
+  object. Functions are looked up by following the lexical scoping of
+  `model.frame` (see details). Specials that are missing in the formula
+  will create special fields in the returned design object with their
+  value set to `NULL`.
 
 - specials.call:
 
@@ -81,7 +82,7 @@ An object of class 'design'
 
 ## See also
 
-S3 methods: [update.design](update.design.md)
+[update.design](update.design.md)
 
 ## Author
 

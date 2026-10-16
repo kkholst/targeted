@@ -73,8 +73,8 @@
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>additional named arguments (e.g., specials such as <code>weights = w</code>
-or <code>offset = o</code>) that are passed on to <a href="https://rdrr.io/r/stats/model.frame.html" class="external-link">stats::model.frame</a> and returned
-as specials. Unnamed arguments and <code>subset</code> are not allowed.</p></dd>
+or <code>offset = o</code>) that are passed on to <a href="https://rdrr.io/r/stats/model.frame.html" class="external-link">stats::model.frame</a> and returned as
+specials. Unnamed arguments and <code>subset</code> are not allowed.</p></dd>
 
 
 <dt id="arg-intercept">intercept<a class="anchor" aria-label="anchor" href="#arg-intercept"></a></dt>
@@ -87,15 +87,16 @@ design matrix</p></dd>
 
 
 <dt id="arg-rm-envir">rm.envir<a class="anchor" aria-label="anchor" href="#arg-rm-envir"></a></dt>
-<dd><p>(logical) Remove environment from terms attribute of
-returned object</p></dd>
+<dd><p>(logical) Remove environment from terms attribute of returned
+object</p></dd>
 
 
 <dt id="arg-specials">specials<a class="anchor" aria-label="anchor" href="#arg-specials"></a></dt>
 <dd><p>character vector specifying functions in the formula that
-should be marked as special in the <a href="https://rdrr.io/r/stats/terms.html" class="external-link">terms</a> object. Specials that are
-missing in the formula will still create special fields in the returned
-design object. However, their value will be <code>NULL</code>.</p></dd>
+should be marked as special in the <a href="https://rdrr.io/r/stats/terms.html" class="external-link">terms</a> object. Functions are looked up
+by following the lexical scoping of <code>model.frame</code> (see details). Specials
+that are missing in the formula will create special fields in the returned
+design object with their value set to <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-specials-call">specials.call<a class="anchor" aria-label="anchor" href="#arg-specials-call"></a></dt>
@@ -114,8 +115,8 @@ object.</p></dd>
 
 
 <dt id="arg-na-action">na.action<a class="anchor" aria-label="anchor" href="#arg-na-action"></a></dt>
-<dd><p>(function) method to handle missing data
-(default: <code>na.omit</code>)</p></dd>
+<dd><p>(function) method to handle missing data (default:
+<code>na.omit</code>)</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -124,7 +125,7 @@ object.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>S3 methods: <a href="update.design.html">update.design</a></p></div>
+    <div class="dont-index"><p><a href="update.design.html">update.design</a></p></div>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
