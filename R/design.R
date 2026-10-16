@@ -102,7 +102,9 @@ remove_terms <- function(formula, labels, data = NULL) {
 #'   or `offset = o`) that are passed on to [stats::model.frame] and returned
 #'   as specials. Unnamed arguments and `subset` are not allowed.
 #' @param specials character vector specifying functions in the formula that
-#'   should be marked as special in the [terms] object
+#'   should be marked as special in the [terms] object. Specials that are
+#'   missing in the formula will still create special fields in the returned
+#'   design object. However, their value will be `NULL`.
 #' @param specials.call (call) specials optionally defined as a call-type
 #' @param levels a named list of character vectors giving the full set of levels
 #'   to be assumed for each factor
@@ -137,6 +139,10 @@ design <- function(formula, data, ..., # nolint
     data <- as.data.frame(data)
   }
 
+  if (!is.character(specials) && !is.null(specials)) {
+    stop("The special argument must be a character vector.")
+  }
+
   dots <- substitute(list(...))
   dots.names <- names(dots)[-1L]
   if (is.null(dots.names)) dots.names <- character(length(dots) - 1L)
@@ -166,19 +172,11 @@ design <- function(formula, data, ..., # nolint
 
   tt <- terms(formula, data = data, specials = specials)
 
-  missing_specials <- sapply(attr(tt, "specials")[specials], is.null)
-  if (any(missing_specials) && !is.null(specials)) {
-    msp <- specials[missing_specials]
-    .str <- ifelse(
-      length(msp) == 1,
-      sprintf("Special %s is provided", msp),
-      sprintf("Specials %s are provided", paste0(msp, collapse = ", "))
-    )
-    warning(
-      .str,
-      " in specials argument but ",
-      ifelse(length(msp) == 1, "is", "are"),
-      " missing in formula."
+  n_specials <- sapply(attr(tt, "specials"), length)
+  if (any(n_specials > 1)) {
+    stop(
+      "Duplicated specials defined in formula. Specify only a single",
+      " definition in the formula for each special."
     )
   }
 

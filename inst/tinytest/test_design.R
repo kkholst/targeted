@@ -209,6 +209,19 @@ test_design_ellipsis()
 
 # test specials argument
 test_design_specials <- function() {
+
+  # don't allow duplicated specials
+  expect_error(
+    design(y ~ offset(x1) + offset(x2), ddata, specials="offset"),
+    pattern = "Duplicated special"
+  )
+
+  # specials argument needs to be a character
+  expect_error(
+    design(y ~ offset(x1), ddata, specials=offset),
+    pattern = "The special argument must be a character vector."
+  )
+
   # offset is correctly identified as a special variable and not added as a
   # covariate
   dd <- design(y ~ offset(x1), ddata, specials="offset")
@@ -218,33 +231,23 @@ test_design_specials <- function() {
   names(offset_expect) <- seq(n)
   expect_equal(dd$offset, offset_expect)
 
-
-  # cast warnining when incorrectly declaring a special
-    # specifying a variable accidentally doesn't have an effect
-  expect_warning(
-    dd <- design(y ~ x1, ddata, specials = "x1"),
-    pattern = "missing in formula"
-  )
-  expect_equivalent(as.matrix(ddata$x1), dd$x)
-
   # offset is not identified correctly because it is not defined in specials
-  expect_warning(
-    dd <- design(y ~ offset(x1), ddata, specials = c("empty")),
-    pattern = "missing in formula"
-  )
+  dd <- design(y ~ offset(x1), ddata, specials = c("empty"))
   expect_false("offset" %in% names(dd))
 
   # an offset variable is not changed
   ddata1 <- ddata
   ddata1$offset <- 1
-  expect_warning(
-    dd <- design(y ~ offset + x1, ddata1, specials="offset"),
-    pattern = "missing in formula"
-  )
+  dd <- design(y ~ offset + x1, ddata1, specials="offset")
   expect_equivalent(
     as.matrix(ddata1[, c("offset", "x1")]),
     dd$x
   )
+
+  # specifying a variable accidentally doesn't have an effect
+  dd <- design(y ~ x1, ddata, specials = "x1")
+  expect_equivalent(as.matrix(ddata$x1), dd$x)
+
 
   # a user defined specials is handled correctly
   sq <- identity # nolint
