@@ -228,10 +228,28 @@ test_design_specials <- function() {
     pattern = "could not find function"
   )
 
+  # variables only defined in the calling.frame of design are not looked up
+  # that's the same behaviour as with model.frame
+  ff <- function(formula) {
+    ooffset <- identity
+    design(formula, ddata, specials = "ooffset")
+  }
+  expect_error(
+    ff(y ~ ooffset(x1)),
+    pattern = "could not find function \"ooffset\""
+  )
+
+  # function is correctly looked up in the environment of the formula
+  ff <- local({
+    ooffset <- offset
+    y ~ ooffset(x1)
+  })
+  dd <- design(ff, ddata, specials = "ooffset")
+  expect_equivalent(dd$ooffset, ddata$x1)
 
   # offset is correctly identified as a special variable and not added as a
   # covariate
-  dd <- design(y ~ offset(x1), ddata, specials="offset")
+  dd <- design(y ~ offset(x1), ddata, specials = "offset")
 
   expect_equal(ncol(dd$x), 0)
   offset_expect <- ddata$x1
