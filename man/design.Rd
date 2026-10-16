@@ -39,7 +39,8 @@ object}
 should be marked as special in the \link{terms} object. Functions are looked up
 by following the lexical scoping of \code{model.frame} (see details). Specials
 that are missing in the formula will create special fields in the returned
-design object with their value set to \code{NULL}.}
+design object with their value set to \code{NULL}. Similarly, special terms with
+variables missing in data will also be set to \code{NULL}.}
 
 \item{specials.call}{(call) specials optionally defined as a call-type}
 

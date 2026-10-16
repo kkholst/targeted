@@ -105,7 +105,8 @@ remove_terms <- function(formula, labels, data = NULL) {
 #'   should be marked as special in the [terms] object. Functions are looked up
 #'   by following the lexical scoping of `model.frame` (see details). Specials
 #'   that are missing in the formula will create special fields in the returned
-#'   design object with their value set to `NULL`.
+#'   design object with their value set to `NULL`. Similarly, special terms with
+#'   variables missing in data will also be set to `NULL`.
 #' @param specials.call (call) specials optionally defined as a call-type
 #' @param levels a named list of character vectors giving the full set of levels
 #'   to be assumed for each factor
