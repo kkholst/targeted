@@ -96,26 +96,27 @@ remove_terms <- function(formula, labels, data = NULL) {
 #' @param intercept (logical) If FALSE an intercept is not included in the
 #'   design matrix
 #' @param response (logical) if FALSE the response variable is dropped
-#' @param rm.envir (logical) Remove environment from terms attribute of
-#'   returned object
+#' @param rm.envir (logical) Remove environment from terms attribute of returned
+#'   object
 #' @param ... additional named arguments (e.g., specials such as `weights = w`
-#'   or `offset = o`) that are passed on to [stats::model.frame] and returned
-#'   as specials. Unnamed arguments and `subset` are not allowed.
+#'   or `offset = o`) that are passed on to [stats::model.frame] and returned as
+#'   specials. Unnamed arguments and `subset` are not allowed.
 #' @param specials character vector specifying functions in the formula that
-#'   should be marked as special in the [terms] object. Specials that are
-#'   missing in the formula will still create special fields in the returned
-#'   design object. However, their value will be `NULL`.
+#'   should be marked as special in the [terms] object. Functions are looked up
+#'   by following the lexical scoping of `model.frame` (see details). Specials
+#'   that are missing in the formula will create special fields in the returned
+#'   design object with their value set to `NULL`.
 #' @param specials.call (call) specials optionally defined as a call-type
 #' @param levels a named list of character vectors giving the full set of levels
 #'   to be assumed for each factor
 #' @param design.matrix (logical) if FALSE then only response and specials are
 #'   returned. Otherwise, the design.matrix `x` is als part of the returned
 #'   object.
-#' @param na.action (function) method to handle missing data
-#'   (default: \code{na.omit})
+#' @param na.action (function) method to handle missing data (default:
+#'   \code{na.omit})
 #' @return An object of class 'design'
 #' @author Klaus Kähler Holst
-#' @seealso S3 methods: [update.design]
+#' @seealso [update.design]
 #' @examples
 #' n <- 1e2
 #' d0 <- data.frame(a = rbinom(n, 1, 0.5), x = rnorm(n), y = rnorm(n))

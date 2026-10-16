@@ -24,21 +24,22 @@ design(
 \item{data}{data.frame}
 
 \item{...}{additional named arguments (e.g., specials such as \code{weights = w}
-or \code{offset = o}) that are passed on to \link[stats:model.frame]{stats::model.frame} and returned
-as specials. Unnamed arguments and \code{subset} are not allowed.}
+or \code{offset = o}) that are passed on to \link[stats:model.frame]{stats::model.frame} and returned as
+specials. Unnamed arguments and \code{subset} are not allowed.}
 
 \item{intercept}{(logical) If FALSE an intercept is not included in the
 design matrix}
 
 \item{response}{(logical) if FALSE the response variable is dropped}
 
-\item{rm.envir}{(logical) Remove environment from terms attribute of
-returned object}
+\item{rm.envir}{(logical) Remove environment from terms attribute of returned
+object}
 
 \item{specials}{character vector specifying functions in the formula that
-should be marked as special in the \link{terms} object. Specials that are
-missing in the formula will still create special fields in the returned
-design object. However, their value will be \code{NULL}.}
+should be marked as special in the \link{terms} object. Functions are looked up
+by following the lexical scoping of \code{model.frame} (see details). Specials
+that are missing in the formula will create special fields in the returned
+design object with their value set to \code{NULL}.}
 
 \item{specials.call}{(call) specials optionally defined as a call-type}
 
@@ -49,8 +50,8 @@ to be assumed for each factor}
 returned. Otherwise, the design.matrix \code{x} is als part of the returned
 object.}
 
-\item{na.action}{(function) method to handle missing data
-(default: \code{na.omit})}
+\item{na.action}{(function) method to handle missing data (default:
+\code{na.omit})}
 }
 \value{
 An object of class 'design'
@@ -77,7 +78,7 @@ dd$weights
 head(dd$x)
 }
 \seealso{
-S3 methods: \link{update.design}
+\link{update.design}
 }
 \author{
 Klaus Kähler Holst
