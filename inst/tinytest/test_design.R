@@ -692,6 +692,11 @@ test_design_specials_missing_var <- function() {
   expect_true(is.null(dd5$stratify))
   expect_equal(colnames(dd5$x), "x1")
 
+  # same applies for specials which rely on variables in the global env
+  thr <- 1
+  dd6 <- design(y ~ x1 + weights(x1 < thr), d2, specials = "weights")
+  expect_null(dd6$weights)
+
   # print() should not list a dropped special under "specials"
   expect_stdout(print(dd_upd), "design matrix")
   # (specifically: 'weights' should not appear in the specials section)
