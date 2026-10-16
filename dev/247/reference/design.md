@@ -56,7 +56,8 @@ design(
   object. Functions are looked up by following the lexical scoping of
   `model.frame` (see details). Specials that are missing in the formula
   will create special fields in the returned design object with their
-  value set to `NULL`.
+  value set to `NULL`. Similarly, special terms with variables missing
+  in data will also be set to `NULL`.
 
 - specials.call:
 
