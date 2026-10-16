@@ -115,6 +115,24 @@ remove_terms <- function(formula, labels, data = NULL) {
 #'   (default: \code{na.omit})
 #' @return An object of class 'design'
 #' @author Klaus Kähler Holst
+#' @seealso S3 methods: [update.design]
+#' @examples
+#' n <- 1e2
+#' d0 <- data.frame(a = rbinom(n, 1, 0.5), x = rnorm(n), y = rnorm(n))
+#' d0$w <- runif(n)
+#'
+#' dd <- design(y ~ a + x, data = d0)
+#' list(response = head(dd$y, 2), design.matrix = head(dd$x, 2))
+#'
+#' # specials
+#' # special variable is extracted and removed from design matrix
+#' dd <- design(y ~ a + x + weights(w), d0, specials = "weights")
+#' list(weights = head(dd$weights, 2), design.matrix = head(dd$x, 2))
+#' # declared special variable is missing in formula. the associated field
+#' # is NULL
+#' dd <- design(y ~ a + x, d0, specials = "weights")
+#' dd$weights
+#' head(dd$x)
 #' @export
 design <- function(formula, data, ..., # nolint
                    intercept = FALSE,
@@ -343,7 +361,13 @@ design <- function(formula, data, ..., # nolint
   return(structure(res, class="design"))
 }
 
+#' Update method for design
 #' @export
+#' @examples
+#' n <- 1e2
+#' d0 <- data.frame(a = rbinom(n, 1, 0.5), x = rnorm(n), y = rnorm(n))
+#' d0$w <- runif(n)
+#' dnew <- data.frame(a = rbinom(n, 1, 0.5), x = rnorm(n), y = rnorm(n))
 update.design <- function(object, data = NULL, response = FALSE, levels, ...) {
   if (is.null(data)) data <- object$data
   if (missing(levels)) levels <- object$levels

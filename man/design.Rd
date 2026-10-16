@@ -36,7 +36,9 @@ design matrix}
 returned object}
 
 \item{specials}{character vector specifying functions in the formula that
-should be marked as special in the \link{terms} object}
+should be marked as special in the \link{terms} object. Specials that are
+missing in the formula will still create special fields in the returned
+design object. However, their value will be \code{NULL}.}
 
 \item{specials.call}{(call) specials optionally defined as a call-type}
 
@@ -55,6 +57,27 @@ An object of class 'design'
 }
 \description{
 Extract design matrix from data.frame and formula
+}
+\examples{
+n <- 1e2
+d0 <- data.frame(a = rbinom(n, 1, 0.5), x = rnorm(n), y = rnorm(n))
+d0$w <- runif(n)
+
+dd <- design(y ~ a + x, data = d0)
+list(response = head(dd$y, 2), design.matrix = head(dd$x, 2))
+
+# specials
+# special variable is extracted and removed from design matrix
+dd <- design(y ~ a + x + weights(w), d0, specials = "weights")
+list(weights = head(dd$weights, 2), design.matrix = head(dd$x, 2))
+# declared special variable is missing in formula. the associated field
+# is NULL
+dd <- design(y ~ a + x, d0, specials = "weights")
+dd$weights
+head(dd$x)
+}
+\seealso{
+S3 methods: \link{update.design}
 }
 \author{
 Klaus Kähler Holst
