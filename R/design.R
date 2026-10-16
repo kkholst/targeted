@@ -274,12 +274,12 @@ design <- function(formula, data, ..., # nolint
     if (length(sterm.list) > 0) {
       if (design.matrix) {
         xlev0[sterm.list] <- NULL
-        mf <- model.frame(formula0,
-                          data = data, ...,
-                          xlev = xlev0,
-                          na.action = na.action,
-                          drop.unused.levels = FALSE
-                          )
+        ## mf <- model.frame(formula0,
+        ##                   data = data, ...,
+        ##                   xlev = xlev0,
+        ##                   na.action = na.action,
+        ##                   drop.unused.levels = FALSE
+        ##                   )
       }
     }
   }
@@ -295,6 +295,8 @@ design <- function(formula, data, ..., # nolint
 
   if (design.matrix) {
     x <- model.matrix(mf, data=mf)
+    x <- x[, setdiff(colnames(x), sterm.list)] # removing specials
+
     if (!intercept && has_intercept) {
       has_intercept <- FALSE
       x <- x[, -1, drop = FALSE]
