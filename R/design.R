@@ -96,23 +96,63 @@ remove_terms <- function(formula, labels, data = NULL) {
 #' @param intercept (logical) If FALSE an intercept is not included in the
 #'   design matrix
 #' @param response (logical) if FALSE the response variable is dropped
-#' @param rm.envir (logical) Remove environment from terms attribute of
-#'   returned object
+#' @param rm.envir (logical) Remove environment from terms attribute of returned
+#'   object
 #' @param ... additional named arguments (e.g., specials such as `weights = w`
-#'   or `offset = o`) that are passed on to [stats::model.frame] and returned
-#'   as specials. Unnamed arguments and `subset` are not allowed.
+#'   or `offset = o`) that are passed on to [stats::model.frame] and returned as
+#'   specials. Unnamed arguments and `subset` are not allowed.
 #' @param specials character vector specifying functions in the formula that
-#'   should be marked as special in the [terms] object
+#'   should be marked as special in the [terms] object. Functions are looked up
+#'   by following the lexical scoping of `model.frame` (see details). Specials
+#'   that are missing in the formula will create special fields in the returned
+#'   design object with their value set to `NULL`. Similarly, special terms with
+#'   variables missing in data will also be set to `NULL`.
 #' @param specials.call (call) specials optionally defined as a call-type
 #' @param levels a named list of character vectors giving the full set of levels
 #'   to be assumed for each factor
 #' @param design.matrix (logical) if FALSE then only response and specials are
 #'   returned. Otherwise, the design.matrix `x` is als part of the returned
 #'   object.
-#' @param na.action (function) method to handle missing data
-#'   (default: \code{na.omit})
+#' @param na.action (function) method to handle missing data (default:
+#'   \code{na.omit})
+#' @details Special terms are identified syntactically by the name of the
+#'   called function (see [stats::terms.formula]). For example, with
+#'   `specials = "stratify"`, the term `stratify(a)` is a special whereas
+#'   `targeted::stratify(a)` is not.
+#'
+#'   The special terms are evaluated by [stats::model.frame] in `data` with the
+#'   environment of `formula` as the enclosing environment. Following the
+#'   lexical scoping rules of R, a special function is thus looked up in the
+#'   environment of `formula` (by default the environment in which the formula
+#'   was created) and its parent environments (e.g., the global environment and
+#'   attached packages), but not in the environment from which `design()` is
+#'   called. Hence, a special function must be visible from the environment of
+#'   `formula`. The environment of `formula` is kept in the returned object such
+#'   that the same lookup applies when the design is re-evaluated with
+#'   [update.design].
+#'
+#'   Note that a special term is dropped (i.e., its field in the returned
+#'   object is `NULL`) if any variable referenced in the term is not a column
+#'   of `data`, even if the variable exists in the environment of `formula`.
 #' @return An object of class 'design'
 #' @author Klaus Kähler Holst
+#' @seealso [update.design]
+#' @examples
+#' n <- 1e2
+#' d0 <- data.frame(a = rbinom(n, 1, 0.5), x = rnorm(n), y = rnorm(n))
+#' d0$w <- runif(n)
+#'
+#' dd <- design(y ~ a + x, data = d0)
+#' list(response = head(dd$y, 2), design.matrix = head(dd$x, 2))
+#'
+#' # specials
+#' # special variable is extracted and removed from design matrix
+#' dd <- design(y ~ a + x + weights(w), d0, specials = "weights")
+#' list(weights = head(dd$weights, 2), design.matrix = head(dd$x, 2))
+#' # declared special variable is missing in formula. the associated field
+#' # is NULL
+#' dd <- design(y ~ a + x, d0, specials = "weights")
+#' list(weights = dd$weights, design.matrix = head(dd$x, 2))
 #' @export
 design <- function(formula, data, ..., # nolint
                    intercept = FALSE,
@@ -135,6 +175,10 @@ design <- function(formula, data, ..., # nolint
   }
   if (inherits(data, c("data.table", "tbl_df"))) {
     data <- as.data.frame(data)
+  }
+
+  if (!is.character(specials) && !is.null(specials)) {
+    stop("The special argument must be a character vector.")
   }
 
   dots <- substitute(list(...))
@@ -165,6 +209,14 @@ design <- function(formula, data, ..., # nolint
   formula.original <- stats::formula(formula)
 
   tt <- terms(formula, data = data, specials = specials)
+
+  n_specials <- sapply(attr(tt, "specials"), length)
+  if (any(n_specials > 1)) {
+    stop(
+      "Duplicated specials defined in formula. Specify only a single",
+      " definition in the formula for each special."
+    )
+  }
 
   # Drop specials whose variables are not available in `data`. This lets a
   # design built with e.g. `y ~ x + weights(w)` be (re-)evaluated against data
@@ -220,7 +272,7 @@ design <- function(formula, data, ..., # nolint
     mf <- model.frame(fs, data = data, na.action = na.action, ...)
   } else { # also extract design matrix
     mf <- model.frame(tt,
-                      data = data, ...,
+                      data = data, ..., # specials provided via ...
                       xlev = xlev,
                       na.action = na.action,
                       drop.unused.levels = FALSE
@@ -329,7 +381,22 @@ design <- function(formula, data, ..., # nolint
   return(structure(res, class="design"))
 }
 
+#' Update method for design
 #' @export
+#' @param object (design) object returned by [design]
+#' @param data (data.frame) data on which the design is re-evaluated. If `NULL`,
+#'   the empty data.frame stored in `object` is used.
+#' @param response (logical) if FALSE the response variable is dropped
+#' @param levels (list) named list of character vectors giving the full set of
+#'   levels to be assumed for each factor. Defaults to the levels stored in
+#'   `object`, such that factors are coded as in the original design.
+#' @param ... additional arguments (currently ignored)
+#' @return An object of class 'design'
+#' @examples
+#' n <- 1e2
+#' d0 <- data.frame(a = rbinom(n, 1, 0.5), x = rnorm(n), y = rnorm(n))
+#' d0$w <- runif(n)
+#' dnew <- data.frame(a = rbinom(n, 1, 0.5), x = rnorm(n), y = rnorm(n))
 update.design <- function(object, data = NULL, response = FALSE, levels, ...) {
   if (is.null(data)) data <- object$data
   if (missing(levels)) levels <- object$levels

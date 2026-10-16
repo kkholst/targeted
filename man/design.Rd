@@ -24,19 +24,23 @@ design(
 \item{data}{data.frame}
 
 \item{...}{additional named arguments (e.g., specials such as \code{weights = w}
-or \code{offset = o}) that are passed on to \link[stats:model.frame]{stats::model.frame} and returned
-as specials. Unnamed arguments and \code{subset} are not allowed.}
+or \code{offset = o}) that are passed on to \link[stats:model.frame]{stats::model.frame} and returned as
+specials. Unnamed arguments and \code{subset} are not allowed.}
 
 \item{intercept}{(logical) If FALSE an intercept is not included in the
 design matrix}
 
 \item{response}{(logical) if FALSE the response variable is dropped}
 
-\item{rm.envir}{(logical) Remove environment from terms attribute of
-returned object}
+\item{rm.envir}{(logical) Remove environment from terms attribute of returned
+object}
 
 \item{specials}{character vector specifying functions in the formula that
-should be marked as special in the \link{terms} object}
+should be marked as special in the \link{terms} object. Functions are looked up
+by following the lexical scoping of \code{model.frame} (see details). Specials
+that are missing in the formula will create special fields in the returned
+design object with their value set to \code{NULL}. Similarly, special terms with
+variables missing in data will also be set to \code{NULL}.}
 
 \item{specials.call}{(call) specials optionally defined as a call-type}
 
@@ -47,14 +51,55 @@ to be assumed for each factor}
 returned. Otherwise, the design.matrix \code{x} is als part of the returned
 object.}
 
-\item{na.action}{(function) method to handle missing data
-(default: \code{na.omit})}
+\item{na.action}{(function) method to handle missing data (default:
+\code{na.omit})}
 }
 \value{
 An object of class 'design'
 }
 \description{
 Extract design matrix from data.frame and formula
+}
+\details{
+Special terms are identified syntactically by the name of the
+called function (see \link[stats:terms.formula]{stats::terms.formula}). For example, with
+\code{specials = "stratify"}, the term \code{stratify(a)} is a special whereas
+\code{targeted::stratify(a)} is not.
+
+The special terms are evaluated by \link[stats:model.frame]{stats::model.frame} in \code{data} with the
+environment of \code{formula} as the enclosing environment. Following the
+lexical scoping rules of R, a special function is thus looked up in the
+environment of \code{formula} (by default the environment in which the formula
+was created) and its parent environments (e.g., the global environment and
+attached packages), but not in the environment from which \code{design()} is
+called. Hence, a special function must be visible from the environment of
+\code{formula}. The environment of \code{formula} is kept in the returned object such
+that the same lookup applies when the design is re-evaluated with
+\link{update.design}.
+
+Note that a special term is dropped (i.e., its field in the returned
+object is \code{NULL}) if any variable referenced in the term is not a column
+of \code{data}, even if the variable exists in the environment of \code{formula}.
+}
+\examples{
+n <- 1e2
+d0 <- data.frame(a = rbinom(n, 1, 0.5), x = rnorm(n), y = rnorm(n))
+d0$w <- runif(n)
+
+dd <- design(y ~ a + x, data = d0)
+list(response = head(dd$y, 2), design.matrix = head(dd$x, 2))
+
+# specials
+# special variable is extracted and removed from design matrix
+dd <- design(y ~ a + x + weights(w), d0, specials = "weights")
+list(weights = head(dd$weights, 2), design.matrix = head(dd$x, 2))
+# declared special variable is missing in formula. the associated field
+# is NULL
+dd <- design(y ~ a + x, d0, specials = "weights")
+list(weights = dd$weights, design.matrix = head(dd$x, 2))
+}
+\seealso{
+\link{update.design}
 }
 \author{
 Klaus Kähler Holst
