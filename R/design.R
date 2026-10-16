@@ -151,8 +151,7 @@ remove_terms <- function(formula, labels, data = NULL) {
 #' # declared special variable is missing in formula. the associated field
 #' # is NULL
 #' dd <- design(y ~ a + x, d0, specials = "weights")
-#' dd$weights
-#' head(dd$x)
+#' list(weights = dd$weights, design.matrix = head(dd$x, 2))
 #' @export
 design <- function(formula, data, ..., # nolint
                    intercept = FALSE,

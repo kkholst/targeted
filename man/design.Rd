@@ -95,8 +95,7 @@ list(weights = head(dd$weights, 2), design.matrix = head(dd$x, 2))
 # declared special variable is missing in formula. the associated field
 # is NULL
 dd <- design(y ~ a + x, d0, specials = "weights")
-dd$weights
-head(dd$x)
+list(weights = dd$weights, design.matrix = head(dd$x, 2))
 }
 \seealso{
 \link{update.design}
