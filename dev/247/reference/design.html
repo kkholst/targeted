@@ -124,6 +124,26 @@ object.</p></dd>
     <p>An object of class 'design'</p>
     </div>
     <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Special terms are identified syntactically by the name of the
+called function (see <a href="https://rdrr.io/r/stats/terms.formula.html" class="external-link">stats::terms.formula</a>). For example, with
+<code>specials = "stratify"</code>, the term <code>stratify(a)</code> is a special whereas
+<code>targeted::stratify(a)</code> is not.</p>
+<p>The special terms are evaluated by <a href="https://rdrr.io/r/stats/model.frame.html" class="external-link">stats::model.frame</a> in <code>data</code> with the
+environment of <code>formula</code> as the enclosing environment. Following the
+lexical scoping rules of R, a special function is thus looked up in the
+environment of <code>formula</code> (by default the environment in which the formula
+was created) and its parent environments (e.g., the global environment and
+attached packages), but not in the environment from which <code>design()</code> is
+called. Hence, a special function must be visible from the environment of
+<code>formula</code>. The environment of <code>formula</code> is kept in the returned object such
+that the same lookup applies when the design is re-evaluated with
+<a href="update.design.html">update.design</a>.</p>
+<p>Note that a special term is dropped (i.e., its field in the returned
+object is <code>NULL</code>) if any variable referenced in the term is not a column
+of <code>data</code>, even if the variable exists in the environment of <code>formula</code>.</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><a href="update.design.html">update.design</a></p></div>
     </div>

@@ -80,6 +80,30 @@ design(
 
 An object of class 'design'
 
+## Details
+
+Special terms are identified syntactically by the name of the called
+function (see
+[stats::terms.formula](https://rdrr.io/r/stats/terms.formula.html)). For
+example, with `specials = "stratify"`, the term `stratify(a)` is a
+special whereas `targeted::stratify(a)` is not.
+
+The special terms are evaluated by
+[stats::model.frame](https://rdrr.io/r/stats/model.frame.html) in `data`
+with the environment of `formula` as the enclosing environment.
+Following the lexical scoping rules of R, a special function is thus
+looked up in the environment of `formula` (by default the environment in
+which the formula was created) and its parent environments (e.g., the
+global environment and attached packages), but not in the environment
+from which `design()` is called. Hence, a special function must be
+visible from the environment of `formula`. The environment of `formula`
+is kept in the returned object such that the same lookup applies when
+the design is re-evaluated with [update.design](update.design.md).
+
+Note that a special term is dropped (i.e., its field in the returned
+object is `NULL`) if any variable referenced in the term is not a column
+of `data`, even if the variable exists in the environment of `formula`.
+
 ## See also
 
 [update.design](update.design.md)
