@@ -252,24 +252,24 @@ lrs <- list(
 sl <- learnerSL$new(estimate.args = list(learners = lrs, nfolds = 2))
 sl$formula # formula of the first base learner
 #> y ~ 1
-#> <environment: 0x5649b59c9790>
+#> <environment: 0x55678dfa7780>
 
 # update the response variable of the super learner and all base learners
 sl$update("z")
 sl$formula
 #> z ~ 1
-#> <environment: 0x5649b59c9790>
+#> <environment: 0x55678dfa7780>
 lapply(sl$learners, \(lr) lr$formula)
 #> $mean
 #> z ~ 1
-#> <environment: 0x5649b59c9790>
+#> <environment: 0x55678dfa7780>
 #> 
 #> $glm
 #> z ~ x1 + x2
-#> <environment: 0x5649b59c9790>
+#> <environment: 0x55678dfa7780>
 #> 
 
 sl$estimate(d)
 sl$predict(head(d))
-#> [1] -0.6737501 -0.8923655 -1.8966800 -1.4373709  2.2343352 -1.2449426
+#> [1]  0.05368882 -0.32306826 -1.02974860  0.57548211  0.37640144 -0.39584702
 ```
