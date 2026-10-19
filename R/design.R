@@ -228,7 +228,7 @@ design <- function(formula, data, ..., # nolint
     if (is.null(xlev)) {
       xlev <- .getXlevels(tt, mf)
     }
-    xlev0 <- xlev
+    ## xlev0 <- xlev
   }
 
   y <- NULL
@@ -294,6 +294,9 @@ design <- function(formula, data, ..., # nolint
   ## }
 
   if (design.matrix) {
+    # mf from the earlier model.frame calls applies the na.action to the
+    # response, predictors and specials. this step just selects the predictors
+    # from mf
     x <- model.matrix(terms(formula0, data = data), data = mf)
 
     if (!intercept && has_intercept) {
