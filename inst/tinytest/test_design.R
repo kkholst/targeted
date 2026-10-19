@@ -104,6 +104,13 @@ test_design_response_factor <- function() {
   # the response vector
   dd_works <- design(y ~ x1, data, levels = list(y = c("a", "b", "c")))
   expect_equal(levels(dd_works$y), c("a", "b", "c"))
+  expect_equal(dd_works$levels$y, c("a", "b", "c"))
+
+  # the same works when design.matrix = FALSE
+  dd0 <- design(y ~ x1, data, levels = list(y = c("a", "b", "c")),
+                design.matrix = FALSE)
+  expect_equal(levels(dd0$y), c("a", "b", "c"))
+  expect_equal(dd0$levels$y, c("a", "b", "c"))
 
   # both work because y and response_ are both elements in levels attribute
   dd2 <- update(dd_works, head(data, 1), response = TRUE,
@@ -145,15 +152,15 @@ test_design_response_factor <- function() {
   expect_equal(res_factor, dd$y)
 
   dd2 <- update(dd, head(data, 1), response = TRUE)
-  expect_equal(levels(dd2$y), c("a","b"))
+  expect_equal(levels(dd2$y), c("a", "b"))
 
   # also works when new data is a character
   dd2 <- update(dd, data.frame(y = "a", x1 = 1, x2=2), response = TRUE)
-  expect_equal(levels(dd2$y), c("a","b"))
+  expect_equal(levels(dd2$y), c("a", "b"))
 
   # adding an extra level works by using the "correct" levels element
   dd <- design(y ~ x1, data, levels = list("response_" = c("a", "b", "c")))
-  expect_equal(levels(dd$y), c("a","b", "c"))
+  expect_equal(levels(dd$y), c("a", "b", "c"))
 
   data <- data.frame(x = c("x", "y"), y = c("a", "b"))
   dd <- design(as.factor(y) ~ x, data)
