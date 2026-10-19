@@ -215,9 +215,10 @@ design <- function(formula, data, ..., # nolint
       # formula with only special-terms
       fs <- reformulate(paste(sterm.list, collapse = " + "))
       fs <- update(formula0, fs)
+
     }
     environment(formula) <- formulaenv
-    mf <- model.frame(fs, data = data, na.action = na.action, ...)
+    mf <- model.frame(fs, data = data, na.action = na.action, ..., xlev = xlev)
   } else { # also extract design matrix
     mf <- model.frame(tt,
                       data = data, ...,
