@@ -196,8 +196,8 @@ design <- function(formula, data, ..., # nolint
     names(args) <- specials_dots_internal
     new_env <- do.call(rlang::env, c(formulaenv, args))
     environment(formula) <- new_env
-    # specials provided via ellipsis will now be treated as specials that
-    # have been in the formula
+    # specials provided via ellipsis will now be treated as specials that are
+    # in the formula
     specials <- union(specials_arg, specials_dots_internal)
   }
 
@@ -235,7 +235,7 @@ design <- function(formula, data, ..., # nolint
     response <- FALSE
   }
 
-  formula0 <- formula # formula0 will be the formula without specials
+  formula0 <- formula # formula0: formula with specials removed
   if (!response) {
     formula0 <- stats::formula(delete.response(terms(formula, data = data)))
     # delete response to generate design matrix when making predictions
