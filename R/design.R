@@ -200,7 +200,6 @@ design <- function(formula, data, ..., # nolint
     # in the formula
     specials <- union(specials_arg, specials_dots_internal)
   }
-
   tt <- terms(formula, data = data, specials = specials)
 
   # Drop specials whose variables are not available in `data`. This lets a
@@ -355,8 +354,8 @@ update.design <- function(object, data = NULL, response = FALSE, levels, ...) {
   if (is.null(data)) data <- object$data
   if (missing(levels)) levels <- object$levels
 
-  # removing ellipsis specials from special argument to reconstruct how
-  # design was initially called
+  # removing ellipsis specials from special argument to reconstruct the initial
+  # call to design that generated this object (first argument of this method)
   specials_call <- names(object$specials.call[-1])
   specials <- setdiff(object$specials, specials_call)
   if (length(specials) == 0L) specials <- NULL
