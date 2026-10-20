@@ -202,8 +202,11 @@ test_design_ellipsis <- function() {
   )
 
   # no error when argument is a vector of length n
+  # TODO: inconsistent behaviour and will be removed later on when restricting
+  # the ellipsis arguments to be formulas
   dd <- design(y ~ x1, ddata, nocolumn = rep(1, n))
-  expect_equal(rep(1, n), unname(dd$nocolumn))
+  expect_true("nocolumn" %in% names(dd))
+  expect_null(dd$nocolumn)
 
   # fails because column cannot be added with model.frame because of differing
   # lengths
@@ -213,6 +216,43 @@ test_design_ellipsis <- function() {
   )
 }
 test_design_ellipsis()
+
+test_design_ellipsis_specials <- function() {
+
+  # environment of formula argument remains untouched
+  ff <- local({
+    ooffset <- offset
+    y ~ ooffset(x1)
+  })
+  dd <- design(ff, ddata, specials = "ooffset", foo = x1)
+  expect_equivalent(dd$foo, ddata$x1)
+  expect_equivalent(dd$ooffset, ddata$x1)
+  # the environment of the formula provided to design remains the same
+  expect_true(identical(environment(dd$formula), environment(ff)))
+  expect_true(identical(environment(dd$formula.original), environment(ff)))
+  # but specials are stripped away
+  expect_equivalent(dd$formula, y ~ 1)
+
+  # specials can also be a user-defined function
+  pp <- function(x) x ** 2
+  dd <- design(y ~ pp(x1), ddata, specials = "pp", foo = pp(x1))
+  expect_equivalent(dd$pp, pp(ddata$x1))
+  expect_equivalent(dd$foo, pp(ddata$x1))
+
+  # ellipsis specials have access to variables that are only defined in the
+  # env of formula // users wouldn't use specials this way. we just verify
+  # that the ellipsis specials are evaluated in the env of formula
+  rm(pp)
+  ff <- local({
+    pp <- function(x) x ** 2
+    y ~ pp(x1)
+  })
+  dd <- design(ff, ddata, specials = "pp", foo = pp(x1))
+  expect_equivalent(dd$pp, environment(ff)$pp(ddata$x1))
+  expect_equivalent(dd$foo, environment(ff)$pp(ddata$x1))
+
+}
+test_design_ellipsis_specials()
 
 # test specials argument
 test_design_specials <- function() {
