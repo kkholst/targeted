@@ -31,12 +31,39 @@ model.extract2 <- function(frame, component) {
   return(rval)
 }
 
+# label of a variable of a terms object as created by terms(), i.e., the row
+# names of the `factors` attribute and the term labels. Equivalent to R's
+# internal deparse1line(), which, unlike deparse1(), drops integer suffixes
+# (e.g., "f(x == 1)" for f(x == 1L)) and joins multiple lines by "\n". dropping
+# integer suffixes is needed to handle strata(a == 1L) where the variable
+# attribute of terms keeps the integer literal (1L) while the factors attribute
+# drops it
+deparse_term <- function(x) {
+  return(paste(
+    deparse(x, width.cutoff = 500L, backtick = TRUE, control = NULL),
+    collapse = "\n"
+  ))
+}
+
+# labels of the special terms (e.g. "weights(w)") of a terms object, optionally
+# restricted to the specials named in `specials`. The positions in the
+# `specials` attribute refer to the `variables` attribute. The row names of the
+# `factors` attribute can not be used, since the factors matrix is empty if the
+# right-hand side only consists of offset terms (#248)
+specials_labels <- function(terms, specials = NULL) {
+  pos <- attr(terms, "specials")
+  if (!is.null(specials)) pos <- pos[specials]
+  pos <- unlist(pos, use.names = FALSE)
+  vars <- as.list(attr(terms, "variables"))[-1L]
+  return(vapply(vars[pos], deparse_term, character(1)))
+}
+
 # extract variables of special terms. Returns results in a named list
 Specials <- function(formula, spec, split1 = ",", split2 = NULL, ...) {
   tt <- terms(formula, spec)
   pos <- attributes(tt)$specials[[spec]]
   if (is.null(pos)) return(NULL)
-  x <- rownames(attributes(tt)$factors)[pos]
+  x <- specials_labels(tt, spec)
   st <- gsub(" ", "", x) ## trim
   spec <- unlist(strsplit(st, "[()]"))[[1]]
   res <- substr(st, nchar(spec) + 2, nchar(st) - 1)
@@ -55,9 +82,8 @@ Specials <- function(formula, spec, split1 = ",", split2 = NULL, ...) {
 # labels of special terms (e.g. "weights(w)") whose variables are not all
 # present in `data`
 specials_unavailable <- function(terms, data) {
-  pos <- unlist(attr(terms, "specials"))
-  if (length(pos) < 1) return(character(0))
-  labels <- rownames(attr(terms, "factors"))[pos]
+  labels <- specials_labels(terms)
+  if (length(labels) < 1) return(character(0))
   unavailable <- vapply(labels, function(lab) {
     vars <- all.vars(str2lang(lab))
     # skip pathological cases (e.g. `.` inside a special) to avoid false drops
@@ -76,7 +102,7 @@ remove_terms <- function(formula, labels, data = NULL) {
   tt <- terms(formula, data = data)
   vars <- attr(tt, "variables")
   offset.labels <- vapply(
-    attr(tt, "offset"), function(i) deparse1(vars[[i + 1]]), character(1)
+    attr(tt, "offset"), function(i) deparse_term(vars[[i + 1]]), character(1)
   )
   keep <- setdiff(c(attr(tt, "term.labels"), offset.labels), labels)
   if (length(keep) < 1) keep <- "1"
@@ -179,11 +205,7 @@ design <- function(formula, data, ..., # nolint
   term.labels <- attr(tt, "term.labels") # predictors
   sterm.list <- c()
   if (length(specials) > 0) {
-    des <- attr(tt, "factors")
-    for (s in specials) {
-      sterm <- rownames(des)[attr(tt, "specials")[[s]]]
-      sterm.list <- c(sterm.list, sterm)
-    }
+    sterm.list <- specials_labels(tt, specials)
     # predictors without the specials
     term.labels <- setdiff(term.labels, unlist(sterm.list))
     # remove special terms from formula
@@ -209,7 +231,6 @@ design <- function(formula, data, ..., # nolint
   xlev <- levels
   xlev[["response_"]] <- NULL
   if (!design.matrix) { # only extract specials, response
-    des <- attr(tt, "factors")
     fs <- update(formula0, ~1)
     if (length(sterm.list) > 0) {
       # formula with only special-terms
