@@ -139,6 +139,17 @@ design <- function(formula, data, ..., # nolint
 
   dots <- substitute(list(...))
   dots.names <- names(dots)[-1L]
+  # TODO: will refactor this later when removing the specials.call argument
+  if (!is.null(dots.names) && !is.null(specials.call)) {
+    stop("Don't provide specials via ... and specials.call at the same time.")
+  }
+  if (!is.null(specials.call)) {
+    # update.design path when the s3 method calls design with the specials.call
+    # argument
+    dots <- specials.call
+    dots.names <- names(dots)[-1L]
+  }
+
   if (is.null(dots.names)) dots.names <- character(length(dots) - 1L)
   # `...` is forwarded to model.frame() right after `data`. Unnamed arguments
   # would be matched by position (and abbreviated names such as `sub` by
@@ -329,7 +340,7 @@ design <- function(formula, data, ..., # nolint
       design.matrix = design.matrix,
       intercept = has_intercept,
       data = data[0, ], ## Empty data.frame to capture structure of data
-      specials = specials,
+      specials = names(specials.var),
       na.action = na.action,
       specials.var = specials.var,
       specials.call = specials.call
@@ -343,17 +354,22 @@ design <- function(formula, data, ..., # nolint
 update.design <- function(object, data = NULL, response = FALSE, levels, ...) {
   if (is.null(data)) data <- object$data
   if (missing(levels)) levels <- object$levels
-  return(
-    design(object$formula.original,
-      data = data,
-      design.matrix = object$design.matrix,
-      levels = levels,
-      intercept = object$intercept,
-      specials = object$specials,
-      specials.call = object$specials.call,
-      na.action = object$na.action,
-      response = response
-    )
+
+  # removing ellipsis specials from special argument to reconstruct how
+  # design was initially called
+  specials_call <- names(object$specials.call[-1])
+  specials <- setdiff(object$specials, specials_call)
+  if (length(specials) == 0L) specials <- NULL
+
+  design(object$formula.original,
+         data = data,
+         design.matrix = object$design.matrix,
+         levels = levels,
+         intercept = object$intercept,
+         specials = specials,
+         specials.call = object$specials.call,
+         na.action = object$na.action,
+         response = response
   )
 }
 

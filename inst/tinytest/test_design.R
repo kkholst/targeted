@@ -225,6 +225,8 @@ test_design_ellipsis_specials <- function() {
     y ~ ooffset(x1)
   })
   dd <- design(ff, ddata, specials = "ooffset", foo = x1)
+  # creates foo special even though foo does not exist in the current env
+  expect_error(foo, "object 'foo' not found")
   expect_equivalent(dd$foo, ddata$x1)
   expect_equivalent(dd$ooffset, ddata$x1)
   # the environment of the formula provided to design remains the same
@@ -251,6 +253,28 @@ test_design_ellipsis_specials <- function() {
   expect_equivalent(dd$pp, environment(ff)$pp(ddata$x1))
   expect_equivalent(dd$foo, environment(ff)$pp(ddata$x1))
 
+  # variables of specials are only looked up in data and not in the environment
+  # of the formula
+  dd <- design(y ~ 1 + x1, ddata, foo = x1)
+  expect_equivalent(dd$x[, "x1"], dd$foo)
+
+  dd <- local({
+    x11 <- 1
+    design(y ~ 1, ddata, foo = x11)
+  })
+  expect_true("foo" %in% names(dd) && is.null(dd$foo))
+  expect_equal("foo", dd$specials) # special name exists in specials field
+
+  # TODO: tests should be moved into a seperate test function
+  # update method will correctly use x11 if it exists in data
+  ddnew <- cbind(head(ddata), x11 = 1:6)
+  ddupd <- update(dd, ddnew)
+  expect_equivalent(ddupd$foo, 1:6)
+
+  # drop it again when it doesn't exist in data
+  ddupd1 <- update(ddupd, head(ddata))
+  expect_null(ddupd1$foo)
+  expect_equal(ddupd1$specials, "foo")
 }
 test_design_ellipsis_specials()
 
