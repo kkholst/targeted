@@ -118,12 +118,21 @@ predict.estimate.mmrm <- function(object, newdata = NULL, time = NULL,
   if (length(Sig) > 1L) g <- as.character(d[[fp$group_var]][first])
 
   pred <- ifelse(is.na(r[, time]), NA_real_, y[, time])
+  cache <- new.env(hash = TRUE, parent = emptyenv())
   observed <- !is.na(pred)
   for (i in which(!observed)) {
-    S <- Sig[[g[i]]]
     O <- which(!is.na(r[i, ]))
-    pred[i] <- mu[i, time] + if (length(O) == 0L) 0 else
-      sum(S[time, O] * solve(S[O, O, drop = FALSE], r[i, O]))
+    pred[i] <- mu[i, time]
+    if (length(O) == 0L) next
+    # hash/key: variance group, missing pattern
+    key <- paste0(g[i], ":", paste(O, collapse = ","))
+    w <- get0(key, envir = cache, inherits = FALSE) # NULL if key not found
+    if (is.null(w)) { # calculate and cache
+      S <- Sig[[g[i]]]
+      w <- solve(S[O, O, drop = FALSE], S[O, time])
+      assign(key, w, envir = cache)
+    }
+    pred[i] <- pred[i] + sum(w * r[i, O])
   }
   structure(pred, names = as.character(d[[fp$subject_var]][first]),
             observed = observed, time = time)
