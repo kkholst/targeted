@@ -3,10 +3,10 @@
 Constructs a [learner](learner.md) class object for fitting entire lasso
 or elastic-net regularization paths for various linear and non-linear
 regression models with
-[glmnet::cv.glmnet](https://rdrr.io/pkg/glmnet/man/cv.glmnet.html).
+[glmnet::cv.glmnet](https://glmnet.stanford.edu/reference/cv.glmnet.html).
 Predictions are returned for the value of `lambda` that gives minimum
 `cvm`. That is,
-[glmnet::predict.cv.glmnet](https://rdrr.io/pkg/glmnet/man/predict.cv.glmnet.html)
+[glmnet::predict.cv.glmnet](https://glmnet.stanford.edu/reference/predict.cv.glmnet.html)
 is called with `s = "lambda.min"`.
 
 ## Usage
@@ -92,7 +92,7 @@ d0 <- data.frame(y, x1, x2)
 lr <- learner_glmnet_cv(y ~ x1 + x2)
 lr$estimate(d0, nfolds = 3)
 lr$predict(data.frame(x1 = c(0, 1), x2 = 1))
-#> [1] 0.1368843 1.1173389
+#> [1] 0.06141835 0.92385937
 
 # count outcome with different exposure time
 w <- 50 + rexp(n, rate = 1 / 5)
@@ -102,5 +102,5 @@ d0 <- data.frame(y, x1, x2, w)
 lr <- learner_glmnet_cv(y ~ x1 + x2 + offset(log(w)), family = "poisson")
 lr$estimate(d0, nfolds = 3)
 lr$predict(data.frame(x1 = 1, x2 = 1, w = c(1, 5)))
-#> [1] 0.6290245 3.1451226
+#> [1] 0.6192883 3.0964415
 ```

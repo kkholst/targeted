@@ -100,5 +100,7 @@
   intersection test
 - [`test_zmax_onesided()`](test_zmax_onesided.md) : One-sided Zmax test
 - [`truncatedscore`](truncatedscore.md) : Scores truncated by death
+- [`update(`*`<design>`*`)`](update.design.md) : Update method for
+  design
 - [`weights(`*`<superlearner>`*`)`](weights.superlearner.md) : Extract
   ensemble weights
