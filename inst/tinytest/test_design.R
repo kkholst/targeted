@@ -280,9 +280,47 @@ test_design_ellipsis_specials()
 
 # test specials argument
 test_design_specials <- function() {
+
+  # don't allow duplicated specials
+  expect_error(
+    design(y ~ offset(x1) + offset(x2), ddata, specials = "offset"),
+    pattern = "Duplicated special"
+  )
+
+  # specials argument needs to be a character
+  expect_error(
+    design(y ~ offset(x1), ddata, specials = offset),
+    pattern = "The special argument must be a character vector."
+  )
+
+  # defined special function does not exist in the environment
+  expect_error(
+    design(y ~ ooffset(x1), ddata, specials = "ooffset"),
+    pattern = "could not find function"
+  )
+
+  # variables only defined in the calling.frame of design are not looked up
+  # that's the same behaviour as with model.frame
+  ff <- function(formula) {
+    ooffset <- identity
+    design(formula, ddata, specials = "ooffset")
+  }
+  expect_error(
+    ff(y ~ ooffset(x1)),
+    pattern = "could not find function \"ooffset\""
+  )
+
+  # function is correctly looked up in the environment of the formula
+  ff <- local({
+    ooffset <- offset
+    y ~ ooffset(x1)
+  })
+  dd <- design(ff, ddata, specials = "ooffset")
+  expect_equivalent(dd$ooffset, ddata$x1)
+
   # offset is correctly identified as a special variable and not added as a
   # covariate
-  dd <- design(y ~ offset(x1), ddata, specials="offset")
+  dd <- design(y ~ offset(x1), ddata, specials = "offset")
 
   expect_equal(ncol(dd$x), 0)
   offset_expect <- ddata$x1
@@ -305,6 +343,7 @@ test_design_specials <- function() {
   # specifying a variable accidentally doesn't have an effect
   dd <- design(y ~ x1, ddata, specials = "x1")
   expect_equivalent(as.matrix(ddata$x1), dd$x)
+
 
   # a user defined specials is handled correctly
   sq <- identity # nolint
@@ -872,6 +911,11 @@ test_design_specials_missing_var <- function() {
   expect_true(is.null(dd5$stratify))
   expect_equal(colnames(dd5$x), "x1")
 
+  # same applies for specials which rely on variables in the global env
+  thr <- 1
+  dd6 <- design(y ~ x1 + weights(x1 < thr), d2, specials = "weights")
+  expect_null(dd6$weights)
+
   # print() should not list a dropped special under "specials"
   expect_stdout(print(dd_upd), "design matrix")
   # (specifically: 'weights' should not appear in the specials section)
@@ -904,10 +948,41 @@ test_design_specials_missing_var <- function() {
 }
 test_design_specials_missing_var()
 
+# offset as the only term on the right-hand side of the formula (#248)
+test_design_offset_only <- function() {
+  d <- data.frame(
+    y = c(1.2, 0.4, 2.1, 1.7, 0.9),
+    x = c(0.1, 0.5, 0.3, 0.9, 0.7),
+    z = c(2, 1, 3, 1, 2)
+  )
+
+  # offset is removed from the formula and its variables are registered, as
+  # for formulas with additional terms
+  dd <- design(y ~ offset(z), d, specials = "offset")
+  expect_equivalent(dd$offset, d$z)
+  expect_equal(deparse(dd$formula), "y ~ 1")
+  expect_equal(dd$specials.var, list(offset = "z"))
+  expect_equal(ncol(dd$x), 0)
+
+  # offset is extracted when only the response and specials are requested
+  dd <- design(y ~ offset(z), d, specials = "offset", design.matrix = FALSE)
+  expect_equivalent(dd$offset, d$z)
+  expect_equivalent(update(dd, d[1:2, ])$offset, d$z[1:2])
+
+  # offset whose variable is not a column of `data` is dropped instead of
+  # throwing an error ...
+  dd <- design(y ~ offset(w), d, specials = "offset")
+  expect_null(dd$offset)
+  expect_equal(deparse(dd$formula), "y ~ 1")
+}
+test_design_offset_only()
+
 # unit tests for the internal helpers
 test_design_internal_helpers <- function() {
   remove_terms <- targeted:::remove_terms
   specials_unavailable <- targeted:::specials_unavailable
+  specials_labels <- targeted:::specials_labels
+  deparse_term <- targeted:::deparse_term
 
   # remove a single term
   expect_equal(deparse(remove_terms(y ~ x + weights(w), "weights(w)")),
@@ -946,5 +1021,36 @@ test_design_internal_helpers <- function() {
   # no specials declared -> nothing to report
   tt0 <- terms(y ~ x)
   expect_equal(length(specials_unavailable(tt0, data.frame(x = 1))), 0)
+  # offset as the only term (#248)
+  tt <- terms(y ~ offset(z), specials = "offset")
+  expect_equal(specials_unavailable(tt, data.frame(y = 1)), "offset(z)")
+  expect_equal(length(specials_unavailable(tt, data.frame(y = 1, z = 1))), 0)
+
+  # specials_labels: labels of the special terms, also if the right-hand side
+  # only consists of an offset (#248)
+  expect_equal(specials_labels(tt), "offset(z)")
+  tt <- terms(y ~ x + weights(w) + offset(z),
+              specials = c("weights", "offset"))
+  expect_equal(specials_labels(tt), c("weights(w)", "offset(z)"))
+  expect_equal(specials_labels(tt, "offset"), "offset(z)")
+  expect_equal(specials_labels(tt, c("offset", "weights")),
+               c("offset(z)", "weights(w)"))
+  expect_equal(specials_labels(tt0), character(0))
+
+  # deparse_term: identical to the labels created by terms(), e.g., for integer
+  # literals, typed NAs, non-syntactic names and multi-line expressions
+  f <- as.formula(paste(
+    "y ~ `a b` + f(x == 1L) + g(NA_integer_) + h(",
+    paste(rep("xxxxxxxxxx", 60), collapse = " + "), ")"
+  ))
+  tt <- terms(f)
+  expect_equal(
+    vapply(as.list(attr(tt, "variables"))[-1L], deparse_term, character(1)),
+    rownames(attr(tt, "factors"))
+  )
+  # offsets are hence matched by the labels created by terms()
+  expect_equal(
+    deparse(remove_terms(y ~ x + offset(1L * z), "offset(1 * z)")), "y ~ x"
+  )
 }
 test_design_internal_helpers()
