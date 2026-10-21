@@ -365,22 +365,6 @@ test_design_transformations <- function() {
 }
 test_design_transformations()
 
-# test behavior of design for handling NA values in data
-test_design_na_handling <- function() {
-  # handle NA values
-  ddata_na <- ddata
-  ddata_na[1, "x1"] <- NA
-
-  dd <- design(y ~ x1 * x2, ddata_na)
-  dd_expect <- cbind(ddata_na[, c("x1", "x2")], ddata_na$x1 * ddata_na$x2) |>
-    as.matrix()
-  # remove rows with NAs
-  expect_equivalent(dd$x, dd_expect[-1, ])
-  # same behavior without interactions
-  dd <- design(y ~ x1 + x2, ddata_na)
-  expect_equivalent(dd$x, as.matrix(ddata[-1, c("x1", "x2")]))
-}
-test_design_na_handling()
 
 # test behavior of design with factor variables
 test_design_factor <- function() {
@@ -621,15 +605,46 @@ test_design_formula_env()
 test_design_na_action <- function() {
   ddata_na <- ddata
   ddata_na[1:3, "x1"] <- NA
+  n <- nrow(ddata_na)
 
   # default na.omit removes rows with NAs
   dd <- design(y ~ x1, ddata_na)
   expect_equal(nrow(dd$x), n - 3)
+  expect_equal(length(dd$y), n - 3)
+
+  # na.omit only applies the defined predictors
+  dd <- design(y ~ x2, ddata_na)
+  expect_equal(nrow(dd$x), n)
+
+  dd <- design(y ~ x1, ddata_na, response = FALSE)
+  expect_equal(nrow(dd$x), n - 3)
+  expect_null(dd$y)
+
+  # ignore missing predictor variables for design.matrix = FALSE
+  dd <- design(y ~ x1, ddata_na, design.matrix = FALSE)
+  expect_null(dd$x)
+  expect_equal(length(dd$y), n)
+
+  # now with missing response variable
+  d0 <- ddata
+  d0[1:3, "y"] <- NA
+  dd <- design(y ~ x1, d0)
+  expect_equal(nrow(dd$x), n - 3)
+  expect_equal(length(dd$y), n - 3)
+
+  dd <- design(y ~ x1, d0, response = FALSE)
+  expect_equal(nrow(dd$x), n)
+  expect_null(dd$y)
+
+  dd <- design(y ~ x1, d0, design.matrix = FALSE)
+  expect_null(dd$x)
+  expect_equal(length(dd$y), n - 3)
 
   # na.action is stored in the design object
   expect_identical(dd$na.action, na.omit)
 
   # explicit na.omit gives same result as default
+  dd <- design(y ~ x1, ddata_na)
   dd_explicit <- design(y ~ x1, ddata_na, na.action = na.omit)
   expect_equivalent(dd$x, dd_explicit$x)
 
@@ -643,8 +658,141 @@ test_design_na_action <- function() {
   dd_upd <- update(dd_pass, ddata_na, response = TRUE)
   expect_equal(nrow(dd_upd$x), n)
   expect_identical(dd_upd$na.action, na.pass)
+
+  # custom function
+  na_custom <- function(object, ...) {
+    object[is.na(object$x1), "x1"] <- 1
+    object
+  }
+  dd_custom <- design(y ~ x1, ddata_na, na.action = na_custom)
+  expect_true(all(dd_custom$x[1:3] == 1))
 }
 test_design_na_action()
+
+# test na.action parameter with specials
+test_design_na_action_specials <- function() {
+  d0 <- ddata
+  d0[1:3, "x1"] <- NA
+  d0$w <- runif(nrow(d0))
+  n <- nrow(d0)
+
+  # default na.omit removes rows with NAs in predictors from the design
+  # matrix, the response and the specials
+  dd <- design(y ~ x1 + weights(w), d0, specials = "weights")
+  expect_equal(nrow(dd$x), n - 3)
+  expect_equal(length(dd$y), n - 3)
+  expect_equal(length(dd$weights), n - 3)
+  # rows of design matrix, response and specials remain aligned
+  expect_equivalent(dd$weights, d0$w[-(1:3)])
+  expect_equal(names(dd$weights), names(dd$y))
+  expect_equal(names(dd$weights), rownames(dd$x))
+
+  # na.omit only applies to the variables in the formula
+  dd <- design(y ~ x2 + weights(w), d0, specials = "weights")
+  expect_equal(nrow(dd$x), n)
+  expect_equal(length(dd$weights), n)
+
+  dd <- design(y ~ x1 + weights(w), d0, specials = "weights", response = FALSE)
+  expect_equal(nrow(dd$x), n - 3)
+  expect_null(dd$y)
+  expect_equal(length(dd$weights), n - 3)
+
+  # ignore missing predictor variables for design.matrix = FALSE
+  dd <- design(y ~ x1 + weights(w), d0, specials = "weights",
+               design.matrix = FALSE)
+  expect_null(dd$x)
+  expect_equal(length(dd$y), n)
+  expect_equal(length(dd$weights), n)
+
+  # now with missing response variable
+  d1 <- ddata
+  d1$w <- d0$w
+  d1[1:3, "y"] <- NA
+  dd <- design(y ~ x1 + weights(w), d1, specials = "weights")
+  expect_equal(nrow(dd$x), n - 3)
+  expect_equal(length(dd$y), n - 3)
+  expect_equal(length(dd$weights), n - 3)
+
+  dd <- design(y ~ x1 + weights(w), d1, specials = "weights", response = FALSE)
+  expect_equal(nrow(dd$x), n)
+  expect_null(dd$y)
+  expect_equal(length(dd$weights), n)
+
+  dd <- design(y ~ x1 + weights(w), d1, specials = "weights",
+               design.matrix = FALSE)
+  expect_null(dd$x)
+  expect_equal(length(dd$y), n - 3)
+  expect_equal(length(dd$weights), n - 3)
+
+  # now with missing special variable
+  d2 <- ddata
+  d2$w <- d0$w
+  d2[1:3, "w"] <- NA
+  dd <- design(y ~ x1 + weights(w), d2, specials = "weights")
+  expect_equal(nrow(dd$x), n - 3)
+  expect_equal(length(dd$y), n - 3)
+  expect_equal(length(dd$weights), n - 3)
+
+  dd <- design(y ~ x1 + weights(w), d2, specials = "weights", response = FALSE)
+  expect_equal(nrow(dd$x), n - 3)
+  expect_null(dd$y)
+  expect_equal(length(dd$weights), n - 3)
+
+  dd <- design(y ~ x1 + weights(w), d2, specials = "weights",
+               design.matrix = FALSE)
+  expect_null(dd$x)
+  expect_equal(length(dd$y), n - 3)
+  expect_equal(length(dd$weights), n - 3)
+
+  # declared specials which are not part of the formula are ignored
+  dd <- design(y ~ x1, d2, specials = "weights")
+  expect_equal(nrow(dd$x), n)
+  expect_equal(length(dd$y), n)
+  expect_null(dd$weights)
+
+  # rows with NAs in either predictors or specials are removed
+  d3 <- d0
+  d3[4:6, "w"] <- NA
+  dd <- design(y ~ x1 + weights(w), d3, specials = "weights")
+  expect_equal(nrow(dd$x), n - 6)
+  expect_equal(length(dd$y), n - 6)
+  expect_equal(length(dd$weights), n - 6)
+
+  # na.action is stored in the design object
+  expect_identical(dd$na.action, na.omit)
+
+  # explicit na.omit gives same result as default
+  dd_explicit <- design(y ~ x1 + weights(w), d3, specials = "weights",
+                        na.action = na.omit)
+  expect_equivalent(dd$x, dd_explicit$x)
+  expect_equivalent(dd$weights, dd_explicit$weights)
+
+  # na.pass keeps all rows including NAs
+  dd_pass <- design(y ~ x1 + weights(w), d3, specials = "weights",
+                    na.action = na.pass)
+  expect_equal(nrow(dd_pass$x), n)
+  expect_equal(length(dd_pass$weights), n)
+  expect_true(all(is.na(dd_pass$x[1:3, ])))
+  expect_true(all(is.na(dd_pass$weights[4:6])))
+  expect_identical(dd_pass$na.action, na.pass)
+
+  # na.action is forwarded through update
+  dd_upd <- update(dd_pass, d3, response = TRUE)
+  expect_equal(nrow(dd_upd$x), n)
+  expect_equal(length(dd_upd$weights), n)
+  expect_identical(dd_upd$na.action, na.pass)
+
+  # custom function
+  na_custom <- function(object, ...) {
+    object[is.na(object)] <- 1
+    object
+  }
+  dd_custom <- design(y ~ x1 + weights(w), d3, specials = "weights",
+                      na.action = na_custom)
+  expect_true(all(dd_custom$x[1:3] == 1))
+  expect_true(all(dd_custom$weights[4:6] == 1))
+}
+test_design_na_action_specials()
 
 # test tolerance of specials whose variables are absent from `data`
 test_design_specials_missing_var <- function() {

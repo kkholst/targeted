@@ -302,7 +302,7 @@ design <- function(formula, data, ..., # nolint
     if (is.null(xlev)) {
       xlev <- .getXlevels(tt, mf)
     }
-    xlev0 <- xlev
+    ## xlev0 <- xlev
   }
 
   y <- NULL
@@ -345,30 +345,34 @@ design <- function(formula, data, ..., # nolint
     }
     names(specials.var) <- specials
     names(specials.list) <- specials
-    if (length(sterm.list) > 0) {
-      if (design.matrix) {
-        xlev0[sterm.list] <- NULL
-        mf <- model.frame(formula0,
-                          data = data, ...,
-                          xlev = xlev0,
-                          na.action = na.action,
-                          drop.unused.levels = FALSE
-                          )
-      }
-    }
+    ## if (length(sterm.list) > 0) {
+    ##   if (design.matrix) {
+    ##     xlev0[sterm.list] <- NULL
+    ##     ## mf <- model.frame(formula0,
+    ##     ##                   data = data, ...,
+    ##     ##                   xlev = xlev0,
+    ##     ##                   na.action = na.action,
+    ##     ##                   drop.unused.levels = FALSE
+    ##     ##                   )
+    ##   }
+    ## }
   }
 
-  if (!is.null(specials.call)) {
-    specials.list2 <- eval(specials.call, data)
-    for (n in names(specials.list2)) {
-      if (is.null(specials.list[[n]])) {
-        specials.list[[n]] <- specials.list2[[n]]
-      }
-    }
-  }
+  ## if (!is.null(specials.call)) {
+  ##   specials.list2 <- eval(specials.call, data)
+  ##   for (n in names(specials.list2)) {
+  ##     if (is.null(specials.list[[n]])) {
+  ##       specials.list[[n]] <- specials.list2[[n]]
+  ##     }
+  ##   }
+  ## }
 
   if (design.matrix) {
-    x <- model.matrix(mf, data=mf)
+    # mf from the earlier model.frame calls applies the na.action to the
+    # response, predictors and specials. this step just selects the predictors
+    # from mf
+    x <- model.matrix(terms(formula0, data = data), data = mf)
+
     if (!intercept && has_intercept) {
       has_intercept <- FALSE
       x <- x[, -1, drop = FALSE]
