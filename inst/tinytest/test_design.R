@@ -216,9 +216,47 @@ test_design_ellipsis()
 
 # test specials argument
 test_design_specials <- function() {
+
+  # don't allow duplicated specials
+  expect_error(
+    design(y ~ offset(x1) + offset(x2), ddata, specials = "offset"),
+    pattern = "Duplicated special"
+  )
+
+  # specials argument needs to be a character
+  expect_error(
+    design(y ~ offset(x1), ddata, specials = offset),
+    pattern = "The special argument must be a character vector."
+  )
+
+  # defined special function does not exist in the environment
+  expect_error(
+    design(y ~ ooffset(x1), ddata, specials = "ooffset"),
+    pattern = "could not find function"
+  )
+
+  # variables only defined in the calling.frame of design are not looked up
+  # that's the same behaviour as with model.frame
+  ff <- function(formula) {
+    ooffset <- identity
+    design(formula, ddata, specials = "ooffset")
+  }
+  expect_error(
+    ff(y ~ ooffset(x1)),
+    pattern = "could not find function \"ooffset\""
+  )
+
+  # function is correctly looked up in the environment of the formula
+  ff <- local({
+    ooffset <- offset
+    y ~ ooffset(x1)
+  })
+  dd <- design(ff, ddata, specials = "ooffset")
+  expect_equivalent(dd$ooffset, ddata$x1)
+
   # offset is correctly identified as a special variable and not added as a
   # covariate
-  dd <- design(y ~ offset(x1), ddata, specials="offset")
+  dd <- design(y ~ offset(x1), ddata, specials = "offset")
 
   expect_equal(ncol(dd$x), 0)
   offset_expect <- ddata$x1
@@ -241,6 +279,7 @@ test_design_specials <- function() {
   # specifying a variable accidentally doesn't have an effect
   dd <- design(y ~ x1, ddata, specials = "x1")
   expect_equivalent(as.matrix(ddata$x1), dd$x)
+
 
   # a user defined specials is handled correctly
   sq <- identity # nolint
@@ -659,6 +698,11 @@ test_design_specials_missing_var <- function() {
   dd5 <- design(y ~ x1 + stratify(x2, w), d2, specials = "stratify")
   expect_true(is.null(dd5$stratify))
   expect_equal(colnames(dd5$x), "x1")
+
+  # same applies for specials which rely on variables in the global env
+  thr <- 1
+  dd6 <- design(y ~ x1 + weights(x1 < thr), d2, specials = "weights")
+  expect_null(dd6$weights)
 
   # print() should not list a dropped special under "specials"
   expect_stdout(print(dd_upd), "design matrix")
