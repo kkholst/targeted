@@ -126,9 +126,9 @@ Predict arguments:
 Formula: y ~ age * bili
 ─────────────────────────────────────
           score     weight
-glm1 0.09822996 0.34542451
-glm2 0.10773240 0.06273344
-gam  0.09737508 0.59184204</code></pre>
+glm1 0.09777926 0.31576644
+glm2 0.10745710 0.05525077
+gam  0.09676167 0.62898279</code></pre>
 </div>
 </div>
 <p>Most constructors have additional arguments that impact the resulting model fit, ranging from the specification of a link function for generalized linear models to hyper hyperparameters of machine learning models. Arguments naturally vary between the constructors and are documented for each function (e.g. <code><a href="../reference/learner_gam.html">?learner_gam</a></code>). The implemented constructors only provide arguments for the most relevant parameters of the underlying fit function (<code><a href="https://rdrr.io/pkg/mgcv/man/gam.html" class="external-link">mgcv::gam</a></code> in case of <code>learner_gam</code>). As described in the documentation, the ellipsis argument (<code>...</code>) can be used to pass additional arguments to the fit function. However, in most situations this is rarely required.</p>
@@ -238,8 +238,8 @@ Formula: y ~ age + sex + bili </code></pre>
         list(params = xgb_params)), )
     return(res)
 }
-&lt;bytecode: 0x583271eb1040&gt;
-&lt;environment: 0x58326e473c38&gt;</code></pre>
+&lt;bytecode: 0x5c3cee869d38&gt;
+&lt;environment: 0x5c3ceb84dbf8&gt;</code></pre>
 </div>
 </div>
 <p>Rare situations may arise where one wants to update the formula argument. This supported and implemented via the <code>update</code> method</p>
@@ -289,8 +289,8 @@ Formula: y ~ age + sex + bili </code></pre>
 5-fold cross-validation with 2 repetitions
 
            mse       mae
-glm 0.10728106 0.2126634
-gam 0.09924413 0.1895694</code></pre>
+glm 0.10707978 0.2125482
+gam 0.09673361 0.1865648</code></pre>
 </div>
 </div>
 </section><section class="level2"><h3 id="prediction-filter">Prediction filter<a class="anchor" aria-label="anchor" href="#prediction-filter"></a>
@@ -444,9 +444,9 @@ Estimate arguments: learners=&lt;list&gt;, nfolds=2
 Predict arguments:
 Formula: NULL
 ─────────────────────────────────────
-        score weight
-glm 0.1061497      1
-gam 0.1085439      0</code></pre>
+        score     weight
+glm 0.1065698 0.97376939
+gam 0.1071697 0.02623061</code></pre>
 </div>
 </div>
 <p>In this case, all arguments provided to <code>lr$estimate</code> are joined together with the specified <code>estimate.args</code> and passed on to the defined estimate function (i.e. <code>superlearner</code>).</p>
@@ -489,7 +489,7 @@ gam 0.1085439      0</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>function (object, ...)
 object
-&lt;bytecode: 0x58326e9467e0&gt;
+&lt;bytecode: 0x5c3cee02deb0&gt;
 &lt;environment: namespace:targeted&gt;</code></pre>
 </div>
 </div>
