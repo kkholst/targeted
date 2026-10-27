@@ -144,11 +144,6 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #'   available for ATE and when `calibration.model` is also specified)
 #' @param second.order add seconder order term to IF to handle misspecification
 #'   of outcome models
-#' @param response_model Deprecated. Use response.model instead.
-#' @param propensity_model Deprecated. Use treatment.model instead.
-#' @param cate_model Deprecated. Use cate.model instead.
-#' @param treatment Deprecated. Use cate.model instead.
-#' @param propensity.model Deprecated. Use treatment.model instead.
 #' @return cate.targeted object
 #' @author Klaus Kähler Holst, Andreas Nordland
 #' @references Mark J. van der Laan (2006) Statistical Inference for Variable
@@ -233,51 +228,53 @@ cate <- function(response.model, # nolint
                  mc.cores = NULL,
                  var.type = "IC",
                  second.order = TRUE,
-                 response_model = deprecated,
-                 cate_model = deprecated,
-                 propensity_model = deprecated,
-                 propensity.model = deprecated,
-                 treatment = deprecated,
                  ...) {
+  # Deprecated arguments are not part of the function definition. When
+  # supplied, they are captured by `...`, except for `treatment`, which may be
+  # partially matched to `treatment.model`. Hence, inspect the call with the
+  # argument names as supplied, warn, and re-dispatch with the new names.
+  deprecated_args <- c( # deprecated argument = new argument
+    response_model = "response.model",
+    cate_model = "cate.model",
+    propensity_model = "treatment.model",
+    propensity.model = "treatment.model",
+    treatment = "cate.model"
+  )
+  # `...` of a calling function are expanded to `..1`, `..2`, etc. such that
+  # the re-dispatched call evaluates them in their original environment
+  mc <- match.call(function(...) NULL, sys.call(), envir = parent.frame())
+  if (any(names(mc) %in% names(deprecated_args))) {
+    # match the call as if the deprecated arguments were still part of the
+    # function definition to name positional arguments as before
+    def <- sys.function()
+    fargs <- formals(def)
+    dargs <- rep(alist(x = ), length(deprecated_args))
+    names(dargs) <- names(deprecated_args)
+    formals(def) <- c(fargs[names(fargs) != "..."], dargs, fargs["..."])
+    mc <- match.call(def, sys.call(), envir = parent.frame())
+    arg_names <- names(mc)
+    is_old <- arg_names %in% names(deprecated_args)
+    arg_names[is_old] <- deprecated_args[arg_names[is_old]]
+    for (new in unique(arg_names[is_old])) {
+      supplied <- names(mc)[arg_names == new]
+      if (length(supplied) > 1) {
+        stop(
+          "Arguments ", paste0("`", supplied, "`", collapse = " and "),
+          " of `cate()` cannot be used together. ",
+          "Please use only the `", new, "` argument.",
+          call. = FALSE
+        )
+      }
+      deprecate_arg_warn(supplied, new, "cate", "1.0.0")
+    }
+    names(mc) <- arg_names
+    return(eval(mc, parent.frame()))
+  }
 
   cl <- match.call()
   n <- nrow(data)
   if (inherits(data, c("data.table", "tbl_df"))) {
     data <- as.data.frame(data)
-  }
-
-  dvers <- "1.0.0"
-  if (!missing(response_model)) {
-    deprecate_arg_warn("response_model", "response.model", "cate", dvers)
-    response.model <- response_model
-  }
-
-  if (!missing(propensity_model)) {
-    deprecate_arg_warn("propensity_model", "treatment.model", "cate", dvers)
-    treatment.model <- propensity_model
-  }
-
-  if (!missing(propensity.model)) {
-    deprecate_arg_warn("propensity.model", "treatment.model", "cate", dvers)
-    treatment.model <- propensity.model
-  }
-
-  if (!missing(cate_model)) {
-    deprecate_arg_warn("cate_model", "cate.model", "cate", dvers)
-    cate.model <- cate_model
-  }
-
-  if (!missing(treatment)) { ## Backward compatibility
-    # ~1 is current default value of cate.model
-    if (!isTRUE(all.equal(cate.model, ~1))) {
-      stop(
-        "Calling `cate` with both the obsolete 'treatment'",
-        " and the new 'cate.model' argument"
-      )
-    }
-    # only used to inform user that treatment argument is deprecated
-    deprecate_arg_warn("treatment", "cate.model", "cate", dvers)
-    cate.model <- treatment
   }
 
   if (missing(treatment.model)) {
