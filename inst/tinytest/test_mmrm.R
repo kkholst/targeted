@@ -19,16 +19,55 @@ dl <- mets::fast.reshape(
             ARMCD=factor(ARMCD),
             USUBJID=factor(USUBJID)) # Data in long format
 
+ctrl <- list(eval.max = 1000, iter.max = 1000, rel.tol = 1e-9)
+## Unstructured covariance
 a <- mmrm(
   FEV ~ -1 + AVISIT + ARMCD : AVISIT + us(AVISIT | USUBJID),
   data = dl, reml = FALSE,
   optimizer = "nlminb",
-  optimizer_control = list(
-    eval.max = 1000,
-    iter.max = 1000,
-    rel.tol = 1e-9
-  )
+  optimizer_control = ctrl
 )
+
+## Grouped unstructured covariance
+b <- mmrm(FEV ~ -1 + AVISIT + ARMCD:AVISIT + us(AVISIT | ARMCD / USUBJID),
+          data = dl,
+          reml = FALSE,
+          optimizer = "nlminb",
+          optimizer_control = ctrl)
+
+## Ante-dependence heterogeneous covariance
+c <- mmrm(
+  FEV ~ -1 + AVISIT + ARMCD : AVISIT + adh(AVISIT | USUBJID),
+  data = dl, reml = FALSE,
+  optimizer = "nlminb",
+  optimizer_control = ctrl
+)
+
+## Ante-dependence homogeneous covariance
+d <- mmrm(
+  FEV ~ -1 + AVISIT + ARMCD : AVISIT + ad(AVISIT | USUBJID),
+  data = dl, reml = FALSE,
+  optimizer = "nlminb",
+  optimizer_control = ctrl
+)
+
+## Auto-regressive covariance
+e <-  mmrm(
+  FEV ~ -1 + AVISIT + ARMCD : AVISIT + ar1h(AVISIT | USUBJID),
+  data = dl, reml = FALSE,
+  optimizer = "nlminb",
+  optimizer_control = ctrl
+)
+
+## Weighted model, unstructured covariance
+aw <- mmrm(FEV1 ~ ARMCD * AVISIT + us(AVISIT | USUBJID),
+           data = fev_data, reml = FALSE, weights = fev_data$WEIGHT,
+           optimizer = "nlminb", optimizer_control = ctrl)
+
+## Weighted model, toeplitz covariance structure
+bw <- mmrm(FEV1 ~ ARMCD * AVISIT + toep(AVISIT | ARMCD / USUBJID),
+           data = fev_data, reml = FALSE, weights = fev_data$WEIGHT,
+           optimizer = "nlminb", optimizer_control = ctrl)
 
 ## log-likelihood as a function of parameters (mean (beta) and covariance
 ## (theta)).
@@ -51,6 +90,7 @@ a <- mmrm(
   sum(loglik)
 }
 
+## test ordering of subjects in .mmrm_subjects
 test_mmrm_subject <- function(fit, data_long) {
   ref <- targeted:::.mmrm_subjects(fit = fit, theta = NULL)
 
@@ -84,8 +124,9 @@ test_mmrm_subject <- function(fit, data_long) {
 }
 test_mmrm_subject(fit = a, data_long = dl)
 
+## test variance covariance constructor
+## test parameter shifting (for numerical derivation)
 test_mmrm_varcor <- function(fit) {
-
   ref <- mmrm::VarCorr(fit)
   tmp <- targeted:::.mmrm_varcor(
                       fit = fit,
@@ -100,12 +141,25 @@ test_mmrm_varcor <- function(fit) {
                       fit = fit,
                       theta = mmrm::component(fit, "theta_est") + 0.1
                     )
-  expect_true(
-    all(abs(ref - tmp) > 1e-2)
-  )
+  if (is.list(ref)) {
+    expect_true(
+      all(abs(unlist(ref) - unlist(tmp)) > 1e-2)
+    )
+  } else {
+    expect_true(
+      all(abs(ref - tmp) > 1e-2)
+    )
+  }
+
 
 }
 test_mmrm_varcor(a)
+test_mmrm_varcor(b)
+test_mmrm_varcor(c)
+test_mmrm_varcor(d)
+test_mmrm_varcor(e)
+test_mmrm_varcor(aw)
+test_mmrm_varcor(bw)
 
 ## Weights (cov(y_ij, y_ik) = Sigma_jk / sqrt(w_ij * w_ik))
 test_mmrm_wsigma <- function() {
@@ -118,6 +172,7 @@ test_mmrm_wsigma <- function() {
 }
 test_mmrm_wsigma()
 
+## test score function
 test_mmrm_score <- function(fit) {
   opt <- lava.options(Dmethod="Richardson")
   expect_true(mean(colMeans(score(fit)))<1e-9)
@@ -134,8 +189,15 @@ test_mmrm_score <- function(fit) {
   lava.options(opt)
 }
 test_mmrm_score(a)
+test_mmrm_score(b)
+test_mmrm_score(c)
+test_mmrm_score(d)
+test_mmrm_score(e)
+test_mmrm_score(aw)
+test_mmrm_score(bw)
 
 # Transformation to real variance/covariance scale
+## lava benchmark, unstructured covariance
 test_mmrm_sigma <- function() {
   f <- targeted:::mmrm2sigma(a)
   ea <- estimate(a)
@@ -174,23 +236,7 @@ test_mmrm_sigma <- function() {
 }
 test_mmrm_sigma()
 
-## Grouped covariance
-b <- mmrm(FEV ~ -1 + AVISIT + ARMCD:AVISIT + us(AVISIT | ARMCD / USUBJID),
-  data = dl, reml = FALSE
-)
-test_mmrm_score(b)
-
-ctrl <- list(eval.max = 1000, iter.max = 1000, rel.tol = 1e-9)
-aw <- mmrm(FEV1 ~ ARMCD * AVISIT + us(AVISIT | USUBJID),
-           data = fev_data, reml = FALSE, weights = fev_data$WEIGHT,
-           optimizer = "nlminb", optimizer_control = ctrl)
-test_mmrm_score(aw)
-bw <- mmrm(FEV1 ~ ARMCD * AVISIT + toep(AVISIT | ARMCD / USUBJID),
-           data = fev_data, reml = FALSE, weights = fev_data$WEIGHT,
-           optimizer = "nlminb", optimizer_control = ctrl)
-test_mmrm_score(bw)
-
-## Missing data
+## Missing data, grouped toeplitz
 a <- mmrm(
   FEV1 ~ -1 + AVISIT + ARMCD : AVISIT + toep(AVISIT | ARMCD / USUBJID),
   data = fev_data, reml = FALSE,
@@ -225,7 +271,7 @@ test_mmrm_visitn <- function(fit) {
 }
 test_mmrm_visitn(a)
 
-
+## Missing data, toeplitz
 a <- mmrm(
   FEV1 ~ -1 + AVISIT + ARMCD : AVISIT + toep(AVISIT | USUBJID),
   data = fev_data, reml = FALSE,
