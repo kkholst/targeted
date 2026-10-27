@@ -343,7 +343,7 @@ riskreg(y~a, nuisance=~x+z, data=d2, type="rd")
 ```
 
                 Estimate Std.Err   2.5% 97.5% P-value
-    (Intercept)    1.012 0.02036 0.9722 1.052       0
+    (Intercept)    1.027 0.02093 0.9855 1.068       0
 
 ### Influence-function
 
@@ -362,11 +362,11 @@ head(IC(fit))
 
       (Intercept)          x
     1   0.6226459 -0.4585424
-    2   1.2319960  0.7925974
-    3   0.3941325 -0.5798067
-    4  -0.8854890  2.9621436
-    5  -6.9949142 -5.2133643
-    6   0.5853933 -0.7571452
+    2   1.2319959  0.7925975
+    3   0.3941326 -0.5798067
+    4  -0.8854891  2.9621437
+    5  -6.9949137 -5.2133649
+    6   0.5853934 -0.7571452
 
 ## SessionInfo
 
@@ -377,11 +377,11 @@ sessionInfo()
 
     R version 4.6.1 (2026-06-24)
     Platform: x86_64-pc-linux-gnu
-    Running under: Ubuntu 24.04.5 LTS
+    Running under: Ubuntu 26.04.1 LTS
 
     Matrix products: default
     BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3
-    LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so;  LAPACK version 3.12.0
+    LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.32.so;  LAPACK version 3.12.0
 
     locale:
      [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8
@@ -402,10 +402,11 @@ sessionInfo()
      [1] cli_3.6.6           knitr_1.52          rlang_1.3.0
      [4] xfun_0.62           otel_0.2.0          jsonlite_2.0.0
      [7] future.apply_1.21.0 listenv_1.1.0       lava_1.10
-    [10] htmltools_0.5.9     rmarkdown_2.32      grid_4.6.1
-    [13] evaluate_1.0.5      fastmap_1.2.0       yaml_2.3.12
-    [16] compiler_4.6.1      codetools_0.2-20    Rcpp_1.1.2
-    [19] future_1.80.0       lattice_0.22-9      digest_0.6.39
-    [22] R6_2.6.1            parallelly_1.48.0   parallel_4.6.1
-    [25] splines_4.6.1       Matrix_1.7-5        tools_4.6.1
-    [28] globals_0.20.0      survival_3.8-6     
+    [10] htmltools_0.5.9     pracma_2.4.6        rmarkdown_2.32
+    [13] grid_4.6.1          evaluate_1.0.5      fastmap_1.2.0
+    [16] numDeriv_2016.8-1.1 yaml_2.3.12         compiler_4.6.1
+    [19] codetools_0.2-20    Rcpp_1.1.2          future_1.80.0
+    [22] lattice_0.22-9      digest_0.6.39       nloptr_2.2.1
+    [25] optimx_2025-4.9     R6_2.6.1            parallelly_1.48.0
+    [28] parallel_4.6.1      splines_4.6.1       Matrix_1.7-5
+    [31] tools_4.6.1         globals_0.20.0      survival_3.8-6     
