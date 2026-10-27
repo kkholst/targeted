@@ -107,7 +107,7 @@ test_cate_deprecated_arguments <- function() {
   expect_warning(
     aa5 <- cate(
       response.model = learner_glm(qmod),
-      treatment.model = learner_glm(a ~ 1, family = binomial),
+      treatment.model = learner_glm(a ~ x, family = binomial),
       treatment = ~ x,
       data = d
     ),
