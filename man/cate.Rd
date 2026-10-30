@@ -20,11 +20,6 @@ cate(
   mc.cores = NULL,
   var.type = "IC",
   second.order = TRUE,
-  response_model = deprecated,
-  cate_model = deprecated,
-  propensity_model = deprecated,
-  propensity.model = deprecated,
-  treatment = deprecated,
   ...
 )
 }
@@ -78,16 +73,6 @@ available for ATE and when \code{calibration.model} is also specified)}
 
 \item{second.order}{add seconder order term to IF to handle misspecification
 of outcome models}
-
-\item{response_model}{Deprecated. Use response.model instead.}
-
-\item{cate_model}{Deprecated. Use cate.model instead.}
-
-\item{propensity_model}{Deprecated. Use treatment.model instead.}
-
-\item{propensity.model}{Deprecated. Use treatment.model instead.}
-
-\item{treatment}{Deprecated. Use cate.model instead.}
 
 \item{...}{additional arguments to future.apply::future_mapply}
 }
