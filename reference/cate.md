@@ -21,11 +21,6 @@ cate(
   mc.cores = NULL,
   var.type = "IC",
   second.order = TRUE,
-  response_model = deprecated,
-  cate_model = deprecated,
-  propensity_model = deprecated,
-  propensity.model = deprecated,
-  treatment = deprecated,
   ...
 )
 ```
@@ -112,26 +107,6 @@ cate(
 
   add seconder order term to IF to handle misspecification of outcome
   models
-
-- response_model:
-
-  Deprecated. Use response.model instead.
-
-- cate_model:
-
-  Deprecated. Use cate.model instead.
-
-- propensity_model:
-
-  Deprecated. Use treatment.model instead.
-
-- propensity.model:
-
-  Deprecated. Use treatment.model instead.
-
-- treatment:
-
-  Deprecated. Use cate.model instead.
 
 - ...:
 

@@ -343,7 +343,7 @@ riskreg(y~a, nuisance=~x+z, data=d2, type="rd")
 ```
 
                 Estimate Std.Err   2.5% 97.5% P-value
-    (Intercept)   0.9832 0.02062 0.9428 1.024       0
+    (Intercept)    1.007 0.02024 0.9677 1.047       0
 
 ### Influence-function
 
@@ -361,12 +361,12 @@ head(IC(fit))
 ```
 
       (Intercept)          x
-    1   0.6226459 -0.4585424
-    2   1.2319960  0.7925974
-    3   0.3941325 -0.5798067
-    4  -0.8854890  2.9621436
-    5  -6.9949142 -5.2133643
-    6   0.5853933 -0.7571452
+    1   0.6226459 -0.4585423
+    2   1.2319962  0.7925971
+    3   0.3941325 -0.5798066
+    4  -0.8854887  2.9621434
+    5  -6.9949162 -5.2133624
+    6   0.5853933 -0.7571451
 
 ## SessionInfo
 
@@ -375,13 +375,13 @@ head(IC(fit))
 sessionInfo()
 ```
 
-    R version 4.6.1 (2026-06-24)
+    R version 4.6.2 (2026-10-29)
     Platform: x86_64-pc-linux-gnu
-    Running under: Ubuntu 24.04.5 LTS
+    Running under: Ubuntu 26.04.1 LTS
 
     Matrix products: default
     BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3
-    LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so;  LAPACK version 3.12.0
+    LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.32.so;  LAPACK version 3.12.0
 
     locale:
      [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8
@@ -399,15 +399,13 @@ sessionInfo()
     [1] targeted_0.9.0.9000
 
     loaded via a namespace (and not attached):
-     [1] mets_1.3.12            cli_3.6.6              knitr_1.52
-     [4] rlang_1.3.0            xfun_0.62              otel_0.2.0
-     [7] jsonlite_2.0.0         future.apply_1.21.0    listenv_1.1.0
-    [10] lava_1.9.3             htmltools_0.5.9        rmarkdown_2.32
-    [13] grid_4.6.1             evaluate_1.0.5         fastmap_1.2.0
-    [16] numDeriv_2016.8-1.1    mvtnorm_1.4-2          yaml_2.3.12
-    [19] timereg_2.0.7          compiler_4.6.1         codetools_0.2-20
-    [22] Rcpp_1.1.2             future_1.80.0          lattice_0.22-9
-    [25] digest_0.6.39          R6_2.6.1               parallelly_1.48.0
-    [28] parallel_4.6.1         splines_4.6.1          Matrix_1.7-5
-    [31] RcppArmadillo_15.6.2-1 tools_4.6.1            globals_0.20.0
-    [34] survival_3.8-6        
+     [1] cli_3.6.6           knitr_1.52          rlang_1.3.0
+     [4] xfun_0.62           otel_0.2.0          jsonlite_2.0.0
+     [7] future.apply_1.21.0 listenv_1.1.0       lava_1.10
+    [10] htmltools_0.5.9     rmarkdown_2.32      grid_4.6.2
+    [13] evaluate_1.0.5      fastmap_1.2.0       yaml_2.3.12
+    [16] compiler_4.6.2      codetools_0.2-20    Rcpp_1.1.2
+    [19] future_1.80.0       lattice_0.23-1      digest_0.6.39
+    [22] R6_2.6.1            parallelly_1.48.0   parallel_4.6.2
+    [25] splines_4.6.2       Matrix_1.7-6        tools_4.6.2
+    [28] globals_0.20.0      survival_3.8-12    
