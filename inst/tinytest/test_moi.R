@@ -311,18 +311,16 @@ test_moi_missing_IC_reference_lava <- function() {
     max(abs(lava_pred_IC_3 - lava_pred_IC_2)) == 0
   )
 
-  est1 <- estimate(imp_mod,
+  est1 <- expectation(object=imp_mod,
                    lava::predict_glm,
                    data = data,
                    subset = (data$a == 1) & (delta == FALSE),                   
-                   average = TRUE,
                    id = 1:nrow(data))
 
-  est0 <- estimate(imp_mod,
+  est0 <- expectation(object=imp_mod,
                    lava::predict_glm,
                    data = data,
                    subset = (data$a == 0) & (delta == FALSE),
-                   average = TRUE,
                    id = 1:nrow(data))
 
   expect_true(
@@ -787,3 +785,45 @@ test_moi_augmentation <- function() {
   expect_equal(coef(res_f), coef(res_l), tolerance = 1e-12)
 }
 test_moi_augmentation()
+
+test_moi_id <- function() {
+  set.seed(1)
+  data <- sim_complex(1e2, binary = TRUE)
+
+  moi_est <- moi(data = data,
+                 id = NULL,
+                 response.model = learner_glm(y ~ x, family = binomial()),
+                 missing.model = learner_glm(~ x, family = binomial()),
+                 stratify = TRUE,
+                 treatment.model = a ~ 1,
+                 imputation.model = learner_glm(y ~ a + x, family = binomial()),
+                 imputation.subset = "!is.na(y)")
+
+  id <- paste0("a", seq_len(length.out = nrow(data)))
+
+  moi_est_id <- moi(data = data,
+                    id = id,
+                    response.model = learner_glm(y ~ x, family = binomial()),
+                    missing.model = learner_glm(~ x, family = binomial()),
+                    stratify = TRUE,
+                    treatment.model = a ~ 1,
+                    imputation.model = learner_glm(y ~ a + x, family = binomial()),
+                    imputation.subset = "!is.na(y)")
+
+  expect_equal(
+    id,
+    moi_est_id$estimate$id
+  )
+
+  expect_equal(
+    coef(moi_est),
+    coef(moi_est_id)
+  )
+
+  expect_equal(
+    IC(moi_est),
+    IC(moi_est_id),
+    check.attributes = FALSE
+  )
+}
+test_moi_id()
