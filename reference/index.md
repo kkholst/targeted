@@ -13,6 +13,7 @@
 - [`calibration-class`](calibration-class.md) : calibration class object
 - [`calibration()`](calibration.md) : Calibration (training)
 - [`cate()`](cate.md) : Conditional Average Treatment Effect estimation
+- [`complete_visits()`](complete_visits.md) : Expand long-format data
 - [`cross_validated-class`](cross_validated-class.md)
   [`cross_validated`](cross_validated-class.md) : cross_validated class
   object
@@ -65,6 +66,8 @@
 - [`pava()`](pava.md) : Pooled Adjacent Violators Algorithm
 - [`predict(`*`<density>`*`)`](predict.density.md) : Prediction for
   kernel density estimates
+- [`predict(`*`<estimate.mmrm>`*`)`](predict.estimate.mmrm.md) :
+  Predictions at a single visit from mmrm models
 - [`predict(`*`<naivebayes>`*`)`](predict.naivebayes.md) : Predictions
   for Naive Bayes Classifier
 - [`predict(`*`<superlearner>`*`)`](predict.superlearner.md) : Predict
@@ -102,5 +105,7 @@
 - [`truncatedscore`](truncatedscore.md) : Scores truncated by death
 - [`update(`*`<design>`*`)`](update.design.md) : Update method for
   design
+- [`vec2sigma()`](vec2sigma.md) [`sigma2vec()`](vec2sigma.md) :
+  Covariance matrix from upper-triangular elements
 - [`weights(`*`<superlearner>`*`)`](weights.superlearner.md) : Extract
   ensemble weights

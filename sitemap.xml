@@ -19,6 +19,7 @@
 <url><loc>/reference/calibration-class.html</loc></url>
 <url><loc>/reference/calibration.html</loc></url>
 <url><loc>/reference/cate.html</loc></url>
+<url><loc>/reference/complete_visits.html</loc></url>
 <url><loc>/reference/cross_validated-class.html</loc></url>
 <url><loc>/reference/cumhaz.html</loc></url>
 <url><loc>/reference/cv.default.html</loc></url>
@@ -56,6 +57,7 @@
 <url><loc>/reference/nondom.html</loc></url>
 <url><loc>/reference/pava.html</loc></url>
 <url><loc>/reference/predict.density.html</loc></url>
+<url><loc>/reference/predict.estimate.mmrm.html</loc></url>
 <url><loc>/reference/predict.naivebayes.html</loc></url>
 <url><loc>/reference/predict.superlearner.html</loc></url>
 <url><loc>/reference/predict_filter_bound.html</loc></url>
@@ -79,6 +81,7 @@
 <url><loc>/reference/test_zmax_onesided.html</loc></url>
 <url><loc>/reference/truncatedscore.html</loc></url>
 <url><loc>/reference/update.design.html</loc></url>
+<url><loc>/reference/vec2sigma.html</loc></url>
 <url><loc>/reference/weights.superlearner.html</loc></url>
 </urlset>
 

@@ -14,6 +14,7 @@ moi(
   response.model,
   treatment.model,
   missing.model,
+  id = NULL,
   imputation.model,
   imputation.subset = NULL,
   imputation.augmentation = FALSE,
@@ -54,6 +55,11 @@ moi(
   \\P(\Delta = 1 \| A = a)\\). If a `formula` is provided, it is wrapped
   in `learner_glm(..., family = binomial())`. Used to estimate
   \\P(\Delta = 0 \| A = a)\\.
+
+- id:
+
+  (integer or character) optional subject id vector of length
+  `nrow(data)`.
 
 - imputation.model:
 
@@ -219,8 +225,6 @@ moi(data = d,
     missing.model = ~ a + w,
     imputation.model = y ~ a + w,
     imputation.subset = "!is.na(y)")
-#> Warning: `lava::estimate(..., average=TRUE)` is deprecated.  Use `lava::expectation` instead.
-#> Warning: `lava::estimate(..., average=TRUE)` is deprecated.  Use `lava::expectation` instead.
 #>                       Estimate Std.Err   2.5% 97.5%    P-value
 #> E[ỹ(1)]                 1.9923 0.06462 1.8656 2.119 1.061e-208
 #> E[ỹ(0)]                 1.0095 0.06462 0.8829 1.136  5.190e-55
