@@ -104,6 +104,13 @@ test_design_response_factor <- function() {
   # the response vector
   dd_works <- design(y ~ x1, data, levels = list(y = c("a", "b", "c")))
   expect_equal(levels(dd_works$y), c("a", "b", "c"))
+  expect_equal(dd_works$levels$y, c("a", "b", "c"))
+
+  # the same works when design.matrix = FALSE
+  dd0 <- design(y ~ x1, data, levels = list(y = c("a", "b", "c")),
+                design.matrix = FALSE)
+  expect_equal(levels(dd0$y), c("a", "b", "c"))
+  expect_equal(dd0$levels$y, c("a", "b", "c"))
 
   # both work because y and response_ are both elements in levels attribute
   dd2 <- update(dd_works, head(data, 1), response = TRUE,
@@ -145,15 +152,15 @@ test_design_response_factor <- function() {
   expect_equal(res_factor, dd$y)
 
   dd2 <- update(dd, head(data, 1), response = TRUE)
-  expect_equal(levels(dd2$y), c("a","b"))
+  expect_equal(levels(dd2$y), c("a", "b"))
 
   # also works when new data is a character
   dd2 <- update(dd, data.frame(y = "a", x1 = 1, x2=2), response = TRUE)
-  expect_equal(levels(dd2$y), c("a","b"))
+  expect_equal(levels(dd2$y), c("a", "b"))
 
   # adding an extra level works by using the "correct" levels element
   dd <- design(y ~ x1, data, levels = list("response_" = c("a", "b", "c")))
-  expect_equal(levels(dd$y), c("a","b", "c"))
+  expect_equal(levels(dd$y), c("a", "b", "c"))
 
   data <- data.frame(x = c("x", "y"), y = c("a", "b"))
   dd <- design(as.factor(y) ~ x, data)
@@ -177,10 +184,29 @@ test_design_ellipsis <- function() {
     design(y ~ x1, data = ddata, subset = seq(10)),
     pattern = "subset is not an allowed specials argument"
   )
+  # abbreviations would be partially matched to model.frame(subset = )
+  expect_error(
+    design(y ~ x1, data = ddata, sub = x2 > 0),
+    pattern = "subset is not an allowed specials argument"
+  )
+
+  # unnamed arguments would be matched by position to model.frame(subset = )
+  # (#241)
+  expect_error(
+    design(y ~ x1, data = ddata, x2),
+    pattern = "must be named"
+  )
+  expect_error(
+    design(y ~ x1, data = ddata, weights = x2, x1),
+    pattern = "Unnamed: x1"
+  )
 
   # no error when argument is a vector of length n
+  # TODO: inconsistent behaviour and will be removed later on when restricting
+  # the ellipsis arguments to be formulas
   dd <- design(y ~ x1, ddata, nocolumn = rep(1, n))
-  expect_equal(rep(1, n), unname(dd$nocolumn))
+  expect_true("nocolumn" %in% names(dd))
+  expect_null(dd$nocolumn)
 
   # fails because column cannot be added with model.frame because of differing
   # lengths
@@ -191,11 +217,110 @@ test_design_ellipsis <- function() {
 }
 test_design_ellipsis()
 
+test_design_ellipsis_specials <- function() {
+
+  # environment of formula argument remains untouched
+  ff <- local({
+    ooffset <- offset
+    y ~ ooffset(x1)
+  })
+  dd <- design(ff, ddata, specials = "ooffset", foo = x1)
+  # creates foo special even though foo does not exist in the current env
+  expect_error(foo, "object 'foo' not found")
+  expect_equivalent(dd$foo, ddata$x1)
+  expect_equivalent(dd$ooffset, ddata$x1)
+  # the environment of the formula provided to design remains the same
+  expect_true(identical(environment(dd$formula), environment(ff)))
+  expect_true(identical(environment(dd$formula.original), environment(ff)))
+  # but specials are stripped away
+  expect_equivalent(dd$formula, y ~ 1)
+
+  # specials can also be a user-defined function
+  pp <- function(x) x ** 2
+  dd <- design(y ~ pp(x1), ddata, specials = "pp", foo = pp(x1))
+  expect_equivalent(dd$pp, pp(ddata$x1))
+  expect_equivalent(dd$foo, pp(ddata$x1))
+
+  # ellipsis specials have access to variables that are only defined in the
+  # env of formula // users wouldn't use specials this way. we just verify
+  # that the ellipsis specials are evaluated in the env of formula
+  rm(pp)
+  ff <- local({
+    pp <- function(x) x ** 2
+    y ~ pp(x1)
+  })
+  dd <- design(ff, ddata, specials = "pp", foo = pp(x1))
+  expect_equivalent(dd$pp, environment(ff)$pp(ddata$x1))
+  expect_equivalent(dd$foo, environment(ff)$pp(ddata$x1))
+
+  # variables of specials are only looked up in data and not in the environment
+  # of the formula
+  dd <- design(y ~ 1 + x1, ddata, foo = x1)
+  expect_equivalent(dd$x[, "x1"], dd$foo)
+
+  dd <- local({
+    x11 <- 1
+    design(y ~ 1, ddata, foo = x11)
+  })
+  expect_true("foo" %in% names(dd) && is.null(dd$foo))
+  expect_equal("foo", dd$specials) # special name exists in specials field
+
+  # TODO: tests should be moved into a seperate test function
+  # update method will correctly use x11 if it exists in data
+  ddnew <- cbind(head(ddata), x11 = 1:6)
+  ddupd <- update(dd, ddnew)
+  expect_equivalent(ddupd$foo, 1:6)
+
+  # drop it again when it doesn't exist in data
+  ddupd1 <- update(ddupd, head(ddata))
+  expect_null(ddupd1$foo)
+  expect_equal(ddupd1$specials, "foo")
+}
+test_design_ellipsis_specials()
+
 # test specials argument
 test_design_specials <- function() {
+
+  # don't allow duplicated specials
+  expect_error(
+    design(y ~ offset(x1) + offset(x2), ddata, specials = "offset"),
+    pattern = "Duplicated special"
+  )
+
+  # specials argument needs to be a character
+  expect_error(
+    design(y ~ offset(x1), ddata, specials = offset),
+    pattern = "The special argument must be a character vector."
+  )
+
+  # defined special function does not exist in the environment
+  expect_error(
+    design(y ~ ooffset(x1), ddata, specials = "ooffset"),
+    pattern = "could not find function"
+  )
+
+  # variables only defined in the calling.frame of design are not looked up
+  # that's the same behaviour as with model.frame
+  ff <- function(formula) {
+    ooffset <- identity
+    design(formula, ddata, specials = "ooffset")
+  }
+  expect_error(
+    ff(y ~ ooffset(x1)),
+    pattern = "could not find function \"ooffset\""
+  )
+
+  # function is correctly looked up in the environment of the formula
+  ff <- local({
+    ooffset <- offset
+    y ~ ooffset(x1)
+  })
+  dd <- design(ff, ddata, specials = "ooffset")
+  expect_equivalent(dd$ooffset, ddata$x1)
+
   # offset is correctly identified as a special variable and not added as a
   # covariate
-  dd <- design(y ~ offset(x1), ddata, specials="offset")
+  dd <- design(y ~ offset(x1), ddata, specials = "offset")
 
   expect_equal(ncol(dd$x), 0)
   offset_expect <- ddata$x1
@@ -218,6 +343,7 @@ test_design_specials <- function() {
   # specifying a variable accidentally doesn't have an effect
   dd <- design(y ~ x1, ddata, specials = "x1")
   expect_equivalent(as.matrix(ddata$x1), dd$x)
+
 
   # a user defined specials is handled correctly
   sq <- identity # nolint
@@ -303,22 +429,6 @@ test_design_transformations <- function() {
 }
 test_design_transformations()
 
-# test behavior of design for handling NA values in data
-test_design_na_handling <- function() {
-  # handle NA values
-  ddata_na <- ddata
-  ddata_na[1, "x1"] <- NA
-
-  dd <- design(y ~ x1 * x2, ddata_na)
-  dd_expect <- cbind(ddata_na[, c("x1", "x2")], ddata_na$x1 * ddata_na$x2) |>
-    as.matrix()
-  # remove rows with NAs
-  expect_equivalent(dd$x, dd_expect[-1, ])
-  # same behavior without interactions
-  dd <- design(y ~ x1 + x2, ddata_na)
-  expect_equivalent(dd$x, as.matrix(ddata[-1, c("x1", "x2")]))
-}
-test_design_na_handling()
 
 # test behavior of design with factor variables
 test_design_factor <- function() {
@@ -559,15 +669,46 @@ test_design_formula_env()
 test_design_na_action <- function() {
   ddata_na <- ddata
   ddata_na[1:3, "x1"] <- NA
+  n <- nrow(ddata_na)
 
   # default na.omit removes rows with NAs
   dd <- design(y ~ x1, ddata_na)
   expect_equal(nrow(dd$x), n - 3)
+  expect_equal(length(dd$y), n - 3)
+
+  # na.omit only applies the defined predictors
+  dd <- design(y ~ x2, ddata_na)
+  expect_equal(nrow(dd$x), n)
+
+  dd <- design(y ~ x1, ddata_na, response = FALSE)
+  expect_equal(nrow(dd$x), n - 3)
+  expect_null(dd$y)
+
+  # ignore missing predictor variables for design.matrix = FALSE
+  dd <- design(y ~ x1, ddata_na, design.matrix = FALSE)
+  expect_null(dd$x)
+  expect_equal(length(dd$y), n)
+
+  # now with missing response variable
+  d0 <- ddata
+  d0[1:3, "y"] <- NA
+  dd <- design(y ~ x1, d0)
+  expect_equal(nrow(dd$x), n - 3)
+  expect_equal(length(dd$y), n - 3)
+
+  dd <- design(y ~ x1, d0, response = FALSE)
+  expect_equal(nrow(dd$x), n)
+  expect_null(dd$y)
+
+  dd <- design(y ~ x1, d0, design.matrix = FALSE)
+  expect_null(dd$x)
+  expect_equal(length(dd$y), n - 3)
 
   # na.action is stored in the design object
   expect_identical(dd$na.action, na.omit)
 
   # explicit na.omit gives same result as default
+  dd <- design(y ~ x1, ddata_na)
   dd_explicit <- design(y ~ x1, ddata_na, na.action = na.omit)
   expect_equivalent(dd$x, dd_explicit$x)
 
@@ -581,8 +722,141 @@ test_design_na_action <- function() {
   dd_upd <- update(dd_pass, ddata_na, response = TRUE)
   expect_equal(nrow(dd_upd$x), n)
   expect_identical(dd_upd$na.action, na.pass)
+
+  # custom function
+  na_custom <- function(object, ...) {
+    object[is.na(object$x1), "x1"] <- 1
+    object
+  }
+  dd_custom <- design(y ~ x1, ddata_na, na.action = na_custom)
+  expect_true(all(dd_custom$x[1:3] == 1))
 }
 test_design_na_action()
+
+# test na.action parameter with specials
+test_design_na_action_specials <- function() {
+  d0 <- ddata
+  d0[1:3, "x1"] <- NA
+  d0$w <- runif(nrow(d0))
+  n <- nrow(d0)
+
+  # default na.omit removes rows with NAs in predictors from the design
+  # matrix, the response and the specials
+  dd <- design(y ~ x1 + weights(w), d0, specials = "weights")
+  expect_equal(nrow(dd$x), n - 3)
+  expect_equal(length(dd$y), n - 3)
+  expect_equal(length(dd$weights), n - 3)
+  # rows of design matrix, response and specials remain aligned
+  expect_equivalent(dd$weights, d0$w[-(1:3)])
+  expect_equal(names(dd$weights), names(dd$y))
+  expect_equal(names(dd$weights), rownames(dd$x))
+
+  # na.omit only applies to the variables in the formula
+  dd <- design(y ~ x2 + weights(w), d0, specials = "weights")
+  expect_equal(nrow(dd$x), n)
+  expect_equal(length(dd$weights), n)
+
+  dd <- design(y ~ x1 + weights(w), d0, specials = "weights", response = FALSE)
+  expect_equal(nrow(dd$x), n - 3)
+  expect_null(dd$y)
+  expect_equal(length(dd$weights), n - 3)
+
+  # ignore missing predictor variables for design.matrix = FALSE
+  dd <- design(y ~ x1 + weights(w), d0, specials = "weights",
+               design.matrix = FALSE)
+  expect_null(dd$x)
+  expect_equal(length(dd$y), n)
+  expect_equal(length(dd$weights), n)
+
+  # now with missing response variable
+  d1 <- ddata
+  d1$w <- d0$w
+  d1[1:3, "y"] <- NA
+  dd <- design(y ~ x1 + weights(w), d1, specials = "weights")
+  expect_equal(nrow(dd$x), n - 3)
+  expect_equal(length(dd$y), n - 3)
+  expect_equal(length(dd$weights), n - 3)
+
+  dd <- design(y ~ x1 + weights(w), d1, specials = "weights", response = FALSE)
+  expect_equal(nrow(dd$x), n)
+  expect_null(dd$y)
+  expect_equal(length(dd$weights), n)
+
+  dd <- design(y ~ x1 + weights(w), d1, specials = "weights",
+               design.matrix = FALSE)
+  expect_null(dd$x)
+  expect_equal(length(dd$y), n - 3)
+  expect_equal(length(dd$weights), n - 3)
+
+  # now with missing special variable
+  d2 <- ddata
+  d2$w <- d0$w
+  d2[1:3, "w"] <- NA
+  dd <- design(y ~ x1 + weights(w), d2, specials = "weights")
+  expect_equal(nrow(dd$x), n - 3)
+  expect_equal(length(dd$y), n - 3)
+  expect_equal(length(dd$weights), n - 3)
+
+  dd <- design(y ~ x1 + weights(w), d2, specials = "weights", response = FALSE)
+  expect_equal(nrow(dd$x), n - 3)
+  expect_null(dd$y)
+  expect_equal(length(dd$weights), n - 3)
+
+  dd <- design(y ~ x1 + weights(w), d2, specials = "weights",
+               design.matrix = FALSE)
+  expect_null(dd$x)
+  expect_equal(length(dd$y), n - 3)
+  expect_equal(length(dd$weights), n - 3)
+
+  # declared specials which are not part of the formula are ignored
+  dd <- design(y ~ x1, d2, specials = "weights")
+  expect_equal(nrow(dd$x), n)
+  expect_equal(length(dd$y), n)
+  expect_null(dd$weights)
+
+  # rows with NAs in either predictors or specials are removed
+  d3 <- d0
+  d3[4:6, "w"] <- NA
+  dd <- design(y ~ x1 + weights(w), d3, specials = "weights")
+  expect_equal(nrow(dd$x), n - 6)
+  expect_equal(length(dd$y), n - 6)
+  expect_equal(length(dd$weights), n - 6)
+
+  # na.action is stored in the design object
+  expect_identical(dd$na.action, na.omit)
+
+  # explicit na.omit gives same result as default
+  dd_explicit <- design(y ~ x1 + weights(w), d3, specials = "weights",
+                        na.action = na.omit)
+  expect_equivalent(dd$x, dd_explicit$x)
+  expect_equivalent(dd$weights, dd_explicit$weights)
+
+  # na.pass keeps all rows including NAs
+  dd_pass <- design(y ~ x1 + weights(w), d3, specials = "weights",
+                    na.action = na.pass)
+  expect_equal(nrow(dd_pass$x), n)
+  expect_equal(length(dd_pass$weights), n)
+  expect_true(all(is.na(dd_pass$x[1:3, ])))
+  expect_true(all(is.na(dd_pass$weights[4:6])))
+  expect_identical(dd_pass$na.action, na.pass)
+
+  # na.action is forwarded through update
+  dd_upd <- update(dd_pass, d3, response = TRUE)
+  expect_equal(nrow(dd_upd$x), n)
+  expect_equal(length(dd_upd$weights), n)
+  expect_identical(dd_upd$na.action, na.pass)
+
+  # custom function
+  na_custom <- function(object, ...) {
+    object[is.na(object)] <- 1
+    object
+  }
+  dd_custom <- design(y ~ x1 + weights(w), d3, specials = "weights",
+                      na.action = na_custom)
+  expect_true(all(dd_custom$x[1:3] == 1))
+  expect_true(all(dd_custom$weights[4:6] == 1))
+}
+test_design_na_action_specials()
 
 # test tolerance of specials whose variables are absent from `data`
 test_design_specials_missing_var <- function() {
@@ -637,6 +911,11 @@ test_design_specials_missing_var <- function() {
   expect_true(is.null(dd5$stratify))
   expect_equal(colnames(dd5$x), "x1")
 
+  # same applies for specials which rely on variables in the global env
+  thr <- 1
+  dd6 <- design(y ~ x1 + weights(x1 < thr), d2, specials = "weights")
+  expect_null(dd6$weights)
+
   # print() should not list a dropped special under "specials"
   expect_stdout(print(dd_upd), "design matrix")
   # (specifically: 'weights' should not appear in the specials section)
@@ -669,10 +948,41 @@ test_design_specials_missing_var <- function() {
 }
 test_design_specials_missing_var()
 
+# offset as the only term on the right-hand side of the formula (#248)
+test_design_offset_only <- function() {
+  d <- data.frame(
+    y = c(1.2, 0.4, 2.1, 1.7, 0.9),
+    x = c(0.1, 0.5, 0.3, 0.9, 0.7),
+    z = c(2, 1, 3, 1, 2)
+  )
+
+  # offset is removed from the formula and its variables are registered, as
+  # for formulas with additional terms
+  dd <- design(y ~ offset(z), d, specials = "offset")
+  expect_equivalent(dd$offset, d$z)
+  expect_equal(deparse(dd$formula), "y ~ 1")
+  expect_equal(dd$specials.var, list(offset = "z"))
+  expect_equal(ncol(dd$x), 0)
+
+  # offset is extracted when only the response and specials are requested
+  dd <- design(y ~ offset(z), d, specials = "offset", design.matrix = FALSE)
+  expect_equivalent(dd$offset, d$z)
+  expect_equivalent(update(dd, d[1:2, ])$offset, d$z[1:2])
+
+  # offset whose variable is not a column of `data` is dropped instead of
+  # throwing an error ...
+  dd <- design(y ~ offset(w), d, specials = "offset")
+  expect_null(dd$offset)
+  expect_equal(deparse(dd$formula), "y ~ 1")
+}
+test_design_offset_only()
+
 # unit tests for the internal helpers
 test_design_internal_helpers <- function() {
   remove_terms <- targeted:::remove_terms
   specials_unavailable <- targeted:::specials_unavailable
+  specials_labels <- targeted:::specials_labels
+  deparse_term <- targeted:::deparse_term
 
   # remove a single term
   expect_equal(deparse(remove_terms(y ~ x + weights(w), "weights(w)")),
@@ -711,5 +1021,36 @@ test_design_internal_helpers <- function() {
   # no specials declared -> nothing to report
   tt0 <- terms(y ~ x)
   expect_equal(length(specials_unavailable(tt0, data.frame(x = 1))), 0)
+  # offset as the only term (#248)
+  tt <- terms(y ~ offset(z), specials = "offset")
+  expect_equal(specials_unavailable(tt, data.frame(y = 1)), "offset(z)")
+  expect_equal(length(specials_unavailable(tt, data.frame(y = 1, z = 1))), 0)
+
+  # specials_labels: labels of the special terms, also if the right-hand side
+  # only consists of an offset (#248)
+  expect_equal(specials_labels(tt), "offset(z)")
+  tt <- terms(y ~ x + weights(w) + offset(z),
+              specials = c("weights", "offset"))
+  expect_equal(specials_labels(tt), c("weights(w)", "offset(z)"))
+  expect_equal(specials_labels(tt, "offset"), "offset(z)")
+  expect_equal(specials_labels(tt, c("offset", "weights")),
+               c("offset(z)", "weights(w)"))
+  expect_equal(specials_labels(tt0), character(0))
+
+  # deparse_term: identical to the labels created by terms(), e.g., for integer
+  # literals, typed NAs, non-syntactic names and multi-line expressions
+  f <- as.formula(paste(
+    "y ~ `a b` + f(x == 1L) + g(NA_integer_) + h(",
+    paste(rep("xxxxxxxxxx", 60), collapse = " + "), ")"
+  ))
+  tt <- terms(f)
+  expect_equal(
+    vapply(as.list(attr(tt, "variables"))[-1L], deparse_term, character(1)),
+    rownames(attr(tt, "factors"))
+  )
+  # offsets are hence matched by the labels created by terms()
+  expect_equal(
+    deparse(remove_terms(y ~ x + offset(1L * z), "offset(1 * z)")), "y ~ x"
+  )
 }
 test_design_internal_helpers()

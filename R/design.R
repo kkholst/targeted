@@ -31,12 +31,39 @@ model.extract2 <- function(frame, component) {
   return(rval)
 }
 
+# label of a variable of a terms object as created by terms(), i.e., the row
+# names of the `factors` attribute and the term labels. Equivalent to R's
+# internal deparse1line(), which, unlike deparse1(), drops integer suffixes
+# (e.g., "f(x == 1)" for f(x == 1L)) and joins multiple lines by "\n". dropping
+# integer suffixes is needed to handle strata(a == 1L) where the variable
+# attribute of terms keeps the integer literal (1L) while the factors attribute
+# drops it
+deparse_term <- function(x) {
+  return(paste(
+    deparse(x, width.cutoff = 500L, backtick = TRUE, control = NULL),
+    collapse = "\n"
+  ))
+}
+
+# labels of the special terms (e.g. "weights(w)") of a terms object, optionally
+# restricted to the specials named in `specials`. The positions in the
+# `specials` attribute refer to the `variables` attribute. The row names of the
+# `factors` attribute can not be used, since the factors matrix is empty if the
+# right-hand side only consists of offset terms (#248)
+specials_labels <- function(terms, specials = NULL) {
+  pos <- attr(terms, "specials")
+  if (!is.null(specials)) pos <- pos[specials]
+  pos <- unlist(pos, use.names = FALSE)
+  vars <- as.list(attr(terms, "variables"))[-1L]
+  return(vapply(vars[pos], deparse_term, character(1)))
+}
+
 # extract variables of special terms. Returns results in a named list
 Specials <- function(formula, spec, split1 = ",", split2 = NULL, ...) {
   tt <- terms(formula, spec)
   pos <- attributes(tt)$specials[[spec]]
   if (is.null(pos)) return(NULL)
-  x <- rownames(attributes(tt)$factors)[pos]
+  x <- specials_labels(tt, spec)
   st <- gsub(" ", "", x) ## trim
   spec <- unlist(strsplit(st, "[()]"))[[1]]
   res <- substr(st, nchar(spec) + 2, nchar(st) - 1)
@@ -55,9 +82,8 @@ Specials <- function(formula, spec, split1 = ",", split2 = NULL, ...) {
 # labels of special terms (e.g. "weights(w)") whose variables are not all
 # present in `data`
 specials_unavailable <- function(terms, data) {
-  pos <- unlist(attr(terms, "specials"))
-  if (length(pos) < 1) return(character(0))
-  labels <- rownames(attr(terms, "factors"))[pos]
+  labels <- specials_labels(terms)
+  if (length(labels) < 1) return(character(0))
   unavailable <- vapply(labels, function(lab) {
     vars <- all.vars(str2lang(lab))
     # skip pathological cases (e.g. `.` inside a special) to avoid false drops
@@ -76,7 +102,7 @@ remove_terms <- function(formula, labels, data = NULL) {
   tt <- terms(formula, data = data)
   vars <- attr(tt, "variables")
   offset.labels <- vapply(
-    attr(tt, "offset"), function(i) deparse1(vars[[i + 1]]), character(1)
+    attr(tt, "offset"), function(i) deparse_term(vars[[i + 1]]), character(1)
   )
   keep <- setdiff(c(attr(tt, "term.labels"), offset.labels), labels)
   if (length(keep) < 1) keep <- "1"
@@ -96,21 +122,63 @@ remove_terms <- function(formula, labels, data = NULL) {
 #' @param intercept (logical) If FALSE an intercept is not included in the
 #'   design matrix
 #' @param response (logical) if FALSE the response variable is dropped
-#' @param rm.envir (logical) Remove environment from terms attribute of
-#'   returned object
-#' @param ... additional arguments (e.g, specials such weights, offsets, ...)
+#' @param rm.envir (logical) Remove environment from terms attribute of returned
+#'   object
+#' @param ... additional named arguments (e.g., specials such as `weights = w`
+#'   or `offset = o`) that are passed on to [stats::model.frame] and returned as
+#'   specials. Unnamed arguments and `subset` are not allowed.
 #' @param specials character vector specifying functions in the formula that
-#'   should be marked as special in the [terms] object
+#'   should be marked as special in the [terms] object. Functions are looked up
+#'   by following the lexical scoping of `model.frame` (see details). Specials
+#'   that are missing in the formula will create special fields in the returned
+#'   design object with their value set to `NULL`. Similarly, special terms with
+#'   variables missing in data will also be set to `NULL`.
 #' @param specials.call (call) specials optionally defined as a call-type
 #' @param levels a named list of character vectors giving the full set of levels
 #'   to be assumed for each factor
 #' @param design.matrix (logical) if FALSE then only response and specials are
 #'   returned. Otherwise, the design.matrix `x` is als part of the returned
 #'   object.
-#' @param na.action (function) method to handle missing data
-#'   (default: \code{na.omit})
+#' @param na.action (function) method to handle missing data (default:
+#'   \code{na.omit})
+#' @details Special terms are identified syntactically by the name of the
+#'   called function (see [stats::terms.formula]). For example, with
+#'   `specials = "stratify"`, the term `stratify(a)` is a special whereas
+#'   `targeted::stratify(a)` is not.
+#'
+#'   The special terms are evaluated by [stats::model.frame] in `data` with the
+#'   environment of `formula` as the enclosing environment. Following the
+#'   lexical scoping rules of R, a special function is thus looked up in the
+#'   environment of `formula` (by default the environment in which the formula
+#'   was created) and its parent environments (e.g., the global environment and
+#'   attached packages), but not in the environment from which `design()` is
+#'   called. Hence, a special function must be visible from the environment of
+#'   `formula`. The environment of `formula` is kept in the returned object such
+#'   that the same lookup applies when the design is re-evaluated with
+#'   [update.design].
+#'
+#'   Note that a special term is dropped (i.e., its field in the returned
+#'   object is `NULL`) if any variable referenced in the term is not a column
+#'   of `data`, even if the variable exists in the environment of `formula`.
 #' @return An object of class 'design'
 #' @author Klaus Kähler Holst
+#' @seealso [update.design]
+#' @examples
+#' n <- 1e2
+#' d0 <- data.frame(a = rbinom(n, 1, 0.5), x = rnorm(n), y = rnorm(n))
+#' d0$w <- runif(n)
+#'
+#' dd <- design(y ~ a + x, data = d0)
+#' list(response = head(dd$y, 2), design.matrix = head(dd$x, 2))
+#'
+#' # specials
+#' # special variable is extracted and removed from design matrix
+#' dd <- design(y ~ a + x + weights(w), d0, specials = "weights")
+#' list(weights = head(dd$weights, 2), design.matrix = head(dd$x, 2))
+#' # declared special variable is missing in formula. the associated field
+#' # is NULL
+#' dd <- design(y ~ a + x, d0, specials = "weights")
+#' list(weights = dd$weights, design.matrix = head(dd$x, 2))
 #' @export
 design <- function(formula, data, ..., # nolint
                    intercept = FALSE,
@@ -134,8 +202,39 @@ design <- function(formula, data, ..., # nolint
   if (inherits(data, c("data.table", "tbl_df"))) {
     data <- as.data.frame(data)
   }
+
+  if (!is.character(specials) && !is.null(specials)) {
+    stop("The special argument must be a character vector.")
+  }
+
   dots <- substitute(list(...))
-  if ("subset" %in% names(dots)) stop(
+  dots.names <- names(dots)[-1L]
+  # TODO: will refactor this later when removing the specials.call argument
+  if (!is.null(dots.names) && !is.null(specials.call)) {
+    stop("Don't provide specials via ... and specials.call at the same time.")
+  }
+  if (!is.null(specials.call)) {
+    # update.design path when the s3 method calls design with the specials.call
+    # argument
+    dots <- specials.call
+    dots.names <- names(dots)[-1L]
+  }
+
+  if (is.null(dots.names)) dots.names <- character(length(dots) - 1L)
+  # `...` is forwarded to model.frame() right after `data`. Unnamed arguments
+  # would be matched by position (and abbreviated names such as `sub` by
+  # partial matching) to its `subset` argument (#241)
+  unnamed <- !nzchar(dots.names)
+  if (any(unnamed)) {
+    exprs <- vapply(as.list(dots)[-1L][unnamed],
+      \(e) deparse(e, nlines = 1L)[1L], character(1)
+    )
+    stop(
+      "all arguments in `...` must be named (e.g., `weights = w`). ",
+      "Unnamed: ", paste(exprs, collapse = ", ")
+    )
+  }
+  if (any(startsWith("subset", dots.names))) stop(
     "subset is not an allowed specials argument for targeted::design"
   )
   formulaenv <- environment(formula)
@@ -146,7 +245,40 @@ design <- function(formula, data, ..., # nolint
   # into its formula (environment preserved in both cases).
   formula.original <- stats::formula(formula)
 
+  specials_arg <- specials
+  specials_dots <- names(dots)[-1]
+
+  # specials that are provided via ellipsis are handled by adding internal
+  # dummy specials to the original formula
+  if (length(specials_dots) > 0) {
+    # insert dummy functions of specials provided via ... into formula
+    specials_dots_internal <- paste0(specials_dots, "_internal_function_name")
+    .formula_specials <- paste0(
+      specials_dots_internal, "(", unlist(dots)[-1], ")",
+      collapse = "+"
+    )
+    formula <- update(formula, sprintf("~ . + %s", .formula_specials))
+
+
+    # new formula inherits (reference only) from formulaenv which avoids
+    # injecting the variables in specials_dots_internal into formulaenv
+    args <- lapply(specials_dots_internal, \(x) base::identity)
+    names(args) <- specials_dots_internal
+    new_env <- do.call(rlang::env, c(formulaenv, args))
+    environment(formula) <- new_env
+    # specials provided via ellipsis will now be treated as specials that are
+    # in the formula
+    specials <- union(specials_arg, specials_dots_internal)
+  }
   tt <- terms(formula, data = data, specials = specials)
+
+  n_specials <- sapply(attr(tt, "specials"), length)
+  if (any(n_specials > 1)) {
+    stop(
+      "Duplicated specials defined in formula. Specify only a single",
+      " definition in the formula for each special."
+    )
+  }
 
   # Drop specials whose variables are not available in `data`. This lets a
   # design built with e.g. `y ~ x + weights(w)` be (re-)evaluated against data
@@ -161,11 +293,7 @@ design <- function(formula, data, ..., # nolint
   term.labels <- attr(tt, "term.labels") # predictors
   sterm.list <- c()
   if (length(specials) > 0) {
-    des <- attr(tt, "factors")
-    for (s in specials) {
-      sterm <- rownames(des)[attr(tt, "specials")[[s]]]
-      sterm.list <- c(sterm.list, sterm)
-    }
+    sterm.list <- specials_labels(tt, specials)
     # predictors without the specials
     term.labels <- setdiff(term.labels, unlist(sterm.list))
     # remove special terms from formula
@@ -180,8 +308,7 @@ design <- function(formula, data, ..., # nolint
     response <- FALSE
   }
 
-  formula0 <- formula
-  environment(formula0) <- formulaenv # preserve formula environment
+  formula0 <- formula # formula0: formula with specials removed
   if (!response) {
     formula0 <- stats::formula(delete.response(terms(formula, data = data)))
     # delete response to generate design matrix when making predictions
@@ -191,18 +318,17 @@ design <- function(formula, data, ..., # nolint
   xlev <- levels
   xlev[["response_"]] <- NULL
   if (!design.matrix) { # only extract specials, response
-    des <- attr(tt, "factors")
     fs <- update(formula0, ~1)
     if (length(sterm.list) > 0) {
       # formula with only special-terms
       fs <- reformulate(paste(sterm.list, collapse = " + "))
       fs <- update(formula0, fs)
+
     }
-    environment(formula) <- formulaenv
-    mf <- model.frame(fs, data = data, na.action = na.action, ...)
+    mf <- model.frame(fs, data = data, na.action = na.action, xlev = xlev)
   } else { # also extract design matrix
     mf <- model.frame(tt,
-                      data = data, ...,
+                      data = data,
                       xlev = xlev,
                       na.action = na.action,
                       drop.unused.levels = FALSE
@@ -210,7 +336,7 @@ design <- function(formula, data, ..., # nolint
     if (is.null(xlev)) {
       xlev <- .getXlevels(tt, mf)
     }
-    xlev0 <- xlev
+    ## xlev0 <- xlev
   }
 
   y <- NULL
@@ -235,10 +361,6 @@ design <- function(formula, data, ..., # nolint
   }
 
   has_intercept <- attr(tt, "intercept") == 1L
-  specials <- union(
-    specials,
-    names(dots)[-1] # removing "" at first position when calling dots, which
-  ) # is a call object
 
   specials.list <- c()
   specials.var <- c() # holds the variable-arguments of the specials functions
@@ -251,32 +373,20 @@ design <- function(formula, data, ..., # nolint
         list(unlist(Specials(tt, spec = s)))
       )
     }
-    names(specials.var) <- specials
-    names(specials.list) <- specials
-    if (length(sterm.list) > 0) {
-      if (design.matrix) {
-        xlev0[sterm.list] <- NULL
-        mf <- model.frame(formula0,
-                          data = data, ...,
-                          xlev = xlev0,
-                          na.action = na.action,
-                          drop.unused.levels = FALSE
-                          )
-      }
-    }
+    # reset names of ellipsis specials to the name that was provided in the call
+    names(specials.var) <- union(specials_arg, specials_dots)
+    names(specials.list) <- union(specials_arg, specials_dots)
   }
 
-  if (!is.null(specials.call)) {
-    specials.list2 <- eval(specials.call, data)
-    for (n in names(specials.list2)) {
-      if (is.null(specials.list[[n]])) {
-        specials.list[[n]] <- specials.list2[[n]]
-      }
-    }
-  }
-
+  # reset formula environments to enviroment of formula provided during call
+  environment(formula0) <- formulaenv
+  environment(formula) <- formulaenv
   if (design.matrix) {
-    x <- model.matrix(mf, data=mf)
+    # mf from the earlier model.frame calls applies the na.action to the
+    # response, predictors and specials. this step just selects the predictors
+    # from mf
+    x <- model.matrix(terms(formula0, data = data), data = mf)
+
     if (!intercept && has_intercept) {
       has_intercept <- FALSE
       x <- x[, -1, drop = FALSE]
@@ -285,6 +395,7 @@ design <- function(formula, data, ..., # nolint
     term.labels <- NULL
     x <- NULL
   }
+
 
   if (rm.envir) attr(tt, ".Environment") <- NULL
   if (is.null(specials.call)) specials.call <- dots
@@ -301,7 +412,7 @@ design <- function(formula, data, ..., # nolint
       design.matrix = design.matrix,
       intercept = has_intercept,
       data = data[0, ], ## Empty data.frame to capture structure of data
-      specials = specials,
+      specials = names(specials.var),
       na.action = na.action,
       specials.var = specials.var,
       specials.call = specials.call
@@ -311,21 +422,41 @@ design <- function(formula, data, ..., # nolint
   return(structure(res, class="design"))
 }
 
+#' Update method for design
 #' @export
+#' @param object (design) object returned by [design]
+#' @param data (data.frame) data on which the design is re-evaluated. If `NULL`,
+#'   the empty data.frame stored in `object` is used.
+#' @param response (logical) if FALSE the response variable is dropped
+#' @param levels (list) named list of character vectors giving the full set of
+#'   levels to be assumed for each factor. Defaults to the levels stored in
+#'   `object`, such that factors are coded as in the original design.
+#' @param ... additional arguments (currently ignored)
+#' @return An object of class 'design'
+#' @examples
+#' n <- 1e2
+#' d0 <- data.frame(a = rbinom(n, 1, 0.5), x = rnorm(n), y = rnorm(n))
+#' d0$w <- runif(n)
+#' dnew <- data.frame(a = rbinom(n, 1, 0.5), x = rnorm(n), y = rnorm(n))
 update.design <- function(object, data = NULL, response = FALSE, levels, ...) {
   if (is.null(data)) data <- object$data
   if (missing(levels)) levels <- object$levels
-  return(
-    design(object$formula.original,
-      data = data,
-      design.matrix = object$design.matrix,
-      levels = levels,
-      intercept = object$intercept,
-      specials = object$specials,
-      specials.call = object$specials.call,
-      na.action = object$na.action,
-      response = response
-    )
+
+  # removing ellipsis specials from special argument to reconstruct the initial
+  # call to design that generated this object (first argument of this method)
+  specials_call <- names(object$specials.call[-1])
+  specials <- setdiff(object$specials, specials_call)
+  if (length(specials) == 0L) specials <- NULL
+
+  design(object$formula.original,
+         data = data,
+         design.matrix = object$design.matrix,
+         levels = levels,
+         intercept = object$intercept,
+         specials = specials,
+         specials.call = object$specials.call,
+         na.action = object$na.action,
+         response = response
   )
 }
 

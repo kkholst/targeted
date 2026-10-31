@@ -1,3 +1,51 @@
+# development version
+
+- `moi`: new `id` argument for subject ids (propagated to the influence
+  functions of the nuisance and target parameter estimates)
+- Support for mixed models for repeated measures (MMRM) fitted with the `mmrm`
+  package (added to `Suggests`):
+  - `score`, `pars`, `IC` and `estimate` methods for `mmrm` objects
+    (subject-level scores and influence functions of the mean and covariance
+    parameters, including observation weights). `estimate(fit, sigma = TRUE)`
+    returns the covariance parameters on the scale of the covariance matrix
+    elements
+  - `predict` method for `estimate(fit, sigma = TRUE)` objects: per subject,
+    the observed outcome at a given visit, or the conditional mean given the
+    observed outcomes (as `predict(fit, conditional = TRUE)` in `mmrm`), as a
+    function of the parameters for use with the delta method
+  - `complete_visits`: expands long-format data to all subject and visit
+    combinations
+  - `vec2sigma` and `sigma2vec`: conversion between covariance matrices and
+    their upper-triangular elements
+- `pars` is re-exported from `lava`
+
+- `learnerSL`: new R6 class for super learners, which inherits from `learner`.
+  `learnerSL$new()` has the same arguments as `learner$new()`, where the base
+  learners are provided via `estimate.args$learners`. `learner_sl` now returns
+  a `learnerSL` object.
+
+Bug fixes:
+
+- `learner$clone()` produced a clone with unintended reference-type behaviour. A
+  clone used the formula of the original object, instead of a new formula that
+  was provided with the `update()` method.
+- `learner_sl`: `update` now changes the response variable of all base learners,
+  while each base learner keeps its covariates. Previously, only the formula of
+  the super learner was updated, such that, e.g., `cate` estimated treatment
+  models of the super learner with the wrong response variable.
+- `learner$update()` with a character string lost the environment of the
+  formula. Formula variables that are not in the data (e.g., defined inside a
+  function) were not found or resolved to other objects with the same name
+  (e.g., `cut` to `base::cut()`). A new response variable now keeps the
+  environment of the current formula, and a formula string gets the calling
+  environment like a formula object. This also fixes `aipw()`, `cate()` and
+  `moi()`, which update the response variable of the provided learners.
+- `design()` now throws an error for unnamed arguments in `...` and for
+  abbreviations of `subset` (e.g., `sub = `). Such arguments were passed on to
+  the `subset` argument of `model.frame()`, which silently dropped or
+  duplicated observations (#241).
+
+
 # targeted 0.9
 
 - `cate`: doubly robust estimation with missing outcomes under MAR via the new

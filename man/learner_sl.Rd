@@ -41,10 +41,10 @@ from a base learner (see \code{targeted:::mse} for additional details).}
 \item{...}{Additional arguments to \link{superlearner}}
 }
 \value{
-\link{learner} object.
+\link{learnerSL} object.
 }
 \description{
-Constructs a \link{learner} class object for fitting a
+Constructs a \link{learnerSL} object for fitting a
 \link{superlearner}.
 }
 \examples{
@@ -81,5 +81,5 @@ cvres
 # score(cvres)
 }
 \seealso{
-\link{cv.learner_sl}
+\link{learnerSL}, \link{cv.learner_sl}
 }

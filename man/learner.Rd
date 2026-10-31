@@ -227,7 +227,10 @@ filter function}
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
-      \item{\code{formula}}{formula or character which defines the new response}
+      \item{\code{formula}}{(formula or character) new formula, or new response
+variable given as a character string without \code{~} (e.g., \code{"y"} or
+\code{"I(a == 1)"}). A new response variable keeps the right-hand side and the
+environment of the current formula.}
     }
     \if{html}{\out{</div>}}
   }

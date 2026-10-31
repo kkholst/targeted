@@ -199,7 +199,7 @@ get_learner_names <- function(model.list, name.prefix) {
 #' predict(sl, newdata = sim1(n = 5), all.learners = TRUE)
 superlearner <- function(learners,
                          data,
-                         nfolds = 10,
+                         nfolds = 5L,
                          meta.learner = metalearner_nnls,
                          model.score = mse,
                          mc.cores = NULL,

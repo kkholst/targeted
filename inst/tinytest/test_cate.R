@@ -42,17 +42,24 @@ simcate(y ~ a * x) # cate: correct q-model
 simcate(y ~ a + x) # cate: mis-specified q-model
 
 test_cate_deprecated_arguments <- function() {
+  # deprecated arguments are not part of the function definition
+  deprecated_args <- c(
+    "response_model", "cate_model", "propensity_model", "propensity.model",
+    "treatment"
+  )
+  expect_false(any(deprecated_args %in% names(formals(cate))))
+
   qmod <- y ~ a * x
   q1 <- predict(lm(qmod, data = d), newdata = transform(d, a = 1))
   e1 <- true_estimate1(q1)
-  # use deprecated argument names to verify that cate continues to work as
-  # expected
+  # use deprecated argument names (captured by `...`) to verify that cate
+  # continues to work as expected
   expect_warning(
     aa1 <- cate(
       response_model = learner_glm(qmod),
       treatment.model = learner_glm(a ~ x, family = binomial),
       data = d
-    ) |> estimate(),
+    )$estimate,
     pattern = "Please use the `response.model` argument instead"
   )
   expect_equivalent(parameter(e1)[1:2], parameter(aa1)["E[y(1)]", 1:2])
@@ -62,32 +69,91 @@ test_cate_deprecated_arguments <- function() {
       response.model = learner_glm(qmod),
       propensity.model = learner_glm(a ~ x, family = binomial),
       data = d
-    ) |> estimate(),
+    )$estimate,
     pattern = "Please use the `treatment.model` argument instead"
   )
   expect_equivalent(parameter(e1)[1:2], parameter(aa2)["E[y(1)]", 1:2])
 
+  expect_warning(
+    aa3 <- cate(
+      response.model = learner_glm(qmod),
+      propensity_model = learner_glm(a ~ x, family = binomial),
+      data = d
+    )$estimate,
+    pattern = "Please use the `treatment.model` argument instead"
+  )
+  expect_equivalent(parameter(e1)[1:2], parameter(aa3)["E[y(1)]", 1:2])
+
+  # use a CATE model different from the default value of `cate.model` to
+  # verify that the values of the deprecated arguments are used
+  ref <- cate(
+    response.model = learner_glm(qmod),
+    treatment.model = learner_glm(a ~ x, family = binomial),
+    cate.model = ~ x,
+    data = d
+  )
+  expect_warning(
+    aa4 <- cate(
+      response.model = learner_glm(qmod),
+      treatment.model = learner_glm(a ~ x, family = binomial),
+      cate_model = ~ x,
+      data = d
+    ),
+    pattern = "Please use the `cate.model` argument instead"
+  )
+  expect_equivalent(coef(aa4), coef(ref))
+
   # user is informed when deprecated treatment argument is used
-  expect_warning(aa4 <- cate(
-    response.model = learner_glm(qmod),
-    treatment.model = learner_glm(a ~ x, family = binomial),
-    treatment = ~ 1,
-    data = d) |> estimate(),
+  expect_warning(
+    aa5 <- cate(
+      response.model = learner_glm(qmod),
+      treatment.model = learner_glm(a ~ x, family = binomial),
+      treatment = ~ x,
+      data = d
+    ),
     pattern = "Please use the `cate.model` argument instead"
   )
-  expect_equivalent(parameter(e1)[1:2], parameter(aa4)["E[y(1)]", 1:2])
+  expect_equivalent(coef(aa5), coef(ref))
 
-  # same with cate_model argument
-  expect_warning(aa4 <- cate(
-    response.model = learner_glm(qmod),
-    treatment.model = learner_glm(a ~ x, family = binomial),
-    cate_model = ~ 1,
-    data = d) |> estimate(),
+  # `treatment` is not partially matched to `treatment.model` when the
+  # treatment model is supplied as positional argument
+  expect_warning(
+    aa6 <- cate(
+      learner_glm(qmod),
+      learner_glm(a ~ x, family = binomial),
+      treatment = ~ x,
+      data = d
+    ),
     pattern = "Please use the `cate.model` argument instead"
   )
-  expect_equivalent(parameter(e1)[1:2], parameter(aa4)["E[y(1)]", 1:2])
+  expect_equivalent(coef(aa6), coef(ref))
 
-  # function fails when old treatment arg and new cate.model arg are used
+  # or not supplied at all, such that the treatment model is derived from the
+  # response of the cate model
+  expect_warning(
+    aa7 <- cate(learner_glm(qmod), treatment = a ~ x, data = d),
+    pattern = "Please use the `cate.model` argument instead"
+  )
+  expect_equivalent(
+    coef(aa7),
+    coef(cate(learner_glm(qmod), cate.model = a ~ x, data = d))
+  )
+
+  # deprecated arguments are also handled when passed on via `...` of a
+  # calling function, and evaluated in the environment of the caller
+  wrapper <- function(...) cate(...)
+  fit_wrapper <- function() {
+    qm <- learner_glm(qmod)
+    tm <- learner_glm(a ~ x, family = binomial)
+    wrapper(qm, tm, treatment = ~ x, data = d)
+  }
+  expect_warning(
+    aa8 <- fit_wrapper(),
+    pattern = "Please use the `cate.model` argument instead"
+  )
+  expect_equivalent(coef(aa8), coef(ref))
+
+  # function fails when a deprecated argument and its replacement are used
   # together
   expect_error(
     cate(
@@ -97,7 +163,27 @@ test_cate_deprecated_arguments <- function() {
       treatment = ~1,
       data = d
     ),
-    pattern = "Calling `cate` with both the obsolete"
+    pattern = "Arguments `cate.model` and `treatment` of `cate()` cannot be",
+    fixed = TRUE
+  )
+  expect_error(
+    cate(
+      response.model = learner_glm(qmod),
+      propensity_model = learner_glm(a ~ x, family = binomial),
+      propensity.model = learner_glm(a ~ x, family = binomial),
+      data = d
+    ),
+    pattern = "Please use only the `treatment.model` argument"
+  )
+  # also when the replacement is supplied as positional argument
+  expect_error(
+    cate(
+      learner_glm(qmod),
+      response_model = learner_glm(qmod),
+      treatment.model = learner_glm(a ~ x, family = binomial),
+      data = d
+    ),
+    pattern = "Please use only the `response.model` argument"
   )
 }
 test_cate_deprecated_arguments()
@@ -455,3 +541,22 @@ test_cate_id_arg <- function() {
   expect_true(mean(IC(a)[order(ord), 1] - if1)<1e-12)
 }
 test_cate_id_arg()
+
+
+test_cate_environment_lookups <- function() {
+  fs <- local({
+    cut <- 2
+    a ~ (x < cut)
+  })
+  qmod <- learner_glm(y ~ a)
+  pmod <- learner_glm(fs, family = binomial)
+
+  # verify that variables in the local formula enviroment are accessible after
+  # updating the response variable of the treatment.model inside cate
+  expect_silent(cate(qmod, treatment.model = pmod, data = d))
+
+  cut <- 2 # lookup on global enviroment
+  qmod <- learner_glm(y ~ a + (x < cut))
+  expect_silent(cate(qmod, treatment.model = pmod, data = d))
+}
+test_cate_environment_lookups()

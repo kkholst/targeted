@@ -1,7 +1,7 @@
 library("tinytest")
-library("data.table")
 library("ranger")
 suppressPackageStartupMessages({
+  library("data.table")
   library("mets")
   library("randomForestSRC")
   Surv <- survival::Surv

@@ -48,6 +48,13 @@ test_aipw_default_propensity <- function() {
   a1 <- aipw(y ~ x, data = d)
   a2 <- aipw(y ~ x, propensity.model = R_ ~ x, data = d)
   expect_equal(coef(a1$estimate), coef(a2$estimate))
+
+  # regression guard: cut variable is looked up in the right environment when
+   # building the propensity model from the response model
+  cut <- 2
+  a1 <- aipw(y ~ I(x < cut), data = d)
+  a2 <- aipw(y ~ I(x < cut), propensity.model = R_ ~ I(x < cut), data = d)
+  expect_equal(coef(a1$estimate), coef(a2$estimate))
 }
 test_aipw_default_propensity()
 

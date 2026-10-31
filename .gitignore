@@ -27,6 +27,8 @@ inst/README.html
 vignettes/*.html
 vignettes/figure/*chunk*
 vignettes/*.R
+vignettes/.quarto/
+vignettes/**/*.quarto_ipynb
 src/dependencies
 *.gcno
 TAGS

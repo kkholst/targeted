@@ -1,7 +1,9 @@
 ^.dir.locals.el$
+^.tool-versions$
 ._files$
 ^.github$
 ^.cache$
+^.ccls-cache$
 ^\.git$
 ^.gitignore$
 ^.editorconfig$
