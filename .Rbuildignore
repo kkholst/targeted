@@ -1,13 +1,14 @@
 ^.dir.locals.el$
+^.tool-versions$
 ._files$
 ^.github$
 ^.cache$
+^.ccls-cache$
 ^\.git$
 ^.gitignore$
 ^.editorconfig$
 ^.lintr$
 ^src/CPPLINT.cfg$
-^Dockerfile$
 ^CONTRIBUTING.md$
 ^Makefile$
 ^tmp$
@@ -23,6 +24,7 @@
 ^src/target/tests$
 ^src/target/config$
 ^README\.Rmd$
+^AGENTS\.md$
 ^LICENSE$
 ^examples$
 ^TODO$
@@ -35,3 +37,4 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\.cliff\.toml$
+^certs$

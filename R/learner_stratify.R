@@ -65,15 +65,16 @@ learner_stratify <- function(formula,
     if (!length(stratify) == 1L && is.character(stratify)) {
       stop("expected string `stratify``")
     }
-    ff <- as.character(formula)
-    formula <- reformulate(c(ff[3],
-                             paste0("stratify(", stratify, ")")), ff[2])
+    ff_rhs <- paste(deparse(formula[[3]]), collapse = " ")
+    ff_lhs <- if (length(formula) == 3) deparse(formula[[2]]) else NULL
+    formula <- reformulate(c(ff_rhs,
+                             paste0("stratify(", stratify, ")")), ff_lhs)
   }
   dots <- list(...)
   if (length(dots)>0) learner.args[names(dots)] <- dots
   est <- function(formula, data, stratify, ...) {
     dots <- list(...)
-    if (length(dots)>0) earner.args[names(dots)] <- dots
+    if (length(dots)>0) learner.args[names(dots)] <- dots
     lr <- do.call(learner, c(list(formula), learner.args))
     if (is.null(stratify)) stratify <- rep(1, nrow(data))
     res <- c()

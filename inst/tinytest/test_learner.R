@@ -158,6 +158,35 @@ test_predict <- function() {
 }
 test_predict()
 
+test_predict_s3 <- function() {
+  m <- learner$new(
+    formula = y ~ x + offset(w), estimate = glm,
+    estimate.args = list(family = poisson)
+  )
+  m$estimate(ddata_count)
+  expect_equal(
+    m$predict(ddata_count),
+    predict(m, ddata_count)
+  )
+
+  expect_equal(
+    m$predict(ddata_count, type = "response"),
+    predict(m, ddata_count, type = "response")
+  )
+}
+test_predict_s3()
+
+test_estimate_s3 <- function() {
+  m <- learner$new(
+    formula = y ~ x + offset(w), estimate = glm,
+    estimate.args = list(family = poisson)
+  )
+  expect_null(m$fit)
+  estimate(m, ddata_count)
+  expect_true(inherits(m$fit, "glm"))
+}
+test_estimate_s3()
+
 test_design <- function() {
   m <- learner$new(formula = y ~ x1 + x2, estimate = glm.fit, intercept = TRUE)
   m$estimate(ddata)
@@ -216,6 +245,96 @@ test_update <- function() {
 }
 test_update()
 
+test_update_environment <- function() {
+  thr <- 0 # not a column of ddata
+  fit_ref <- glm(y ~ x1 + I(x2 > thr), data = ddata)
+
+  # a formula given as a character string gets the calling environment, same
+  # as a formula object. The current formula is created in another environment
+  # to distinguish the calling environment from the one of the current formula
+  lr <- learner_glm(local(y ~ x1))
+  lr$update("y ~ x1 + I(x2 > thr)")
+  # all.equal ignores formula environments and expect_identical calls
+  # all.equal on environments if they differ, hence expect_true(identical())
+  expect_true(identical(environment(lr$formula), environment()))
+  # variables not in the data are found in the calling environment
+  lr$estimate(ddata)
+  expect_equal(coef(lr$fit), coef(fit_ref))
+  expect_equal(lr$predict(ddata), predict(fit_ref, newdata = ddata))
+
+  # formula objects keep their environment
+  f <- local(y ~ x1)
+  lr$update(f)
+  expect_true(identical(environment(lr$formula), environment(f)))
+}
+test_update_environment()
+
+test_update_response_environment <- function() {
+  # formulas with and without response that are created in an environment
+  # that is not reachable from here (thr is not a column of ddata)
+  fs <- local({
+    thr <- 0
+    list(x1 ~ I(x2 > thr), ~ I(x2 > thr))
+  })
+  fit_ref <- glm(y ~ I(x2 > 0), data = ddata)
+  for (f in fs) {
+    lr <- learner_glm(f)
+    lr$update("y")
+    # new response keeps the right-hand side and environment of the formula
+    expect_equal(lr$formula, y ~ I(x2 > thr))
+    expect_true(identical(environment(lr$formula), environment(f)))
+    # variables not in the data are found in the environment of the formula
+    lr$estimate(ddata)
+    expect_equivalent(coef(lr$fit), coef(fit_ref))
+  }
+}
+test_update_response_environment()
+
+test_clone <- function() {
+  # testing the behaviour for deep=FALSE and deep=TRUE are regression tests
+  # because the behaviour should be exactly the same (i.e. no deep clone is
+  # required)
+  vars <- function(lr) setdiff(names(coef(lr$fit)), "(Intercept)")
+  for (deep in c(TRUE, FALSE)) {
+    # formula interface (glm) and design matrix interface (lm.fit)
+    for (est in list(glm, \(x, y, ...) lm.fit(x = x, y = y))) {
+      new_lr <- \(f) learner$new(f, estimate = est,
+        predict = \(object, newdata) {
+          if (is.matrix(newdata)) return(drop(newdata %*% coef(object)))
+          predict(object, newdata = newdata)
+        }
+      )
+      lr <- new_lr(y ~ x1)
+      cl <- lr$clone(deep = deep)
+
+      # updating the original leaves the clone untouched
+      lr$update(y ~ x2)
+      expect_equal(cl$formula, y ~ x1)
+      cl$estimate(ddata)
+      expect_equal(vars(cl), "x1")
+      lr$estimate(ddata)
+      expect_equal(vars(lr), "x2")
+
+      # updating the clone leaves the original untouched
+      cl$update(y ~ x1 + x2)
+      expect_equal(lr$formula, y ~ x2)
+      lr$estimate(ddata)
+      expect_equal(vars(lr), "x2")
+      cl$estimate(ddata)
+      expect_equal(vars(cl), c("x1", "x2"))
+
+      # fitted models are stored separately and predictions use own fit
+      ref <- new_lr(y ~ x1 + x2)
+      ref$estimate(ddata)
+      expect_equal(cl$predict(ddata), ref$predict(ddata))
+      ref$update(y ~ x2)
+      ref$estimate(ddata)
+      expect_equal(lr$predict(ddata), ref$predict(ddata))
+    }
+  }
+}
+test_clone()
+
 test_response <- function() {
   lr <- learner$new(formula = I(y > 0) ~ -1 + x1 + x2, estimate = glm)
 
@@ -266,18 +385,6 @@ test_summary <- function() {
 }
 test_summary()
 
-test_ml_model <- function() {
-  lr <- learner$new(formula = y ~ -1 + x1 + x2, estimate = glm)
-  expect_warning(
-    ml <- ml_model$new(formula = y ~ -1 + x1 + x2, estimate = glm),
-    pattern = "targeted::ml_model is deprecated"
-  )
-  lr$estimate(ddata)
-  ml$estimate(ddata)
-  expect_equal(coef(lr$fit), coef(ml$fit))
-}
-test_ml_model()
-
 test_specials <- function() {
   ## Here we test 'specials'
   n <- 200
@@ -326,9 +433,83 @@ test_specials <- function() {
   expect_true(inherits(lr$fit[[2]], "lm"))
   f <- formula(lr$fit[[1]])
   # strata in original formula
-  expect_true(grepl("strata", as.character(lr$formula)[3]))
+  expect_true(grepl("strata", paste(deparse(lr$formula[[3]]), collapse = " ")))
   # but not in fitted model formula
-  expect_true(!grepl("strata", as.character(f)[3]))
+  expect_true(!grepl("strata", paste(deparse(f[[3]]), collapse = " ")))
+
+  test_special_args_to_estimate_predict_method <- function(lr) {
+    lr$estimate(dw)
+    expect_equivalent(lr$fit$weights, dw$w)
+
+    lr$estimate(dw, weights = rep(1, nrow(dw)))
+    expect_equivalent(lr$fit$weights, rep(1, nrow(dw)))
+    # special in design is not updated after fitting a model with specials that
+    # are provided to method call // that is, we don't temper with the internal
+    # design object
+    expect_equivalent(lr$design(dw)$weights, dw$w)
+
+    newd <- cbind(head(dw[, c("y", "a")]), w = 1:6)
+    # design removes special that does not exist in data // that's the behavior
+    # we want
+    expect_error(
+      lr$predict(head(newd[, c("y", "a")])),
+      pattern = 'argument "weights" is missing, with no default'
+    )
+    # provide via argument to predict method
+    expect_equivalent(
+      lr$predict(head(newd[, c("y", "a")]), weights = newd$w),
+      newd$w
+    )
+
+    # pick up special variable from data
+    expect_equivalent(lr$predict(newd), newd$w)
+
+    # providing special variable to method call precedes special variable from
+    # design function
+    expect_equal(lr$predict(newd, weights = 2), 2)
+  }
+
+  dw <- cbind(d, w = runif(nrow(d)))
+  lr <- learner$new(
+    y ~ a + weights(w),
+    estimate = stats::glm,
+    specials = "weights",
+    predict = function(object, data, weights, ...) weights
+  )
+  test_special_args_to_estimate_predict_method(lr)
+
+  # now for a learner who's estimate function does not accept a formula
+  # argument
+  lr <- learner$new(
+    y ~ a + weights(w),
+    estimate = glm.fit,
+    specials = "weights",
+    predict = function(object, data, weights, ...) weights
+  )
+  test_special_args_to_estimate_predict_method(lr)
+
+  expect_error(
+    lr <- learner$new(
+      y ~ a + weights(w),
+      estimate = stats::glm,
+      specials = "weights",
+      predict = function(object, data, weights, ...) weights,
+      estimate.args = list(weights = dw$w)
+    ),
+    pattern = "Duplicated entries in specials and estimate.args"
+  )
+
+
+  expect_error(
+    lr <- learner$new(
+      y ~ a + weights(w),
+      estimate = stats::glm,
+      specials = "weights",
+      predict = function(object, data, weights, ...) weights,
+      predict.args = list(weights = dw$w)
+    ),
+    pattern = "Duplicated entries in specials and predict.args"
+  )
 }
 test_specials()
 
@@ -347,8 +528,8 @@ test_prediction_filter <- function() {
 
   expect_equal(max(lr$predict(ddata)), 0)
 
-  # arguments are passed on correctly
-  expect_equal(max(lr$predict(ddata, bound = 0.5)), 0.5)
+  # arguments are by the design of learner$predict not passed on to filter
+  expect_equal(max(lr$predict(ddata, bound = 0.5)), 0)
 
   filter_bound_estimation <- function(data) {
     bound <- max(data$y)

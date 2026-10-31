@@ -1,3 +1,4 @@
+# nolint start
 #' @keywords internal
 "_PACKAGE"
 
@@ -6,16 +7,16 @@
 #' @importFrom graphics plot points abline lines
 #' @importFrom grDevices nclass.Sturges
 #' @importFrom lava IC getoutcome estimate Inverse na.pass0 score logit expit
-#'   parameter sim
+#'   parameter sim predict_glm pars
 #' @importFrom stats approxfun as.formula update binomial deriv density glm.fit
 #'   lm.wfit lm.fit glm lm coef vcov model.frame model.matrix na.pass nlminb
 #'   predict dnorm quantile terms weighted.mean runif .getXlevels
 #'   delete.response model.response gaussian formula model.offset reformulate
 #'   drop.terms weights model.extract cov2cor pnorm pchisq uniroot sd na.omit
-#'   offset
+#'   offset rnorm rbinom
 #' @importFrom rlang hash call_match
 #' @importFrom R6 R6Class
-#' @importFrom survival survfit Surv strata
+#' @importFrom survival survfit Surv strata cluster
 #' @importFrom utils tail head capture.output getFromNamespace
 #' @references Bang & Robins (2005) Doubly Robust Estimation in Missing Data and
 #'   Causal Inference Models, Biometrics.
@@ -81,23 +82,30 @@ NULL
 NULL
 
 
-##' @export
+#' @export
 lava::IC
 
-##' @export
+#' @export
 lava::sim
 
-##' @export
+#' @export
 lava::score
 
-##' @export
+#' @export
+lava::pars
+
+#' @export
 lava::parameter
 
-##' @export
+#' @export
 lava::estimate
 
-##' @export
+#' @export
 survival::strata
 
-##' @export
+#' @export
+survival::cluster
+
+#' @export
 survival::Surv
+# nolint end

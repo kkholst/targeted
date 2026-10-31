@@ -1,7 +1,7 @@
 Package: targeted
 Type: Package
 Title: Targeted Inference
-Version: 0.8
+Version: 0.9.0.9000
 Authors@R: c(person(given = "Klaus K.",
                     family = "Holst",
                     role = c("aut", "cre"),
@@ -23,6 +23,7 @@ Maintainer: Klaus K. Holst <klaus@holst.it>
 Description: Various methods for targeted and semiparametric inference including
 	     augmented inverse probability weighted (AIPW) estimators for missing data and
 	     causal inference (Bang and Robins (2005) <doi:10.1111/j.1541-0420.2005.00377.x>),
+         one-step imputation (Nordland et al (2026)) <doi:10.48550/arXiv.2606.07174>),
          variable importance and conditional average treatment effects (CATE)
          (van der Laan (2006) <doi:10.2202/1557-4679.1008>),
 	     estimators for risk differences and relative risks (Richardson et al. (2017)
@@ -32,13 +33,14 @@ Depends:
     R (>= 4.1)
 Imports:
     R6,
-    Rcpp (>= 1.0.0),
+    Rcpp (>= 1.1.1),
     abind,
     cli,
     future.apply,
-    lava (>= 1.9.0),
+    lava (>= 1.10),
     methods,
-    mets (>= 1.3.9),
+    mets (>= 1.3.12),
+    numDeriv,
     quadprog,
     progressr,
     rlang,
@@ -54,6 +56,7 @@ Suggests:
     grf,
     hal9001,
     mgcv,
+    mmrm,
     nnls,
     optimx,
     polle (>= 1.5),
@@ -63,13 +66,11 @@ Suggests:
     ranger,
     riskRegression,
     scatterplot3d,
-    survSuperLearner,
     tinytest,
     viridisLite,
     xgboost (>= 3.1.2.1),
-Remotes: tedwestling/survSuperLearner
 BugReports: https://github.com/kkholst/targeted/issues
-URL: https://kkholst.github.io/targeted/
+URL: https://kkholst.github.io/targeted/, https://github.com/kkholst/targeted
 License: Apache License (== 2.0)
 LinkingTo: Rcpp, RcppArmadillo
 LazyLoad: yes
@@ -78,8 +79,8 @@ ByteCompile: yes
 RcppModules: riskregmodel
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 VignetteBuilder:
     quarto
 SystemRequirements: Quarto command line tools
     (https://github.com/quarto-dev/quarto-cli).
+Config/roxygen2/version: 8.1.1

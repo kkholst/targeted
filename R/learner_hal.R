@@ -2,7 +2,8 @@
 #' adaptive lasso model with [hal9001::fit_hal].
 #' @export
 #' @param ... Additional arguments to [hal9001::fit_hal].
-#' @inherit constructor_shared
+#' @inherit learner_glm title return
+#' @inheritParams learner_glm formula info learner.args
 #' @inheritParams hal9001::fit_hal
 #' @examples
 #' \dontrun{

@@ -2,7 +2,8 @@
 #' additive models with [mgcv::gam].
 #' @export
 #' @param ... Additional arguments to [mgcv::gam].
-#' @inherit constructor_shared
+#' @inherit learner_glm title return
+#' @inheritParams learner_glm formula info learner.args
 #' @inheritParams mgcv::gam
 #' @examples
 #' n <- 5e2

@@ -25,7 +25,7 @@ probabilities of success (only for 'bin' method)}
 \section{S3 generics}{
 
 The following S3 generic functions are available for an object
-of class \code{targeted}:
+of class \code{calibration}:
 \describe{
 \item{\code{predict}}{Apply calibration to new data.}
 \item{\code{plot}}{Plot the calibration curves (reliability plot).}

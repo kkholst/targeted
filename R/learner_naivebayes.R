@@ -6,7 +6,7 @@
 #' classification.
 #' @export
 #' @param ... Additional arguments to [naivebayes].
-#' @inherit constructor_shared
+#' @inherit learner_glm
 #' @inheritParams naivebayes
 #' @examples
 #' n <- 5e2

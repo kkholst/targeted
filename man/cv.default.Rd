@@ -49,7 +49,7 @@ below)}
 
 \item{args.future}{Arguments to future.apply::future_mapply}
 
-\item{mc.cores}{Optional number of cores. \link[parallel:mclapply]{parallel::mcmapply} used instead
+\item{mc.cores}{Optional number of cores. \link[parallel:mcmapply]{parallel::mcmapply} used instead
 of future}
 
 \item{silent}{suppress all messages and progressbars}

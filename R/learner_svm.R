@@ -6,7 +6,7 @@
 #' classification.
 #' @export
 #' @param ... Additional arguments to [e1071::svm].
-#' @inherit constructor_shared
+#' @inherit learner_glm
 #' @inheritParams e1071::svm
 #' @examples
 #' n <- 5e2

@@ -73,7 +73,7 @@ one-sided null-hypotheses based on influence functions. arXiv:
 https://arxiv.org/abs/2511.07096.
 }
 \seealso{
-\link{test_zmax_onesided} \link[lava:compare]{lava::test_wald} \link[lava:closed_testing]{lava::closed_testing}
+\link{test_zmax_onesided} \link[lava:test_wald]{lava::test_wald} \link[lava:closed_testing]{lava::closed_testing}
 }
 \author{
 Klaus Kähler Holst, Christian Bressen Pipper

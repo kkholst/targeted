@@ -15,7 +15,7 @@ learner_surv_cox(formula, info = "mets::phreg", learner.args = NULL, ...)
 \item{learner.args}{(list) Additional arguments to
 \link[=learner]{learner$new()}.}
 
-\item{...}{Additional arguments to lower level funtions}
+\item{...}{Additional arguments passed to lower-level functions (e.g., optimization controls).}
 }
 \value{
 \link{learner} object.

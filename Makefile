@@ -15,6 +15,11 @@ cliff-unreleased:
 cliff-unreleased-prepend:
 	@git cliff --unreleased -c $(CLIFF_CFG) -p $(CHANGELOG)
 
+.PHONY: pkgdown
+pkgdown:
+	@echo 'pkgdown::build_site(override = list(destination = "docs"))' | $(R)
+	@rm -rf vignettes/.quarto vignettes/.gitignore
+
 rcpp:
 	@echo 'Rcpp::compileAttributes(".")' | $(R)
 
@@ -23,7 +28,7 @@ readme:
 	@cp inst/README.md README.md
 
 roxygen:
-	@echo 'devtools::document(".")' | $(R)
+	@echo 'roxygen2::roxygenize(".")' | $(R)
 
 doc: roxygen rcpp readme
 
@@ -31,8 +36,10 @@ clean:
 	@find vignettes inst '(' -name "*.html" -o -name "*_cache" -o -name "*_files" ')' -exec rm -Rf {} +
 	@# remove output files of code coverage
 	@rm -rf tests/lib tests/coverage-report.html
-	@rm -rf build
+	@rm -rf inst/man
+	@rm -rf build targeted.Rcheck docs pkgdown
 	@rm -rf src/*.o src/*.so src/target/src/*.o
+	@rm -rf vignettes/.gitignore vignettes/.quarto
 
 .PHONY: build
 build:

@@ -4,9 +4,11 @@
 #' models with [glmnet::cv.glmnet]. Predictions are returned for the value of
 #' `lambda` that gives minimum `cvm`. That is, [glmnet::predict.cv.glmnet] is
 #' called with `s = "lambda.min"`.
-#' @inherit constructor_shared
+#' @inherit learner_glm title return
+#' @inheritParams learner_glm formula info learner.args
 #' @inheritParams glmnet::cv.glmnet
-#' @inheritParams glmnet::glmnet # required to document family and alpha args
+#' @inheritParams glmnet::glmnet
+# inheritParams glmnet::glmnet is required to document family and alpha args
 #' @examples
 #' # continuous outcome
 #' n <- 5e2

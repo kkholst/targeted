@@ -1,8 +1,5 @@
 # superlearner
 library("tinytest")
-suppressPackageStartupMessages(
-  library("SuperLearner")
-)
 
 sim1 <- function(n = 5e3) {
    x1 <- rnorm(n, sd = 2)
@@ -56,6 +53,9 @@ test_sl <- function() {
   expect_true(sm[1] > ci2[1] & sm[1] < ci2[2])
 }
 if (lava:::versioncheck("SuperLearner", geq = c(2, 0, 30))) {
+  suppressPackageStartupMessages(
+    library("SuperLearner")
+  )
   test_sl()
 }
 
