@@ -566,11 +566,8 @@ cate <- function(response.model, # nolint
                 id = id,
                 calibration.model = calibration.model,
                 var.type = var.type,
-<<<<<<< HEAD
                 second.order = second.order,
                 effect.scale = effect.scale
-  )
-                second.order = second.order
                 )
   res$response.model <- response.model
   return(res)
