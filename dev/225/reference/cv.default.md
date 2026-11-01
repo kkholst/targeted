@@ -125,7 +125,7 @@ x
 #> 5-fold cross-validation with 10 repetitions
 #> 
 #>              mse       mae
-#> model1 0.6927760 0.6933756
-#> model2 0.2710510 0.4071199
-#> model3 0.1192489 0.2793619
+#> model1 0.6900482 0.6917667
+#> model2 0.2712526 0.4074768
+#> model3 0.1173008 0.2765319
 ```

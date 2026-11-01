@@ -162,13 +162,13 @@ of <code>data</code>, even if the variable exists in the environment of <code>fo
 <span class="r-in"><span><span class="va">dd</span> <span class="op">&lt;-</span> <span class="fu">design</span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">a</span> <span class="op">+</span> <span class="va">x</span>, data <span class="op">=</span> <span class="va">d0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>response <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dd</span><span class="op">$</span><span class="va">y</span>, <span class="fl">2</span><span class="op">)</span>, design.matrix <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dd</span><span class="op">$</span><span class="va">x</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $response</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           1           2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -1.28373448 -0.03446884 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          1          2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> -0.5845553  0.3477605 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $design.matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   a          x</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 1  1.8687205</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 1 -0.1739599</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 1  0.7940403</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 0 -0.2252579</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># specials</span></span></span>
@@ -176,13 +176,13 @@ of <code>data</code>, even if the variable exists in the environment of <code>fo
 <span class="r-in"><span><span class="va">dd</span> <span class="op">&lt;-</span> <span class="fu">design</span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">a</span> <span class="op">+</span> <span class="va">x</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/weights.html" class="external-link">weights</a></span><span class="op">(</span><span class="va">w</span><span class="op">)</span>, <span class="va">d0</span>, specials <span class="op">=</span> <span class="st">"weights"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dd</span><span class="op">$</span><span class="va">weights</span>, <span class="fl">2</span><span class="op">)</span>, design.matrix <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dd</span><span class="op">$</span><span class="va">x</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $weights</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          1          2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.99034101 0.04562852 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         1         2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.7757335 0.9833097 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $design.matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   a          x</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 1  1.8687205</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 1 -0.1739599</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 1  0.7940403</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 0 -0.2252579</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="co"># declared special variable is missing in formula. the associated field</span></span></span>
 <span class="r-in"><span><span class="co"># is NULL</span></span></span>
@@ -193,8 +193,8 @@ of <code>data</code>, even if the variable exists in the environment of <code>fo
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $design.matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   a          x</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 1  1.8687205</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 1 -0.1739599</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 1  0.7940403</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 0 -0.2252579</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>

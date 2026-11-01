@@ -386,31 +386,31 @@ models <- lapply(args, function(par) do.call(rf, par))
 x <- models[[1]]$clone()
 x$estimate(iris)
 predict(x, newdata = head(iris))
-#>         setosa   versicolor   virginica
-#> [1,] 0.9930556 0.0058333333 0.001111111
-#> [2,] 0.9655357 0.0298809524 0.004583333
-#> [3,] 0.9747381 0.0080119048 0.017250000
-#> [4,] 0.9767857 0.0152976190 0.007916667
-#> [5,] 0.9963889 0.0008333333 0.002777778
-#> [6,] 0.8968889 0.0634166667 0.039694444
+#>         setosa  versicolor   virginica
+#> [1,] 0.9900000 0.006666667 0.003333333
+#> [2,] 0.9367143 0.063285714 0.000000000
+#> [3,] 0.9708810 0.023119048 0.006000000
+#> [4,] 0.9668810 0.033119048 0.000000000
+#> [5,] 0.9933333 0.003333333 0.003333333
+#> [6,] 0.9134524 0.067285714 0.019261905
 
 # \donttest{
 # Reduce Ex. timing
 a <- targeted::cv(models, data = iris)
 cbind(coef(a), attr(args, "table"))
 #>              brier -logscore
-#> model1  0.10256223 0.2222698
-#> model2  0.10544979 0.2251251
-#> model3  0.09652546 0.1980674
-#> model4  0.09390614 0.1970298
-#> model5  0.09082805 0.1804666
-#> model6  0.08763618 0.1780873
-#> model7  0.35666675 0.5823886
-#> model8  0.34669338 0.5686989
-#> model9  0.35066329 0.5682587
-#> model10 0.34356210 0.5599642
-#> model11 0.34411904 0.5599373
-#> model12 0.34428188 0.5538106
+#> model1  0.10197953 0.2229566
+#> model2  0.10243825 0.2202602
+#> model3  0.09046538 0.1892048
+#> model4  0.09412910 0.1965359
+#> model5  0.08954690 0.1775216
+#> model6  0.08440783 0.1712559
+#> model7  0.33955940 0.5655337
+#> model8  0.33633002 0.5540937
+#> model9  0.33704930 0.5522342
+#> model10 0.33059281 0.5474953
+#> model11 0.33352224 0.5445028
+#> model12 0.32876930 0.5398556
 # }
 
 # defining learner via function with arguments y (response)
@@ -440,7 +440,7 @@ lr$summary()
 #> ────────── learner object ──────────
 #> glm 
 #> 
-#> formula: y ~ x <environment: 0x5afd62529080> 
+#> formula: y ~ x <environment: 0x60008670dfe0> 
 #> estimate: formula, data, family, ... 
 #> estimate.args: family=nb 
 #> predict: object, newdata, ... 
@@ -455,7 +455,7 @@ print(lr_sum)
 #> ────────── learner object ──────────
 #> glm 
 #> 
-#> formula: y ~ x <environment: 0x5afd62529080> 
+#> formula: y ~ x <environment: 0x60008670dfe0> 
 #> estimate: formula, data, family, ... 
 #> estimate.args: family=nb 
 #> predict: object, newdata, ... 
