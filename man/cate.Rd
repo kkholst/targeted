@@ -193,6 +193,29 @@ fit <- cate(cate.model = ~1,
             missing.model  = ~ a * (w1 + w2),
             data = d, nfolds = 1L)
 fit
+
+# missingness depending on a post-randomization variable Z
+# (doubly-robust estimation via `auxiliary.model`)
+
+sim_aux <- function(n = 5000, seed = 1) {
+  set.seed(seed)
+  w <- rnorm(n)
+  a <- rbinom(n, 1, 0.5)
+  z <- rnorm(n, mean = 0.5 * a, sd=0.5)
+  r <- rbinom(n, 1, plogis(-0.5 - 0.5 * a * z + 0.1 * w))
+  y0 <- 1 + 0.5 * a + 2 * z^2 + w + rnorm(n, sd=0.5)
+  y <- ifelse(r == 1, y0, NA_real_)
+  data.frame(w, a, z, y0, y)
+}
+d <- sim_aux()
+# Truth: E[Y(1)] = 1 + 0.5 + 2 * (1 + 0.25) = 4, E[Y(0)] = 3, ATE = 1
+cate(y ~ a + w, a ~ 1, data=na.omit(d))
+fit <- cate(response.model = y ~ a + w,
+            treatment.model = a ~ 1,
+            missing.model = ~ a * z + w,
+            auxiliary.model = y ~ a + I(z^2) + w,
+            data = d)
+fit
 }
 \references{
 Mark J. van der Laan (2006) Statistical Inference for Variable
