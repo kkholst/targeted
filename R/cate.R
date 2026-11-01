@@ -152,7 +152,7 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #' Missing data is handled under a Missing At Random assumption (MAR). Let
 #' \eqn{R} denote the indicator for data not being missing, \eqn{R\perp Y|W,A,Z}
 #' where the conditioning set must be observed for all subjects,
-#' and $Z$ denotes potentiel  post-treatment variable.
+#' and \eqn{Z} denotes potentiel post-treatment variable.
 #'
 #' The nuisance models are \eqn{Q(w,a) = E(Y|W=w, A=a)}, \eqn{g(w,a) =
 #' P(A=a|W=w)}, and \eqn{\rho(w, a, z) = P(R=1|W=w, A=a, Z=z)},
@@ -187,7 +187,7 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #'   an additional second-order term is added to the influence function.
 #' @param auxiliary.model when the missing data model depends on
 #'   post-randomization variables \eqn{Z}, this argument defines the nuisance
-#'   model for \eqn{E(Y|W,A,Z)}#'
+#'   model for \eqn{E(Y|W,A,Z)}
 #' @param cate.model formula specifying regression design for conditional
 #'   average treatment effects
 #' @param calibration.model linear calibration model. Specify covariates in
@@ -213,15 +213,14 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #'   available for ATE and when `calibration.model` is also specified)
 #' @param pseudo.outcome character specifying the pseudo-outcome used to fit
 #'   `response.model` when `auxiliary.model` is supplied. With `"regression"`
-#'   (default), use predictions from `auxiliary.model`. With `"dr"`, use \eqn{U
-#'   = h(W,A,Z) + R\{Y-h(W,A,Z)\}/\rho(W,A,Z)}. The latter has conditional
-#'   expectation \eqn{E[Y\mid A,W]} when either the auxiliary outcome model or
-#'   the observation model is correctly specified, under MAR.
+#'   (default), use predictions from `auxiliary.model`, \eqn{h(W,A,Z)}. With
+#'   `"dr"`, use \eqn{U = h(W,A,Z) + R\{Y-h(W,A,Z)\}/\rho(W,A,Z)}. The latter
+#'   has conditional expectation \eqn{E[Y\mid A,W]} when either the auxiliary
+#'   outcome model or the observation model is correctly specified, under MAR.
 #'   Note, for binary outcomes, `"regression"` requires a learner accepting
-#'   fractional responses (e.g. quasibinomial regression). The `"dr"`
-#'   option requires a learner accepting responses outside the outcome's
-#'   original bounds.
-#'   Ignored when `auxiliary.model` is not used.
+#'   fractional responses (e.g. quasibinomial regression). The `"dr"` option
+#'   requires a learner accepting responses outside the outcome's original
+#'   bounds. Ignored when `auxiliary.model` is not used.
 #' @param second.order add seconder order term to IF to handle misspecification
 #'   of outcome models
 #' @return cate.targeted object

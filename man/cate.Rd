@@ -47,7 +47,7 @@ an additional second-order term is added to the influence function.}
 
 \item{auxiliary.model}{when the missing data model depends on
 post-randomization variables \eqn{Z}, this argument defines the nuisance
-model for \eqn{E(Y|W,A,Z)}#'}
+model for \eqn{E(Y|W,A,Z)}}
 
 \item{data}{data.frame}
 
@@ -79,15 +79,14 @@ available for ATE and when \code{calibration.model} is also specified)}
 
 \item{pseudo.outcome}{character specifying the pseudo-outcome used to fit
 \code{response.model} when \code{auxiliary.model} is supplied. With \code{"regression"}
-(default), use predictions from \code{auxiliary.model}. With \code{"dr"}, use \eqn{U
-= h(W,A,Z) + R\{Y-h(W,A,Z)\}/\rho(W,A,Z)}. The latter has conditional
-expectation \eqn{E[Y\mid A,W]} when either the auxiliary outcome model or
-the observation model is correctly specified, under MAR.
+(default), use predictions from \code{auxiliary.model}, \eqn{h(W,A,Z)}. With
+\code{"dr"}, use \eqn{U = h(W,A,Z) + R\{Y-h(W,A,Z)\}/\rho(W,A,Z)}. The latter
+has conditional expectation \eqn{E[Y\mid A,W]} when either the auxiliary
+outcome model or the observation model is correctly specified, under MAR.
 Note, for binary outcomes, \code{"regression"} requires a learner accepting
-fractional responses (e.g. quasibinomial regression). The \code{"dr"}
-option requires a learner accepting responses outside the outcome's
-original bounds.
-Ignored when \code{auxiliary.model} is not used.}
+fractional responses (e.g. quasibinomial regression). The \code{"dr"} option
+requires a learner accepting responses outside the outcome's original
+bounds. Ignored when \code{auxiliary.model} is not used.}
 
 \item{second.order}{add seconder order term to IF to handle misspecification
 of outcome models}
@@ -112,7 +111,7 @@ E_{P}[\{\Psi_{1}(P)(V)-\Psi_{0}(P)(V)\} - m(V; \beta)]^{2}}
 Missing data is handled under a Missing At Random assumption (MAR). Let
 \eqn{R} denote the indicator for data not being missing, \eqn{R\perp Y|W,A,Z}
 where the conditioning set must be observed for all subjects,
-and $Z$ denotes potentiel  post-treatment variable.
+and \eqn{Z} denotes potentiel post-treatment variable.
 
 The nuisance models are \eqn{Q(w,a) = E(Y|W=w, A=a)}, \eqn{g(w,a) =
 P(A=a|W=w)}, and \eqn{\rho(w, a, z) = P(R=1|W=w, A=a, Z=z)},
@@ -130,7 +129,7 @@ Note that when the MAR assumption depends on \eqn{Z}, we can no longer obtain
 a consistent estimate of \eqn{Q(W,A)} from \eqn{E[Y|A,W,R=1]}. Instead we an
 estimate of \eqn{Q(W,A)} is obtained as \eqn{E[h(W,A,Z) | A, W]}. A more
 general doubly-robust estimate can be obtained from the regression
-\eqn{E[U|A,W]} using the pseudo-outcome \eqn{U = h(W,A,Z) +
+\eqn{E[U|A,W]} using the DR pseudo-outcome \eqn{U = h(W,A,Z) +
 R/\rho(W,A,Z)(Y-h(W,A,Z))}.
 }
 \examples{
