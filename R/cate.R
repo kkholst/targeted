@@ -63,9 +63,11 @@ est_nuisance_fold <- function(fold,
   }
 
   use_ipmw <- !is.null(missing.model)
-  R_train <- if (use_ipmw) dtrain[["R_"]] else {
-    rep(1L, nrow(dtrain))
-  }
+  R_train <- if (use_ipmw) {
+               dtrain[["R_"]]
+             } else {
+               rep(1L, nrow(dtrain))
+             }
   ## Training rows in the relevant arm, or all rows for pooled fits.
   idx_arm <- if (stratify) {
     which(dtrain[, treatment] == level)
