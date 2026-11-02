@@ -1,5 +1,12 @@
 # development version
 
+- `cate`: new `auxiliary.model` argument supports missing outcomes under MAR
+   conditional on baseline and fully observed post-randomization variables. The
+   auxiliary outcome regression augments the missingness-adjusted score. The new
+   `pseudo.outcome` argument controls fitting of the baseline outcome
+   regression: "regression" (default) uses auxiliary predictions, while "dr"
+   uses a doubly robust pseudo-outcome. Both options support repeated
+   cross-fitting.
 - `moi`: new `id` argument for subject ids (propagated to the influence
   functions of the nuisance and target parameter estimates)
 - Support for mixed models for repeated measures (MMRM) fitted with the `mmrm`
