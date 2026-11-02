@@ -50,6 +50,7 @@
 <span>  cate.model <span class="op">=</span> <span class="op">~</span><span class="fl">1</span>,</span>
 <span>  calibration.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  missing.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  auxiliary.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">data</span>,</span>
 <span>  <span class="va">contrast</span>,</span>
 <span>  nfolds <span class="op">=</span> <span class="fl">1</span>,</span>
@@ -59,6 +60,7 @@
 <span>  stratify <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  mc.cores <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  var.type <span class="op">=</span> <span class="st">"IC"</span>,</span>
+<span>  pseudo.outcome <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"regression"</span>, <span class="st">"dr"</span><span class="op">)</span>,</span>
 <span>  second.order <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -89,12 +91,18 @@ addition to predicted potential outcomes to include in the calibration.</p></dd>
 <dt id="arg-missing-model">missing.model<a class="anchor" aria-label="anchor" href="#arg-missing-model"></a></dt>
 <dd><p>formula or learner object (formula =&gt; learner_glm(family
 = binomial); default <code>NULL</code>. Model for the missingness mechanism \(P(R=1
-\mid X, A)\). Required when the outcome in <code>response.model</code> contains NAs. If
+\mid W, A)\). Required when the outcome in <code>response.model</code> contains NAs. If
 the formula LHS is omitted, the observation indicator is used
 automatically. When <code>stratify = TRUE</code> the missing model is fit separately
 per treatment arm. When supplied, the AIPW score is
 inverse-probability-of-observation weighted and (if <code>second.order = TRUE</code>)
 an additional second-order term is added to the influence function.</p></dd>
+
+
+<dt id="arg-auxiliary-model">auxiliary.model<a class="anchor" aria-label="anchor" href="#arg-auxiliary-model"></a></dt>
+<dd><p>when the missing data model depends on
+post-randomization variables \(Z\), this argument defines the nuisance
+model for \(E(Y|W,A,Z)\)</p></dd>
 
 
 <dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
@@ -127,8 +135,8 @@ argument with a formula syntax: <code>~ 1 + cluster(id)</code>.</p></dd>
 
 
 <dt id="arg-stratify">stratify<a class="anchor" aria-label="anchor" href="#arg-stratify"></a></dt>
-<dd><p>if TRUE the response.model and missing.model (if provided)
-will be stratified by treatment</p></dd>
+<dd><p>if TRUE the response.model, missing.model and auxiliary.model
+(if provided) will be stratified by treatment</p></dd>
 
 
 <dt id="arg-mc-cores">mc.cores<a class="anchor" aria-label="anchor" href="#arg-mc-cores"></a></dt>
@@ -141,6 +149,19 @@ of future</p></dd>
 the influence function. Otherwise, based on expressions in Bannick et al.
 (2025) valid under different covariate-adaptive randomization schemes (only
 available for ATE and when <code>calibration.model</code> is also specified)</p></dd>
+
+
+<dt id="arg-pseudo-outcome">pseudo.outcome<a class="anchor" aria-label="anchor" href="#arg-pseudo-outcome"></a></dt>
+<dd><p>character specifying the pseudo-outcome used to fit
+<code>response.model</code> when <code>auxiliary.model</code> is supplied. With <code>"regression"</code>
+(default), use predictions from <code>auxiliary.model</code>, \(h(W,A,Z)\). With
+<code>"dr"</code>, use \(U = h(W,A,Z) + R\{Y-h(W,A,Z)\}/\rho(W,A,Z)\). The latter
+has conditional expectation \(E[Y\mid A,W]\) when either the auxiliary
+outcome model or the observation model is correctly specified, under MAR.
+Note, for binary outcomes, <code>"regression"</code> requires a learner accepting
+fractional responses (e.g. quasibinomial regression). The <code>"dr"</code> option
+requires a learner accepting responses outside the outcome's original
+bounds. Ignored when <code>auxiliary.model</code> is not used.</p></dd>
 
 
 <dt id="arg-second-order">second.order<a class="anchor" aria-label="anchor" href="#arg-second-order"></a></dt>
@@ -166,12 +187,24 @@ $$\psi_{a}(P)(V) = E_{P}[E_{P}(Y\mid A=a, W)|V]$$ and let \(m(V;
 mean-squared error $$\beta(P) = \operatorname{argmin}_{\beta}
 E_{P}[\{\Psi_{1}(P)(V)-\Psi_{0}(P)(V)\} - m(V; \beta)]^{2}$$</p>
 <p>Missing data is handled under a Missing At Random assumption (MAR). Let
-\(R\) denote the indicator for data not being missing, \(R\perp Y|W,A\).
-The nuisance models are \(Q(w,a) = E(Y|W=w, A=a)\), \(g_a(w) =
-P(A=a|W=w)\), and \(\rho(w, a) = P(R=1|W=w, A=a)\). For the expected
-potential outcome \(E[Y(a)]\), the AIPW estimator then takes the form
-$$\frac{1}{n}\sum_{i=1}^n R_i I(A_i=a) / \{g_a(W_i) \rho(W_i, a)\} (Y_i -
-Q(W_i,a)) + Q(W_i, a)$$.</p>
+\(R\) denote the indicator for data not being missing, \(R\perp Y|W,A,Z\)
+where the conditioning set must be observed for all subjects,
+and \(Z\) denotes potentiel post-treatment variable.</p>
+<p>The nuisance models are \(Q(w,a) = E(Y|W=w, A=a)\), \(g(w,a) =
+P(A=a|W=w)\), and \(\rho(w, a, z) = P(R=1|W=w, A=a, Z=z)\),
+\(h(w,a,z) = E(Y|W=w, A=a, Z=z)\).</p>
+<p>For the expected potential outcome \(E[Y(a)]\), the EIF then takes the form</p>
+<p>$$\frac{I(A=a)}{g(W,a)}\left[
+\frac{R}{\rho(W, a, Z)}\{Y-Q(W, a)\} +
+\big\{1 - \frac{R}{\rho(W, a, Z)}\big\}\{h(W,a,Z)-Q(W,a)\}
+\right] + Q(W,a) - \psi_a
+$$</p>
+<p>Note that when the MAR assumption depends on \(Z\), we can no longer obtain
+a consistent estimate of \(Q(W,A)\) from \(E[Y|A,W,R=1]\). Instead we an
+estimate of \(Q(W,A)\) is obtained as \(E[h(W,A,Z) | A, W]\). A more
+general doubly-robust estimate can be obtained from the regression
+\(E[U|A,W]\) using the DR pseudo-outcome \(U = h(W,A,Z) +
+R/\rho(W,A,Z)(Y-h(W,A,Z))\).</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -268,6 +301,39 @@ Clinical Trials under Covariate-Adaptive Randomization, Biometrika.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> E[y(0)]       0.9725 0.03237 0.9091 1.036 2.485e-198</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ───────────                                         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   1.0082 0.04573 0.9186 1.098 1.033e-107</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># missingness depending on a post-randomization variable Z</span></span></span>
+<span class="r-in"><span><span class="co"># (doubly-robust estimation via `auxiliary.model`)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">sim_aux</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span> <span class="op">=</span> <span class="fl">5000</span>, <span class="va">seed</span> <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="va">seed</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">1</span>, <span class="fl">0.5</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, mean <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="va">a</span>, sd<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Logistic.html" class="external-link">plogis</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.5</span> <span class="op">-</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="va">a</span> <span class="op">*</span> <span class="va">z</span> <span class="op">+</span> <span class="fl">0.1</span> <span class="op">*</span> <span class="va">w</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">y0</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="va">a</span> <span class="op">+</span> <span class="fl">2</span> <span class="op">*</span> <span class="va">z</span><span class="op">^</span><span class="fl">2</span> <span class="op">+</span> <span class="va">w</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, sd<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">r</span> <span class="op">==</span> <span class="fl">1</span>, <span class="va">y0</span>, <span class="cn">NA_real_</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">w</span>, <span class="va">a</span>, <span class="va">z</span>, <span class="va">y0</span>, <span class="va">y</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">sim_aux</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Truth: E[Y(1)] = 1 + 0.5 + 2 * (1 + 0.25) = 4, E[Y(0)] = 3, ATE = 1</span></span></span>
+<span class="r-in"><span><span class="fu">cate</span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">a</span> <span class="op">+</span> <span class="va">w</span>, <span class="va">a</span> <span class="op">~</span> <span class="fl">1</span>, data<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/na.fail.html" class="external-link">na.omit</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err   2.5%  97.5%   P-value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> E[y(1)]       2.3849 0.04900 2.2889 2.4810 0.000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> E[y(0)]       1.5743 0.03687 1.5021 1.6466 0.000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ───────────                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.8106 0.05051 0.7116 0.9096 5.817e-58</span>
+<span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">cate</span><span class="op">(</span>response.model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">a</span> <span class="op">+</span> <span class="va">w</span>,</span></span>
+<span class="r-in"><span>            treatment.model <span class="op">=</span> <span class="va">a</span> <span class="op">~</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>            missing.model <span class="op">=</span> <span class="op">~</span> <span class="va">a</span> <span class="op">*</span> <span class="va">z</span> <span class="op">+</span> <span class="va">w</span>,</span></span>
+<span class="r-in"><span>            auxiliary.model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">a</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="va">z</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">+</span> <span class="va">w</span>,</span></span>
+<span class="r-in"><span>            data <span class="op">=</span> <span class="va">d</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fit</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             Estimate Std.Err   2.5% 97.5%    P-value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> E[y(1)]       2.4744 0.03405 2.4077 2.541  0.000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> E[y(0)]       1.5108 0.02668 1.4585 1.563  0.000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ───────────                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   0.9636 0.03814 0.8889 1.038 7.847e-141</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

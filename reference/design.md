@@ -123,13 +123,13 @@ d0$w <- runif(n)
 dd <- design(y ~ a + x, data = d0)
 list(response = head(dd$y, 2), design.matrix = head(dd$x, 2))
 #> $response
-#>           1           2 
-#> -1.28373448 -0.03446884 
+#>          1          2 
+#> -0.5845553  0.3477605 
 #> 
 #> $design.matrix
 #>   a          x
-#> 1 1  1.8687205
-#> 2 1 -0.1739599
+#> 1 1  0.7940403
+#> 2 0 -0.2252579
 #> 
 
 # specials
@@ -137,13 +137,13 @@ list(response = head(dd$y, 2), design.matrix = head(dd$x, 2))
 dd <- design(y ~ a + x + weights(w), d0, specials = "weights")
 list(weights = head(dd$weights, 2), design.matrix = head(dd$x, 2))
 #> $weights
-#>          1          2 
-#> 0.99034101 0.04562852 
+#>         1         2 
+#> 0.7757335 0.9833097 
 #> 
 #> $design.matrix
 #>   a          x
-#> 1 1  1.8687205
-#> 2 1 -0.1739599
+#> 1 1  0.7940403
+#> 2 0 -0.2252579
 #> 
 # declared special variable is missing in formula. the associated field
 # is NULL
@@ -154,7 +154,7 @@ list(weights = dd$weights, design.matrix = head(dd$x, 2))
 #> 
 #> $design.matrix
 #>   a          x
-#> 1 1  1.8687205
-#> 2 1 -0.1739599
+#> 1 1  0.7940403
+#> 2 0 -0.2252579
 #> 
 ```

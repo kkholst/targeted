@@ -59,7 +59,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Prediction model class (<code>learner</code>)</h1>
 
       <p class="author">Klaus Kähler Holst, Benedikt Sommer</p>
-      <p class="date">2026-10-30</p>
+      <p class="date">2026-11-02</p>
 
       <small class="dont-index">Source: <a href="https://github.com/kkholst/targeted/blob/main/vignettes/predictionclass.qmd" class="external-link"><code>vignettes/predictionclass.qmd</code></a></small>
       <div class="d-none name"><code></code></div>
@@ -125,10 +125,10 @@ Estimate arguments: nfolds=5, meta.learner=&lt;function&gt;, model.score=&lt;fun
 Predict arguments:
 Formula: y ~ age * bili
 ─────────────────────────────────────
-          score     weight
-glm1 0.09814148 0.37420430
-glm2 0.10831678 0.01273167
-gam  0.09713761 0.61306404</code></pre>
+         score     weight
+glm1 0.1001820 0.52670138
+glm2 0.1083122 0.09217008
+gam  0.1013494 0.38112854</code></pre>
 </div>
 </div>
 <p>Most constructors have additional arguments that impact the resulting model fit, ranging from the specification of a link function for generalized linear models to hyper hyperparameters of machine learning models. Arguments naturally vary between the constructors and are documented for each function (e.g. <code><a href="../reference/learner_gam.html">?learner_gam</a></code>). The implemented constructors only provide arguments for the most relevant parameters of the underlying fit function (<code><a href="https://rdrr.io/pkg/mgcv/man/gam.html" class="external-link">mgcv::gam</a></code> in case of <code>learner_gam</code>). As described in the documentation, the ellipsis argument (<code>...</code>) can be used to pass additional arguments to the fit function. However, in most situations this is rarely required.</p>
@@ -238,8 +238,8 @@ Formula: y ~ age + sex + bili </code></pre>
         list(params = xgb_params)), )
     return(res)
 }
-&lt;bytecode: 0x560b9c060530&gt;
-&lt;environment: 0x560b98d11648&gt;</code></pre>
+&lt;bytecode: 0x5d2402d598d0&gt;
+&lt;environment: 0x5d23ffb92f98&gt;</code></pre>
 </div>
 </div>
 <p>Rare situations may arise where one wants to update the formula argument. This supported and implemented via the <code>update</code> method</p>
@@ -289,8 +289,8 @@ Formula: y ~ age + sex + bili </code></pre>
 5-fold cross-validation with 2 repetitions
 
            mse       mae
-glm 0.10661448 0.2121854
-gam 0.09541927 0.1856327</code></pre>
+glm 0.10729995 0.2124875
+gam 0.09599675 0.1846981</code></pre>
 </div>
 </div>
 </section><section class="level2"><h3 id="prediction-filter">Prediction filter<a class="anchor" aria-label="anchor" href="#prediction-filter"></a>
@@ -445,8 +445,8 @@ Predict arguments:
 Formula: NULL
 ─────────────────────────────────────
         score weight
-glm 0.1092031      1
-gam 0.1101241      0</code></pre>
+glm 0.1089581      1
+gam 0.1150820      0</code></pre>
 </div>
 </div>
 <p>In this case, all arguments provided to <code>lr$estimate</code> are joined together with the specified <code>estimate.args</code> and passed on to the defined estimate function (i.e. <code>superlearner</code>).</p>
@@ -489,7 +489,7 @@ gam 0.1101241      0</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>function (object, ...)
 object
-&lt;bytecode: 0x560b9b9a61c8&gt;
+&lt;bytecode: 0x5d23fe75c3b0&gt;
 &lt;environment: namespace:targeted&gt;</code></pre>
 </div>
 </div>
@@ -589,7 +589,8 @@ Coefficients:
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
       // Inspect non-navigation links and adorn them if external
-     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      window.quartoDecorateExternalLinks = function (root) {
+     var links = (root || window.document).querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
       for (var i=0; i<links.length; i++) {
         const link = links[i];
         if (!isInternal(link.href)) {
@@ -598,8 +599,69 @@ Coefficients:
           if (link.dataset.originalHref !== undefined) {
             link.href = link.dataset.originalHref;
           }
+          if (!link.classList.contains('no-external-icon')) {
+          }
         }
       }
+      };
+      window.quartoDecorateExternalLinks(window.document);
+    // Esc closes the popup (WCAG 1.4.13) and focus leaving both trigger and
+    // popup closes it (WCAG 2.4.11); tippy handles neither for interactive popups.
+    const hideOnEscAndFocusOut = {
+      name: 'hideOnEscAndFocusOut',
+      defaultValue: true,
+      fn(instance) {
+        const dismiss = () => {
+          // A show scheduled by the trigger delay would otherwise reopen it
+          instance.clearDelayTimeouts();
+          instance.hide();
+        };
+        const onKeyDown = (event) => {
+          if (event.key !== 'Escape') {
+            return;
+          }
+          // Keep Esc from also reaching page handlers (e.g. reveal.js overview),
+          // except an open reveal.js slide menu, which Esc should close too.
+          // The menu handles keys only when its keyboard option is on.
+          const menuHandlesEsc = window.Reveal?.getPlugin?.('menu')?.isOpen() &&
+            window.Reveal.getConfig().menu?.keyboard !== false;
+          if (!menuHandlesEsc) {
+            event.stopPropagation();
+          }
+          if (instance.popper.contains(window.document.activeElement)) {
+            // Disabled while refocusing so the focus trigger does not reopen it
+            instance.disable();
+            instance.reference.focus();
+            instance.enable();
+          }
+          dismiss();
+        };
+        const onFocusOut = (event) => {
+          const target = event.relatedTarget;
+          if (target && !instance.reference.contains(target) &&
+              !instance.popper.contains(target)) {
+            dismiss();
+          }
+        };
+        // On the trigger too: a click trigger (code-annotations: select) has no
+        // blur handling. Attached for the instance's lifetime so leaving the
+        // trigger also cancels a show still pending on the trigger delay.
+        instance.reference.addEventListener('focusout', onFocusOut);
+        return {
+          onShow() {
+            window.document.addEventListener('keydown', onKeyDown, true);
+            instance.popper.addEventListener('focusout', onFocusOut);
+          },
+          onHide() {
+            window.document.removeEventListener('keydown', onKeyDown, true);
+            instance.popper.removeEventListener('focusout', onFocusOut);
+          },
+          onDestroy() {
+            instance.reference.removeEventListener('focusout', onFocusOut);
+          },
+        };
+      },
+    };
     function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
       const config = {
         allowHTML: true,
@@ -613,6 +675,7 @@ Coefficients:
         interactiveBorder: 10,
         theme: 'light-border',
         placement: 'bottom-start',
+        plugins: [hideOnEscAndFocusOut],
       };
       if (contentFn) {
         config.content = contentFn;

@@ -11,6 +11,7 @@ cate(
   cate.model = ~1,
   calibration.model = NULL,
   missing.model = NULL,
+  auxiliary.model = NULL,
   data,
   contrast,
   nfolds = 1,
@@ -20,6 +21,7 @@ cate(
   stratify = FALSE,
   mc.cores = NULL,
   var.type = "IC",
+  pseudo.outcome = c("regression", "dr"),
   second.order = TRUE,
   ...
 )
@@ -48,7 +50,7 @@ cate(
 - missing.model:
 
   formula or learner object (formula =\> learner_glm(family = binomial);
-  default `NULL`. Model for the missingness mechanism \\P(R=1 \mid X,
+  default `NULL`. Model for the missingness mechanism \\P(R=1 \mid W,
   A)\\. Required when the outcome in `response.model` contains NAs. If
   the formula LHS is omitted, the observation indicator is used
   automatically. When `stratify = TRUE` the missing model is fit
@@ -56,6 +58,11 @@ cate(
   inverse-probability-of-observation weighted and (if
   `second.order = TRUE`) an additional second-order term is added to the
   influence function.
+
+- auxiliary.model:
+
+  when the missing data model depends on post-randomization variables
+  \\Z\\, this argument defines the nuisance model for \\E(Y\|W,A,Z)\\
 
 - data:
 
@@ -88,8 +95,8 @@ cate(
 
 - stratify:
 
-  if TRUE the response.model and missing.model (if provided) will be
-  stratified by treatment
+  if TRUE the response.model, missing.model and auxiliary.model (if
+  provided) will be stratified by treatment
 
 - mc.cores:
 
@@ -102,6 +109,19 @@ cate(
   al. (2025) valid under different covariate-adaptive randomization
   schemes (only available for ATE and when `calibration.model` is also
   specified)
+
+- pseudo.outcome:
+
+  character specifying the pseudo-outcome used to fit `response.model`
+  when `auxiliary.model` is supplied. With `"regression"` (default), use
+  predictions from `auxiliary.model`, \\h(W,A,Z)\\. With `"dr"`, use \\U
+  = h(W,A,Z) + R\\Y-h(W,A,Z)\\/\rho(W,A,Z)\\. The latter has conditional
+  expectation \\E\[Y\mid A,W\]\\ when either the auxiliary outcome model
+  or the observation model is correctly specified, under MAR. Note, for
+  binary outcomes, `"regression"` requires a learner accepting
+  fractional responses (e.g. quasibinomial regression). The `"dr"`
+  option requires a learner accepting responses outside the outcome's
+  original bounds. Ignored when `auxiliary.model` is not used.
 
 - second.order:
 
@@ -129,11 +149,26 @@ E\_{P}\[\\\Psi\_{1}(P)(V)-\Psi\_{0}(P)(V)\\ - m(V; \beta)\]^{2}\$\$
 
 Missing data is handled under a Missing At Random assumption (MAR). Let
 \\R\\ denote the indicator for data not being missing, \\R\perp
-Y\|W,A\\. The nuisance models are \\Q(w,a) = E(Y\|W=w, A=a)\\, \\g_a(w)
-= P(A=a\|W=w)\\, and \\\rho(w, a) = P(R=1\|W=w, A=a)\\. For the expected
-potential outcome \\E\[Y(a)\]\\, the AIPW estimator then takes the form
-\$\$\frac{1}{n}\sum\_{i=1}^n R_i I(A_i=a) / \\g_a(W_i) \rho(W_i, a)\\
-(Y_i - Q(W_i,a)) + Q(W_i, a)\$\$.
+Y\|W,A,Z\\ where the conditioning set must be observed for all subjects,
+and \\Z\\ denotes potentiel post-treatment variable.
+
+The nuisance models are \\Q(w,a) = E(Y\|W=w, A=a)\\, \\g(w,a) =
+P(A=a\|W=w)\\, and \\\rho(w, a, z) = P(R=1\|W=w, A=a, Z=z)\\, \\h(w,a,z)
+= E(Y\|W=w, A=a, Z=z)\\.
+
+For the expected potential outcome \\E\[Y(a)\]\\, the EIF then takes the
+form
+
+\$\$\frac{I(A=a)}{g(W,a)}\left\[ \frac{R}{\rho(W, a, Z)}\\Y-Q(W, a)\\ +
+\big\\1 - \frac{R}{\rho(W, a, Z)}\big\\\\h(W,a,Z)-Q(W,a)\\ \right\] +
+Q(W,a) - \psi_a \$\$
+
+Note that when the MAR assumption depends on \\Z\\, we can no longer
+obtain a consistent estimate of \\Q(W,A)\\ from \\E\[Y\|A,W,R=1\]\\.
+Instead we an estimate of \\Q(W,A)\\ is obtained as \\E\[h(W,A,Z) \| A,
+W\]\\. A more general doubly-robust estimate can be obtained from the
+regression \\E\[U\|A,W\]\\ using the DR pseudo-outcome \\U = h(W,A,Z) +
+R/\rho(W,A,Z)(Y-h(W,A,Z))\\.
 
 ## References
 
@@ -231,4 +266,37 @@ fit
 #> E[y(0)]       0.9725 0.03237 0.9091 1.036 2.485e-198
 #> ───────────                                         
 #> (Intercept)   1.0082 0.04573 0.9186 1.098 1.033e-107
+
+# missingness depending on a post-randomization variable Z
+# (doubly-robust estimation via `auxiliary.model`)
+
+sim_aux <- function(n = 5000, seed = 1) {
+  set.seed(seed)
+  w <- rnorm(n)
+  a <- rbinom(n, 1, 0.5)
+  z <- rnorm(n, mean = 0.5 * a, sd=0.5)
+  r <- rbinom(n, 1, plogis(-0.5 - 0.5 * a * z + 0.1 * w))
+  y0 <- 1 + 0.5 * a + 2 * z^2 + w + rnorm(n, sd=0.5)
+  y <- ifelse(r == 1, y0, NA_real_)
+  data.frame(w, a, z, y0, y)
+}
+d <- sim_aux()
+# Truth: E[Y(1)] = 1 + 0.5 + 2 * (1 + 0.25) = 4, E[Y(0)] = 3, ATE = 1
+cate(y ~ a + w, a ~ 1, data=na.omit(d))
+#>             Estimate Std.Err   2.5%  97.5%   P-value
+#> E[y(1)]       2.3849 0.04900 2.2889 2.4810 0.000e+00
+#> E[y(0)]       1.5743 0.03687 1.5021 1.6466 0.000e+00
+#> ───────────                                         
+#> (Intercept)   0.8106 0.05051 0.7116 0.9096 5.817e-58
+fit <- cate(response.model = y ~ a + w,
+            treatment.model = a ~ 1,
+            missing.model = ~ a * z + w,
+            auxiliary.model = y ~ a + I(z^2) + w,
+            data = d)
+fit
+#>             Estimate Std.Err   2.5% 97.5%    P-value
+#> E[y(1)]       2.4744 0.03405 2.4077 2.541  0.000e+00
+#> E[y(0)]       1.5108 0.02668 1.4585 1.563  0.000e+00
+#> ───────────                                         
+#> (Intercept)   0.9636 0.03814 0.8889 1.038 7.847e-141
 ```

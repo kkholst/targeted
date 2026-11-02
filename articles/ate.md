@@ -293,6 +293,6 @@ sessionInfo()
     [16] evaluate_1.0.5      fastmap_1.2.0       yaml_2.3.12
     [19] compiler_4.6.2      codetools_0.2-20    Rcpp_1.1.2
     [22] mgcv_1.9-4          lattice_0.23-1      digest_0.6.39
-    [25] R6_2.6.1            parallelly_1.48.0   parallel_4.6.2
+    [25] R6_2.6.1            parallelly_1.50.0   parallel_4.6.2
     [28] splines_4.6.2       Matrix_1.7-6        tools_4.6.2
     [31] globals_0.20.0      survival_3.8-12    
