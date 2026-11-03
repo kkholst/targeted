@@ -311,13 +311,13 @@ test_moi_missing_IC_reference_lava <- function() {
     max(abs(lava_pred_IC_3 - lava_pred_IC_2)) == 0
   )
 
-  est1 <- expectation(object=imp_mod,
+  est1 <- lava::expectation(object=imp_mod,
                    lava::predict_glm,
                    data = data,
                    subset = (data$a == 1) & (delta == FALSE),                   
                    id = 1:nrow(data))
 
-  est0 <- expectation(object=imp_mod,
+  est0 <- lava::expectation(object=imp_mod,
                    lava::predict_glm,
                    data = data,
                    subset = (data$a == 0) & (delta == FALSE),
@@ -338,7 +338,6 @@ test_moi_missing_IC_reference_lava <- function() {
     max(abs(moi_est$estimate$IC[, 2, drop = FALSE] - ic0)) < 1e-14
   )
 }
-
 test_moi_missing_IC_reference_lava()
 
 test_moi_treatment_model_validation <- function() {

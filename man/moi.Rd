@@ -80,8 +80,8 @@ forming a partition of \code{1:nrow(data)}.}
 
 \item{silent}{suppress all messages and progressbars}
 
-\item{stratify}{if TRUE the response.model and missing.model (if provided)
-will be stratified by treatment}
+\item{stratify}{if TRUE the response.model, missing.model and auxiliary.model
+(if provided) will be stratified by treatment}
 
 \item{mc.cores}{(optional) number of cores. parallel::mcmapply used instead
 of future}
