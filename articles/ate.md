@@ -282,7 +282,7 @@ sessionInfo()
     [1] stats     graphics  grDevices utils     datasets  methods   base
 
     other attached packages:
-    [1] future_1.80.0       targeted_0.9.0.9000
+    [1] future_1.82.0       targeted_0.9.0.9000
 
     loaded via a namespace (and not attached):
      [1] nlme_3.1-171        progressr_1.1.0     cli_3.6.6

@@ -343,7 +343,7 @@ riskreg(y~a, nuisance=~x+z, data=d2, type="rd")
 ```
 
                 Estimate Std.Err   2.5% 97.5% P-value
-    (Intercept)   0.9764 0.02037 0.9365 1.016       0
+    (Intercept)   0.9651 0.02021 0.9255 1.005       0
 
 ### Influence-function
 
@@ -405,7 +405,7 @@ sessionInfo()
     [10] htmltools_0.5.9     rmarkdown_2.32      grid_4.6.2
     [13] evaluate_1.0.5      fastmap_1.2.0       yaml_2.3.12
     [16] compiler_4.6.2      codetools_0.2-20    Rcpp_1.1.2
-    [19] future_1.80.0       lattice_0.23-1      digest_0.6.39
+    [19] future_1.82.0       lattice_0.23-1      digest_0.6.39
     [22] R6_2.6.1            parallelly_1.50.0   parallel_4.6.2
     [25] splines_4.6.2       Matrix_1.7-6        tools_4.6.2
     [28] globals_0.20.0      survival_3.8-12    
