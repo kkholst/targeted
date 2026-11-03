@@ -3,7 +3,9 @@ procfold <- function(a, fold,
                      treatment.model,
                      response.model,
                      missing.model = NULL,
+                     auxiliary.model = NULL,
                      treatment_var,
+                     pseudo.outcome,
                      stratify,
                      folds,
                      ...) {
@@ -16,14 +18,20 @@ procfold <- function(a, fold,
     ## Missing model's LHS is the observation indicator "R_" (see cate()).
     mmod$update(outcome_level("R_", 1))
   }
+  hmod <- NULL
+  if (!is.null(auxiliary.model)) {
+    hmod <- auxiliary.model$clone(deep = TRUE)
+  }
   val <- list(est_nuisance_fold(
     folds[[fold]],
     data,
     treatment.model = pmod,
     response.model = qmod,
     missing.model = mmod,
+    auxiliary.model = hmod,
     treatment = treatment_var,
     level = a,
+    pseudo.outcome = pseudo.outcome,
     stratify = stratify
   ))
   return(val)
@@ -34,50 +42,86 @@ est_nuisance_fold <- function(fold,
                               treatment.model,
                               response.model,
                               missing.model = NULL,
+                              auxiliary.model = NULL,
                               treatment, level,
-                              stratify=FALSE) {
-  if (length(fold) == NROW(data)) { ## No cross-fitting
-    dtrain <- data
-    deval <- data
+                              pseudo.outcome,
+                              stratify = FALSE) {
+  if (length(fold) == NROW(data)) {
+    dtrain <- deval <- data
   } else {
-    dtrain <- data[-fold, ]
-    deval <- data[fold, ]
+    dtrain <- data[-fold, , drop = FALSE]
+    deval <- data[fold, , drop = FALSE]
   }
-  treatment.model$estimate(dtrain)
-  X <- deval
-  ## Observation indicator for the outcome. When missing.model is supplied
-  ## the caller has attached data$R_; use it to (i) restrict the response
-  ## model to observed rows and (ii) fit the missingness model.
+  predict_mean <- function(model, newdata) {
+    pred <- model$predict(newdata = newdata)
+    if (NCOL(pred) > 1L) pred <- pred[, 2L]
+    pred <- as.numeric(pred)
+    ## if (length(pred) != nrow(newdata) || any(!is.finite(pred))) {
+      ## stop("Invalid nuisance-model predictions")
+    ## }
+    pred
+  }
+
   use_ipmw <- !is.null(missing.model)
-  if (use_ipmw) {
-    R_train <- dtrain[, "R_"]
+  R_train <- if (use_ipmw) {
+               dtrain[["R_"]]
+             } else {
+               rep(1L, nrow(dtrain))
+             }
+  ## Training rows in the relevant arm, or all rows for pooled fits.
+  idx_arm <- if (stratify) {
+    which(dtrain[, treatment] == level)
   } else {
-    R_train <- rep(1L, nrow(dtrain))
+    seq_len(nrow(dtrain))
   }
-  if (stratify) {
-    idx <- which(dtrain[, treatment] == level & R_train == 1)
-    tmp <- response.model$estimate(dtrain[idx, , drop = FALSE]) # nolint
-  } else {
-    idx <- which(R_train == 1)
-    tmp <- response.model$estimate(dtrain[idx, , drop = FALSE]) # nolint
-    X[, treatment] <- level
-  }
-  pr <- treatment.model$predict(newdata = deval)
-  if (NCOL(pr) > 1)
-    pr <- pr[, 2]
-  eY <- response.model$predict(newdata = X)
-  rr <- NULL
+  idx_obs <- idx_arm[R_train[idx_arm] == 1L]
+  ## Intervention data for validation predictions.
+  X <- deval
+  if (!stratify) X[, treatment] <- level
+  treatment.model$estimate(dtrain)
+  pr <- predict_mean(treatment.model, deval)
+  rr <- hh <- NULL
   if (use_ipmw) {
-    if (stratify) {
-      midx <- which(dtrain[, treatment] == level)
-      missing.model$estimate(dtrain[midx, , drop = FALSE])
-    } else {
-      missing.model$estimate(dtrain)
+    ## Include both observed and missing outcomes.
+    missing.model$estimate(dtrain[idx_arm, , drop = FALSE])
+    rr <- predict_mean(missing.model, X)
+  }
+
+  if (use_ipmw && !is.null(auxiliary.model)) {
+    ## First regression: E[Y | A,W,Z], fitted on observed outcomes.
+    auxiliary.model$estimate(dtrain[idx_obs, , drop = FALSE])
+    ## Retain actual treatment assignments.
+    dresponse <- dtrain[idx_arm, , drop = FALSE]
+    outcome <- lava::getoutcome(response.model$formula)
+    if (length(outcome) != 1L || !outcome %in% names(dresponse)) {
+      stop("Sequential regression requires a plain response column")
     }
-    rr <- missing.model$predict(newdata = X)
-    if (NCOL(rr) > 1) rr <- rr[, 2]
-  }
-  return(list(pmod = pr, qmod = eY, rmod = rr))
+    h_train <- predict_mean(auxiliary.model, dresponse)
+    U <- h_train
+    if (pseudo.outcome == "dr") {
+      rho_train <- predict_mean(missing.model, dresponse)
+      if (any(rho_train <= 0 | rho_train > 1)) {
+        stop("Observation probabilities must be in (0, 1]")
+      }
+
+      y_train <- factor2numeric(dresponse[[outcome]])
+      obs <- which(dresponse[["R_"]] == 1L)
+      ## Correct observed outcomes only, avoiding 0 * NA.
+      U[obs] <- h_train[obs] +
+        (y_train[obs] - h_train[obs]) / rho_train[obs]
+    }
+
+    ## Second regression: average over Z within actual treatment arms.
+    dresponse[[outcome]] <- U
+    response.model$estimate(dresponse)
+    hh <- predict_mean(auxiliary.model, X)
+  } else {
+    ## Existing behavior without an auxiliary model.
+    response.model$estimate(dtrain[idx_obs, , drop = FALSE])
+       }
+
+  eY <- predict_mean(response.model, X)
+  list(pmod = pr, qmod = eY, rmod = rr, hmod = hh)
 }
 
 outcome_level <- function(variable, level) {
@@ -101,24 +145,44 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #' E_{P}[\{\Psi_{1}(P)(V)-\Psi_{0}(P)(V)\} - m(V; \beta)]^{2}}
 #'
 #' Missing data is handled under a Missing At Random assumption (MAR). Let
-#' \eqn{R} denote the indicator for data not being missing, \eqn{R\perp Y|W,A}.
-#' The nuisance models are \eqn{Q(w,a) = E(Y|W=w, A=a)}, \eqn{g_a(w) =
-#' P(A=a|W=w)}, and \eqn{\rho(w, a) = P(R=1|W=w, A=a)}. For the expected
-#' potential outcome \eqn{E[Y(a)]}, the AIPW estimator then takes the form
-#' \deqn{\frac{1}{n}\sum_{i=1}^n R_i I(A_i=a) / \{g_a(W_i) \rho(W_i, a)\} (Y_i -
-#' Q(W_i,a)) + Q(W_i, a)}.
+#' \eqn{R} denote the indicator for data not being missing, \eqn{R\perp Y|W,A,Z}
+#' where the conditioning set must be observed for all subjects,
+#' and \eqn{Z} denotes potentiel post-treatment variable.
+#'
+#' The nuisance models are \eqn{Q(w,a) = E(Y|W=w, A=a)}, \eqn{g(w,a) =
+#' P(A=a|W=w)}, and \eqn{\rho(w, a, z) = P(R=1|W=w, A=a, Z=z)},
+#' \eqn{h(w,a,z) = E(Y|W=w, A=a, Z=z)}.
+#'
+#' For the expected potential outcome \eqn{E[Y(a)]}, the EIF then takes the form
+#'
+#' \deqn{\frac{I(A=a)}{g(W,a)}\left[
+#' \frac{R}{\rho(W, a, Z)}\{Y-Q(W, a)\} +
+#' \big\{1 - \frac{R}{\rho(W, a, Z)}\big\}\{h(W,a,Z)-Q(W,a)\}
+#' \right] + Q(W,a) - \psi_a
+#' }
+#'
+#' Note that when the MAR assumption depends on \eqn{Z}, we can no longer obtain
+#' a consistent estimate of \eqn{Q(W,A)} from \eqn{E[Y|A,W,R=1]}. Instead we an
+#' estimate of \eqn{Q(W,A)} is obtained as \eqn{E[h(W,A,Z) | A, W]}. A more
+#' general doubly-robust estimate can be obtained from the regression
+#' \eqn{E[U|A,W]} using the DR pseudo-outcome \eqn{U = h(W,A,Z) +
+#' R/\rho(W,A,Z)(Y-h(W,A,Z))}.
+#'
 #' @title Conditional Average Treatment Effect estimation
 #' @param response.model formula or learner object (formula => learner_glm)
 #' @param ... additional arguments to future.apply::future_mapply
 #' @param treatment.model formula or learner object (formula => learner_glm)
 #' @param missing.model formula or learner object (formula => learner_glm(family
 #'   = binomial); default `NULL`. Model for the missingness mechanism \eqn{P(R=1
-#'   \mid X, A)}. Required when the outcome in `response.model` contains NAs. If
+#'   \mid W, A)}. Required when the outcome in `response.model` contains NAs. If
 #'   the formula LHS is omitted, the observation indicator is used
 #'   automatically. When `stratify = TRUE` the missing model is fit separately
 #'   per treatment arm. When supplied, the AIPW score is
 #'   inverse-probability-of-observation weighted and (if `second.order = TRUE`)
 #'   an additional second-order term is added to the influence function.
+#' @param auxiliary.model when the missing data model depends on
+#'   post-randomization variables \eqn{Z}, this argument defines the nuisance
+#'   model for \eqn{E(Y|W,A,Z)}
 #' @param cate.model formula specifying regression design for conditional
 #'   average treatment effects
 #' @param calibration.model linear calibration model. Specify covariates in
@@ -134,14 +198,24 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #'   `nrow(data)`. The `id` can also be specified as part of the `cate.model`
 #'   argument with a formula syntax: `~ 1 + cluster(id)`.
 #' @param silent suppress all messages and progressbars
-#' @param stratify if TRUE the response.model and missing.model (if provided)
-#'   will be stratified by treatment
+#' @param stratify if TRUE the response.model, missing.model and auxiliary.model
+#'   (if provided) will be stratified by treatment
 #' @param mc.cores (optional) number of cores. parallel::mcmapply used instead
 #'   of future
 #' @param var.type when equal to "IC" the asymptotic variance is derived from
 #'   the influence function. Otherwise, based on expressions in Bannick et al.
 #'   (2025) valid under different covariate-adaptive randomization schemes (only
 #'   available for ATE and when `calibration.model` is also specified)
+#' @param pseudo.outcome character specifying the pseudo-outcome used to fit
+#'   `response.model` when `auxiliary.model` is supplied. With `"regression"`
+#'   (default), use predictions from `auxiliary.model`, \eqn{h(W,A,Z)}. With
+#'   `"dr"`, use \eqn{U = h(W,A,Z) + R\{Y-h(W,A,Z)\}/\rho(W,A,Z)}. The latter
+#'   has conditional expectation \eqn{E[Y\mid A,W]} when either the auxiliary
+#'   outcome model or the observation model is correctly specified, under MAR.
+#'   Note, for binary outcomes, `"regression"` requires a learner accepting
+#'   fractional responses (e.g. quasibinomial regression). The `"dr"` option
+#'   requires a learner accepting responses outside the outcome's original
+#'   bounds. Ignored when `auxiliary.model` is not used.
 #' @param second.order add seconder order term to IF to handle misspecification
 #'   of outcome models
 #' @return cate.targeted object
@@ -212,12 +286,36 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #'             missing.model  = ~ a * (w1 + w2),
 #'             data = d, nfolds = 1L)
 #' fit
+#'
+#' # missingness depending on a post-randomization variable Z
+#' # (doubly-robust estimation via `auxiliary.model`)
+#'
+#' sim_aux <- function(n = 5000, seed = 1) {
+#'   set.seed(seed)
+#'   w <- rnorm(n)
+#'   a <- rbinom(n, 1, 0.5)
+#'   z <- rnorm(n, mean = 0.5 * a, sd=0.5)
+#'   r <- rbinom(n, 1, plogis(-0.5 - 0.5 * a * z + 0.1 * w))
+#'   y0 <- 1 + 0.5 * a + 2 * z^2 + w + rnorm(n, sd=0.5)
+#'   y <- ifelse(r == 1, y0, NA_real_)
+#'   data.frame(w, a, z, y0, y)
+#' }
+#' d <- sim_aux()
+#' # Truth: E[Y(1)] = 1 + 0.5 + 2 * (1 + 0.25) = 4, E[Y(0)] = 3, ATE = 1
+#' cate(y ~ a + w, a ~ 1, data=na.omit(d))
+#' fit <- cate(response.model = y ~ a + w,
+#'             treatment.model = a ~ 1,
+#'             missing.model = ~ a * z + w,
+#'             auxiliary.model = y ~ a + I(z^2) + w,
+#'             data = d)
+#' fit
 #' @export
 cate <- function(response.model, # nolint
                  treatment.model,
                  cate.model = ~1,
                  calibration.model = NULL,
                  missing.model = NULL,
+                 auxiliary.model = NULL,
                  data,
                  contrast,
                  nfolds = 1,
@@ -227,6 +325,7 @@ cate <- function(response.model, # nolint
                  stratify = FALSE,
                  mc.cores = NULL,
                  var.type = "IC",
+                 pseudo.outcome = c("regression", "dr"),
                  second.order = TRUE,
                  ...) {
   # Deprecated arguments are not part of the function definition. When
@@ -240,6 +339,7 @@ cate <- function(response.model, # nolint
     propensity.model = "treatment.model",
     treatment = "cate.model"
   )
+  pseudo.outcome <- match.arg(pseudo.outcome)
   # `...` of a calling function are expanded to `..1`, `..2`, etc. such that
   # the re-dispatched call evaluates them in their original environment
   mc <- match.call(function(...) NULL, sys.call(), envir = parent.frame())
@@ -290,6 +390,10 @@ cate <- function(response.model, # nolint
 
   if (inherits(response.model, "formula")) {
     response.model <- learner_glm(response.model)
+  }
+
+  if (inherits(auxiliary.model, "formula")) {
+    auxiliary.model <- learner_glm(auxiliary.model)
   }
 
   if (inherits(treatment.model, "formula")) {
@@ -416,8 +520,10 @@ cate <- function(response.model, # nolint
         treatment.model = treatment.model,
         response.model = response.model,
         missing.model = if (use_ipmw) missing.model else NULL,
+        auxiliary.model = if (use_ipmw) auxiliary.model else NULL,
         treatment_var = treatment_var,
         data = data, folds = folds,
+        pseudo.outcome = pseudo.outcome,
         stratify = stratify
       ), ...
     )
@@ -439,10 +545,11 @@ cate <- function(response.model, # nolint
       )
     }
 
-    # outcome model: q
-    # treatment model: p
-    # missing model: r
-    qval <- pval <- rval <- list()
+    # outcome model: q = E(Y|A,W)
+    # treatment model: p = P(A=a|W)
+    # missing model: r = P(R=1|A,W,Z)
+    # auxiliary model: h = E(Y|A,W,Z)
+    qval <- pval <- rval <- hval <- list()
     for (i in contrast) {
       ii <- which(fargs[, 2] == i)
       qval <- c(
@@ -458,12 +565,23 @@ cate <- function(response.model, # nolint
           rval,
           list(unlist(lapply(ii, function(x) val[[x]]$rmod))[idx])
         )
+        if (!is.null(auxiliary.model)) {
+          hval <- c(
+            hval,
+            list(unlist(lapply(ii, function(x) val[[x]]$hmod))[idx])
+          )
+        }
       }
     }
     names(qval) <- contrast
     names(pval) <- contrast
-    if (use_ipmw) names(rval) <- contrast
-    return(list(qval = qval, pval = pval, rval = rval, folds = folds))
+    if (use_ipmw) {
+      names(rval) <- contrast
+      if (!is.null(auxiliary.model)) names(hval) <- contrast
+    }
+    return(list(qval = qval, pval = pval,
+                rval = rval, hval = hval,
+                folds = folds))
   }
 
   if (rep > 1) {
@@ -506,8 +624,12 @@ cate <- function(response.model, # nolint
   folds_out <- if (rep == 1) val$nuisance[[1]]$folds else NULL
   val$p <- lapply(val$nuisance, \(x) Reduce(cbind, x$pval))
   val$q <- lapply(val$nuisance, \(x) Reduce(cbind, x$qval))
+  val$h <- NULL
   if (use_ipmw) {
     val$pr <- lapply(val$nuisance, \(x) Reduce(cbind, x$rval))
+    if (!is.null(auxiliary.model)) {
+      val$h <- lapply(val$nuisance, \(x) Reduce(cbind, x$hval))
+    }
   } else {
     val$pr <- NULL
   }
@@ -520,6 +642,8 @@ cate <- function(response.model, # nolint
     call = cl,
     treatment.model = treatment.model,
     missing.model = if (use_ipmw) missing.model else NULL,
+    auxiliary.model = if (use_ipmw & !is.null(auxiliary.model)) auxiliary.model else NULL, # nolint
+    pseudo.outcome = pseudo.outcome,
     stratify = stratify,
     folds = folds_out,
     # (outcome, trt, propensity-pred, outcome-pred, missing-pred)
@@ -573,16 +697,19 @@ cate <- function(response.model, # nolint
 cate_est <- function(y, # response vector
                      a, # matrix with treatment indicators a=1, a=0
                      p, # matrix with treatment probabilities a=1, a=0
-                     q, # matrix with outcome predictions E(Y|A=1,X), E(Y|A=0,X)
+                     q, # matrix with outcome predictions E(Y|W,A=1), E(Y|W,A=0)
+                     h, # matrix E(Y|W,A=1,Z), E(Y|W,A=0,Z), ...
                      data, # data.frame
                      treatment.model = NULL, # propensity model
                      missing.model = NULL, # missing-data model
+                     auxiliary.model = NULL, # E[Y|W,A,Z], Z post-randomization
                      pr = NULL, # matrix P(R=1|X,A=a), same shape as p
                      r = NULL, # length-n integer observation indicator
                      stratify = FALSE,
                      X.cate
                      ) {
   use_ipmw <- !is.null(r) && !is.null(pr)
+  post_treatment <- use_ipmw & !is.null(h)
   ## Expand length-n vectors to n x k (k = number of treatment levels) so
   ## that every term entering the score has conforming dimensions.
   one_k <- rbind(rep(1, NCOL(a)))
@@ -592,7 +719,9 @@ cate_est <- function(y, # response vector
     ## coerced to 0 by lava::na.pass0 upstream, so the product is well
     ## defined (and exactly zero) wherever the outcome is unobserved.
     rmat <- r %x% one_k
-    K <- (a * rmat) / (p * pr) * (ymat - q)
+    h_eff <- if (post_treatment) h else q
+    K_R <- (a * rmat) / (p * pr) * (ymat - h_eff)
+    K <- K_R + a / p * (h_eff - q)
   } else {
     K <- a / p * (ymat - q)
   }
@@ -640,7 +769,7 @@ cate_est <- function(y, # response vector
       if (length(midx) > 0) {
         rfit <- rmod$estimate(dat_r[midx, , drop = FALSE])
         dlinkinv_r <- rfit$family$mu.eta
-        adj_r <- -K[, i] / pr[, i] * dlinkinv_r(rfit$family$linkfun(pr[, i]))
+        adj_r <- -K_R[, i] / pr[, i] * dlinkinv_r(rfit$family$linkfun(pr[, i]))
         X.miss <- rmod$design(dat_r, intercept = TRUE)$x
         for (j in seq_len(ncol(X.miss))) {
           X.miss[, j] <- X.miss[, j] * adj_r
@@ -731,6 +860,9 @@ update.cate.targeted <- function(object,
   if (length(object$data$y) != nrow(desA$x)) {
     stop("Not same data as the `cate` object")
   }
+  if (!is.null(object$data$h) && !is.null(calibration.model)) {
+    stop("Calibration with auxiliary outcome models is not yet supported")
+  }
   use_ipmw <- !is.null(object$data$pr)
   ## When missingness is being modeled the Bannick et al. (2025) variance
   ## expressions do not apply; fall back to the influence-function based
@@ -785,6 +917,7 @@ update.cate.targeted <- function(object,
 
   pmod <- object$treatment.model # nolint
   rmod <- object$missing.model # nolint
+  hmod <- object$auxiliary.model # nolint
   if (!second.order) {
     pmod <- NULL
     rmod <- NULL
@@ -800,9 +933,15 @@ update.cate.targeted <- function(object,
           p = cbind(p[[x]]),
           q = cbind(q[[x]]),
           r = if (use_ipmw) r else NULL,
+          h = if (use_ipmw && !is.null(object$data$h)) {
+                cbind(object$data$h[[x]])
+              } else {
+                NULL
+              },
           pr = if (use_ipmw) cbind(pr[[x]]) else NULL,
           treatment.model = pmod,
           missing.model = rmod,
+          auxiliary.model = hmod,
           stratify = isTRUE(object$stratify),
           data = data,
           X.cate = desA$x
