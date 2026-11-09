@@ -8,7 +8,7 @@ moi(
   data,
   response.model,
   treatment.model,
-  missing.model,
+  missing.model = NULL,
   id = NULL,
   imputation.model,
   imputation.subset = NULL,
@@ -30,19 +30,25 @@ coerced to \code{data.frame}.}
 \item{response.model}{A \code{formula} or \code{learner} object
 specifying the response/outcome and the associated baseline adjusted
 model. If a \code{formula} is provided,
-it is automatically wrapped in \code{\link{learner_glm}}. Used to
-estimate \eqn{E[\Delta Y | A = a]}.}
+it is automatically wrapped in \code{\link{learner_glm}}. For the
+sub-target estimator it is used to estimate \eqn{E[\Delta Y | A = a]};
+for the direct estimator (\code{missing.model = NULL}) it is used as the
+outcome regression \eqn{Q^*(X, A)} for the imputed outcome
+\eqn{\tilde{Y}}.}
 
 \item{treatment.model}{A base R \code{stats} formula specifying the
 binary treatment variable. Only an intercept is allowed on the right-hand
 side, e.g., \code{A ~ 1}.}
 
-\item{missing.model}{A \code{formula} or \code{learner} object
+\item{missing.model}{Optional \code{formula} or \code{learner} object
 specifying the model for the probability of the outcome being
 observed/non-missing
 (i.e., \eqn{P(\Delta = 1 | A = a)}). If a \code{formula} is provided,
-it is wrapped in \code{learner_glm(..., family = binomial())}. Used to
-estimate \eqn{P(\Delta = 0 | A = a)}.}
+it is wrapped in \code{learner_glm(..., family = binomial())}. When
+supplied, the sub-target estimator is used (and this model estimates
+\eqn{P(\Delta = 0 | A = a)}). When \code{NULL} (default), the direct
+one-step imputation estimator is used, which requires no missingness
+model.}
 
 \item{id}{(integer or character) optional subject id vector of length
 \code{nrow(data)}.}
@@ -105,10 +111,13 @@ influence-function-based standard errors. Row labels follow the
 and the contrast row is labeled
 \eqn{E[\tilde{y}(1)]-E[\tilde{y}(0)]}.}
 \item{levels}{Treatment levels (character).}
-\item{intermediate}{(only if \code{return.all = TRUE}) Intermediate
-estimates: \eqn{E[\Delta Y|A=a]}, \eqn{P(\Delta=0|A=a)}, and
-\eqn{E[U|A=a, \Delta=0]}.}
 }
+If \code{return.all = TRUE}, the \code{estimate} component additionally
+includes the intermediate estimates: for the sub-target estimator
+\eqn{E[\Delta Y|A=a]}, \eqn{P(\Delta=0|A=a)} and
+\eqn{E[U|A=a, \Delta=0]}; for the direct estimator the uncorrected
+per-arm outcome regression means (i.e. before the
+\eqn{\theta}-estimation correction).
 Standard methods (\code{print}, \code{summary}, \code{coef},
 \code{vcov}, \code{IC}) are provided.
 }
@@ -139,12 +148,33 @@ treatment \eqn{A}, and a post randomization variable \eqn{Z}.
 Inference in based on the estimated influence functions (IFs)
 of the associated (covariate adjusted) one-step estimators.
 
+Two estimators are available, selected by whether \code{missing.model} is
+supplied:
+\itemize{
+\item \strong{Sub-target (indirect) estimator} (\code{missing.model}
+supplied): estimates the three sub-target parameters
+\eqn{E[\Delta Y | A=a]}, \eqn{P(\Delta=0 | A=a)} and
+\eqn{E[U(X,A,Z;\theta) | A=a, \Delta=0]} separately and combines them.
+A missingness model is required for the
+\eqn{P(\Delta=0 | A=a)} factor and for the optional augmentation.
+\item \strong{Direct one-step imputation estimator}
+(\code{missing.model = NULL}, the default): targets
+\eqn{E[\tilde{Y}(\theta) | A = a]} directly as a one-step estimator
+applied to the imputed outcome
+\eqn{\tilde{Y} = \Delta Y + (1-\Delta) U(X,A,Z;\theta)}, with an
+additional influence-function term correcting for estimation of the
+imputation parameter \eqn{\theta}. This requires no missingness model.
+See supplementary material C of Nordland et al. (2026).
+}
+
 When \code{imputation.augmentation = TRUE}, an augmentation term built from
 the efficient influence function is added, giving an efficient one-step
 estimator of the treatment effect implied by the imputation model
 (Nordland et al., 2026). The augmentation uses a working model for the
 conditional imputation mean \eqn{E[U(X, A, Z; \theta) \mid W, A]} (see
 \code{imputation.augmentation.model}) together with the missingness model.
+It is only available for the sub-target estimator (i.e. when
+\code{missing.model} is supplied).
 
 If no observations are missing in an arm \eqn{a}, the imputation
 contribution for that arm vanishes
@@ -165,11 +195,19 @@ sim_moi <- function(n = 1000, ...) {
 }
 
 d <- sim_moi(1000)
-## ATE with missing outcomes imputed by a working glm model
+## Sub-target estimator: ATE with missing outcomes imputed by a working
+## glm model and a missingness model.
 moi(data = d,
     response.model = y ~ a + w,
     treatment.model = a ~ 1,
     missing.model = ~ a + w,
+    imputation.model = y ~ a + w,
+    imputation.subset = "!is.na(y)")
+
+## Direct one-step imputation estimator (no missingness model required).
+moi(data = d,
+    response.model = y ~ a + w,
+    treatment.model = a ~ 1,
     imputation.model = y ~ a + w,
     imputation.subset = "!is.na(y)")
 

@@ -311,13 +311,13 @@ test_moi_missing_IC_reference_lava <- function() {
     max(abs(lava_pred_IC_3 - lava_pred_IC_2)) == 0
   )
 
-  est1 <- expectation(object=imp_mod,
+  est1 <- lava::expectation(object=imp_mod,
                    lava::predict_glm,
                    data = data,
                    subset = (data$a == 1) & (delta == FALSE),                   
                    id = 1:nrow(data))
 
-  est0 <- expectation(object=imp_mod,
+  est0 <- lava::expectation(object=imp_mod,
                    lava::predict_glm,
                    data = data,
                    subset = (data$a == 0) & (delta == FALSE),
@@ -827,3 +827,151 @@ test_moi_id <- function() {
   )
 }
 test_moi_id()
+
+test_moi_direct_dispatch <- function() {
+  ## When missing.model is NULL, moi() uses the direct one-step imputation
+  ## estimator (supplementary material C). Check the result shape and labels.
+  set.seed(42)
+  d <- sim_missing(300)
+
+  res <- moi(
+    data = d,
+    response.model = learner_glm(y ~ a + x),
+    treatment.model = a ~ 1,
+    imputation.model = learner_glm(y ~ x),
+    imputation.subset = "!is.na(y)"
+  )
+  expect_true(inherits(res, "moi.targeted"))
+  cf <- coef(res)
+  expect_equal(length(cf), 3L)
+  expect_true(all(is.finite(cf)))
+
+  ## per-arm and contrast labels follow the cate() tilde-y convention
+  ty <- if (isTRUE(l10n_info()[["UTF-8"]])) "\u1ef9" else "tildeY"
+  expect_equal(names(cf)[1], paste0("E[", ty, "(1)]"))
+  expect_equal(names(cf)[2], paste0("E[", ty, "(0)]"))
+  expect_equal(names(cf)[3], paste0("[E[", ty, "(1)]] - [E[", ty, "(0)]]"))
+}
+test_moi_direct_dispatch()
+
+test_moi_direct_reduces_to_cate <- function() {
+  ## With no missingness anywhere, the imputed outcome equals the observed
+  ## outcome and the theta-correction vanishes (the subset {A=a, Delta=0} is
+  ## empty in both arms). moi_direct() must then reduce exactly to cate().
+  set.seed(11)
+  n <- 300
+  d <- data.frame(a = rbinom(n, 1, 0.5), x = rnorm(n))
+  d$y <- 1 + d$a + d$x + rnorm(n)
+  id <- as.character(seq_len(n))
+  delta <- !is.na(d$y)
+
+  response.model <- learner_glm(y ~ a + x)$clone()
+  response <- response.model$response(d, na.action = stats::na.pass)
+  imputation <- targeted:::.moi_imputation_context(
+    data = d, id = id,
+    imputation.model = learner_glm(y ~ x),
+    imputation.subset = "!is.na(y)"
+  )
+  direct <- targeted:::moi_direct(
+    data = d, id = id, delta = delta, response = response,
+    response.model = response.model,
+    treatment.model = learner_glm(a ~ 1, family = binomial()),
+    imputation = imputation
+  )
+
+  ## per_level must equal the uncorrected cate() per-arm estimate exactly
+  expect_equal(coef(direct$per_level), coef(direct$intermediate))
+  expect_equal(IC(direct$per_level), IC(direct$intermediate))
+}
+test_moi_direct_reduces_to_cate()
+
+test_moi_direct_theta_correction <- function() {
+  ## The theta-estimation correction (term 3 of the IF, supplement C) obtained
+  ## from lava::expectation(..., details = TRUE) / g(a) must equal the
+  ## closed-form P(Delta=0|A=a) * mean_S(grad_theta U) %*% epsilon with
+  ## S = {A=a, Delta=0}. This ties the direct estimator's correction to the
+  ## sub-target estimator's imputation-coefficient uncertainty term.
+  set.seed(2)
+  n <- 800
+  d <- sim_missing_id(n)
+  delta <- !is.na(d$y)
+  A <- d$a
+
+  lr <- learner_glm(y ~ x)
+  lr$estimate(data = d, weights = as.numeric(delta),
+              na.action = lava::na.pass0)
+  po <- lava::predict_glm(lr$fit, data = d)
+  nabla <- attr(po, "grad")
+  IC_epsilon <- IC(lr$fit)
+  obj <- estimate(lr$fit, id = seq_len(n))
+
+  for (a in c(1, 0)) {
+    g <- mean(A == a)
+    ## direct: attr(ic.theta) / g
+    ex <- lava::expectation(predict, object = obj, data = d,
+                            subset = (A == a) & (!delta),
+                            id = seq_len(n), details = TRUE)
+    direct_ic <- attr(ex, "ic.theta")[, 1] / g
+    ## closed form
+    v <- colMeans(nabla[A == a & !delta, , drop = FALSE])
+    p_d0 <- mean((!delta)[A == a])
+    closed_ic <- as.vector(t(p_d0 * v %*% t(IC_epsilon)))
+    expect_equal(unname(direct_ic), unname(closed_ic), tolerance = 1e-12)
+  }
+}
+test_moi_direct_theta_correction()
+
+test_moi_direct_degenerate_arm <- function() {
+  ## Arm with no missing outcomes: the theta-correction must be exactly zero
+  ## (not NaN from dividing by an empty subset) and estimates finite.
+  set.seed(12)
+  n <- 300
+  a <- rbinom(n, 1, 0.5)
+  x <- rnorm(n)
+  y_full <- 1 + a + x + rnorm(n)
+  ## arm 0 fully observed; arm 1 has missingness
+  delta <- ifelse(a == 0, 1L, rbinom(n, 1, lava::expit(0.5 + x)))
+  y <- ifelse(delta == 1, y_full, NA)
+  d <- data.frame(y = y, a = a, x = x)
+
+  res <- moi(
+    data = d,
+    response.model = learner_glm(y ~ a + x),
+    treatment.model = a ~ 1,
+    imputation.model = learner_glm(y ~ x),
+    imputation.subset = "!is.na(y)"
+  )
+  cf <- coef(res)
+  expect_true(all(is.finite(cf)))
+  expect_false(any(is.nan(cf)))
+}
+test_moi_direct_degenerate_arm()
+
+test_moi_direct_guards <- function() {
+  set.seed(1)
+  d <- sim_missing_id(100)
+
+  ## (1) imputation.augmentation = TRUE with missing.model = NULL is rejected
+  expect_error(
+    moi(data = d,
+        response.model = learner_glm(y ~ a + x),
+        treatment.model = a ~ 1,
+        imputation.model = learner_glm(y ~ x),
+        imputation.subset = "!is.na(y)",
+        imputation.augmentation = TRUE),
+    "only available for the sub-target"
+  )
+
+  ## (2) a pre-existing 'imputed_response' column is rejected
+  d2 <- d
+  d2$imputed_response <- 0
+  expect_error(
+    moi(data = d2,
+        response.model = learner_glm(y ~ a + x),
+        treatment.model = a ~ 1,
+        imputation.model = learner_glm(y ~ x),
+        imputation.subset = "!is.na(y)"),
+    "imputed_response"
+  )
+}
+test_moi_direct_guards()
