@@ -109,9 +109,6 @@
   )
 }
 
-#' @keywords internal
-#' @inheritParams moi_missing
-#' @noRd
 moi_missing <- function(data,
                         id,
                         delta,
@@ -333,7 +330,7 @@ moi_direct <- function(data,
                        stratify = FALSE,
                        mc.cores = NULL,
                        second.order = TRUE) {
-  ## Imputed outcome: observed value where available, imputation elsewhere.
+  ## Imputed outcome:
   if ("imputed_response" %in% colnames(data)) {
     stop("'imputed_response' column not permitted in data")
   }
