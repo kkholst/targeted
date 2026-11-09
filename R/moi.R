@@ -424,9 +424,11 @@ moi_direct <- function(data,
 ## Sub-target (indirect) estimator of E[tilde Y(theta) | A = a], decomposing
 ## the target into E[Delta Y | A = a], P(Delta = 0 | A = a) and
 ## E[U(X,A,Z;theta) | A = a, Delta = 0] (see Nordland et al. 2026, Estimation).
-## Requires a missingness model. Returns a list with `per_level` (unlabeled
-## lava::estimate of the two per-arm potential outcomes), `levels`, and
-## `intermediate` (the merged sub-target estimates, for return.all).
+## Requires a missingness model. An augmentation term is added to the
+## imputation sub-target whenever `imputation.augmentation.model` is supplied.
+## Returns a list with `per_level` (unlabeled lava::estimate of the two per-arm
+## potential outcomes), `levels`, and `intermediate` (the merged sub-target
+## estimates, for return.all).
 moi_indirect <- function(data,
                          id,
                          delta,
@@ -436,7 +438,6 @@ moi_indirect <- function(data,
                          missing.model,
                          imputation.model,
                          imputation.subset = NULL,
-                         imputation.augmentation = FALSE,
                          imputation.augmentation.model = NULL,
                          nfolds = 1,
                          silent = FALSE,
@@ -509,7 +510,7 @@ moi_indirect <- function(data,
     treatment.model = treatment.model,
     imputation.model = imputation.model,
     imputation.subset = imputation.subset,
-    imputation.augmentation = imputation.augmentation,
+    imputation.augmentation = !is.null(imputation.augmentation.model),
     imputation.augmentation.model = imputation.augmentation.model,
     missing.model = missing.model
   )
@@ -563,39 +564,30 @@ moi_indirect <- function(data,
 #' Inference is based on the estimated influence function
 #' of the associated (covariate adjusted) one-step estimator.
 #'
-#' Two estimators are available, selected by whether \code{missing.model} is
-#' supplied:
+#' Two estimators are available, selected by the \code{type} argument:
 #' \itemize{
 #'   \item \strong{Direct one-step imputation estimator}
-#'     (\code{missing.model = NULL}, the default): targets
-#'     \eqn{E[\tilde{Y}(\theta) | A = a]} directly as a one-step estimator
+#'     (\code{type = "direct"}, the default): targets
+#'     \eqn{E[\tilde{Y}(\theta) | A = a]} directly via a (covariate augmented)
+#'     one-step estimator
 #'     applied to the imputed outcome
 #'     \eqn{\tilde{Y} = \Delta Y + (1-\Delta) U(X,A,Z;\theta)},
 #'     see supplementary material C of Nordland et al. (2026).
-#' \item \strong{Sub-target (indirect) estimator} (\code{missing.model}
-#'     supplied): estimates the three sub-target parameters
+#' \item \strong{Sub-target (indirect) estimator} (\code{type = "indirect"}):
+#'     estimates the three sub-target parameters
 #'     \eqn{E[\Delta Y | A=a]}, \eqn{P(\Delta=0 | A=a)} and
 #'     \eqn{E[U(X,A,Z;\theta) | A=a, \Delta=0]} separately and combines them.
 #'     A missingness model is required for (augmented) estimation of
 #'     \eqn{P(\Delta=0 | A=a)} and for the optional imputation model
-#'     augmentation, supplementary material B of Nordland et al. (2026).
+#'     augmentation, see supplementary material B of Nordland et al. (2026).
 #' }
 #'
-#' @param data data.frame (`data.table` and `tbl_df` objects are coerced to
-#'   `data.frame`)
 #' @param response.model formula or learner object (formula => learner_glm).
 #'   For the direct estimator, the outcome model for the imputed outcome
 #'   \eqn{\tilde{Y}(\theta)}
 #' @param treatment.model formula specifying the binary
 #'   treatment. Only an intercept is allowed on the right-hand side, e.g.
 #'   `a ~ 1`
-#' @param missing.model formula or learner object (formula => learner_glm(family
-#'   = binomial)); default `NULL`. Model for the probability of the outcome
-#'   being missing, \eqn{P(\Delta = 0 | A = a)}. When supplied, the sub-target
-#'   estimator is used. When `NULL`, the direct one-step imputation estimator
-#'   is used
-#' @param id (integer or character) optional subject id vector of length
-#'   `nrow(data)`.
 #' @param imputation.model formula or learner_glm object (formula =>
 #'   learner_glm). Model \eqn{U(X,A,Z;\theta)} used to impute the missing
 #'   outcomes
@@ -603,18 +595,28 @@ moi_indirect <- function(data,
 #'   a logical vector indicating the rows of `data` used to fit the imputation
 #'   model, e.g. `"!is.na(y)"`. The expression is evaluated in the context of
 #'   `data`. When `NULL` (default), all rows are used
-#' @param imputation.augmentation if TRUE an augmentation term is added to the
-#'   imputation estimator for improved efficiency. Only available for the
-#'   sub-target estimator
+#' @param data data.frame (`data.table` and `tbl_df` objects are coerced to
+#'   `data.frame`)
+#' @param type character specifying the estimator. `"direct"` (default) gives
+#'   the direct one-step imputation estimator, which uses no missingness
+#'   model. `"indirect"` gives the sub-target estimator, which requires
+#'   `missing.model`
+#' @param id (integer or character) optional subject id vector of length
+#'   `nrow(data)`.
+#' @param missing.model formula or learner object (formula => learner_glm(family
+#'   = binomial)); default `NULL`. Model for the probability of the outcome
+#'   being missing, \eqn{P(\Delta = 0 | A = a)}. Required when
+#'   `type = "indirect"` and ignored when `type = "direct"`
 #' @param imputation.augmentation.model formula or learner object (formula =>
 #'   learner_glm); default `NULL`. Working model for the conditional imputation
-#'   mean \eqn{E[U(X, A, Z; \theta) \mid W, A]}. Only used when
-#'   `imputation.augmentation = TRUE`; when `NULL` the imputation model
-#'   \eqn{U} itself is used
+#'   mean \eqn{E[U(X, A, Z; \theta) \mid W, A]}. When supplied, an augmentation
+#'   term is added to the imputation sub-target for improved efficiency. Only
+#'   used when `type = "indirect"`
 #' @param return.all if TRUE the `estimate` component additionally includes the
 #'   intermediate estimates: \eqn{E[\Delta Y|A=a]}, \eqn{P(\Delta=0|A=a)} and
-#'   \eqn{E[U|A=a, \Delta=0]} for the sub-target estimator, and the per-arm
-#'   outcome regression means before the \eqn{\theta}-correction for the direct
+#'   \eqn{E[U|A=a, \Delta=0]} for the sub-target estimator, and
+#'   \eqn{E[\tilde{Y}| A = a] without the imputation parameter
+#'   influence function correction for the direct
 #'   estimator
 #' @inheritParams cate
 #' @return moi.targeted object
@@ -635,48 +637,51 @@ moi_indirect <- function(data,
 #'
 #' d <- sim_moi(1000)
 #' ## direct one-step imputation estimator
-#' moi(data = d,
-#'     response.model = y ~ a + w,
+#' moi(response.model = y ~ a + w,
 #'     treatment.model = a ~ 1,
 #'     imputation.model = y ~ a + w,
-#'     imputation.subset = "!is.na(y)")
+#'     imputation.subset = "!is.na(y)",
+#'     data = d)
 #'
 #' ## sub-target estimator
-#' moi(data = d,
-#'     response.model = y ~ a + w,
+#' moi(response.model = y ~ a + w,
 #'     treatment.model = a ~ 1,
-#'     missing.model = ~ a + w,
 #'     imputation.model = y ~ a + w,
-#'     imputation.subset = "!is.na(y)")
+#'     imputation.subset = "!is.na(y)",
+#'     missing.model = ~ a + w,
+#'     data = d,
+#'     type = "indirect")
 #'
 #' @export
-moi <- function(data,
-                response.model,
+moi <- function(response.model,
                 treatment.model,
-                missing.model = NULL,
-                id = NULL,
                 imputation.model,
                 imputation.subset = NULL,
-                imputation.augmentation = FALSE,
+                data,
+                type = c("direct", "indirect"),
+                id = NULL,
                 imputation.augmentation.model = NULL,
-                return.all = FALSE,
+                missing.model = NULL,
                 nfolds = 1,
                 silent = FALSE,
                 stratify = FALSE,
                 mc.cores = NULL,
-                second.order = TRUE) {
+                second.order = TRUE,
+                return.all = FALSE) {
   cl <- match.call()
   n <- nrow(data)
+
+  type <- match.arg(type)
+  indirect <- identical(type, "indirect")
 
   if (is.null(id)) {
     id <- seq_len(nrow(data))
   }
   if (!is.null(id)) {
-    if (!is.vector(id)) { # in case users provide a matrix or the like
+    if (!is.vector(id)) {
       rlang::abort("subject ids must be a vector")
     }
-    if (length(id) != n) { # downstream lava::estimate also fails in this case
-    # however, stop here to provide more informative error message
+    if (length(id) != n) {
       rlang::abort("subject ids must be a vector of length `nrow(data)`")
     }
   }
@@ -694,6 +699,9 @@ moi <- function(data,
   if (inherits(response.model, "formula")) {
     response.model <- learner_glm(response.model)
   }
+  if (indirect && is.null(missing.model)) {
+    stop(sprintf("'missing.model' is required when type = '%s'.", type))
+  }
   if (!is.null(missing.model) && inherits(missing.model, "formula")) {
     missing.model <- learner_glm(missing.model, family = binomial())
   }
@@ -702,6 +710,25 @@ moi <- function(data,
   }
   if (inherits(imputation.augmentation.model, "formula")) {
     imputation.augmentation.model <- learner_glm(imputation.augmentation.model)
+  }
+  if (!is.null(imputation.augmentation.model) &&
+        !inherits(imputation.augmentation.model, "learner")) {
+    stop(
+      "'imputation.augmentation.model' must be a formula or a learner ",
+      "object."
+    )
+  }
+  if (!indirect) {
+    ignored <- c("missing.model", "imputation.augmentation.model")[
+      c(!is.null(missing.model), !is.null(imputation.augmentation.model))
+    ]
+    if (length(ignored) > 0) {
+      warning(sprintf(
+        paste0("%s ignored when type = 'direct'; the direct one-step ",
+               "imputation estimator uses no missingness model. Use ",
+               "type = 'indirect' for the sub-target estimator."),
+        paste0("'", ignored, "'", collapse = " and ")))
+    }
   }
   if (!identical(class(treatment.model), "formula")) {
     stop(
@@ -764,16 +791,9 @@ moi <- function(data,
     return(out)
   }
 
-  ## missing.model =  NULL: direct one-step imputation estimator
-  ## else: sub-target (indirect) one-step imputation estimator
-  if (is.null(missing.model)) {
-    if (isTRUE(imputation.augmentation)) {
-      stop(
-        "'imputation.augmentation' is only available for the sub-target ",
-        "estimator; supply a 'missing.model' or set ",
-        "imputation.augmentation = FALSE."
-      )
-    }
+  ## type = "direct": direct one-step imputation estimator
+  ## else: sub-target ("indirect") one-step imputation estimator
+  if (!indirect) {
     imputation <- .moi_imputation_context(
       data = data,
       id = id,
@@ -805,7 +825,6 @@ moi <- function(data,
       missing.model = missing.model,
       imputation.model = imputation.model,
       imputation.subset = imputation.subset,
-      imputation.augmentation = imputation.augmentation,
       imputation.augmentation.model = imputation.augmentation.model,
       nfolds = nfolds,
       silent = silent,

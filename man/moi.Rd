@@ -5,27 +5,24 @@
 \title{average treatment effect estimation with Missing Outcome Imputation}
 \usage{
 moi(
-  data,
   response.model,
   treatment.model,
-  missing.model = NULL,
-  id = NULL,
   imputation.model,
   imputation.subset = NULL,
-  imputation.augmentation = FALSE,
+  data,
+  type = c("direct", "indirect"),
+  id = NULL,
   imputation.augmentation.model = NULL,
-  return.all = FALSE,
+  missing.model = NULL,
   nfolds = 1,
   silent = FALSE,
   stratify = FALSE,
   mc.cores = NULL,
-  second.order = TRUE
+  second.order = TRUE,
+  return.all = FALSE
 )
 }
 \arguments{
-\item{data}{data.frame (\code{data.table} and \code{tbl_df} objects are coerced to
-\code{data.frame})}
-
 \item{response.model}{formula or learner object (formula => learner_glm).
 For the direct estimator, the outcome model for the imputed outcome
 \eqn{\tilde{Y}(\theta)}}
@@ -33,15 +30,6 @@ For the direct estimator, the outcome model for the imputed outcome
 \item{treatment.model}{formula specifying the binary
 treatment. Only an intercept is allowed on the right-hand side, e.g.
 \code{a ~ 1}}
-
-\item{missing.model}{formula or learner object (formula => learner_glm(family
-= binomial)); default \code{NULL}. Model for the probability of the outcome
-being missing, \eqn{P(\Delta = 0 | A = a)}. When supplied, the sub-target
-estimator is used. When \code{NULL}, the direct one-step imputation estimator
-is used}
-
-\item{id}{(integer or character) optional subject id vector of length
-\code{nrow(data)}.}
 
 \item{imputation.model}{formula or learner_glm object (formula =>
 learner_glm). Model \eqn{U(X,A,Z;\theta)} used to impute the missing
@@ -52,21 +40,27 @@ a logical vector indicating the rows of \code{data} used to fit the imputation
 model, e.g. \code{"!is.na(y)"}. The expression is evaluated in the context of
 \code{data}. When \code{NULL} (default), all rows are used}
 
-\item{imputation.augmentation}{if TRUE an augmentation term is added to the
-imputation estimator for improved efficiency. Only available for the
-sub-target estimator}
+\item{data}{data.frame (\code{data.table} and \code{tbl_df} objects are coerced to
+\code{data.frame})}
+
+\item{type}{character specifying the estimator. \code{"direct"} (default) gives
+the direct one-step imputation estimator, which uses no missingness
+model. \code{"indirect"} gives the sub-target estimator, which requires
+\code{missing.model}}
+
+\item{id}{(integer or character) optional subject id vector of length
+\code{nrow(data)}.}
 
 \item{imputation.augmentation.model}{formula or learner object (formula =>
 learner_glm); default \code{NULL}. Working model for the conditional imputation
-mean \eqn{E[U(X, A, Z; \theta) \mid W, A]}. Only used when
-\code{imputation.augmentation = TRUE}; when \code{NULL} the imputation model
-\eqn{U} itself is used}
+mean \eqn{E[U(X, A, Z; \theta) \mid W, A]}. When supplied, an augmentation
+term is added to the imputation sub-target for improved efficiency. Only
+used when \code{type = "indirect"}}
 
-\item{return.all}{if TRUE the \code{estimate} component additionally includes the
-intermediate estimates: \eqn{E[\Delta Y|A=a]}, \eqn{P(\Delta=0|A=a)} and
-\eqn{E[U|A=a, \Delta=0]} for the sub-target estimator, and the per-arm
-outcome regression means before the \eqn{\theta}-correction for the direct
-estimator}
+\item{missing.model}{formula or learner object (formula => learner_glm(family
+= binomial)); default \code{NULL}. Model for the probability of the outcome
+being missing, \eqn{P(\Delta = 0 | A = a)}. Required when
+\code{type = "indirect"} and ignored when \code{type = "direct"}}
 
 \item{nfolds}{number of folds (positive integer), or a pre-specified list of
 fold indices where each element is an integer vector of observation indices
@@ -113,22 +107,22 @@ treatment \eqn{A}, and a post randomization variable \eqn{Z}.
 Inference is based on the estimated influence function
 of the associated (covariate adjusted) one-step estimator.
 
-Two estimators are available, selected by whether \code{missing.model} is
-supplied:
+Two estimators are available, selected by the \code{type} argument:
 \itemize{
 \item \strong{Direct one-step imputation estimator}
-(\code{missing.model = NULL}, the default): targets
-\eqn{E[\tilde{Y}(\theta) | A = a]} directly as a one-step estimator
+(\code{type = "direct"}, the default): targets
+\eqn{E[\tilde{Y}(\theta) | A = a]} directly via a (covariate augmented)
+one-step estimator
 applied to the imputed outcome
 \eqn{\tilde{Y} = \Delta Y + (1-\Delta) U(X,A,Z;\theta)},
 see supplementary material C of Nordland et al. (2026).
-\item \strong{Sub-target (indirect) estimator} (\code{missing.model}
-supplied): estimates the three sub-target parameters
+\item \strong{Sub-target (indirect) estimator} (\code{type = "indirect"}):
+estimates the three sub-target parameters
 \eqn{E[\Delta Y | A=a]}, \eqn{P(\Delta=0 | A=a)} and
 \eqn{E[U(X,A,Z;\theta) | A=a, \Delta=0]} separately and combines them.
 A missingness model is required for (augmented) estimation of
 \eqn{P(\Delta=0 | A=a)} and for the optional imputation model
-augmentation, supplementary material B of Nordland et al. (2026).
+augmentation, see supplementary material B of Nordland et al. (2026).
 }
 }
 \examples{
@@ -144,19 +138,20 @@ sim_moi <- function(n = 1000, ...) {
 
 d <- sim_moi(1000)
 ## direct one-step imputation estimator
-moi(data = d,
-    response.model = y ~ a + w,
+moi(response.model = y ~ a + w,
     treatment.model = a ~ 1,
     imputation.model = y ~ a + w,
-    imputation.subset = "!is.na(y)")
+    imputation.subset = "!is.na(y)",
+    data = d)
 
 ## sub-target estimator
-moi(data = d,
-    response.model = y ~ a + w,
+moi(response.model = y ~ a + w,
     treatment.model = a ~ 1,
-    missing.model = ~ a + w,
     imputation.model = y ~ a + w,
-    imputation.subset = "!is.na(y)")
+    imputation.subset = "!is.na(y)",
+    missing.model = ~ a + w,
+    data = d,
+    type = "indirect")
 
 }
 \references{

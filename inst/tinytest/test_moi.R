@@ -94,6 +94,7 @@ test_moi_nfolds <- function() {
     response.model = learner_glm(y ~ a + x),
     treatment.model = a ~ 1,
     missing.model = learner_glm(~ a + x, family = binomial()),
+    type = "indirect",
     imputation.model = learner_glm(y ~ a + x),
     imputation.subset = "!is.na(y)"
   )
@@ -106,6 +107,7 @@ test_moi_nfolds <- function() {
     response.model = learner_glm(y ~ a + x),
     treatment.model = a ~ 1,
     missing.model = learner_glm(~ a + x, family = binomial()),
+    type = "indirect",
     imputation.model = learner_glm(y ~ a + x),
     imputation.subset = "!is.na(y)",
     nfolds = 5
@@ -122,6 +124,7 @@ test_moi_nfolds <- function() {
     response.model = learner_glm(y ~ a + x),
     treatment.model = a ~ 1,
     missing.model = learner_glm(~ a + x, family = binomial()),
+    type = "indirect",
     imputation.model = learner_glm(y ~ a + x),
     imputation.subset = "!is.na(y)",
     nfolds = custom_folds
@@ -145,6 +148,7 @@ test_moi_cate_passthrough <- function() {
     response.model = learner_glm(y ~ x),
     treatment.model = a ~ 1,
     missing.model = learner_glm(~ x, family = binomial()),
+    type = "indirect",
     imputation.model = learner_glm(y ~ a + x),
     imputation.subset = "!is.na(y)",
     nfolds = 3,
@@ -166,6 +170,7 @@ test_moi_print_summary <- function() {
     response.model = learner_glm(y ~ a + x),
     treatment.model = a ~ 1,
     missing.model = learner_glm(~ a + x, family = binomial()),
+    type = "indirect",
     imputation.model = learner_glm(y ~ a + x),
     imputation.subset = "!is.na(y)"
   )
@@ -349,6 +354,7 @@ test_moi_treatment_model_validation <- function() {
     data = d,
     response.model = learner_glm(y ~ a + x),
     missing.model = learner_glm(~ a + x, family = binomial()),
+    type = "indirect",
     imputation.model = learner_glm(y ~ a + x),
     imputation.subset = "!is.na(y)"
   )
@@ -580,6 +586,7 @@ test_moi_no_missing_anywhere <- function() {
     response.model = learner_glm(y ~ a + x),
     treatment.model = a ~ 1,
     missing.model = learner_glm(~ a + x, family = binomial()),
+    type = "indirect",
     imputation.model = learner_glm(y ~ a + x),
     imputation.subset = "!is.na(y)"
   )
@@ -626,6 +633,7 @@ test_moi_no_missing_in_one_arm <- function() {
     response.model = learner_glm(y ~ a + x),
     treatment.model = a ~ 1,
     missing.model = learner_glm(~ a + x, family = binomial()),
+    type = "indirect",
     imputation.model = learner_glm(y ~ a + x),
     imputation.subset = "!is.na(y)"
   )
@@ -674,6 +682,7 @@ test_moi_all_missing_in_one_arm <- function() {
       response.model = learner_glm(y ~ a + x),
       treatment.model = a ~ 1,
       missing.model = learner_glm(~ a + x, family = binomial()),
+      type = "indirect",
       imputation.model = learner_glm(y ~ a + x),
       imputation.subset = "!is.na(y)"
     ),
@@ -745,6 +754,7 @@ test_moi_augmentation <- function() {
   ## supplying imputation.augmentation.model as both a formula and an
   ## equivalent learner. This is a regression guard for the
   ## formula -> learner_glm conversion in moi(): the two forms must agree.
+  ## Augmentation is keyed off imputation.augmentation.model being supplied.
   set.seed(7)
   n <- 300
   x <- rnorm(n)
@@ -760,9 +770,9 @@ test_moi_augmentation <- function() {
     response.model = learner_glm(y ~ a + x),
     treatment.model = a ~ 1,
     missing.model = learner_glm(~ a + x, family = binomial()),
+    type = "indirect",
     imputation.model = learner_glm(y ~ a + x + z),
-    imputation.subset = "!is.na(y)",
-    imputation.augmentation = TRUE
+    imputation.subset = "!is.na(y)"
   )
 
   ## (a) augmentation model supplied as a formula
@@ -782,6 +792,12 @@ test_moi_augmentation <- function() {
 
   ## formula and learner forms must produce identical estimates
   expect_equal(coef(res_f), coef(res_l), tolerance = 1e-12)
+
+  ## (c) no augmentation model => no augmentation term, different estimate
+  res_none <- do.call(moi, common)
+  expect_true(inherits(res_none, "moi.targeted"))
+  expect_true(all(is.finite(coef(res_none))))
+  expect_false(isTRUE(all.equal(coef(res_none), coef(res_f))))
 }
 test_moi_augmentation()
 
@@ -793,6 +809,7 @@ test_moi_id <- function() {
                  id = NULL,
                  response.model = learner_glm(y ~ x, family = binomial()),
                  missing.model = learner_glm(~ x, family = binomial()),
+                 type = "indirect",
                  stratify = TRUE,
                  treatment.model = a ~ 1,
                  imputation.model = learner_glm(y ~ a + x, family = binomial()),
@@ -804,6 +821,7 @@ test_moi_id <- function() {
                     id = id,
                     response.model = learner_glm(y ~ x, family = binomial()),
                     missing.model = learner_glm(~ x, family = binomial()),
+                    type = "indirect",
                     stratify = TRUE,
                     treatment.model = a ~ 1,
                     imputation.model = learner_glm(y ~ a + x, family = binomial()),
@@ -959,7 +977,8 @@ test_moi_direct_guards <- function() {
   set.seed(1)
   d <- sim_missing_id(100)
 
-  ## (1) imputation.augmentation = TRUE with missing.model = NULL is rejected
+  ## (1) the removed 'imputation.augmentation' argument is rejected rather
+  ## than silently partial-matched to 'imputation.augmentation.model'
   expect_error(
     moi(data = d,
         response.model = learner_glm(y ~ a + x),
@@ -967,7 +986,7 @@ test_moi_direct_guards <- function() {
         imputation.model = learner_glm(y ~ x),
         imputation.subset = "!is.na(y)",
         imputation.augmentation = TRUE),
-    "only available for the sub-target"
+    "must be a formula or a learner"
   )
 
   ## (2) a pre-existing 'imputed_response' column is rejected
@@ -997,6 +1016,7 @@ test_moi_return_all_indirect <- function() {
     response.model = learner_glm(y ~ a + x),
     treatment.model = a ~ 1,
     missing.model = learner_glm(~ a + x, family = binomial()),
+    type = "indirect",
     imputation.model = learner_glm(y ~ a + x),
     imputation.subset = "!is.na(y)"
   )
@@ -1099,3 +1119,61 @@ test_moi_return_all_short_circuit <- function() {
   expect_equal(coef(res), coef(ref), tolerance = 1e-12)
 }
 test_moi_return_all_short_circuit()
+
+test_moi_type <- function() {
+  ## The `type` argument selects the estimator. "direct" (default) uses no
+  ## missingness model; "indirect" selects the sub-target estimator, which
+  ## requires `missing.model`.
+  set.seed(42)
+  d <- sim_missing(300)
+
+  base_args <- list(
+    response.model = learner_glm(y ~ a + x),
+    treatment.model = a ~ 1,
+    imputation.model = learner_glm(y ~ x),
+    imputation.subset = "!is.na(y)",
+    data = d
+  )
+  mmod <- list(missing.model = learner_glm(~ a + x, family = binomial()))
+
+  ## default is the direct estimator
+  res_default <- do.call(moi, base_args)
+  res_direct <- do.call(moi, c(base_args, list(type = "direct")))
+  expect_equal(coef(res_default), coef(res_direct))
+
+  ## direct and sub-target are genuinely different estimators
+  res_ind <- do.call(moi, c(base_args, mmod, list(type = "indirect")))
+  expect_false(isTRUE(all.equal(coef(res_direct), coef(res_ind))))
+
+  ## match.arg partial matching is accepted
+  res_pmatch <- do.call(moi, c(base_args, mmod, list(type = "ind")))
+  expect_equal(coef(res_pmatch), coef(res_ind))
+  expect_equal(IC(res_pmatch), IC(res_ind))
+
+  ## `missing.model` is required for the sub-target estimator
+  expect_error(
+    do.call(moi, c(base_args, list(type = "indirect"))),
+    "'missing.model' is required"
+  )
+
+  ## unknown type is rejected
+  expect_error(do.call(moi, c(base_args, list(type = "bogus"))))
+
+  ## a `type` of length > 1 is rejected
+  expect_error(
+    do.call(moi, c(base_args, mmod, list(type = c("indirect", "direct")))),
+    "must be of length 1"
+  )
+
+  ## arguments unused by the direct estimator are ignored with a warning
+  expect_warning(
+    do.call(moi, c(base_args, mmod, list(type = "direct"))),
+    "ignored when type = 'direct'"
+  )
+  expect_warning(
+    do.call(moi, c(base_args,
+                   list(imputation.augmentation.model = ~ a + x))),
+    "ignored when type = 'direct'"
+  )
+}
+test_moi_type()

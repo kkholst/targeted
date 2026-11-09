@@ -84,26 +84,28 @@ test_moi_direct_continuous <- function() {
   onerun <- function(n) {
     data <- trial$simulate(n)
 
-    ## sub-target (indirect) estimator
+    ## sub-target (indirect) estimator, with imputation augmentation
     est_indirect <- moi(
-      data = data,
-      treatment.model = a ~ 1,
       response.model = learner_glm(y ~ a * (w1 + w2)),
-      missing.model = learner_glm(delta ~ a + w1 + w2 + w3 + w2:w3,
-                                  family = binomial()),
+      treatment.model = a ~ 1,
       imputation.model = learner_glm(y ~ w1 + w2 + w3 + w2:w3),
       imputation.augmentation.model = learner_glm(~ a * (w1 + w2)),
-      imputation.subset = "!is.na(y) & a == 0"
+      imputation.subset = "!is.na(y) & a == 0",
+      missing.model = learner_glm(delta ~ a + w1 + w2 + w3 + w2:w3,
+                                  family = binomial()),
+      data = data,
+      type = "indirect"
     )
     est_indirect <- estimate(est_indirect$estimate)[c(1, 2)]
 
-    ## direct one-step imputation estimator (missing.model = NULL)
+    ## direct one-step imputation estimator
     est_direct <- moi(
-      data = data,
-      treatment.model = a ~ 1,
       response.model = learner_glm(y ~ a * (w1 + w2)),
+      treatment.model = a ~ 1,
       imputation.model = learner_glm(y ~ w1 + w2 + w3 + w2:w3),
-      imputation.subset = "!is.na(y) & a == 0"
+      imputation.subset = "!is.na(y) & a == 0",
+      data = data,
+      type = "direct"
     )
     est_direct <- estimate(est_direct$estimate)[c(1, 2)]
 
