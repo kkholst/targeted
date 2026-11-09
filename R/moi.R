@@ -109,6 +109,7 @@
   )
 }
 
+## One-step estimator of E[U(X,A,Z;theta)| A = a, Delta = 0].
 moi_missing <- function(data,
                         id,
                         delta,
@@ -134,7 +135,7 @@ moi_missing <- function(data,
     }
   }
 
-  ## Fit the imputation model
+  ## Fit imputation model
   ## Use positional ids (1..n) for the imputation object to keep the order of
   ## the influence function stable regardless of the caller's `id`.
   imputation <- .moi_imputation_context(
