@@ -975,3 +975,119 @@ test_moi_direct_guards <- function() {
   )
 }
 test_moi_direct_guards()
+
+test_moi_return_all_indirect <- function() {
+  ## return.all = TRUE on the sub-target (indirect) estimator exposes the
+  ## intermediate estimates. Verify the shape, that the first three rows match
+  ## the default output exactly, and that the sub-targets genuinely compose
+  ## into the reported per-arm estimates.
+  set.seed(42)
+  d <- sim_missing(400)
+
+  args <- list(
+    data = d,
+    response.model = learner_glm(y ~ a + x),
+    treatment.model = a ~ 1,
+    missing.model = learner_glm(~ a + x, family = binomial()),
+    imputation.model = learner_glm(y ~ a + x),
+    imputation.subset = "!is.na(y)"
+  )
+  res <- do.call(moi, c(args, list(return.all = TRUE)))
+  ref <- do.call(moi, args)
+
+  expect_true(inherits(res, "moi.targeted"))
+  cf <- coef(res)
+  ## 3 target rows (per-arm + ATE) + 6 intermediate rows
+  expect_equal(length(cf), 9L)
+  expect_true(all(is.finite(cf)))
+
+  ## first three rows identical (coef and IC) to the default return
+  expect_equal(unname(cf[1:3]), unname(coef(ref)), tolerance = 1e-12)
+  expect_equal(IC(res)[, 1:3], IC(ref), check.attributes = FALSE)
+
+  ## intermediate row labels present
+  expect_equal(
+    names(cf)[4:9],
+    c("E[dy(1)]", "E[dy(0)]", "P(1-d(1))", "P(1-d(0))",
+      "E[u(1)|d=0]", "E[u(0)|d=0]")
+  )
+
+  ## decomposition reconstruction:
+  ## E[ty|A=a] = E[dy|A=a] + P(1-d|A=a) * E[u|A=a, d=0]
+  expect_equal(unname(cf[1]), unname(cf[4] + cf[6] * cf[8]),
+               tolerance = 1e-10)
+  expect_equal(unname(cf[2]), unname(cf[5] + cf[7] * cf[9]),
+               tolerance = 1e-10)
+}
+test_moi_return_all_indirect()
+
+test_moi_return_all_direct <- function() {
+  ## return.all = TRUE on the direct estimator exposes the uncorrected per-arm
+  ## outcome-regression means. The corrected per-arm coefs equal the
+  ## intermediate coefs (the theta-correction has coef 0), while the standard
+  ## errors are not smaller (the correction only inflates variance).
+  set.seed(42)
+  d <- sim_missing(400)
+
+  args <- list(
+    data = d,
+    response.model = learner_glm(y ~ a + x),
+    treatment.model = a ~ 1,
+    imputation.model = learner_glm(y ~ x),
+    imputation.subset = "!is.na(y)"
+  )
+  res <- do.call(moi, c(args, list(return.all = TRUE)))
+  ref <- do.call(moi, args)
+
+  expect_true(inherits(res, "moi.targeted"))
+  cf <- coef(res)
+  ## 3 target rows (per-arm + ATE) + 2 intermediate rows
+  expect_equal(length(cf), 5L)
+  expect_true(all(is.finite(cf)))
+
+  ## first three rows identical to the default return
+  expect_equal(unname(cf[1:3]), unname(coef(ref)), tolerance = 1e-12)
+
+  ## intermediate (uncorrected) per-arm regression means
+  expect_equal(
+    names(cf)[4:5],
+    c("E[imputed_response(1)]", "E[imputed_response(0)]")
+  )
+
+  ## corrected per-arm coefs equal the intermediate coefs (correction coef = 0)
+  expect_equal(unname(cf[1]), unname(cf[4]), tolerance = 1e-12)
+  expect_equal(unname(cf[2]), unname(cf[5]), tolerance = 1e-12)
+
+  ## the theta-correction does not reduce the standard errors
+  se <- res$estimate$coefmat[, 2]
+  expect_true(se[1] >= se[4] - 1e-10)
+  expect_true(se[2] >= se[5] - 1e-10)
+}
+test_moi_return_all_direct()
+
+test_moi_return_all_short_circuit <- function() {
+  ## When no outcomes are missing, moi() short-circuits to a plain cate() call.
+  ## There are no intermediate estimates in this case, so return.all = TRUE
+  ## returns the same three rows as the default. Characterises current
+  ## behaviour.
+  set.seed(11)
+  n <- 300
+  d <- data.frame(a = rbinom(n, 1, 0.5), x = rnorm(n))
+  d$y <- 1 + d$a + d$x + rnorm(n)
+
+  args <- list(
+    data = d,
+    response.model = learner_glm(y ~ a + x),
+    treatment.model = a ~ 1,
+    imputation.model = learner_glm(y ~ x),
+    imputation.subset = "!is.na(y)"
+  )
+  res <- do.call(moi, c(args, list(return.all = TRUE)))
+  ref <- do.call(moi, args)
+
+  expect_true(inherits(res, "moi.targeted"))
+  ## no intermediates available on the short-circuit path: 3 rows only
+  expect_equal(length(coef(res)), 3L)
+  expect_equal(coef(res), coef(ref), tolerance = 1e-12)
+}
+test_moi_return_all_short_circuit()

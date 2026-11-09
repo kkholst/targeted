@@ -208,8 +208,8 @@ moi_missing <- function(data,
     ## imputation model.
     if (n_observed_in_arm == 0) {
       warning(sprintf(
-        paste0("All outcomes are missing in arm '%s'; the per-arm ",
-               "potential outcome E[Y|A=%s] is identified only by the ",
+        paste0("All outcomes are missing in arm '%s': ",
+               "E[tilde Y|A=%s] is identified only by the ",
                "imputation model."),
         a, a
       ))
@@ -375,7 +375,8 @@ moi_direct <- function(data,
   fun <- function(a) {
     label <- paste0("ic_theta(", a, ")")
     in_arm <- (A == a)
-    ## Empty subset {A = a, Delta = 0}: return a degenerate zero-coef/zero-IC estimate.
+    ## Empty subset {A = a, Delta = 0}: return a degenerate
+    ## zero-coef/zero-IC estimate.
     if (sum(in_arm & !delta) == 0) {
       return(estimate(coef = 0,
                       IC = matrix(0, nrow = length(id), ncol = 1),
