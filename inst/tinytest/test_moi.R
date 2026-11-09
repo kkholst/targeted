@@ -338,7 +338,6 @@ test_moi_missing_IC_reference_lava <- function() {
     max(abs(moi_est$estimate$IC[, 2, drop = FALSE] - ic0)) < 1e-14
   )
 }
-
 test_moi_missing_IC_reference_lava()
 
 test_moi_treatment_model_validation <- function() {
