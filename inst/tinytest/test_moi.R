@@ -899,13 +899,16 @@ test_moi_direct_theta_correction <- function() {
   lr$estimate(data = d, weights = as.numeric(delta),
               na.action = lava::na.pass0)
 
-  design_matrix <- imputation.model$design(data = data,
-                                           intercept = TRUE,
-                                           response = FALSE)$x
+  design_matrix <- lr$design(data = d,
+                             intercept = TRUE,
+                             response = FALSE)$x
+  po <- lava::predict_glm(lr$fit, data = d)
   nabla <- attr(po, "grad")
+
   expect_equal(
     design_matrix,
-    nabla
+    nabla,
+    check.attributes = FALSE
   )
 
   IC_epsilon <- IC(lr$fit)
