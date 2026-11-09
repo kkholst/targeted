@@ -888,9 +888,8 @@ test_moi_direct_reduces_to_cate()
 test_moi_direct_theta_correction <- function() {
   ## The theta-estimation correction (term 3 of the IF, supplement C) obtained
   ## from lava::expectation(..., details = TRUE) / g(a) must equal the
-  ## closed-form P(Delta=0|A=a) * mean_S(grad_theta U) %*% epsilon with
-  ## S = {A=a, Delta=0}. This ties the direct estimator's correction to the
-  ## sub-target estimator's imputation-coefficient uncertainty term.
+  ## closed-form E[S / g(a) nabla U(theta)] %*% epsilon with
+  ## S = {A=a, Delta=0}.
   set.seed(2)
   n <- 800
   d <- sim_missing_id(n)
@@ -900,15 +899,22 @@ test_moi_direct_theta_correction <- function() {
   lr <- learner_glm(y ~ x)
   lr$estimate(data = d, weights = as.numeric(delta),
               na.action = lava::na.pass0)
-  po <- lava::predict_glm(lr$fit, data = d)
+
+  design_matrix <- imputation.model$design(data = data,
+                                           intercept = TRUE,
+                                           response = FALSE)$x
   nabla <- attr(po, "grad")
+  expect_equal(
+    design_matrix,
+    nabla
+  )
+
   IC_epsilon <- IC(lr$fit)
   obj <- estimate(lr$fit, id = seq_len(n))
-
   for (a in c(1, 0)) {
     g <- mean(A == a)
     ## direct: attr(ic.theta) / g
-    ex <- lava::expectation(predict, object = obj, data = d,
+    ex <- lava::expectation(f = predict, object = obj, data = d,
                             subset = (A == a) & (!delta),
                             id = seq_len(n), details = TRUE)
     direct_ic <- attr(ex, "ic.theta")[, 1] / g

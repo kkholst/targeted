@@ -308,18 +308,19 @@ moi_missing <- function(data,
 ## imputation parameter theta.
 ##
 ## The influence function (per arm a) is
-##   phi(a) = I(A=a)/g(a) {tilde Y - Q*(X,A)} + Q*(X,a) - Psi(a)   [terms 1]
-##          + E[ I(A=a)/g(a) (1-Delta) nabla U(theta) ] epsilon(.)   [term 2]
-## Term 1 are exactly what cate(cate.model = ~ 1) returns for the imputed
-## outcome. Term 2 is obtained from lava::expectation(..., details = TRUE):
+##   phi(a) = I(A=a)/g(a) {tilde Y - Q*(X,A)} + Q*(X,a) - Psi(a)   [term 1]
+##          + [g(a) - I(A=a)] / g(a) E[I(A=a)/g(a) {tilde Y - Q*(X,A)}] [term 2]
+##          + E[ I(A=a)/g(a) (1-Delta) nabla U(theta) ] epsilon(.)   [term 3]
+## Terms 1-2 are exactly what cate(cate.model = ~ 1) returns for the imputed
+## outcome. Term 3 is obtained from lava::expectation(..., details = TRUE):
 ## attr(., "ic.theta") equals E[S nabla U(theta)] %*% epsilon with
-## S = {A = a, Delta = 0}, so dividing by g(a) gives term 2.
+## S = {A = a, Delta = 0}, so dividing by g(a) gives term 3.
 ##
 ## `imputation` is the context returned by .moi_imputation_context().
 ## Returns a list with `per_level` (lava::estimate with the two per-arm
 ## potential outcomes and their influence functions), `levels`,
 ## `imputation.model`, and `intermediate` (the uncorrected cate() per-arm
-## estimate, i.e. term 1 only).
+## estimate, i.e. terms 1-2 only).
 moi_direct <- function(data,
                        id,
                        delta,
