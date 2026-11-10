@@ -22,8 +22,8 @@
 ##
 ## Currently supports learner_glm imputation models; the mmrm branch will slot
 ## in here without changing the downstream estimators.
-.moi_imputation_context <- function(data, id, imputation.model,
-                                    imputation.subset = NULL) {
+.moi_imputation <- function(data, id, imputation.model,
+                            imputation.subset = NULL) {
   ## Input checks
   if (!inherits(imputation.model, "learner_glm")) {
     stop("imputation.model must be of inherited class 'learner_glm'")
@@ -138,7 +138,7 @@ moi_missing <- function(data,
   ## Fit imputation model
   ## Use positional ids (1..n) for the imputation object to keep the order of
   ## the influence function stable regardless of the caller's `id`.
-  imputation <- .moi_imputation_context(
+  imputation <- .moi_imputation(
     data = data,
     id = seq_len(nrow(data)),
     imputation.model = imputation.model,
@@ -325,13 +325,20 @@ moi_direct <- function(data,
                        response,
                        response.model,
                        treatment.model,
-                       imputation,
+                       imputation.model,
+                       imputation.subset,
                        nfolds = 1,
                        silent = FALSE,
                        stratify = FALSE,
                        mc.cores = NULL,
                        second.order = TRUE) {
-  ## Imputed outcome:
+  ## Imputation model:
+  imputation <- .moi_imputation(
+      data = data,
+      id = id,
+      imputation.model = imputation.model,
+      imputation.subset = imputation.subset
+    )
   if ("imputed_response" %in% colnames(data)) {
     stop("'imputed_response' column not permitted in data")
   }
@@ -792,12 +799,6 @@ moi <- function(response.model,
   ## type = "direct": direct one-step imputation estimator
   ## else: sub-target ("indirect") one-step imputation estimator
   if (!indirect) {
-    imputation <- .moi_imputation_context(
-      data = data,
-      id = id,
-      imputation.model = imputation.model,
-      imputation.subset = imputation.subset
-    )
     branch <- moi_direct(
       data = data,
       id = id,
@@ -805,7 +806,8 @@ moi <- function(response.model,
       response = response,
       response.model = response.model,
       treatment.model = treatment.model,
-      imputation = imputation,
+      imputation.model = imputation.model,
+      imputation.subset = imputation.subset,
       nfolds = nfolds,
       silent = silent,
       stratify = stratify,

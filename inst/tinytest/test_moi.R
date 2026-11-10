@@ -884,16 +884,12 @@ test_moi_direct_reduces_to_cate <- function() {
 
   response.model <- learner_glm(y ~ a + x)$clone()
   response <- response.model$response(d, na.action = stats::na.pass)
-  imputation <- targeted:::.moi_imputation_context(
-    data = d, id = id,
-    imputation.model = learner_glm(y ~ x),
-    imputation.subset = "!is.na(y)"
-  )
   direct <- targeted:::moi_direct(
     data = d, id = id, delta = delta, response = response,
     response.model = response.model,
     treatment.model = learner_glm(a ~ 1, family = binomial()),
-    imputation = imputation
+    imputation.model = learner_glm(y ~ x),
+    imputation.subset = "!is.na(y)"
   )
 
   ## per_level must equal the uncorrected cate() per-arm estimate exactly
