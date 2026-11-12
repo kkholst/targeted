@@ -28,7 +28,7 @@
   if (!inherits(imputation.model, "learner_glm")) {
     stop("imputation.model must be of inherited class 'learner_glm'")
   }
-  ## Clone so the caller's imputation.model is not fitted in place.
+  ## Clone updated imputation.model
   imputation.model <- imputation.model$clone()
 
   ## Evaluate imputation.subset expression
@@ -118,8 +118,7 @@ moi_missing <- function(data,
                         imputation.subset = NULL,
                         imputation.augmentation = FALSE,
                         missing.model = NULL,
-                        imputation.augmentation.model = NULL,
-                        extended.output = FALSE) {
+                        imputation.augmentation.model = NULL) {
   if (inherits(data, c("data.table", "tbl_df"))) {
     data <- as.data.frame(data)
   }
@@ -136,20 +135,14 @@ moi_missing <- function(data,
   }
 
   ## Fit imputation model
-  ## Use positional ids (1..n) for the imputation object to keep the order of
-  ## the influence function stable regardless of the caller's `id`.
   imputation <- .moi_imputation(
     data = data,
-    id = seq_len(nrow(data)),
+    id = seq_len(nrow(data)), # keep data row order
     imputation.model = imputation.model,
     imputation.subset = imputation.subset
   )
   imputation.model <- imputation$model
   pred <- imputation$pred
-
-  if (isTRUE(extended.output)) {
-    IC_epsilon <- IC(imputation.model$fit)
-  }
 
   ## Getting the treatment variable and levels:
   A <- treatment.model$response(data)
@@ -186,24 +179,16 @@ moi_missing <- function(data,
     n_observed_in_arm <- sum((A == a) & (delta == 1))
     n_missing_in_arm  <- sum((A == a) & (delta == 0))
 
-    ## Case: no missing outcomes in this arm, i.e., {A = a, \Delta = 0}
-    ## is an empty set.
-    ## Setting E[U|A=a, Delta=0] = 0: return a
-    ## degenerate zero-coef/zero-IC estimate object
+    ## {A = a, \Delta = 0} empty (no missing)
     if (n_missing_in_arm == 0) {
       out <- estimate(coef = 0,
                       IC = matrix(0, nrow = length(id), ncol = 1),
                       id = id,
                       labels = paste0("E[u(", a, ")|d=0]"))
-      if (isTRUE(extended.output) && isTRUE(imputation.augmentation)) {
-        attr(out, "IC3") <- rep(0, length(id))
-      }
       return(out)
     }
 
-    ## Case: all missing in this arm.
-    ## Warn the user that this arm is identified solely by the
-    ## imputation model.
+    ## {A = a, \Delta = 1} empty (all missing).
     if (n_observed_in_arm == 0) {
       warning(sprintf(
         paste0("All outcomes are missing in arm '%s': ",
@@ -220,7 +205,7 @@ moi_missing <- function(data,
                     object = imputation$object,
                     data = imputation$data,
                     subset = subset_,
-                    id = seq_len(nrow(data)) # keep order of the IC
+                    id = seq_len(nrow(data)) # keep data row order
                   )
     IC <- IC(est)
     est <- coef(est)
@@ -257,14 +242,9 @@ moi_missing <- function(data,
     }
     out <- estimate(coef = est,
                     IC = IC,
-                    id = id,
+                    id = id, # user id
                     labels = paste0("E[u(", a, ")|d=0]"))
 
-    if (isTRUE(extended.output)) {
-      if (isTRUE(imputation.augmentation)) {
-        attr(out, "IC3") <- IC3
-      }
-    }
     return(out)
   }
 
@@ -272,13 +252,6 @@ moi_missing <- function(data,
     levels,
     FUN = fun
   )
-  if (isTRUE(extended.output)) {
-    ## Stash per-level IC components from attributes before merge() drops them.
-    level_names <- as.character(levels)
-    if (isTRUE(imputation.augmentation)) {
-      IC3 <- stats::setNames(lapply(est, attr, "IC3"), level_names)
-    }
-  }
   est <- do.call("merge", est)
 
   out <- list(
@@ -287,12 +260,6 @@ moi_missing <- function(data,
     imputation.subset = imputation.subset,
     levels = as.character(levels)
   )
-  if (isTRUE(extended.output)) {
-    if (isTRUE(imputation.augmentation)) {
-      out$IC3 <- IC3
-    }
-    out$IC_epsilon <- IC_epsilon
-  }
 
   return(out)
 }
