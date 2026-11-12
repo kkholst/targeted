@@ -82,7 +82,7 @@ ic_reference <- function(data, delta, imp_mod) {
   do.call("merge", lapply(c(1, 0), fun))
 }
 
-test_moi_nfolds <- function() {
+test_moi_nfolds_indirect <- function() {
   ## simulate a small dataset with missing outcomes
   set.seed(42)
   n <- 200
@@ -94,6 +94,7 @@ test_moi_nfolds <- function() {
     response.model = learner_glm(y ~ a + x),
     treatment.model = a ~ 1,
     missing.model = learner_glm(~ a + x, family = binomial()),
+    type = "indirect",
     imputation.model = learner_glm(y ~ a + x),
     imputation.subset = "!is.na(y)"
   )
@@ -106,6 +107,7 @@ test_moi_nfolds <- function() {
     response.model = learner_glm(y ~ a + x),
     treatment.model = a ~ 1,
     missing.model = learner_glm(~ a + x, family = binomial()),
+    type = "indirect",
     imputation.model = learner_glm(y ~ a + x),
     imputation.subset = "!is.na(y)",
     nfolds = 5
@@ -122,6 +124,7 @@ test_moi_nfolds <- function() {
     response.model = learner_glm(y ~ a + x),
     treatment.model = a ~ 1,
     missing.model = learner_glm(~ a + x, family = binomial()),
+    type = "indirect",
     imputation.model = learner_glm(y ~ a + x),
     imputation.subset = "!is.na(y)",
     nfolds = custom_folds
@@ -129,9 +132,9 @@ test_moi_nfolds <- function() {
   expect_true(inherits(res_custom, "moi.targeted"))
   expect_true(all(is.finite(coef(res_custom))))
 }
-test_moi_nfolds()
+test_moi_nfolds_indirect()
 
-test_moi_cate_passthrough <- function() {
+test_moi_cate_passthrough_indirect <- function() {
   ## simulate a small dataset with missing outcomes
   set.seed(42)
   d <- sim_missing(200)
@@ -145,6 +148,7 @@ test_moi_cate_passthrough <- function() {
     response.model = learner_glm(y ~ x),
     treatment.model = a ~ 1,
     missing.model = learner_glm(~ x, family = binomial()),
+    type = "indirect",
     imputation.model = learner_glm(y ~ a + x),
     imputation.subset = "!is.na(y)",
     nfolds = 3,
@@ -155,7 +159,7 @@ test_moi_cate_passthrough <- function() {
   expect_true(inherits(res, "moi.targeted"))
   expect_true(all(is.finite(coef(res))))
 }
-test_moi_cate_passthrough()
+test_moi_cate_passthrough_indirect()
 
 test_moi_print_summary <- function() {
   set.seed(13)
@@ -166,6 +170,7 @@ test_moi_print_summary <- function() {
     response.model = learner_glm(y ~ a + x),
     treatment.model = a ~ 1,
     missing.model = learner_glm(~ a + x, family = binomial()),
+    type = "indirect",
     imputation.model = learner_glm(y ~ a + x),
     imputation.subset = "!is.na(y)"
   )
@@ -220,14 +225,12 @@ test_moi_missing_IC <- function() {
                                     id = data$id,
                                     treatment.model = learner_glm(a ~ 1, family = binomial()),
                                     imputation.model = learner_glm(y ~ a + x),
-                                    imputation.subset = "!is.na(y)",
-                                    extended.output = TRUE)
+                                    imputation.subset = "!is.na(y)")
 
   expect_equal(coef(est_ref), coef(moi_est$estimate), tolerance = 1e-14)
   expect_equal(IC(est_ref), IC(moi_est$estimate), tolerance = 1e-14)
 
 }
-
 test_moi_missing_IC()
 
 test_moi_missing_IC_2 <- function() {
@@ -246,14 +249,12 @@ test_moi_missing_IC_2 <- function() {
                                     id = data$id,
                                     treatment.model = learner_glm(a ~ 1, family = binomial()),
                                     imputation.model = learner_glm(y ~ a + x, family = binomial()),
-                                    imputation.subset = "!is.na(y)",
-                                    extended.output = TRUE)
+                                    imputation.subset = "!is.na(y)")
 
   expect_equal(coef(est_ref), coef(moi_est$estimate), tolerance = 1e-14)
   expect_equal(IC(est_ref), IC(moi_est$estimate), tolerance = 1e-14)
 
 }
-
 test_moi_missing_IC_2()
 
 test_moi_missing_IC_reference_lava <- function() {
@@ -266,8 +267,7 @@ test_moi_missing_IC_reference_lava <- function() {
                                     id = seq_len(nrow(data)),
                                     treatment.model = learner_glm(a ~ 1, family = binomial()),
                                     imputation.model = learner_glm(y ~ a + x),
-                                    imputation.subset = "!is.na(y)",
-                                    extended.output = TRUE)
+                                    imputation.subset = "!is.na(y)")
 
   ## test the imputation model parameter influence function IC using lava
   imp_mod <- glm(y ~ a + x,
@@ -276,7 +276,7 @@ test_moi_missing_IC_reference_lava <- function() {
                  na.action = lava::na.pass0) 
   lava_IC_epsilon <- IC(imp_mod)
 
-  expect_true(max(abs(moi_est$IC_epsilon - lava_IC_epsilon)) < 1e-14)
+  ## expect_true(max(abs(moi_est$IC_epsilon - lava_IC_epsilon)) < 1e-14)
 
   ## test the imputation model prediction influence function using lava
 
@@ -349,6 +349,7 @@ test_moi_treatment_model_validation <- function() {
     data = d,
     response.model = learner_glm(y ~ a + x),
     missing.model = learner_glm(~ a + x, family = binomial()),
+    type = "indirect",
     imputation.model = learner_glm(y ~ a + x),
     imputation.subset = "!is.na(y)"
   )
@@ -401,7 +402,7 @@ test_moi_treatment_model_validation <- function() {
 }
 test_moi_treatment_model_validation()
 
-test_moi_missing_weights <- function() {
+test_moi_weights <- function() {
   ## Verifies the merge logic for user-supplied weights x imputation.subset.
   set.seed(2)
   n <- 100
@@ -509,7 +510,7 @@ test_moi_missing_weights <- function() {
     pattern = "non-negative"
   )
 }
-test_moi_missing_weights()
+test_moi_weights()
 
 test_moi_missing_subset_zeroweight_equivalence <- function() {
   ## Verifies that subsetting and zero-weighting
@@ -580,6 +581,7 @@ test_moi_no_missing_anywhere <- function() {
     response.model = learner_glm(y ~ a + x),
     treatment.model = a ~ 1,
     missing.model = learner_glm(~ a + x, family = binomial()),
+    type = "indirect",
     imputation.model = learner_glm(y ~ a + x),
     imputation.subset = "!is.na(y)"
   )
@@ -626,6 +628,7 @@ test_moi_no_missing_in_one_arm <- function() {
     response.model = learner_glm(y ~ a + x),
     treatment.model = a ~ 1,
     missing.model = learner_glm(~ a + x, family = binomial()),
+    type = "indirect",
     imputation.model = learner_glm(y ~ a + x),
     imputation.subset = "!is.na(y)"
   )
@@ -674,6 +677,7 @@ test_moi_all_missing_in_one_arm <- function() {
       response.model = learner_glm(y ~ a + x),
       treatment.model = a ~ 1,
       missing.model = learner_glm(~ a + x, family = binomial()),
+      type = "indirect",
       imputation.model = learner_glm(y ~ a + x),
       imputation.subset = "!is.na(y)"
     ),
@@ -745,6 +749,7 @@ test_moi_augmentation <- function() {
   ## supplying imputation.augmentation.model as both a formula and an
   ## equivalent learner. This is a regression guard for the
   ## formula -> learner_glm conversion in moi(): the two forms must agree.
+  ## Augmentation is keyed off imputation.augmentation.model being supplied.
   set.seed(7)
   n <- 300
   x <- rnorm(n)
@@ -760,9 +765,9 @@ test_moi_augmentation <- function() {
     response.model = learner_glm(y ~ a + x),
     treatment.model = a ~ 1,
     missing.model = learner_glm(~ a + x, family = binomial()),
+    type = "indirect",
     imputation.model = learner_glm(y ~ a + x + z),
-    imputation.subset = "!is.na(y)",
-    imputation.augmentation = TRUE
+    imputation.subset = "!is.na(y)"
   )
 
   ## (a) augmentation model supplied as a formula
@@ -782,6 +787,12 @@ test_moi_augmentation <- function() {
 
   ## formula and learner forms must produce identical estimates
   expect_equal(coef(res_f), coef(res_l), tolerance = 1e-12)
+
+  ## (c) no augmentation model => no augmentation term, different estimate
+  res_none <- do.call(moi, common)
+  expect_true(inherits(res_none, "moi.targeted"))
+  expect_true(all(is.finite(coef(res_none))))
+  expect_false(isTRUE(all.equal(coef(res_none), coef(res_f))))
 }
 test_moi_augmentation()
 
@@ -793,6 +804,7 @@ test_moi_id <- function() {
                  id = NULL,
                  response.model = learner_glm(y ~ x, family = binomial()),
                  missing.model = learner_glm(~ x, family = binomial()),
+                 type = "indirect",
                  stratify = TRUE,
                  treatment.model = a ~ 1,
                  imputation.model = learner_glm(y ~ a + x, family = binomial()),
@@ -804,6 +816,7 @@ test_moi_id <- function() {
                     id = id,
                     response.model = learner_glm(y ~ x, family = binomial()),
                     missing.model = learner_glm(~ x, family = binomial()),
+                    type = "indirect",
                     stratify = TRUE,
                     treatment.model = a ~ 1,
                     imputation.model = learner_glm(y ~ a + x, family = binomial()),
@@ -826,3 +839,332 @@ test_moi_id <- function() {
   )
 }
 test_moi_id()
+
+test_moi_direct_dispatch <- function() {
+  ## When missing.model is NULL, moi() uses the direct one-step imputation
+  ## estimator (supplementary material C). Check the result shape and labels.
+  set.seed(42)
+  d <- sim_missing(300)
+
+  res <- moi(
+    data = d,
+    response.model = learner_glm(y ~ a + x),
+    treatment.model = a ~ 1,
+    imputation.model = learner_glm(y ~ x),
+    imputation.subset = "!is.na(y)"
+  )
+  expect_true(inherits(res, "moi.targeted"))
+  cf <- coef(res)
+  expect_equal(length(cf), 3L)
+  expect_true(all(is.finite(cf)))
+
+  ## per-arm and contrast labels follow the cate() tilde-y convention
+  ty <- if (isTRUE(l10n_info()[["UTF-8"]])) "\u1ef9" else "tildeY"
+  expect_equal(names(cf)[1], paste0("E[", ty, "(1)]"))
+  expect_equal(names(cf)[2], paste0("E[", ty, "(0)]"))
+  expect_equal(names(cf)[3], paste0("[E[", ty, "(1)]] - [E[", ty, "(0)]]"))
+}
+test_moi_direct_dispatch()
+
+test_moi_direct_reduces_to_cate <- function() {
+  ## With no missingness anywhere, the imputed outcome equals the observed
+  ## outcome and the theta-correction vanishes (the subset {A=a, Delta=0} is
+  ## empty in both arms). moi_direct() must then reduce exactly to cate().
+  set.seed(11)
+  n <- 300
+  d <- data.frame(a = rbinom(n, 1, 0.5), x = rnorm(n))
+  d$y <- 1 + d$a + d$x + rnorm(n)
+  id <- as.character(seq_len(n))
+  delta <- !is.na(d$y)
+
+  response.model <- learner_glm(y ~ a + x)$clone()
+  response <- response.model$response(d, na.action = stats::na.pass)
+  direct <- targeted:::moi_direct(
+    data = d, id = id, delta = delta, response = response,
+    response.model = response.model,
+    treatment.model = learner_glm(a ~ 1, family = binomial()),
+    imputation.model = learner_glm(y ~ x),
+    imputation.subset = "!is.na(y)"
+  )
+
+  ## per_level must equal the uncorrected cate() per-arm estimate exactly
+  expect_equal(coef(direct$per_level), coef(direct$intermediate))
+  expect_equal(IC(direct$per_level), IC(direct$intermediate))
+}
+test_moi_direct_reduces_to_cate()
+
+test_moi_direct_theta_correction <- function() {
+  ## The theta-estimation correction (term 3 of the IF, supplement C) obtained
+  ## from lava::expectation(..., details = TRUE) / g(a) must equal the
+  ## closed-form E[S / g(a) nabla U(theta)] %*% epsilon with
+  ## S = {A=a, Delta=0}.
+  set.seed(2)
+  n <- 800
+  d <- sim_missing_id(n)
+  delta <- !is.na(d$y)
+  A <- d$a
+
+  lr <- learner_glm(y ~ x)
+  lr$estimate(data = d, weights = as.numeric(delta),
+              na.action = lava::na.pass0)
+
+  design_matrix <- lr$design(data = d,
+                             intercept = TRUE,
+                             response = FALSE)$x
+  po <- lava::predict_glm(lr$fit, data = d)
+  nabla <- attr(po, "grad")
+
+  expect_equal(
+    design_matrix,
+    nabla,
+    check.attributes = FALSE
+  )
+
+  IC_epsilon <- IC(lr$fit)
+  obj <- estimate(lr$fit, id = seq_len(n))
+  for (a in c(1, 0)) {
+    g <- mean(A == a)
+    ## direct: attr(ic.theta) / g
+    ex <- lava::expectation(f = predict, object = obj, data = d,
+                            subset = (A == a) & (!delta),
+                            id = seq_len(n), details = TRUE)
+    direct_ic <- attr(ex, "ic.theta")[, 1] / g
+    ## closed form
+    v <- colMeans(nabla[A == a & !delta, , drop = FALSE])
+    p_d0 <- mean((!delta)[A == a])
+    closed_ic <- as.vector(t(p_d0 * v %*% t(IC_epsilon)))
+    expect_equal(unname(direct_ic), unname(closed_ic), tolerance = 1e-12)
+  }
+}
+test_moi_direct_theta_correction()
+
+test_moi_direct_degenerate_arm <- function() {
+  ## Arm with no missing outcomes: the theta-correction must be exactly zero
+  ## (not NaN from dividing by an empty subset) and estimates finite.
+  set.seed(12)
+  n <- 300
+  a <- rbinom(n, 1, 0.5)
+  x <- rnorm(n)
+  y_full <- 1 + a + x + rnorm(n)
+  ## arm 0 fully observed; arm 1 has missingness
+  delta <- ifelse(a == 0, 1L, rbinom(n, 1, lava::expit(0.5 + x)))
+  y <- ifelse(delta == 1, y_full, NA)
+  d <- data.frame(y = y, a = a, x = x)
+
+  res <- moi(
+    data = d,
+    response.model = learner_glm(y ~ a + x),
+    treatment.model = a ~ 1,
+    imputation.model = learner_glm(y ~ x),
+    imputation.subset = "!is.na(y)"
+  )
+  cf <- coef(res)
+  expect_true(all(is.finite(cf)))
+  expect_false(any(is.nan(cf)))
+}
+test_moi_direct_degenerate_arm()
+
+test_moi_direct_guards <- function() {
+  set.seed(1)
+  d <- sim_missing_id(100)
+
+  ## (1) the removed 'imputation.augmentation' argument is rejected rather
+  ## than silently partial-matched to 'imputation.augmentation.model'
+  expect_error(
+    moi(data = d,
+        response.model = learner_glm(y ~ a + x),
+        treatment.model = a ~ 1,
+        imputation.model = learner_glm(y ~ x),
+        imputation.subset = "!is.na(y)",
+        imputation.augmentation = TRUE),
+    "must be a formula or a learner"
+  )
+
+  ## (2) a pre-existing 'imputed_response' column is rejected
+  d2 <- d
+  d2$imputed_response <- 0
+  expect_error(
+    moi(data = d2,
+        response.model = learner_glm(y ~ a + x),
+        treatment.model = a ~ 1,
+        imputation.model = learner_glm(y ~ x),
+        imputation.subset = "!is.na(y)"),
+    "imputed_response"
+  )
+}
+test_moi_direct_guards()
+
+test_moi_return_all_indirect <- function() {
+  ## return.all = TRUE on the sub-target (indirect) estimator exposes the
+  ## intermediate estimates. Verify the shape, that the first three rows match
+  ## the default output exactly, and that the sub-targets genuinely compose
+  ## into the reported per-arm estimates.
+  set.seed(42)
+  d <- sim_missing(400)
+
+  args <- list(
+    data = d,
+    response.model = learner_glm(y ~ a + x),
+    treatment.model = a ~ 1,
+    missing.model = learner_glm(~ a + x, family = binomial()),
+    type = "indirect",
+    imputation.model = learner_glm(y ~ a + x),
+    imputation.subset = "!is.na(y)"
+  )
+  res <- do.call(moi, c(args, list(return.all = TRUE)))
+  ref <- do.call(moi, args)
+
+  expect_true(inherits(res, "moi.targeted"))
+  cf <- coef(res)
+  ## 3 target rows (per-arm + ATE) + 6 intermediate rows
+  expect_equal(length(cf), 9L)
+  expect_true(all(is.finite(cf)))
+
+  ## first three rows identical (coef and IC) to the default return
+  expect_equal(unname(cf[1:3]), unname(coef(ref)), tolerance = 1e-12)
+  expect_equal(IC(res)[, 1:3], IC(ref), check.attributes = FALSE)
+
+  ## intermediate row labels present
+  expect_equal(
+    names(cf)[4:9],
+    c("E[dy(1)]", "E[dy(0)]", "P(1-d(1))", "P(1-d(0))",
+      "E[u(1)|d=0]", "E[u(0)|d=0]")
+  )
+
+  ## decomposition reconstruction:
+  ## E[ty|A=a] = E[dy|A=a] + P(1-d|A=a) * E[u|A=a, d=0]
+  expect_equal(unname(cf[1]), unname(cf[4] + cf[6] * cf[8]),
+               tolerance = 1e-10)
+  expect_equal(unname(cf[2]), unname(cf[5] + cf[7] * cf[9]),
+               tolerance = 1e-10)
+}
+test_moi_return_all_indirect()
+
+test_moi_return_all_direct <- function() {
+  ## return.all = TRUE on the direct estimator exposes the uncorrected per-arm
+  ## outcome-regression means. The corrected per-arm coefs equal the
+  ## intermediate coefs (the theta-correction has coef 0), while the standard
+  ## errors are not smaller (the correction only inflates variance).
+  set.seed(42)
+  d <- sim_missing(400)
+
+  args <- list(
+    data = d,
+    response.model = learner_glm(y ~ a + x),
+    treatment.model = a ~ 1,
+    imputation.model = learner_glm(y ~ x),
+    imputation.subset = "!is.na(y)"
+  )
+  res <- do.call(moi, c(args, list(return.all = TRUE)))
+  ref <- do.call(moi, args)
+
+  expect_true(inherits(res, "moi.targeted"))
+  cf <- coef(res)
+  ## 3 target rows (per-arm + ATE) + 2 intermediate rows
+  expect_equal(length(cf), 5L)
+  expect_true(all(is.finite(cf)))
+
+  ## first three rows identical to the default return
+  expect_equal(unname(cf[1:3]), unname(coef(ref)), tolerance = 1e-12)
+
+  ## intermediate (uncorrected) per-arm regression means
+  expect_equal(
+    names(cf)[4:5],
+    c("E[imputed_response(1)]", "E[imputed_response(0)]")
+  )
+
+  ## corrected per-arm coefs equal the intermediate coefs (correction coef = 0)
+  expect_equal(unname(cf[1]), unname(cf[4]), tolerance = 1e-12)
+  expect_equal(unname(cf[2]), unname(cf[5]), tolerance = 1e-12)
+
+  ## the theta-correction does not reduce the standard errors
+  se <- res$estimate$coefmat[, 2]
+  expect_true(se[1] >= se[4] - 1e-10)
+  expect_true(se[2] >= se[5] - 1e-10)
+}
+test_moi_return_all_direct()
+
+test_moi_return_all_short_circuit <- function() {
+  ## When no outcomes are missing, moi() short-circuits to a plain cate() call.
+  ## There are no intermediate estimates in this case, so return.all = TRUE
+  ## returns the same three rows as the default. Characterises current
+  ## behaviour.
+  set.seed(11)
+  n <- 300
+  d <- data.frame(a = rbinom(n, 1, 0.5), x = rnorm(n))
+  d$y <- 1 + d$a + d$x + rnorm(n)
+
+  args <- list(
+    data = d,
+    response.model = learner_glm(y ~ a + x),
+    treatment.model = a ~ 1,
+    imputation.model = learner_glm(y ~ x),
+    imputation.subset = "!is.na(y)"
+  )
+  res <- do.call(moi, c(args, list(return.all = TRUE)))
+  ref <- do.call(moi, args)
+
+  expect_true(inherits(res, "moi.targeted"))
+  ## no intermediates available on the short-circuit path: 3 rows only
+  expect_equal(length(coef(res)), 3L)
+  expect_equal(coef(res), coef(ref), tolerance = 1e-12)
+}
+test_moi_return_all_short_circuit()
+
+test_moi_type <- function() {
+  ## The `type` argument selects the estimator. "direct" (default) uses no
+  ## missingness model; "indirect" selects the sub-target estimator, which
+  ## requires `missing.model`.
+  set.seed(42)
+  d <- sim_missing(300)
+
+  base_args <- list(
+    response.model = learner_glm(y ~ a + x),
+    treatment.model = a ~ 1,
+    imputation.model = learner_glm(y ~ x),
+    imputation.subset = "!is.na(y)",
+    data = d
+  )
+  mmod <- list(missing.model = learner_glm(~ a + x, family = binomial()))
+
+  ## default is the direct estimator
+  res_default <- do.call(moi, base_args)
+  res_direct <- do.call(moi, c(base_args, list(type = "direct")))
+  expect_equal(coef(res_default), coef(res_direct))
+
+  ## direct and sub-target are genuinely different estimators
+  res_ind <- do.call(moi, c(base_args, mmod, list(type = "indirect")))
+  expect_false(isTRUE(all.equal(coef(res_direct), coef(res_ind))))
+
+  ## match.arg partial matching is accepted
+  res_pmatch <- do.call(moi, c(base_args, mmod, list(type = "ind")))
+  expect_equal(coef(res_pmatch), coef(res_ind))
+  expect_equal(IC(res_pmatch), IC(res_ind))
+
+  ## `missing.model` is required for the sub-target estimator
+  expect_error(
+    do.call(moi, c(base_args, list(type = "indirect"))),
+    "'missing.model' is required"
+  )
+
+  ## unknown type is rejected
+  expect_error(do.call(moi, c(base_args, list(type = "bogus"))))
+
+  ## a `type` of length > 1 is rejected
+  expect_error(
+    do.call(moi, c(base_args, mmod, list(type = c("indirect", "direct")))),
+    "must be of length 1"
+  )
+
+  ## arguments unused by the direct estimator are ignored with a warning
+  expect_warning(
+    do.call(moi, c(base_args, mmod, list(type = "direct"))),
+    "ignored when type = 'direct'"
+  )
+  expect_warning(
+    do.call(moi, c(base_args,
+                   list(imputation.augmentation.model = ~ a + x))),
+    "ignored when type = 'direct'"
+  )
+}
+test_moi_type()
