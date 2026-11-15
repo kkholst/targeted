@@ -37,7 +37,7 @@ Imports:
     abind,
     cli,
     future.apply,
-    lava (>= 1.10),
+    lava (>= 1.11),
     methods,
     mets (>= 1.3.12),
     quadprog,
