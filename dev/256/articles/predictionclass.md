@@ -12,7 +12,7 @@ used models are constructed as `learner` class objects through the
 `learner_` functions. These functions are wrappers for statistical and
 machine learning models that have been implemented in other R packages.
 This is conceptually similar to packages such as
-[caret](https://github.com/topepo/caret/) and
+[caret](https://github.com/topepo/caret) and
 [mlr3](https://mlr3.mlr-org.com). Besides implementing a large number of
 prediction models, these packages provide extensive functionalities for
 data preprocessing, model selection and diagnostics, and hyper-parameter
@@ -102,9 +102,9 @@ lr_sl
     Formula: y ~ age * bili
     ─────────────────────────────────────
               score     weight
-    glm1 0.09725241 0.29843115
-    glm2 0.10734242 0.01926129
-    gam  0.09573341 0.68230757
+    glm1 0.09702617 0.26693034
+    glm2 0.10731190 0.03415667
+    gam  0.09528669 0.69891298
 
 Most constructors have additional arguments that impact the resulting
 model fit, ranging from the specification of a link function for
@@ -248,8 +248,8 @@ lr_xgboost$summary()$estimate
             list(params = xgb_params)), )
         return(res)
     }
-    <bytecode: 0x5899f1c6a320>
-    <environment: 0x5899ec0c6528>
+    <bytecode: 0x563a5399b238>
+    <environment: 0x563a5108c138>
 
 Rare situations may arise where one wants to update the formula
 argument. This supported and implemented via the `update` method
@@ -314,8 +314,8 @@ cv(lrs, data = pbc, rep = 2, nfolds = 5)
     5-fold cross-validation with 2 repetitions
 
                mse       mae
-    glm 0.10801098 0.2136381
-    gam 0.09723761 0.1876360
+    glm 0.10784784 0.2126041
+    gam 0.09739301 0.1862617
 
 ### Prediction filter
 
@@ -525,9 +525,9 @@ lr
     Predict arguments:
     Formula: NULL
     ─────────────────────────────────────
-            score    weight
-    glm 0.1064076 0.3056535
-    gam 0.1059870 0.6943465
+            score weight
+    glm 0.1087188      1
+    gam 0.1098175      0
 
 In this case, all arguments provided to `lr$estimate` are joined
 together with the specified `estimate.args` and passed on to the defined
@@ -579,7 +579,7 @@ targeted:::weights.numeric
 
     function (object, ...)
     object
-    <bytecode: 0x5899ece2c260>
+    <bytecode: 0x563a4eeea8b0>
     <environment: namespace:targeted>
 
 To illustrate how to define a custom learner that utilizes special

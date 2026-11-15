@@ -57,7 +57,7 @@
   learner
 - [`metalearner_nnls()`](metalearner_nnls.md) : Non-negative least
   squares meta learner
-- [`moi()`](moi.md) : Average Treatment Effect Estimation with Missing
+- [`moi()`](moi.md) : average treatment effect estimation with Missing
   Outcome Imputation
 - [`naivebayes-class`](naivebayes-class.md) : naivebayes class object
 - [`naivebayes()`](naivebayes.md) : Naive Bayes classifier

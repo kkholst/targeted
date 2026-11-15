@@ -59,7 +59,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Prediction model class (<code>learner</code>)</h1>
 
       <p class="author">Klaus Kähler Holst, Benedikt Sommer</p>
-      <p class="date">2026-11-03</p>
+      <p class="date">2026-11-15</p>
 
       <small class="dont-index">Source: <a href="https://github.com/kkholst/targeted/blob/release/cran-nov-2026/vignettes/predictionclass.qmd" class="external-link"><code>vignettes/predictionclass.qmd</code></a></small>
       <div class="d-none name"><code></code></div>
@@ -72,7 +72,7 @@
 
     <section class="section level2"><h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>Methods for targeted and semiparametric inference rely on fitting nuisance models to observed data when estimating the target parameter of interest. The <a href="https://kkholst.github.io/targeted/" class="external-link">targeted</a> package implements the <a href="https://r6.r-lib.org/" class="external-link">R6 reference class</a> <code>learner</code> to harmonize common statistical and machine learning models for the usage as nuisance models across the various implemented estimators. Commonly used models are constructed as <code>learner</code> class objects through the <code>learner_</code> functions. These functions are wrappers for statistical and machine learning models that have been implemented in other R packages. This is conceptually similar to packages such as <a href="https://github.com/topepo/caret/" class="external-link">caret</a> and <a href="https://mlr3.mlr-org.com" class="external-link">mlr3</a>. Besides implementing a large number of prediction models, these packages provide extensive functionalities for data preprocessing, model selection and diagnostics, and hyper-parameter optimization. The design of the <code>learner</code> class and accompanied functions is much leaner, as our use-cases often only require a standardized interface for estimating models and generating predictions, instead of the full predictive modelling pipeline.</p>
+<p>Methods for targeted and semiparametric inference rely on fitting nuisance models to observed data when estimating the target parameter of interest. The <a href="https://kkholst.github.io/targeted/" class="external-link">targeted</a> package implements the <a href="https://r6.r-lib.org/" class="external-link">R6 reference class</a> <code>learner</code> to harmonize common statistical and machine learning models for the usage as nuisance models across the various implemented estimators. Commonly used models are constructed as <code>learner</code> class objects through the <code>learner_</code> functions. These functions are wrappers for statistical and machine learning models that have been implemented in other R packages. This is conceptually similar to packages such as <a href="https://github.com/topepo/caret" class="external-link">caret</a> and <a href="https://mlr3.mlr-org.com" class="external-link">mlr3</a>. Besides implementing a large number of prediction models, these packages provide extensive functionalities for data preprocessing, model selection and diagnostics, and hyper-parameter optimization. The design of the <code>learner</code> class and accompanied functions is much leaner, as our use-cases often only require a standardized interface for estimating models and generating predictions, instead of the full predictive modelling pipeline.</p>
 <p>This vignette uses the Mayo Clinic Primary Biliary Cholangitis data (<code><a href="https://rdrr.io/pkg/survival/man/pbc.html" class="external-link">?survival::pbc</a></code>) to exemplify the usage of the <code>learner</code> class objects. Our interest lies in the prediction of the composite event of death or transplant before 2 years.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="downlit sourceCode r">
@@ -126,9 +126,9 @@ Predict arguments:
 Formula: y ~ age * bili
 ─────────────────────────────────────
           score     weight
-glm1 0.09725241 0.29843115
-glm2 0.10734242 0.01926129
-gam  0.09573341 0.68230757</code></pre>
+glm1 0.09702617 0.26693034
+glm2 0.10731190 0.03415667
+gam  0.09528669 0.69891298</code></pre>
 </div>
 </div>
 <p>Most constructors have additional arguments that impact the resulting model fit, ranging from the specification of a link function for generalized linear models to hyper hyperparameters of machine learning models. Arguments naturally vary between the constructors and are documented for each function (e.g. <code><a href="../reference/learner_gam.html">?learner_gam</a></code>). The implemented constructors only provide arguments for the most relevant parameters of the underlying fit function (<code><a href="https://rdrr.io/pkg/mgcv/man/gam.html" class="external-link">mgcv::gam</a></code> in case of <code>learner_gam</code>). As described in the documentation, the ellipsis argument (<code>...</code>) can be used to pass additional arguments to the fit function. However, in most situations this is rarely required.</p>
@@ -238,8 +238,8 @@ Formula: y ~ age + sex + bili </code></pre>
         list(params = xgb_params)), )
     return(res)
 }
-&lt;bytecode: 0x5899f1c6a320&gt;
-&lt;environment: 0x5899ec0c6528&gt;</code></pre>
+&lt;bytecode: 0x563a5399b238&gt;
+&lt;environment: 0x563a5108c138&gt;</code></pre>
 </div>
 </div>
 <p>Rare situations may arise where one wants to update the formula argument. This supported and implemented via the <code>update</code> method</p>
@@ -289,8 +289,8 @@ Formula: y ~ age + sex + bili </code></pre>
 5-fold cross-validation with 2 repetitions
 
            mse       mae
-glm 0.10801098 0.2136381
-gam 0.09723761 0.1876360</code></pre>
+glm 0.10784784 0.2126041
+gam 0.09739301 0.1862617</code></pre>
 </div>
 </div>
 </section><section class="level2"><h3 id="prediction-filter">Prediction filter<a class="anchor" aria-label="anchor" href="#prediction-filter"></a>
@@ -444,9 +444,9 @@ Estimate arguments: learners=&lt;list&gt;, nfolds=2
 Predict arguments:
 Formula: NULL
 ─────────────────────────────────────
-        score    weight
-glm 0.1064076 0.3056535
-gam 0.1059870 0.6943465</code></pre>
+        score weight
+glm 0.1087188      1
+gam 0.1098175      0</code></pre>
 </div>
 </div>
 <p>In this case, all arguments provided to <code>lr$estimate</code> are joined together with the specified <code>estimate.args</code> and passed on to the defined estimate function (i.e. <code>superlearner</code>).</p>
@@ -489,7 +489,7 @@ gam 0.1059870 0.6943465</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>function (object, ...)
 object
-&lt;bytecode: 0x5899ece2c260&gt;
+&lt;bytecode: 0x563a4eeea8b0&gt;
 &lt;environment: namespace:targeted&gt;</code></pre>
 </div>
 </div>
