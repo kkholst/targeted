@@ -287,8 +287,8 @@ sessionInfo()
     loaded via a namespace (and not attached):
      [1] nlme_3.1-171        progressr_1.1.0     cli_3.6.6
      [4] knitr_1.52          rlang_1.3.0         xfun_0.62
-     [7] otel_0.2.0          jsonlite_2.0.0      future.apply_1.21.0
-    [10] listenv_1.1.0       lava_1.10           htmltools_0.5.9
+     [7] otel_0.3.0          jsonlite_2.0.0      future.apply_1.21.0
+    [10] listenv_1.1.0       lava_1.11           htmltools_0.5.9
     [13] rmarkdown_2.32      quadprog_1.5-8      grid_4.6.2
     [16] evaluate_1.0.5      fastmap_1.2.0       yaml_2.3.12
     [19] compiler_4.6.2      codetools_0.2-20    Rcpp_1.1.2

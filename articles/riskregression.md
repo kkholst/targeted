@@ -342,8 +342,8 @@ And we can then fit the DRE with the syntax
 riskreg(y~a, nuisance=~x+z, data=d2, type="rd")
 ```
 
-                Estimate Std.Err   2.5% 97.5% P-value
-    (Intercept)   0.9651 0.02021 0.9255 1.005       0
+                Estimate Std.Err  2.5% 97.5% P-value
+    (Intercept)    1.029 0.02117 0.987  1.07       0
 
 ### Influence-function
 
@@ -361,12 +361,12 @@ head(IC(fit))
 ```
 
       (Intercept)          x
-    1   0.6226459 -0.4585423
-    2   1.2319962  0.7925971
-    3   0.3941325 -0.5798066
-    4  -0.8854887  2.9621434
-    5  -6.9949162 -5.2133624
-    6   0.5853933 -0.7571451
+    1   0.6226459 -0.4585424
+    2   1.2319959  0.7925975
+    3   0.3941326 -0.5798067
+    4  -0.8854891  2.9621437
+    5  -6.9949137 -5.2133649
+    6   0.5853934 -0.7571452
 
 ## SessionInfo
 
@@ -400,8 +400,8 @@ sessionInfo()
 
     loaded via a namespace (and not attached):
      [1] cli_3.6.6           knitr_1.52          rlang_1.3.0
-     [4] xfun_0.62           otel_0.2.0          jsonlite_2.0.0
-     [7] future.apply_1.21.0 listenv_1.1.0       lava_1.10
+     [4] xfun_0.62           otel_0.3.0          jsonlite_2.0.0
+     [7] future.apply_1.21.0 listenv_1.1.0       lava_1.11
     [10] htmltools_0.5.9     rmarkdown_2.32      grid_4.6.2
     [13] evaluate_1.0.5      fastmap_1.2.0       yaml_2.3.12
     [16] compiler_4.6.2      codetools_0.2-20    Rcpp_1.1.2

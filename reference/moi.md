@@ -1,99 +1,88 @@
-# Average Treatment Effect Estimation with Missing Outcome Imputation
+# average treatment effect estimation with Missing Outcome Imputation
 
-Estimates the Average Treatment Effect (ATE) in settings where the
-outcome may be missing (not observed for all individuals). The treatment
-effect implied by a parametric imputation model is targeted directly
-through an efficient one-step estimator constructed from its influence
-function (Nordland et al., 2026).
+Estimates the average treatment effect in settings where the outcome may
+be missing. The treatment effect implied by a parametric imputation
+model is targeted directly through an efficient one-step estimator
+(Nordland et al., 2026).
 
 ## Usage
 
 ``` r
 moi(
-  data,
   response.model,
   treatment.model,
-  missing.model,
-  id = NULL,
   imputation.model,
   imputation.subset = NULL,
-  imputation.augmentation = FALSE,
+  data,
+  type = c("direct", "indirect"),
+  id = NULL,
   imputation.augmentation.model = NULL,
-  return.all = FALSE,
+  missing.model = NULL,
   nfolds = 1,
   silent = FALSE,
   stratify = FALSE,
   mc.cores = NULL,
-  second.order = TRUE
+  second.order = TRUE,
+  return.all = FALSE
 )
 ```
 
 ## Arguments
 
-- data:
-
-  A `data.frame` containing all variables required by the models.
-  `data.table` and `tbl_df` objects are automatically coerced to
-  `data.frame`.
-
 - response.model:
 
-  A `formula` or `learner` object specifying the response/outcome and
-  the associated baseline adjusted model. If a `formula` is provided, it
-  is automatically wrapped in [`learner_glm`](learner_glm.md). Used to
-  estimate \\E\[\Delta Y \| A = a\]\\.
+  formula or learner object (formula =\> learner_glm). For the direct
+  estimator, the outcome model for the imputed outcome
+  \\\tilde{Y}(\theta)\\
 
 - treatment.model:
 
-  A base R `stats` formula specifying the binary treatment variable.
-  Only an intercept is allowed on the right-hand side, e.g., `A ~ 1`.
+  formula specifying the binary treatment. Only an intercept is allowed
+  on the right-hand side, e.g. `a ~ 1`
 
-- missing.model:
+- imputation.model:
 
-  A `formula` or `learner` object specifying the model for the
-  probability of the outcome being observed/non-missing (i.e.,
-  \\P(\Delta = 1 \| A = a)\\). If a `formula` is provided, it is wrapped
-  in `learner_glm(..., family = binomial())`. Used to estimate
-  \\P(\Delta = 0 \| A = a)\\.
+  formula or learner_glm object (formula =\> learner_glm). Model
+  \\U(X,A,Z;\theta)\\ used to impute the missing outcomes
+
+- imputation.subset:
+
+  character string with an R expression evaluating to a logical vector
+  indicating the rows of `data` used to fit the imputation model, e.g.
+  `"!is.na(y)"`. The expression is evaluated in the context of `data`.
+  When `NULL` (default), all rows are used
+
+- data:
+
+  data.frame (`data.table` and `tbl_df` objects are coerced to
+  `data.frame`)
+
+- type:
+
+  character specifying the estimator. `"direct"` (default) gives the
+  direct one-step imputation estimator, which uses no missingness model.
+  `"indirect"` gives the sub-target estimator, which requires
+  `missing.model`
 
 - id:
 
   (integer or character) optional subject id vector of length
   `nrow(data)`.
 
-- imputation.model:
-
-  A `formula` or `learner_glm` object specifying the missing outcome
-  imputation model. If a `formula` is provided, it is wrapped in
-  [`learner_glm`](learner_glm.md). Used to estimate \\E\[U(X, A, Z;
-  \theta) \| A = a, \Delta = 0\]\\.
-
-- imputation.subset:
-
-  Optional character string giving an R expression that evaluates to a
-  logical vector indicating which rows of `data` to use when fitting the
-  imputation model. The expression is parsed and evaluated in the
-  context of `data`; for example, `imputation.subset = "!is.na(y)"`
-  restricts the fit to the observed outcomes. If `NULL` (default), all
-  rows are used.
-
-- imputation.augmentation:
-
-  Logical. If `TRUE`, an augmentation term is added to the imputation
-  estimator for improved efficiency. Default is `FALSE`.
-
 - imputation.augmentation.model:
 
-  A `formula`, `learner`, or `NULL` specifying a working model for the
-  conditional imputation mean \\E\[U(X, A, Z; \theta) \mid W, A\]\\,
-  used to augment the imputation estimator. Only used when
-  `imputation.augmentation = TRUE`; if `NULL`, the imputation model
-  \\U\\ itself is used. Default is `NULL`.
+  formula or learner object (formula =\> learner_glm); default `NULL`.
+  Working model for the conditional imputation mean \\E\[U(X, A, Z;
+  \theta) \mid W, A\]\\. When supplied, an augmentation term is added to
+  the imputation sub-target for improved efficiency. Only used when
+  `type = "indirect"`
 
-- return.all:
+- missing.model:
 
-  Logical. If `TRUE`, the returned object includes all intermediate
-  estimates in addition to the final ATE estimate. Default is `FALSE`.
+  formula or learner object (formula =\> learner_glm(family =
+  binomial)); default `NULL`. Model for the probability of the outcome
+  being missing, \\P(\Delta = 0 \| A = a)\\. Required when
+  `type = "indirect"` and ignored when `type = "direct"`
 
 - nfolds:
 
@@ -121,41 +110,12 @@ moi(
 
 ## Value
 
-An object of class `moi.targeted` (inheriting from `targeted`), a list
-with components:
-
-- call:
-
-  The matched call.
-
-- estimate:
-
-  A
-  [`lava::estimate`](https://kkholst.github.io/lava/reference/estimate.default.html)
-  object containing the per-arm expected potential outcomes
-  \\E\[\tilde{Y}\|A=a\]\\ and the ATE contrast \\E\[\tilde{Y}\|A=1\] -
-  E\[\tilde{Y}\|A=0\]\\, with influence-function-based standard errors.
-  Row labels follow the [`cate`](cate.md) convention: per-arm rows are
-  labeled \\E\[\tilde{y}(1)\]\\ and \\E\[\tilde{y}(0)\]\\ (or
-  `E[tildeY(1)]` / `E[tildeY(0)]` in non-UTF-8 locales), and the
-  contrast row is labeled \\E\[\tilde{y}(1)\]-E\[\tilde{y}(0)\]\\.
-
-- levels:
-
-  Treatment levels (character).
-
-- intermediate:
-
-  (only if `return.all = TRUE`) Intermediate estimates: \\E\[\Delta
-  Y\|A=a\]\\, \\P(\Delta=0\|A=a)\\, and \\E\[U\|A=a, \Delta=0\]\\.
-
-Standard methods (`print`, `summary`, `coef`, `vcov`, `IC`) are
-provided.
+moi.targeted object
 
 ## Details
 
-The `moi` function implements an estimator for the Average Treatment
-Effect where missing outcomes are imputed using a parametric (glm)
+The `moi` function implements an estimator for the average treatment
+effect where missing outcomes are imputed using a parametric (glm)
 model.
 
 The function estimate the target parameter
@@ -165,40 +125,36 @@ The function estimate the target parameter
 where
 
 \$\$E\[\tilde{Y}\| A = a\] = E\[\Delta Y \| A=a\] + P(\Delta=0 \| A=a)
-\cdot E\[U(X, A, Z; \theta) \| A=a, \Delta=0\],\$\$
+E\[U(X, A, Z; \theta) \| A=a, \Delta=0\],\$\$
 
 and \\\Delta\\ denotes the non-missing indicator, and \\U\\ denotes the
 imputation model possibly depending on baseline covariates \\X\\, the
 treatment \\A\\, and a post randomization variable \\Z\\.
 
-Inference in based on the estimated influence functions (IFs) of the
-associated (covariate adjusted) one-step estimators.
+Inference is based on the estimated influence function of the associated
+(covariate adjusted) one-step estimator.
 
-When `imputation.augmentation = TRUE`, an augmentation term built from
-the efficient influence function is added, giving an efficient one-step
-estimator of the treatment effect implied by the imputation model
-(Nordland et al., 2026). The augmentation uses a working model for the
-conditional imputation mean \\E\[U(X, A, Z; \theta) \mid W, A\]\\ (see
-`imputation.augmentation.model`) together with the missingness model.
+Two estimators are available, selected by the `type` argument:
 
-If no observations are missing in an arm \\a\\, the imputation
-contribution for that arm vanishes (\\P(\Delta = 0 \| A = a) = 0\\) and
-\\E\[\tilde{Y} \| A = a\] = E\[Y \| A = a\]\\. If no observations are
-missing in any arm, `moi` reduces to a standard [`cate`](cate.md) call
-with `cate.model = ~ 1`.
+- **Direct one-step imputation estimator** (`type = "direct"`, the
+  default): targets \\E\[\tilde{Y}(\theta) \| A = a\]\\ directly via a
+  (covariate augmented) one-step estimator applied to the imputed
+  outcome \\\tilde{Y} = \Delta Y + (1-\Delta) U(X,A,Z;\theta)\\, see
+  supplementary material C of Nordland et al. (2026).
+
+- **Sub-target (indirect) estimator** (`type = "indirect"`): estimates
+  the three sub-target parameters \\E\[\Delta Y \| A=a\]\\, \\P(\Delta=0
+  \| A=a)\\ and \\E\[U(X,A,Z;\theta) \| A=a, \Delta=0\]\\ separately and
+  combines them. A missingness model is required for (augmented)
+  estimation of \\P(\Delta=0 \| A=a)\\ and for the optional imputation
+  model augmentation, see supplementary material B of Nordland et al.
+  (2026).
 
 ## References
 
 Nordland, A., Holst, K. K., Redek, D., Pipper, C. B. & Iversen, A. T.
 (2026) One-step Outcome Imputation: An Alternative to Multiple
 Imputation. arXiv: https://arxiv.org/abs/2606.07174.
-
-## See also
-
-[`cate`](cate.md) for Conditional Average Treatment Effect estimation,
-[`learner`](learner.md) for creating learner objects,
-[`lava::estimate`](https://kkholst.github.io/lava/reference/estimate.default.html)
-for combining and transforming estimators
 
 ## Author
 
@@ -218,13 +174,25 @@ sim_moi <- function(n = 1000, ...) {
 }
 
 d <- sim_moi(1000)
-## ATE with missing outcomes imputed by a working glm model
-moi(data = d,
-    response.model = y ~ a + w,
+## direct one-step imputation estimator
+moi(response.model = y ~ a + w,
     treatment.model = a ~ 1,
-    missing.model = ~ a + w,
     imputation.model = y ~ a + w,
-    imputation.subset = "!is.na(y)")
+    imputation.subset = "!is.na(y)",
+    data = d)
+#>                       Estimate Std.Err   2.5% 97.5%    P-value
+#> E[ỹ(1)]                 1.9516 0.06146 1.8312 2.072 2.730e-221
+#> E[ỹ(0)]                 0.9939 0.06057 0.8752 1.113  1.606e-60
+#> [E[ỹ(1)]] - [E[ỹ(0)]]   0.9577 0.07315 0.8144 1.101  3.661e-39
+
+## sub-target estimator
+moi(response.model = y ~ a + w,
+    treatment.model = a ~ 1,
+    imputation.model = y ~ a + w,
+    imputation.subset = "!is.na(y)",
+    missing.model = ~ a + w,
+    data = d,
+    type = "indirect")
 #>                       Estimate Std.Err   2.5% 97.5%    P-value
 #> E[ỹ(1)]                 1.9258 0.06130 1.8056 2.046 1.355e-216
 #> E[ỹ(0)]                 1.0066 0.06168 0.8857 1.127  7.021e-60
