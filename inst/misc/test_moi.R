@@ -904,3 +904,238 @@ test_moi_2 <- function() {
 }
 
 test_moi_2()
+
+
+test_moi_direct_continuous <- function() {
+
+  ## covariate distribution
+  covariate = function(n) {
+    data.frame(
+      a = rbinom(n, 1, 0.5),
+      w1 = rnorm(n),
+      w2 = rbinom(n, 1, 0.8),
+      w3 = rbinom(n, 1, 0.5)
+    )
+  }
+
+  ##  outcome distribution
+  par0 <- c(10, -3, 0.1, 0.03, -0.04, 0.02)
+  outcome = setargs(
+    outcome_continuous,
+    mean = ~ 1 + a + w1 + w2 + w3 + w2:w3,
+    par = par0,
+    # coef order as defined by the above formula
+    sd = 1
+  )
+
+  ## tmp_d <- covariate(10000) %>% cbind(., outcome(.))
+  ## tmp <- lm(y ~ a + w1 + w2 + w3 + w2:w3, data = tmp_d)
+
+  ## true outcome model
+  q0 <- function(a, w1, w2, w3) {
+    apply(cbind(1, a, w1, w2, w3, w2*w3), MARGIN = 1, function(x) sum(x * par0))
+  }
+
+  ## predict(tmp, newdata = data.frame(a = c(0,1), w1 = c(1,2), w2 = c(1,2), w3 = c(1,3)))
+  ## q0(a = c(0,1), w1 = c(1,2), w2 = c(1,2), w3 = c(1,3))
+
+  ## coarsening distribution
+  coarsening_par0 <- c(1.5, 0.2, 0.3, 0.3, 0.4, 0.2)
+  coarsening = setargs(
+    outcome_binary,
+    mean = ~ 1 + a + w1 + w2 + w3 + w2:w3,
+    par = coarsening_par0 # coef order as defined by the above formula
+  )
+
+  ## true coarsening model
+  s0 <- function(a, w1, w2, w3) {
+    apply(cbind(1, a, w1, w2, w3, w2*w3), MARGIN = 1, function(x) lava::expit(sum(x * coarsening_par0)))
+  }
+
+  ## approximate true target parameters under imputation
+  approx_target <- function(n = 1e4) {
+    covar <- covariate(n)
+    ED1Y1 <- mean(q0(a = 1, w1 = covar$w1, w2 = covar$w2, w3 = covar$w3) * s0(a = 1, w1 = covar$w1, w2 = covar$w2, w3 = covar$w3))
+    ED0Y0 <- mean(q0(a = 0, w1 = covar$w1, w2 = covar$w2, w3 = covar$w3) * s0(a = 0, w1 = covar$w1, w2 = covar$w2, w3 = covar$w3))
+
+    PDeltaA1 <- mean(s0(a = 1, w1 = covar$w1, w2 = covar$w2, w3 = covar$w3))
+    PDeltaA0 <- mean(s0(a = 0, w1 = covar$w1, w2 = covar$w2, w3 = covar$w3))
+
+    E1DUA1 <- mean((1 - s0(a = 1, w1 = covar$w1, w2 = covar$w2, w3 = covar$w3)) * q0(a = 0, w1 = covar$w1, w2 = covar$w2, w3 = covar$w3))
+    E1DUA0 <- mean((1 - s0(a = 0, w1 = covar$w1, w2 = covar$w2, w3 = covar$w3)) * q0(a = 0, w1 = covar$w1, w2 = covar$w2, w3 = covar$w3))
+
+    EUD0A1 <- E1DUA1 / (1-PDeltaA1)
+    EUD0A0 <- E1DUA0 / (1-PDeltaA0)
+
+    targets <- c(
+    (ED1Y1 + E1DUA1),
+    (ED0Y0 + E1DUA0)
+    )
+
+    return(targets)
+  }
+
+  set.seed(1)
+  plan(tweak("multicore"), workers = 6)
+  targets0 <- future_replicate(1e3, approx_target())
+  targets0 <- rowMeans(targets0)
+  plan("sequential")
+
+  ## setup trial
+  trial <- Trial$new(covariates = covariate,
+                     outcome = \(data) outcome(data) *
+                                       ifelse(coarsening(data) == 1, 1, NA))
+
+  direct_moi <- function(data,
+                         treatment.model,
+                         response.model,
+                         imputation.model,
+                         imputation.subset) {
+    response.model <- response.model$clone()
+    imputation.model <- imputation.model$clone()
+    treatment.model <- learner_glm(treatment.model, family = binomial())
+
+    id <- seq_len(nrow(data))
+
+    response <- response.model$response(data, na.action = stats::na.pass)
+    if (is.null(response)) {
+      stop("invalid outcome in response.model")
+    }
+    delta <- !is.na(response)
+
+    ## Evaluate imputation.subset expression
+    if (!is.null(imputation.subset)) {
+      tryCatch({
+        model_rows <- eval(parse(text = imputation.subset),
+                           envir = data, enclos = parent.frame())
+      }, error = function(e) {
+        stop(sprintf("Error evaluating 'imputation.subset' expression: %s",
+                     e$message))
+      })
+    } else {
+      model_rows <- rep(TRUE, times = nrow(data))
+    }
+    weights <- as.numeric(model_rows)
+    ## Fit imputation model
+    imputation.model$estimate(data = data,
+                              weights = weights,
+                              na.action = lava::na.pass0)
+
+    ## Predict from imputation model
+    pred <- imputation.model$predict(newdata = data, type = "response")
+
+    ## Getting the treatment variable and levels:
+    A <- treatment.model$response(data)
+    levels <- rev(sort(unique(A)))
+    treatment_name <- lava::getoutcome(treatment.model$formula)
+
+    ## imputed response
+    imputed_response <- response
+    imputed_response[delta == 0] <- pred[delta == 0]
+
+    ## direct one-step imputation
+    data$imputed_response <- imputed_response
+    response.model$update("imputed_response")
+    est <- cate(
+      cate.model =  ~ 1,
+      response.model = response.model,
+      treatment.model = treatment.model,
+      data = data,
+      id = id,
+      nfolds = 1,
+      silent = FALSE,
+      stratify = FALSE,
+      mc.cores = NULL,
+      second.order = TRUE
+    )
+
+    ## Direct influence function correction
+    ic_reference <- function(data, delta, imputation.model, A, id) {
+      pred <- imputation.model$predict(newdata = data, type = "response")
+      design_matrix <- imputation.model$design(data = data,
+                                               intercept = TRUE,
+                                               response = FALSE)$x
+      IC_epsilon <- IC(imputation.model$fit)
+
+      fam <- family(imputation.model$fit)
+      if (fam$family == "binomial" && fam$link == "logit") {
+        nabla <- pred * (1 - pred)
+      } else if (fam$family == "gaussian" && fam$link == "identity") {
+        nabla <- 1
+      } else {
+        stop("Unsupported family/link combination")
+      }
+      nabla <- nabla * design_matrix
+
+      fun <- function(a) {
+        g <- mean(A == a)
+
+        IC <- t(colMeans((delta == 0) * (A == a) / g * nabla) %*%
+                t(IC_epsilon))
+
+        estimate(coef = 0,
+                 IC = IC,
+                 id = id,
+                 labels = paste0("direct", a))
+      }
+      do.call("merge", lapply(c(1, 0), fun))
+    }
+
+    est_imputation <- ic_reference(data = data,
+                                   delta = delta,
+                                   A = A,
+                                   id = id,
+                                   imputation.model = imputation.model)
+
+    estimate(est_imputation) + estimate(est)[c(1,2)]
+  }
+
+  ## run and report the simulation study
+  onerun <- function(n) {
+    data <- trial$simulate(n)
+    id <- 1:n
+    delta <- !is.na(data$y)
+
+    est <- moi(
+      data = data,
+      treatment.model = a ~ 1,
+      response.model = learner_glm(y ~ a * (w1 + w2)),
+      missing.model = learner_glm(delta ~ a + w1 + w2 + w3 + w2:w3, family = binomial()),
+      imputation.model = learner_glm(y ~ w1 + w2 + w3 + w2:w3),
+      imputation.augmentation.model = learner_glm( ~ a * (w1 + w2)),
+      imputation.subset = "!is.na(y) & a == 0",
+      return.all = TRUE
+    )
+    est <- estimate(est)[c(1,2)]
+
+    est_direct <- direct_moi(
+      data = data,
+      treatment.model = a ~ 1,
+      response.model = learner_glm(y ~ a * (w1 + w2)),
+      imputation.model = learner_glm(y ~ w1 + w2 + w3 + w2:w3),
+      imputation.subset = "!is.na(y) & a == 0"
+    )
+
+    c(est, est_direct)
+  }
+
+
+  library(progressr)
+  handlers(global = TRUE)
+  plan(tweak("multicore", workers = 6))
+  res <- sim(onerun, R = 1e4, seed = 1, args = list(n = 1e3))
+  plan("sequential")
+
+
+  sumres <- summary(res,
+                    estimate = 1:4,
+                    se = 5:8,
+                    true = c(targets0, targets0))
+
+  ## test bias, SE/SD and coverage within a given tolerance
+  lapply(sumres["Bias",], function(x) expect_equivalent(x, 0, tolerance=0.0025))
+  lapply(sumres["SE/SD",], function(x) expect_equivalent(x, 1, tolerance = 0.02))
+  lapply(sumres["Coverage",], function(x) expect_equivalent(x, 0.95, tolerance = 0.01))
+}
+
+test_moi_direct_continuous()
