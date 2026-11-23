@@ -218,6 +218,8 @@ cate_fold1 <- function(fold, data, score, cate_des) {
 #'   bounds. Ignored when `auxiliary.model` is not used.
 #' @param second.order add seconder order term to IF to handle misspecification
 #'   of outcome models
+#' @param effect.scale treatment effect defined on absolute scale (`identity`),
+#'  `log`-scale (for log-relative effects) or `logit`-scale (log-odds-ratio)
 #' @return cate.targeted object
 #' @author Klaus Kähler Holst, Andreas Nordland
 #' @references Mark J. van der Laan (2006) Statistical Inference for Variable
@@ -327,6 +329,7 @@ cate <- function(response.model, # nolint
                  var.type = "IC",
                  pseudo.outcome = c("regression", "dr"),
                  second.order = TRUE,
+                 effect.scale = c("identity", "log", "logit"),
                  ...) {
   # Deprecated arguments are not part of the function definition. When
   # supplied, they are captured by `...`, except for `treatment`, which may be
@@ -687,7 +690,8 @@ cate <- function(response.model, # nolint
                 id = id,
                 calibration.model = calibration.model,
                 var.type = var.type,
-                second.order = second.order
+                second.order = second.order,
+                effect.scale = effect.scale
                 )
   res$response.model <- response.model
   return(res)
@@ -701,6 +705,7 @@ cate_est <- function(y, # response vector
                      h, # matrix E(Y|W,A=1,Z), E(Y|W,A=0,Z), ...
                      data, # data.frame
                      treatment.model = NULL, # propensity model
+                     effect.scale = "identity"
                      missing.model = NULL, # missing-data model
                      auxiliary.model = NULL, # E[Y|W,A,Z], Z post-randomization
                      pr = NULL, # matrix P(R=1|X,A=a), same shape as p
@@ -787,7 +792,39 @@ cate_est <- function(y, # response vector
     }
     IF0 <- cbind(IF0,  newIF)
   }
+
+##1/(p(1-p))
+
+
+
+  effect.scale = tolower(effect.scale[1])
+  if (effect.scale %in% c("log", "logit")) {
+    epo <- colMeans(q)
+    est0 <- numeric(length(epo))
+    init <- switch(effect.scale,
+      log=log(epo),
+      logit=logit(epo),
+      epo
+    )
+    for (i in seq_along(init)) {
+      if (effect.scale == "log") {
+        IF0[,i] <- (scores[,i]) / epo[i] - 1
+      } else if (effect.scale == "logit") {
+        IF0[,i] <- (scores[,i] - epo[i]) / (epo[i]-epo[i]^2)
+      } else {
+        # no transformation
+      }
+      est0[i] <- init[i] + mean(IF0[,i])
+      scores[,i] <- IF0[,i] + init[i]
+    }
+  }
   nam <- paste0("E[", colnames(y), "(", colnames(a), ")]")
+  if (effect.scale == "log") {
+    nam <- paste0("log{", nam,"}")
+  }
+  if (effect.scale == "logit") {
+    nam <- paste0("logit{", nam, "}")
+  }
   names(est0) <- nam
 
   if (length(contrast) > 1) {
@@ -840,8 +877,9 @@ cate_est <- function(y, # response vector
       )
     }
   }
-  est0 <- c(est0, unlist(lapply(res, \(x) x$est)))
+
   IF0 <- cbind(IF0, Reduce(cbind, lapply(res, \(x) x$IF)))
+  est0 <- c(est0, unlist(lapply(res, \(x) x$est)))
 
   return(list(coef = est0, IC = IF0, scores = scores))
 }
@@ -853,7 +891,9 @@ update.cate.targeted <- function(object,
                                  id = lava::index(estimate(object)),
                                  calibration.model = NULL,
                                  var.type = "IC",
-                                 second.order = TRUE, ...) {
+                                 second.order = TRUE,
+                                 effect.scale = "identity",
+                                 ...) {
 
   desA <- design(cate.model, data,
                  intercept = TRUE, rm.envir = FALSE, specials="cluster")
@@ -944,7 +984,8 @@ update.cate.targeted <- function(object,
           auxiliary.model = hmod,
           stratify = isTRUE(object$stratify),
           data = data,
-          X.cate = desA$x
+          X.cate = desA$x,
+          effect.scale = effect.scale
         )
       )
     }
